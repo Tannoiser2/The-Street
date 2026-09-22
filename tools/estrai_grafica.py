@@ -64,15 +64,23 @@ def ordine_pdf(ids):
     return r
 
 
-def illustrazioni_di_pagina(doc, n_pagina):
-    """Le immagini incorporate della pagina, ordinate per riga e poi colonna."""
+def illustrazioni_di_pagina(doc, n_pagina, specchiata=False):
+    """Le immagini incorporate della pagina, ordinate per riga e poi colonna.
+
+    Le pagine in grigio sono il RETRO del foglio, quindi impaginate
+    specchiate: i due lati devono combaciare alla fustellatura. Ordinandole
+    per x crescente come le altre, le righe con più pezzi escono invertite, e
+    il rudere di un edificio finisce accoppiato al disegno di un altro. Con
+    `specchiata` la x si legge al contrario, e i due stati tornano allineati.
+    """
     pg = doc[n_pagina - 1]
     trovate = []
     for x in pg.get_images(full=True):
         rects = pg.get_image_rects(x[0])
         if rects:
             trovate.append((rects[0], doc.extract_image(x[0])))
-    trovate.sort(key=lambda t: (round(t[0].y0 / 20), t[0].x0))
+    verso = (lambda r: -r.x0) if specchiata else (lambda r: r.x0)
+    trovate.sort(key=lambda t: (round(t[0].y0 / 20), verso(t[0])))
     return trovate
 
 
@@ -131,7 +139,7 @@ def estrai_sagome(doc, dest):
         os.makedirs(cartella, exist_ok=True)
         n = 0
         for p in pagine:
-            for _, info in illustrazioni_di_pagina(doc, p):
+            for _, info in illustrazioni_di_pagina(doc, p, variante == "grigio"):
                 n += 1
                 grezzo = os.path.join(cartella, f"_tmp.{info['ext']}")
                 with open(grezzo, "wb") as f:
@@ -141,7 +149,42 @@ def estrai_sagome(doc, dest):
                 os.remove(grezzo)
                 out.setdefault(variante, {})[n] = nome
         print(f"estratte {n} sagome ({variante})")
+    _verifica_stati(doc)
     return out
+
+
+# I due stati sono lo stesso pezzo di cartone visto dai due lati: alla stessa
+# posizione devono avere la stessa sagoma, quindi la stessa misura. Se non
+# combaciano l'ordinamento e' sbagliato e un rudere mostrerebbe il disegno di
+# un altro edificio - un difetto silenzioso, che senza questo controllo si
+# nota solo guardando la plancia.
+def _verifica_stati(doc):
+    def misure(pagine, specchiata):
+        out = []
+        for p in pagine:
+            for rect, _ in illustrazioni_di_pagina(doc, p, specchiata):
+                out.append((round(rect.width, 1), round(rect.height, 1)))
+        return out
+
+    col = misure(PAGINE_SAGOME_COLORE, False)
+    gri = misure(PAGINE_SAGOME_GRIGIO, True)
+    if len(col) != len(gri):
+        print(f"  ATTENZIONE: {len(col)} sagome a colori e {len(gri)} in grigio")
+    # Uno scarto di qualche decimo è il bordo del disegno; uno scarto grosso
+    # vuol dire che le due posizioni sono pezzi diversi.
+    scarti = []
+    for i in range(min(len(col), len(gri))):
+        d = max(abs(col[i][0] - gri[i][0]), abs(col[i][1] - gri[i][1]))
+        if d > 0.5:
+            scarti.append((i + 1, round(d * 25.4 / 72.0, 1)))
+    grossi = [n for n, d in scarti if d > 5.0]
+    if grossi:
+        print(f"  ATTENZIONE: colore e grigio sono pezzi diversi alle posizioni {grossi}")
+    if scarti:
+        detta = ", ".join(f"{n} ({d} mm)" for n, d in scarti)
+        print(f"  i due stati combaciano tranne uno scarto di bordo alla posizione {detta}")
+    else:
+        print(f"  i due stati combaciano in tutte le {len(col)} posizioni")
 
 
 def main(dest):

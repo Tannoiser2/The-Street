@@ -50,6 +50,33 @@ tutte, quindi allargarsi non li rende irraggiungibili.
 Il confronto con l'oracolo resta entro il limite documentato e i quattro
 canali esatti restano esatti.
 
+## Quali due disegni mancano
+
+Le due coppie ripetute sono **le stesse nei due stati**, a colori e in grigio.
+È la prova che la ripetizione sta nel disegno d'origine e non nell'impaginazione:
+se fosse nata montando il foglio, i due lati non ripeterebbero le stesse due.
+
+E il conto dei pezzi torna: il PDF ha **60 sagome**, tante quante gli edifici,
+e le larghezze si distribuiscono 41/16/3 esattamente come i dati. Quindi
+**non sono stati aggiunti due edifici in più**: sono due *slot legittimi*
+riempiti con la copia di un altro disegno.
+
+Quali due mancano si legge dal soggetto:
+
+| coppia | cosa mostra il disegno | di chi è | a chi manca |
+|---|---|---|---|
+| 26 e 33 | una chiesa romanica con campanile | **Cappella** | **Ospedale dei pellegrini** |
+| 29 e 35 | un mulino ad acqua con ruota | **Mulino** | **Mercato** |
+
+Da disegnare quindi: **Ospedale dei pellegrini** e **Mercato**. Finché non
+esistono, le loro sagome fisiche sarebbero fustellate nella forma di una
+chiesa e di un mulino, perché la copia si porta dietro anche il profilo.
+
+C'è poi un terzo caso, diverso: la sagoma del **Ponte** mostra un foro romano.
+Non è un duplicato — gli hash lo escludono — ma una seconda illustrazione di
+foro, distinta da quella del Foro vero. Lì il disegno c'è, e raffigura la cosa
+sbagliata.
+
 ## Due disegni serviti a due carte ciascuno
 
 - la sagoma **26** (Cappella) e la **33** (Ospedale dei pellegrini) sono lo
@@ -58,7 +85,7 @@ canali esatti restano esatti.
 
 Verificato confrontando gli hash dei 60 file, non a occhio: le coppie identiche
 sono esattamente queste due, e le illustrazioni distinte sono **58 per 60
-carte**. Da decidere se è voluto o se due carte aspettano ancora il proprio
+carte**. Lo stesso vale per lo stato in grigio. Da decidere se è voluto o se due carte aspettano ancora il proprio
 disegno.
 
 **Una terza carta ha un disegno che non la raffigura.** La sagoma 24, che per
@@ -84,6 +111,19 @@ grande edificio a cupola fra i cipressi — un campus; il 59 mostra un arco di
 trionfo e basi di colonne sparse lungo un sentiero — uno scavo. La conferma era
 arrivata su una mia lettura sbagliata, quindi la segnalo invece di lasciarla
 passare.
+
+## Le pagine in grigio sono specchiate
+
+Il retro del foglio è impaginato a specchio, perché i due lati combacino alla
+fustellatura. L'estrattore le leggeva per x crescente come le altre, e nelle
+righe con più pezzi l'ordine usciva invertito: **otto posizioni su sessanta
+accoppiavano il rudere di un edificio al disegno di un altro**. Era un difetto
+silenzioso — la plancia mostrava un'immagine plausibile, solo sbagliata.
+
+Corretto leggendo la x al contrario sulle pagine pari. Ora `estrai_grafica.py`
+verifica da sé che i due stati combacino posizione per posizione e lo stampa:
+59 su 60 coincidono, e alla 15 resta uno scarto di 2,8 mm che è il bordo del
+disegno, non un pezzo diverso — verificato guardandole.
 
 ## Le immagini sulla plancia
 

@@ -862,3 +862,28 @@ dato è stato importato da lì. Ma due confronti fra ciò che è stampato e
     percio' in `data/sagome.json` accanto al numero, e senza le immagini la
     vista ripiega sui rettangoli colorati con le proporzioni giuste. C'e' un
     test che gira con `assets/sagome` rimossa.
+
+64. **Le pagine in grigio sono specchiate, e accoppiavo otto ruderi sbagliati.**
+    Il retro del foglio e' impaginato a specchio perche' i due lati combacino
+    alla fustellatura. L'estrattore leggeva entrambe le facce per x crescente,
+    e nelle righe con piu' pezzi l'ordine usciva invertito: **otto posizioni su
+    sessanta** davano al rudere di un edificio il disegno di un altro.
+
+    Difetto silenzioso: la plancia mostrava un'immagine plausibile, solo
+    sbagliata. L'ho trovato mentre rispondevo a una domanda del designer sui
+    duplicati - i due stati riportavano coppie ripetute diverse, e quella
+    differenza non poteva che essere mia.
+
+    Corretto, e lo strumento ora **verifica da se'** che i due stati combacino
+    posizione per posizione, stampandolo a ogni estrazione: senza il controllo
+    la cosa potrebbe tornare senza che nessuno se ne accorga.
+
+65. **Quali due disegni mancano.** Le coppie ripetute sono le stesse nei due
+    stati: la ripetizione e' nel disegno d'origine, non nell'impaginazione. E
+    il conto dei pezzi torna (60 sagome, larghezze 41/16/3 come i dati), quindi
+    non sono stati aggiunti due edifici in piu': sono due slot legittimi
+    riempiti con la copia di un altro disegno.
+
+    Mancano **Ospedale dei pellegrini** (che porta la chiesa della Cappella) e
+    **Mercato** (che porta il mulino del Mulino). Terzo caso a parte: il
+    **Ponte** un disegno ce l'ha, ma raffigura un foro romano.
