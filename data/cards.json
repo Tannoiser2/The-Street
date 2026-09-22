@@ -2446,6 +2446,7 @@
           "hook": "on_acquire",
           "op": "rule_override",
           "name": "arte_vp_bonus",
+          "value": 1,
           "duration": "era"
         }
       ]

@@ -45,9 +45,10 @@ const APPLIED: Array[String] = [
 	"potenziamento:on_acquire:resistance",
 	"potenziamento:on_acquire:scavo_delta",
 	"potenziamento:on_final_scoring:scavo_delta",
+	"potenziamento:on_acquire:rendita_delta",  # Stalli mercantili
 ]
 const APPLIED_OVERRIDES: Array[String] = ["first_terrapieno_free", "free_restore_of_class",
-	"ignore_terrain_requirement", "counts_as_class"]
+	"ignore_terrain_requirement", "counts_as_class", "arte_vp_bonus", "free_upgrade_of_class"]
 
 # Override che NON richiedono codice: descrivono un comportamento che il modello
 # generico gia' fornisce. Tenerli distinti dagli APPLIED_OVERRIDES e' deliberato:
@@ -95,6 +96,34 @@ static func find_override(gs: GameState, name: String) -> Dictionary:
 
 static func has_override(gs: GameState, name: String) -> bool:
 	return not find_override(gs, name).is_empty()
+
+# `find_override` guarda l'EVENTO in corso. Questo guarda invece cio' che il
+# GIOCATORE ha attivo adesso: i suoi personaggi dell'era e le carte dei suoi
+# edifici vivi. Salta gli override gia' esauriti (`times`), cosi' chi chiama
+# non deve conoscere la contabilita'. Restituisce [effetto, carta], oppure [].
+static func player_override(gs: GameState, player: int, name: String,
+		host: Building = null) -> Array:
+	var p: PlayerState = gs.players[player]
+	for voce in _sorgenti_attive(gs, player):
+		var e: Dictionary = voce[0]
+		if str(e["op"]) != "rule_override" or str(e.get("name", "")) != name: continue
+		if int(voce[2]) != player: continue
+		var t: Dictionary = e.get("target", {})
+		if not t.is_empty():
+			if host == null: continue
+			if not matches(gs, host, t, voce[1], int(voce[2])): continue
+		var carta: Dictionary = voce[3]
+		if e.has("times") and int(p.effect_used.get(str(carta["id"]), 0)) >= int(e["times"]):
+			continue
+		return [e, carta]
+	return []
+
+# Segna una volta consumata. Stessa contabilita' di `_quota`, cosi' `times`
+# significa la stessa cosa per gli override e per gli effetti che danno valore.
+static func consume_override(gs: GameState, player: int, carta: Dictionary) -> void:
+	var p: PlayerState = gs.players[player]
+	var k := str(carta["id"])
+	p.effect_used[k] = int(p.effect_used.get(k, 0)) + 1
 
 # ---- selettore -----------------------------------------------------
 # I predicati presenti valgono in AND. `source` serve solo ai predicati di
@@ -453,6 +482,12 @@ static func apply_on_acquire(gs: GameState, player: int, card: Dictionary,
 			"scavo_delta":
 				for b in _bersagli(gs, host, e):
 					b.bonus_scavo += int(e["value"])
+			"rendita_delta":
+				# Stalli mercantili: "l'affitto incassato da questo edificio e' +1".
+				# E' la Rendita del censimento, quindi PV, e ricorre a ogni era.
+				for b in _bersagli(gs, host, e):
+					b.bonus_rendita += int(e["value"])
+					gs.log_line("%s: %s rende %+d" % [card["name"], b.data["name"], int(e["value"])])
 			"rule_override":
 				if str(e.get("name", "")) == "counts_as_class":
 					for b in _bersagli(gs, host, e):
@@ -465,6 +500,16 @@ static func apply_on_acquire(gs: GameState, player: int, card: Dictionary,
 				if host != null:
 					host.protection += int(e["value"])
 					gs.log_line("%s: %s protetto meglio (+%d)" % [card["name"], host.data["name"], int(e["value"])])
+
+	# Mecenate: "per l'era, i potenziamenti Arte che acquisti valgono +1 PV".
+	# Il bonus e' per CARTA acquisita, non per effetto: l'Idolo su un edificio
+	# Religione ha due effetti `vp`, ma il Mecenate lo paga una volta sola.
+	if str(card.get("family", "")) == "arte":
+		var mec := player_override(gs, player, "arte_vp_bonus")
+		if not mec.is_empty():
+			var v := int(mec[0].get("value", 1))
+			p.add_vp("cultura", v)
+			gs.log_line("%s: %s vale %+d PV" % [mec[1]["name"], card["name"], v])
 
 static func _bersagli(gs: GameState, src: Building, e: Dictionary) -> Array[Building]:
 	var out: Array[Building] = []

@@ -228,6 +228,12 @@ func upgrade(upg_id: String, target: Building) -> bool:
 		gs.log_line("Potenziamento rifiutato: %s" % q.reason)
 		return false
 	if not p.can_pay(q.pietra, q.oro): return false
+	# Il Vescovo si consuma qui, non nel preventivo: il preventivo viene
+	# chiesto anche solo per sapere se l'azione e' legale.
+	var vescovo := Effects.player_override(gs, p.index, "free_upgrade_of_class", target)
+	if not vescovo.is_empty():
+		Effects.consume_override(gs, p.index, vescovo[1])
+		gs.log_line("%s: potenziamento gratuito su %s" % [vescovo[1]["name"], target.data["name"]])
 	p.pay(q.pietra, q.oro)
 	target.upgrades.append(upg_id)
 	# Gli effetti vengono dai dati della carta, con l'edificio ospite come

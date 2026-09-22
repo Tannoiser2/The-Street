@@ -64,10 +64,14 @@ static func _on_terrain(gs: GameState, b: Building, t: int) -> bool:
 	return false
 
 # ---- censimento ----------------------------------------------------
+# "Ogni vostro edificio in piedi paga la sua Rendita piu' la Vetusta'". Un
+# edificio a Rendita 0 non paga nulla, nemmeno la Vetusta': la Vetusta' e' un
+# moltiplicatore della Rendita, non una voce a se'. Gli Stalli mercantili
+# possono percio' far pagare un edificio che prima taceva.
 static func census(gs: GameState) -> void:
 	for b in gs.grid.buildings:
-		if b.is_alive() and int(b.data["rendita"]) > 0:
-			gs.players[b.owner].add_vp("rendita", int(b.data["rendita"]) + b.vetusta)
+		if b.is_alive() and b.rendita_value() > 0:
+			gs.players[b.owner].add_vp("rendita", b.rendita_value() + b.vetusta)
 
 # ---- dispersione dei secoli ---------------------------------------
 # Si scarta a scelta del giocatore; il default scarta prima la pietra.

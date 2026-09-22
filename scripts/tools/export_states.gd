@@ -60,7 +60,7 @@ func _snapshot(gs: GameState, seed_v: int, players: int, before: Dictionary) -> 
 			# classi EFFETTIVE: la continuita' che l'oracolo ricalcola deve
 			# vedere anche quelle acquisite (po_merlatura).
 			"classes": b.classes(),
-			"rendita": int(b.data["rendita"]),
+			"rendita": b.rendita_value(),
 			"lampo": int(b.data["lampo"]),
 			# Scavo effettivo, bonus da Impronte e potenziamenti inclusi, ma
 			# SENZA l'azzeramento dello spianato: quello lo applica l'oracolo

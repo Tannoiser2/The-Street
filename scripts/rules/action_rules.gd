@@ -64,6 +64,12 @@ static func quote_upgrade(gs: GameState, player: int, upg_id: String, target: Bu
 		return ActionQuote.no("l'edificio ha gia' %d potenziamenti (capienza %d)" % [target.upgrades.size(), cap])
 	var data: Dictionary = CardDB.upgrades[upg_id]
 	var cost: Dictionary = data["cost"]
+	# Vescovo: "il prossimo potenziamento su un tuo edificio Religione in
+	# quest'era costa 0". Decisione del designer: aspetta il primo Religione,
+	# non si brucia se nel frattempo potenzi un edificio di un'altra classe.
+	# Lo sconto e' percio' legato al bersaglio, non all'ordine delle azioni.
+	if not Effects.player_override(gs, player, "free_upgrade_of_class", target).is_empty():
+		return ActionQuote.yes(0, 0, target)
 	# Sconti sui potenziamenti: Bottega d'artista, e il Cardinale sui Religione.
 	var sconto := Effects.cost_delta(gs, player, "upgrade", target)
 	return ActionQuote.yes(max(0, int(cost.get("pietra", 0)) + sconto.x),

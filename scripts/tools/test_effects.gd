@@ -25,6 +25,11 @@ func _ready() -> void:
 	_run("Sacerdotessa e Mastro costruttore", _test_on_build)
 	_run("Colossali", _test_colossal)
 	_run("counts_as_class", _test_counts_as_class)
+	_run("Stalli mercantili", _test_stalli)
+	_run("Mecenate", _test_mecenate)
+	_run("Vescovo: il potenziamento gratuito", _test_vescovo)
+	_run("  e il suo consumo", _test_vescovo_consumo)
+	_run("  che non si brucia su altre classi", _test_vescovo_non_si_brucia)
 	_run("lo schema e' davvero chiuso", _test_schema_closed)
 	print("\n%d superati, %d falliti" % [_passed, _failed])
 	get_tree().quit(0 if _failed == 0 else 1)
@@ -1435,3 +1440,211 @@ func _test_counts_as_class() -> void:
 		not rudere.shares_class_with(carta_mil))
 	rudere.extra_classes.append("militare")
 	_ok("   con la classe acquisita, gliela da'", rudere.shares_class_with(carta_mil))
+
+# ---- Stalli mercantili, Mecenate, Vescovo ---------------------------
+# Il gruppo "acquisizione": tre carte che agiscono nel momento in cui una
+# carta entra in gioco, e che finora erano inerti.
+func _censimento(gs: GameState) -> Array[int]:
+	EraRules.census(gs)
+	var out: Array[int] = []
+	for p in gs.players:
+		out.append(int(p.vp_breakdown.get("rendita", 0)))
+	return out
+
+func _test_stalli() -> void:
+	# Su un edificio che gia' rende: la Rendita sale di 1, e la Vetusta' la
+	# accompagna perche' il censimento paga "Rendita piu' Vetusta'".
+	var a := _scena()
+	var h := _put(a, "ed_dolmen", 1)
+	h.vetusta = 2
+	_eq("senza Stalli: Rendita 1 + Vetusta' 2", _censimento(a)[0], 3)
+	var b := _scena()
+	var h2 := _put(b, "ed_dolmen", 1)
+	h2.vetusta = 2
+	_posa(b, "po_stalli_mercantili", h2)
+	_eq("con Stalli: Rendita 2 + Vetusta' 2", _censimento(b)[0], 4)
+
+	# Su un edificio a Rendita 0 gli Stalli lo fanno parlare per la prima volta.
+	var c := _scena()
+	var h3 := _put(c, "ed_capanne", 1)
+	h3.vetusta = 1
+	_eq("Capanne senza Stalli: non rende nulla", _censimento(c)[0], 0)
+	var d := _scena()
+	var h4 := _put(d, "ed_capanne", 1)
+	h4.vetusta = 1
+	_posa(d, "po_stalli_mercantili", h4)
+	_eq("  con gli Stalli: 1 + Vetusta' 1", _censimento(d)[0], 2)
+
+	# Vale solo per l'ospite, e solo finche' l'edificio e' in piedi.
+	var e := _scena()
+	var h5 := _put(e, "ed_dolmen", 1)
+	var altro := _put(e, "ed_dolmen", 3)
+	_posa(e, "po_stalli_mercantili", h5)
+	_eq("l'edificio accanto non ne beneficia", altro.rendita_value(), 1)
+	_eq("  l'ospite si', invece", h5.rendita_value(), 2)
+	h5.state = Enums.BuildingState.ROVINA
+	_eq("un edificio in rovina non rende, Stalli o no", _censimento(e)[0], 1)
+
+	# Il censimento finale e' lo stesso censimento: il bonus ricorre.
+	var f := _scena()
+	var h6 := _put(f, "ed_capanne", 1)
+	_posa(f, "po_stalli_mercantili", h6)
+	_eq("prima era", _censimento(f)[0], 1)
+	_eq("  e di nuovo all'era dopo", _censimento(f)[0], 2)
+
+func _test_mecenate() -> void:
+	var senza := _card_of_class("civico")
+	# Senza il Mecenate, la Statua vale i suoi 2 PV.
+	var a := _scena()
+	var h := _put(a, senza, 1)
+	var prima: int = a.players[0].vp
+	_posa(a, "po_statua", h)
+	_eq("Statua da sola: +2 PV", a.players[0].vp - prima, 2)
+
+	var b := _scena()
+	var h2 := _put(b, senza, 1)
+	b.players[0].specialized_characters = ["pe_mecenate"] as Array[String]
+	var prima2: int = b.players[0].vp
+	_posa(b, "po_statua", h2)
+	_eq("col Mecenate: +3 PV", b.players[0].vp - prima2, 3)
+
+	# L'Idolo su un edificio Religione ha DUE effetti `vp`: il Mecenate deve
+	# pagare una volta sola, perche' il bonus e' per carta, non per effetto.
+	var rel := _card_of_class("religione")
+	var c := _scena()
+	var h3 := _put(c, rel, 1)
+	var prima3: int = c.players[0].vp
+	_posa(c, "po_idolo", h3)
+	var base_idolo: int = c.players[0].vp - prima3
+	_eq("Idolo su Religione da solo: 1 + 1 condizionale", base_idolo, 2)
+	var d := _scena()
+	var h4 := _put(d, rel, 1)
+	d.players[0].specialized_characters = ["pe_mecenate"] as Array[String]
+	var prima4: int = d.players[0].vp
+	_posa(d, "po_idolo", h4)
+	_eq("  col Mecenate: uno solo in piu', non due", d.players[0].vp - prima4, base_idolo + 1)
+
+	# Solo i potenziamenti Arte.
+	var e := _scena()
+	var h5 := _put(e, senza, 1)
+	e.players[0].specialized_characters = ["pe_mecenate"] as Array[String]
+	var prima5: int = e.players[0].vp
+	_posa(e, "po_palizzata", h5)
+	_eq("un potenziamento Struttura non prende nulla", e.players[0].vp - prima5, 0)
+
+	# Vale per ogni Arte dell'era, non una volta sola: il testo non pone limiti.
+	var f := _scena()
+	var h6 := _put(f, senza, 1)
+	var h7 := _put(f, senza, 3)
+	f.players[0].specialized_characters = ["pe_mecenate"] as Array[String]
+	var prima6: int = f.players[0].vp
+	_posa(f, "po_statua", h6)
+	_posa(f, "po_pittura_rupestre", h7)
+	_eq("due Arte nella stessa era: +1 ciascuna", f.players[0].vp - prima6, 2 + 1 + 1 + 1)
+
+func _test_vescovo() -> void:
+	var rel := _card_of_class("religione")
+	var non_rel := _card_of_class("commercio")
+
+	# Il preventivo: gratis sul Religione, pieno altrove.
+	var a := _scena()
+	a.upg_row = ["po_statua"]
+	var h := _put(a, rel, 1)
+	var pieno := ActionRules.quote_upgrade(a, 0, "po_statua", h)
+	_ok("preventivo legale senza il Vescovo", pieno.legal, pieno.reason)
+	_ok("  e non e' gia' gratis", pieno.oro > 0 or pieno.pietra > 0)
+	a.players[0].specialized_characters = ["pe_vescovo"] as Array[String]
+	var gratis := ActionRules.quote_upgrade(a, 0, "po_statua", h)
+	_ok("col Vescovo il preventivo resta legale", gratis.legal, gratis.reason)
+	_ok("  e costa 0", gratis.pietra == 0 and gratis.oro == 0)
+
+	var b := _scena()
+	b.upg_row = ["po_statua"]
+	var h2 := _put(b, non_rel, 1)
+	b.players[0].specialized_characters = ["pe_vescovo"] as Array[String]
+	var q2 := ActionRules.quote_upgrade(b, 0, "po_statua", h2)
+	_ok("su un edificio di altra classe il preventivo e' legale", q2.legal, q2.reason)
+	_ok("  e il Vescovo non lo sconta", q2.oro > 0 or q2.pietra > 0)
+
+	# Non vale sugli edifici altrui.
+	var c := _scena()
+	c.upg_row = ["po_statua"]
+	var h3 := _put(c, rel, 1)
+	h3.owner = 1
+	c.players[0].specialized_characters = ["pe_vescovo"] as Array[String]
+	var q3 := ActionRules.quote_upgrade(c, 0, "po_statua", h3)
+	_ok("su un Religione altrui il preventivo e' comunque rifiutato", not q3.legal)
+
+# Il consumo va provato sul percorso vero: il comando, non solo il preventivo.
+# Il preventivo viene chiesto anche solo per sapere se l'azione e' legale, e
+# non deve consumare nulla.
+func _ctl_con_vescovo(card_id: String, col: int) -> Array:
+	var ctl := _game()
+	var gs := ctl.gs
+	_flat(gs, Enums.Terrain.PIANURA)
+	var b := Building.new()
+	b.uid = gs.new_uid()
+	b.data = CardDB.buildings[card_id]
+	b.owner = gs.current_index
+	b.era_built = gs.era
+	b.col_from = col
+	b.col_to = col + int(b.data["width"])
+	gs.grid.buildings.append(b)
+	gs.upg_row = ["po_statua", "po_palizzata"]
+	gs.upg_decks[gs.era] = []
+	gs.players[gs.current_index].specialized_characters = ["pe_vescovo"] as Array[String]
+	return [ctl, b]
+
+func _test_vescovo_consumo() -> void:
+	var rel := _card_of_class("religione")
+
+	# Chiedere il preventivo non consuma: due preventivi di fila, entrambi gratis.
+	var v := _ctl_con_vescovo(rel, 1)
+	var ctl: GameController = v[0]
+	var h: Building = v[1]
+	var idx: int = ctl.gs.current_index
+	var q1 := ActionRules.quote_upgrade(ctl.gs, idx, "po_statua", h)
+	var q2 := ActionRules.quote_upgrade(ctl.gs, idx, "po_statua", h)
+	_ok("due preventivi di fila sono entrambi gratis", q1.oro == 0 and q2.oro == 0)
+
+	# Il comando consuma. Con 0 oro in tasca il potenziamento riesce lo stesso:
+	# prova che ha pagato 0 davvero, non che il costo era basso.
+	ctl.place_worker(1)
+	var p: PlayerState = ctl.gs.players[idx]
+	p.pietra = 0
+	p.oro = 0
+	_ok("il primo Religione passa senza un soldo", ctl.upgrade("po_statua", h))
+	_eq("  e infatti non ha speso nulla", p.oro, 0)
+
+	# Il secondo non e' piu' gratis. Serve capienza: il Vescovo la da' (+1).
+	var q3 := ActionRules.quote_upgrade(ctl.gs, idx, "po_palizzata", h)
+	_ok("il secondo Religione e' di nuovo a pagamento", q3.legal and q3.oro > 0, q3.reason)
+
+func _test_vescovo_non_si_brucia() -> void:
+	# "Il primo che faro' di Religione": potenziare prima un edificio di
+	# un'altra classe non deve bruciare lo sconto.
+	var non_rel := _card_of_class("commercio")
+	var v := _ctl_con_vescovo(non_rel, 1)
+	var ctl: GameController = v[0]
+	var altro: Building = v[1]
+	var idx: int = ctl.gs.current_index
+	var rel := _card_of_class("religione")
+	var h := Building.new()
+	h.uid = ctl.gs.new_uid()
+	h.data = CardDB.buildings[rel]
+	h.owner = idx
+	h.era_built = ctl.gs.era
+	h.col_from = 3
+	h.col_to = 3 + int(h.data["width"])
+	ctl.gs.grid.buildings.append(h)
+
+	ctl.place_worker(1)
+	var p: PlayerState = ctl.gs.players[idx]
+	p.pietra = 9
+	p.oro = 9
+	var prima := p.oro
+	_ok("potenzia prima un edificio di altra classe", ctl.upgrade("po_statua", altro))
+	_ok("  e lo paga a prezzo pieno", p.oro < prima)
+
+	var q := ActionRules.quote_upgrade(ctl.gs, idx, "po_palizzata", h)
+	_ok("lo sconto e' ancora li' per il primo Religione", q.legal and q.oro == 0 and q.pietra == 0, q.reason)
