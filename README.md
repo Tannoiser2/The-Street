@@ -59,7 +59,8 @@ godot --headless res://scenes/headless_runner.tscn -- --games 100 --players 3 --
 vedere davvero l'interfaccia serve un display, vero o virtuale:
 
 ```bash
-tools/scatta.sh plancia.png -- --players 3 --seed 7 --era 4
+tools/scatta.sh plancia.png -- --players 3 --seed 7 --era 4      # vista 2D
+tools/scatta3d.sh strada.png -- --players 3 --seed 7 --era 4    # plancia 3D
 ```
 
 Lo script mette `xvfb-run` da solo se non c'e' un display. Disegna una partita

@@ -16,6 +16,10 @@ func _ready() -> void:
 	_run("dal punto all'edificio", _test_click)
 	_run("le file laterali", _test_pannelli)
 	_run("una partita vera sta tutta dentro la plancia", _test_partita)
+	_run("3D: gli assi del tavolo", _test_3d_assi)
+	_run("3D: quote, sagome e plinti", _test_3d_quote)
+	_run("3D: cielo e telecamera", _test_3d_scena)
+	_run("3D: una partita vera sta sulla strada", _test_3d_partita)
 	print("\n%d superati, %d falliti" % [_passed, _failed])
 	get_tree().quit(0 if _failed == 0 else 1)
 
@@ -33,6 +37,11 @@ func _ok(label: String, cond: bool, detail := "") -> void:
 
 func _eq(label: String, got, want) -> void:
 	_ok(label, got == want, "atteso %s, ottenuto %s" % [want, got])
+
+# I float non si confrontano con ==: la geometria li produce per somme e
+# prodotti, e 0.85 calcolato non e' 0.85 scritto.
+func _approx(label: String, got: float, want: float) -> void:
+	_ok(label, is_equal_approx(got, want), "atteso %f, ottenuto %f" % [want, got])
 
 func _gioco(n := 3) -> GameController:
 	var ctl := GameController.new()
@@ -201,3 +210,107 @@ func _test_partita() -> void:
 			for j in range(i + 1, lista.size()):
 				if (lista[i] as Rect2).intersects(lista[j]): scontri += 1
 	_eq("nessuna sovrapposizione alla stessa quota", scontri, 0)
+
+# ---- geometria 3D ---------------------------------------------------
+# Il tavolo: X le colonne, Z i binari con l'ERA 1 DAVANTI, Y le quote.
+func _test_3d_assi() -> void:
+	_ok("l'era 1 sta davanti a tutte", BoardLayout3D.rail_z(1) < BoardLayout3D.rail_z(2))
+	_ok("  e l'era 5 in fondo", BoardLayout3D.rail_z(4) < BoardLayout3D.rail_z(5))
+	_ok("i binari sono distanziati: e' cio' che lascia vedere le basette",
+		BoardLayout3D.rail_z(2) - BoardLayout3D.rail_z(1) > BoardLayout3D.SLOT_D)
+	_ok("le colonne procedono lungo la X", BoardLayout3D.col_x(0) < BoardLayout3D.col_x(1))
+	_ok("le quote salgono lungo la Y",
+		BoardLayout3D.level_y(2) > BoardLayout3D.level_y(1))
+	_approx("due colonne sono due slot piu' uno stacco", BoardLayout3D.span_w(2),
+		2.0 * BoardLayout3D.SLOT_W + BoardLayout3D.GAP_X)
+
+	# Le tessere non si compenetrano, ne' di fianco ne' in profondita'.
+	var scontri := 0
+	for c in 4:
+		for e in range(1, BoardLayout3D.RAILS + 1):
+			var a := BoardLayout3D.tile_box(c, e)
+			for c2 in 4:
+				for e2 in range(1, BoardLayout3D.RAILS + 1):
+					if c2 == c and e2 == e: continue
+					if a.intersects(BoardLayout3D.tile_box(c2, e2)): scontri += 1
+	_eq("nessuna tessera tocca un'altra", scontri, 0)
+
+# L'errore che avevo fatto: con la quota piu' bassa di una sagoma, due livelli
+# si compenetrano e la plancia diventa illeggibile. Il test lo impedisce per
+# TUTTI i 60 edifici, non per quello che ho guardato io.
+func _test_3d_quote() -> void:
+	var gs := _gioco().gs
+	var piu_alta := 0.0
+	var nome := ""
+	for id in CardDB.buildings:
+		var b := Building.new()
+		b.data = CardDB.buildings[id]
+		b.col_from = 0
+		b.col_to = int(b.data["width"])
+		var h: float = BoardLayout3D.standee_size(b).y
+		if h > piu_alta:
+			piu_alta = h
+			nome = str(b.data["name"])
+	_ok("nessuna sagoma e' piu' alta del passo fra le quote (%s: %.2f su %.2f)"
+		% [nome, piu_alta, BoardLayout3D.LEVEL_H], piu_alta <= BoardLayout3D.LEVEL_H,
+		"con una sagoma piu' alta del passo, due quote si compenetrano")
+
+	# Il plinto e' un dado sotto la sagoma, non una lastra che copre la
+	# colonna: la basetta vera sono gli edifici sotto, che restano visibili.
+	var sopra := _metti(gs, "ed_capanne", 2, 3, 1)
+	var plinto := BoardLayout3D.base_box(gs, sopra)
+	_approx("il plinto e' profondo uno slot, non tutta la strada",
+		plinto.size.z, BoardLayout3D.SLOT_D)
+	_ok("  ed e' molto piu' sottile della profondita' dei binari",
+		plinto.size.z < BoardLayout3D.board_d() / 2.0)
+	_ok("il plinto sta sotto la sagoma",
+		plinto.position.y + plinto.size.y <= BoardLayout3D.standee_base(gs, sopra).y + 0.001)
+
+func _test_3d_scena() -> void:
+	var gs := _gioco().gs
+	_metti(gs, "ed_capanne", 0, 1)
+	var cielo := BoardLayout3D.sky_rect(gs)
+	_ok("il cielo sta dietro l'ultimo binario",
+		cielo.position.z > BoardLayout3D.rail_z(BoardLayout3D.RAILS) + BoardLayout3D.SLOT_D)
+	_ok("  ed e' piu' largo della strada", cielo.size.x > BoardLayout3D.board_w(gs))
+	_ok("  e in piedi, non steso", cielo.size.y > 0.0 and cielo.size.z == 0.0)
+
+	var cam := BoardLayout3D.camera_position(gs)
+	_ok("la telecamera sta davanti alla prima fila", cam.z < BoardLayout3D.rail_z(1))
+	_ok("  e alzata, per vedere oltre l'era 1", cam.y > 1.0)
+	var mira := BoardLayout3D.camera_target(gs)
+	_ok("  e guarda verso il fondo della strada", mira.z > cam.z)
+
+func _test_3d_partita() -> void:
+	# Una partita vera: ogni sagoma deve stare sulla strada e nessuna coppia
+	# alla stessa quota deve occupare lo stesso posto.
+	var ctl := _gioco()
+	var giri := 0
+	while ctl.gs.phase != Enums.Phase.FINE_PARTITA and giri < 4000:
+		RandomBot.play_turn(ctl)
+		giri += 1
+	var gs := ctl.gs
+	var sopraelevati := 0
+	for b in gs.grid.buildings:
+		if b.level > 0: sopraelevati += 1
+	_ok("la partita ha prodotto sopraelevazioni", sopraelevati > 0)
+
+	var fuori := 0
+	for b in gs.grid.buildings:
+		var c := BoardLayout3D.standee_base(gs, b)
+		var mezza: float = BoardLayout3D.standee_size(b).x / 2.0
+		if c.x - mezza < -0.001 or c.x + mezza > BoardLayout3D.board_w(gs) + 0.001: fuori += 1
+		if c.z < -0.001 or c.z > BoardLayout3D.board_d() + 0.001: fuori += 1
+	_eq("nessuna sagoma esce dalla strada", fuori, 0)
+
+	# Stessa quota e colonne sovrapposte non possono coesistere: e'
+	# l'invariante "un edificio sta tutto a un solo livello", vista da qui.
+	var scontri := 0
+	for i in gs.grid.buildings.size():
+		for j in range(i + 1, gs.grid.buildings.size()):
+			var a: Building = gs.grid.buildings[i]
+			var b2: Building = gs.grid.buildings[j]
+			if a.level != b2.level: continue
+			if a.level == 0 and a.era_built != b2.era_built: continue
+			if a.col_from < b2.col_to and b2.col_from < a.col_to: scontri += 1
+	_eq("nessuna sagoma occupa il posto di un'altra", scontri, 0)

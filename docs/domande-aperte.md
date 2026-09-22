@@ -591,20 +591,30 @@ dato è stato importato da lì. Ma due confronti fra ciò che è stampato e
     coppia di riquadri alla stessa quota si sovrapponga**, che e' l'invariante
     di regola «un edificio sta tutto a un solo livello» vista dallo schermo.
 
-43. **Due viste, perche' un edificio sopraelevato non sta su nessun binario.**
-    La vista dall'alto mostra 5 binari x N colonne, ma un edificio a livello >0
-    non appartiene al binario di un'era: sta sopra le sue basi. L'ho risolto
-    con una fascia in vista laterale sopra la griglia, una riga per quota,
-    allineata alle stesse colonne. **Da confermare col designer**: e' la
-    lettura giusta, o preferisce una vista unica (isometrica, o le sagome
-    sovrapposte alla griglia)?
+43. ~~**Due viste, perche' un edificio sopraelevato non sta su nessun
+    binario.**~~ **RISOLTA dal designer: si fa in 3D.** Tessere colonna stese
+    sul tavolo una a fianco all'altra, pannello verticale dietro a fare da
+    cielo, sagome in piedi sugli slot. Gli assi vengono dal tavolo vero:
+    **X** le colonne, **Z** i cinque binari con l'**era 1 davanti** e la 5 in
+    fondo, **Y** le quote. Il problema sparisce da solo: l'altezza smette di
+    essere un numero scritto e diventa altezza, e le due viste tornano una.
 
-44. **Cosa mostrare di un edificio sotterrato.** Sul tavolo vero un edificio
-    sotterrato e' fisicamente coperto: si sa cosa c'e' sotto perche' lo si e'
-    visto costruire, non perche' lo si legga. A schermo l'ho disegnato con un
-    velo e un tratteggio leggero, quindi **piu' visibile del vero**. E' una
-    scelta a favore del giocatore (lo Scavo finale dipende da cosa c'e'
-    sotto), ma e' una scelta: **da confermare**.
+    La vista 2D resta, ma come **strumento di diagnosi**: per capire cosa c'e'
+    sotto a una plancia piena di sepolti e' piu' chiara di qualunque 3D, ed e'
+    gia' scritta e provata.
+
+44. ~~**Cosa mostrare di un edificio sotterrato.**~~ **RISOLTA, e avevo posto
+    male la domanda.** Chiedevo se nascondere i sepolti per fedelta' al tavolo.
+    La risposta del designer ribalta la premessa: **i sepolti sono la basetta
+    su cui poggiano le nuove costruzioni**, quindi non stanno sotto un
+    coperchio - stanno sotto, in vista, e bastano dei binari distanziati per
+    vederli. Non serve nessuna vista a raggi X.
+
+    Nel 3D i binari hanno percio' uno stacco deliberato (`GAP_Z`), ed e'
+    l'unica costante di quel modulo che esiste per una ragione di regola e non
+    di estetica: c'e' un test che verifica che sia maggiore di zero. Le sagome
+    sepolte restano in vista, solo smorzate, perche' non producono piu' nulla
+    ma il loro Scavo conta ancora a fine partita.
 
 45. **La faccia della carta va disegnata dai dati.** Le immagini estratte dal
     PDF (`assets/carte`) portano numeri della calibrazione precedente alla v1.5
@@ -624,3 +634,35 @@ dato è stato importato da lì. Ma due confronti fra ciò che è stampato e
     potenziamento gratuito dell'Eruzione (punto 40) e l'Ingegnere militare
     (punto 27). Entrambe aspettano l'input del giocatore, che e' il prossimo
     pezzo dell'interfaccia.
+
+48. **Il plinto non e' la basetta, ed e' un errore che ho fatto davvero.** La
+    prima versione 3D disegnava sotto ogni sopraelevazione una lastra grigia
+    larga quanto l'edificio e profonda quanto **tutta** la strada. A schermo
+    era un ripiano che nascondeva ogni cosa dietro di se': esattamente il
+    contrario di quello che il designer aveva chiesto. La basetta vera sono
+    gli edifici sottostanti; il plinto e' solo un dado, profondo uno slot.
+    C'e' un test che lo impedisce di tornare.
+
+49. **Una quota non puo' essere piu' bassa di una sagoma.** Secondo errore
+    della stessa sessione: col passo fra le quote a 0,55 e sagome alte fino a
+    0,93 i livelli si compenetravano. Non e' una questione di gusto ma di
+    coerenza fisica - sul tavolo una sagoma poggia sopra l'altra - quindi c'e'
+    un test che misura **tutti e 60** gli edifici e confronta la piu' alta col
+    passo, invece di fidarsi di quello che ho guardato io.
+
+50. **L'illustrazione delle sagome e' utilizzabile, quella delle carte no.**
+    Distinzione che non avevo fatto: il problema dei numeri della calibrazione
+    vecchia (punti 20 e 23) riguarda le **carte**, che stampano valori. Le
+    **sagome** sono ritagli illustrati senza numeri, quindi si possono usare
+    come sono - appena si sapra' quale sagoma appartiene a quale edificio, che
+    e' la mappatura ancora non derivabile del punto 23. Finche' manca, le
+    sagome a schermo sono rettangoli colorati col nome sopra.
+
+51. **Cosa manca alla plancia 3D.** Per ora ci sono tessere, cielo, sagome,
+    plinti, luce e telecamera. Mancano: le file laterali e le plance dei
+    giocatori (oggi solo nella vista 2D), il PNG del cielo al posto del colore
+    pieno, l'illustrazione sulle sagome, e soprattutto **l'input**: il clic
+    sulla colonna e sulla carta, con l'anteprima del costo che il brief chiede
+    esplicitamente. `BoardLayout3D` e' gia' scritto per servirlo - da' le
+    posizioni, quindi un raggio dalla telecamera bastera' - ma il raccordo non
+    c'e' ancora.
