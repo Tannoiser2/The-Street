@@ -663,7 +663,7 @@
         "ingegneria"
       ],
       "terrain": "fiume",
-      "width": 1,
+      "width": 2,
       "cost": {
         "pietra": 3,
         "oro": 0
@@ -1426,7 +1426,7 @@
         "ingegneria"
       ],
       "terrain": "fiume",
-      "width": 1,
+      "width": 2,
       "cost": {
         "pietra": 2,
         "oro": 2
@@ -1877,7 +1877,7 @@
         "ingegneria"
       ],
       "terrain": "fiume",
-      "width": 1,
+      "width": 2,
       "cost": {
         "pietra": 1,
         "oro": 3
