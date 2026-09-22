@@ -269,3 +269,26 @@ dato è stato importato da lì. Ma due confronti fra ciò che è stampato e
     provino a contatto numerato. Serve la corrispondenza numero → id: o la dai
     tu, o la ricavo a vista e la fai validare. È lavoro da farsi una volta sola,
     ma un errore qui metterebbe l'edificio sbagliato sul tabellone in silenzio.
+
+24. **«I tuoi edifici in questa colonna» comprende la carta stessa?** — Castrum
+    e Biblioteca usano la stessa formula, ma tirano in direzioni opposte.
+    Lettura adottata: **sì, comprende se stessa.** È uno dei tuoi edifici in
+    quella colonna, e il testo non lo esclude. Conseguenze:
+    - il Castrum si dà +1 resistenza da solo, oltre che agli altri;
+    - la Biblioteca conta anche la propria classe (Cultura) fra quelle distinte.
+
+    Chi deve escludersi lo dice esplicitamente: il Monumento ai caduti parla di
+    «ogni **altro** tuo edificio Militare», ed è modellato con `is_self: false`.
+    «Adiacente» resta invece sempre escludente, perché un edificio non è
+    adiacente a se stesso.
+    Se per il Castrum intendevi solo gli altri, è una riga nei dati.
+
+25. **Due miei errori di modellazione, corretti** — non sono domande, ma vale la
+    pena che restino a verbale perché erano dello stesso tipo.
+    Avevo usato `cap` (tetto sui *punti*) dove il testo dice «fino a N edifici»,
+    che è un limite sul *numero di bersagli*, cioè `times`. Riguardava il Parco
+    archeologico («fino a 2 tuoi edifici») e il Soprintendente («fino a 3 tuoi
+    edifici Sotterrati»). Con `cap` il Parco archeologico avrebbe reso al
+    massimo 2 PV invece dello Scavo di due edifici, che può valere 12.
+    I casi con `cap` corretto restano Urbanista e Veterano, che dicono «max +4»
+    riferito ai punti.

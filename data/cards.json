@@ -1962,12 +1962,12 @@
           "hook": "on_final_scoring",
           "op": "vp_per",
           "value_from": "scavo",
-          "cap": 2,
           "target": {
             "owner": "self",
             "buried": false,
             "adjacent_to_self": true
-          }
+          },
+          "times": 2
         }
       ]
     },
@@ -2650,11 +2650,11 @@
           "hook": "on_final_scoring",
           "op": "scavo_delta",
           "value": 2,
-          "cap": 3,
           "target": {
             "owner": "self",
             "buried": true
-          }
+          },
+          "times": 3
         }
       ]
     },

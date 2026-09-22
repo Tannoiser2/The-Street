@@ -18,6 +18,8 @@ const APPLIED_HOOK_OPS: Array[String] = [
 	"on_era_end:resource",      # ev_inverno_lungo
 	"on_acquire:resource",      # "Subito: +N pietra/oro" dei personaggi
 	"on_acquire:vp",            # "Subito: +N cultura"
+	"on_final_scoring:vp",      # Osservatorio, Acquedotto, Caffe' letterario
+	"on_final_scoring:vp_per",  # Museo, Biblioteca, Grattacielo, Universita'...
 ]
 const APPLIED_OVERRIDES: Array[String] = ["first_terrapieno_free", "free_restore_of_class"]
 
@@ -138,8 +140,13 @@ static func _adjacent(a: Building, b: Building) -> bool:
 	if a.col_from < b.col_to and b.col_from < a.col_to: return false
 	return a.col_to == b.col_from or b.col_to == a.col_from
 
+# "i tuoi edifici in questa colonna" comprende anche la carta che porta
+# l'effetto: e' uno dei tuoi edifici in quella colonna. Chi deve escludersi lo
+# dice con `is_self: false` nel selettore (vedi Monumento ai caduti).
+# Nota: "adiacente" invece esclude sempre se stessi, perche' un edificio non e'
+# adiacente a se'. Vedi docs/domande-aperte.md punto 24.
 static func _shares_column(a: Building, b: Building) -> bool:
-	return a != b and a.col_from < b.col_to and b.col_from < a.col_to
+	return a.col_from < b.col_to and b.col_from < a.col_to
 
 static func _terrain_name(t: int) -> String:
 	return ["pianura", "fiume", "collina", "bosco"][t]
@@ -182,6 +189,79 @@ static func apply_on_acquire(gs: GameState, player: int, card: Dictionary) -> vo
 			"vp":
 				p.add_vp("cultura", int(e["value"]))
 				gs.log_line("%s: %+d cultura" % [card["name"], int(e["value"])])
+
+# ---- hook: on_final_scoring (applica) -------------------------------
+# Voce 7 del conteggio, "Effetti finali". Ogni edificio in gioco porta i propri
+# effetti, in qualunque stato si trovi: le carte che richiedono di essere
+# sopravvissute lo dicono con una `condition` esplicita (Osservatorio,
+# Acquedotto), quindi il silenzio delle altre e' significativo.
+const VP_CHANNEL := "effetti_finali"
+
+static func apply_final_scoring(gs: GameState) -> void:
+	for src in gs.grid.buildings:
+		for e in src.data.get("effects", []):
+			if e["hook"] != "on_final_scoring": continue
+			if not _condition_met(gs, src, e.get("condition", {})): continue
+			match str(e["op"]):
+				"vp": _award(gs, src.owner, int(e.get("value", 0)), src)
+				"vp_per": _apply_vp_per(gs, src, e)
+
+static func _condition_met(gs: GameState, src: Building, cond: Dictionary) -> bool:
+	if cond.is_empty(): return true
+	if str(cond["op"]) != "count_matching": return true
+	var n := 0
+	for b in gs.grid.buildings:
+		if matches(gs, b, cond.get("target", {}), src): n += 1
+	return n >= int(cond["min"])
+
+static func _apply_vp_per(gs: GameState, src: Building, e: Dictionary) -> void:
+	var hits: Array[Building] = []
+	for b in gs.grid.buildings:
+		if matches(gs, b, e.get("target", {}), src): hits.append(b)
+	# `times` limita QUANTI bersagli si contano ("fino a 2 tuoi edifici").
+	# `cap` limita i PUNTI totali ("max +4"). Sono due cose diverse.
+	if e.has("times"): hits = hits.slice(0, int(e["times"]))
+
+	# A chi vanno i punti: di norma al proprietario della carta; col malus del
+	# Grattacielo vanno invece a ciascun proprietario colpito.
+	if str(e.get("to", "self")) == "target_owner":
+		for b in hits: _award(gs, b.owner, int(e.get("value", 0)), src)
+		return
+
+	var pts := 0
+	if e.has("value_from"):
+		var field := str(e["value_from"])
+		for b in hits:
+			pts += b.level if field == "level" else int(b.data["scavo"])
+	else:
+		var v := int(e.get("value", 0))
+		pts = v * _conta(gs, src, hits, str(e.get("per", "building")))
+	if e.has("cap"): pts = min(pts, int(e["cap"]))
+	_award(gs, src.owner, pts, src)
+
+static func _conta(gs: GameState, src: Building, hits: Array[Building], per: String) -> int:
+	match per:
+		"distinct_class":
+			var cls := {}
+			for b in hits:
+				for c in b.classes(): cls[c] = true
+			return cls.size()
+		"level":
+			var n := 0
+			for b in hits: n += b.level
+			return n
+		"upgrade":
+			var n2 := 0
+			for b in hits: n2 += b.upgrades.size()
+			return n2
+		"recruited_character":
+			return gs.players[src.owner].recruited_total
+	return hits.size()
+
+static func _award(gs: GameState, player: int, pts: int, src: Building) -> void:
+	if pts == 0: return
+	gs.players[player].add_vp(VP_CHANNEL, pts)
+	gs.log_line("%s: %+d PV a giocatore %d" % [src.data["name"], pts, player])
 
 # ---- op: resource (applica) ----------------------------------------
 # Unico effetto che modifica lo stato: lo fa il chiamante in rules/, non qui.

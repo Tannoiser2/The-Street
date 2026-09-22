@@ -15,6 +15,7 @@ func _ready() -> void:
 	_run("override dichiarati ma non ancora applicati", _test_pending)
 	_run("aure degli edifici", _test_auras)
 	_run("requisito di terreno adiacente", _test_terrain_adjacent)
+	_run("punteggio finale degli edifici", _test_final_scoring)
 	_run("lo schema e' davvero chiuso", _test_schema_closed)
 	print("\n%d superati, %d falliti" % [_passed, _failed])
 	get_tree().quit(0 if _failed == 0 else 1)
@@ -372,7 +373,9 @@ func _test_auras() -> void:
 	_eq("Castrum · mio edificio nella stessa colonna → +1", Effects.aura_resistance_modifier(gs, mio), 1)
 	_eq("  mio edificio lontano → 0", Effects.aura_resistance_modifier(gs, lontano), 0)
 	_eq("  edificio altrui nella colonna → 0", Effects.aura_resistance_modifier(gs, altrui), 0)
-	_eq("  il Castrum non potenzia se stesso", Effects.aura_resistance_modifier(gs, castrum), 0)
+	# Lettura letterale: "ai tuoi edifici in questa colonna" comprende il Castrum
+	# stesso, che e' uno dei tuoi edifici in quella colonna (domande-aperte 24).
+	_eq("  il Castrum potenzia anche se stesso", Effects.aura_resistance_modifier(gs, castrum), 1)
 
 	# la sorgente spenta non protegge piu'
 	castrum.state = Enums.BuildingState.RUDERE
@@ -445,3 +448,113 @@ func _test_terrain_adjacent() -> void:
 	gs3.grid.terrains[4] = Enums.Terrain.FIUME
 	_ok("fiume a due colonne di distanza: rifiutato",
 		not BuildRules.quote_rail(gs3, 0, mulino, 1).legal)
+
+
+# ---- punteggio finale degli edifici ---------------------------------
+# Restituisce i PV del canale "effetti finali" per giocatore.
+func _final(gs: GameState) -> Array[int]:
+	Effects.apply_final_scoring(gs)
+	var out: Array[int] = []
+	for p in gs.players:
+		out.append(int(p.vp_breakdown.get(Effects.VP_CHANNEL, 0)))
+	return out
+
+func _scena() -> GameState:
+	var gs := _game().gs
+	_flat(gs, Enums.Terrain.PIANURA)
+	return gs
+
+func _test_final_scoring() -> void:
+	# Osservatorio: "Eco: +2 PV se ancora in piedi a fine partita"
+	var a := _scena()
+	_put(a, "ed_osservatorio", 1)
+	_eq("Osservatorio intatto → +2", _final(a)[0], 2)
+	var b := _scena()
+	_put(b, "ed_osservatorio", 1, 0, Enums.BuildingState.RUDERE)
+	_eq("  ridotto a rudere → 0", _final(b)[0], 0)
+	var c := _scena()
+	var oss := _put(c, "ed_osservatorio", 1)
+	oss.is_buried = true
+	_eq("  sotterrato → 0", _final(c)[0], 0)
+
+	# Caffè letterario: "+1 PV se adiacente a un edificio Cultura"
+	var d := _scena()
+	_put(d, "ed_caffe_letterario", 2)
+	_put(d, _card_of_class("cultura"), 3)
+	_eq("Caffe letterario con un Cultura accanto → +1", _final(d)[0], 1)
+	var e := _scena()
+	_put(e, "ed_caffe_letterario", 2)
+	_put(e, _card_of_class("militare"), 3)
+	_eq("  con un Militare accanto → 0", _final(e)[0], 0)
+
+	# Monumento ai caduti: "+1 PV per ogni ALTRO tuo edificio Militare"
+	var f := _scena()
+	_put(f, "ed_monumento_ai_caduti", 1)     # e' Militare+Religione
+	_put(f, _card_of_class("militare"), 4)
+	_put(f, _card_of_class("militare"), 6)
+	_eq("Monumento ai caduti con 2 altri Militari → +2", _final(f)[0], 2)
+	var g := _scena()
+	_put(g, "ed_monumento_ai_caduti", 1)
+	_eq("  da solo → 0, non conta se stesso", _final(g)[0], 0)
+
+	# Museo: "+2 PV per ogni edificio Sotterrato sotto di se'"
+	var h := _scena()
+	var sotto1 := _put(h, "ed_capanne", 2, 0)
+	var sotto2 := _put(h, "ed_capanne", 2, 1)
+	sotto1.is_buried = true
+	sotto2.is_buried = true
+	_put(h, "ed_museo", 2, 2)
+	_eq("Museo con 2 sotterrati sotto → +4", _final(h)[0], 4)
+	var i := _scena()
+	var accanto := _put(i, "ed_capanne", 5, 0)
+	accanto.is_buried = true
+	_put(i, "ed_museo", 2, 2)
+	_eq("  un sotterrato in un'altra colonna non conta", _final(i)[0], 0)
+
+	# Biblioteca: "+1 PV per classe diversa fra i tuoi edifici in questa colonna"
+	var j := _scena()
+	_put(j, "ed_biblioteca", 3)                      # cultura
+	_put(j, _card_of_class("militare"), 3)
+	_put(j, _card_of_class("religione"), 3)
+	_eq("Biblioteca con 3 classi diverse in colonna → +3", _final(j)[0], 3)
+
+	# Università: "+1 PV per ogni tuo personaggio reclutato"
+	var k := _scena()
+	_put(k, "ed_universita", 2)
+	k.players[0].recruited_total = 3
+	_eq("Universita con 3 reclutamenti → +3", _final(k)[0], 3)
+
+	# Fondazione d'arte: "I tuoi potenziamenti valgono +1 PV"
+	var l := _scena()
+	_put(l, "ed_fondazione_darte", 1)
+	var con_pot := _put(l, "ed_capanne", 4)
+	con_pot.upgrades.append("po_idolo")
+	con_pot.upgrades.append("po_statua")
+	_eq("Fondazione d'arte con 2 potenziamenti in gioco → +2", _final(l)[0], 2)
+
+	# Piazza monumentale: "+1 PV per tuo edificio in cima adiacente"
+	var m := _scena()
+	_put(m, "ed_piazza_monumentale", 1)              # occupa 1-2
+	_put(m, "ed_capanne", 3)                         # adiacente, ed e' in cima
+	_eq("Piazza monumentale con un mio edificio in cima accanto → +1", _final(m)[0], 1)
+
+	# Parco archeologico: "fino a 2 tuoi edifici non Sotterrati adiacenti
+	# valgono il loro Scavo" — il limite e' sul NUMERO, non sui punti
+	var n := _scena()
+	_put(n, "ed_parco_archeologico", 1)              # occupa 1-2
+	for c2 in [3, 3, 3]:
+		_put(n, "ed_grotte_dipinte", c2)             # Scavo 6 ciascuno
+	var atteso: int = 2 * int(CardDB.buildings["ed_grotte_dipinte"]["scavo"])
+	_eq("Parco archeologico conta al massimo 2 edifici", _final(n)[0], atteso)
+
+	# Grattacielo: "+1 PV per livello" e "−1 PV agli edifici in cima adiacenti altrui"
+	var o := _scena()
+	_put(o, "ed_grattacielo", 2, 3)
+	_eq("Grattacielo a livello 3 → +3 al proprietario", _final(o)[0], 3)
+	var q := _scena()
+	_put(q, "ed_grattacielo", 2, 3)
+	var avversario := _put(q, "ed_capanne", 3)
+	avversario.owner = 1
+	var r := _final(q)
+	_eq("  il malus colpisce l'avversario in cima accanto", r[1], -1)
+	_eq("  e non tocca il proprietario del Grattacielo", r[0], 3)

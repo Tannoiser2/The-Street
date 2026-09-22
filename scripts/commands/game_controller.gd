@@ -248,6 +248,7 @@ func recruit(char_id: String) -> bool:
 	if not p.can_pay(q.pietra, q.oro): return false
 	p.pay(q.pietra, q.oro)
 	p.specialized_characters.append(char_id)
+	p.recruited_total += 1
 	Effects.apply_on_acquire(gs, p.index, CardDB.characters[char_id])
 	gs.char_row.erase(char_id)
 	_refill(gs.char_row, gs.char_decks[gs.era], int(CardDB.constants["side_rows"]))

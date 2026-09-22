@@ -27,8 +27,9 @@ implementarli**. Questo è quello.
 >
 > **Stato: dati strutturati per EVENTI, PERSONAGGI ed EDIFICI. Il motore
 > applica: i modificatori di resistenza degli eventi, le aure di Quartiere e di
-> colonna degli edifici, i «Subito:» dei personaggi, due override e il
-> requisito di terreno adiacente. `Effects.pending()` elenca il resto.** Lo schema qui descritto è in
+> colonna degli edifici, i «Subito:» dei personaggi, il **punteggio finale degli
+> edifici** (voce 7 del conteggio), due override e il requisito di terreno
+> adiacente. `Effects.pending()` elenca i 17 tipi ancora inerti.** Lo schema qui descritto è in
 > `data/cards.schema.json`, tutti e 24 gli eventi hanno il campo `effects`, e
 > `Effects` li applica. Gli altri blocchi (personaggi, edifici, potenziamenti,
 > Monumenti, Eredità) sono ancora solo proposta: le cinque decisioni in fondo

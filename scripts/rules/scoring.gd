@@ -10,8 +10,8 @@ static func final_scoring(gs: GameState) -> void:
 	_continuity(gs)
 	_scavo(gs)
 	_skeletons(gs)
+	Effects.apply_final_scoring(gs)   # voce 7: effetti finali delle carte
 	# TODO: _objectives(gs)  — Monumenti reclamati + Eredità segrete (condition_text)
-	# TODO: _final_effects(gs) — Museo, Piazza monumentale, Biblioteca, eco, personaggi "Finale"
 
 static func _census_final(gs: GameState) -> void:
 	EraRules.census(gs)

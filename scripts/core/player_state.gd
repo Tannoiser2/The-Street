@@ -22,6 +22,9 @@ var specialized_characters: Array[String] = []
 var worker_cols: Array[int] = []
 # "Il primo terrapieno di ogni giocatore in quest'era costa 0" (ev_bonifiche).
 var terrapieno_free_used: bool = false
+# Personaggi reclutati in tutta la partita: non si azzera a fine era.
+# Serve all'Universita' ("+1 PV per ogni tuo personaggio reclutato").
+var recruited_total: int = 0
 
 func reset_for_era() -> void:
 	workers_used = 0
