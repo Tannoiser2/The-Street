@@ -300,6 +300,10 @@
             "$ref": "#/$defs/cls"
           },
           "description": "Solo per rule_override=counts_as_class: le classi che l'edificio bersaglio acquisisce."
+        },
+        "own_production": {
+          "type": "boolean",
+          "description": "Solo per op=production_delta: il bonus vale su ciascuna risorsa che il bersaglio gia' produce, invece che sulle risorse elencate. Chi non produce nulla non riceve nulla."
         }
       }
     },

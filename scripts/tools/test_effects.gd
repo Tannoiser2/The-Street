@@ -30,6 +30,9 @@ func _ready() -> void:
 	_run("Vescovo: il potenziamento gratuito", _test_vescovo)
 	_run("  e il suo consumo", _test_vescovo_consumo)
 	_run("  che non si brucia su altre classi", _test_vescovo_non_si_brucia)
+	_run("il Ponte: +1 a quello che gia' producono", _test_ponte)
+	_run("Industriale", _test_industriale)
+	_run("Anni della fame", _test_anni_della_fame)
 	_run("lo schema e' davvero chiuso", _test_schema_closed)
 	print("\n%d superati, %d falliti" % [_passed, _failed])
 	get_tree().quit(0 if _failed == 0 else 1)
@@ -328,8 +331,9 @@ func _test_pending() -> void:
 		_ok("  applicato: %s" % n, not n in pend)
 	for n in Effects.DESCRIPTIVE_OVERRIDES:
 		_ok("  descrittivo, nessun codice necessario: %s" % n, not n in pend)
-	# i due override degli eventi noti come inerti devono restare segnalati
-	for n in ["no_production_last_round", "free_upgrade_on_loss"]:
+	# gli override noti come inerti devono restare segnalati: questa lista si
+	# accorcia solo quando l'effetto viene davvero implementato.
+	for n in ["free_upgrade_on_loss", "resource_exchange", "upgrade_on_others_building"]:
 		_ok("  ancora inerte, e segnalato: %s" % n, n in pend)
 
 	# i 25 personaggi hanno tutti effetti strutturati
@@ -1648,3 +1652,155 @@ func _test_vescovo_non_si_brucia() -> void:
 
 	var q := ActionRules.quote_upgrade(ctl.gs, idx, "po_palizzata", h)
 	_ok("lo sconto e' ancora li' per il primo Religione", q.legal and q.oro == 0 and q.pietra == 0, q.reason)
+
+# ---- il gruppo "attivazione": Ponte, Industriale, Anni della fame ----
+# Attiva una colonna e restituisce quanto e' entrato a ciascun giocatore,
+# come [pietra, oro] per giocatore.
+func _attiva(gs: GameState, chi: int, col: int) -> Array:
+	var prima := []
+	for p in gs.players: prima.append([p.pietra, p.oro])
+	EraRules.activate(gs, chi, col)
+	var out := []
+	for i in gs.players.size():
+		out.append([gs.players[i].pietra - prima[i][0], gs.players[i].oro - prima[i][1]])
+	return out
+
+func _test_ponte() -> void:
+	# Il Ponte vuole il fiume, che produce 1 pietra + 1 oro di base.
+	# Le Capanne producono 1 pietra: col Ponte accanto ne producono 2.
+	var a := _scena()
+	_flat(a, Enums.Terrain.FIUME)
+	var vicino := _put(a, "ed_capanne", 2)
+	_eq("Capanne da sole: 1 pietra (piu' 1+1 di fiume)", _attiva(a, 0, 2), [[2, 1], [0, 0], [0, 0]])
+
+	var b := _scena()
+	_flat(b, Enums.Terrain.FIUME)
+	var v2 := _put(b, "ed_capanne", 2)
+	_put(b, "ed_ponte", 3)                      # colonna adiacente
+	_eq("col Ponte accanto: 1 pietra in piu'", _attiva(b, 0, 2), [[3, 1], [0, 0], [0, 0]])
+
+	# "+1 di quello che loro producono": chi non produce nulla non prende nulla.
+	var c := _scena()
+	_flat(c, Enums.Terrain.FIUME)
+	var muto := _card_of_class("militare")
+	var m := _put(c, muto, 2)
+	_ok("l'edificio scelto non produce nulla",
+		int(CardDB.buildings[muto]["production"]["pietra"]) == 0
+		and int(CardDB.buildings[muto]["production"]["oro"]) == 0)
+	_put(c, "ed_ponte", 2 + int(CardDB.buildings[muto]["width"]))
+	_eq("chi non produce non riceve: solo il fiume", _attiva(c, 0, 2), [[1, 1], [0, 0], [0, 0]])
+
+	# Chi produce oro riceve oro, non pietra.
+	var d := _scena()
+	_flat(d, Enums.Terrain.FIUME)
+	_put(d, "ed_emporio", 2)
+	_put(d, "ed_ponte", 3)
+	_eq("l'Emporio produce oro: il Ponte gli da' oro", _attiva(d, 0, 2), [[1, 3], [0, 0], [0, 0]])
+
+	# Vale anche per gli edifici altrui, e paga il loro proprietario.
+	var e := _scena()
+	_flat(e, Enums.Terrain.FIUME)
+	var altrui := _put(e, "ed_capanne", 2)
+	altrui.owner = 1
+	_put(e, "ed_ponte", 3)
+	_eq("il Ponte serve anche il quartiere altrui", _attiva(e, 0, 2), [[1, 1], [2, 0], [0, 0]])
+
+	# Non serve se stesso, e non serve se e' crollato.
+	var f := _scena()
+	_flat(f, Enums.Terrain.FIUME)
+	var p1 := _put(f, "ed_ponte", 2)
+	var p2 := _put(f, "ed_ponte", 3)
+	_ok("il Ponte non produce di suo",
+		int(CardDB.buildings["ed_ponte"]["production"]["pietra"]) == 0)
+	_eq("due Ponti adiacenti non si pagano a vicenda", _attiva(f, 0, 2), [[1, 1], [0, 0], [0, 0]])
+	var g := _scena()
+	_flat(g, Enums.Terrain.FIUME)
+	_put(g, "ed_capanne", 2)
+	var rotto := _put(g, "ed_ponte", 3)
+	rotto.state = Enums.BuildingState.ROVINA
+	_eq("un Ponte in rovina non serve piu' nessuno", _attiva(g, 0, 2), [[2, 1], [0, 0], [0, 0]])
+
+	# Lontano non arriva.
+	var h := _scena()
+	_flat(h, Enums.Terrain.FIUME)
+	_put(h, "ed_capanne", 0)
+	_put(h, "ed_ponte", 3)
+	_eq("a due colonne di distanza non arriva", _attiva(h, 0, 0), [[2, 1], [0, 0], [0, 0]])
+
+func _test_industriale() -> void:
+	# Fiume: il terreno paga 1 oro, l'Emporio ne paga un altro. Sono due
+	# produzioni di oro distinte, quindi l'Industriale le alza entrambe e
+	# esaurisce li' le sue due volte.
+	var a := _scena()
+	_flat(a, Enums.Terrain.FIUME)
+	_put(a, "ed_emporio", 2)
+	_eq("senza Industriale: 1 pietra, 2 oro", _attiva(a, 0, 2), [[1, 2], [0, 0], [0, 0]])
+
+	var b := _scena()
+	_flat(b, Enums.Terrain.FIUME)
+	_put(b, "ed_emporio", 2)
+	b.players[0].specialized_characters = ["pe_industriale"] as Array[String]
+	_eq("con Industriale: +1 al fiume e +1 all'Emporio", _attiva(b, 0, 2), [[1, 4], [0, 0], [0, 0]])
+	_eq("  le due volte sono finite", _attiva(b, 0, 2), [[1, 2], [0, 0], [0, 0]])
+
+	# Una produzione di sola pietra non consuma una delle due volte.
+	var c := _scena()
+	_flat(c, Enums.Terrain.PIANURA)      # 2 pietra, 0 oro
+	_put(c, "ed_capanne", 2)
+	c.players[0].specialized_characters = ["pe_industriale"] as Array[String]
+	_eq("colonna senza oro: niente bonus", _attiva(c, 0, 2), [[3, 0], [0, 0], [0, 0]])
+	_flat(c, Enums.Terrain.FIUME)
+	_eq("  e le volte sono ancora tutte e due li'", _attiva(c, 0, 2)[0][1], 2)
+
+	# Vale sull'oro che incassi tu: se attiva un altro, il tuo edificio che
+	# produce oro e' comunque una tua produzione.
+	var d := _scena()
+	_flat(d, Enums.Terrain.PIANURA)
+	var mio := _put(d, "ed_emporio", 2)
+	mio.owner = 1
+	d.players[1].specialized_characters = ["pe_industriale"] as Array[String]
+	_eq("l'Industriale incassa anche quando attiva un altro",
+		_attiva(d, 0, 2), [[2, 0], [0, 2], [0, 0]])
+
+func _test_anni_della_fame() -> void:
+	var a := _scena()
+	_flat(a, Enums.Terrain.FIUME)
+	_put(a, "ed_capanne", 2)
+	var p0: PlayerState = a.players[0]
+	p0.workers = 3
+	p0.workers_used = 1
+	_set_event(a, "ev_anni_della_fame")
+	_eq("primo lavoratore: il terreno paga", _attiva(a, 0, 2), [[2, 1], [0, 0], [0, 0]])
+	p0.workers_used = 3
+	_eq("ultimo lavoratore: solo l'edificio paga", _attiva(a, 0, 2), [[1, 0], [0, 0], [0, 0]])
+
+	# Senza l'evento, l'ultimo lavoratore incassa come tutti.
+	var b := _scena()
+	_flat(b, Enums.Terrain.FIUME)
+	_put(b, "ed_capanne", 2)
+	b.players[0].workers = 3
+	b.players[0].workers_used = 3
+	_eq("senza carestia l'ultimo giro e' normale", _attiva(b, 0, 2), [[2, 1], [0, 0], [0, 0]])
+
+	# La Dinastia sposta in avanti l'ultimo giro: con un lavoratore in piu',
+	# il terzo non e' piu' l'ultimo.
+	var c := _scena()
+	_flat(c, Enums.Terrain.FIUME)
+	_put(c, "ed_capanne", 2)
+	_set_event(c, "ev_anni_della_fame")
+	c.players[0].workers = 4
+	c.players[0].workers_used = 3
+	_eq("col lavoratore della Dinastia il terzo giro paga ancora", _attiva(c, 0, 2), [[2, 1], [0, 0], [0, 0]])
+	c.players[0].workers_used = 4
+	_eq("  ed e' il quarto a restare a secco", _attiva(c, 0, 2), [[1, 0], [0, 0], [0, 0]])
+
+	# Colpisce solo chi sta giocando il proprio ultimo lavoratore, non gli altri.
+	var d := _scena()
+	_flat(d, Enums.Terrain.FIUME)
+	var suo := _put(d, "ed_capanne", 2)
+	suo.owner = 1
+	_set_event(d, "ev_anni_della_fame")
+	d.players[0].workers = 3
+	d.players[0].workers_used = 3
+	_eq("l'edificio altrui paga comunque il suo proprietario",
+		_attiva(d, 0, 2), [[0, 0], [1, 0], [0, 0]])

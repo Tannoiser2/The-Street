@@ -46,9 +46,12 @@ const APPLIED: Array[String] = [
 	"potenziamento:on_acquire:scavo_delta",
 	"potenziamento:on_final_scoring:scavo_delta",
 	"potenziamento:on_acquire:rendita_delta",  # Stalli mercantili
+	"edificio:on_activate:production_delta",  # il Ponte: +1 a chi gia' produce
+	"personaggio:on_activate:production_delta",  # Industriale
 ]
 const APPLIED_OVERRIDES: Array[String] = ["first_terrapieno_free", "free_restore_of_class",
-	"ignore_terrain_requirement", "counts_as_class", "arte_vp_bonus", "free_upgrade_of_class"]
+	"ignore_terrain_requirement", "counts_as_class", "arte_vp_bonus", "free_upgrade_of_class",
+	"no_production_last_round"]
 
 # Override che NON richiedono codice: descrivono un comportamento che il modello
 # generico gia' fornisce. Tenerli distinti dagli APPLIED_OVERRIDES e' deliberato:
@@ -432,6 +435,61 @@ static func _sorgenti_attive(gs: GameState, player: int) -> Array:
 
 static func _terrain_name(t: int) -> String:
 	return ["pianura", "fiume", "collina", "bosco"][t]
+
+# ---- op: production_delta ------------------------------------------
+# Aure di produzione: il Ponte, "+1 produzione agli edifici adiacenti".
+# Il bonus vale su CIO' CHE L'EDIFICIO GIA' PRODUCE (`own_production`): chi non
+# produce nulla non riceve nulla, e chi produce solo pietra riceve solo pietra.
+# Vale per gli edifici di chiunque: il testo non limita ai propri, e il bonus
+# finisce a chi incassa, cioe' al proprietario dell'edificio beneficiato.
+# La sorgente deve essere viva: un ponte crollato non serve piu' il quartiere.
+static func aura_production_bonus(gs: GameState, b: Building) -> Dictionary:
+	var out := {"pietra": 0, "oro": 0, "cultura": 0}
+	if not b.is_alive(): return out
+	var pr: Dictionary = b.data["production"]
+	for src in gs.grid.buildings:
+		if src == b or not src.is_alive(): continue
+		for card in _carte_di(src):
+			for e in card.get("effects", []):
+				if str(e.get("hook", "")) != "on_activate": continue
+				if str(e.get("op", "")) != "production_delta": continue
+				if not matches(gs, b, e.get("target", {}), src, src.owner): continue
+				if bool(e.get("own_production", false)):
+					var v := int(e.get("value", 0))
+					for r in out:
+						if int(pr.get(r, 0)) > 0: out[r] += v
+				else:
+					for r in out:
+						out[r] += int(e.get(r, 0))
+	return out
+
+# Industriale: "per l'era, le tue prime 2 produzioni di oro danno +1".
+# Decisione del designer: ogni fonte che ti paga oro e' una produzione a se'.
+# Il terreno del fiume e un edificio che produce oro nella stessa colonna sono
+# due produzioni diverse, e ciascuna prende il suo +1.
+# L'oro della Prosperita' non e' una produzione: e' un premio del Centro
+# Urbano, e non conta. Vedi docs/domande-aperte.md.
+static func production_bonus(gs: GameState, player: int, pietra: int, oro: int) -> Vector2i:
+	var p: PlayerState = gs.players[player]
+	var extra := Vector2i.ZERO
+	for cid in p.specialized_characters:
+		if not CardDB.characters.has(cid): continue
+		var carta: Dictionary = CardDB.characters[cid]
+		for e in carta.get("effects", []):
+			if str(e.get("hook", "")) != "on_activate": continue
+			if str(e.get("op", "")) != "production_delta": continue
+			# La fonte deve pagare davvero la risorsa che la carta alza:
+			# altrimenti si consumerebbe una delle volte su una produzione
+			# che quella risorsa non la tocca.
+			var dp := int(e.get("pietra", 0))
+			var do_ := int(e.get("oro", 0))
+			if dp > 0 and pietra <= 0: continue
+			if do_ > 0 and oro <= 0: continue
+			if dp <= 0 and do_ <= 0: continue
+			if _quota(p, e, carta, 1) <= 0: continue
+			extra += Vector2i(dp, do_)
+			gs.log_line("%s: la produzione di giocatore %d sale di %+d pietra %+d oro" % [carta["name"], player, dp, do_])
+	return extra
 
 # ---- op: resistance ------------------------------------------------
 # Somma dei modificatori dell'evento corrente applicabili all'edificio.

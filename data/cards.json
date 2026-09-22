@@ -685,8 +685,8 @@
         {
           "hook": "on_activate",
           "op": "production_delta",
-          "pietra": 1,
-          "oro": 1,
+          "value": 1,
+          "own_production": true,
           "target": {
             "adjacent_to_self": true
           }
@@ -3579,7 +3579,7 @@
           "hook": "on_event",
           "op": "rule_override",
           "name": "free_upgrade_on_loss",
-          "cap": 1
+          "times": 1
         }
       ]
     },

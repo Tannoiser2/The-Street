@@ -10,14 +10,32 @@ static func activate(gs: GameState, player: int, col: int) -> void:
 	var g := gs.grid
 	var t_id: String = ["pianura", "fiume", "collina", "bosco"][g.terrains[col]]
 	var base = CardDB.terrains[t_id]["base_production"]
-	gs.players[player].gain(int(base["pietra"]), int(base["oro"]))
+	# "Anni della fame: nessuna produzione durante l'ultimo round dell'era."
+	# Decisione del designer: salta la sola produzione BASE, e solo sull'ultimo
+	# lavoratore che ciascuno piazza. Gli edifici pagano comunque. "Ultimo" si
+	# calcola sul momento: chi compra la Dinastia guadagna un lavoratore e
+	# sposta in avanti il proprio ultimo giro.
+	if not (Effects.has_override(gs, "no_production_last_round") and _is_last_worker(gs, player)):
+		var bp := int(base["pietra"])
+		var bo := int(base["oro"])
+		var be := Effects.production_bonus(gs, player, bp, bo)
+		gs.players[player].gain(bp + be.x, bo + be.y)
+	else:
+		gs.log_line("Anni della fame: giocatore %d non incassa la produzione base" % player)
 
 	for b in g.alive_in_column(col):
 		var pr = b.data["production"]
 		var ow: PlayerState = gs.players[b.owner]
-		ow.gain(int(pr.get("pietra", 0)), int(pr.get("oro", 0)))
-		if int(pr.get("cultura", 0)) > 0:
-			ow.add_vp("cultura", int(pr["cultura"]))
+		# Il Ponte alza cio' che l'edificio gia' produce, prima che si conti
+		# se la produzione e' "di oro" per l'Industriale.
+		var aura := Effects.aura_production_bonus(gs, b)
+		var pp := int(pr.get("pietra", 0)) + int(aura["pietra"])
+		var po := int(pr.get("oro", 0)) + int(aura["oro"])
+		var pc := int(pr.get("cultura", 0)) + int(aura["cultura"])
+		var ex := Effects.production_bonus(gs, b.owner, pp, po)
+		ow.gain(pp + ex.x, po + ex.y)
+		if pc > 0:
+			ow.add_vp("cultura", pc)
 		if int(b.data.get("exhaustible", 0)) > 0:
 			b.charges -= 1
 			if b.charges <= 0:
@@ -57,6 +75,13 @@ static func resolve_event(gs: GameState) -> void:
 
 # I modificatori dell'evento vengono dal campo `effects` della carta (M4):
 # nessuna stringa interpretata a runtime. Vedi Effects.event_resistance_modifier.
+
+# L'ultimo lavoratore che quel giocatore piazza in quest'era. Il lavoratore e'
+# gia' stato segnato quando si attiva, quindi "usati == disponibili" vuol dire
+# che questo era l'ultimo.
+static func _is_last_worker(gs: GameState, player: int) -> bool:
+	var p: PlayerState = gs.players[player]
+	return p.workers_used >= p.workers
 
 static func _on_terrain(gs: GameState, b: Building, t: int) -> bool:
 	for c in range(b.col_from, b.col_to):
