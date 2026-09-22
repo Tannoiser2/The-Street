@@ -38,34 +38,90 @@ func new_game(n_players: int, seed_value: int) -> void:
 		var ids := CardDB.buildings_of_era(e).map(func(b): return b["id"])
 		_shuffle(ids)
 		gs.building_decks[e] = ids
+		var cids := CardDB.characters.values().filter(
+			func(c): return c.get("era") == e and not c.get("is_dynasty", false)
+		).map(func(c): return c["id"])
+		_shuffle(cids)
+		gs.char_decks[e] = cids
+		var uids := CardDB.upgrades.values().filter(func(u): return int(u["era"]) == e).map(func(u): return u["id"])
+		_shuffle(uids)
+		gs.upg_decks[e] = uids
+	gs.dynasties_left = int(CardDB.characters[ActionRules.dynasty_id()].get("copies", 0))
 	_start_era(1)
 
 func _start_era(era: int) -> void:
 	gs.era = era
 	gs.market.clear()
-	var deck: Array = gs.building_decks[era]
-	for i in min(int(CardDB.constants["market_size"]), deck.size()):
-		gs.market.append(deck.pop_back())
+	_refill(gs.market, gs.building_decks[era], int(CardDB.constants["market_size"]))
+	# "quando un'era finisce, le file non usate si scartano": si riparte da zero.
+	gs.char_row.clear()
+	gs.upg_row.clear()
+	var side := int(CardDB.constants["side_rows"])
+	_refill(gs.char_row, gs.char_decks[era], side)
+	_refill(gs.upg_row, gs.upg_decks[era], side)
+
 	if era <= 4:
 		var evs := CardDB.events_of_era(era)
 		gs.current_event = evs[gs.rng.randi_range(0, evs.size() - 1)]
 	else:
 		gs.current_event = {}
-	# Ordine: prima chi ha costruito meno. TODO: snake in 2 giocatori, era 1.
-	gs.turn_order = range(gs.n_players)
-	gs.turn_order.sort_custom(func(a, b): return gs.players[a].buildings_built < gs.players[b].buildings_built)
-	gs.turn_pos = 0
+
+	gs.turn_order = _era_turn_order()
+	gs.turn_sequence = _era_turn_sequence()
+	gs.turn_pos = -1
+	gs.current_index = -1
+	for p in gs.players: p.reset_for_era()
 	gs.phase = Enums.Phase.PIAZZA
 	gs.log_line("Inizia l'era %d. Evento: %s" % [era, gs.current_event.get("name", "nessuno")])
-	state_changed.emit()
+	if _advance_to_next_player():
+		state_changed.emit()
+	else:
+		_finish_era()
+
+# "A ogni nuova era parte primo chi ha costruito meno edifici in totale;
+# a parita' si mantiene l'ordine precedente."
+# Il confronto e' un ordine totale (pareggio risolto dalla posizione precedente),
+# quindi il risultato non dipende dalla stabilita' di sort_custom.
+func _era_turn_order() -> Array:
+	var prev: Array = gs.turn_order.duplicate() if not gs.turn_order.is_empty() else range(gs.n_players)
+	var decorated := []
+	for pos in prev.size():
+		decorated.append({"p": int(prev[pos]), "pos": pos})
+	decorated.sort_custom(func(a, b):
+		var ba: int = gs.players[a["p"]].buildings_built
+		var bb: int = gs.players[b["p"]].buildings_built
+		if ba != bb: return ba < bb
+		return a["pos"] < b["pos"])
+	var out := []
+	for d in decorated: out.append(d["p"])
+	return out
+
+# "In due giocatori, l'Era 1 si apre a snake - A, B, B, A, A, B."
+# Se qualcuno acquista la Dinastia durante l'era, il lavoratore in piu' viene
+# servito dal giro normale una volta esaurita la sequenza.
+func _era_turn_sequence() -> Array[int]:
+	var seq: Array[int] = []
+	if gs.n_players == 2 and gs.era == 1:
+		var a: int = gs.turn_order[0]
+		var b: int = gs.turn_order[1]
+		seq = [a, b, b, a, a, b]
+	return seq
+
+func _refill(row: Array, deck: Array, size: int) -> void:
+	while row.size() < size and not deck.is_empty():
+		row.append(deck.pop_back())
 
 # ---- fase 1+2: piazza e attiva --------------------------------------
 func place_worker(col: int, protect: Building = null) -> bool:
 	if gs.phase != Enums.Phase.PIAZZA: return false
+	if col < 0 or col >= gs.grid.n_cols: return false
 	var p := gs.current_player()
 	if p.workers_used >= p.workers: return false
+	# "Potete avere al massimo un vostro lavoratore per colonna."
+	if col in p.worker_cols: return false
 	p.workers_used += 1
-	if protect != null and protect.owner == p.index and protect.covers(col):
+	p.worker_cols.append(col)
+	if protect != null and protect.owner == p.index and protect.covers(col) and protect.is_standing():
 		protect.protection += int(CardDB.constants["protection_bonus"])
 	EraRules.activate(gs, p.index, col)
 	_activated_col = col
@@ -74,13 +130,16 @@ func place_worker(col: int, protect: Building = null) -> bool:
 	return true
 
 # ---- fase 3: azioni -------------------------------------------------
-func build(card_id: String, col_from: int, above: bool, pay_option: int = 0) -> bool:
+# Costruire: nella colonna attivata o in una adiacente.
+# `despoil` e' il rudere opzionalmente depredato (spoliazione).
+func build(card_id: String, col_from: int, above: bool, pay_option: int = 0, despoil: Building = null) -> bool:
 	if gs.phase != Enums.Phase.AZIONE: return false
 	if abs(col_from - _activated_col) > 1: return false
 	if not card_id in gs.market: return false
 	var p := gs.current_player()
 	var data: Dictionary = CardDB.buildings[card_id]
-	var q := BuildRules.quote_above(gs, p.index, data, col_from) if above else BuildRules.quote_rail(gs, p.index, data, col_from)
+	var q := BuildRules.quote_above(gs, p.index, data, col_from, despoil) if above \
+		else BuildRules.quote_rail(gs, p.index, data, col_from, despoil)
 	if not q.legal:
 		gs.log_line("Costruzione rifiutata: %s" % q.reason)
 		return false
@@ -88,6 +147,14 @@ func build(card_id: String, col_from: int, above: bool, pay_option: int = 0) -> 
 	var cost: Vector2i = opts[clamp(pay_option, 0, opts.size() - 1)]
 	if not p.can_pay(cost.x, cost.y): return false
 	p.pay(cost.x, cost.y)
+
+	# La spoliazione si risolve PRIMA di costruire: il rudere e' gia' rovina,
+	# e resta del suo proprietario.
+	if q.despoiled != null:
+		q.despoiled.state = Enums.BuildingState.ROVINA
+		q.despoiled.upgrades.clear()
+		gs.log_line("%s depredato: diventa rovina" % q.despoiled.data["name"])
+		building_changed.emit(q.despoiled)
 
 	for base in q.bases:
 		if base in q.razed:
@@ -115,31 +182,122 @@ func build(card_id: String, col_from: int, above: bool, pay_option: int = 0) -> 
 	p.buildings_built += 1
 	if int(data["lampo"]) > 0: p.add_vp("lampo", int(data["lampo"]))
 	gs.market.erase(card_id)
-	var deck: Array = gs.building_decks[gs.era]
-	if not deck.is_empty(): gs.market.append(deck.pop_back())
+	_refill(gs.market, gs.building_decks[gs.era], int(CardDB.constants["market_size"]))
 	building_placed.emit(b)
+	_end_turn()
+	return true
+
+# Potenziare: carta dalla fila, sotto un tuo edificio in piedi della colonna attivata.
+func upgrade(upg_id: String, target: Building) -> bool:
+	if gs.phase != Enums.Phase.AZIONE: return false
+	if target == null or not target.covers(_activated_col): return false
+	var p := gs.current_player()
+	var q := ActionRules.quote_upgrade(gs, p.index, upg_id, target)
+	if not q.legal:
+		gs.log_line("Potenziamento rifiutato: %s" % q.reason)
+		return false
+	if not p.can_pay(q.pietra, q.oro): return false
+	p.pay(q.pietra, q.oro)
+	target.upgrades.append(upg_id)
+	# "quelli Struttura danno resistenza permanente, segnata con un cubetto nero".
+	# Gli effetti specifici (Arte, "altro", i condizionali) sono M4.
+	if CardDB.upgrades[upg_id]["family"] == "struttura":
+		target.bonus_res += 1
+	gs.upg_row.erase(upg_id)
+	_refill(gs.upg_row, gs.upg_decks[gs.era], int(CardDB.constants["side_rows"]))
+	gs.log_line("%s potenziato con %s" % [target.data["name"], CardDB.upgrades[upg_id]["name"]])
+	building_changed.emit(target)
+	_end_turn()
+	return true
+
+# Restaurare: stessa azione del potenziamento. Il rudere torna intatto,
+# la Vetusta' si azzera e, se era altrui, cambia proprietario.
+func restore(target: Building) -> bool:
+	if gs.phase != Enums.Phase.AZIONE: return false
+	if target == null or not target.covers(_activated_col): return false
+	var p := gs.current_player()
+	var q := ActionRules.quote_restore(gs, p.index, target)
+	if not q.legal:
+		gs.log_line("Restauro rifiutato: %s" % q.reason)
+		return false
+	if not p.can_pay(q.pietra, q.oro): return false
+	p.pay(q.pietra, q.oro)
+	target.state = Enums.BuildingState.INTATTO
+	target.vetusta = 0
+	var stolen := target.owner != p.index
+	target.owner = p.index
+	gs.log_line("%s restaurato%s" % [target.data["name"], " e appropriato" if stolen else ""])
+	building_changed.emit(target)
+	_end_turn()
+	return true
+
+# Reclutare: il lavoratore appena piazzato si specializza fino a fine era.
+func recruit(char_id: String) -> bool:
+	if gs.phase != Enums.Phase.AZIONE: return false
+	var p := gs.current_player()
+	var q := ActionRules.quote_recruit(gs, p.index, char_id, _activated_col)
+	if not q.legal:
+		gs.log_line("Reclutamento rifiutato: %s" % q.reason)
+		return false
+	if not p.can_pay(q.pietra, q.oro): return false
+	p.pay(q.pietra, q.oro)
+	p.specialized_characters.append(char_id)
+	gs.char_row.erase(char_id)
+	_refill(gs.char_row, gs.char_decks[gs.era], int(CardDB.constants["side_rows"]))
+	gs.log_line("Reclutato %s" % CardDB.characters[char_id]["name"])
+	_end_turn()
+	return true
+
+# Dinastia: quarto lavoratore permanente, attivo da subito. Una sola a testa.
+func buy_dynasty() -> bool:
+	if gs.phase != Enums.Phase.AZIONE: return false
+	var p := gs.current_player()
+	var q := ActionRules.quote_dynasty(gs, p.index)
+	if not q.legal:
+		gs.log_line("Dinastia rifiutata: %s" % q.reason)
+		return false
+	if not p.can_pay(q.pietra, q.oro): return false
+	p.pay(q.pietra, q.oro)
+	p.has_dynasty = true
+	p.workers += 1          # "attivo da subito e per tutte le ere che restano"
+	gs.dynasties_left -= 1
+	gs.log_line("Giocatore %d acquista la Dinastia" % p.index)
 	_end_turn()
 	return true
 
 func pass_action() -> void:
 	if gs.phase == Enums.Phase.AZIONE: _end_turn()
 
-# TODO: upgrade(), restore(), recruit(), buy_dynasty(), despoil()
-# Seguire lo stesso schema: validare in rules/, applicare qui, emettere segnali.
-
 # ---- avanzamento ---------------------------------------------------
 func _end_turn() -> void:
 	gs.phase = Enums.Phase.PIAZZA
+	if _advance_to_next_player():
+		state_changed.emit()
+	else:
+		_finish_era()
+
+# Sceglie chi gioca ora: prima la sequenza esplicita (snake), poi il giro
+# normale fra chi ha ancora lavoratori. false = l'era e' finita.
+func _advance_to_next_player() -> bool:
+	while not gs.turn_sequence.is_empty():
+		var cand: int = gs.turn_sequence.pop_front()
+		if _has_worker(cand):
+			gs.turn_pos = gs.turn_order.find(cand)
+			gs.current_index = cand
+			return true
 	for _i in gs.n_players:
 		gs.turn_pos = (gs.turn_pos + 1) % gs.n_players
-		var np := gs.current_player()
-		if np.workers_used < np.workers:
-			state_changed.emit()
-			return
-	_finish_era()
+		var c: int = gs.turn_order[gs.turn_pos]
+		if _has_worker(c):
+			gs.current_index = c
+			return true
+	return false
+
+func _has_worker(i: int) -> bool:
+	var p: PlayerState = gs.players[i]
+	return p.workers_used < p.workers
 
 func _finish_era() -> void:
-	# TODO: sepoltura dei personaggi reclutati (ere 1-4) sotto un edificio vivo.
 	EraRules.end_era(gs)
 	era_ended.emit(gs.era)
 	if gs.era >= 5:

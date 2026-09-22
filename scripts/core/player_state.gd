@@ -14,8 +14,17 @@ var vp: int = 0                        # punti già segnati durante la partita
 var vp_breakdown: Dictionary = {}      # canale -> punti (per il riepilogo finale)
 var legacy_id: String = ""             # Eredità segreta tenuta
 var monuments_claimed: Array = []
-var specialized_character: String = "" # personaggio attivo per l'era corrente
-var specialized_era: int = 0
+# Personaggi reclutati in quest'era, uno per lavoratore specializzato.
+# Il regolamento non limita i reclutamenti a uno per era, e la sepoltura dice
+# "uno solo per edificio": quindi possono essercene piu' d'uno.
+var specialized_characters: Array[String] = []
+# Colonne dove hai gia' un lavoratore: "al massimo un vostro lavoratore per colonna".
+var worker_cols: Array[int] = []
+
+func reset_for_era() -> void:
+	workers_used = 0
+	specialized_characters.clear()
+	worker_cols.clear()
 
 func _init(i: int) -> void:
 	index = i

@@ -91,13 +91,34 @@ static func disperse(gs: GameState) -> void:
 		p.pietra -= from_p
 		p.oro -= excess - from_p
 
+# ---- scheletri: sepoltura dei personaggi ---------------------------
+# "Nelle ere 1-4, a fine era il personaggio non si scarta: infilatelo sotto la
+# carta di un vostro edificio ancora in piedi, uno solo per edificio."
+# "I personaggi dell'era Moderna si scartano."
+# I personaggi in eccesso rispetto agli edifici disponibili si scartano.
+static func bury_characters(gs: GameState) -> void:
+	if gs.era >= 5: return
+	for p in gs.players:
+		if p.specialized_characters.is_empty(): continue
+		var hosts := gs.grid.buildings.filter(func(b):
+			return b.owner == p.index and b.is_standing() and b.buried_character == "")
+		var i := 0
+		for cid in p.specialized_characters:
+			if i >= hosts.size(): break
+			var h: Building = hosts[i]
+			h.buried_character = cid
+			h.buried_character_era = gs.era
+			gs.log_line("%s sepolto sotto %s" % [CardDB.characters[cid]["name"], h.data["name"]])
+			i += 1
+
 # ---- chiusura dell'era completa -----------------------------------
+# L'ordine conta: l'evento precede il censimento ("si conta solo cio' che e'
+# sopravvissuto"), e la sepoltura precede l'azzeramento dei personaggi.
 static func end_era(gs: GameState) -> void:
 	resolve_event(gs)
 	census(gs)
+	bury_characters(gs)
 	disperse(gs)
 	for b in gs.grid.buildings: b.protection = 0
-	for p in gs.players:
-		p.workers_used = 0
-		p.specialized_character = ""
+	for p in gs.players: p.reset_for_era()
 	gs.grid.reset_era_flags()

@@ -15,6 +15,7 @@ class BuildQuote:
 	var razed: Array = []          # tuoi intatti che verrebbero spianati
 	var terrapieno_cols: int = 0
 	var continuity_bonus: int = 0
+	var despoiled: Building = null   # rudere depredato, diventa rovina prima di costruire
 
 # ---- requisiti di terreno -----------------------------------------
 # Morbidi per pianura/collina/bosco (colonna o adiacente), stretti per fiume.
@@ -32,6 +33,22 @@ static func terrain_ok(gs: GameState, data: Dictionary, col_from: int, col_to: i
 		if g.terrains[c] == want: return true
 	return false
 
+# ---- spoliazione ---------------------------------------------------
+# "Quando costruite potete depredare un rudere esposto nella colonna della
+# costruzione o in una adiacente: diventa subito rovina - restando del suo
+# proprietario - e vi sconta 1, 2 o 3 pietra secondo la sua taglia, mai piu' del
+# costo in pietra della costruzione. Si risolve prima di costruire, quindi quel
+# rudere non vi dara' la continuita' di classe, e sostituisce lo sconto macerie:
+# i due non si sommano."
+static func despoil_reason(gs: GameState, target: Building, col_from: int, col_to: int) -> String:
+	if target == null: return ""
+	if target.is_buried: return "il rudere e' sotterrato, non e' esposto"
+	if target.state != Enums.BuildingState.RUDERE: return "il bersaglio della spoliazione non e' un rudere"
+	# esposto nella colonna della costruzione o in una adiacente
+	for c in range(max(0, col_from - 1), min(gs.grid.n_cols, col_to + 1)):
+		if target.covers(c): return ""
+	return "il rudere non e' nella colonna della costruzione ne' in una adiacente"
+
 static func base_cost(data: Dictionary) -> Vector2i:
 	return Vector2i(int(data["cost"]["pietra"]), int(data["cost"]["oro"]))
 
@@ -41,7 +58,7 @@ static func pianura_discount(gs: GameState, data: Dictionary, col_from: int) -> 
 	return 0
 
 # ---- costruzione nel proprio binario ------------------------------
-static func quote_rail(gs: GameState, player: int, data: Dictionary, col_from: int) -> BuildQuote:
+static func quote_rail(gs: GameState, player: int, data: Dictionary, col_from: int, despoil: Building = null) -> BuildQuote:
 	var q := BuildQuote.new()
 	var w := int(data["width"])
 	var col_to := col_from + w
@@ -55,18 +72,30 @@ static func quote_rail(gs: GameState, player: int, data: Dictionary, col_from: i
 		q.reason = "richiede livello %d: va costruito sopra" % data["level_required"]; return q
 	if not terrain_ok(gs, data, col_from, col_to):
 		q.reason = "terreno non adatto"; return q
+	var dr := despoil_reason(gs, despoil, col_from, col_to)
+	if dr != "":
+		q.reason = dr; return q
 	var c := base_cost(data)
-	q.pietra = max(0, c.x - pianura_discount(gs, data, col_from))
+	var p := c.x - pianura_discount(gs, data, col_from)
+	p = _apply_despoil(q, despoil, p)
+	q.pietra = max(0, p)
 	q.oro = c.y
 	q.level = 0
 	q.legal = true
 	return q
 
+# Lo sconto vale la taglia del rudere e non puo' superare la pietra ancora dovuta.
+static func _apply_despoil(q: BuildQuote, despoil: Building, pietra_so_far: int) -> int:
+	if despoil == null: return pietra_so_far
+	q.despoiled = despoil
+	var discount: int = min(despoil.width(), max(0, pietra_so_far))
+	return pietra_so_far - discount
+
 # ---- costruzione sopra --------------------------------------------
 # Ogni colonna dell'impronta offre una base valida (rudere/rovina di chiunque,
 # oppure un proprio intatto da spianare) o richiede terrapieno.
 # Almeno una colonna deve avere una base vera. Cap: +1 livello per colonna per era.
-static func quote_above(gs: GameState, player: int, data: Dictionary, col_from: int) -> BuildQuote:
+static func quote_above(gs: GameState, player: int, data: Dictionary, col_from: int, despoil: Building = null) -> BuildQuote:
 	var q := BuildQuote.new()
 	var g := gs.grid
 	var w := int(data["width"])
@@ -77,6 +106,9 @@ static func quote_above(gs: GameState, player: int, data: Dictionary, col_from: 
 		q.reason = "non è un edificio dell'era corrente"; return q
 	if not terrain_ok(gs, data, col_from, col_to):
 		q.reason = "terreno non adatto"; return q
+	var dr := despoil_reason(gs, despoil, col_from, col_to)
+	if dr != "":
+		q.reason = dr; return q
 
 	var top_level := -1
 	var real_bases := 0
@@ -98,7 +130,9 @@ static func quote_above(gs: GameState, player: int, data: Dictionary, col_from: 
 					q.razed.append(top)
 					spolia += int(ceil(float(top.data["resistance"] + top.bonus_res) / 2.0))
 			Enums.BuildingState.RUDERE:
-				if top.shares_class_with(data): q.continuity_bonus = 1
+				# Il rudere depredato e' gia' rovina quando si costruisce:
+				# non offre continuita' di classe.
+				if top != despoil and top.shares_class_with(data): q.continuity_bonus = 1
 			Enums.BuildingState.ROVINA:
 				rubble_discount = true
 		if not top in q.bases: q.bases.append(top)
@@ -115,7 +149,9 @@ static func quote_above(gs: GameState, player: int, data: Dictionary, col_from: 
 	var p := c.x + q.terrapieno_cols * int(CardDB.constants["terrapieno_cost_pietra"])
 	p -= pianura_discount(gs, data, col_from)
 	p -= spolia
-	if rubble_discount: p -= int(CardDB.constants["rubble_discount_pietra"])
+	# Lo sconto macerie non si somma alla spoliazione: la sostituisce.
+	if rubble_discount and despoil == null: p -= int(CardDB.constants["rubble_discount_pietra"])
+	p = _apply_despoil(q, despoil, p)
 	q.pietra = max(0, p)
 	q.oro = c.y
 	q.legal = true
