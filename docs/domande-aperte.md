@@ -347,3 +347,19 @@ dato è stato importato da lì. Ma due confronti fra ciò che è stampato e
     Ora la chiave è `tipo:hook:op`. Il numero onesto degli inerti è passato da
     12 a 25 nel momento della riparazione, ed è sceso a 16 implementando questo
     blocco. Vale la pena ricordarlo quando quel numero sembra buono.
+
+29. **`production_delta` resta inerte, e il motivo è un'ambiguità.** Due carte
+    lo usano e nessuna delle due dice *quale* risorsa aumenta.
+    - Ponte: «Quartiere: **+1 produzione** agli edifici adiacenti». Un edificio
+      adiacente che produce 1 pietra passa a 2 pietra, o guadagna anche 1 oro?
+      L'avevo modellato come `+1 pietra e +1 oro`, che è quasi certamente
+      sbagliato: raddoppierebbe il valore su un edificio che produce entrambe.
+    - Industriale: «le tue prime 2 **produzioni di oro** danno +1». Qui la
+      risorsa è detta, ma «produzione di oro» va definito: è ogni edificio che
+      paga oro, o ogni attivazione in cui incassi oro?
+
+    Lettura provvisoria: **nessuna**, l'op resta dichiarata e non applicata,
+    perché qualunque scelta cambierebbe l'economia in modo misurabile e
+    preferisco chiedertelo. La più probabile per il Ponte è «+1 della risorsa
+    che già produce», che però non è esprimibile senza un terzo valore nello
+    schema (tipo `same_as_base`).

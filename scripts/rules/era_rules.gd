@@ -24,11 +24,12 @@ static func activate(gs: GameState, player: int, col: int) -> void:
 				b.state = Enums.BuildingState.RUDERE
 				gs.log_line("%s si esaurisce e diventa rudere" % b.data["name"])
 
+	Effects.apply_on_activate(gs, player, col)
+
 	if g.is_prosperity_center(col):
 		var gold := int(CardDB.constants["prosperity"]["gold_per_owner"])
 		for ow in g.owners_alive_in(col):
 			gs.players[ow].gain(0, gold)
-	# TODO: effetti "quando attivi" di edifici e personaggi (hook su effect_text).
 
 # ---- evento --------------------------------------------------------
 # Confronta la resistenza effettiva con la forza dell'era.

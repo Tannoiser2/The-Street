@@ -29,12 +29,16 @@ var recruited_total: int = 0
 # pagano dopo che l'era e' chiusa, quindi non possono stare in
 # specialized_characters, che l'era azzera. Vedi domande-aperte punto 26.
 var final_characters: Array[String] = []
+# Quanto ha gia' reso un effetto in quest'era, per carta. Serve ai tetti
+# ("max 2") e ai conteggi ("le tue prime 2 produzioni").
+var effect_used: Dictionary = {}
 
 func reset_for_era() -> void:
 	workers_used = 0
 	specialized_characters.clear()
 	worker_cols.clear()
 	terrapieno_free_used = false
+	effect_used.clear()
 
 func _init(i: int) -> void:
 	index = i

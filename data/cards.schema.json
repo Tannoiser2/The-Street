@@ -277,6 +277,13 @@
             "recruited_character"
           ],
           "description": "Solo per op=vp_per: cosa si conta. Default building."
+        },
+        "when": {
+          "enum": [
+            "self_activates",
+            "other_activates"
+          ],
+          "description": "Solo per hook=on_activate: chi deve attivare perche' l'effetto scatti. Default self_activates."
         }
       }
     },

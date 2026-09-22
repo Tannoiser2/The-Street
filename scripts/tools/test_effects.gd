@@ -18,6 +18,7 @@ func _ready() -> void:
 	_run("punteggio finale degli edifici", _test_final_scoring)
 	_run("potenziamenti", _test_upgrades)
 	_run("effetti per l'era dei personaggi", _test_characters_era)
+	_run("hook di attivazione", _test_on_activate)
 	_run("lo schema e' davvero chiuso", _test_schema_closed)
 	print("\n%d superati, %d falliti" % [_passed, _failed])
 	get_tree().quit(0 if _failed == 0 else 1)
@@ -782,3 +783,114 @@ func _test_characters_era() -> void:
 		k.players[0].final_characters, ["pe_veterano"] as Array[String])
 	_eq("  e specialized_characters si azzera come sempre",
 		k.players[0].specialized_characters, [] as Array[String])
+
+
+# ---- hook di attivazione ---------------------------------------------
+func _ric(gs: GameState, i: int) -> Array[int]:
+	var p: PlayerState = gs.players[i]
+	return [p.pietra, p.oro] as Array[int]
+
+func _test_on_activate() -> void:
+	var civ := _card_of_class("civico")
+
+	# Focolare comune: "+1 pietra quando abiti qui"
+	var a := _scena()
+	_put(a, "ed_focolare_comune", 2)
+	var pre := _ric(a, 0)
+	Effects.apply_on_activate(a, 0, 2)
+	_eq("Focolare: chi lo abita prende +1 pietra", _ric(a, 0), [pre[0] + 1, pre[1]] as Array[int])
+	var b := _scena()
+	_put(b, "ed_focolare_comune", 2)
+	var pre_b := _ric(b, 0)
+	Effects.apply_on_activate(b, 0, 5)
+	_eq("  attivando un'altra colonna → nulla", _ric(b, 0), pre_b)
+	var c := _scena()
+	_put(c, "ed_focolare_comune", 2)
+	var pre_c := _ric(c, 0)
+	Effects.apply_on_activate(c, 1, 2)          # attiva un avversario
+	_eq("  se attiva un altro → nulla al proprietario", _ric(c, 0), pre_c)
+
+	# Ospedale dei pellegrini: "+1 oro quando abiti qui"
+	var d := _scena()
+	_put(d, "ed_ospedale_dei_pellegrini", 1)
+	var pre_d := _ric(d, 0)
+	Effects.apply_on_activate(d, 0, 1)
+	_eq("Ospedale: +1 oro", _ric(d, 0), [pre_d[0], pre_d[1] + 1] as Array[int])
+
+	# po_boutique sull'ospite
+	var e2 := _scena()
+	var host := _put(e2, civ, 3)
+	host.upgrades.append("po_boutique")
+	var pre_e := _ric(e2, 0)
+	Effects.apply_on_activate(e2, 0, 3)
+	_eq("Boutique: +2 oro a chi abita l'edificio", _ric(e2, 0), [pre_e[0], pre_e[1] + 2] as Array[int])
+
+	# po_banchina: solo su colonna fiume
+	var f := _scena()
+	f.grid.terrains[2] = Enums.Terrain.FIUME
+	var hf := _put(f, civ, 2)
+	hf.upgrades.append("po_banchina")
+	var pre_f := _ric(f, 0)
+	Effects.apply_on_activate(f, 0, 2)
+	_eq("Banchina su fiume: +1 oro", _ric(f, 0), [pre_f[0], pre_f[1] + 1] as Array[int])
+	var g := _scena()                            # tutto pianura
+	var hg := _put(g, civ, 2)
+	hg.upgrades.append("po_banchina")
+	var pre_g := _ric(g, 0)
+	Effects.apply_on_activate(g, 0, 2)
+	_eq("  fuori dal fiume → nulla", _ric(g, 0), pre_g)
+
+	# Console: "+1 oro quando attivi una colonna con un tuo strato Civico (max 2)"
+	var h := _scena()
+	_put(h, civ, 4)
+	h.players[0].specialized_characters = ["pe_console"] as Array[String]
+	var pre_h := _ric(h, 0)
+	for i in 4: Effects.apply_on_activate(h, 0, 4)
+	_eq("Console: il tetto di 2 oro per era regge", _ric(h, 0), [pre_h[0], pre_h[1] + 2] as Array[int])
+	var i2 := _scena()
+	_put(i2, _card_of_class("militare"), 4)
+	i2.players[0].specialized_characters = ["pe_console"] as Array[String]
+	var pre_i := _ric(i2, 0)
+	Effects.apply_on_activate(i2, 0, 4)
+	_eq("  senza un Civico in colonna → nulla", _ric(i2, 0), pre_i)
+
+	# Mercante: scatta quando attiva un AVVERSARIO
+	var j := _scena()
+	var mio := _put(j, civ, 3)
+	mio.owner = 0
+	j.players[0].specialized_characters = ["pe_mercante"] as Array[String]
+	var pre_j := _ric(j, 0)
+	Effects.apply_on_activate(j, 1, 3)           # attiva il giocatore 1
+	_eq("Mercante: +1 oro quando attiva un avversario", _ric(j, 0), [pre_j[0], pre_j[1] + 1] as Array[int])
+	var k := _scena()
+	var mio2 := _put(k, civ, 3)
+	mio2.owner = 0
+	k.players[0].specialized_characters = ["pe_mercante"] as Array[String]
+	var pre_k := _ric(k, 0)
+	Effects.apply_on_activate(k, 0, 3)           # attiva il proprietario
+	_eq("  ma non quando attiva lui stesso", _ric(k, 0), pre_k)
+
+	# Cronista: "+1 cultura se la colonna ha edifici di 3+ ere diverse"
+	var l := _scena()
+	for era in [1, 2, 3]:
+		var b2 := _put(l, civ, 2)
+		b2.era_built = era
+	l.players[0].specialized_characters = ["pe_cronista"] as Array[String]
+	var vp0: int = l.players[0].vp
+	Effects.apply_on_activate(l, 0, 2)
+	_eq("Cronista: 3 ere diverse in colonna → +1 cultura", l.players[0].vp, vp0 + 1)
+	var m := _scena()
+	for era2 in [1, 1]:
+		var b3 := _put(m, civ, 2)
+		b3.era_built = era2
+	m.players[0].specialized_characters = ["pe_cronista"] as Array[String]
+	var vp1: int = m.players[0].vp
+	Effects.apply_on_activate(m, 0, 2)
+	_eq("  con 2 ere soltanto → nulla", m.players[0].vp, vp1)
+
+	# e arriva davvero attraverso EraRules.activate, non solo chiamando il motore
+	var n := _scena()
+	_put(n, "ed_ospedale_dei_pellegrini", 1)
+	var pre_n := _ric(n, 0)
+	EraRules.activate(n, 0, 1)
+	_ok("l'attivazione vera include l'effetto", n.players[0].oro > pre_n[1])

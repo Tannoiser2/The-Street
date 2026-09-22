@@ -2242,8 +2242,7 @@
             "owner": "self",
             "class": [
               "civico"
-            ],
-            "same_column_as_self": true
+            ]
           }
         }
       ]
@@ -2380,8 +2379,9 @@
           "duration": "era",
           "cap": 2,
           "target": {
-            "owner": "others"
-          }
+            "owner": "self"
+          },
+          "when": "other_activates"
         }
       ]
     },

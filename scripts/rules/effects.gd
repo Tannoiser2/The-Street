@@ -32,6 +32,10 @@ const APPLIED: Array[String] = [
 	"personaggio:on_final_scoring:vp_per",
 	"personaggio:on_final_scoring:scavo_delta",  # Soprintendente
 	"edificio:on_build:cost_delta",          # Bottega d'artista
+	"edificio:on_activate:resource",         # Focolare comune, Ospedale dei pellegrini
+	"personaggio:on_activate:resource",      # Console, Mercante
+	"personaggio:on_activate:vp",            # Cronista
+	"potenziamento:on_activate:resource",    # Granaio, Boutique, Banchina
 	"potenziamento:on_acquire:vp",
 	"potenziamento:on_acquire:resistance",
 	"potenziamento:on_acquire:scavo_delta",
@@ -187,6 +191,84 @@ static func character_resistance_modifier(gs: GameState, b: Building) -> int:
 				if matches(gs, b, e.get("target", {}), null, p.index):
 					mod += int(e["value"])
 	return mod
+
+# ---- hook: on_activate (applica) -----------------------------------
+# Scatta quando un giocatore attiva una colonna. La COLONNA ATTIVATA e' un
+# contesto implicito, non un predicato del selettore: i bersagli candidati sono
+# gli edifici che la coprono. Un personaggio non ha un edificio sorgente, e
+# senza questa regola "quando attivi una colonna con un tuo strato Civico" non
+# sarebbe esprimibile.
+static func apply_on_activate(gs: GameState, attivatore: int, col: int) -> void:
+	for voce in _sorgenti_attivabili(gs, col):
+		var e: Dictionary = voce[0]
+		var src: Building = voce[1]
+		var own: int = voce[2]
+		var carta: Dictionary = voce[3]
+		if e["hook"] != "on_activate": continue
+		if not _scatta(e, attivatore, own): continue
+		if not _condition_met(gs, src, e.get("condition", {}), own): continue
+		# i candidati sono i soli edifici della colonna attivata
+		var trovato := false
+		for b in gs.grid.in_column(col):
+			if matches(gs, b, e.get("target", {}), src, own): trovato = true; break
+		if not trovato: continue
+		match str(e["op"]):
+			"resource": _paga(gs, own, e, carta, int(e.get("pietra", 0)), int(e.get("oro", 0)))
+			"vp": _paga_vp(gs, own, e, carta, int(e.get("value", 0)))
+
+static func _scatta(e: Dictionary, attivatore: int, proprietario: int) -> bool:
+	if str(e.get("when", "self_activates")) == "other_activates":
+		return attivatore != proprietario
+	return attivatore == proprietario
+
+# Le sorgenti che possono scattare su questa attivazione: gli edifici che
+# coprono la colonna coi loro potenziamenti, e i personaggi di tutti i
+# giocatori (il Mercante scatta quando attiva un avversario).
+static func _sorgenti_attivabili(gs: GameState, col: int) -> Array:
+	var out := []
+	for b in gs.grid.in_column(col):
+		if not b.is_alive(): continue
+		for card in _carte_di(b):
+			for e in card.get("effects", []):
+				out.append([e, b, b.owner, card])
+	for p in gs.players:
+		for cid in p.specialized_characters:
+			if not CardDB.characters.has(cid): continue
+			for e in CardDB.characters[cid].get("effects", []):
+				out.append([e, null, p.index, CardDB.characters[cid]])
+	return out
+
+# `cap` e' un tetto sul TOTALE reso in quest'era da quella carta; `times` limita
+# quante volte puo' scattare. Entrambi si contano su PlayerState.effect_used.
+static func _quota(p: PlayerState, e: Dictionary, carta: Dictionary, valore: int) -> int:
+	var chiave: String = str(carta["id"])
+	var usato: int = int(p.effect_used.get(chiave, 0))
+	if e.has("times"):
+		if usato >= int(e["times"]): return 0
+		p.effect_used[chiave] = usato + 1
+		return valore
+	if e.has("cap"):
+		var resto: int = int(e["cap"]) - usato
+		if resto <= 0: return 0
+		var dato: int = min(valore, resto)
+		p.effect_used[chiave] = usato + dato
+		return dato
+	return valore
+
+static func _paga(gs: GameState, player: int, e: Dictionary, carta: Dictionary,
+		pietra: int, oro: int) -> void:
+	var p: PlayerState = gs.players[player]
+	var tot := _quota(p, e, carta, max(pietra, oro))
+	if tot <= 0: return
+	p.gain(pietra if pietra > 0 else 0, oro if oro > 0 else 0)
+	gs.log_line("%s: attivazione, %+d pietra %+d oro a giocatore %d" % [carta["name"], pietra, oro, player])
+
+static func _paga_vp(gs: GameState, player: int, e: Dictionary, carta: Dictionary, v: int) -> void:
+	var p: PlayerState = gs.players[player]
+	var dato := _quota(p, e, carta, v)
+	if dato <= 0: return
+	p.add_vp("cultura", dato)
+	gs.log_line("%s: attivazione, %+d cultura a giocatore %d" % [carta["name"], dato, player])
 
 # ---- op: cost_delta ------------------------------------------------
 # Sconti e rincari su una costruzione o un potenziamento ANCORA DA FARE.
