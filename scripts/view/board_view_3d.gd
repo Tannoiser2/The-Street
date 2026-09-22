@@ -128,12 +128,19 @@ func _tessere() -> void:
 func _edifici() -> void:
 	for b in gs.grid.buildings:
 		_basetta(b)
-		_sagoma(b)
-		_linguette(b)
+		# Chi e' CROLLATO IN ROVINA non ha piu' una sagoma in piedi: resta il
+		# piede, che fa da fondamenta a chi ci costruisce sopra. Il rudere
+		# invece e' "in piedi ma spento" e la sagoma ce l'ha ancora, in grigio.
+		# Disegnarli uguali era il motivo per cui in partita sembrava che
+		# nessun edificio crollasse mai: crollano eccome - 877 su 1720 in 60
+		# partite a tre giocatori - ma sullo schermo restavano in piedi.
+		if BoardLayout3D.ha_sagoma(b):
+			_sagoma(b)
+			_linguette(b)
 		_cubetti(b)
 		_segnalini(b)
 
-# Il piede che tiene in piedi il cartone: 15 mm di profondita' sui 54 dello
+# Il piede che tiene in piedi il cartone: 15 mm di profondita' sui 26 dello
 # slot, cosi' il resto resta scoperto e le file dietro si vedono.
 func _basetta(b: Building) -> void:
 	var box := BoardLayout3D.basetta_box(gs, b)

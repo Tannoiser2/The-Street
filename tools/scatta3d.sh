@@ -19,7 +19,10 @@ else
 fi
 # Movie Maker numera i fotogrammi: teniamo l'ultimo e buttiamo il resto.
 BASE="${FUORI%.png}"
-ULTIMO=$(ls "${BASE}"*.png 2>/dev/null | tail -1 || true)
+# Solo i fotogrammi NUMERATI: con `${BASE}*.png` un file vicino di nome
+# affine - un ritaglio "finale_zoom.png" accanto a "finale.png" - finiva
+# ultimo nell'ordinamento e veniva promosso a scatto, cancellando il vero.
+ULTIMO=$(ls "${BASE}"[0-9]*.png 2>/dev/null | tail -1 || true)
 if [ -n "$ULTIMO" ]; then
   mv "$ULTIMO" "$FUORI"
   rm -f "${BASE}"[0-9]*.png "${BASE}.wav"

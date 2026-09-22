@@ -1019,3 +1019,36 @@ dato è stato importato da lì. Ma due confronti fra ciò che è stampato e
     A schermo si vede: a quattro giocatori la terza colonna di fiume ripete
     il disegno della prima.
 
+74. **Le "caselle disegnate" sulle tessere non le trovo.** Mi hai detto che
+    sul PDF ci sono caselle disegnate nella parte alta della tessera, dove
+    vanno le sagome. Nella copia che ho in mano - `materiali/Carte.pdf`,
+    impronta `06530822fdf30035` - non ci sono: le tessere portano titolo,
+    illustrazione, icone di produzione, regola e la fascia "Prosperita'
+    Urbana", e basta. Controllate tutte e undici.
+
+    Ho quindi preso come fascia dei binari **l'illustrazione**, misurata sul
+    pixel: il cielo comincia a 30 mm dal bordo alto e la cornice d'oro sotto
+    il disegno cade a 160. Centotrenta millimetri, cinque binari da 26.
+
+    Se le caselle stanno nel PDF nuovo, quando arriva rimisuro sulle loro
+    posizioni invece che sulla cornice: potrebbero non essere centrate sulla
+    fascia che ho scelto.
+
+75. **I binari stretti costano lo scorcio.** Con i binari a 54 mm bastavano
+    45 gradi di inclinazione per vedere l'82% di una sagoma dietro quella
+    davanti e tenere il 71% di scorcio. Portandoli a 26 mm, a 45 gradi ne
+    restava visibile il **39%** e la fila davanti copriva anche il testo
+    della tessera.
+
+    La telecamera e' salita a **62 gradi**: cosi' la visibilita' torna al 74%
+    - dov'era - e il prezzo lo paga lo scorcio, che scende dal 71 al **47%**.
+    A 70 gradi le sagome sono quasi coricate e non si riconoscono piu':
+    provato, guardato, scartato.
+
+    Le due soglie che il test controllava prima - 75% visibile e 65% di
+    scorcio - non stanno piu' insieme: la prima vuole almeno 62 gradi, la
+    seconda al massimo 49. Le soglie nuove sono scritte nel test, non
+    allentate di nascosto. Se preferisci sagome meno schiacciate si scende
+    d'angolo e si accetta che le file dietro si vedano meno; ora comunque la
+    telecamera la muovi tu.
+
