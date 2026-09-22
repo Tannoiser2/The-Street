@@ -181,7 +181,27 @@ nessuna carta dichiarasse una capienza diversa. Avrei dovuto cercare nel testo.
 
 ---
 
-## 6. Le decisioni che spettano a te
+## 6. Le decisioni — risposte del designer
+
+1. **Il sesto hook.** *"aggiungi il sesto hook se serve"* → `on_acquire` resta
+   nello schema; lo useranno i 15 «Subito:» dei personaggi.
+2. **`flavour_text` o `effect_text`?** *"usa quello che sembra meglio"* →
+   **nessun campo nuovo.** La distinzione è già interamente portata dalla
+   presenza o assenza di `effects`: se una carta non ha `effects`, non c'è nulla
+   da implementare. Un secondo campo di testo significherebbe due campi da
+   tenere allineati e un ramo di schema in più per tre carte.
+3. **Le righe che ribadiscono campi esistenti.** *"se sono doppioni le
+   togliamo"* → rimosse 16 righe di `effect_text` sugli edifici, tutte
+   verificate come ricavabili dai campi strutturati prima di toccarle
+   (`production`, `level_required`, `exhaustible`). Restano 33 edifici con
+   `effect_text`.
+4. **I Monumenti sono una corsa.** *"si reclamano quando la condizione è
+   soddisfatta"* → confermato. Servono la valutazione continua e i contatori
+   storici.
+5. **L'ordine di lavoro.** *"procedi come hai deciso"* → eventi (fatti) →
+   personaggi → edifici → potenziamenti → Monumenti ed Eredità.
+
+## 6bis. Le decisioni originali, per riferimento
 
 1. **Il sesto hook.** `on_acquire` non è nell'elenco del brief ma serve ai 15
    «Subito:». Lo aggiungiamo, o li modelliamo diversamente?

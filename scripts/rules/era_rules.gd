@@ -112,7 +112,12 @@ static func end_era(gs: GameState) -> void:
 	if gs.era < 5:
 		census(gs)
 	bury_characters(gs)
-	disperse(gs)
+	# "Fra un'era e l'altra passano generazioni": la dispersione prepara l'era
+	# successiva, e dopo l'era 5 non ce n'e' una. Decisione del designer
+	# (domande-aperte punto 17): le risorse residue restano, perche' sono il
+	# secondo criterio di spareggio.
+	if gs.era < 5:
+		disperse(gs)
 	for b in gs.grid.buildings: b.protection = 0
 	for p in gs.players: p.reset_for_era()
 	gs.grid.reset_era_flags()

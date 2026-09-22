@@ -144,8 +144,7 @@
         "oro": 0,
         "cultura": 0
       },
-      "exhaustible": 0,
-      "effect_text": "Produce 1 pietra."
+      "exhaustible": 0
     },
     {
       "id": "ed_dolmen",
@@ -225,8 +224,7 @@
         "oro": 0,
         "cultura": 0
       },
-      "exhaustible": 0,
-      "effect_text": "Produce 1 pietra."
+      "exhaustible": 0
     },
     {
       "id": "ed_menhir",
@@ -279,8 +277,7 @@
         "oro": 0,
         "cultura": 0
       },
-      "exhaustible": 0,
-      "effect_text": "Produce 1 pietra."
+      "exhaustible": 0
     },
     {
       "id": "ed_cava",
@@ -306,8 +303,7 @@
         "oro": 0,
         "cultura": 0
       },
-      "exhaustible": 4,
-      "effect_text": "Produce 2 pietra. Esauribile 4: dopo la quarta attivazione diventa rudere."
+      "exhaustible": 4
     },
     {
       "id": "ed_focolare_comune",
@@ -360,8 +356,7 @@
         "oro": 0,
         "cultura": 0
       },
-      "exhaustible": 0,
-      "effect_text": "Produce 1 pietra."
+      "exhaustible": 0
     },
     {
       "id": "ed_circolo_di_pietre",
@@ -658,8 +653,7 @@
         "oro": 1,
         "cultura": 0
       },
-      "exhaustible": 0,
-      "effect_text": "Produce 1 oro."
+      "exhaustible": 0
     },
     {
       "id": "ed_insulae",
@@ -685,8 +679,7 @@
         "oro": 0,
         "cultura": 0
       },
-      "exhaustible": 0,
-      "effect_text": "Produce 1 pietra."
+      "exhaustible": 0
     },
     {
       "id": "ed_foro",
@@ -713,8 +706,7 @@
         "oro": 1,
         "cultura": 0
       },
-      "exhaustible": 0,
-      "effect_text": "Produce 1 oro."
+      "exhaustible": 0
     },
     {
       "id": "ed_anfiteatro",
@@ -794,8 +786,7 @@
         "oro": 1,
         "cultura": 0
       },
-      "exhaustible": 0,
-      "effect_text": "Produce 1 oro."
+      "exhaustible": 0
     },
     {
       "id": "ed_mura",
@@ -902,8 +893,7 @@
         "oro": 1,
         "cultura": 0
       },
-      "exhaustible": 0,
-      "effect_text": "Produce 1 oro."
+      "exhaustible": 0
     },
     {
       "id": "ed_mulino",
@@ -986,8 +976,7 @@
         "oro": 1,
         "cultura": 0
       },
-      "exhaustible": 0,
-      "effect_text": "Produce 1 oro + 1 pietra."
+      "exhaustible": 0
     },
     {
       "id": "ed_ospedale_dei_pellegrini",
@@ -1040,8 +1029,7 @@
         "oro": 0,
         "cultura": 0
       },
-      "exhaustible": 0,
-      "effect_text": "Richiede livello 1+."
+      "exhaustible": 0
     },
     {
       "id": "ed_abbazia",
@@ -1231,8 +1219,7 @@
         "oro": 1,
         "cultura": 0
       },
-      "exhaustible": 0,
-      "effect_text": "Produce 1 oro."
+      "exhaustible": 0
     },
     {
       "id": "ed_villa",
@@ -1285,8 +1272,7 @@
         "oro": 0,
         "cultura": 1
       },
-      "exhaustible": 0,
-      "effect_text": "Produce 1 cultura."
+      "exhaustible": 0
     },
     {
       "id": "ed_ponte_monumentale",
@@ -1397,8 +1383,7 @@
         "oro": 0,
         "cultura": 0
       },
-      "exhaustible": 0,
-      "effect_text": "Richiede livello 1+."
+      "exhaustible": 0
     },
     {
       "id": "ed_piazza_monumentale",
@@ -1532,8 +1517,7 @@
         "oro": 2,
         "cultura": 0
       },
-      "exhaustible": 0,
-      "effect_text": "Produce 2 oro."
+      "exhaustible": 0
     },
     {
       "id": "ed_monumento_ai_caduti",

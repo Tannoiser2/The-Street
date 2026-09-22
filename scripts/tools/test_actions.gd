@@ -20,6 +20,7 @@ func _ready() -> void:
 	_run("sepoltura dei personaggi", _test_burial)
 	_run("ordine di turno e snake", _test_turn_order)
 	_run("un lavoratore per colonna", _test_worker_per_column)
+	_run("dispersione dei secoli", _test_disperse)
 	print("\n%d superati, %d falliti" % [_passed, _failed])
 	get_tree().quit(0 if _failed == 0 else 1)
 
@@ -451,3 +452,39 @@ func _test_worker_per_column() -> void:
 		guard += 1
 	_ok("rifiuta un secondo lavoratore nella stessa colonna", not ctl.place_worker(1))
 	_ok("accetta una colonna libera", ctl.place_worker(2))
+
+
+# ---- dispersione dei secoli -----------------------------------------
+func _test_disperse() -> void:
+	var cap := int(CardDB.constants["resource_cap"])
+
+	# ere 1-4: il tetto si applica
+	for era in [1, 2, 3, 4]:
+		var ctl := _game()
+		var gs := ctl.gs
+		gs.era = era
+		var p0: PlayerState = gs.players[0]
+		_give(p0, cap + 4, 3)
+		EraRules.end_era(gs)
+		_eq("era %d: le risorse scendono al tetto di %d" % [era, cap], p0.total_resources(), cap)
+
+	# era 5: nessun taglio, le risorse residue servono allo spareggio
+	var ctl5 := _game()
+	var gs5 := ctl5.gs
+	gs5.era = 5
+	gs5.current_event = {}          # "L'era Moderna non ha evento"
+	var p5: PlayerState = gs5.players[0]
+	_give(p5, cap + 4, 3)
+	var prima: int = p5.total_resources()
+	EraRules.end_era(gs5)
+	_eq("era 5: le risorse restano intatte", p5.total_resources(), prima)
+
+	# e lo spareggio le usa davvero
+	var ctl6 := _game()
+	var gs6 := ctl6.gs
+	for p in gs6.players:
+		p.vp = 10
+		_give(p, 0, 0)
+	var p2: PlayerState = gs6.players[2]
+	p2.pietra = 7
+	_eq("a parita' di PV e di edifici vince chi ha piu' risorse", Scoring.winner(gs6), 2)

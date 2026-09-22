@@ -133,14 +133,12 @@ segnata qui invece di essere data per buona.
     Nessuna azione: è un limite dell'oracolo, come quelli già elencati in
     `reference/README.md`.
 
-17. **Dispersione delle risorse a fine era 5** — `EraRules.end_era` applica il
-    tetto di 5 risorse anche alla chiusura dell'era 5, subito prima del
-    conteggio finale. Il secondo criterio di spareggio è "chi ha più risorse
-    residue", quindi il tetto può cambiare un pareggio.
-    Il regolamento mette la dispersione fra i passi di "Fine era", insieme al
-    "ricambio" che prepara l'era successiva — e dopo l'era 5 non c'è un'era
-    successiva. Lettura provvisoria: **lasciata com'è**, nessuna modifica.
-    Da confermare: la dispersione si applica anche all'ultima era?
+17. ~~**Dispersione delle risorse a fine era 5**~~ — **RISOLTA dal designer:**
+    *"nessun limite alle risorse, serve per lo spareggio"*.
+    **Implementazione cambiata**: `EraRules.end_era` applica la dispersione solo
+    nelle ere 1-4. Dopo l'era 5 le risorse residue restano intatte, perché sono
+    il secondo criterio di spareggio. Coerente col regolamento, che mette la
+    dispersione fra i passi che preparano l'era successiva.
 
 ### Due bug trovati dal confronto, già corretti
 
