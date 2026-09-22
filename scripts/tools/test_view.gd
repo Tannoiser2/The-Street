@@ -340,9 +340,14 @@ func _test_3d_scena() -> void:
 	var gs := _gioco().gs
 	_metti(gs, "ed_capanne", 0, 1)
 	var cielo := BoardLayout3D.sky_rect(gs)
-	_ok("il cielo sta dietro l'ultimo binario",
-		cielo.position.z < BoardLayout3D.rail_z(BoardLayout3D.RAILS))
-	_ok("  ed e' piu' largo della strada", cielo.size.x > BoardLayout3D.board_w(gs))
+	# Il cielo e' il fondale della strada: attaccato al bordo alto delle
+	# tessere e largo quanto loro, non una parete della stanza piu' larga e
+	# staccata indietro - cosi' si vedeva che era un'altra cosa.
+	_approx("il cielo e' attaccato al bordo alto delle tessere", cielo.position.z, 0.0)
+	_approx("  ed e' largo quanto le tessere", cielo.size.x, BoardLayout3D.board_w(gs))
+	_approx("  e parte dal piano del tavolo", cielo.position.x, 0.0)
+	_ok("  e sta dietro l'ultimo binario",
+		cielo.position.z <= BoardLayout3D.rail_z(BoardLayout3D.RAILS))
 	_ok("  e in piedi, non steso", cielo.size.y > 0.0 and cielo.size.z == 0.0)
 
 	var cam := BoardLayout3D.camera_position(gs)

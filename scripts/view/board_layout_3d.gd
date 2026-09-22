@@ -50,7 +50,10 @@ const BASETTA_Y := 5.0
 # sopra una sagoma in piedi - le basi diventano tutte rovina nel momento in
 # cui ci si costruisce - quindi non c'e' niente da scavalcare.
 const LEVEL_H := 5.0
-const CIELO_STACCO := 90.0
+# Il cielo e' un pannello in piedi ATTACCATO al bordo alto delle tessere e
+# largo esattamente quanto loro: e' il fondale della strada, non una parete
+# della stanza. Prima stava 90 mm piu' indietro e sbordava di due tessere per
+# lato, e si vedeva che era un'altra cosa.
 const CIELO_H := 620.0
 
 static func col_x(col: int) -> float:
@@ -177,9 +180,8 @@ static func carta_path(tipo: String, id: String) -> String:
 	return "res://assets/carte/%s/%s.%s" % [d[0], id, d[1]]
 
 static func sky_rect(gs: GameState) -> AABB:
-	var z := -CIELO_STACCO
-	return AABB(Vector3(-TESSERA_W * 2.0, -20.0, z),
-		Vector3(board_w(gs) + TESSERA_W * 4.0, CIELO_H, 0.0))
+	return AABB(Vector3(0.0, 0.0, 0.0),
+		Vector3(board_w(gs), CIELO_H, 0.0))
 
 # L'inquadratura e' DERIVATA, non aggiustata a occhio: inclinazione fissa e
 # distanza calcolata perche' la strada riempia il fotogramma. Cosi' vale per
