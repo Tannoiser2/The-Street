@@ -63,6 +63,13 @@ const LEVEL_H := BASETTA_Y
 # il panorama non si deforma. Il valore qui e' quello di materiali/Sfondo.png
 # (1672x941); la vista passa il rapporto vero della texture che ha caricato.
 const CIELO_RAPPORTO := 1672.0 / 941.0
+# Quanta parte dell'immagine si mostra, dal basso. A pannello intero il
+# fondale saliva quasi quanto e' profonda la strada - un muro dietro il
+# tabellone - e la meta' alta era cielo vuoto. Si mostra la meta' bassa,
+# cioe' l'orizzonte e la terra: il pannello cala della meta' e il panorama
+# NON si schiaccia, perche' quel che resta tiene le sue proporzioni.
+# E' un numero solo: per farlo piu' alto o piu' basso si cambia qui.
+const CIELO_QUOTA := 0.5
 const SFONDO_PATH := "res://assets/sfondo.png"
 
 static func col_x(col: int) -> float:
@@ -240,10 +247,11 @@ static func carta_path(tipo: String, id: String) -> String:
 	var d: Array = CARTELLE_CARTE[tipo]
 	return "res://assets/carte/%s/%s.%s" % [d[0], id, d[1]]
 
-static func sky_rect(gs: GameState, rapporto := CIELO_RAPPORTO) -> AABB:
+static func sky_rect(gs: GameState, rapporto := CIELO_RAPPORTO,
+		quota := CIELO_QUOTA) -> AABB:
 	var largo := board_w(gs)
 	return AABB(Vector3(0.0, 0.0, 0.0),
-		Vector3(largo, largo / maxf(rapporto, 0.05), 0.0))
+		Vector3(largo, largo / maxf(rapporto, 0.05) * clampf(quota, 0.05, 1.0), 0.0))
 
 # L'inquadratura e' DERIVATA, non aggiustata a occhio: inclinazione fissa e
 # distanza calcolata perche' la strada riempia il fotogramma. Cosi' vale per

@@ -95,6 +95,12 @@ func _cielo() -> void:
 		var mat := p.material_override as StandardMaterial3D
 		mat.albedo_texture = tex
 		mat.texture_filter = BaseMaterial3D.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
+		# Del panorama si mostra solo la striscia bassa - orizzonte e terra -
+		# invece di schiacciare tutta l'immagine in meta' pannello: si taglia
+		# il cielo vuoto in alto e quel che resta tiene le sue proporzioni.
+		var quota := clampf(BoardLayout3D.CIELO_QUOTA, 0.05, 1.0)
+		mat.uv1_scale = Vector3(1.0, quota, 1.0)
+		mat.uv1_offset = Vector3(0.0, 1.0 - quota, 0.0)
 	p.position = r.position + Vector3(r.size.x / 2.0, r.size.y / 2.0, 0.0)
 	add_child(p)
 

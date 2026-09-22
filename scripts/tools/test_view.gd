@@ -362,6 +362,17 @@ func _test_3d_scena() -> void:
 		cielo.position.z <= BoardLayout3D.rail_z(BoardLayout3D.RAILS))
 	_ok("  e in piedi, non steso", cielo.size.y > 0.0 and cielo.size.z == 0.0)
 
+	# E NON E' PIU' UN MURO. A pannello intero saliva quasi quanto e'
+	# profonda la strada, e la meta' alta era cielo vuoto: adesso si mostra
+	# la striscia bassa, quella dell'orizzonte.
+	var intero := BoardLayout3D.sky_rect(gs, BoardLayout3D.CIELO_RAPPORTO, 1.0)
+	_approx("il fondale mostra la quota scelta dell'immagine",
+		cielo.size.y, intero.size.y * BoardLayout3D.CIELO_QUOTA)
+	_ok("  cioe' la meta' o meno", cielo.size.y <= intero.size.y / 2.0 + 0.001)
+	_ok("  e resta piu' basso della strada e' profonda",
+		cielo.size.y < BoardLayout3D.board_d())
+	_approx("  restando largo quanto le tessere", cielo.size.x, intero.size.x)
+
 	var cam := BoardLayout3D.camera_position(gs)
 	_ok("la telecamera sta davanti alla prima fila", cam.z > BoardLayout3D.rail_z(1))
 	_ok("  e alzata, per vedere oltre l'era 1", cam.y > 1.0)
