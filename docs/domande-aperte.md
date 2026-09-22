@@ -769,3 +769,48 @@ dato è stato importato da lì. Ma due confronti fra ciò che è stampato e
     regolamento la richiede (punto 55), il PNG del cielo al posto del colore
     pieno, l'illustrazione sulle sagome (che aspetta la mappatura del punto
     23), e il dettaglio dei cubetti sulla plancia del giocatore.
+
+59. **La scelta del bersaglio, e un difetto peggiore di quanto avevo scritto.**
+    Dove il regolamento fa scegliere, il motore non deve decidere al posto del
+    giocatore. I posti sono tre, e ora sono tutti e tre chiusi.
+
+    **Ingegnere militare** — «i tuoi edifici Militari hanno +1 res; uno a tua
+    scelta +2». Al punto 27 avevo scritto che «il totale e' corretto, la
+    distribuzione no». **Era ottimista**: il codice ignorava del tutto il
+    limite e dava **+2 a tutti** i Militari. Misurato prima di correggere: due
+    Militari, entrambi +2. Ora l'effetto porta nei dati un campo nuovo,
+    `designated`, e vale sul solo edificio che il giocatore designa prendendo
+    la carta. Tre Militari fanno 1+2+1 = 4, non 2+2+2 = 6.
+
+    **Quando si designa**: al reclutamento. Il regolamento non dice quando, e
+    il reclutamento e' il momento in cui la carta entra in gioco - lo stesso
+    in cui si sceglie dove infilare un'Impronta. Il preventivo rifiuta il
+    reclutamento senza bersaglio, e il bersaglio deve soddisfare il selettore
+    della carta: un Civico o un Militare altrui non si designano.
+
+    **Impronte e designazioni nell'interfaccia**: `AvailableActions` offre ora
+    **una voce per bersaglio** invece di scegliere il primo legale. Sceglierne
+    uno al posto del giocatore farebbe tornare il totale ma non la partita.
+
+    **Il potenziamento dell'Eruzione** e' il caso difficile, perche' la scelta
+    cade *dentro* la fine dell'era: la carta si infila «subito», cioe' prima
+    del censimento, e il censimento puo' dipenderne (gli Stalli mercantili
+    alzano la Rendita). Non si poteva rimandare a dopo.
+
+    La fine dell'era e' percio' divisa in pezzi e **puo' sospendersi in
+    mezzo**: `GameState.pending_choice` dice cosa il gioco sta aspettando e da
+    chi, nessun comando passa finche' e' piena, e `GameController.choose()`
+    la risolve e riprende. Se il bersaglio e' uno solo non si disturba
+    nessuno; se non ce n'e', la carta si perde.
+
+    `EraRules.end_era` resta intera per chi la chiama direttamente, composta
+    dagli stessi pezzi con la scelta automatica: una sola implementazione,
+    due composizioni. Il bot sceglie a caso e non «sempre il primo», perche'
+    e' una scelta vera.
+
+60. **Un errore di tipo che sembrava un altro errore.** `var scelta :=
+    d.get("imprint", false) or ...` non compila - `get` torna Variant - e
+    Godot riporta il guasto come «funzione inesistente» su una classe che
+    invece esiste: lo script non era stato compilato affatto. Vale la pena
+    ricordarlo: davanti a un «Nonexistent function» su una classe propria,
+    il sospetto giusto e' un errore di compilazione piu' in alto.

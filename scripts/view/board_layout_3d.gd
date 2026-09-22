@@ -272,6 +272,44 @@ static func slot_at_ray(gs: GameState, origine: Vector3, direzione: Vector3) -> 
 	var era := RAILS - int(floor(p.z / SLOT_D))
 	return {"col": col, "era": clampi(era, 1, RAILS), "punto": p}
 
+# L'edificio colpito da un raggio: la sagoma sta IN PIEDI, quindi non basta
+# intersecare il piano del tavolo come per gli slot e le carte. Si prova
+# l'ingombro di ciascuna, e vince la piu' vicina alla telecamera.
+# Restituisce l'uid, o -1.
+static func at_ray_building(gs: GameState, origine: Vector3, direzione: Vector3) -> int:
+	var migliore := -1
+	var piu_vicino := INF
+	for b in gs.grid.buildings:
+		var base := standee_base(gs, b)
+		var dim := standee_size(b)
+		var box := AABB(
+			Vector3(base.x - dim.x / 2.0, base.y, base.z - SAGOMA_SPESSORE * 2.0),
+			Vector3(dim.x, dim.y + BASETTA_Y, SAGOMA_SPESSORE * 4.0))
+		var t := _colpisce(box, origine, direzione)
+		if t >= 0.0 and t < piu_vicino:
+			piu_vicino = t
+			migliore = b.uid
+	return migliore
+
+# Distanza a cui il raggio entra nella scatola, o -1 se la manca.
+static func _colpisce(box: AABB, o: Vector3, d: Vector3) -> float:
+	var t0 := -INF
+	var t1 := INF
+	for asse in 3:
+		var od: float = d[asse]
+		var oo: float = o[asse]
+		var lo: float = box.position[asse]
+		var hi: float = lo + box.size[asse]
+		if absf(od) < 0.000001:
+			if oo < lo or oo > hi: return -1.0
+			continue
+		var a := (lo - oo) / od
+		var b := (hi - oo) / od
+		t0 = maxf(t0, minf(a, b))
+		t1 = minf(t1, maxf(a, b))
+	if t1 < maxf(t0, 0.0): return -1.0
+	return maxf(t0, 0.0)
+
 # La carta di una fila sotto un raggio, se ce n'e' una. Stessa geometria del
 # disegno: il giocatore clicca cio' che vede.
 static func card_at_ray(gs: GameState, origine: Vector3, direzione: Vector3) -> Dictionary:

@@ -25,6 +25,11 @@ var dynasties_left: int = 0        # copie di Dinastia ancora acquistabili
 # (serve allo snake dell'Era 1 in due giocatori). Vuota = giro normale.
 var turn_sequence: Array[int] = []
 var monuments_open: Array = []
+# Una scelta che il gioco aspetta dal giocatore prima di proseguire: per ora
+# solo il bersaglio del potenziamento omaggio dell'Eruzione, che cade DENTRO
+# la fine dell'era. Finche' e' piena, nessun comando passa.
+# {"player": int, "kind": String, "prompt": String, "options": Array[int]}
+var pending_choice: Dictionary = {}
 var next_uid: int = 1
 var log: Array = []                # traccia testuale degli eventi (utile per i test)
 

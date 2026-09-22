@@ -35,6 +35,10 @@ func _ready() -> void:
 	_run("Anni della fame", _test_anni_della_fame)
 	_run("Eruzione: il potenziamento in cambio della perdita", _test_eruzione)
 	_run("Mercante di ossidiana", _test_mercante_scambi)
+	_run("Ingegnere militare: uno a tua scelta", _test_designazione)
+	_run("  e la designazione al reclutamento", _test_designazione_reclutamento)
+	_run("l'omaggio dell'Eruzione si sceglie", _test_omaggio_scelto)
+	_run("  e la fine dell'era aspetta", _test_omaggio_sospende)
 	_run("Artista di corte", _test_artista)
 	_run("  e il suo incasso", _test_artista_incasso)
 	_run("lo schema e' davvero chiuso", _test_schema_closed)
@@ -1830,6 +1834,13 @@ func _scena_eruzione() -> GameState:
 	gs.upg_decks[gs.era] = ["po_statua", "po_palizzata", "po_idolo"]
 	return gs
 
+# L'evento per intero con la scelta automatica: e' la stessa composizione che
+# fa `EraRules.end_era`, cosi' i test dell'Eruzione provano il percorso vero.
+func _evento_completo(gs: GameState) -> void:
+	var persi := EraRules.resolve_event(gs)
+	for omaggio in EraRules.draw_gifts(gs, persi):
+		EraRules.place_gift(gs, omaggio, EraRules.default_host(gs, int(omaggio["player"])))
+
 func _test_eruzione() -> void:
 	# Un edificio crolla: il proprietario pesca e infila subito.
 	var a := _scena_eruzione()
@@ -1837,7 +1848,7 @@ func _test_eruzione() -> void:
 	var salvo := _put(a, "ed_capanne", 4)
 	salvo.bonus_res = 9                       # regge di sicuro
 	var quante: int = a.upg_decks[a.era].size()
-	EraRules.resolve_event(a)
+	_evento_completo(a)
 	_eq("l'edificio colpito crolla in rovina", perso.state, Enums.BuildingState.ROVINA)
 	_eq("  l'altro regge", salvo.state, Enums.BuildingState.INTATTO)
 	_eq("  e ha pescato una carta dal mazzetto", a.upg_decks[a.era].size(), quante - 1)
@@ -1850,7 +1861,7 @@ func _test_eruzione() -> void:
 	var vivo := _put(b, "ed_capanne", 4)
 	vivo.bonus_res = 9
 	var n2: int = b.upg_decks[b.era].size()
-	EraRules.resolve_event(b)
+	_evento_completo(b)
 	_eq("due edifici persi, una carta sola", b.upg_decks[b.era].size(), n2 - 1)
 	_eq("  e una sola infilata", vivo.upgrades.size(), 1)
 
@@ -1862,7 +1873,7 @@ func _test_eruzione() -> void:
 	var ospite := _put(c, "ed_capanne", 4)
 	ospite.bonus_res = 9
 	var n3: int = c.upg_decks[c.era].size()
-	EraRules.resolve_event(c)
+	_evento_completo(c)
 	_eq("con scarto 1 diventa rudere", ferito.state, Enums.BuildingState.RUDERE)
 	_eq("  e il rudere non fa pescare nulla", c.upg_decks[c.era].size(), n3)
 	_eq("  ne' infilare nulla", ospite.upgrades.size(), 0)
@@ -1871,7 +1882,7 @@ func _test_eruzione() -> void:
 	var d := _scena_eruzione()
 	_put(d, "ed_capanne", 1)
 	var n4: int = d.upg_decks[d.era].size()
-	EraRules.resolve_event(d)
+	_evento_completo(d)
 	_eq("senza un edificio dove infilarla, non si pesca", d.upg_decks[d.era].size(), n4)
 
 	# Il potenziamento pescato fa il suo effetto: la Statua da' 2 PV.
@@ -1881,7 +1892,7 @@ func _test_eruzione() -> void:
 	var ospite2 := _put(e, "ed_capanne", 4)
 	ospite2.bonus_res = 9
 	var prima: int = e.players[0].vp
-	EraRules.resolve_event(e)
+	_evento_completo(e)
 	_eq("la carta pescata vale i suoi punti", e.players[0].vp - prima, 2)
 
 	# Un altro evento non fa pescare nessuno.
@@ -1893,7 +1904,7 @@ func _test_eruzione() -> void:
 	var vivo2 := _put(f, "ed_capanne", 4)
 	vivo2.bonus_res = 9
 	var n5: int = f.upg_decks[f.era].size()
-	EraRules.resolve_event(f)
+	_evento_completo(f)
 	_eq("senza l'Eruzione non si pesca niente", f.upg_decks[f.era].size(), n5)
 
 # ---- Mercante di ossidiana: due scambi alla pari ---------------------
@@ -2068,3 +2079,131 @@ func _test_artista_incasso() -> void:
 	gs_t.players[io_t].specialized_characters = ["pe_industriale"] as Array[String]
 	var res4 := _attiva(gs_t, altro_t, 2)
 	_eq("l'incasso del firmatario non e' una produzione di oro", res4[io_t], [0, 1])
+
+# ---- la scelta del bersaglio ----------------------------------------
+# Dove il regolamento fa scegliere, il motore non deve decidere al posto del
+# giocatore. Tre posti: l'Impronta, l'"uno a tua scelta" dell'Ingegnere, e il
+# potenziamento omaggio dell'Eruzione.
+func _test_designazione() -> void:
+	var gs := _scena()
+	var mil := _card_of_class("militare")
+	var a := _put(gs, mil, 0)
+	var b := _put(gs, mil, 3)
+	var p: PlayerState = gs.players[0]
+	p.specialized_characters = ["pe_ingegnere_militare"] as Array[String]
+
+	# Senza designazione, il "+2 a uno" non va a nessuno: il generico resta.
+	_eq("senza designare, entrambi prendono solo il +1",
+		[Effects.character_resistance_modifier(gs, a), Effects.character_resistance_modifier(gs, b)],
+		[1, 1])
+
+	p.character_targets["pe_ingegnere_militare"] = a.uid
+	_eq("designato A: A prende +2", Effects.character_resistance_modifier(gs, a), 2)
+	_eq("  e B resta a +1", Effects.character_resistance_modifier(gs, b), 1)
+	p.character_targets["pe_ingegnere_militare"] = b.uid
+	_eq("spostando la designazione su B, A torna a +1",
+		Effects.character_resistance_modifier(gs, a), 1)
+	_eq("  e B sale a +2", Effects.character_resistance_modifier(gs, b), 2)
+
+	# Il totale e' quello della carta: +1 a tutti, +2 a uno. Non +2 a tutti.
+	var c := _put(gs, mil, 5)
+	var totale: int = Effects.character_resistance_modifier(gs, a) \
+		+ Effects.character_resistance_modifier(gs, b) \
+		+ Effects.character_resistance_modifier(gs, c)
+	_eq("tre Militari: 1+2+1, non 2+2+2", totale, 4)
+
+	# Un edificio non Militare non prende nulla, designato o no.
+	var civ := _put(gs, _card_of_class("civico"), 6)
+	p.character_targets["pe_ingegnere_militare"] = civ.uid
+	_eq("designare un Civico non gli da' nulla",
+		Effects.character_resistance_modifier(gs, civ), 0)
+
+func _test_designazione_reclutamento() -> void:
+	# Il preventivo deve pretendere il bersaglio, e offrirne uno per edificio.
+	var gs := _scena()
+	var mil := _card_of_class("militare")
+	var a := _put(gs, mil, 2)
+	var b := _put(gs, mil, 2 + int(CardDB.buildings[mil]["width"]))
+	gs.char_row = ["pe_ingegnere_militare"]
+	var d: Dictionary = CardDB.characters["pe_ingegnere_militare"]
+	_ok("la carta chiede una designazione", Effects.requires_designation(d))
+	var senza := ActionRules.quote_recruit(gs, 0, "pe_ingegnere_militare", 2, null)
+	_ok("senza bersaglio il reclutamento e' rifiutato", not senza.legal)
+	_ok("  col motivo giusto", senza.reason.contains("a tua scelta"), senza.reason)
+	var con := ActionRules.quote_recruit(gs, 0, "pe_ingegnere_militare", 2, a)
+	_ok("con un Militare tuo e' legale", con.legal, con.reason)
+
+	var civ := _put(gs, _card_of_class("civico"), 0)
+	var q := ActionRules.quote_recruit(gs, 0, "pe_ingegnere_militare", 2, civ)
+	_ok("un Civico non si puo' designare", not q.legal)
+	var altrui := _put(gs, mil, 0)
+	altrui.owner = 1
+	var q2 := ActionRules.quote_recruit(gs, 0, "pe_ingegnere_militare", 2, altrui)
+	_ok("ne' un Militare altrui", not q2.legal)
+
+	var cand := ActionRules.designation_candidates(gs, 0, d)
+	_eq("i candidati sono i due Militari tuoi", cand.size(), 2)
+
+	# E l'interfaccia deve offrirne uno per bersaglio, non sceglierne uno.
+	var voci := AvailableActions.reclutamenti(gs, 0, 2)
+	var con_ing := 0
+	for v in voci:
+		if str(v.parametri.get("char_id", "")) == "pe_ingegnere_militare" and v.legale:
+			con_ing += 1
+	_eq("una voce per ogni edificio designabile", con_ing, 2)
+
+func _test_omaggio_scelto() -> void:
+	# Il potenziamento dell'Eruzione: se i bersagli sono piu' d'uno il gioco
+	# si ferma e chiede, invece di prendere il primo.
+	var ctl := _game()
+	var gs := ctl.gs
+	_flat(gs, Enums.Terrain.COLLINA)
+	_set_event(gs, "ev_eruzione")
+	gs.upg_decks[gs.era] = ["po_statua"]
+	var perso := _put(gs, "ed_capanne", 0)          # res 1 -2 collina: crolla
+	var x := _put(gs, "ed_capanne", 2)
+	var y := _put(gs, "ed_capanne", 4)
+	x.bonus_res = 9
+	y.bonus_res = 9
+	var persi := EraRules.resolve_event(gs)
+	_eq("l'Eruzione ha fatto una vittima", persi, [0] as Array[int])
+	var omaggi := EraRules.draw_gifts(gs, persi)
+	_eq("e un potenziamento da piazzare", omaggi.size(), 1)
+	var ospiti := EraRules.possible_hosts(gs, 0)
+	_eq("con due ospiti possibili", ospiti.size(), 2)
+	_ok("nessuno dei due l'ha ancora ricevuto",
+		x.upgrades.is_empty() and y.upgrades.is_empty())
+	EraRules.place_gift(gs, omaggi[0], y)
+	_eq("piazzato dove ho scelto io", y.upgrades.size(), 1)
+	_eq("  e non sull'altro", x.upgrades.size(), 0)
+
+func _test_omaggio_sospende() -> void:
+	# Lo stesso, ma dal comando: la fine dell'era si ferma e aspetta.
+	var ctl := _game()
+	var gs := ctl.gs
+	_flat(gs, Enums.Terrain.COLLINA)
+	_set_event(gs, "ev_eruzione")
+	gs.upg_decks[gs.era] = ["po_statua"]
+	var chi := gs.current_index
+	var perso := _put(gs, "ed_capanne", 0)
+	perso.owner = chi
+	var x := _put(gs, "ed_capanne", 2)
+	var y := _put(gs, "ed_capanne", 4)
+	for b in [x, y]:
+		b.owner = chi
+		b.bonus_res = 9
+	# esaurisce i lavoratori di tutti: l'era finisce
+	for p in gs.players: p.workers_used = p.workers
+	gs.players[chi].workers_used = gs.players[chi].workers - 1
+	ctl.place_worker(6)
+	ctl.pass_action()
+	_ok("il gioco si e' fermato per chiedere", not gs.pending_choice.is_empty())
+	if gs.pending_choice.is_empty(): return
+	_eq("  chiede al giocatore giusto", int(gs.pending_choice["player"]), chi)
+	_eq("  offrendo i due ospiti", (gs.pending_choice["options"] as Array).size(), 2)
+	_ok("  e nessun comando passa intanto", not ctl.place_worker(1))
+	_ok("una scelta fuori elenco e' rifiutata", not ctl.choose(perso.uid))
+	_ok("quella giusta passa", ctl.choose(y.uid))
+	_eq("  e la carta e' finita dove ho detto", y.upgrades.size(), 1)
+	_ok("  il gioco riparte", gs.pending_choice.is_empty())
+	_ok("  e l'era e' avanzata", gs.era == 2 or gs.phase == Enums.Phase.FINE_PARTITA)

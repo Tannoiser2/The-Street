@@ -64,11 +64,18 @@ func _colonna_puntata(pixel: Vector2) -> int:
 	var slot := BoardLayout3D.slot_at_ray(ctl.gs, o, d)
 	return int(slot.get("col", -1)) if not slot.is_empty() else -1
 
+func _origine(pixel: Vector2) -> Vector3:
+	var cam := get_viewport().get_camera_3d()
+	return Vector3.ZERO if cam == null else cam.project_ray_origin(pixel) / BoardLayout3D.U
+
+func _direzione(pixel: Vector2) -> Vector3:
+	var cam := get_viewport().get_camera_3d()
+	return Vector3.DOWN if cam == null else cam.project_ray_normal(pixel)
+
 func _carta_puntata(pixel: Vector2) -> Dictionary:
 	var cam := get_viewport().get_camera_3d()
 	if cam == null: return {}
-	var o := cam.project_ray_origin(pixel) / BoardLayout3D.U
-	return BoardLayout3D.card_at_ray(ctl.gs, o, cam.project_ray_normal(pixel))
+	return BoardLayout3D.card_at_ray(ctl.gs, _origine(pixel), _direzione(pixel))
 
 func _descrivi(c: Dictionary) -> String:
 	var id := str(c["id"])
@@ -93,6 +100,17 @@ func _descrivi(c: Dictionary) -> String:
 
 func _clic(pixel: Vector2) -> void:
 	if ctl.gs.phase == Enums.Phase.FINE_PARTITA: return
+	# Una scelta in sospeso viene prima di tutto: finche' non e' risolta il
+	# gioco non prosegue, quindi il clic serve solo a quella.
+	if not ctl.gs.pending_choice.is_empty():
+		if int(ctl.gs.pending_choice["player"]) != UMANO: return
+		var t := BoardLayout3D.at_ray_building(ctl.gs, _origine(pixel), _direzione(pixel))
+		if t < 0: return
+		if ctl.choose(t):
+			_messaggio = "Scelto."
+			_turni_dei_bot()
+			_aggiorna()
+		return
 	if ctl.gs.current_index != UMANO: return
 	# Prima il menu: se il clic cade su una voce, quella vince sul tabellone.
 	for i in _righe.size():
@@ -176,6 +194,15 @@ func _disegna_menu() -> void:
 	_menu.draw_string(font, Vector2(20, 54), invito, HORIZONTAL_ALIGNMENT_LEFT, -1, 14,
 		Color("#9aa0ad"))
 
+	# La scelta in sospeso prende il posto del menu: e' l'unica cosa da fare.
+	if not gs.pending_choice.is_empty():
+		if int(gs.pending_choice["player"]) != UMANO: return
+		_menu.draw_string(font, Vector2(20, 90), str(gs.pending_choice["prompt"]),
+			HORIZONTAL_ALIGNMENT_LEFT, -1, 16, Color("#c9a227"))
+		_menu.draw_string(font, Vector2(20, 112),
+			"Clicca l'edificio che vuoi (%d possibili)." % (gs.pending_choice["options"] as Array).size(),
+			HORIZONTAL_ALIGNMENT_LEFT, -1, 13, Color("#9aa0ad"))
+		return
 	if gs.phase != Enums.Phase.AZIONE or gs.current_index != UMANO: return
 	var col := ctl.colonna_attivata()
 	_voci = AvailableActions.tutte(gs, UMANO, col)

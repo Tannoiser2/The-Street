@@ -304,6 +304,10 @@
         "own_production": {
           "type": "boolean",
           "description": "Solo per op=production_delta: il bonus vale su ciascuna risorsa che il bersaglio gia' produce, invece che sulle risorse elencate. Chi non produce nulla non riceve nulla."
+        },
+        "designated": {
+          "type": "boolean",
+          "description": "L'effetto vale solo sull'edificio che il giocatore ha DESIGNATO prendendo la carta (\"uno a tua scelta\"), non su tutti quelli che il selettore accetta."
         }
       }
     },

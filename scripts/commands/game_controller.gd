@@ -9,11 +9,13 @@ signal state_changed
 signal building_placed(b: Building)
 signal building_changed(b: Building)
 signal era_ended(era: int)
+signal choice_required(choice: Dictionary)
 signal game_ended(winner: int)
 
 var gs: GameState
 var _activated_col: int = -1      # colonna attivata nel turno corrente
 var _last_protected: Building = null  # edificio abitato dal lavoratore di questo turno
+var _omaggi_da_piazzare: Array = []   # potenziamenti dell'Eruzione in attesa di bersaglio
 
 # ---- setup ---------------------------------------------------------
 func new_game(n_players: int, seed_value: int) -> void:
@@ -132,6 +134,7 @@ func _refill(row: Array, deck: Array, size: int) -> void:
 
 # ---- fase 1+2: piazza e attiva --------------------------------------
 func place_worker(col: int, protect: Building = null) -> bool:
+	if not gs.pending_choice.is_empty(): return false
 	if gs.phase != Enums.Phase.PIAZZA: return false
 	if col < 0 or col >= gs.grid.n_cols: return false
 	var p := gs.current_player()
@@ -156,6 +159,7 @@ func place_worker(col: int, protect: Building = null) -> bool:
 # `despoil` e' il rudere opzionalmente depredato (spoliazione).
 func build(card_id: String, col_from: int, above: bool, pay_option: int = 0, despoil: Building = null) -> bool:
 	if gs.phase != Enums.Phase.AZIONE: return false
+	if not gs.pending_choice.is_empty(): return false
 	if abs(col_from - _activated_col) > 1: return false
 	if not card_id in gs.market: return false
 	var p := gs.current_player()
@@ -220,6 +224,7 @@ func build(card_id: String, col_from: int, above: bool, pay_option: int = 0, des
 
 # Potenziare: carta dalla fila, sotto un tuo edificio in piedi della colonna attivata.
 func upgrade(upg_id: String, target: Building) -> bool:
+	if not gs.pending_choice.is_empty(): return false
 	if gs.phase != Enums.Phase.AZIONE: return false
 	if target == null or not target.covers(_activated_col): return false
 	var p := gs.current_player()
@@ -265,6 +270,7 @@ func upgrade(upg_id: String, target: Building) -> bool:
 # Restaurare: stessa azione del potenziamento. Il rudere torna intatto,
 # la Vetusta' si azzera e, se era altrui, cambia proprietario.
 func restore(target: Building) -> bool:
+	if not gs.pending_choice.is_empty(): return false
 	if gs.phase != Enums.Phase.AZIONE: return false
 	if target == null or not target.covers(_activated_col): return false
 	var p := gs.current_player()
@@ -288,6 +294,7 @@ func restore(target: Building) -> bool:
 # `imprint_target` serve solo ai due personaggi Impronta, che si infilano sotto
 # un edificio a scelta del giocatore.
 func recruit(char_id: String, imprint_target: Building = null) -> bool:
+	if not gs.pending_choice.is_empty(): return false
 	if gs.phase != Enums.Phase.AZIONE: return false
 	var p := gs.current_player()
 	var q := ActionRules.quote_recruit(gs, p.index, char_id, _activated_col, imprint_target)
@@ -304,6 +311,12 @@ func recruit(char_id: String, imprint_target: Building = null) -> bool:
 	var host: Building = imprint_target if data.get("imprint", false) else _last_protected
 	if _last_protected != null:
 		p.character_targets[char_id] = _last_protected.uid
+	# "Uno a tua scelta": la designazione vince sull'edificio abitato, perche'
+	# e' una scelta del giocatore e non una conseguenza di dove ha messo il
+	# lavoratore.
+	if Effects.requires_designation(data) and imprint_target != null:
+		p.character_targets[char_id] = imprint_target.uid
+		gs.log_line("%s: designato %s" % [data["name"], imprint_target.data["name"]])
 	Effects.apply_on_acquire(gs, p.index, data, host)
 	if data.get("imprint", false):
 		# La carta e' gia' infilata sotto l'edificio: non resta in mano al
@@ -320,6 +333,7 @@ func recruit(char_id: String, imprint_target: Building = null) -> bool:
 # Dinastia: quarto lavoratore permanente, attivo da subito. Una sola a testa.
 func buy_dynasty() -> bool:
 	if gs.phase != Enums.Phase.AZIONE: return false
+	if not gs.pending_choice.is_empty(): return false
 	var p := gs.current_player()
 	var q := ActionRules.quote_dynasty(gs, p.index)
 	if not q.legal:
@@ -397,8 +411,61 @@ func _has_worker(i: int) -> bool:
 	var p: PlayerState = gs.players[i]
 	return p.workers_used < p.workers
 
+# La fine dell'era si interrompe se il gioco deve chiedere qualcosa: il
+# potenziamento dell'Eruzione va infilato SUBITO, cioe' prima del censimento,
+# ma dove lo decide il giocatore. Percio' la sequenza e' divisa in pezzi e
+# puo' sospendersi in mezzo.
 func _finish_era() -> void:
-	EraRules.end_era(gs)
+	var persi := EraRules.resolve_event(gs)
+	_omaggi_da_piazzare = EraRules.draw_gifts(gs, persi)
+	_prosegui_fine_era()
+
+func _prosegui_fine_era() -> void:
+	while not _omaggi_da_piazzare.is_empty():
+		var o: Dictionary = _omaggi_da_piazzare[0]
+		var chi := int(o["player"])
+		var ospiti := EraRules.possible_hosts(gs, chi)
+		if ospiti.is_empty():
+			_omaggi_da_piazzare.pop_front()          # nessun posto: si perde
+			continue
+		if ospiti.size() == 1:
+			# un solo bersaglio non e' una scelta: non si disturba nessuno
+			EraRules.place_gift(gs, o, ospiti[0])
+			_omaggi_da_piazzare.pop_front()
+			continue
+		var uid_possibili: Array[int] = []
+		for b in ospiti: uid_possibili.append(b.uid)
+		gs.pending_choice = {
+			"player": chi,
+			"kind": "ospite_omaggio",
+			"prompt": "%s: scegli dove infilare %s" % [gs.current_event["name"],
+				CardDB.upgrades[str(o["upg_id"])]["name"]],
+			"options": uid_possibili,
+		}
+		gs.phase = Enums.Phase.FINE_ERA
+		choice_required.emit(gs.pending_choice)
+		return
+	gs.pending_choice = {}
+	_completa_fine_era()
+
+# Risolve la scelta in sospeso. Unico modo per farla: come ogni altra cosa,
+# passa dal controller.
+func choose(uid: int) -> bool:
+	if gs.pending_choice.is_empty(): return false
+	if not uid in (gs.pending_choice["options"] as Array): return false
+	var o: Dictionary = _omaggi_da_piazzare.pop_front()
+	EraRules.place_gift(gs, o, _per_uid(uid))
+	gs.pending_choice = {}
+	_prosegui_fine_era()
+	return true
+
+func _per_uid(uid: int) -> Building:
+	for b in gs.grid.buildings:
+		if b.uid == uid: return b
+	return null
+
+func _completa_fine_era() -> void:
+	EraRules.end_era_after_event(gs)
 	Conditions.claim_monuments(gs)      # l'evento puo' aver cambiato la plancia
 	era_ended.emit(gs.era)
 	if gs.era >= 5:

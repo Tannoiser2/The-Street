@@ -60,9 +60,12 @@ static func activate(gs: GameState, player: int, col: int) -> void:
 # ---- evento --------------------------------------------------------
 # Confronta la resistenza effettiva con la forza dell'era.
 # Fallire di 1 -> rudere; di 2+ -> rovina; un rudere che fallisce crolla.
-static func resolve_event(gs: GameState) -> void:
+# Restituisce i proprietari che hanno perso un edificio: il potenziamento
+# dell'Eruzione va a loro, ma DOVE lo decide il giocatore, quindi qui non si
+# piazza nulla.
+static func resolve_event(gs: GameState) -> Array[int]:
 	var force := int(gs.current_event.get("force", 0))
-	if force == 0: return
+	if force == 0: return [] as Array[int]
 	var persi: Array[int] = []       # chi ha perso un edificio: ev_eruzione
 	for b in gs.grid.buildings:
 		if not b.is_standing(): continue
@@ -82,42 +85,56 @@ static func resolve_event(gs: GameState) -> void:
 			b.upgrades.clear()
 			if not b.owner in persi: persi.append(b.owner)
 			gs.log_line("%s crolla in rovina" % b.data["name"])
-	_free_upgrade_on_loss(gs, persi)
+	return persi
 
 # ev_eruzione: "chi perde un edificio pesca un potenziamento gratis (massimo
 # uno per giocatore)". Decisione del designer: "perdere" e' il crollo in
 # rovina, non il passaggio a rudere; la carta si pesca dal mazzetto coperto
 # dell'era e si piazza subito.
-# Il bersaglio e' pero' una SCELTA del giocatore, e l'interfaccia non c'e'
-# ancora: per ora va sul primo edificio intatto con capienza libera, in ordine
-# di uid. Approssimazione dichiarata, come per l'Ingegnere militare: vedi
-# docs/domande-aperte.md.
-static func _free_upgrade_on_loss(gs: GameState, persi: Array) -> void:
-	if persi.is_empty(): return
+# DOVE si piazza e' una scelta del giocatore, quindi qui si pesca soltanto: il
+# comando chiede il bersaglio e poi chiama `place_gift`.
+static func draw_gifts(gs: GameState, persi: Array) -> Array[Dictionary]:
+	var out: Array[Dictionary] = []
+	if persi.is_empty(): return out
 	var e := Effects.find_override(gs, "free_upgrade_on_loss")
-	if e.is_empty(): return
+	if e.is_empty(): return out
 	var quante := int(e.get("times", 1))
 	var deck: Array = gs.upg_decks.get(gs.era, [])
 	for i in gs.turn_order:          # ordine di turno: il pescaggio e' deterministico
 		if not int(i) in persi: continue
-		if deck.is_empty(): return
+		if deck.is_empty(): return out
 		var p: PlayerState = gs.players[i]
 		var chiave := str(gs.current_event["id"])
 		if int(p.effect_used.get(chiave, 0)) >= quante: continue
-		var host := _primo_ospite_libero(gs, int(i))
-		if host == null: continue    # nessun edificio dove infilarla: si perde
-		var upg_id: String = deck.pop_back()
+		if possible_hosts(gs, int(i)).is_empty(): continue   # non ha dove infilarla
 		p.effect_used[chiave] = int(p.effect_used.get(chiave, 0)) + 1
-		host.upgrades.append(upg_id)
-		Effects.apply_on_acquire(gs, int(i), CardDB.upgrades[upg_id], host)
-		gs.log_line("%s: giocatore %d pesca %s e la infila sotto %s" % [
-			gs.current_event["name"], int(i), CardDB.upgrades[upg_id]["name"], host.data["name"]])
+		out.append({"player": int(i), "upg_id": str(deck.pop_back())})
+	return out
 
-static func _primo_ospite_libero(gs: GameState, player: int) -> Building:
-	var out: Building = null
+static func place_gift(gs: GameState, omaggio: Dictionary, host: Building) -> void:
+	if host == null: return
+	var giocatore := int(omaggio["player"])
+	var upg_id := str(omaggio["upg_id"])
+	host.upgrades.append(upg_id)
+	Effects.apply_on_acquire(gs, giocatore, CardDB.upgrades[upg_id], host)
+	gs.log_line("%s: giocatore %d pesca %s e la infila sotto %s" % [
+		gs.current_event["name"], giocatore, CardDB.upgrades[upg_id]["name"], host.data["name"]])
+
+# Gli edifici che possono ospitare il potenziamento omaggio: tuoi, intatti e
+# con capienza libera. L'interfaccia li offre tutti.
+static func possible_hosts(gs: GameState, player: int) -> Array[Building]:
+	var out: Array[Building] = []
 	for b in gs.grid.buildings:
 		if b.owner != player or not b.is_alive(): continue
 		if b.upgrades.size() >= ActionRules.upgrade_capacity_for(gs, player, b): continue
+		out.append(b)
+	return out
+
+# La scelta automatica, per chi non ha nessuno a cui chiedere: il bot e i test
+# che chiamano `end_era` direttamente. Deterministica, in ordine di uid.
+static func default_host(gs: GameState, player: int) -> Building:
+	var out: Building = null
+	for b in possible_hosts(gs, player):
 		if out == null or b.uid < out.uid: out = b
 	return out
 
@@ -180,8 +197,16 @@ static func bury_characters(gs: GameState) -> void:
 # ---- chiusura dell'era completa -----------------------------------
 # L'ordine conta: l'evento precede il censimento ("si conta solo cio' che e'
 # sopravvissuto"), e la sepoltura precede l'azzeramento dei personaggi.
+# La fine dell'era per intero, con i bersagli scelti automaticamente. Il
+# GameController usa invece i tre pezzi separati, perche' fra l'evento e il
+# resto deve poter chiedere al giocatore dove infilare il potenziamento.
 static func end_era(gs: GameState) -> void:
-	resolve_event(gs)
+	var persi := resolve_event(gs)
+	for omaggio in draw_gifts(gs, persi):
+		place_gift(gs, omaggio, default_host(gs, int(omaggio["player"])))
+	end_era_after_event(gs)
+
+static func end_era_after_event(gs: GameState) -> void:
 	Effects.era_end_resources(gs)
 	Effects.apply_era_end_characters(gs)
 	# Il censimento delle ere 1-4 si paga qui. Quello dell'era 5 NON si paga:

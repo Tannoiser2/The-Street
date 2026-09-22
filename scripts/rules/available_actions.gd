@@ -109,18 +109,28 @@ static func reclutamenti(gs: GameState, player: int, col: int) -> Array[Voce]:
 	var out: Array[Voce] = []
 	for cid in gs.char_row:
 		var d: Dictionary = CardDB.characters[cid]
-		# Le Impronte vogliono un edificio scelto: si offre il primo legale,
-		# finche' l'interfaccia non fara' scegliere (domande-aperte punto 47).
-		var bersaglio: Building = null
-		if d.get("imprint", false):
-			for b in gs.grid.in_column(col):
-				if ActionRules.imprint_reason(gs, player, d, b) == "":
-					bersaglio = b
-					break
-		var q := ActionRules.quote_recruit(gs, player, cid, col, bersaglio)
-		var par := {"char_id": cid}
-		if bersaglio != null: par["uid"] = bersaglio.uid
-		out.append(_voce("recluta", "Recluta %s (%s)" % [d["name"], d["class"]], q, par))
+		# Dove il regolamento fa scegliere un edificio - l'Impronta che si
+		# infila sotto una carta, l'"uno a tua scelta" dell'Ingegnere - si
+		# offre UNA VOCE PER BERSAGLIO. Sceglierne uno al posto del giocatore
+		# sarebbe decidere per lui: il totale tornerebbe, la partita no.
+		var scelta: bool = bool(d.get("imprint", false)) or Effects.requires_designation(d)
+		if not scelta:
+			out.append(_voce("recluta", "Recluta %s (%s)" % [d["name"], d["class"]],
+				ActionRules.quote_recruit(gs, player, cid, col), {"char_id": cid}))
+			continue
+		var candidati: Array[Building] = ActionRules.imprint_candidates(gs, player, d) \
+			if bool(d.get("imprint", false)) else ActionRules.designation_candidates(gs, player, d)
+		if candidati.is_empty():
+			# nessun bersaglio: si riporta comunque il motivo
+			out.append(_voce("recluta", "Recluta %s (%s)" % [d["name"], d["class"]],
+				ActionRules.quote_recruit(gs, player, cid, col, null), {"char_id": cid}))
+			continue
+		for b in candidati:
+			var q := ActionRules.quote_recruit(gs, player, cid, col, b)
+			var verbo: String = "sotto" if bool(d.get("imprint", false)) else "designando"
+			out.append(_voce("recluta",
+				"Recluta %s (%s) %s %s" % [d["name"], d["class"], verbo, b.data["name"]],
+				q, {"char_id": cid, "uid": b.uid}))
 	return out
 
 static func dinastia(gs: GameState, player: int) -> Voce:

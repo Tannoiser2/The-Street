@@ -118,6 +118,11 @@ static func quote_recruit(gs: GameState, player: int, char_id: String, col: int,
 	if data.get("imprint", false):
 		var why := imprint_reason(gs, player, data, imprint_target)
 		if why != "": return ActionQuote.no(why)
+	# "uno a tua scelta": la carta vuole un edificio designato, e lo stesso
+	# parametro serve a passarlo. Senza, l'effetto non avrebbe bersaglio.
+	elif Effects.requires_designation(data):
+		var why2 := designation_reason(gs, player, data, imprint_target)
+		if why2 != "": return ActionQuote.no(why2)
 	var cls: String = data["class"]
 	var found := false
 	for b in gs.grid.alive_in_column(col):
@@ -157,6 +162,31 @@ static func imprint_reason(gs: GameState, player: int, data: Dictionary,
 		if not Effects.matches(gs, target, e.get("target", {}), target, player):
 			return "l'edificio non soddisfa il requisito dell'Impronta"
 	return ""
+
+# "Uno a tua scelta": l'edificio designato dev'essere tuo, in piedi, e
+# soddisfare il selettore della carta (per l'Ingegnere militare: Militare).
+static func designation_reason(gs: GameState, player: int, data: Dictionary,
+		target: Building) -> String:
+	if target == null: return "questa carta richiede un edificio a tua scelta"
+	if target.owner != player: return "l'edificio non e' tuo"
+	if not target.is_standing(): return "l'edificio non e' in piedi"
+	if not Effects.matches(gs, target, Effects.designation_target(data), null, player):
+		return "l'edificio non soddisfa il requisito della carta"
+	return ""
+
+# Gli edifici che si possono designare adesso: serve all'interfaccia, che deve
+# offrirli tutti invece di sceglierne uno al posto del giocatore.
+static func designation_candidates(gs: GameState, player: int, data: Dictionary) -> Array[Building]:
+	var out: Array[Building] = []
+	for b in gs.grid.buildings:
+		if designation_reason(gs, player, data, b) == "": out.append(b)
+	return out
+
+static func imprint_candidates(gs: GameState, player: int, data: Dictionary) -> Array[Building]:
+	var out: Array[Building] = []
+	for b in gs.grid.buildings:
+		if imprint_reason(gs, player, data, b) == "": out.append(b)
+	return out
 
 static func dynasty_id() -> String:
 	for id in CardDB.characters:

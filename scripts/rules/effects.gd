@@ -259,9 +259,27 @@ static func character_resistance_modifier(gs: GameState, b: Building) -> int:
 			if not CardDB.characters.has(cid): continue
 			for e in CardDB.characters[cid].get("effects", []):
 				if e["hook"] != "on_event" or e["op"] != "resistance": continue
+				# "uno a tua scelta": vale sul solo edificio designato quando
+				# la carta e' stata presa. Senza questo controllo l'Ingegnere
+				# militare dava +2 a TUTTI i propri Militari invece di +1 a
+				# tutti e +2 a uno: sbagliato il totale, non la distribuzione.
+				if bool(e.get("designated", false)):
+					if int(p.character_targets.get(cid, -1)) != b.uid: continue
 				if matches(gs, b, e.get("target", {}), null, p.index):
 					mod += int(e["value"])
 	return mod
+
+# La carta chiede al giocatore di designare un edificio ("uno a tua scelta")?
+static func requires_designation(data: Dictionary) -> bool:
+	for e in data.get("effects", []):
+		if bool(e.get("designated", false)): return true
+	return false
+
+# Il selettore che il bersaglio designato deve soddisfare.
+static func designation_target(data: Dictionary) -> Dictionary:
+	for e in data.get("effects", []):
+		if bool(e.get("designated", false)): return e.get("target", {})
+	return {}
 
 # ---- hook: on_era_end per i personaggi ------------------------------
 # "se l'edificio protetto sopravvive all'evento, +1 cultura". Va valutato DOPO

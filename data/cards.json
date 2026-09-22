@@ -2496,7 +2496,7 @@
           "op": "resistance",
           "value": 1,
           "duration": "era",
-          "times": 1,
+          "designated": true,
           "target": {
             "owner": "self",
             "class": [

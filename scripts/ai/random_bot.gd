@@ -9,6 +9,15 @@ extends RefCounted
 
 static func play_turn(ctl: GameController) -> void:
 	var gs := ctl.gs
+	# Il gioco puo' aspettare una scelta - dove infilare il potenziamento
+	# dell'Eruzione - e finche' aspetta nessun comando passa. Il bot sceglie
+	# a caso: e' una scelta vera, non una che il motore possa fare al posto
+	# suo, quindi meglio casuale che "sempre la prima".
+	while not gs.pending_choice.is_empty():
+		var opzioni: Array = gs.pending_choice["options"]
+		if opzioni.is_empty(): break
+		if not ctl.choose(int(opzioni[gs.rng.randi_range(0, opzioni.size() - 1)])): break
+	if gs.phase == Enums.Phase.FINE_PARTITA: return
 	var p := gs.current_player()
 	var col := _free_column(gs, p)
 	# "Mettetelo su una colonna, sopra un vostro edificio ancora in piedi
