@@ -3,7 +3,7 @@ config_version=5
 
 [application]
 config/name="La Strada delle Ere"
-config/features=PackedStringArray("4.3")
+config/features=PackedStringArray("4.7")
 
 [autoload]
 CardDB="*res://scripts/data/card_db.gd"

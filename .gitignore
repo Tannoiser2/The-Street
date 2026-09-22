@@ -1,0 +1,6 @@
+# Cache di import di Godot: rigenerata da `godot --headless --import`.
+# I file *.uid invece vanno versionati (Godot 4.4+).
+godot/.godot/
+
+# Sistema
+.DS_Store

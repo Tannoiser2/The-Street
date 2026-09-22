@@ -19,7 +19,7 @@ enum ActionType { NESSUNA, COSTRUISCI_BINARIO, COSTRUISCI_SOPRA, POTENZIA, RESTA
 
 enum BaseKind { RUDERE, ROVINA, PROPRIO_INTATTO, TERRAPIENO }
 
-const CLASSES := ["militare", "religione", "commercio", "cultura", "civico", "ingegneria"]
+const CLASSES: Array[String] = ["militare", "religione", "commercio", "cultura", "civico", "ingegneria"]
 
 static func terrain_from_string(s: String) -> int:
 	match s:
