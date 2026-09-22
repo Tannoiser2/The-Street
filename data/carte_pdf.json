@@ -89,30 +89,30 @@
   ],
   "potenziamenti": [
     "po_pittura_rupestre",
-    null,
     "po_palizzata",
     "po_idolo",
     "po_granaio_comune",
+    "po_fondamenta_in_pietra",
     "po_statua",
-    null,
     "po_altare",
     "po_bastioni",
     "po_banchina",
+    "po_iscrizione",
     "po_contrafforte",
-    null,
     "po_campanile",
     "po_merlatura",
     "po_stalli_mercantili",
+    "po_reliquia",
     "po_opera_darte",
-    null,
     "po_affreschi",
     "po_cupola",
     "po_giardino_pensile",
+    "po_cannoniere",
     "po_installazione",
-    null,
     "po_targa_storica",
     "po_ascensore_panoramico",
-    "po_boutique"
+    "po_boutique",
+    "po_memoriale"
   ],
   "_mancanti": {
     "eventi": [
@@ -120,23 +120,11 @@
       "ev_persecuzioni",
       "ev_guerra_civile"
     ],
-    "potenziamenti": [
-      "po_fondamenta_in_pietra",
-      "po_iscrizione",
-      "po_reliquia",
-      "po_cannoniere",
-      "po_memoriale"
-    ]
+    "potenziamenti": []
   },
-  "_note_mancanti": "eventi: le posizioni 10, 11 e 12 dovrebbero portare i tre eventi gravi dell'era 2 e portano invece una seconda stampa di Grande incendio, Scisma e Anni della fame - stessa carta, illustrazione rigenerata. potenziamenti: stanno in materiali/Potenziamenti.pdf, 25 posizioni per 25 carte, ma la prima carta di ogni era e' stampata due volte (posizioni 2, 7, 12, 17, 22 sono la copia byte per byte della posizione precedente) e un potenziamento per era non c'e'.",
+  "_note_mancanti": "eventi: le posizioni 10, 11 e 12 dovrebbero portare i tre eventi gravi dell'era 2 (Eruzione, Persecuzioni, Guerra civile) e portano invece una seconda stampa di Grande incendio, Scisma e Anni della fame - stessa carta, stesso testo, illustrazione rigenerata. Verificato di nuovo sul PDF del 22 settembre: non e' cambiato niente. potenziamenti: RISOLTO nel PDF del 22 settembre. Le 25 posizioni portano ora 25 carte distinte, nell'ordine esatto di data/cards.json; le cinque ristampe (2, 7, 12, 17, 22) sono sparite e le cinque carte che mancavano - Fondamenta in pietra, Iscrizione, Reliquia, Cannoniere, Memoriale - ci sono.",
   "_copie_byte": {
-    "potenziamenti": [
-      2,
-      7,
-      12,
-      17,
-      22
-    ],
+    "potenziamenti": [],
     "eventi": [],
     "tessere": [
       7,
@@ -144,8 +132,8 @@
     ]
   },
   "_impronte_pdf": {
-    "Carte.pdf": "06530822fdf30035",
-    "Potenziamenti.pdf": "3914b0297b2997e4"
+    "Carte.pdf": "e7fd8c7d452995b3",
+    "Potenziamenti.pdf": "8c73855c172997c6"
   },
   "_nota_controlli": "`_copie_byte`: le posizioni che portano la copia byte per byte di un'altra, riconoscibili a macchina. Gli eventi hanno l'elenco vuoto perche' le loro ristampe hanno l'illustrazione rigenerata e nessuna impronta le tradisce: quelle sono dichiarate a mano fra i `null`. `_impronte_pdf`: se non combaciano, il PDF e' stato rifatto e la mappatura ricavata a vista va ricontrollata. Fra le tessere la 11 e' la seconda copia del segnalino pietra/oro, che non e' una tessera colonna. La 7, invece, e' una seconda Collina delle Cave dove servirebbe una terza tessera FIUME: vedi data/tessere_pdf.json e domande-aperte punto 72."
 }

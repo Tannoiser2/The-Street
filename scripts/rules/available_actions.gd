@@ -133,6 +133,70 @@ static func reclutamenti(gs: GameState, player: int, col: int) -> Array[Voce]:
 				q, {"char_id": cid, "uid": b.uid}))
 	return out
 
+# ---- una voce per BERSAGLIO ------------------------------------------
+# Le funzioni qui sopra riportano, per ogni carta, il solo piazzamento piu'
+# economico: bastava a fare una lista, non basta a un'interfaccia che deve
+# ACCENDERE SUL TABELLONE tutti i posti dove la carta puo' andare. Queste
+# invece le enumerano tutte, cosi' chi gioca vede le sue opzioni sul tavolo
+# invece di leggerle in un menu.
+# Restano pure come le altre, quindi si provano headless.
+
+# Ogni posizione in cui un edificio del mercato puo' essere costruito: una
+# voce per colonna di partenza e per quota (a terra o sopra).
+static func piazzamenti(gs: GameState, player: int, col: int,
+		card_id: String) -> Array[Voce]:
+	var out: Array[Voce] = []
+	if not CardDB.buildings.has(card_id): return out
+	var d: Dictionary = CardDB.buildings[card_id]
+	for c in _partenze(gs, col, int(d["width"])):
+		for sopra in [false, true]:
+			var q = BuildRules.quote_above(gs, player, d, c) if sopra \
+				else BuildRules.quote_rail(gs, player, d, c)
+			if not q.legal: continue
+			var dove := "sopra" if sopra else "a terra"
+			out.append(_voce("costruisci", "Costruisci %s %s" % [d["name"], dove], q,
+				{"card_id": card_id, "col_from": c, "above": sopra}))
+	return out
+
+# Gli edifici che possono ricevere un potenziamento: uno per bersaglio.
+static func bersagli_potenziamento(gs: GameState, player: int, col: int,
+		upg_id: String) -> Array[Voce]:
+	var out: Array[Voce] = []
+	if not CardDB.upgrades.has(upg_id): return out
+	var d: Dictionary = CardDB.upgrades[upg_id]
+	for b in gs.grid.in_column(col):
+		var q := ActionRules.quote_upgrade(gs, player, upg_id, b)
+		if not q.legal: continue
+		out.append(_voce("potenzia", "Potenzia %s con %s" % [b.data["name"], d["name"]],
+			q, {"upg_id": upg_id, "uid": b.uid}))
+	return out
+
+# Dove si puo' mettere un personaggio. Quelli senza scelta di bersaglio - la
+# maggioranza - danno una voce sola senza uid: si reclutano e basta, e
+# l'interfaccia non ha niente da accendere sul tabellone.
+static func bersagli_reclutamento(gs: GameState, player: int, col: int,
+		char_id: String) -> Array[Voce]:
+	var out: Array[Voce] = []
+	if not CardDB.characters.has(char_id): return out
+	var d: Dictionary = CardDB.characters[char_id]
+	var scelta: bool = bool(d.get("imprint", false)) or Effects.requires_designation(d)
+	if not scelta:
+		var q0 := ActionRules.quote_recruit(gs, player, char_id, col)
+		if q0.legal:
+			out.append(_voce("recluta", "Recluta %s (%s)" % [d["name"], d["class"]],
+				q0, {"char_id": char_id}))
+		return out
+	var candidati: Array[Building] = ActionRules.imprint_candidates(gs, player, d) \
+		if bool(d.get("imprint", false)) else ActionRules.designation_candidates(gs, player, d)
+	for b in candidati:
+		var q := ActionRules.quote_recruit(gs, player, char_id, col, b)
+		if not q.legal: continue
+		var verbo: String = "sotto" if bool(d.get("imprint", false)) else "designando"
+		out.append(_voce("recluta",
+			"Recluta %s (%s) %s %s" % [d["name"], d["class"], verbo, b.data["name"]],
+			q, {"char_id": char_id, "uid": b.uid}))
+	return out
+
 static func dinastia(gs: GameState, player: int) -> Voce:
 	return _voce("dinastia", "Acquista la Dinastia",
 		ActionRules.quote_dynasty(gs, player), {})

@@ -148,3 +148,27 @@ python3 tools/estrai_grafica.py        # estrae le sagome numerate in assets/
 
 Il numero stampato è l'indice di estrazione, cioè la chiave di
 `data/sagome.json`.
+
+## Aggiornamento del 22 settembre: il PDF corretto
+
+Il designer ha ricaricato `Carte.pdf`. Confrontandolo posizione per posizione con la
+copia precedente — impronta per impronta, non a occhio — sono cambiate **sei posizioni
+e solo quelle**, e tutto il resto del PDF è identico al byte.
+
+| posizione | prima | ora |
+|---|---|---|
+| 23 | Borgo | **Ponte** (disegno nuovo: un ponte, non più un foro romano) |
+| 24 | Ponte (foro romano) | **Borgo** (lo stesso disegno di prima, spostato) |
+| 33 | Ospedale dei pellegrini (era il disegno della 26) | **Abbazia** (spostata dalla 34) |
+| 34 | Abbazia | **Ospedale dei pellegrini** (disegno nuovo) |
+| 35 | Mercato (era il disegno della 29) | **Arsenale** (spostato dalla 36) |
+| 36 | Arsenale | **Mercato** (disegno nuovo) |
+
+Lo schema è chiaro: i tre disegni sbagliati sono stati rifatti e ogni inserimento ha
+spinto avanti di uno il vicino. Le tre carte nuove sono state **guardate una per una**
+per confermare che siano quelle — un ponte a due arcate sul fiume, un ospizio con
+loggiato e campanili, un mercato con le bancarelle — e non dedotte soltanto dallo
+spostamento.
+
+Adesso sono 60 disegni distinti per 60 edifici: la biiezione non ha più eccezioni.
+

@@ -30,8 +30,10 @@ func _ready() -> void:
 	_run("3D: la telecamera gira attorno al tavolo", _test_orbita)
 	_run("  e cliccare funziona da ogni angolo", _test_orbita_e_clic)
 	_run("  e finisce davvero dove dice, nella scena", _test_telecamera_nel_mondo)
+	_run("3D: la tessera si disegna intera", _test_tessera_intera)
 	_run("le azioni offerte, col preventivo", _test_azioni_offerte)
 	_run("  e la promessa che mantengono", _test_azioni_mantengono_la_promessa)
+	_run("i bersagli: dove si puo' mettere una carta", _test_bersagli)
 	print("\n%d superati, %d falliti" % [_passed, _failed])
 	get_tree().quit(0 if _failed == 0 else 1)
 
@@ -340,9 +342,14 @@ func _test_3d_scena() -> void:
 	var gs := _gioco().gs
 	_metti(gs, "ed_capanne", 0, 1)
 	var cielo := BoardLayout3D.sky_rect(gs)
-	_ok("il cielo sta dietro l'ultimo binario",
-		cielo.position.z < BoardLayout3D.rail_z(BoardLayout3D.RAILS))
-	_ok("  ed e' piu' largo della strada", cielo.size.x > BoardLayout3D.board_w(gs))
+	# Il cielo e' il fondale della strada: attaccato al bordo alto delle
+	# tessere e largo quanto loro, non una parete della stanza piu' larga e
+	# staccata indietro - cosi' si vedeva che era un'altra cosa.
+	_approx("il cielo e' attaccato al bordo alto delle tessere", cielo.position.z, 0.0)
+	_approx("  ed e' largo quanto le tessere", cielo.size.x, BoardLayout3D.board_w(gs))
+	_approx("  e parte dal piano del tavolo", cielo.position.x, 0.0)
+	_ok("  e sta dietro l'ultimo binario",
+		cielo.position.z <= BoardLayout3D.rail_z(BoardLayout3D.RAILS))
 	_ok("  e in piedi, non steso", cielo.size.y > 0.0 and cielo.size.z == 0.0)
 
 	var cam := BoardLayout3D.camera_position(gs)
@@ -424,15 +431,19 @@ func _test_raggio() -> void:
 	var scorcio := BoardLayout3D.scorcio()
 	# Le due soglie di prima - 75% visibile e 65% di scorcio - non stanno piu'
 	# insieme da quando i binari si sono stretti a 26 mm per entrare nella
-	# fascia del disegno: la prima vuole almeno 62 gradi, la seconda al
-	# massimo 49. Si e' tenuta la visibilita' dov'era e il prezzo lo paga lo
-	# scorcio. Le soglie qui sotto sono quelle nuove, non le vecchie
-	# allentate di nascosto.
-	_ok("dietro la fila davanti resta visibile almeno il 70%% di una sagoma (%.0f%%)"
-		% (visibile * 100.0), visibile >= 0.70)
-	_ok("  e una sagoma non e' schiacciata sotto il 45%% (%.0f%%)"
-		% (scorcio * 100.0), scorcio >= 0.45,
-		"a 70 gradi erano quasi coricate e non si riconoscevano piu'")
+	# fascia del disegno: la prima vorrebbe almeno 62 gradi, la seconda al
+	# massimo 49. Vince la seconda, e non per gusto: a 62 gradi la TESSERA si
+	# legge alta la meta' di quello che e', e una tessera distorta si vede
+	# subito mentre una fila dietro un po' coperta no.
+	# La soglia sulla visibilita' qui sotto e' quella vera, non la vecchia
+	# allentata di nascosto: dice che dietro se ne vede circa un terzo, ed e'
+	# il prezzo scritto in chiaro. La telecamera si muove, quindi chi vuole
+	# guardare in fondo alza lo sguardo.
+	_ok("dietro la fila davanti resta visibile almeno un terzo di sagoma (%.0f%%)"
+		% (visibile * 100.0), visibile >= 0.33)
+	_ok("  e ne' sagoma ne' tessera sono schiacciate sotto il 65%% (%.0f%%)"
+		% (scorcio * 100.0), scorcio >= 0.65,
+		"a 62 gradi la tessera si leggeva alta la meta' di quello che e'")
 	_ok("  e la telecamera usa davvero quell'inclinazione",
 		is_equal_approx(BoardLayout3D.camera_pitch_deg(gs), BoardLayout3D.INCLINAZIONE))
 
@@ -869,3 +880,81 @@ func _test_rovine() -> void:
 			if e.state == Enums.BuildingState.ROVINA: rovine += 1
 	_ok("in partita gli edifici crollano davvero (%d su %d in 5 partite)"
 		% [rovine, totali], rovine > totali / 5)
+
+# La tessera e' 63 x 271 mm, e il test che serviva non e' "la funzione che la
+# misura restituisce 271" - quella era giusta e non la chiamava nessuno - ma
+# "il rettangolo che finisce sul tavolo e' profondo 271". Qui si costruisce la
+# vista vera e si misurano i piani disegnati.
+# Il difetto che questo test prende: il disegno della tessera veniva steso su
+# un riquadro alto 130 mm, cioe' la fascia dei binari, e la carta ci entrava
+# schiacciata a meta'. A occhio si vede, ma solo se si sa cosa cercare.
+func _test_tessera_intera() -> void:
+	var gs := _gioco().gs
+	var vista: Node3D = preload("res://scripts/view/board_view_3d.gd").new()
+	add_child(vista)
+	vista.mostra(gs)
+	var piu_profondo := 0.0
+	var quanti := 0
+	for f in vista.get_children():
+		if not (f is MeshInstance3D): continue
+		var q := (f as MeshInstance3D).mesh as QuadMesh
+		if q == null: continue
+		if not is_equal_approx(q.size.x, BoardLayout3D.TESSERA_W): continue
+		piu_profondo = maxf(piu_profondo, q.size.y)
+		if is_equal_approx(q.size.y, BoardLayout3D.TESSERA_D): quanti += 1
+	_approx("il piano della tessera e' profondo quanto la tessera",
+		piu_profondo, BoardLayout3D.TESSERA_D)
+	_eq("  e ce n'e' uno per colonna", quanti, gs.grid.n_cols)
+	vista.queue_free()
+
+# L'interfaccia nuova non offre piu' una lista: accende sul tabellone i posti
+# dove la carta puo' andare. Quei posti li calcolano queste funzioni, e se
+# sbagliano il giocatore clicca un riquadro acceso e si sente dire di no.
+func _test_bersagli() -> void:
+	var ctl := _gioco()
+	var gs := ctl.gs
+	ctl.place_worker(2)
+	var col := ctl.colonna_attivata()
+
+	# Ogni piazzamento offerto deve essere legale e pagabile: e' la promessa
+	# che l'accensione fa al giocatore.
+	var offerti := 0
+	var bugie := 0
+	for card_id in gs.market:
+		for v in AvailableActions.piazzamenti(gs, 0, col, card_id):
+			offerti += 1
+			if not v.legale: bugie += 1
+			var c0 := int(v.parametri["col_from"])
+			var w := int(CardDB.buildings[card_id]["width"])
+			# il piazzamento deve coprire la colonna attivata o una adiacente
+			if c0 > col or c0 + w <= col: bugie += 1
+	_ok("i piazzamenti offerti sono parecchi (%d)" % offerti, offerti > 0)
+	_eq("  e sono tutti legali e coprono la colonna attivata", bugie, 0)
+
+	# Il piu' economico fra i piazzamenti deve coincidere con quello che la
+	# vecchia lista compatta sceglieva: le due strade portano allo stesso
+	# posto, altrimenti una delle due mente.
+	for v in AvailableActions.costruzioni(gs, 0, col):
+		if not v.legale: continue
+		var id := str(v.parametri["card_id"])
+		var minimo := 999
+		for p2 in AvailableActions.piazzamenti(gs, 0, col, id):
+			minimo = mini(minimo, p2.pietra + p2.oro)
+		_eq("  %s: il piu' economico e' lo stesso della lista" % id,
+			minimo, v.pietra + v.oro)
+
+	# I bersagli dei potenziamenti e dei personaggi sono edifici veri.
+	var uid_validi := {}
+	for b in gs.grid.buildings: uid_validi[b.uid] = true
+	var fuori := 0
+	for u in gs.upg_row:
+		for v in AvailableActions.bersagli_potenziamento(gs, 0, col, u):
+			if not uid_validi.has(int(v.parametri["uid"])): fuori += 1
+	for c in gs.char_row:
+		for v in AvailableActions.bersagli_reclutamento(gs, 0, col, c):
+			if v.parametri.has("uid") and not uid_validi.has(int(v.parametri["uid"])): fuori += 1
+	_eq("i bersagli indicati sono edifici che esistono", fuori, 0)
+
+	# Una carta che non c'e' non accende nulla, invece di far saltare tutto.
+	_eq("una carta sconosciuta non offre posti",
+		AvailableActions.piazzamenti(gs, 0, col, "ed_inventato").size(), 0)

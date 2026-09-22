@@ -19,10 +19,14 @@ var _evidenziata := -1
 # l'inquadratura calcolata da BoardLayout3D e basta.
 var orbita: CameraOrbita = null
 var _cam: Camera3D = null
+# Cosa accendere: la carta scelta, i posti dove si puo' metterla, gli edifici
+# che possono riceverla. E' l'interfaccia che lo decide; qui si disegna.
+var evidenze: Dictionary = {}
 
-func mostra(stato: GameState, colonna_evidenziata := -1) -> void:
+func mostra(stato: GameState, colonna_evidenziata := -1, acceso := {}) -> void:
 	gs = stato
 	_evidenziata = colonna_evidenziata
+	evidenze = acceso
 	for f in get_children(): f.queue_free()
 	_tavolo()
 	_cielo()
@@ -30,6 +34,7 @@ func mostra(stato: GameState, colonna_evidenziata := -1) -> void:
 	_file_laterali()
 	_plance()
 	_edifici()
+	_posti_liberi()
 	_luci()
 	_telecamera()
 
@@ -67,10 +72,81 @@ func _tavolo() -> void:
 # Il pannello verticale che fa da cielo. Per ora un colore pieno: al suo posto
 # andra' un PNG, e basta cambiare l'albedo in una texture.
 func _cielo() -> void:
-	var r := BoardLayout3D.sky_rect(gs)
-	var p := _quad(Vector2(r.size.x, r.size.y), CIELO, true)
+	# Il fondale: largo quanto la fila di tessere e attaccato al loro bordo
+	# alto. L'altezza la detta l'immagine, non un numero scelto: si prende il
+	# rapporto della texture, cosi' il panorama non si schiaccia.
+	var tex: Texture2D = null
+	if ResourceLoader.exists(BoardLayout3D.SFONDO_PATH):
+		tex = load(BoardLayout3D.SFONDO_PATH) as Texture2D
+	var rapporto := BoardLayout3D.CIELO_RAPPORTO
+	if tex != null and tex.get_height() > 0:
+		rapporto = float(tex.get_width()) / float(tex.get_height())
+	var r := BoardLayout3D.sky_rect(gs, rapporto)
+	var p := _quad(Vector2(r.size.x, r.size.y), CIELO if tex == null else Color.WHITE, true)
+	if tex != null:
+		var mat := p.material_override as StandardMaterial3D
+		mat.albedo_texture = tex
+		mat.texture_filter = BaseMaterial3D.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
 	p.position = r.position + Vector3(r.size.x / 2.0, r.size.y / 2.0, 0.0)
 	add_child(p)
+
+# Un velo chiaro steso su un riquadro: e' cosi' che si "accende" qualcosa
+# senza coprirne il disegno.
+func _velo_su(box: AABB, col: Color, alzo := 1.2) -> void:
+	var velo := _quad(Vector2(box.size.x, box.size.z), col, true)
+	velo.rotate_x(-PI / 2.0)
+	var mat := velo.material_override as StandardMaterial3D
+	mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	velo.position = Vector3(box.position.x + box.size.x / 2.0,
+		box.end.y + alzo, box.position.z + box.size.z / 2.0)
+	add_child(velo)
+
+# Una CORNICE accesa attorno a un riquadro. Una velatura sola si perdeva
+# sopra il disegno della tessera: il bordo pieno si vede anche su una striscia
+# di 26 mm, e non copre quello che c'e' dentro.
+func _cornice(box: AABB, col: Color, spessore := 5.0) -> void:
+	# Dentro solo una velatura, cosi' il disegno della tessera resta
+	# leggibile: se il posto acceso coprisse il terreno, per sapere dove si
+	# sta costruendo bisognerebbe spegnere l'accensione.
+	_velo_su(box, Color(col.r, col.g, col.b, 0.26), 1.4)
+	var pieno := Color(col.r, col.g, col.b, 0.95)
+	var x0 := box.position.x
+	var z0 := box.position.z
+	var w := box.size.x
+	var d := box.size.z
+	var y := box.position.y
+	var h := box.size.y
+	for lato in [
+		AABB(Vector3(x0 - spessore, y, z0 - spessore), Vector3(w + 2.0 * spessore, h, spessore)),
+		AABB(Vector3(x0 - spessore, y, z0 + d), Vector3(w + 2.0 * spessore, h, spessore)),
+		AABB(Vector3(x0 - spessore, y, z0), Vector3(spessore, h, d)),
+		AABB(Vector3(x0 + w, y, z0), Vector3(spessore, h, d)),
+	]:
+		_velo_su(lato, pieno, 1.7)
+
+func _acceso_carta(c: Dictionary) -> bool:
+	var sc: Dictionary = evidenze.get("carta", {})
+	return not sc.is_empty() and str(sc.get("kind", "")) == str(c["kind"]) \
+		and str(sc.get("id", "")) == str(c["id"])
+
+# I posti dove la carta scelta puo' andare: riquadri accesi sul binario
+# dell'era in corso, e un alone attorno agli edifici che possono riceverla.
+func _posti_liberi() -> void:
+	for pz in evidenze.get("slot", []):
+		var c0 := int(pz["col_from"])
+		var w := int(pz["width"])
+		var box := BoardLayout3D.tile_box(c0, gs.era)
+		box.size.x = w * BoardLayout3D.TESSERA_W
+		box.position.z = BoardLayout3D.rail_z(gs.era)
+		box.size.z = BoardLayout3D.SLOT_D
+		var col := Color(0.42, 1.0, 0.52)
+		if bool(pz.get("above", false)): col = Color(1.0, 0.76, 0.26)
+		_cornice(box, col)
+	for uid in evidenze.get("uid", []):
+		for b in gs.grid.buildings:
+			if b.uid != int(uid): continue
+			var piede := BoardLayout3D.basetta_box(gs, b)
+			_cornice(piede, Color(0.42, 1.0, 0.52), 4.0)
 
 # Una carta stesa sul tavolo: lo spessore del cartoncino piu' il disegno
 # sopra. Il disegno e' un piano a se' e non la faccia della scatola, perche'
@@ -102,11 +178,12 @@ func _carta_stesa(box: AABB, percorso: String, tinta: Color,
 func _tessere() -> void:
 	for c in gs.grid.n_cols:
 		var t: int = gs.grid.terrains[c]
-		# La tessera stampata e' UNA per colonna, 63 x 271 mm: copre tutti e
-		# cinque i binari, che sono righe su di lei e non pezzi a se'. Si
-		# unisce quindi il primo slot con l'ultimo.
-		var box := BoardLayout3D.tile_box(c, 1).merge(
-			BoardLayout3D.tile_box(c, BoardLayout3D.RAILS))
+		# La tessera stampata e' UNA per colonna e va disegnata INTERA, 63 x
+		# 271 mm. Qui prima si univa il primo binario con l'ultimo: da quando
+		# i binari stanno nella sola fascia del disegno quella unione da' 130
+		# mm, e la carta ci finiva dentro schiacciata a meta'. Il disegno era
+		# giusto, la cornice no.
+		var box := BoardLayout3D.tessera_box(c)
 		var col: Color = COLORI_TERRENO[t]
 		var percorso := BoardLayout3D.tessera_path(gs, c)
 		if percorso != "" and ResourceLoader.exists(percorso): col = Color("#1d1b17")
@@ -180,27 +257,9 @@ func _sagoma(b: Building) -> void:
 		m = _scatola(Vector3(dim.x, dim.y, BoardLayout3D.SAGOMA_SPESSORE), col)
 	m.position = base + Vector3(0.0, dim.y / 2.0 + BoardLayout3D.BASETTA_Y, 0.0)
 	add_child(m)
-	# Il nome va solo a chi si vede dall'alto della propria colonna: la cima.
-	# Etichettare tutto riempiva la plancia di scritte accavallate, e le
-	# scritte accavallate non si leggono piu' di nessuna.
-	if b.is_buried: return
-	var in_cima := false
-	for c in range(b.col_from, b.col_to):
-		if gs.grid.top_of(c) == b:
-			in_cima = true
-			break
-	if not in_cima: return
-	var eti := Label3D.new()
-	eti.text = str(b.data["name"])
-	eti.font_size = 64
-	eti.pixel_size = 0.20
-	eti.billboard = BaseMaterial3D.BILLBOARD_ENABLED
-	eti.no_depth_test = true
-	eti.position = base + Vector3(0.0, dim.y + BoardLayout3D.BASETTA_Y + 14.0, 0.0)
-	eti.modulate = Color(1, 1, 1, 0.95)
-	eti.outline_size = 22
-	eti.outline_modulate = Color(0, 0, 0, 0.85)
-	add_child(eti)
+	# Niente nome sopra la sagoma. Le scritte che galleggiano sul tavolo
+	# coprivano proprio quello che dovevano far vedere: adesso il nome esce
+	# quando ci passi sopra col mouse, e solo quello puntato.
 
 # L'illustrazione della sagoma, se le immagini sono state estratte.
 func _illustrazione(b: Building) -> Texture2D:
@@ -264,15 +323,11 @@ func _file_laterali() -> void:
 		var sfondo := CARTA_SFONDO
 		if percorso != "" and ResourceLoader.exists(percorso): sfondo = Color("#1d1b17")
 		_carta_stesa(r, percorso, sfondo)
-		# Il nome e i numeri restano scritti sopra anche col disegno vero, e
-		# non e' una ridondanza: a questa distanza il testo stampato non si
-		# legge, e soprattutto i NUMERI DEL PDF SONO VECCHI - su 44 edifici su
-		# 60 lo Scavo stampato non e' quello della v1.5. Questi vengono dai
-		# dati, che sono la fonte.
-		_scritta(r.position + Vector3(r.size.x / 2.0, 30.0, r.size.z / 2.0),
-			_titolo_carta(c), 0.14, Color("#e8e6df"))
-		_scritta(r.position + Vector3(r.size.x / 2.0, 16.0, r.size.z / 2.0),
-			_dettaglio_carta(c), 0.11, Color("#9aa0ad"))
+		# Niente scritte sopra: il nome e i numeri escono nel riquadro che
+		# segue il mouse. I numeri li' vengono dai DATI e non dal disegno,
+		# perche' quelli stampati sono vecchi - su 44 edifici su 60 lo Scavo
+		# del PDF non e' quello della v1.5.
+		if _acceso_carta(c): _cornice(r, Color(1.0, 0.88, 0.35), 4.0)
 
 func _titolo_carta(c: Dictionary) -> String:
 	var id := str(c["id"])
@@ -302,38 +357,18 @@ func _dettaglio_carta(c: Dictionary) -> String:
 	return ""
 
 func _plance() -> void:
+	# Del rettangolo colorato che fingeva di essere un tabellone resta una
+	# BACCHETTA del colore del giocatore: le carte che ha comprato si
+	# impilano sotto, e sono carte vere - vengono disegnate come tutte le
+	# altre da _file_laterali.
 	for p in BoardLayout3D.player_boards(gs):
 		var r: AABB = p["aabb"]
 		var i: int = int(p["player"])
-		var ps: PlayerState = gs.players[i]
 		var suo: Color = COLORI_GIOCATORE[i % COLORI_GIOCATORE.size()]
-		var sfondo := PLANCIA_SFONDO.lerp(suo, 0.22)
-		if i == gs.current_index: sfondo = sfondo.lightened(0.18)
-		var m := _scatola(r.size, sfondo)
+		if i == gs.current_index: suo = suo.lightened(0.35)
+		var m := _scatola(r.size, suo)
 		m.position = r.position + r.size / 2.0
 		add_child(m)
-		var centro := r.position + Vector3(r.size.x / 2.0, 0.0, r.size.z / 2.0)
-		var turno := "  ←" if i == gs.current_index else ""
-		_scritta(centro + Vector3(0, 34, 0), "G%d — %d PV%s" % [i, ps.vp, turno], 0.15, suo.lightened(0.5))
-		_scritta(centro + Vector3(0, 20, 0),
-			"%dp %do · lav %d/%d" % [ps.pietra, ps.oro, ps.workers_used, ps.workers],
-			0.12, Color("#c8ccd4"))
-		var extra := ""
-		if ps.has_dynasty: extra += "Dinastia "
-		for cid in ps.specialized_characters:
-			extra += "%s " % CardDB.characters[cid]["name"]
-		# Gli edifici in piedi e i personaggi sepolti: le "carte possedute"
-		# che il brief chiede sulla plancia del giocatore.
-		var vivi := 0
-		var sepolti := 0
-		for b in gs.grid.buildings:
-			if b.owner != i: continue
-			if b.is_alive(): vivi += 1
-			if b.buried_character != "": sepolti += 1
-		var riga := "%d edifici" % vivi
-		if sepolti > 0: riga += " · %d sepolti" % sepolti
-		if extra != "": riga += " · " + extra.strip_edges()
-		_scritta(centro + Vector3(0, 8, 0), riga, 0.10, Color("#9aa0ad"))
 
 # I cubetti: bianchi la Vetusta', neri la resistenza guadagnata. Sono i
 # segnalini del gioco vero, e sulla basetta si leggono senza girare il
