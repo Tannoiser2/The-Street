@@ -20,11 +20,14 @@ var monuments_claimed: Array = []
 var specialized_characters: Array[String] = []
 # Colonne dove hai gia' un lavoratore: "al massimo un vostro lavoratore per colonna".
 var worker_cols: Array[int] = []
+# "Il primo terrapieno di ogni giocatore in quest'era costa 0" (ev_bonifiche).
+var terrapieno_free_used: bool = false
 
 func reset_for_era() -> void:
 	workers_used = 0
 	specialized_characters.clear()
 	worker_cols.clear()
+	terrapieno_free_used = false
 
 func _init(i: int) -> void:
 	index = i

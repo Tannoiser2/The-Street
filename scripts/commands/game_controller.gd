@@ -147,6 +147,8 @@ func build(card_id: String, col_from: int, above: bool, pay_option: int = 0, des
 	var cost: Vector2i = opts[clamp(pay_option, 0, opts.size() - 1)]
 	if not p.can_pay(cost.x, cost.y): return false
 	p.pay(cost.x, cost.y)
+	if q.terrapieno_free_applied:
+		p.terrapieno_free_used = true
 
 	# La spoliazione si risolve PRIMA di costruire: il rudere e' gia' rovina,
 	# e resta del suo proprietario.
