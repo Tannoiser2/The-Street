@@ -48,6 +48,23 @@ func new_game(n_players: int, seed_value: int) -> void:
 		_shuffle(uids)
 		gs.upg_decks[e] = uids
 	gs.dynasties_left = int(CardDB.characters[ActionRules.dynasty_id()].get("copies", 0))
+
+	# "Rivelate tanti Monumenti celebri quanti sono i giocatori meno uno"
+	var mons := CardDB.monuments.keys()
+	_shuffle(mons)
+	for i in max(0, n_players - 1):
+		if i < mons.size(): gs.monuments_open.append(mons[i])
+
+	# "distribuite 2 carte Eredita' a testa: ognuno ne tiene una segreta"
+	var legs := CardDB.legacies.keys()
+	_shuffle(legs)
+	for p2 in gs.players:
+		var due := []
+		for k in 2:
+			if not legs.is_empty(): due.append(legs.pop_back())
+		if not due.is_empty():
+			p2.legacy_id = due[gs.rng.randi_range(0, due.size() - 1)]
+
 	_start_era(1)
 
 func _start_era(era: int) -> void:
@@ -73,6 +90,7 @@ func _start_era(era: int) -> void:
 	gs.current_index = -1
 	for p in gs.players: p.reset_for_era()
 	gs.phase = Enums.Phase.PIAZZA
+	Conditions.claim_monuments(gs)      # il Pantheon guarda l'inizio dell'era Moderna
 	gs.log_line("Inizia l'era %d. Evento: %s" % [era, gs.current_event.get("name", "nessuno")])
 	if _advance_to_next_player():
 		state_changed.emit()
@@ -153,6 +171,8 @@ func build(card_id: String, col_from: int, above: bool, pay_option: int = 0, des
 	p.pay(cost.x, cost.y)
 	if q.terrapieno_free_applied:
 		p.terrapieno_free_used = true
+	if q.terrapieno_pietra > 0:
+		p.bump("terrapieno_pietra", q.terrapieno_pietra)
 
 	# La spoliazione si risolve PRIMA di costruire: il rudere e' gia' rovina,
 	# e resta del suo proprietario.
@@ -213,6 +233,7 @@ func upgrade(upg_id: String, target: Building) -> bool:
 	# sorgente dei selettori. Prima il cubetto nero dei Struttura era un caso
 	# speciale sulla famiglia: ora e' un effetto `resistance` come gli altri.
 	Effects.apply_on_acquire(gs, p.index, CardDB.upgrades[upg_id], target)
+	p.bump("potenziamenti_piazzati")
 	gs.upg_row.erase(upg_id)
 	_refill(gs.upg_row, gs.upg_decks[gs.era], int(CardDB.constants["side_rows"]))
 	gs.log_line("%s potenziato con %s" % [target.data["name"], CardDB.upgrades[upg_id]["name"]])
@@ -234,6 +255,7 @@ func restore(target: Building) -> bool:
 	p.pay(q.pietra, q.oro)
 	target.state = Enums.BuildingState.INTATTO
 	target.vetusta = 0
+	p.bump("restauri")
 	var stolen := target.owner != p.index
 	target.owner = p.index
 	gs.log_line("%s restaurato%s" % [target.data["name"], " e appropriato" if stolen else ""])
@@ -296,6 +318,9 @@ func pass_action() -> void:
 
 # ---- avanzamento ---------------------------------------------------
 func _end_turn() -> void:
+	# I Monumenti si reclamano nell'istante in cui la condizione e' soddisfatta,
+	# quindi vanno controllati dopo ogni azione, non a fine partita.
+	Conditions.claim_monuments(gs)
 	gs.phase = Enums.Phase.PIAZZA
 	if _advance_to_next_player():
 		state_changed.emit()
@@ -325,6 +350,7 @@ func _has_worker(i: int) -> bool:
 
 func _finish_era() -> void:
 	EraRules.end_era(gs)
+	Conditions.claim_monuments(gs)      # l'evento puo' aver cambiato la plancia
 	era_ended.emit(gs.era)
 	if gs.era >= 5:
 		Scoring.final_scoring(gs)

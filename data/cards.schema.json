@@ -153,6 +153,14 @@
         "below_self": {
           "type": "boolean",
           "description": "Sta sotto la sorgente, nella stessa colonna."
+        },
+        "upgrades": {
+          "$ref": "#/$defs/range",
+          "description": "Numero di potenziamenti che porta."
+        },
+        "razed": {
+          "type": "boolean",
+          "description": "Spianato dal proprietario per costruirci sopra."
         }
       }
     },
@@ -291,15 +299,20 @@
       "type": "object",
       "additionalProperties": false,
       "required": [
-        "op",
-        "min"
+        "op"
       ],
       "description": "Gate di un effetto. count_matching conta i bersagli; protected_survived guarda se l'edificio protetto dal lavoratore che ha reclutato questo personaggio ha superato l'evento.",
       "properties": {
         "op": {
           "enum": [
             "count_matching",
-            "protected_survived"
+            "protected_survived",
+            "same_column_count",
+            "distinct_columns",
+            "consecutive_columns",
+            "all_terrains",
+            "all_eras",
+            "counter"
           ]
         },
         "min": {
@@ -308,6 +321,18 @@
         },
         "target": {
           "$ref": "#/$defs/selector"
+        },
+        "name": {
+          "enum": [
+            "terrapieno_pietra",
+            "restauri",
+            "potenziamenti_piazzati"
+          ],
+          "description": "Solo per op=counter: contatore storico. Elenco CHIUSO."
+        },
+        "min_era": {
+          "$ref": "#/$defs/era",
+          "description": "La condizione non si valuta prima di quest'era (il Pantheon)."
         }
       }
     }
@@ -602,12 +627,48 @@
     "monuments": {
       "type": "array",
       "minItems": 14,
-      "maxItems": 14
+      "maxItems": 14,
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "vp",
+          "condition"
+        ],
+        "properties": {
+          "condition": {
+            "$ref": "#/$defs/condition"
+          },
+          "vp": {
+            "type": "integer",
+            "minimum": 1
+          }
+        }
+      }
     },
     "legacies": {
       "type": "array",
       "minItems": 16,
-      "maxItems": 16
+      "maxItems": 16,
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "vp",
+          "condition"
+        ],
+        "properties": {
+          "condition": {
+            "$ref": "#/$defs/condition"
+          },
+          "vp": {
+            "type": "integer",
+            "minimum": 1
+          }
+        }
+      }
     }
   }
 }

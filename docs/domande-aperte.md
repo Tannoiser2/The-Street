@@ -413,3 +413,18 @@ dato è stato importato da lì. Ma due confronti fra ciò che è stampato e
     un bersaglio esplicito, come `build` accetta la colonna. Il bot casuale
     prende il primo proprio edificio libero, che è un segnaposto: la scelta vera
     la farà l'interfaccia.
+
+33. **Catacombe: «3 edifici sotterrati nella stessa colonna», di chi?** — il
+    testo del Monumento non dice «propri», a differenza dei Fori Imperiali che
+    dicono «4 **propri** edifici Sotterrati».
+    Lettura adottata: **letterale**, contano i sotterrati di chiunque. Basta
+    quindi che una colonna ne accumuli tre, e lo reclama il primo giocatore in
+    ordine di turno nel momento in cui accade — anche senza averne sotterrato
+    nessuno lui.
+    Se l'intenzione era «3 tuoi», è una riga nei dati.
+
+34. **A parità, chi reclama un Monumento?** Due giocatori possono soddisfare la
+    condizione nello stesso istante (per esempio dopo un evento che sotterra
+    edifici di entrambi). Adottato: **l'ordine di turno dell'era corrente**.
+    Il regolamento non lo dice, perché al tavolo la simultaneità non capita
+    quasi mai: qui invece la valutazione è puntuale e va decisa.

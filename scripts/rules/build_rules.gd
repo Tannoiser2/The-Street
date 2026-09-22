@@ -17,6 +17,7 @@ class BuildQuote:
 	var continuity_bonus: int = 0
 	var despoiled: Building = null   # rudere depredato, diventa rovina prima di costruire
 	var terrapieno_free_applied: bool = false
+	var terrapieno_pietra: int = 0   # pietra effettivamente spesa in terrapieni
 
 # ---- requisiti di terreno -----------------------------------------
 # Morbidi per pianura/collina/bosco (colonna o adiacente), stretti per fiume.
@@ -165,7 +166,8 @@ static func quote_above(gs: GameState, player: int, data: Dictionary, col_from: 
 			and not gs.players[player].terrapieno_free_used:
 		billable -= 1
 		q.terrapieno_free_applied = true
-	var p := c.x + billable * int(CardDB.constants["terrapieno_cost_pietra"])
+	q.terrapieno_pietra = billable * int(CardDB.constants["terrapieno_cost_pietra"])
+	var p := c.x + q.terrapieno_pietra
 	p -= pianura_discount(gs, data, col_from)
 	p -= spolia
 	# Lo sconto macerie non si somma alla spoliazione: la sostituisce.

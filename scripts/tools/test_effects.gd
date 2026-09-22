@@ -21,6 +21,7 @@ func _ready() -> void:
 	_run("hook di attivazione", _test_on_activate)
 	_run("lavoratore ed edificio protetto", _test_protection)
 	_run("Impronte", _test_imprints)
+	_run("Monumenti ed Eredita'", _test_objectives)
 	_run("lo schema e' davvero chiuso", _test_schema_closed)
 	print("\n%d superati, %d falliti" % [_passed, _failed])
 	get_tree().quit(0 if _failed == 0 else 1)
@@ -1093,3 +1094,127 @@ func _test_imprints() -> void:
 	# ma conta come reclutamento, per l'Universita'
 	_eq("  conta comunque come personaggio reclutato",
 		gs7.players[chi].recruited_total, 1)
+
+
+# ---- Monumenti ed Eredita' -------------------------------------------
+func _cond(id: String) -> Dictionary:
+	if CardDB.monuments.has(id): return CardDB.monuments[id]["condition"]
+	return CardDB.legacies[id]["condition"]
+
+func _test_objectives() -> void:
+	var rel := _card_of_class("religione")
+	var civ := _card_of_class("civico")
+	var mil := _card_of_class("militare")
+
+	# count_matching — Acropoli: "primo a costruire a livello 4"
+	var a := _scena()
+	_put(a, civ, 1, 3)
+	_ok("Acropoli: livello 3 non basta", not Conditions.met(a, 0, _cond("mo_acropoli")))
+	_put(a, civ, 3, 4)
+	_ok("  livello 4 la soddisfa", Conditions.met(a, 0, _cond("mo_acropoli")))
+
+	# same_column_count — San Clemente: 3 Religione nella STESSA colonna
+	var b := _scena()
+	for c2 in [1, 1, 5]: _put(b, rel, c2)
+	_ok("San Clemente: 2 in colonna e 1 altrove non bastano",
+		not Conditions.met(b, 0, _cond("mo_san_clemente")))
+	_put(b, rel, 1)
+	_ok("  tre nella stessa colonna la soddisfano", Conditions.met(b, 0, _cond("mo_san_clemente")))
+
+	# distinct_columns — Ponte Milvio: 2 edifici su colonne fiume DISTINTE
+	var c := _scena()
+	_flat(c, Enums.Terrain.FIUME)
+	_put(c, civ, 2)
+	_ok("Ponte Milvio: un solo edificio non basta", not Conditions.met(c, 0, _cond("mo_ponte_milvio")))
+	_put(c, civ, 4)
+	_ok("  due colonne fiume distinte la soddisfano", Conditions.met(c, 0, _cond("mo_ponte_milvio")))
+
+	# consecutive_columns — Lastricatore: 3 colonne consecutive
+	var d := _scena()
+	for c3 in [0, 1, 3]: _put(d, civ, c3)
+	_ok("Lastricatore: 0,1,3 non sono consecutive",
+		not Conditions.met(d, 0, _cond("er_il_lastricatore")))
+	_put(d, civ, 2)
+	_ok("  con la 2 diventano tre consecutive", Conditions.met(d, 0, _cond("er_il_lastricatore")))
+
+	# all_terrains — il Geografo
+	var e2 := _scena()
+	var terreni := [Enums.Terrain.PIANURA, Enums.Terrain.FIUME, Enums.Terrain.COLLINA, Enums.Terrain.BOSCO]
+	for i in 3:
+		e2.grid.terrains[i] = terreni[i]
+		_put(e2, civ, i)
+	_ok("Geografo: tre terreni non bastano", not Conditions.met(e2, 0, _cond("er_il_geografo")))
+	e2.grid.terrains[3] = terreni[3]
+	_put(e2, civ, 3)
+	_ok("  con tutti e quattro e' soddisfatta", Conditions.met(e2, 0, _cond("er_il_geografo")))
+
+	# all_eras — il Cronista
+	var f := _scena()
+	for era in [1, 2, 3, 4]:
+		var bb := _put(f, civ, era)
+		bb.era_built = era
+	_ok("Cronista: quattro ere non bastano", not Conditions.met(f, 0, _cond("er_il_cronista")))
+	var b5 := _put(f, civ, 5)
+	b5.era_built = 5
+	_ok("  con tutte e cinque e' soddisfatta", Conditions.met(f, 0, _cond("er_il_cronista")))
+
+	# counter — il Restauratore, contatore storico
+	var g := _scena()
+	_ok("Restauratore: senza restauri, no", not Conditions.met(g, 0, _cond("er_il_restauratore")))
+	g.players[0].bump("restauri")
+	_ok("  con un solo restauro, ancora no", not Conditions.met(g, 0, _cond("er_il_restauratore")))
+	g.players[0].bump("restauri")
+	_ok("  con due, si'", Conditions.met(g, 0, _cond("er_il_restauratore")))
+
+	# min_era — il Pantheon guarda l'inizio dell'era Moderna
+	var h := _scena()
+	h.era = 1
+	var vecchio := _put(h, civ, 2)
+	vecchio.era_built = 1
+	_ok("Pantheon: nell'era 1 non si valuta", not Conditions.met(h, 0, _cond("mo_pantheon")))
+	h.era = 5
+	_ok("  nell'era 5 si'", Conditions.met(h, 0, _cond("mo_pantheon")))
+
+	# selettore `razed` — il Demolitore
+	var i2 := _scena()
+	for c4 in [1, 3, 5]:
+		var sp := _put(i2, civ, c4)
+		sp.was_razed = true
+	_ok("Demolitore: tre spianati la soddisfano", Conditions.met(i2, 0, _cond("er_il_demolitore")))
+
+	# la CORSA: il primo la prende, e il Monumento esce dalla corsa
+	var j := _scena()
+	j.monuments_open = ["mo_acropoli"]
+	j.turn_order = [0, 1, 2]
+	var suo := _put(j, civ, 2, 4)
+	suo.owner = 1
+	Conditions.claim_monuments(j)
+	_eq("il Monumento va a chi ha soddisfatto la condizione",
+		j.players[1].monuments_claimed, ["mo_acropoli"])
+	_eq("  e non ai giocatori di turno precedente", j.players[0].monuments_claimed, [])
+	_eq("  esce dalla corsa", j.monuments_open, [])
+	_eq("  e paga i suoi PV", int(j.players[1].vp_breakdown.get("monumenti", 0)),
+		int(CardDB.monuments["mo_acropoli"]["vp"]))
+	var dopo := _put(j, civ, 4, 4)
+	dopo.owner = 2
+	Conditions.claim_monuments(j)
+	_eq("  chi arriva dopo non prende nulla", j.players[2].monuments_claimed, [])
+
+	# Eredita': si pagano nel conteggio finale, e solo se soddisfatte
+	var k := _scena()
+	k.players[0].legacy_id = "er_il_verticalista"
+	Conditions.score_legacies(k)
+	_eq("Eredita' non soddisfatta: nessun punto",
+		int(k.players[0].vp_breakdown.get("eredita", 0)), 0)
+	_put(k, civ, 2, 4)
+	Conditions.score_legacies(k)
+	_eq("  soddisfatta: paga i suoi PV", int(k.players[0].vp_breakdown.get("eredita", 0)),
+		int(CardDB.legacies["er_il_verticalista"]["vp"]))
+
+	# ogni Monumento e ogni Eredita' ha una condizione strutturata
+	var senza: Array[String] = []
+	for id in CardDB.monuments:
+		if CardDB.monuments[id].get("condition", {}).is_empty(): senza.append(id)
+	for id in CardDB.legacies:
+		if CardDB.legacies[id].get("condition", {}).is_empty(): senza.append(id)
+	_eq("tutti e 30 gli obiettivi hanno una condizione", senza, [] as Array[String])

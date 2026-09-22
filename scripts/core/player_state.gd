@@ -35,6 +35,13 @@ var effect_used: Dictionary = {}
 # personaggio -> uid dell'edificio protetto dal lavoratore che lo ha reclutato.
 # Serve al Legionario e al Cavaliere ("se l'edificio protetto sopravvive").
 var character_targets: Dictionary = {}
+# Contatori storici per Monumenti ed Eredita': pietra spesa in terrapieni,
+# ruderi restaurati, potenziamenti piazzati. Non si azzerano a fine era,
+# perche' non sono ricavabili dalla plancia finale.
+var counters: Dictionary = {}
+
+func bump(nome: String, quanto: int = 1) -> void:
+	counters[nome] = int(counters.get(nome, 0)) + quanto
 
 func reset_for_era() -> void:
 	workers_used = 0

@@ -25,7 +25,13 @@ implementarli**. Questo è quello.
 > `terrain_adjacent` sugli edifici, che **chiude la domanda aperta 1** (Mulino)
 > con un campo invece che con un caso speciale.
 >
-> **Stato: dati strutturati per EVENTI, PERSONAGGI ed EDIFICI. Il motore
+> **M4 COMPLETA nei dati: tutti e 195 gli effetti e le condizioni sono
+> strutturati** — 24 eventi, 25 personaggi, 60 edifici, 25 potenziamenti, 14
+> Monumenti e 16 Eredità. Restano 14 tipi di effetto dichiarati ma non ancora
+> applicati dal motore, elencati da `Effects.pending()` e quasi tutti in attesa
+> di una decisione del designer.
+>
+> Stato precedente: dati strutturati per EVENTI, PERSONAGGI ed EDIFICI. Il motore
 > applica: i modificatori di resistenza degli eventi, le aure di Quartiere e di
 > colonna degli edifici, i «Subito:» dei personaggi, il **punteggio finale degli
 > edifici** (voce 7 del conteggio), due override e il requisito di terreno

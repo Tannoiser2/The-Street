@@ -3952,85 +3952,226 @@
       "id": "mo_san_clemente",
       "name": "San Clemente",
       "vp": 5,
-      "condition_text": "Primo ad avere 3 edifici Religione nella stessa colonna."
+      "condition_text": "Primo ad avere 3 edifici Religione nella stessa colonna.",
+      "condition": {
+        "op": "same_column_count",
+        "target": {
+          "owner": "self",
+          "class": [
+            "religione"
+          ]
+        },
+        "min": 3
+      }
     },
     {
       "id": "mo_colosseo",
       "name": "Colosseo",
       "vp": 4,
-      "condition_text": "Primo il cui edificio sopravvive esposto a 3 eventi."
+      "condition_text": "Primo il cui edificio sopravvive esposto a 3 eventi.",
+      "condition": {
+        "op": "count_matching",
+        "target": {
+          "owner": "self",
+          "vetusta": {
+            "min": 3
+          }
+        },
+        "min": 1
+      }
     },
     {
       "id": "mo_pantheon",
       "name": "Pantheon",
       "vp": 4,
-      "condition_text": "Primo ad avere un edificio dell’era 1 o 2 ancora in piedi all’inizio dell’era Moderna."
+      "condition_text": "Primo ad avere un edificio dell’era 1 o 2 ancora in piedi all’inizio dell’era Moderna.",
+      "condition": {
+        "op": "count_matching",
+        "target": {
+          "owner": "self",
+          "era": {
+            "max": 2
+          },
+          "state": [
+            "intatto",
+            "rudere"
+          ],
+          "buried": false
+        },
+        "min": 1,
+        "min_era": 5
+      }
     },
     {
       "id": "mo_fori_imperiali",
       "name": "Fori Imperiali",
       "vp": 4,
-      "condition_text": "Primo ad avere 4 propri edifici Sotterrati."
+      "condition_text": "Primo ad avere 4 propri edifici Sotterrati.",
+      "condition": {
+        "op": "count_matching",
+        "target": {
+          "owner": "self",
+          "buried": true
+        },
+        "min": 4
+      }
     },
     {
       "id": "mo_acropoli",
       "name": "Acropoli",
       "vp": 4,
-      "condition_text": "Primo a costruire a livello 4."
+      "condition_text": "Primo a costruire a livello 4.",
+      "condition": {
+        "op": "count_matching",
+        "target": {
+          "owner": "self",
+          "level": {
+            "min": 4
+          }
+        },
+        "min": 1
+      }
     },
     {
       "id": "mo_via_appia",
       "name": "Via Appia",
       "vp": 5,
-      "condition_text": "Primo ad avere propri edifici in cima a 4 colonne consecutive."
+      "condition_text": "Primo ad avere propri edifici in cima a 4 colonne consecutive.",
+      "condition": {
+        "op": "consecutive_columns",
+        "target": {
+          "owner": "self",
+          "is_top": true
+        },
+        "min": 4
+      }
     },
     {
       "id": "mo_terme_di_caracalla",
       "name": "Terme di Caracalla",
       "vp": 4,
-      "condition_text": "Primo a costruire un edificio da 3 caselle."
+      "condition_text": "Primo a costruire un edificio da 3 caselle.",
+      "condition": {
+        "op": "count_matching",
+        "target": {
+          "owner": "self",
+          "width": {
+            "min": 3
+          }
+        },
+        "min": 1
+      }
     },
     {
       "id": "mo_ponte_milvio",
       "name": "Ponte Milvio",
       "vp": 4,
-      "condition_text": "Primo ad avere 2 edifici su colonne fiume distinte."
+      "condition_text": "Primo ad avere 2 edifici su colonne fiume distinte.",
+      "condition": {
+        "op": "distinct_columns",
+        "target": {
+          "owner": "self",
+          "terrain": [
+            "fiume"
+          ]
+        },
+        "min": 2
+      }
     },
     {
       "id": "mo_mura_aureliane",
       "name": "Mura Aureliane",
       "vp": 5,
-      "condition_text": "Primo ad avere 3 edifici Militari in piedi contemporaneamente."
+      "condition_text": "Primo ad avere 3 edifici Militari in piedi contemporaneamente.",
+      "condition": {
+        "op": "count_matching",
+        "target": {
+          "owner": "self",
+          "class": [
+            "militare"
+          ],
+          "state": [
+            "intatto"
+          ],
+          "buried": false
+        },
+        "min": 3
+      }
     },
     {
       "id": "mo_cloaca_massima",
       "name": "Cloaca Massima",
       "vp": 4,
-      "condition_text": "Primo ad aver speso almeno 3 pietra complessive in costi di terrapieno."
+      "condition_text": "Primo ad aver speso almeno 3 pietra complessive in costi di terrapieno.",
+      "condition": {
+        "op": "counter",
+        "name": "terrapieno_pietra",
+        "min": 3
+      }
     },
     {
       "id": "mo_domus_aurea",
       "name": "Domus Aurea",
       "vp": 5,
-      "condition_text": "Primo ad avere un edificio con 3 potenziamenti."
+      "condition_text": "Primo ad avere un edificio con 3 potenziamenti.",
+      "condition": {
+        "op": "count_matching",
+        "target": {
+          "owner": "self",
+          "upgrades": {
+            "min": 3
+          }
+        },
+        "min": 1
+      }
     },
     {
       "id": "mo_campidoglio",
       "name": "Campidoglio",
       "vp": 4,
-      "condition_text": "Primo ad avere 2 edifici Civici nella stessa colonna."
+      "condition_text": "Primo ad avere 2 edifici Civici nella stessa colonna.",
+      "condition": {
+        "op": "same_column_count",
+        "target": {
+          "owner": "self",
+          "class": [
+            "civico"
+          ]
+        },
+        "min": 2
+      }
     },
     {
       "id": "mo_isola_tiberina",
       "name": "Isola Tiberina",
       "vp": 4,
-      "condition_text": "Primo a costruire su una colonna fiume a livello 2+."
+      "condition_text": "Primo a costruire su una colonna fiume a livello 2+.",
+      "condition": {
+        "op": "count_matching",
+        "target": {
+          "owner": "self",
+          "terrain": [
+            "fiume"
+          ],
+          "level": {
+            "min": 2
+          }
+        },
+        "min": 1
+      }
     },
     {
       "id": "mo_catacombe",
       "name": "Catacombe",
       "vp": 5,
-      "condition_text": "Primo ad avere 3 edifici sotterrati nella stessa colonna."
+      "condition_text": "Primo ad avere 3 edifici sotterrati nella stessa colonna.",
+      "condition": {
+        "op": "same_column_count",
+        "target": {
+          "buried": true
+        },
+        "min": 3
+      }
     }
   ],
   "legacies": [
@@ -4038,97 +4179,242 @@
       "id": "er_larcheologo",
       "name": "L’Archeologo",
       "vp": 5,
-      "condition_text": "4+ tuoi edifici Sotterrati."
+      "condition_text": "4+ tuoi edifici Sotterrati.",
+      "condition": {
+        "op": "count_matching",
+        "target": {
+          "owner": "self",
+          "buried": true
+        },
+        "min": 4
+      }
     },
     {
       "id": "er_il_costruttore_di_cattedrali",
       "name": "Il Costruttore di cattedrali",
       "vp": 4,
-      "condition_text": "3+ tuoi edifici Religione, in qualsiasi stato."
+      "condition_text": "3+ tuoi edifici Religione, in qualsiasi stato.",
+      "condition": {
+        "op": "count_matching",
+        "target": {
+          "owner": "self",
+          "class": [
+            "religione"
+          ]
+        },
+        "min": 3
+      }
     },
     {
       "id": "er_il_verticalista",
       "name": "Il Verticalista",
       "vp": 4,
-      "condition_text": "hai costruito un edificio a livello 4 o superiore."
+      "condition_text": "hai costruito un edificio a livello 4 o superiore.",
+      "condition": {
+        "op": "count_matching",
+        "target": {
+          "owner": "self",
+          "level": {
+            "min": 4
+          }
+        },
+        "min": 1
+      }
     },
     {
       "id": "er_il_geografo",
       "name": "Il Geografo",
       "vp": 4,
-      "condition_text": "tuoi edifici su tutti e quattro i terreni."
+      "condition_text": "tuoi edifici su tutti e quattro i terreni.",
+      "condition": {
+        "op": "all_terrains",
+        "target": {
+          "owner": "self"
+        }
+      }
     },
     {
       "id": "er_il_colonizzatore",
       "name": "Il Colonizzatore",
       "vp": 4,
-      "condition_text": "tuoi edifici in 5+ colonne diverse."
+      "condition_text": "tuoi edifici in 5+ colonne diverse.",
+      "condition": {
+        "op": "distinct_columns",
+        "target": {
+          "owner": "self"
+        },
+        "min": 5
+      }
     },
     {
       "id": "er_il_mecenate",
       "name": "Il Mecenate",
       "vp": 4,
-      "condition_text": "4+ potenziamenti collocati sui tuoi edifici, inclusi quelli poi Sotterrati."
+      "condition_text": "4+ potenziamenti collocati sui tuoi edifici, inclusi quelli poi Sotterrati.",
+      "condition": {
+        "op": "counter",
+        "name": "potenziamenti_piazzati",
+        "min": 4
+      }
     },
     {
       "id": "er_il_condottiero",
       "name": "Il Condottiero",
       "vp": 4,
-      "condition_text": "3+ tuoi edifici Militari in piedi."
+      "condition_text": "3+ tuoi edifici Militari in piedi.",
+      "condition": {
+        "op": "count_matching",
+        "target": {
+          "owner": "self",
+          "class": [
+            "militare"
+          ],
+          "state": [
+            "intatto"
+          ],
+          "buried": false
+        },
+        "min": 3
+      }
     },
     {
       "id": "er_il_cronista",
       "name": "Il Cronista",
       "vp": 5,
-      "condition_text": "tuoi edifici di tutte e cinque le ere."
+      "condition_text": "tuoi edifici di tutte e cinque le ere.",
+      "condition": {
+        "op": "all_eras",
+        "target": {
+          "owner": "self"
+        }
+      }
     },
     {
       "id": "er_il_guardiano",
       "name": "Il Guardiano",
       "vp": 5,
-      "condition_text": "un tuo edificio in piedi costruito nell’era 1 o 2."
+      "condition_text": "un tuo edificio in piedi costruito nell’era 1 o 2.",
+      "condition": {
+        "op": "count_matching",
+        "target": {
+          "owner": "self",
+          "era": {
+            "max": 2
+          },
+          "state": [
+            "intatto",
+            "rudere"
+          ],
+          "buried": false
+        },
+        "min": 1
+      }
     },
     {
       "id": "er_il_lastricatore",
       "name": "Il Lastricatore",
       "vp": 4,
-      "condition_text": "tuoi edifici in 3 colonne consecutive."
+      "condition_text": "tuoi edifici in 3 colonne consecutive.",
+      "condition": {
+        "op": "consecutive_columns",
+        "target": {
+          "owner": "self"
+        },
+        "min": 3
+      }
     },
     {
       "id": "er_il_demolitore",
       "name": "Il Demolitore",
       "vp": 4,
-      "condition_text": "hai spianato 3+ tuoi edifici intatti."
+      "condition_text": "hai spianato 3+ tuoi edifici intatti.",
+      "condition": {
+        "op": "count_matching",
+        "target": {
+          "owner": "self",
+          "razed": true
+        },
+        "min": 3
+      }
     },
     {
       "id": "er_il_massaio",
       "name": "Il Massaio",
       "vp": 4,
-      "condition_text": "due tuoi edifici a livello 2 o superiore."
+      "condition_text": "due tuoi edifici a livello 2 o superiore.",
+      "condition": {
+        "op": "count_matching",
+        "target": {
+          "owner": "self",
+          "level": {
+            "min": 2
+          }
+        },
+        "min": 2
+      }
     },
     {
       "id": "er_lidraulico",
       "name": "L’Idraulico",
       "vp": 4,
-      "condition_text": "3+ tuoi edifici su colonne fiume."
+      "condition_text": "3+ tuoi edifici su colonne fiume.",
+      "condition": {
+        "op": "count_matching",
+        "target": {
+          "owner": "self",
+          "terrain": [
+            "fiume"
+          ]
+        },
+        "min": 3
+      }
     },
     {
       "id": "er_il_silvicoltore",
       "name": "Il Silvicoltore",
       "vp": 5,
-      "condition_text": "un tuo edificio su bosco con Vetustà 3+."
+      "condition_text": "un tuo edificio su bosco con Vetustà 3+.",
+      "condition": {
+        "op": "count_matching",
+        "target": {
+          "owner": "self",
+          "terrain": [
+            "bosco"
+          ],
+          "vetusta": {
+            "min": 3
+          }
+        },
+        "min": 1
+      }
     },
     {
       "id": "er_il_restauratore",
       "name": "Il Restauratore",
       "vp": 4,
-      "condition_text": "hai restaurato 2+ ruderi."
+      "condition_text": "hai restaurato 2+ ruderi.",
+      "condition": {
+        "op": "counter",
+        "name": "restauri",
+        "min": 2
+      }
     },
     {
       "id": "er_lantiquario",
       "name": "L’Antiquario",
       "vp": 5,
-      "condition_text": "un tuo edificio Sotterrato con Scavo 6 o più."
+      "condition_text": "un tuo edificio Sotterrato con Scavo 6 o più.",
+      "condition": {
+        "op": "count_matching",
+        "target": {
+          "owner": "self",
+          "buried": true,
+          "scavo": {
+            "min": 6
+          }
+        },
+        "min": 1
+      }
     }
   ]
 }
