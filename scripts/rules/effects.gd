@@ -51,7 +51,8 @@ const APPLIED: Array[String] = [
 ]
 const APPLIED_OVERRIDES: Array[String] = ["first_terrapieno_free", "free_restore_of_class",
 	"ignore_terrain_requirement", "counts_as_class", "arte_vp_bonus", "free_upgrade_of_class",
-	"no_production_last_round"]
+	"no_production_last_round",
+	"free_upgrade_on_loss", "resource_exchange"]
 
 # Override che NON richiedono codice: descrivono un comportamento che il modello
 # generico gia' fornisce. Tenerli distinti dagli APPLIED_OVERRIDES e' deliberato:

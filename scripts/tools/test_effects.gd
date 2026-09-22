@@ -33,6 +33,8 @@ func _ready() -> void:
 	_run("il Ponte: +1 a quello che gia' producono", _test_ponte)
 	_run("Industriale", _test_industriale)
 	_run("Anni della fame", _test_anni_della_fame)
+	_run("Eruzione: il potenziamento in cambio della perdita", _test_eruzione)
+	_run("Mercante di ossidiana", _test_mercante_scambi)
 	_run("lo schema e' davvero chiuso", _test_schema_closed)
 	print("\n%d superati, %d falliti" % [_passed, _failed])
 	get_tree().quit(0 if _failed == 0 else 1)
@@ -333,7 +335,7 @@ func _test_pending() -> void:
 		_ok("  descrittivo, nessun codice necessario: %s" % n, not n in pend)
 	# gli override noti come inerti devono restare segnalati: questa lista si
 	# accorcia solo quando l'effetto viene davvero implementato.
-	for n in ["free_upgrade_on_loss", "resource_exchange", "upgrade_on_others_building"]:
+	for n in ["upgrade_on_others_building"]:
 		_ok("  ancora inerte, e segnalato: %s" % n, n in pend)
 
 	# i 25 personaggi hanno tutti effetti strutturati
@@ -1804,3 +1806,134 @@ func _test_anni_della_fame() -> void:
 	d.players[0].workers_used = 3
 	_eq("l'edificio altrui paga comunque il suo proprietario",
 		_attiva(d, 0, 2), [[0, 0], [1, 0], [0, 0]])
+
+# ---- Eruzione: il potenziamento in cambio della perdita ---------------
+# Forza 3, e "-2 res" sulla collina. Le Capanne hanno resistenza 1: sulla
+# collina sono a -1 e crollano in rovina (scarto 2+), non diventano rudere.
+func _scena_eruzione() -> GameState:
+	var gs := _game().gs
+	_flat(gs, Enums.Terrain.COLLINA)
+	_set_event(gs, "ev_eruzione")
+	gs.upg_decks[gs.era] = ["po_statua", "po_palizzata", "po_idolo"]
+	return gs
+
+func _test_eruzione() -> void:
+	# Un edificio crolla: il proprietario pesca e infila subito.
+	var a := _scena_eruzione()
+	var perso := _put(a, "ed_capanne", 1)
+	var salvo := _put(a, "ed_capanne", 4)
+	salvo.bonus_res = 9                       # regge di sicuro
+	var quante: int = a.upg_decks[a.era].size()
+	EraRules.resolve_event(a)
+	_eq("l'edificio colpito crolla in rovina", perso.state, Enums.BuildingState.ROVINA)
+	_eq("  l'altro regge", salvo.state, Enums.BuildingState.INTATTO)
+	_eq("  e ha pescato una carta dal mazzetto", a.upg_decks[a.era].size(), quante - 1)
+	_eq("  infilata sotto l'edificio rimasto", salvo.upgrades.size(), 1)
+
+	# "Massimo uno per giocatore": due edifici persi, una carta sola.
+	var b := _scena_eruzione()
+	_put(b, "ed_capanne", 0)
+	_put(b, "ed_capanne", 1)
+	var vivo := _put(b, "ed_capanne", 4)
+	vivo.bonus_res = 9
+	var n2: int = b.upg_decks[b.era].size()
+	EraRules.resolve_event(b)
+	_eq("due edifici persi, una carta sola", b.upg_decks[b.era].size(), n2 - 1)
+	_eq("  e una sola infilata", vivo.upgrades.size(), 1)
+
+	# Il rudere non e' una perdita: "perdere" e' il crollo in rovina.
+	# Con resistenza 2 contro forza 3 lo scarto e' 1, quindi rudere.
+	var c := _scena_eruzione()
+	var ferito := _put(c, "ed_capanne", 1)
+	ferito.bonus_res = 3                      # 1 base +3 -2 collina = 2, scarto 1
+	var ospite := _put(c, "ed_capanne", 4)
+	ospite.bonus_res = 9
+	var n3: int = c.upg_decks[c.era].size()
+	EraRules.resolve_event(c)
+	_eq("con scarto 1 diventa rudere", ferito.state, Enums.BuildingState.RUDERE)
+	_eq("  e il rudere non fa pescare nulla", c.upg_decks[c.era].size(), n3)
+	_eq("  ne' infilare nulla", ospite.upgrades.size(), 0)
+
+	# Chi perde tutto non ha dove infilarla: la carta non si pesca.
+	var d := _scena_eruzione()
+	_put(d, "ed_capanne", 1)
+	var n4: int = d.upg_decks[d.era].size()
+	EraRules.resolve_event(d)
+	_eq("senza un edificio dove infilarla, non si pesca", d.upg_decks[d.era].size(), n4)
+
+	# Il potenziamento pescato fa il suo effetto: la Statua da' 2 PV.
+	var e := _scena_eruzione()
+	e.upg_decks[e.era] = ["po_statua"]
+	_put(e, "ed_capanne", 1)
+	var ospite2 := _put(e, "ed_capanne", 4)
+	ospite2.bonus_res = 9
+	var prima: int = e.players[0].vp
+	EraRules.resolve_event(e)
+	_eq("la carta pescata vale i suoi punti", e.players[0].vp - prima, 2)
+
+	# Un altro evento non fa pescare nessuno.
+	var f := _game().gs
+	_flat(f, Enums.Terrain.FIUME)
+	_set_event(f, "ev_diluvio")
+	f.upg_decks[f.era] = ["po_statua"]
+	_put(f, "ed_capanne", 1)
+	var vivo2 := _put(f, "ed_capanne", 4)
+	vivo2.bonus_res = 9
+	var n5: int = f.upg_decks[f.era].size()
+	EraRules.resolve_event(f)
+	_eq("senza l'Eruzione non si pesca niente", f.upg_decks[f.era].size(), n5)
+
+# ---- Mercante di ossidiana: due scambi alla pari ---------------------
+func _test_mercante_scambi() -> void:
+	var ctl := _game()
+	var gs := ctl.gs
+	var p := gs.current_player()
+	p.pietra = 5
+	p.oro = 5
+
+	_ok("senza il Mercante non si scambia", not ctl.exchange(true))
+	p.specialized_characters = ["pe_mercante_di_ossidiana"] as Array[String]
+
+	_ok("primo scambio: pietra in oro", ctl.exchange(true))
+	_eq("  una pietra in meno", p.pietra, 4)
+	_eq("  un oro in piu'", p.oro, 6)
+	_ok("secondo scambio, nell'altra direzione", ctl.exchange(false))
+	_eq("  e torna la pietra", p.pietra, 5)
+	_eq("  a spese dell'oro", p.oro, 5)
+	_ok("il terzo scambio e' rifiutato", not ctl.exchange(true))
+	_eq("  e non ha toccato nulla", [p.pietra, p.oro], [5, 5])
+
+	# Scambiare non consuma il turno: e' ancora lo stesso giocatore.
+	var ctl2 := _game()
+	var gs2 := ctl2.gs
+	var p2 := gs2.current_player()
+	p2.specialized_characters = ["pe_mercante_di_ossidiana"] as Array[String]
+	p2.pietra = 2
+	p2.oro = 0
+	var chi := gs2.current_index
+	_ok("scambia", ctl2.exchange(true))
+	_eq("  il turno non e' passato", gs2.current_index, chi)
+
+	# Non si scambia cio' che non si ha.
+	var ctl3 := _game()
+	var p3 := ctl3.gs.current_player()
+	p3.specialized_characters = ["pe_mercante_di_ossidiana"] as Array[String]
+	p3.pietra = 0
+	p3.oro = 0
+	_ok("senza pietra non si scambia pietra", not ctl3.exchange(true))
+	_ok("senza oro non si scambia oro", not ctl3.exchange(false))
+	_eq("  e le due volte sono ancora intatte",
+		int(p3.effect_used.get("pe_mercante_di_ossidiana", 0)), 0)
+
+	# Le due volte tornano a ogni era.
+	var ctl4 := _game()
+	var p4 := ctl4.gs.current_player()
+	p4.specialized_characters = ["pe_mercante_di_ossidiana"] as Array[String]
+	p4.pietra = 9
+	p4.oro = 9
+	_ok("scambio 1", ctl4.exchange(true))
+	_ok("scambio 2", ctl4.exchange(true))
+	_ok("  il terzo no", not ctl4.exchange(true))
+	p4.reset_for_era()
+	p4.specialized_characters = ["pe_mercante_di_ossidiana"] as Array[String]
+	_ok("all'era dopo si ricomincia", ctl4.exchange(true))

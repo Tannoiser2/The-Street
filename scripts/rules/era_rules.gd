@@ -55,6 +55,7 @@ static func activate(gs: GameState, player: int, col: int) -> void:
 static func resolve_event(gs: GameState) -> void:
 	var force := int(gs.current_event.get("force", 0))
 	if force == 0: return
+	var persi: Array[int] = []       # chi ha perso un edificio: ev_eruzione
 	for b in gs.grid.buildings:
 		if not b.is_standing(): continue
 		var eff: int = b.effective_resistance() + Effects.event_resistance_modifier(gs, b)
@@ -71,7 +72,46 @@ static func resolve_event(gs: GameState) -> void:
 		else:
 			b.state = Enums.BuildingState.ROVINA
 			b.upgrades.clear()
+			if not b.owner in persi: persi.append(b.owner)
 			gs.log_line("%s crolla in rovina" % b.data["name"])
+	_free_upgrade_on_loss(gs, persi)
+
+# ev_eruzione: "chi perde un edificio pesca un potenziamento gratis (massimo
+# uno per giocatore)". Decisione del designer: "perdere" e' il crollo in
+# rovina, non il passaggio a rudere; la carta si pesca dal mazzetto coperto
+# dell'era e si piazza subito.
+# Il bersaglio e' pero' una SCELTA del giocatore, e l'interfaccia non c'e'
+# ancora: per ora va sul primo edificio intatto con capienza libera, in ordine
+# di uid. Approssimazione dichiarata, come per l'Ingegnere militare: vedi
+# docs/domande-aperte.md.
+static func _free_upgrade_on_loss(gs: GameState, persi: Array) -> void:
+	if persi.is_empty(): return
+	var e := Effects.find_override(gs, "free_upgrade_on_loss")
+	if e.is_empty(): return
+	var quante := int(e.get("times", 1))
+	var deck: Array = gs.upg_decks.get(gs.era, [])
+	for i in gs.turn_order:          # ordine di turno: il pescaggio e' deterministico
+		if not int(i) in persi: continue
+		if deck.is_empty(): return
+		var p: PlayerState = gs.players[i]
+		var chiave := str(gs.current_event["id"])
+		if int(p.effect_used.get(chiave, 0)) >= quante: continue
+		var host := _primo_ospite_libero(gs, int(i))
+		if host == null: continue    # nessun edificio dove infilarla: si perde
+		var upg_id: String = deck.pop_back()
+		p.effect_used[chiave] = int(p.effect_used.get(chiave, 0)) + 1
+		host.upgrades.append(upg_id)
+		Effects.apply_on_acquire(gs, int(i), CardDB.upgrades[upg_id], host)
+		gs.log_line("%s: giocatore %d pesca %s e la infila sotto %s" % [
+			gs.current_event["name"], int(i), CardDB.upgrades[upg_id]["name"], host.data["name"]])
+
+static func _primo_ospite_libero(gs: GameState, player: int) -> Building:
+	var out: Building = null
+	for b in gs.grid.buildings:
+		if b.owner != player or not b.is_alive(): continue
+		if b.upgrades.size() >= ActionRules.upgrade_capacity_for(gs, player, b): continue
+		if out == null or b.uid < out.uid: out = b
+	return out
 
 # I modificatori dell'evento vengono dal campo `effects` della carta (M4):
 # nessuna stringa interpretata a runtime. Vedi Effects.event_resistance_modifier.

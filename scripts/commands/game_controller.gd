@@ -323,6 +323,29 @@ func buy_dynasty() -> bool:
 func pass_action() -> void:
 	if gs.phase == Enums.Phase.AZIONE: _end_turn()
 
+# Mercante di ossidiana: "per l'era, fino a 2 scambi pietra<->oro alla pari".
+# Decisione del designer: alla pari e' 1:1, si scambia durante il proprio
+# turno, e le due volte possono andare nella stessa direzione o in direzioni
+# opposte. Non e' l'azione dell'era: scambiare non consuma il turno, ne'
+# richiede la colonna attivata.
+func exchange(pietra_in_oro: bool) -> bool:
+	if gs.phase != Enums.Phase.PIAZZA and gs.phase != Enums.Phase.AZIONE: return false
+	var p := gs.current_player()
+	var e := Effects.player_override(gs, p.index, "resource_exchange")
+	if e.is_empty(): return false        # non ce l'ha, o le due volte sono finite
+	if pietra_in_oro:
+		if p.pietra < 1: return false
+		p.pietra -= 1
+		p.oro += 1
+	else:
+		if p.oro < 1: return false
+		p.oro -= 1
+		p.pietra += 1
+	Effects.consume_override(gs, p.index, e[1])
+	gs.log_line("%s: giocatore %d scambia 1 %s con 1 %s" % [e[1]["name"], p.index,
+		"pietra" if pietra_in_oro else "oro", "oro" if pietra_in_oro else "pietra"])
+	return true
+
 # ---- avanzamento ---------------------------------------------------
 func _end_turn() -> void:
 	# I Monumenti si reclamano nell'istante in cui la condizione e' soddisfatta,

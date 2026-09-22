@@ -487,3 +487,59 @@ dato è stato importato da lì. Ma due confronti fra ciò che è stampato e
     classi esportate e deve vedere la stessa realtà del motore. Il canale
     continuità resta esatto (1920 contro 1920 su 180 partite) e nelle partite
     reali l'effetto scatta davvero: 25 volte in 100 partite a 3 giocatori.
+
+38. **Otto effetti inerti chiusi, tutti su decisione del designer.** Erano i
+    punti che il regolamento non decideva. Qui la risposta adottata e la sua
+    conseguenza nel codice.
+
+    | carta | domanda | risposta |
+    |---|---|---|
+    | Stalli mercantili | «affitto» = Rendita (PV) o produzione (risorse)? | **Rendita**, quindi PV, e ricorre a ogni censimento |
+    | Ponte | +1 di cosa, e a chi? | +1 di **cio' che l'edificio gia' produce**, anche agli edifici altrui |
+    | Industriale | cos'e' «una produzione di oro»? | **ogni fonte**: il fiume e un edificio che produce oro sono due |
+    | Anni della fame | cos'e' «l'ultimo round»? | **l'ultimo lavoratore di ciascuno**; salta la sola produzione base |
+    | Eruzione | cos'e' «perdere un edificio»? | il **crollo in rovina**, non il rudere; si pesca coperto e si piazza subito |
+    | Mercante | quando e come si scambia? | **1:1, nel proprio turno**, due volte per era, direzioni libere |
+    | Vescovo | «il prossimo» si brucia? | **no**: aspetta il primo Religione |
+    | Mecenate | conferma della lettura letterale | +1 PV **per carta Arte**, non per effetto |
+
+    Tre conseguenze meritano di essere scritte, perche' non si vedono dai dati.
+
+    **La Vetusta' accompagna la Rendita, non e' una voce a se'.** Il censimento
+    paga solo gli edifici che rendono qualcosa: un edificio a Rendita 0 non
+    paga nulla, nemmeno la Vetusta' accumulata. Gli Stalli mercantili possono
+    percio' far parlare un edificio che prima taceva, e non gli aggiungono 1
+    punto ma 1 + Vetusta'.
+
+    **L'ordine fra il Ponte e l'Industriale e' fissato.** Il Ponte alza la
+    produzione *prima* che si conti se quella produzione e' «di oro» per
+    l'Industriale. Non cambia nulla oggi, perche' il Ponte da' +1 solo di cio'
+    che l'edificio gia' produce e non puo' creare oro dal nulla, ma se un
+    giorno un effetto potesse crearlo, l'ordine deciderebbe.
+
+    **L'oro della Prosperita' non e' una produzione.** L'Industriale non lo
+    alza: il Centro Urbano paga un premio, non una produzione di colonna. Se la
+    lettura giusta fosse l'opposta, basta estendere `production_bonus` al ramo
+    della Prosperita' in `EraRules.activate`.
+
+    Resta **un solo effetto inerte**, l'Artista di corte: vedi punto 39.
+
+39. **Artista di corte: la risposta del designer diverge dal testo della
+    carta, e non ho voluto indovinare la differenza.** La carta dice: «il primo
+    potenziamento che piazzi su un edificio altrui e' gratis e incassi 1 oro
+    dal proprietario». La risposta dice invece che l'edificio altrui prende
+    +1 cultura e che l'oro lo incasso *ogni volta che quell'edificio si
+    attiva*. Sono due carte diverse: una paga una volta, l'altra paga per
+    sempre. Domande aperte, in attesa: il +1 cultura va al proprietario
+    dell'edificio o a chi piazza la carta; il potenziamento resta gratis;
+    l'incasso ricorrente dura l'era o la partita; e resta ferma la sola cosa
+    certa, cioe' che il regolamento vieta di potenziare un edificio altrui
+    («infilate la carta sotto un *vostro* edificio»), quindi questa carta crea
+    comunque un'eccezione.
+
+40. **Un bersaglio scelto dal giocatore, approssimato in attesa della M5.**
+    Il potenziamento gratuito dell'Eruzione va «piazzato subito», ma su *quale*
+    edificio lo decide il giocatore. Finche' non c'e' interfaccia va sul primo
+    edificio intatto con capienza libera, in ordine di uid. E' la seconda
+    approssimazione di questo tipo, dopo l'Ingegnere militare (punto 27): sono
+    entrambe scelte, non regole, e vanno riaperte in M5.

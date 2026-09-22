@@ -27,6 +27,13 @@ Richiede Godot 4.7 headless. Dalla radice del repository:
 # globale (class_name), altrimenti l'identificatore non viene risolto.
 godot --headless --import
 
+# Controlla la sintassi di uno script SENZA eseguirlo. Serve perche' un errore
+# di parsing fa restare APPESA la scena headless invece di segnalarsi: qui
+# invece si legge subito riga ed errore. L'unico falso allarme atteso e'
+# "Identifier not found: CardDB", perche' in modo --script gli Autoload non
+# esistono.
+godot --headless --check-only --script scripts/tools/test_effects.gd
+
 # Valida i dati contro lo schema (esce 1 se qualcosa non torna: usabile in CI)
 godot --headless res://scenes/validate_data.tscn
 

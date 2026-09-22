@@ -18,6 +18,16 @@ static func play_turn(ctl: GameController) -> void:
 		ctl.pass_action()
 		return
 
+	# Il Mercante di ossidiana: il bot non ha una strategia, ma lo scambio
+	# deve entrare in gioco, altrimenti resterebbe codice che non gira mai.
+	# Politica minima e difendibile: converte la pietra in oro quando e' corto
+	# d'oro e ne ha di pietra, perche' quasi ogni azione chiede oro mentre la
+	# pietra la produce quasi ogni terreno. La soglia "meno di 2 oro e almeno
+	# 3 pietra" e' scelta perche' scatta davvero: con "0 oro" non scatterebbe
+	# mai, dato che reclutare il Mercante ne regala gia' 1.
+	while p.oro < 2 and p.pietra >= 3 and ctl.exchange(true):
+		pass
+
 	var order := [0, 1, 2, 3, 4]
 	_shuffle(gs, order)
 	for a in order:
