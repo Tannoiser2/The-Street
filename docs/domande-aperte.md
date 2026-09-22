@@ -184,3 +184,40 @@ Non sono domande, ma vale la pena che restino a verbale.
       potenziamento gratis". Richiede di pescare dal mazzo durante la risoluzione
       dell'evento, e di decidere che cosa significhi "perdere" (rudere? rovina?
       entrambi?). Serve la tua risposta prima di implementarlo.
+
+
+## Emerse esaminando materiali/Carte.pdf (preparazione M5)
+
+Il PDF è stato aperto **solo per la grafica**, come prescrive il brief: nessun
+dato è stato importato da lì. Ma due confronti fra ciò che è stampato e
+`data/cards.json` non tornano, e vanno segnalati.
+
+20. **Il PDF è a una calibrazione di dati più vecchia della v1.5.** Due conferme
+    indipendenti, sull'era 1 (pagina 19):
+    - **Scavo**: tutti e 12 i valori stampati coincidono con
+      `cards_simulatore_legacy.json` (scala 0–4) e **11 su 12 differiscono da
+      `data/cards.json`** (scala 0–6). Esempio verificato ad alta risoluzione:
+      Capanne stampa «scavo 1», il JSON dice 2.
+    - **Larghezza**: il badge «N slot» è la larghezza in caselle. Coincide su
+      10 carte su 12, ma **Villaggio palizzato e Tumulo funerario stampano
+      "1 slot" mentre il JSON dice `width: 2`**.
+
+    Non è un problema di grafica: se queste carte andassero in stampa,
+    contraddirebbero le regole che il motore implementa. Da decidere: si
+    ristampa il PDF dai dati v1.5, o i dati vanno riportati a quei valori?
+    Verificata a fondo la sola era 1; le altre quattro si controllano in pochi
+    minuti se serve.
+
+21. **Nessun testo estraibile, e l'ordine non coincide col JSON.** Tutte e 54 le
+    pagine hanno zero testo: nomi ed effetti sono curve o raster. Quindi
+    un'illustrazione non si può associare a un id leggendo il nome.
+    L'ordine di impaginazione è quasi quello del JSON ma non esattamente: sia
+    nell'era 1 sia nell'era 4 le posizioni 5-6-7 risultano ruotate (era 1 —
+    JSON: Menhir, Palafitte, Cava; PDF: Palafitte, Cava, Menhir). Un
+    accoppiamento per indice sbaglierebbe **3 carte per pagina, in silenzio**.
+    Sembra sistematico, ma è verificato su 2 pagine di 5.
+
+22. **Le 9 carte colonna hanno nomi propri** (Pianura dei cantieri, Pianura del
+    mercato, Collina delle cave, Fiume antico, Bosco sacro…) e un riquadro
+    «Prosperità Urbana» in fondo. `data/cards.json` modella 4 terreni generici.
+    Se le 9 carte portano effetti distinti, oggi non sono nei dati. Da chiarire.
