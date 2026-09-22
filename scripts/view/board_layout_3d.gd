@@ -39,11 +39,14 @@ const BANDA_GIU := 160.0
 const SLOT_D := (BANDA_GIU - BANDA_SU) / float(RAILS)   # 26 mm per binario
 const SAGOMA_MODULO := 60.3      # 1/2/3 slot -> 60,3 / 120,6 / 180,9 mm
 const SAGOMA_SPESSORE := 4.0     # cartone vero, misurato
-# A schermo 4 mm non si vedono: una sagoma disegnata cosi' sembra un adesivo.
-# Il DISEGNO la ingrossa, i conti no - il raggio del clic e la geometria usano
-# sempre la misura vera. E' una scelta di leggibilita', scritta qui perche'
-# non sembri una misura sbagliata.
-const SAGOMA_SPESSORE_VISTA := 9.0
+# Il DISEGNO ingrossa appena il cartone, i conti no: il raggio del clic e la
+# geometria usano sempre la misura vera. E' una scelta di leggibilita',
+# scritta qui perche' non sembri una misura sbagliata.
+# Stava a 9 finche' la sagoma era una pila di quattro copie del disegno e lo
+# spessore andava esagerato per farsi vedere. Adesso il cartone e' estruso per
+# davvero, col taglio scuro lungo il bordo, e 9 mm sembravano un bordino
+# disegnato attorno alla figura: bastano 5.
+const SAGOMA_SPESSORE_VISTA := 5.0
 const BASETTA_D := 15.0          # il piede che tiene in piedi la sagoma
 const BASETTA_Y := 10.0
 # Le sagome sono contigue sul binario, ma la basetta ne occupa 15 mm sui 54:
