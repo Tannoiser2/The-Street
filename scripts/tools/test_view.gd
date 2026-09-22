@@ -239,11 +239,14 @@ func _test_3d_assi() -> void:
 	# slot ne occupa 15.
 	_approx("i binari sono contigui, non distanziati",
 		absf(BoardLayout3D.rail_z(2) - BoardLayout3D.rail_z(1)), BoardLayout3D.SLOT_D)
-	# I binari riempiono la FASCIA DEL DISEGNO, non tutta la tessera: sotto
-	# ci sono icone, regola e "Prosperita' Urbana", che devono restare
-	# leggibili per tutta la partita.
-	_approx("i cinque binari riempiono la fascia del disegno",
-		BoardLayout3D.RAILS * BoardLayout3D.SLOT_D,
+	# I BINARI restano larghi su tutta la tessera: la tessera non si tocca.
+	_approx("i cinque binari riempiono la tessera",
+		BoardLayout3D.RAILS * BoardLayout3D.SLOT_D, BoardLayout3D.TESSERA_D)
+	# Le SAGOME invece stanno nella fascia del disegno, perche' sotto ci sono
+	# icone, regola e "Prosperita' Urbana", che si leggono per tutta la
+	# partita. Sagome e binari quindi non si corrispondono uno a uno.
+	_approx("le cinque sagome stanno nella fascia del disegno",
+		BoardLayout3D.RAILS * BoardLayout3D.PASSO_SAGOME,
 		BoardLayout3D.BANDA_GIU - BoardLayout3D.BANDA_SU)
 	_ok("la fascia sta dentro la tessera e lascia scoperto il testo",
 		BoardLayout3D.BANDA_SU > 0.0
@@ -251,11 +254,12 @@ func _test_3d_assi() -> void:
 		"fascia %.0f-%.0f su %.0f mm" % [BoardLayout3D.BANDA_SU,
 			BoardLayout3D.BANDA_GIU, BoardLayout3D.TESSERA_D])
 	_ok("nessuna sagoma finisce sul testo della tessera",
-		BoardLayout3D.rail_z(1) + BoardLayout3D.SLOT_D <= BoardLayout3D.BANDA_GIU + 0.001)
-	_ok("la basetta sta dentro il suo binario",
-		BoardLayout3D.BASETTA_D < BoardLayout3D.SLOT_D,
-		"basetta %.0f su un binario di %.0f mm" % [BoardLayout3D.BASETTA_D,
-			BoardLayout3D.SLOT_D])
+		BoardLayout3D.sagoma_z(1) + BoardLayout3D.PASSO_SAGOME
+			<= BoardLayout3D.BANDA_GIU + 0.001)
+	_ok("le sagome non si accavallano fra loro",
+		BoardLayout3D.BASETTA_D < BoardLayout3D.PASSO_SAGOME,
+		"basetta %.0f su un passo di %.0f mm" % [BoardLayout3D.BASETTA_D,
+			BoardLayout3D.PASSO_SAGOME])
 	_ok("le colonne procedono lungo la X", BoardLayout3D.col_x(0) < BoardLayout3D.col_x(1))
 	_ok("le quote salgono lungo la Y",
 		BoardLayout3D.level_y(2) > BoardLayout3D.level_y(1))
@@ -327,8 +331,9 @@ func _test_3d_quote() -> void:
 	var sopra := _metti(gs, "ed_capanne", 2, 3, 1)
 	var basetta := BoardLayout3D.basetta_box(gs, sopra)
 	_approx("la basetta e' profonda 15 mm", basetta.size.z, BoardLayout3D.BASETTA_D)
-	_ok("  cioe' meno di un binario, che ne e' profondo %.0f"
-		% BoardLayout3D.SLOT_D, basetta.size.z < BoardLayout3D.SLOT_D)
+	_ok("  cioe' meno del passo fra le sagome, che e' %.0f"
+		% BoardLayout3D.PASSO_SAGOME,
+		basetta.size.z < BoardLayout3D.PASSO_SAGOME)
 	_ok("  e molto meno della profondita' della strada",
 		basetta.size.z < BoardLayout3D.board_d() / 10.0)
 	_ok("il cartone e' spesso 4 mm, come il vero",
@@ -423,16 +428,19 @@ func _test_raggio() -> void:
 	var visibile := BoardLayout3D.quota_visibile()
 	var scorcio := BoardLayout3D.scorcio()
 	# Le due soglie di prima - 75% visibile e 65% di scorcio - non stanno piu'
-	# insieme da quando i binari si sono stretti a 26 mm per entrare nella
-	# fascia del disegno: la prima vuole almeno 62 gradi, la seconda al
-	# massimo 49. Si e' tenuta la visibilita' dov'era e il prezzo lo paga lo
-	# scorcio. Le soglie qui sotto sono quelle nuove, non le vecchie
-	# allentate di nascosto.
-	_ok("dietro la fila davanti resta visibile almeno il 70%% di una sagoma (%.0f%%)"
-		% (visibile * 100.0), visibile >= 0.70)
-	_ok("  e una sagoma non e' schiacciata sotto il 45%% (%.0f%%)"
-		% (scorcio * 100.0), scorcio >= 0.45,
-		"a 70 gradi erano quasi coricate e non si riconoscevano piu'")
+	# insieme da quando le sagome si sono raccolte in 26 mm nella fascia del
+	# disegno: la prima vorrebbe almeno 62 gradi, la seconda al massimo 49.
+	# La scelta e' del designer e va nell'altra direzione: le TESSERE devono
+	# vedersi per quello che sono, quindi resta 45 e a pagare e' l'occlusione.
+	# La soglia qui sotto e' quella vera, non la vecchia allentata di
+	# nascosto: dice che dietro si vede circa un terzo di sagoma, ed e' il
+	# prezzo scritto in chiaro. Chi vuole guardare in fondo alza lo sguardo,
+	# perche' la telecamera ora si muove.
+	_ok("dietro la fila davanti resta visibile almeno un terzo di sagoma (%.0f%%)"
+		% (visibile * 100.0), visibile >= 0.33)
+	_ok("  e la tessera non e' schiacciata: scorcio sopra il 65%% (%.0f%%)"
+		% (scorcio * 100.0), scorcio >= 0.65,
+		"a 62 gradi la tessera sembrava compressa in verticale")
 	_ok("  e la telecamera usa davvero quell'inclinazione",
 		is_equal_approx(BoardLayout3D.camera_pitch_deg(gs), BoardLayout3D.INCLINAZIONE))
 

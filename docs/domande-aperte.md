@@ -1034,7 +1034,24 @@ dato è stato importato da lì. Ma due confronti fra ciò che è stampato e
     posizioni invece che sulla cornice: potrebbero non essere centrate sulla
     fascia che ho scelto.
 
-75. **I binari stretti costano lo scorcio.** Con i binari a 54 mm bastavano
+75. **~~I binari stretti costano lo scorcio.~~ Corretto: i binari restano
+    larghi, a stringersi sono solo le sagome.** Avevo stretto i binari e
+    alzato la telecamera a 62 gradi; a 62 gradi la TESSERA si schiaccia al
+    47% della sua profondita' e sembrava compressa in verticale, pur non
+    essendo cambiata di un millimetro. Il designer ha deciso: le tessere
+    restano come stavano, a spostarsi sono solo le sagome.
+
+    Quindi binari a 54,2 mm su tutta la tessera, telecamera a 45 gradi, e le
+    sagome raccolte nei 130 mm della fascia del disegno con un passo di 26.
+    Sagome e binari non si corrispondono piu' uno a uno: la sagoma dell'era 1
+    non sta sopra il proprio slot ma piu' in su, dove c'e' il disegno. Il
+    clic continua a leggere i binari veri.
+
+    Il prezzo lo paga l'occlusione, non piu' lo scorcio: di una sagoma dietro
+    ne resta visibile il **39%** invece dell'82%. La telecamera ora si muove,
+    quindi chi vuole guardare in fondo alza lo sguardo. Quello che segue e' il
+    conto vecchio, tenuto perche' spiega perche' le due soglie del test non
+    stanno piu' insieme. Con i binari a 54 mm bastavano
     45 gradi di inclinazione per vedere l'82% di una sagoma dietro quella
     davanti e tenere il 71% di scorcio. Portandoli a 26 mm, a 45 gradi ne
     restava visibile il **39%** e la fila davanti copriva anche il testo
