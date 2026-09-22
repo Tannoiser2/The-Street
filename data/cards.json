@@ -144,8 +144,7 @@
         "oro": 0,
         "cultura": 0
       },
-      "exhaustible": 0,
-      "effect_text": "Produce 1 pietra."
+      "exhaustible": 0
     },
     {
       "id": "ed_dolmen",
@@ -198,8 +197,7 @@
         "oro": 0,
         "cultura": 0
       },
-      "exhaustible": 0,
-      "effect_text": "Il suo Scavo vale solo se è Sotterrata: le pitture rupestri si scoprono scavando."
+      "exhaustible": 0
     },
     {
       "id": "ed_approdo",
@@ -225,8 +223,7 @@
         "oro": 0,
         "cultura": 0
       },
-      "exhaustible": 0,
-      "effect_text": "Produce 1 pietra."
+      "exhaustible": 0
     },
     {
       "id": "ed_menhir",
@@ -279,8 +276,7 @@
         "oro": 0,
         "cultura": 0
       },
-      "exhaustible": 0,
-      "effect_text": "Produce 1 pietra."
+      "exhaustible": 0
     },
     {
       "id": "ed_cava",
@@ -306,8 +302,7 @@
         "oro": 0,
         "cultura": 0
       },
-      "exhaustible": 4,
-      "effect_text": "Produce 2 pietra. Esauribile 4: dopo la quarta attivazione diventa rudere."
+      "exhaustible": 4
     },
     {
       "id": "ed_focolare_comune",
@@ -334,7 +329,17 @@
         "cultura": 0
       },
       "exhaustible": 0,
-      "effect_text": "Quartiere: +1 pietra quando abiti qui."
+      "effect_text": "Quartiere: +1 pietra quando abiti qui.",
+      "effects": [
+        {
+          "hook": "on_activate",
+          "op": "resource",
+          "pietra": 1,
+          "target": {
+            "is_self": true
+          }
+        }
+      ]
     },
     {
       "id": "ed_trappole_da_pesca",
@@ -360,8 +365,7 @@
         "oro": 0,
         "cultura": 0
       },
-      "exhaustible": 0,
-      "effect_text": "Produce 1 pietra."
+      "exhaustible": 0
     },
     {
       "id": "ed_circolo_di_pietre",
@@ -415,7 +419,18 @@
         "cultura": 0
       },
       "exhaustible": 0,
-      "effect_text": "Quartiere: +1 res ai tuoi edifici adiacenti."
+      "effect_text": "Quartiere: +1 res ai tuoi edifici adiacenti.",
+      "effects": [
+        {
+          "hook": "on_event",
+          "op": "resistance",
+          "value": 1,
+          "target": {
+            "owner": "self",
+            "adjacent_to_self": true
+          }
+        }
+      ]
     },
     {
       "id": "ed_tumulo_funerario",
@@ -442,8 +457,7 @@
         "oro": 0,
         "cultura": 0
       },
-      "exhaustible": 0,
-      "effect_text": "Doppia classe: conta come entrambe, nel bene e negli eventi."
+      "exhaustible": 0
     },
     {
       "id": "ed_teatro",
@@ -497,7 +511,30 @@
         "cultura": 0
       },
       "exhaustible": 0,
-      "effect_text": "Colossale: 2 slot adiacenti (3 pagando +1 pietra; in 2 giocatori il terzo slot è vietato), almeno uno con fiume. Eco: +2 PV (lampo) se ancora in piedi nel Moderno."
+      "effect_text": "Colossale: 2 slot adiacenti (3 pagando +1 pietra; in 2 giocatori il terzo slot è vietato), almeno uno con fiume. Eco: +2 PV (lampo) se ancora in piedi nel Moderno.",
+      "effects": [
+        {
+          "hook": "on_final_scoring",
+          "op": "vp",
+          "value": 2,
+          "condition": {
+            "op": "count_matching",
+            "min": 1,
+            "target": {
+              "is_self": true,
+              "state": [
+                "intatto"
+              ],
+              "buried": false
+            }
+          }
+        },
+        {
+          "hook": "on_build",
+          "op": "rule_override",
+          "name": "colossal"
+        }
+      ]
     },
     {
       "id": "ed_terme",
@@ -578,7 +615,18 @@
         "cultura": 0
       },
       "exhaustible": 0,
-      "effect_text": "Quartiere: +1 res ai tuoi edifici adiacenti."
+      "effect_text": "Quartiere: +1 res ai tuoi edifici adiacenti.",
+      "effects": [
+        {
+          "hook": "on_event",
+          "op": "resistance",
+          "value": 1,
+          "target": {
+            "owner": "self",
+            "adjacent_to_self": true
+          }
+        }
+      ]
     },
     {
       "id": "ed_tempio",
@@ -615,7 +663,7 @@
         "ingegneria"
       ],
       "terrain": "fiume",
-      "width": 1,
+      "width": 2,
       "cost": {
         "pietra": 3,
         "oro": 0
@@ -632,7 +680,18 @@
         "cultura": 0
       },
       "exhaustible": 0,
-      "effect_text": "Quartiere: +1 produzione agli edifici adiacenti."
+      "effect_text": "Quartiere: +1 produzione agli edifici adiacenti.",
+      "effects": [
+        {
+          "hook": "on_activate",
+          "op": "production_delta",
+          "value": 1,
+          "own_production": true,
+          "target": {
+            "adjacent_to_self": true
+          }
+        }
+      ]
     },
     {
       "id": "ed_emporio",
@@ -658,8 +717,7 @@
         "oro": 1,
         "cultura": 0
       },
-      "exhaustible": 0,
-      "effect_text": "Produce 1 oro."
+      "exhaustible": 0
     },
     {
       "id": "ed_insulae",
@@ -685,8 +743,7 @@
         "oro": 0,
         "cultura": 0
       },
-      "exhaustible": 0,
-      "effect_text": "Produce 1 pietra."
+      "exhaustible": 0
     },
     {
       "id": "ed_foro",
@@ -713,8 +770,7 @@
         "oro": 1,
         "cultura": 0
       },
-      "exhaustible": 0,
-      "effect_text": "Produce 1 oro."
+      "exhaustible": 0
     },
     {
       "id": "ed_anfiteatro",
@@ -741,7 +797,14 @@
         "cultura": 0
       },
       "exhaustible": 0,
-      "effect_text": "Colossale: occupa 2 slot adiacenti, si attiva da entrambe le colonne e conta come strato in entrambe. Produce 1 oro a ogni attivazione — il Colosseo vende i biglietti."
+      "effect_text": "Colossale: occupa 2 slot adiacenti, si attiva da entrambe le colonne e conta come strato in entrambe. Produce 1 oro a ogni attivazione — il Colosseo vende i biglietti.",
+      "effects": [
+        {
+          "hook": "on_build",
+          "op": "rule_override",
+          "name": "colossal"
+        }
+      ]
     },
     {
       "id": "ed_castrum",
@@ -768,7 +831,18 @@
         "cultura": 0
       },
       "exhaustible": 0,
-      "effect_text": "+1 res ai tuoi edifici in questa colonna."
+      "effect_text": "+1 res ai tuoi edifici in questa colonna.",
+      "effects": [
+        {
+          "hook": "on_event",
+          "op": "resistance",
+          "value": 1,
+          "target": {
+            "owner": "self",
+            "same_column_as_self": true
+          }
+        }
+      ]
     },
     {
       "id": "ed_borgo",
@@ -794,8 +868,7 @@
         "oro": 1,
         "cultura": 0
       },
-      "exhaustible": 0,
-      "effect_text": "Produce 1 oro."
+      "exhaustible": 0
     },
     {
       "id": "ed_mura",
@@ -822,7 +895,18 @@
         "cultura": 0
       },
       "exhaustible": 0,
-      "effect_text": "Quartiere: +1 res agli edifici adiacenti (anche altrui)."
+      "effect_text": "Quartiere: +1 res agli edifici adiacenti (anche altrui).",
+      "effects": [
+        {
+          "hook": "on_event",
+          "op": "resistance",
+          "value": 1,
+          "target": {
+            "owner": "any",
+            "adjacent_to_self": true
+          }
+        }
+      ]
     },
     {
       "id": "ed_cappella",
@@ -902,8 +986,7 @@
         "oro": 1,
         "cultura": 0
       },
-      "exhaustible": 0,
-      "effect_text": "Produce 1 oro."
+      "exhaustible": 0
     },
     {
       "id": "ed_mulino",
@@ -931,7 +1014,7 @@
         "cultura": 0
       },
       "exhaustible": 0,
-      "effect_text": "Requisito: la colonna è Pianura ed è adiacente a una colonna Fiume. Produce 2 oro."
+      "terrain_adjacent": "fiume"
     },
     {
       "id": "ed_chiesa",
@@ -959,7 +1042,7 @@
         "cultura": 0
       },
       "exhaustible": 0,
-      "effect_text": "Capienza potenziamenti: 2."
+      "upgrade_slots": 2
     },
     {
       "id": "ed_mercato",
@@ -985,8 +1068,7 @@
         "oro": 1,
         "cultura": 0
       },
-      "exhaustible": 0,
-      "effect_text": "Produce 1 oro + 1 pietra."
+      "exhaustible": 0
     },
     {
       "id": "ed_ospedale_dei_pellegrini",
@@ -1013,7 +1095,17 @@
         "cultura": 0
       },
       "exhaustible": 0,
-      "effect_text": "Quando abiti qui, +1 oro."
+      "effect_text": "Quando abiti qui, +1 oro.",
+      "effects": [
+        {
+          "hook": "on_activate",
+          "op": "resource",
+          "oro": 1,
+          "target": {
+            "is_self": true
+          }
+        }
+      ]
     },
     {
       "id": "ed_castello",
@@ -1039,8 +1131,7 @@
         "oro": 0,
         "cultura": 0
       },
-      "exhaustible": 0,
-      "effect_text": "Richiede livello 1+."
+      "exhaustible": 0
     },
     {
       "id": "ed_abbazia",
@@ -1068,7 +1159,7 @@
         "cultura": 0
       },
       "exhaustible": 0,
-      "effect_text": "Capienza potenziamenti: 2."
+      "upgrade_slots": 2
     },
     {
       "id": "ed_arsenale",
@@ -1095,7 +1186,21 @@
         "cultura": 0
       },
       "exhaustible": 0,
-      "effect_text": "Quartiere: i tuoi edifici Militari adiacenti +1 res."
+      "effect_text": "Quartiere: i tuoi edifici Militari adiacenti +1 res.",
+      "effects": [
+        {
+          "hook": "on_event",
+          "op": "resistance",
+          "value": 1,
+          "target": {
+            "owner": "self",
+            "class": [
+              "militare"
+            ],
+            "adjacent_to_self": true
+          }
+        }
+      ]
     },
     {
       "id": "ed_bottega_dartista",
@@ -1122,7 +1227,18 @@
         "cultura": 0
       },
       "exhaustible": 0,
-      "effect_text": "I tuoi potenziamenti costano 1 oro in meno."
+      "effect_text": "I tuoi potenziamenti costano 1 oro in meno.",
+      "effects": [
+        {
+          "hook": "on_build",
+          "op": "cost_delta",
+          "oro": -1,
+          "what": "upgrade",
+          "target": {
+            "owner": "self"
+          }
+        }
+      ]
     },
     {
       "id": "ed_giardino_allitaliana",
@@ -1203,7 +1319,25 @@
         "cultura": 0
       },
       "exhaustible": 0,
-      "effect_text": "Eco: +2 PV (lampo) se ancora in piedi a fine partita."
+      "effect_text": "Eco: +2 PV (lampo) se ancora in piedi a fine partita.",
+      "effects": [
+        {
+          "hook": "on_final_scoring",
+          "op": "vp",
+          "value": 2,
+          "condition": {
+            "op": "count_matching",
+            "min": 1,
+            "target": {
+              "is_self": true,
+              "state": [
+                "intatto"
+              ],
+              "buried": false
+            }
+          }
+        }
+      ]
     },
     {
       "id": "ed_banco",
@@ -1229,8 +1363,7 @@
         "oro": 1,
         "cultura": 0
       },
-      "exhaustible": 0,
-      "effect_text": "Produce 1 oro."
+      "exhaustible": 0
     },
     {
       "id": "ed_villa",
@@ -1283,8 +1416,7 @@
         "oro": 0,
         "cultura": 1
       },
-      "exhaustible": 0,
-      "effect_text": "Produce 1 cultura."
+      "exhaustible": 0
     },
     {
       "id": "ed_ponte_monumentale",
@@ -1294,7 +1426,7 @@
         "ingegneria"
       ],
       "terrain": "fiume",
-      "width": 1,
+      "width": 2,
       "cost": {
         "pietra": 2,
         "oro": 2
@@ -1338,7 +1470,7 @@
         "cultura": 0
       },
       "exhaustible": 0,
-      "effect_text": "Capienza potenziamenti: 2."
+      "upgrade_slots": 2
     },
     {
       "id": "ed_duomo",
@@ -1366,7 +1498,7 @@
         "cultura": 0
       },
       "exhaustible": 0,
-      "effect_text": "Capienza potenziamenti: 3. Richiede livello 2+."
+      "upgrade_slots": 3
     },
     {
       "id": "ed_fortezza_bastionata",
@@ -1393,8 +1525,7 @@
         "oro": 0,
         "cultura": 0
       },
-      "exhaustible": 0,
-      "effect_text": "Richiede livello 1+."
+      "exhaustible": 0
     },
     {
       "id": "ed_piazza_monumentale",
@@ -1421,7 +1552,19 @@
         "cultura": 0
       },
       "exhaustible": 0,
-      "effect_text": "A fine partita: +1 PV per tuo edificio in cima adiacente. Richiede livello 1+."
+      "effect_text": "A fine partita: +1 PV per tuo edificio in cima adiacente. Richiede livello 1+.",
+      "effects": [
+        {
+          "hook": "on_final_scoring",
+          "op": "vp_per",
+          "value": 1,
+          "target": {
+            "owner": "self",
+            "adjacent_to_self": true,
+            "is_top": true
+          }
+        }
+      ]
     },
     {
       "id": "ed_fondazione_darte",
@@ -1448,7 +1591,18 @@
         "cultura": 0
       },
       "exhaustible": 0,
-      "effect_text": "I tuoi potenziamenti valgono +1 PV."
+      "effect_text": "I tuoi potenziamenti valgono +1 PV.",
+      "effects": [
+        {
+          "hook": "on_final_scoring",
+          "op": "vp_per",
+          "value": 1,
+          "per": "upgrade",
+          "target": {
+            "owner": "self"
+          }
+        }
+      ]
     },
     {
       "id": "ed_condominio",
@@ -1502,7 +1656,24 @@
         "cultura": 0
       },
       "exhaustible": 0,
-      "effect_text": "Quartiere: +1 PV se adiacente a un edificio Cultura."
+      "effect_text": "Quartiere: +1 PV se adiacente a un edificio Cultura.",
+      "effects": [
+        {
+          "hook": "on_final_scoring",
+          "op": "vp",
+          "value": 1,
+          "condition": {
+            "op": "count_matching",
+            "min": 1,
+            "target": {
+              "adjacent_to_self": true,
+              "class": [
+                "cultura"
+              ]
+            }
+          }
+        }
+      ]
     },
     {
       "id": "ed_officina",
@@ -1528,8 +1699,7 @@
         "oro": 2,
         "cultura": 0
       },
-      "exhaustible": 0,
-      "effect_text": "Produce 2 oro."
+      "exhaustible": 0
     },
     {
       "id": "ed_monumento_ai_caduti",
@@ -1557,7 +1727,21 @@
         "cultura": 0
       },
       "exhaustible": 0,
-      "effect_text": "Sacrario: +1 PV per ogni altro tuo edificio Militare, in piedi o Sotterrato."
+      "effect_text": "Sacrario: +1 PV per ogni altro tuo edificio Militare, in piedi o Sotterrato.",
+      "effects": [
+        {
+          "hook": "on_final_scoring",
+          "op": "vp_per",
+          "value": 1,
+          "target": {
+            "owner": "self",
+            "class": [
+              "militare"
+            ],
+            "is_self": false
+          }
+        }
+      ]
     },
     {
       "id": "ed_museo",
@@ -1584,7 +1768,18 @@
         "cultura": 0
       },
       "exhaustible": 0,
-      "effect_text": "+2 PV per ogni edificio Sotterrato sotto di sé. Richiede livello 1+."
+      "effect_text": "+2 PV per ogni edificio Sotterrato sotto di sé. Richiede livello 1+.",
+      "effects": [
+        {
+          "hook": "on_final_scoring",
+          "op": "vp_per",
+          "value": 2,
+          "target": {
+            "buried": true,
+            "below_self": true
+          }
+        }
+      ]
     },
     {
       "id": "ed_grattacielo",
@@ -1611,7 +1806,29 @@
         "cultura": 0
       },
       "exhaustible": 0,
-      "effect_text": "Svettante: +1 PV per livello a cui è costruito. Quartiere: −1 PV agli edifici in cima adiacenti altrui, valutato a fine partita. Richiede livello 2+."
+      "effect_text": "Svettante: +1 PV per livello a cui è costruito. Quartiere: −1 PV agli edifici in cima adiacenti altrui, valutato a fine partita. Richiede livello 2+.",
+      "effects": [
+        {
+          "hook": "on_final_scoring",
+          "op": "vp_per",
+          "value": 1,
+          "per": "level",
+          "target": {
+            "is_self": true
+          }
+        },
+        {
+          "hook": "on_final_scoring",
+          "op": "vp_per",
+          "value": -1,
+          "to": "target_owner",
+          "target": {
+            "owner": "others",
+            "adjacent_to_self": true,
+            "is_top": true
+          }
+        }
+      ]
     },
     {
       "id": "ed_biblioteca",
@@ -1638,7 +1855,19 @@
         "cultura": 0
       },
       "exhaustible": 0,
-      "effect_text": "+1 PV per classe diversa fra i tuoi edifici in questa colonna, Sotterrati inclusi."
+      "effect_text": "+1 PV per classe diversa fra i tuoi edifici in questa colonna, Sotterrati inclusi.",
+      "effects": [
+        {
+          "hook": "on_final_scoring",
+          "op": "vp_per",
+          "value": 1,
+          "per": "distinct_class",
+          "target": {
+            "owner": "self",
+            "same_column_as_self": true
+          }
+        }
+      ]
     },
     {
       "id": "ed_ponte_in_acciaio",
@@ -1648,7 +1877,7 @@
         "ingegneria"
       ],
       "terrain": "fiume",
-      "width": 1,
+      "width": 2,
       "cost": {
         "pietra": 1,
         "oro": 3
@@ -1693,7 +1922,14 @@
         "cultura": 0
       },
       "exhaustible": 0,
-      "effect_text": "Colossale: 2 slot adiacenti, si attiva da entrambe le colonne. Produce 2 oro. Richiede livello 1+."
+      "effect_text": "Colossale: 2 slot adiacenti, si attiva da entrambe le colonne. Produce 2 oro. Richiede livello 1+.",
+      "effects": [
+        {
+          "hook": "on_build",
+          "op": "rule_override",
+          "name": "colossal"
+        }
+      ]
     },
     {
       "id": "ed_parco_archeologico",
@@ -1720,7 +1956,20 @@
         "cultura": 0
       },
       "exhaustible": 0,
-      "effect_text": "Finale: fino a 2 tuoi edifici non Sotterrati nelle colonne adiacenti valgono il loro Scavo come se lo fossero."
+      "effect_text": "Finale: fino a 2 tuoi edifici non Sotterrati nelle colonne adiacenti valgono il loro Scavo come se lo fossero.",
+      "effects": [
+        {
+          "hook": "on_final_scoring",
+          "op": "vp_per",
+          "value_from": "scavo",
+          "target": {
+            "owner": "self",
+            "buried": false,
+            "adjacent_to_self": true
+          },
+          "times": 2
+        }
+      ]
     },
     {
       "id": "ed_universita",
@@ -1748,7 +1997,18 @@
         "cultura": 0
       },
       "exhaustible": 0,
-      "effect_text": "+1 PV per ogni tuo personaggio reclutato. Richiede livello 1+."
+      "effect_text": "+1 PV per ogni tuo personaggio reclutato. Richiede livello 1+.",
+      "effects": [
+        {
+          "hook": "on_final_scoring",
+          "op": "vp_per",
+          "value": 1,
+          "per": "recruited_character",
+          "target": {
+            "owner": "self"
+          }
+        }
+      ]
     }
   ],
   "characters": [
@@ -1760,7 +2020,19 @@
       "is_dynasty": false,
       "timing": "misto",
       "imprint": false,
-      "effect_text": "Subito: +2 pietra. Per l'era: l'edificio protetto da questo lavoratore ha +1 res."
+      "effect_text": "Subito: +2 pietra. Per l'era: l'edificio protetto da questo lavoratore ha +1 res.",
+      "effects": [
+        {
+          "hook": "on_acquire",
+          "op": "resource",
+          "pietra": 2
+        },
+        {
+          "hook": "on_acquire",
+          "op": "protection_delta",
+          "value": 1
+        }
+      ]
     },
     {
       "id": "pe_sciamano",
@@ -1770,7 +2042,21 @@
       "is_dynasty": false,
       "timing": "era",
       "imprint": false,
-      "effect_text": "Per l'era: i tuoi edifici Religione hanno +1 res."
+      "effect_text": "Per l'era: i tuoi edifici Religione hanno +1 res.",
+      "effects": [
+        {
+          "hook": "on_event",
+          "op": "resistance",
+          "value": 1,
+          "duration": "era",
+          "target": {
+            "owner": "self",
+            "class": [
+              "religione"
+            ]
+          }
+        }
+      ]
     },
     {
       "id": "pe_mercante_di_ossidiana",
@@ -1780,7 +2066,22 @@
       "is_dynasty": false,
       "timing": "misto",
       "imprint": false,
-      "effect_text": "Subito: +1 oro. Per l'era: fino a 2 scambi pietra↔oro alla pari."
+      "effect_text": "Subito: +1 oro. Per l'era: fino a 2 scambi pietra↔oro alla pari.",
+      "effects": [
+        {
+          "hook": "on_acquire",
+          "op": "resource",
+          "pietra": 0,
+          "oro": 1
+        },
+        {
+          "hook": "on_activate",
+          "op": "rule_override",
+          "name": "resource_exchange",
+          "duration": "era",
+          "times": 2
+        }
+      ]
     },
     {
       "id": "pe_incisore",
@@ -1790,7 +2091,18 @@
       "is_dynasty": false,
       "timing": "subito",
       "imprint": true,
-      "effect_text": "Subito — Impronta: infila questa carta sotto un tuo edificio; Scavo +3 permanente. Max 1 impronta per edificio."
+      "effect_text": "Subito — Impronta: infila questa carta sotto un tuo edificio; Scavo +3 permanente. Max 1 impronta per edificio.",
+      "effects": [
+        {
+          "hook": "on_acquire",
+          "op": "scavo_delta",
+          "value": 3,
+          "duration": "permanent",
+          "target": {
+            "is_self": true
+          }
+        }
+      ]
     },
     {
       "id": "pe_costruttore_di_zattere",
@@ -1800,7 +2112,27 @@
       "is_dynasty": false,
       "timing": "misto",
       "imprint": false,
-      "effect_text": "Subito: +1 pietra. Per l'era: −1 pietra alle costruzioni su slot con fiume."
+      "effect_text": "Subito: +1 pietra. Per l'era: −1 pietra alle costruzioni su slot con fiume.",
+      "effects": [
+        {
+          "hook": "on_acquire",
+          "op": "resource",
+          "pietra": 1,
+          "oro": 0
+        },
+        {
+          "hook": "on_build",
+          "op": "cost_delta",
+          "pietra": -1,
+          "what": "building",
+          "duration": "era",
+          "target": {
+            "terrain": [
+              "fiume"
+            ]
+          }
+        }
+      ]
     },
     {
       "id": "pe_architetto",
@@ -1810,7 +2142,27 @@
       "is_dynasty": false,
       "timing": "misto",
       "imprint": false,
-      "effect_text": "Subito: +1 pietra. Per l'era: −1 pietra agli edifici da 2 o 3 caselle."
+      "effect_text": "Subito: +1 pietra. Per l'era: −1 pietra agli edifici da 2 o 3 caselle.",
+      "effects": [
+        {
+          "hook": "on_acquire",
+          "op": "resource",
+          "pietra": 1,
+          "oro": 0
+        },
+        {
+          "hook": "on_build",
+          "op": "cost_delta",
+          "pietra": -1,
+          "what": "building",
+          "duration": "era",
+          "target": {
+            "width": {
+              "min": 2
+            }
+          }
+        }
+      ]
     },
     {
       "id": "pe_legionario",
@@ -1820,7 +2172,23 @@
       "is_dynasty": false,
       "timing": "era",
       "imprint": false,
-      "effect_text": "Per l'era: la sua protezione vale +3 invece di +2; se l'edificio protetto sopravvive all'evento, +1 cultura."
+      "effect_text": "Per l'era: la sua protezione vale +3 invece di +2; se l'edificio protetto sopravvive all'evento, +1 cultura.",
+      "effects": [
+        {
+          "hook": "on_acquire",
+          "op": "protection_delta",
+          "value": 1
+        },
+        {
+          "hook": "on_era_end",
+          "op": "vp",
+          "value": 1,
+          "condition": {
+            "op": "protected_survived",
+            "min": 1
+          }
+        }
+      ]
     },
     {
       "id": "pe_sacerdotessa",
@@ -1830,7 +2198,28 @@
       "is_dynasty": false,
       "timing": "misto",
       "imprint": false,
-      "effect_text": "Subito: +1 oro. Per l'era: il primo edificio Religione che costruisci ti rimborsa 1 oro."
+      "effect_text": "Subito: +1 oro. Per l'era: il primo edificio Religione che costruisci ti rimborsa 1 oro.",
+      "effects": [
+        {
+          "hook": "on_acquire",
+          "op": "resource",
+          "pietra": 0,
+          "oro": 1
+        },
+        {
+          "hook": "on_build",
+          "op": "resource",
+          "oro": 1,
+          "duration": "era",
+          "times": 1,
+          "target": {
+            "owner": "self",
+            "class": [
+              "religione"
+            ]
+          }
+        }
+      ]
     },
     {
       "id": "pe_console",
@@ -1840,7 +2229,28 @@
       "is_dynasty": false,
       "timing": "misto",
       "imprint": false,
-      "effect_text": "Subito: +1 oro. Per l'era: quando attivi una colonna con un tuo strato Civico, +1 oro (max 2)."
+      "effect_text": "Subito: +1 oro. Per l'era: quando attivi una colonna con un tuo strato Civico, +1 oro (max 2).",
+      "effects": [
+        {
+          "hook": "on_acquire",
+          "op": "resource",
+          "pietra": 0,
+          "oro": 1
+        },
+        {
+          "hook": "on_activate",
+          "op": "resource",
+          "oro": 1,
+          "duration": "era",
+          "cap": 2,
+          "target": {
+            "owner": "self",
+            "class": [
+              "civico"
+            ]
+          }
+        }
+      ]
     },
     {
       "id": "pe_retore",
@@ -1850,7 +2260,21 @@
       "is_dynasty": false,
       "timing": "subito",
       "imprint": true,
-      "effect_text": "Subito — Impronta: infila questa carta sotto un tuo edificio Cultura; Scavo +5 permanente. Max 1 impronta per edificio."
+      "effect_text": "Subito — Impronta: infila questa carta sotto un tuo edificio Cultura; Scavo +5 permanente. Max 1 impronta per edificio.",
+      "effects": [
+        {
+          "hook": "on_acquire",
+          "op": "scavo_delta",
+          "value": 5,
+          "duration": "permanent",
+          "target": {
+            "is_self": true,
+            "class": [
+              "cultura"
+            ]
+          }
+        }
+      ]
     },
     {
       "id": "pe_mastro_costruttore",
@@ -1860,7 +2284,28 @@
       "is_dynasty": false,
       "timing": "misto",
       "imprint": false,
-      "effect_text": "Subito: +1 pietra. Per l'era: puoi costruire in qualsiasi slot; la tua prima costruzione successiva ha +1 res permanente."
+      "effect_text": "Subito: +1 pietra. Per l'era: puoi costruire in qualsiasi slot; la tua prima costruzione successiva ha +1 res permanente.",
+      "effects": [
+        {
+          "hook": "on_acquire",
+          "op": "resource",
+          "pietra": 1,
+          "oro": 0
+        },
+        {
+          "hook": "on_build",
+          "op": "rule_override",
+          "name": "ignore_terrain_requirement",
+          "duration": "era"
+        },
+        {
+          "hook": "on_build",
+          "op": "resistance",
+          "value": 1,
+          "duration": "permanent",
+          "times": 1
+        }
+      ]
     },
     {
       "id": "pe_vescovo",
@@ -1870,7 +2315,33 @@
       "is_dynasty": false,
       "timing": "misto",
       "imprint": false,
-      "effect_text": "Subito: il prossimo potenziamento su un tuo edificio Religione in quest'era costa 0. Per l'era: capienza dei tuoi Religione +1."
+      "effect_text": "Subito: il prossimo potenziamento su un tuo edificio Religione in quest'era costa 0. Per l'era: capienza dei tuoi Religione +1.",
+      "effects": [
+        {
+          "hook": "on_build",
+          "op": "rule_override",
+          "name": "free_upgrade_of_class",
+          "times": 1,
+          "target": {
+            "owner": "self",
+            "class": [
+              "religione"
+            ]
+          }
+        },
+        {
+          "hook": "on_build",
+          "op": "upgrade_slots_delta",
+          "value": 1,
+          "duration": "era",
+          "target": {
+            "owner": "self",
+            "class": [
+              "religione"
+            ]
+          }
+        }
+      ]
     },
     {
       "id": "pe_cavaliere",
@@ -1880,7 +2351,23 @@
       "is_dynasty": false,
       "timing": "era",
       "imprint": false,
-      "effect_text": "Per l'era: la sua protezione vale +4 invece di +2; se l'edificio protetto sopravvive, +1 cultura."
+      "effect_text": "Per l'era: la sua protezione vale +4 invece di +2; se l'edificio protetto sopravvive, +1 cultura.",
+      "effects": [
+        {
+          "hook": "on_acquire",
+          "op": "protection_delta",
+          "value": 2
+        },
+        {
+          "hook": "on_era_end",
+          "op": "vp",
+          "value": 1,
+          "condition": {
+            "op": "protected_survived",
+            "min": 1
+          }
+        }
+      ]
     },
     {
       "id": "pe_mercante",
@@ -1890,7 +2377,26 @@
       "is_dynasty": false,
       "timing": "misto",
       "imprint": false,
-      "effect_text": "Subito: +1 oro. Per l'era: quando un avversario attiva una colonna con tuoi strati visibili, +1 oro (max 2)."
+      "effect_text": "Subito: +1 oro. Per l'era: quando un avversario attiva una colonna con tuoi strati visibili, +1 oro (max 2).",
+      "effects": [
+        {
+          "hook": "on_acquire",
+          "op": "resource",
+          "pietra": 0,
+          "oro": 1
+        },
+        {
+          "hook": "on_activate",
+          "op": "resource",
+          "oro": 1,
+          "duration": "era",
+          "cap": 2,
+          "target": {
+            "owner": "self"
+          },
+          "when": "other_activates"
+        }
+      ]
     },
     {
       "id": "pe_cronista",
@@ -1900,7 +2406,26 @@
       "is_dynasty": false,
       "timing": "misto",
       "imprint": false,
-      "effect_text": "Subito: se la colonna contiene edifici di 3+ ere diverse, +1 cultura. Per l'era: quando attivi una colonna che contiene edifici di 3+ ere diverse (in qualsiasi condizione), +1 cultura (max 2 ulteriori)."
+      "effect_text": "Subito: se la colonna contiene edifici di 3+ ere diverse, +1 cultura. Per l'era: quando attivi una colonna che contiene edifici di 3+ ere diverse (in qualsiasi condizione), +1 cultura (max 2 ulteriori).",
+      "effects": [
+        {
+          "hook": "on_acquire",
+          "op": "vp",
+          "value": 1
+        },
+        {
+          "hook": "on_activate",
+          "op": "vp",
+          "value": 1,
+          "duration": "era",
+          "cap": 2,
+          "target": {
+            "column": {
+              "min_eras": 3
+            }
+          }
+        }
+      ]
     },
     {
       "id": "pe_mecenate",
@@ -1910,7 +2435,21 @@
       "is_dynasty": false,
       "timing": "misto",
       "imprint": false,
-      "effect_text": "Subito: +1 cultura. Per l'era: i potenziamenti Arte che acquisti valgono +1 PV."
+      "effect_text": "Subito: +1 cultura. Per l'era: i potenziamenti Arte che acquisti valgono +1 PV.",
+      "effects": [
+        {
+          "hook": "on_acquire",
+          "op": "vp",
+          "value": 1
+        },
+        {
+          "hook": "on_acquire",
+          "op": "rule_override",
+          "name": "arte_vp_bonus",
+          "value": 1,
+          "duration": "era"
+        }
+      ]
     },
     {
       "id": "pe_banchiere",
@@ -1920,7 +2459,15 @@
       "is_dynasty": false,
       "timing": "subito",
       "imprint": false,
-      "effect_text": "Subito: +3 oro."
+      "effect_text": "Subito: +3 oro.",
+      "effects": [
+        {
+          "hook": "on_acquire",
+          "op": "resource",
+          "pietra": 0,
+          "oro": 3
+        }
+      ]
     },
     {
       "id": "pe_ingegnere_militare",
@@ -1930,7 +2477,34 @@
       "is_dynasty": false,
       "timing": "era",
       "imprint": false,
-      "effect_text": "Per l'era: i tuoi edifici Militari hanno +1 res; uno a tua scelta +2."
+      "effect_text": "Per l'era: i tuoi edifici Militari hanno +1 res; uno a tua scelta +2.",
+      "effects": [
+        {
+          "hook": "on_event",
+          "op": "resistance",
+          "value": 1,
+          "duration": "era",
+          "target": {
+            "owner": "self",
+            "class": [
+              "militare"
+            ]
+          }
+        },
+        {
+          "hook": "on_event",
+          "op": "resistance",
+          "value": 1,
+          "duration": "era",
+          "designated": true,
+          "target": {
+            "owner": "self",
+            "class": [
+              "militare"
+            ]
+          }
+        }
+      ]
     },
     {
       "id": "pe_cardinale",
@@ -1940,7 +2514,27 @@
       "is_dynasty": false,
       "timing": "misto",
       "imprint": false,
-      "effect_text": "Subito: +1 oro. Per l'era: −1 oro agli edifici Religione (minimo 0)."
+      "effect_text": "Subito: +1 oro. Per l'era: −1 oro agli edifici Religione (minimo 0).",
+      "effects": [
+        {
+          "hook": "on_acquire",
+          "op": "resource",
+          "pietra": 0,
+          "oro": 1
+        },
+        {
+          "hook": "on_build",
+          "op": "cost_delta",
+          "oro": -1,
+          "what": "building",
+          "duration": "era",
+          "target": {
+            "class": [
+              "religione"
+            ]
+          }
+        }
+      ]
     },
     {
       "id": "pe_artista_di_corte",
@@ -1950,7 +2544,23 @@
       "is_dynasty": false,
       "timing": "misto",
       "imprint": false,
-      "effect_text": "Subito: +1 cultura. Per l'era: il primo potenziamento che piazzi su un edificio altrui è gratis e incassi 1 oro dal proprietario."
+      "effect_text": "Subito: +1 cultura. Per l'era: il primo potenziamento che piazzi su un edificio altrui è gratis e incassi 1 oro dal proprietario.",
+      "effects": [
+        {
+          "hook": "on_acquire",
+          "op": "vp",
+          "value": 1
+        },
+        {
+          "hook": "on_build",
+          "op": "rule_override",
+          "name": "upgrade_on_others_building",
+          "value": 1,
+          "oro": 1,
+          "duration": "era",
+          "times": 1
+        }
+      ]
     },
     {
       "id": "pe_archeologo",
@@ -1960,7 +2570,35 @@
       "is_dynasty": false,
       "timing": "finale",
       "imprint": false,
-      "effect_text": "Finale: scegli una tua Rovina non Sotterrata: vale il suo Scavo. Se hai già 3+ edifici Sotterrati, +1 PV."
+      "effect_text": "Finale: scegli una tua Rovina non Sotterrata: vale il suo Scavo. Se hai già 3+ edifici Sotterrati, +1 PV.",
+      "effects": [
+        {
+          "hook": "on_final_scoring",
+          "op": "vp_per",
+          "value_from": "scavo",
+          "times": 1,
+          "target": {
+            "owner": "self",
+            "state": [
+              "rovina"
+            ],
+            "buried": false
+          }
+        },
+        {
+          "hook": "on_final_scoring",
+          "op": "vp",
+          "value": 1,
+          "condition": {
+            "op": "count_matching",
+            "min": 3,
+            "target": {
+              "owner": "self",
+              "buried": true
+            }
+          }
+        }
+      ]
     },
     {
       "id": "pe_urbanista",
@@ -1970,7 +2608,21 @@
       "is_dynasty": false,
       "timing": "finale",
       "imprint": false,
-      "effect_text": "Finale: +1 PV per ogni tuo strato in catene da 4+ ere (max +4)."
+      "effect_text": "Finale: +1 PV per ogni tuo strato in catene da 4+ ere (max +4).",
+      "effects": [
+        {
+          "hook": "on_final_scoring",
+          "op": "vp_per",
+          "value": 1,
+          "cap": 4,
+          "target": {
+            "owner": "self",
+            "column": {
+              "min_eras": 4
+            }
+          }
+        }
+      ]
     },
     {
       "id": "pe_industriale",
@@ -1980,7 +2632,22 @@
       "is_dynasty": false,
       "timing": "misto",
       "imprint": false,
-      "effect_text": "Subito: +2 oro. Per l'era: le tue prime 2 produzioni di oro danno +1."
+      "effect_text": "Subito: +2 oro. Per l'era: le tue prime 2 produzioni di oro danno +1.",
+      "effects": [
+        {
+          "hook": "on_acquire",
+          "op": "resource",
+          "pietra": 0,
+          "oro": 2
+        },
+        {
+          "hook": "on_activate",
+          "op": "production_delta",
+          "oro": 1,
+          "duration": "era",
+          "times": 2
+        }
+      ]
     },
     {
       "id": "pe_soprintendente",
@@ -1990,7 +2657,19 @@
       "is_dynasty": false,
       "timing": "finale",
       "imprint": false,
-      "effect_text": "Finale: fino a 3 tuoi edifici Sotterrati hanno Scavo +2."
+      "effect_text": "Finale: fino a 3 tuoi edifici Sotterrati hanno Scavo +2.",
+      "effects": [
+        {
+          "hook": "on_final_scoring",
+          "op": "scavo_delta",
+          "value": 2,
+          "target": {
+            "owner": "self",
+            "buried": true
+          },
+          "times": 3
+        }
+      ]
     },
     {
       "id": "pe_veterano",
@@ -2000,7 +2679,24 @@
       "is_dynasty": false,
       "timing": "finale",
       "imprint": false,
-      "effect_text": "Finale: +1 PV per ogni tuo edificio Militare in piedi (max +4)."
+      "effect_text": "Finale: +1 PV per ogni tuo edificio Militare in piedi (max +4).",
+      "effects": [
+        {
+          "hook": "on_final_scoring",
+          "op": "vp_per",
+          "value": 1,
+          "cap": 4,
+          "target": {
+            "owner": "self",
+            "class": [
+              "militare"
+            ],
+            "state": [
+              "intatto"
+            ]
+          }
+        }
+      ]
     },
     {
       "id": "pe_dinastia",
@@ -2042,7 +2738,23 @@
         "oro": 1
       },
       "family": "arte",
-      "effect_text": "Arte: +1 PV. Scavo dell'edificio +2."
+      "effect_text": "Arte: +1 PV. Scavo dell'edificio +2.",
+      "effects": [
+        {
+          "hook": "on_acquire",
+          "op": "vp",
+          "value": 1
+        },
+        {
+          "hook": "on_acquire",
+          "op": "scavo_delta",
+          "value": 2,
+          "duration": "permanent",
+          "target": {
+            "is_self": true
+          }
+        }
+      ]
     },
     {
       "id": "po_palizzata",
@@ -2053,7 +2765,18 @@
         "oro": 1
       },
       "family": "struttura",
-      "effect_text": "Struttura: +1 res."
+      "effect_text": "Struttura: +1 res.",
+      "effects": [
+        {
+          "hook": "on_acquire",
+          "op": "resistance",
+          "value": 1,
+          "duration": "permanent",
+          "target": {
+            "is_self": true
+          }
+        }
+      ]
     },
     {
       "id": "po_idolo",
@@ -2064,7 +2787,29 @@
         "oro": 1
       },
       "family": "arte",
-      "effect_text": "Arte: +1 PV (+1 extra su edificio Religione)."
+      "effect_text": "Arte: +1 PV (+1 extra su edificio Religione).",
+      "effects": [
+        {
+          "hook": "on_acquire",
+          "op": "vp",
+          "value": 1
+        },
+        {
+          "hook": "on_acquire",
+          "op": "vp",
+          "value": 1,
+          "condition": {
+            "op": "count_matching",
+            "min": 1,
+            "target": {
+              "is_self": true,
+              "class": [
+                "religione"
+              ]
+            }
+          }
+        }
+      ]
     },
     {
       "id": "po_granaio_comune",
@@ -2075,7 +2820,17 @@
         "oro": 1
       },
       "family": "altro",
-      "effect_text": "Quando abiti questo edificio, +1 pietra."
+      "effect_text": "Quando abiti questo edificio, +1 pietra.",
+      "effects": [
+        {
+          "hook": "on_activate",
+          "op": "resource",
+          "pietra": 1,
+          "target": {
+            "is_self": true
+          }
+        }
+      ]
     },
     {
       "id": "po_fondamenta_in_pietra",
@@ -2086,7 +2841,18 @@
         "oro": 1
       },
       "family": "struttura",
-      "effect_text": "Struttura: +1 res."
+      "effect_text": "Struttura: +1 res.",
+      "effects": [
+        {
+          "hook": "on_acquire",
+          "op": "resistance",
+          "value": 1,
+          "duration": "permanent",
+          "target": {
+            "is_self": true
+          }
+        }
+      ]
     },
     {
       "id": "po_statua",
@@ -2097,7 +2863,14 @@
         "oro": 1
       },
       "family": "arte",
-      "effect_text": "Arte: +2 PV."
+      "effect_text": "Arte: +2 PV.",
+      "effects": [
+        {
+          "hook": "on_acquire",
+          "op": "vp",
+          "value": 2
+        }
+      ]
     },
     {
       "id": "po_altare",
@@ -2108,7 +2881,23 @@
         "oro": 1
       },
       "family": "arte",
-      "effect_text": "Arte: +1 PV. Scavo +2."
+      "effect_text": "Arte: +1 PV. Scavo +2.",
+      "effects": [
+        {
+          "hook": "on_acquire",
+          "op": "vp",
+          "value": 1
+        },
+        {
+          "hook": "on_acquire",
+          "op": "scavo_delta",
+          "value": 2,
+          "duration": "permanent",
+          "target": {
+            "is_self": true
+          }
+        }
+      ]
     },
     {
       "id": "po_bastioni",
@@ -2119,7 +2908,18 @@
         "oro": 1
       },
       "family": "struttura",
-      "effect_text": "Struttura: +1 res."
+      "effect_text": "Struttura: +1 res.",
+      "effects": [
+        {
+          "hook": "on_acquire",
+          "op": "resistance",
+          "value": 1,
+          "duration": "permanent",
+          "target": {
+            "is_self": true
+          }
+        }
+      ]
     },
     {
       "id": "po_banchina",
@@ -2130,7 +2930,27 @@
         "oro": 1
       },
       "family": "altro",
-      "effect_text": "Solo su slot fiume: quando abiti qui, +1 oro."
+      "effect_text": "Solo su slot fiume: quando abiti qui, +1 oro.",
+      "effects": [
+        {
+          "hook": "on_activate",
+          "op": "resource",
+          "oro": 1,
+          "target": {
+            "is_self": true
+          },
+          "condition": {
+            "op": "count_matching",
+            "min": 1,
+            "target": {
+              "is_self": true,
+              "terrain": [
+                "fiume"
+              ]
+            }
+          }
+        }
+      ]
     },
     {
       "id": "po_iscrizione",
@@ -2141,7 +2961,18 @@
         "oro": 1
       },
       "family": "altro",
-      "effect_text": "Scavo dell'edificio +2."
+      "effect_text": "Scavo dell'edificio +2.",
+      "effects": [
+        {
+          "hook": "on_acquire",
+          "op": "scavo_delta",
+          "value": 2,
+          "duration": "permanent",
+          "target": {
+            "is_self": true
+          }
+        }
+      ]
     },
     {
       "id": "po_contrafforte",
@@ -2152,7 +2983,18 @@
         "oro": 1
       },
       "family": "struttura",
-      "effect_text": "Struttura: +1 res."
+      "effect_text": "Struttura: +1 res.",
+      "effects": [
+        {
+          "hook": "on_acquire",
+          "op": "resistance",
+          "value": 1,
+          "duration": "permanent",
+          "target": {
+            "is_self": true
+          }
+        }
+      ]
     },
     {
       "id": "po_campanile",
@@ -2163,7 +3005,23 @@
         "oro": 1
       },
       "family": "altro",
-      "effect_text": "Ibrido: +1 PV e +1 res."
+      "effect_text": "Ibrido: +1 PV e +1 res.",
+      "effects": [
+        {
+          "hook": "on_acquire",
+          "op": "vp",
+          "value": 1
+        },
+        {
+          "hook": "on_acquire",
+          "op": "resistance",
+          "value": 1,
+          "duration": "permanent",
+          "target": {
+            "is_self": true
+          }
+        }
+      ]
     },
     {
       "id": "po_merlatura",
@@ -2174,7 +3032,29 @@
         "oro": 1
       },
       "family": "struttura",
-      "effect_text": "Struttura: +1 res. L'edificio conta anche come Militare."
+      "effect_text": "Struttura: +1 res. L'edificio conta anche come Militare.",
+      "effects": [
+        {
+          "hook": "on_acquire",
+          "op": "resistance",
+          "value": 1,
+          "duration": "permanent",
+          "target": {
+            "is_self": true
+          }
+        },
+        {
+          "hook": "on_acquire",
+          "op": "rule_override",
+          "name": "counts_as_class",
+          "target": {
+            "is_self": true
+          },
+          "adds_class": [
+            "militare"
+          ]
+        }
+      ]
     },
     {
       "id": "po_stalli_mercantili",
@@ -2185,7 +3065,18 @@
         "oro": 1
       },
       "family": "altro",
-      "effect_text": "L'affitto incassato da questo edificio è +1."
+      "effect_text": "L'affitto incassato da questo edificio è +1.",
+      "effects": [
+        {
+          "hook": "on_acquire",
+          "op": "rendita_delta",
+          "value": 1,
+          "duration": "permanent",
+          "target": {
+            "is_self": true
+          }
+        }
+      ]
     },
     {
       "id": "po_reliquia",
@@ -2196,7 +3087,29 @@
         "oro": 1
       },
       "family": "arte",
-      "effect_text": "Arte: +2 PV su edificio Religione, altrimenti +1."
+      "effect_text": "Arte: +2 PV su edificio Religione, altrimenti +1.",
+      "effects": [
+        {
+          "hook": "on_acquire",
+          "op": "vp",
+          "value": 1
+        },
+        {
+          "hook": "on_acquire",
+          "op": "vp",
+          "value": 1,
+          "condition": {
+            "op": "count_matching",
+            "min": 1,
+            "target": {
+              "is_self": true,
+              "class": [
+                "religione"
+              ]
+            }
+          }
+        }
+      ]
     },
     {
       "id": "po_opera_darte",
@@ -2207,7 +3120,14 @@
         "oro": 2
       },
       "family": "arte",
-      "effect_text": "Arte: +3 PV."
+      "effect_text": "Arte: +3 PV.",
+      "effects": [
+        {
+          "hook": "on_acquire",
+          "op": "vp",
+          "value": 3
+        }
+      ]
     },
     {
       "id": "po_affreschi",
@@ -2218,7 +3138,14 @@
         "oro": 2
       },
       "family": "arte",
-      "effect_text": "Arte: +2 PV."
+      "effect_text": "Arte: +2 PV.",
+      "effects": [
+        {
+          "hook": "on_acquire",
+          "op": "vp",
+          "value": 2
+        }
+      ]
     },
     {
       "id": "po_cupola",
@@ -2229,7 +3156,23 @@
         "oro": 2
       },
       "family": "altro",
-      "effect_text": "Ibrido: +2 PV e +1 res."
+      "effect_text": "Ibrido: +2 PV e +1 res.",
+      "effects": [
+        {
+          "hook": "on_acquire",
+          "op": "vp",
+          "value": 2
+        },
+        {
+          "hook": "on_acquire",
+          "op": "resistance",
+          "value": 1,
+          "duration": "permanent",
+          "target": {
+            "is_self": true
+          }
+        }
+      ]
     },
     {
       "id": "po_giardino_pensile",
@@ -2240,7 +3183,14 @@
         "oro": 2
       },
       "family": "arte",
-      "effect_text": "Arte: +2 PV."
+      "effect_text": "Arte: +2 PV.",
+      "effects": [
+        {
+          "hook": "on_acquire",
+          "op": "vp",
+          "value": 2
+        }
+      ]
     },
     {
       "id": "po_cannoniere",
@@ -2251,7 +3201,37 @@
         "oro": 2
       },
       "family": "struttura",
-      "effect_text": "Struttura: +1 res (+2 su edificio Militare)."
+      "effect_text": "Struttura: +1 res (+2 su edificio Militare).",
+      "effects": [
+        {
+          "hook": "on_acquire",
+          "op": "resistance",
+          "value": 1,
+          "duration": "permanent",
+          "target": {
+            "is_self": true
+          }
+        },
+        {
+          "hook": "on_acquire",
+          "op": "resistance",
+          "value": 1,
+          "duration": "permanent",
+          "target": {
+            "is_self": true
+          },
+          "condition": {
+            "op": "count_matching",
+            "min": 1,
+            "target": {
+              "is_self": true,
+              "class": [
+                "militare"
+              ]
+            }
+          }
+        }
+      ]
     },
     {
       "id": "po_installazione",
@@ -2262,7 +3242,14 @@
         "oro": 2
       },
       "family": "arte",
-      "effect_text": "Arte: +3 PV."
+      "effect_text": "Arte: +3 PV.",
+      "effects": [
+        {
+          "hook": "on_acquire",
+          "op": "vp",
+          "value": 3
+        }
+      ]
     },
     {
       "id": "po_targa_storica",
@@ -2273,7 +3260,18 @@
         "oro": 2
       },
       "family": "altro",
-      "effect_text": "Finale: +2 Scavo a ogni edificio Sotterrato sotto questo edificio."
+      "effect_text": "Finale: +2 Scavo a ogni edificio Sotterrato sotto questo edificio.",
+      "effects": [
+        {
+          "hook": "on_final_scoring",
+          "op": "scavo_delta",
+          "value": 2,
+          "target": {
+            "buried": true,
+            "below_self": true
+          }
+        }
+      ]
     },
     {
       "id": "po_ascensore_panoramico",
@@ -2284,7 +3282,14 @@
         "oro": 2
       },
       "family": "altro",
-      "effect_text": "+2 PV."
+      "effect_text": "+2 PV.",
+      "effects": [
+        {
+          "hook": "on_acquire",
+          "op": "vp",
+          "value": 2
+        }
+      ]
     },
     {
       "id": "po_boutique",
@@ -2295,7 +3300,17 @@
         "oro": 2
       },
       "family": "altro",
-      "effect_text": "Quando abiti questo edificio, +2 oro."
+      "effect_text": "Quando abiti questo edificio, +2 oro.",
+      "effects": [
+        {
+          "hook": "on_activate",
+          "op": "resource",
+          "oro": 2,
+          "target": {
+            "is_self": true
+          }
+        }
+      ]
     },
     {
       "id": "po_memoriale",
@@ -2306,7 +3321,14 @@
         "oro": 2
       },
       "family": "altro",
-      "effect_text": "+2 PV."
+      "effect_text": "+2 PV.",
+      "effects": [
+        {
+          "hook": "on_acquire",
+          "op": "vp",
+          "value": 2
+        }
+      ]
     }
   ],
   "events": [
@@ -2317,7 +3339,19 @@
       "force": 2,
       "severity": "lieve",
       "kind": "geografico",
-      "effect_text": "Forza 2. Edifici su colonne fiume: −1 res."
+      "effect_text": "Forza 2. Edifici su colonne fiume: −1 res.",
+      "effects": [
+        {
+          "hook": "on_event",
+          "op": "resistance",
+          "value": -1,
+          "target": {
+            "terrain": [
+              "fiume"
+            ]
+          }
+        }
+      ]
     },
     {
       "id": "ev_eta_degli_spiriti",
@@ -2326,7 +3360,29 @@
       "force": 2,
       "severity": "lieve",
       "kind": "classe",
-      "effect_text": "Forza 2. Religione +1 res · Commercio −1 res."
+      "effect_text": "Forza 2. Religione +1 res · Commercio −1 res.",
+      "effects": [
+        {
+          "hook": "on_event",
+          "op": "resistance",
+          "value": 1,
+          "target": {
+            "class": [
+              "religione"
+            ]
+          }
+        },
+        {
+          "hook": "on_event",
+          "op": "resistance",
+          "value": -1,
+          "target": {
+            "class": [
+              "commercio"
+            ]
+          }
+        }
+      ]
     },
     {
       "id": "ev_migrazione",
@@ -2335,7 +3391,17 @@
       "force": 2,
       "severity": "lieve",
       "kind": "comportamentale",
-      "effect_text": "Forza 2. Edifici non protetti: −1 res extra."
+      "effect_text": "Forza 2. Edifici non protetti: −1 res extra.",
+      "effects": [
+        {
+          "hook": "on_event",
+          "op": "resistance",
+          "value": -1,
+          "target": {
+            "protected": false
+          }
+        }
+      ]
     },
     {
       "id": "ev_inverno_lungo",
@@ -2344,7 +3410,28 @@
       "force": 2,
       "severity": "grave",
       "kind": "geografico",
-      "effect_text": "Forza 2. Edifici su bosco e collina: −1 res. Tutti i giocatori perdono 1 pietra."
+      "effect_text": "Forza 2. Edifici su bosco e collina: −1 res. Tutti i giocatori perdono 1 pietra.",
+      "effects": [
+        {
+          "hook": "on_event",
+          "op": "resistance",
+          "value": -1,
+          "target": {
+            "terrain": [
+              "bosco",
+              "collina"
+            ]
+          }
+        },
+        {
+          "hook": "on_era_end",
+          "op": "resource",
+          "pietra": -1,
+          "target": {
+            "owner": "any"
+          }
+        }
+      ]
     },
     {
       "id": "ev_faide_tribali",
@@ -2353,7 +3440,29 @@
       "force": 2,
       "severity": "grave",
       "kind": "classe",
-      "effect_text": "Forza 2. Militare +1 res · Civico −2 res."
+      "effect_text": "Forza 2. Militare +1 res · Civico −2 res.",
+      "effects": [
+        {
+          "hook": "on_event",
+          "op": "resistance",
+          "value": 1,
+          "target": {
+            "class": [
+              "militare"
+            ]
+          }
+        },
+        {
+          "hook": "on_event",
+          "op": "resistance",
+          "value": -2,
+          "target": {
+            "class": [
+              "civico"
+            ]
+          }
+        }
+      ]
     },
     {
       "id": "ev_carestia_primitiva",
@@ -2362,7 +3471,21 @@
       "force": 2,
       "severity": "grave",
       "kind": "comportamentale",
-      "effect_text": "Forza 2. Edifici a livello 0 non protetti che producono risorse: −2 res."
+      "effect_text": "Forza 2. Edifici a livello 0 non protetti che producono risorse: −2 res.",
+      "effects": [
+        {
+          "hook": "on_event",
+          "op": "resistance",
+          "value": -2,
+          "target": {
+            "level": {
+              "max": 0
+            },
+            "protected": false,
+            "produces": true
+          }
+        }
+      ]
     },
     {
       "id": "ev_terremoto",
@@ -2371,7 +3494,19 @@
       "force": 3,
       "severity": "lieve",
       "kind": "geografico",
-      "effect_text": "Forza 3. Edifici da 2 o 3 caselle: −1 res."
+      "effect_text": "Forza 3. Edifici da 2 o 3 caselle: −1 res.",
+      "effects": [
+        {
+          "hook": "on_event",
+          "op": "resistance",
+          "value": -1,
+          "target": {
+            "width": {
+              "min": 2
+            }
+          }
+        }
+      ]
     },
     {
       "id": "ev_pax_imperiale",
@@ -2380,7 +3515,29 @@
       "force": 3,
       "severity": "lieve",
       "kind": "classe",
-      "effect_text": "Forza 3. Ingegneria +1 res · Militare −1 res."
+      "effect_text": "Forza 3. Ingegneria +1 res · Militare −1 res.",
+      "effects": [
+        {
+          "hook": "on_event",
+          "op": "resistance",
+          "value": 1,
+          "target": {
+            "class": [
+              "ingegneria"
+            ]
+          }
+        },
+        {
+          "hook": "on_event",
+          "op": "resistance",
+          "value": -1,
+          "target": {
+            "class": [
+              "militare"
+            ]
+          }
+        }
+      ]
     },
     {
       "id": "ev_invasione",
@@ -2389,7 +3546,17 @@
       "force": 3,
       "severity": "lieve",
       "kind": "comportamentale",
-      "effect_text": "Forza 3. Edifici non protetti: −1 res extra."
+      "effect_text": "Forza 3. Edifici non protetti: −1 res extra.",
+      "effects": [
+        {
+          "hook": "on_event",
+          "op": "resistance",
+          "value": -1,
+          "target": {
+            "protected": false
+          }
+        }
+      ]
     },
     {
       "id": "ev_eruzione",
@@ -2398,7 +3565,25 @@
       "force": 3,
       "severity": "grave",
       "kind": "geografico",
-      "effect_text": "Forza 3. Edifici su collina: −2 res. Chi perde un edificio pesca un potenziamento gratis (massimo uno per giocatore)."
+      "effect_text": "Forza 3. Edifici su collina: −2 res. Chi perde un edificio pesca un potenziamento gratis (massimo uno per giocatore).",
+      "effects": [
+        {
+          "hook": "on_event",
+          "op": "resistance",
+          "value": -2,
+          "target": {
+            "terrain": [
+              "collina"
+            ]
+          }
+        },
+        {
+          "hook": "on_event",
+          "op": "rule_override",
+          "name": "free_upgrade_on_loss",
+          "times": 1
+        }
+      ]
     },
     {
       "id": "ev_persecuzioni",
@@ -2407,7 +3592,29 @@
       "force": 3,
       "severity": "grave",
       "kind": "classe",
-      "effect_text": "Forza 3. Religione −2 res · Civico +1 res."
+      "effect_text": "Forza 3. Religione −2 res · Civico +1 res.",
+      "effects": [
+        {
+          "hook": "on_event",
+          "op": "resistance",
+          "value": -2,
+          "target": {
+            "class": [
+              "religione"
+            ]
+          }
+        },
+        {
+          "hook": "on_event",
+          "op": "resistance",
+          "value": 1,
+          "target": {
+            "class": [
+              "civico"
+            ]
+          }
+        }
+      ]
     },
     {
       "id": "ev_guerra_civile",
@@ -2416,7 +3623,19 @@
       "force": 3,
       "severity": "grave",
       "kind": "comportamentale",
-      "effect_text": "Forza 3. Nelle colonne con edifici di 2+ giocatori: tutti −1 res."
+      "effect_text": "Forza 3. Nelle colonne con edifici di 2+ giocatori: tutti −1 res.",
+      "effects": [
+        {
+          "hook": "on_event",
+          "op": "resistance",
+          "value": -1,
+          "target": {
+            "column": {
+              "min_owners": 2
+            }
+          }
+        }
+      ]
     },
     {
       "id": "ev_incursioni_fluviali",
@@ -2425,7 +3644,19 @@
       "force": 4,
       "severity": "lieve",
       "kind": "geografico",
-      "effect_text": "Forza 4. Edifici su colonne fiume: −1 res."
+      "effect_text": "Forza 4. Edifici su colonne fiume: −1 res.",
+      "effects": [
+        {
+          "hook": "on_event",
+          "op": "resistance",
+          "value": -1,
+          "target": {
+            "terrain": [
+              "fiume"
+            ]
+          }
+        }
+      ]
     },
     {
       "id": "ev_guerra",
@@ -2434,7 +3665,29 @@
       "force": 4,
       "severity": "lieve",
       "kind": "classe",
-      "effect_text": "Forza 4. Militare +1 res · Civico −1 res."
+      "effect_text": "Forza 4. Militare +1 res · Civico −1 res.",
+      "effects": [
+        {
+          "hook": "on_event",
+          "op": "resistance",
+          "value": 1,
+          "target": {
+            "class": [
+              "militare"
+            ]
+          }
+        },
+        {
+          "hook": "on_event",
+          "op": "resistance",
+          "value": -1,
+          "target": {
+            "class": [
+              "civico"
+            ]
+          }
+        }
+      ]
     },
     {
       "id": "ev_peste",
@@ -2443,7 +3696,19 @@
       "force": 4,
       "severity": "lieve",
       "kind": "comportamentale",
-      "effect_text": "Forza 4. Colonne con 3+ edifici in piedi: tutti −1 res."
+      "effect_text": "Forza 4. Colonne con 3+ edifici in piedi: tutti −1 res.",
+      "effects": [
+        {
+          "hook": "on_event",
+          "op": "resistance",
+          "value": -1,
+          "target": {
+            "column": {
+              "min_standing": 3
+            }
+          }
+        }
+      ]
     },
     {
       "id": "ev_grande_incendio",
@@ -2452,7 +3717,29 @@
       "force": 4,
       "severity": "grave",
       "kind": "geografico",
-      "effect_text": "Forza 4. Edifici a livello 0 o 1: −1 res; a livello 2+: −2 res."
+      "effect_text": "Forza 4. Edifici a livello 0 o 1: −1 res; a livello 2+: −2 res.",
+      "effects": [
+        {
+          "hook": "on_event",
+          "op": "resistance",
+          "value": -1,
+          "target": {
+            "level": {
+              "max": 1
+            }
+          }
+        },
+        {
+          "hook": "on_event",
+          "op": "resistance",
+          "value": -2,
+          "target": {
+            "level": {
+              "min": 2
+            }
+          }
+        }
+      ]
     },
     {
       "id": "ev_scisma",
@@ -2461,7 +3748,39 @@
       "force": 4,
       "severity": "grave",
       "kind": "classe",
-      "effect_text": "Forza 4. Religione −2 res · Cultura −1 res · Commercio +1 res."
+      "effect_text": "Forza 4. Religione −2 res · Cultura −1 res · Commercio +1 res.",
+      "effects": [
+        {
+          "hook": "on_event",
+          "op": "resistance",
+          "value": -2,
+          "target": {
+            "class": [
+              "religione"
+            ]
+          }
+        },
+        {
+          "hook": "on_event",
+          "op": "resistance",
+          "value": -1,
+          "target": {
+            "class": [
+              "cultura"
+            ]
+          }
+        },
+        {
+          "hook": "on_event",
+          "op": "resistance",
+          "value": 1,
+          "target": {
+            "class": [
+              "commercio"
+            ]
+          }
+        }
+      ]
     },
     {
       "id": "ev_anni_della_fame",
@@ -2470,7 +3789,14 @@
       "force": 4,
       "severity": "grave",
       "kind": "comportamentale",
-      "effect_text": "Forza 4. Nessuna produzione durante l’ultimo round dell’era."
+      "effect_text": "Forza 4. Nessuna produzione durante l’ultimo round dell’era.",
+      "effects": [
+        {
+          "hook": "on_activate",
+          "op": "rule_override",
+          "name": "no_production_last_round"
+        }
+      ]
     },
     {
       "id": "ev_alluvione",
@@ -2479,7 +3805,19 @@
       "force": 5,
       "severity": "lieve",
       "kind": "geografico",
-      "effect_text": "Forza 5. Edifici su colonne fiume: −1 res."
+      "effect_text": "Forza 5. Edifici su colonne fiume: −1 res.",
+      "effects": [
+        {
+          "hook": "on_event",
+          "op": "resistance",
+          "value": -1,
+          "target": {
+            "terrain": [
+              "fiume"
+            ]
+          }
+        }
+      ]
     },
     {
       "id": "ev_controriforma",
@@ -2488,7 +3826,29 @@
       "force": 5,
       "severity": "lieve",
       "kind": "classe",
-      "effect_text": "Forza 5. Religione +1 res · Cultura −1 res."
+      "effect_text": "Forza 5. Religione +1 res · Cultura −1 res.",
+      "effects": [
+        {
+          "hook": "on_event",
+          "op": "resistance",
+          "value": 1,
+          "target": {
+            "class": [
+              "religione"
+            ]
+          }
+        },
+        {
+          "hook": "on_event",
+          "op": "resistance",
+          "value": -1,
+          "target": {
+            "class": [
+              "cultura"
+            ]
+          }
+        }
+      ]
     },
     {
       "id": "ev_rivoluzione_industriale",
@@ -2497,7 +3857,19 @@
       "force": 5,
       "severity": "lieve",
       "kind": "comportamentale",
-      "effect_text": "Forza 5. Edifici con Scavo 2+: −1 res."
+      "effect_text": "Forza 5. Edifici con Scavo 2+: −1 res.",
+      "effects": [
+        {
+          "hook": "on_event",
+          "op": "resistance",
+          "value": -1,
+          "target": {
+            "scavo": {
+              "min": 2
+            }
+          }
+        }
+      ]
     },
     {
       "id": "ev_bonifiche",
@@ -2506,7 +3878,25 @@
       "force": 5,
       "severity": "grave",
       "kind": "geografico",
-      "effect_text": "Forza 5. Edifici su pianura: −2 res. Il primo terrapieno di ogni giocatore in quest’era costa 0."
+      "effect_text": "Forza 5. Edifici su pianura: −2 res. Il primo terrapieno di ogni giocatore in quest’era costa 0.",
+      "effects": [
+        {
+          "hook": "on_event",
+          "op": "resistance",
+          "value": -2,
+          "target": {
+            "terrain": [
+              "pianura"
+            ]
+          }
+        },
+        {
+          "hook": "on_build",
+          "op": "rule_override",
+          "name": "first_terrapieno_free",
+          "cap": 1
+        }
+      ]
     },
     {
       "id": "ev_secolarizzazioni",
@@ -2515,7 +3905,29 @@
       "force": 5,
       "severity": "grave",
       "kind": "classe",
-      "effect_text": "Forza 5. Religione −2 res · durante l’era, restaurare un rudere Religione non costa risorse (richiede comunque l’azione) e vale sui ruderi già presenti."
+      "effect_text": "Forza 5. Religione −2 res · durante l’era, restaurare un rudere Religione non costa risorse (richiede comunque l’azione) e vale sui ruderi già presenti.",
+      "effects": [
+        {
+          "hook": "on_event",
+          "op": "resistance",
+          "value": -2,
+          "target": {
+            "class": [
+              "religione"
+            ]
+          }
+        },
+        {
+          "hook": "on_build",
+          "op": "rule_override",
+          "name": "free_restore_of_class",
+          "target": {
+            "class": [
+              "religione"
+            ]
+          }
+        }
+      ]
     },
     {
       "id": "ev_speculazione_edilizia",
@@ -2524,7 +3936,19 @@
       "force": 5,
       "severity": "grave",
       "kind": "comportamentale",
-      "effect_text": "Forza 5. Ogni edificio con Vetustà 2+: −1 res."
+      "effect_text": "Forza 5. Ogni edificio con Vetustà 2+: −1 res.",
+      "effects": [
+        {
+          "hook": "on_event",
+          "op": "resistance",
+          "value": -1,
+          "target": {
+            "vetusta": {
+              "min": 2
+            }
+          }
+        }
+      ]
     }
   ],
   "monuments": [
@@ -2532,85 +3956,226 @@
       "id": "mo_san_clemente",
       "name": "San Clemente",
       "vp": 5,
-      "condition_text": "Primo ad avere 3 edifici Religione nella stessa colonna."
+      "condition_text": "Primo ad avere 3 edifici Religione nella stessa colonna.",
+      "condition": {
+        "op": "same_column_count",
+        "target": {
+          "owner": "self",
+          "class": [
+            "religione"
+          ]
+        },
+        "min": 3
+      }
     },
     {
       "id": "mo_colosseo",
       "name": "Colosseo",
       "vp": 4,
-      "condition_text": "Primo il cui edificio sopravvive esposto a 3 eventi."
+      "condition_text": "Primo il cui edificio sopravvive esposto a 3 eventi.",
+      "condition": {
+        "op": "count_matching",
+        "target": {
+          "owner": "self",
+          "vetusta": {
+            "min": 3
+          }
+        },
+        "min": 1
+      }
     },
     {
       "id": "mo_pantheon",
       "name": "Pantheon",
       "vp": 4,
-      "condition_text": "Primo ad avere un edificio dell’era 1 o 2 ancora in piedi all’inizio dell’era Moderna."
+      "condition_text": "Primo ad avere un edificio dell’era 1 o 2 ancora in piedi all’inizio dell’era Moderna.",
+      "condition": {
+        "op": "count_matching",
+        "target": {
+          "owner": "self",
+          "era": {
+            "max": 2
+          },
+          "state": [
+            "intatto",
+            "rudere"
+          ],
+          "buried": false
+        },
+        "min": 1,
+        "min_era": 5
+      }
     },
     {
       "id": "mo_fori_imperiali",
       "name": "Fori Imperiali",
       "vp": 4,
-      "condition_text": "Primo ad avere 4 propri edifici Sotterrati."
+      "condition_text": "Primo ad avere 4 propri edifici Sotterrati.",
+      "condition": {
+        "op": "count_matching",
+        "target": {
+          "owner": "self",
+          "buried": true
+        },
+        "min": 4
+      }
     },
     {
       "id": "mo_acropoli",
       "name": "Acropoli",
       "vp": 4,
-      "condition_text": "Primo a costruire a livello 4."
+      "condition_text": "Primo a costruire a livello 4.",
+      "condition": {
+        "op": "count_matching",
+        "target": {
+          "owner": "self",
+          "level": {
+            "min": 4
+          }
+        },
+        "min": 1
+      }
     },
     {
       "id": "mo_via_appia",
       "name": "Via Appia",
       "vp": 5,
-      "condition_text": "Primo ad avere propri edifici in cima a 4 colonne consecutive."
+      "condition_text": "Primo ad avere propri edifici in cima a 4 colonne consecutive.",
+      "condition": {
+        "op": "consecutive_columns",
+        "target": {
+          "owner": "self",
+          "is_top": true
+        },
+        "min": 4
+      }
     },
     {
       "id": "mo_terme_di_caracalla",
       "name": "Terme di Caracalla",
       "vp": 4,
-      "condition_text": "Primo a costruire un edificio da 3 caselle."
+      "condition_text": "Primo a costruire un edificio da 3 caselle.",
+      "condition": {
+        "op": "count_matching",
+        "target": {
+          "owner": "self",
+          "width": {
+            "min": 3
+          }
+        },
+        "min": 1
+      }
     },
     {
       "id": "mo_ponte_milvio",
       "name": "Ponte Milvio",
       "vp": 4,
-      "condition_text": "Primo ad avere 2 edifici su colonne fiume distinte."
+      "condition_text": "Primo ad avere 2 edifici su colonne fiume distinte.",
+      "condition": {
+        "op": "distinct_columns",
+        "target": {
+          "owner": "self",
+          "terrain": [
+            "fiume"
+          ]
+        },
+        "min": 2
+      }
     },
     {
       "id": "mo_mura_aureliane",
       "name": "Mura Aureliane",
       "vp": 5,
-      "condition_text": "Primo ad avere 3 edifici Militari in piedi contemporaneamente."
+      "condition_text": "Primo ad avere 3 edifici Militari in piedi contemporaneamente.",
+      "condition": {
+        "op": "count_matching",
+        "target": {
+          "owner": "self",
+          "class": [
+            "militare"
+          ],
+          "state": [
+            "intatto"
+          ],
+          "buried": false
+        },
+        "min": 3
+      }
     },
     {
       "id": "mo_cloaca_massima",
       "name": "Cloaca Massima",
       "vp": 4,
-      "condition_text": "Primo ad aver speso almeno 3 pietra complessive in costi di terrapieno."
+      "condition_text": "Primo ad aver speso almeno 3 pietra complessive in costi di terrapieno.",
+      "condition": {
+        "op": "counter",
+        "name": "terrapieno_pietra",
+        "min": 3
+      }
     },
     {
       "id": "mo_domus_aurea",
       "name": "Domus Aurea",
       "vp": 5,
-      "condition_text": "Primo ad avere un edificio con 3 potenziamenti."
+      "condition_text": "Primo ad avere un edificio con 3 potenziamenti.",
+      "condition": {
+        "op": "count_matching",
+        "target": {
+          "owner": "self",
+          "upgrades": {
+            "min": 3
+          }
+        },
+        "min": 1
+      }
     },
     {
       "id": "mo_campidoglio",
       "name": "Campidoglio",
       "vp": 4,
-      "condition_text": "Primo ad avere 2 edifici Civici nella stessa colonna."
+      "condition_text": "Primo ad avere 2 edifici Civici nella stessa colonna.",
+      "condition": {
+        "op": "same_column_count",
+        "target": {
+          "owner": "self",
+          "class": [
+            "civico"
+          ]
+        },
+        "min": 2
+      }
     },
     {
       "id": "mo_isola_tiberina",
       "name": "Isola Tiberina",
       "vp": 4,
-      "condition_text": "Primo a costruire su una colonna fiume a livello 2+."
+      "condition_text": "Primo a costruire su una colonna fiume a livello 2+.",
+      "condition": {
+        "op": "count_matching",
+        "target": {
+          "owner": "self",
+          "terrain": [
+            "fiume"
+          ],
+          "level": {
+            "min": 2
+          }
+        },
+        "min": 1
+      }
     },
     {
       "id": "mo_catacombe",
       "name": "Catacombe",
       "vp": 5,
-      "condition_text": "Primo ad avere 3 edifici sotterrati nella stessa colonna."
+      "condition_text": "Primo ad avere 3 edifici sotterrati nella stessa colonna.",
+      "condition": {
+        "op": "same_column_count",
+        "target": {
+          "buried": true
+        },
+        "min": 3
+      }
     }
   ],
   "legacies": [
@@ -2618,97 +4183,242 @@
       "id": "er_larcheologo",
       "name": "L’Archeologo",
       "vp": 5,
-      "condition_text": "4+ tuoi edifici Sotterrati."
+      "condition_text": "4+ tuoi edifici Sotterrati.",
+      "condition": {
+        "op": "count_matching",
+        "target": {
+          "owner": "self",
+          "buried": true
+        },
+        "min": 4
+      }
     },
     {
       "id": "er_il_costruttore_di_cattedrali",
       "name": "Il Costruttore di cattedrali",
       "vp": 4,
-      "condition_text": "3+ tuoi edifici Religione, in qualsiasi stato."
+      "condition_text": "3+ tuoi edifici Religione, in qualsiasi stato.",
+      "condition": {
+        "op": "count_matching",
+        "target": {
+          "owner": "self",
+          "class": [
+            "religione"
+          ]
+        },
+        "min": 3
+      }
     },
     {
       "id": "er_il_verticalista",
       "name": "Il Verticalista",
       "vp": 4,
-      "condition_text": "hai costruito un edificio a livello 4 o superiore."
+      "condition_text": "hai costruito un edificio a livello 4 o superiore.",
+      "condition": {
+        "op": "count_matching",
+        "target": {
+          "owner": "self",
+          "level": {
+            "min": 4
+          }
+        },
+        "min": 1
+      }
     },
     {
       "id": "er_il_geografo",
       "name": "Il Geografo",
       "vp": 4,
-      "condition_text": "tuoi edifici su tutti e quattro i terreni."
+      "condition_text": "tuoi edifici su tutti e quattro i terreni.",
+      "condition": {
+        "op": "all_terrains",
+        "target": {
+          "owner": "self"
+        }
+      }
     },
     {
       "id": "er_il_colonizzatore",
       "name": "Il Colonizzatore",
       "vp": 4,
-      "condition_text": "tuoi edifici in 5+ colonne diverse."
+      "condition_text": "tuoi edifici in 5+ colonne diverse.",
+      "condition": {
+        "op": "distinct_columns",
+        "target": {
+          "owner": "self"
+        },
+        "min": 5
+      }
     },
     {
       "id": "er_il_mecenate",
       "name": "Il Mecenate",
       "vp": 4,
-      "condition_text": "4+ potenziamenti collocati sui tuoi edifici, inclusi quelli poi Sotterrati."
+      "condition_text": "4+ potenziamenti collocati sui tuoi edifici, inclusi quelli poi Sotterrati.",
+      "condition": {
+        "op": "counter",
+        "name": "potenziamenti_piazzati",
+        "min": 4
+      }
     },
     {
       "id": "er_il_condottiero",
       "name": "Il Condottiero",
       "vp": 4,
-      "condition_text": "3+ tuoi edifici Militari in piedi."
+      "condition_text": "3+ tuoi edifici Militari in piedi.",
+      "condition": {
+        "op": "count_matching",
+        "target": {
+          "owner": "self",
+          "class": [
+            "militare"
+          ],
+          "state": [
+            "intatto"
+          ],
+          "buried": false
+        },
+        "min": 3
+      }
     },
     {
       "id": "er_il_cronista",
       "name": "Il Cronista",
       "vp": 5,
-      "condition_text": "tuoi edifici di tutte e cinque le ere."
+      "condition_text": "tuoi edifici di tutte e cinque le ere.",
+      "condition": {
+        "op": "all_eras",
+        "target": {
+          "owner": "self"
+        }
+      }
     },
     {
       "id": "er_il_guardiano",
       "name": "Il Guardiano",
       "vp": 5,
-      "condition_text": "un tuo edificio in piedi costruito nell’era 1 o 2."
+      "condition_text": "un tuo edificio in piedi costruito nell’era 1 o 2.",
+      "condition": {
+        "op": "count_matching",
+        "target": {
+          "owner": "self",
+          "era": {
+            "max": 2
+          },
+          "state": [
+            "intatto",
+            "rudere"
+          ],
+          "buried": false
+        },
+        "min": 1
+      }
     },
     {
       "id": "er_il_lastricatore",
       "name": "Il Lastricatore",
       "vp": 4,
-      "condition_text": "tuoi edifici in 3 colonne consecutive."
+      "condition_text": "tuoi edifici in 3 colonne consecutive.",
+      "condition": {
+        "op": "consecutive_columns",
+        "target": {
+          "owner": "self"
+        },
+        "min": 3
+      }
     },
     {
       "id": "er_il_demolitore",
       "name": "Il Demolitore",
       "vp": 4,
-      "condition_text": "hai spianato 3+ tuoi edifici intatti."
+      "condition_text": "hai spianato 3+ tuoi edifici intatti.",
+      "condition": {
+        "op": "count_matching",
+        "target": {
+          "owner": "self",
+          "razed": true
+        },
+        "min": 3
+      }
     },
     {
       "id": "er_il_massaio",
       "name": "Il Massaio",
       "vp": 4,
-      "condition_text": "due tuoi edifici a livello 2 o superiore."
+      "condition_text": "due tuoi edifici a livello 2 o superiore.",
+      "condition": {
+        "op": "count_matching",
+        "target": {
+          "owner": "self",
+          "level": {
+            "min": 2
+          }
+        },
+        "min": 2
+      }
     },
     {
       "id": "er_lidraulico",
       "name": "L’Idraulico",
       "vp": 4,
-      "condition_text": "3+ tuoi edifici su colonne fiume."
+      "condition_text": "3+ tuoi edifici su colonne fiume.",
+      "condition": {
+        "op": "count_matching",
+        "target": {
+          "owner": "self",
+          "terrain": [
+            "fiume"
+          ]
+        },
+        "min": 3
+      }
     },
     {
       "id": "er_il_silvicoltore",
       "name": "Il Silvicoltore",
       "vp": 5,
-      "condition_text": "un tuo edificio su bosco con Vetustà 3+."
+      "condition_text": "un tuo edificio su bosco con Vetustà 3+.",
+      "condition": {
+        "op": "count_matching",
+        "target": {
+          "owner": "self",
+          "terrain": [
+            "bosco"
+          ],
+          "vetusta": {
+            "min": 3
+          }
+        },
+        "min": 1
+      }
     },
     {
       "id": "er_il_restauratore",
       "name": "Il Restauratore",
       "vp": 4,
-      "condition_text": "hai restaurato 2+ ruderi."
+      "condition_text": "hai restaurato 2+ ruderi.",
+      "condition": {
+        "op": "counter",
+        "name": "restauri",
+        "min": 2
+      }
     },
     {
       "id": "er_lantiquario",
       "name": "L’Antiquario",
       "vp": 5,
-      "condition_text": "un tuo edificio Sotterrato con Scavo 6 o più."
+      "condition_text": "un tuo edificio Sotterrato con Scavo 6 o più.",
+      "condition": {
+        "op": "count_matching",
+        "target": {
+          "owner": "self",
+          "buried": true,
+          "scavo": {
+            "min": 6
+          }
+        },
+        "min": 1
+      }
     }
   ]
 }

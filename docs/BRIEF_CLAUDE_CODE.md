@@ -26,12 +26,14 @@ Il designer ti passerà anche i PDF dei materiali di stampa: **usali solo per la
 data/
   cards.json           fonte unica (181 carte + costanti + terreni)
   cards.schema.json    validazione: esegui prima di ogni build
-godot/scripts/
+scripts/                 (progetto Godot nella radice del repo: res:// == repo)
   core/                enums, Building, PlayerState, Grid, GameState  (dati)
   rules/               BuildRules, EraRules, Scoring                  (funzioni pure)
   commands/            GameController                                 (unica porta d'ingresso)
   data/                CardDB (autoload)
   ai/                  RandomBot, headless_runner
+  tools/               SchemaValidator, validazione dei dati, test
+scenes/                  scene di avvio (runner headless, test)
 reference/
   regolamento-completo.html   la specifica
   simulatore_riferimento.py   oracolo Python (leggi il README prima)
