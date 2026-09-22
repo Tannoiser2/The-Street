@@ -67,7 +67,7 @@
       }
     },
     "characters": {
-      "type": "array",
+      "type": "array", "minItems": 26, "maxItems": 26,
       "items": {
         "type": "object",
         "required": ["id", "name", "class", "timing", "effect_text"],
