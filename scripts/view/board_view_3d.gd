@@ -91,7 +91,10 @@ func _edifici() -> void:
 # slot, cosi' il resto resta scoperto e le file dietro si vedono.
 func _basetta(b: Building) -> void:
 	var box := BoardLayout3D.basetta_box(gs, b)
-	var m := _scatola(box.size, BASETTA)
+	# Col disegno sopra, il colore del giocatore non ha piu' dove stare: va
+	# sulla basetta, che e' esattamente cio' che sul tavolo vero distingue
+	# due copie della stessa sagoma.
+	var m := _scatola(box.size, COLORI_GIOCATORE[b.owner % COLORI_GIOCATORE.size()].darkened(0.15))
 	m.position = box.position + box.size / 2.0
 	add_child(m)
 
@@ -106,7 +109,22 @@ func _sagoma(b: Building) -> void:
 	# piu' nulla e non subisce piu' eventi.
 	if b.is_buried: col = col.darkened(0.15).lerp(Color("#5a5a64"), 0.42)
 	var base := BoardLayout3D.standee_base(gs, b)
-	var m := _scatola(Vector3(dim.x, dim.y, BoardLayout3D.SAGOMA_SPESSORE), col)
+	# L'illustrazione vera, se c'e': il cartone e' sottile, quindi un piano con
+	# la texture e non una scatola. Senza le immagini - assets/ si rigenera e
+	# non e' versionata - si ripiega sul rettangolo colorato, cosi' i test e
+	# le partite headless non dipendono dalla grafica.
+	var tex: Texture2D = _illustrazione(b)
+	var m: MeshInstance3D
+	if tex != null:
+		m = _quad(dim, Color.WHITE)
+		var mat := m.material_override as StandardMaterial3D
+		mat.albedo_texture = tex
+		mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA_SCISSOR
+		mat.alpha_scissor_threshold = 0.5
+		mat.texture_filter = BaseMaterial3D.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
+		if b.is_buried: mat.albedo_color = Color(0.62, 0.62, 0.66)
+	else:
+		m = _scatola(Vector3(dim.x, dim.y, BoardLayout3D.SAGOMA_SPESSORE), col)
 	m.position = base + Vector3(0.0, dim.y / 2.0 + BoardLayout3D.BASETTA_Y, 0.0)
 	add_child(m)
 	# Il nome va solo a chi si vede dall'alto della propria colonna: la cima.
@@ -130,6 +148,12 @@ func _sagoma(b: Building) -> void:
 	eti.outline_size = 22
 	eti.outline_modulate = Color(0, 0, 0, 0.85)
 	add_child(eti)
+
+# L'illustrazione della sagoma, se le immagini sono state estratte.
+func _illustrazione(b: Building) -> Texture2D:
+	var percorso := BoardLayout3D.sagoma_path(b)
+	if percorso == "" or not ResourceLoader.exists(percorso): return null
+	return load(percorso) as Texture2D
 
 func _luci() -> void:
 	var sole := DirectionalLight3D.new()

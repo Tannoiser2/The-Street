@@ -1,63 +1,423 @@
 {
-  "_nota": "Numero della sagoma nel PDF in ordine di estrazione (tools/estrai_grafica.py). Ricavata riconoscendo le illustrazioni una per una e chiudendo il resto per esclusione sulla larghezza. Vedi docs/mappatura-sagome.md: due coppie condividono il disegno e tre larghezze non concordano coi dati.",
-  "ed_capanne": 2,
-  "ed_dolmen": 3,
-  "ed_grotte_dipinte": 1,
-  "ed_approdo": 9,
-  "ed_menhir": 7,
-  "ed_palafitte": 8,
-  "ed_cava": 4,
-  "ed_focolare_comune": 5,
-  "ed_trappole_da_pesca": 6,
-  "ed_circolo_di_pietre": 10,
-  "ed_villaggio_palizzato": 13,
-  "ed_tumulo_funerario": 12,
-  "ed_teatro": 11,
-  "ed_acquedotto": 22,
-  "ed_terme": 14,
-  "ed_sacello": 19,
-  "ed_torre_di_vedetta": 20,
-  "ed_tempio": 17,
-  "ed_ponte": 24,
-  "ed_emporio": 27,
-  "ed_insulae": 18,
-  "ed_foro": 15,
-  "ed_anfiteatro": 16,
-  "ed_castrum": 21,
-  "ed_borgo": 23,
-  "ed_mura": 32,
-  "ed_cappella": 26,
-  "ed_torre_civica": 25,
-  "ed_conceria": 28,
-  "ed_mulino": 29,
-  "ed_chiesa": 30,
-  "ed_mercato": 35,
-  "ed_ospedale_dei_pellegrini": 33,
-  "ed_castello": 31,
-  "ed_abbazia": 34,
-  "ed_arsenale": 36,
-  "ed_bottega_dartista": 38,
-  "ed_giardino_allitaliana": 40,
-  "ed_loggia": 41,
-  "ed_osservatorio": 45,
-  "ed_banco": 44,
-  "ed_villa": 43,
-  "ed_palazzo_signorile": 46,
-  "ed_ponte_monumentale": 48,
-  "ed_accademia": 47,
-  "ed_duomo": 37,
-  "ed_fortezza_bastionata": 39,
-  "ed_piazza_monumentale": 42,
-  "ed_fondazione_darte": 49,
-  "ed_condominio": 50,
-  "ed_caffe_letterario": 51,
-  "ed_officina": 52,
-  "ed_monumento_ai_caduti": 55,
-  "ed_museo": 53,
-  "ed_grattacielo": 58,
-  "ed_biblioteca": 54,
-  "ed_ponte_in_acciaio": 57,
-  "ed_stazione": 60,
-  "ed_parco_archeologico": 59,
-  "ed_universita": 56
+  "_nota": "Per ogni edificio: `n` e' il numero della sagoma nel PDF in ordine di estrazione (tools/estrai_grafica.py), `mm` la sua misura reale [larghezza, altezza] presa dal PDF. Le misure stanno qui e non negli assets perche' assets/ si rigenera e non e' versionata: la plancia deve saper disegnare le proporzioni giuste anche senza le immagini. Vedi docs/mappatura-sagome.md.",
+  "ed_capanne": {
+    "n": 2,
+    "mm": [
+      61.2,
+      59.0
+    ]
+  },
+  "ed_dolmen": {
+    "n": 3,
+    "mm": [
+      61.1,
+      51.7
+    ]
+  },
+  "ed_grotte_dipinte": {
+    "n": 1,
+    "mm": [
+      60.9,
+      65.9
+    ]
+  },
+  "ed_approdo": {
+    "n": 9,
+    "mm": [
+      60.9,
+      50.6
+    ]
+  },
+  "ed_menhir": {
+    "n": 7,
+    "mm": [
+      60.8,
+      61.3
+    ]
+  },
+  "ed_palafitte": {
+    "n": 8,
+    "mm": [
+      61.0,
+      61.0
+    ]
+  },
+  "ed_cava": {
+    "n": 4,
+    "mm": [
+      60.8,
+      45.0
+    ]
+  },
+  "ed_focolare_comune": {
+    "n": 5,
+    "mm": [
+      61.0,
+      45.0
+    ]
+  },
+  "ed_trappole_da_pesca": {
+    "n": 6,
+    "mm": [
+      61.0,
+      45.0
+    ]
+  },
+  "ed_circolo_di_pietre": {
+    "n": 10,
+    "mm": [
+      120.9,
+      47.3
+    ]
+  },
+  "ed_villaggio_palizzato": {
+    "n": 13,
+    "mm": [
+      120.8,
+      45.7
+    ]
+  },
+  "ed_tumulo_funerario": {
+    "n": 12,
+    "mm": [
+      120.8,
+      39.7
+    ]
+  },
+  "ed_teatro": {
+    "n": 11,
+    "mm": [
+      61.0,
+      66.0
+    ]
+  },
+  "ed_acquedotto": {
+    "n": 22,
+    "mm": [
+      181.0,
+      93.7
+    ]
+  },
+  "ed_terme": {
+    "n": 14,
+    "mm": [
+      61.0,
+      72.4
+    ]
+  },
+  "ed_sacello": {
+    "n": 19,
+    "mm": [
+      50.9,
+      62.8
+    ]
+  },
+  "ed_torre_di_vedetta": {
+    "n": 20,
+    "mm": [
+      47.6,
+      80.3
+    ]
+  },
+  "ed_tempio": {
+    "n": 17,
+    "mm": [
+      61.0,
+      72.6
+    ]
+  },
+  "ed_ponte": {
+    "n": 24,
+    "mm": [
+      120.8,
+      59.8
+    ]
+  },
+  "ed_emporio": {
+    "n": 27,
+    "mm": [
+      61.0,
+      45.4
+    ]
+  },
+  "ed_insulae": {
+    "n": 18,
+    "mm": [
+      61.0,
+      74.1
+    ]
+  },
+  "ed_foro": {
+    "n": 15,
+    "mm": [
+      120.8,
+      59.8
+    ]
+  },
+  "ed_anfiteatro": {
+    "n": 16,
+    "mm": [
+      180.9,
+      71.4
+    ]
+  },
+  "ed_castrum": {
+    "n": 21,
+    "mm": [
+      120.9,
+      43.1
+    ]
+  },
+  "ed_borgo": {
+    "n": 23,
+    "mm": [
+      61.0,
+      65.7
+    ]
+  },
+  "ed_mura": {
+    "n": 32,
+    "mm": [
+      60.8,
+      48.2
+    ]
+  },
+  "ed_cappella": {
+    "n": 26,
+    "mm": [
+      61.2,
+      72.3
+    ]
+  },
+  "ed_torre_civica": {
+    "n": 25,
+    "mm": [
+      61.0,
+      86.1
+    ]
+  },
+  "ed_conceria": {
+    "n": 28,
+    "mm": [
+      61.1,
+      73.8
+    ]
+  },
+  "ed_mulino": {
+    "n": 29,
+    "mm": [
+      61.1,
+      72.5
+    ]
+  },
+  "ed_chiesa": {
+    "n": 30,
+    "mm": [
+      60.9,
+      64.8
+    ]
+  },
+  "ed_mercato": {
+    "n": 35,
+    "mm": [
+      61.1,
+      72.5
+    ]
+  },
+  "ed_ospedale_dei_pellegrini": {
+    "n": 33,
+    "mm": [
+      61.2,
+      72.3
+    ]
+  },
+  "ed_castello": {
+    "n": 31,
+    "mm": [
+      120.9,
+      66.7
+    ]
+  },
+  "ed_abbazia": {
+    "n": 34,
+    "mm": [
+      120.8,
+      61.7
+    ]
+  },
+  "ed_arsenale": {
+    "n": 36,
+    "mm": [
+      120.8,
+      66.0
+    ]
+  },
+  "ed_bottega_dartista": {
+    "n": 38,
+    "mm": [
+      61.0,
+      65.8
+    ]
+  },
+  "ed_giardino_allitaliana": {
+    "n": 40,
+    "mm": [
+      61.1,
+      72.3
+    ]
+  },
+  "ed_loggia": {
+    "n": 41,
+    "mm": [
+      61.0,
+      72.4
+    ]
+  },
+  "ed_osservatorio": {
+    "n": 45,
+    "mm": [
+      61.0,
+      72.5
+    ]
+  },
+  "ed_banco": {
+    "n": 44,
+    "mm": [
+      61.0,
+      72.5
+    ]
+  },
+  "ed_villa": {
+    "n": 43,
+    "mm": [
+      60.9,
+      72.4
+    ]
+  },
+  "ed_palazzo_signorile": {
+    "n": 46,
+    "mm": [
+      60.7,
+      46.4
+    ]
+  },
+  "ed_ponte_monumentale": {
+    "n": 48,
+    "mm": [
+      121.0,
+      80.1
+    ]
+  },
+  "ed_accademia": {
+    "n": 47,
+    "mm": [
+      60.9,
+      46.6
+    ]
+  },
+  "ed_duomo": {
+    "n": 37,
+    "mm": [
+      120.9,
+      76.7
+    ]
+  },
+  "ed_fortezza_bastionata": {
+    "n": 39,
+    "mm": [
+      121.0,
+      69.1
+    ]
+  },
+  "ed_piazza_monumentale": {
+    "n": 42,
+    "mm": [
+      120.7,
+      68.4
+    ]
+  },
+  "ed_fondazione_darte": {
+    "n": 49,
+    "mm": [
+      61.0,
+      72.3
+    ]
+  },
+  "ed_condominio": {
+    "n": 50,
+    "mm": [
+      60.8,
+      72.5
+    ]
+  },
+  "ed_caffe_letterario": {
+    "n": 51,
+    "mm": [
+      60.8,
+      72.5
+    ]
+  },
+  "ed_officina": {
+    "n": 52,
+    "mm": [
+      61.0,
+      54.6
+    ]
+  },
+  "ed_monumento_ai_caduti": {
+    "n": 55,
+    "mm": [
+      61.1,
+      79.6
+    ]
+  },
+  "ed_museo": {
+    "n": 53,
+    "mm": [
+      60.9,
+      54.5
+    ]
+  },
+  "ed_grattacielo": {
+    "n": 58,
+    "mm": [
+      60.8,
+      160.3
+    ]
+  },
+  "ed_biblioteca": {
+    "n": 54,
+    "mm": [
+      60.8,
+      43.1
+    ]
+  },
+  "ed_ponte_in_acciaio": {
+    "n": 57,
+    "mm": [
+      121.1,
+      76.6
+    ]
+  },
+  "ed_stazione": {
+    "n": 60,
+    "mm": [
+      181.1,
+      73.7
+    ]
+  },
+  "ed_parco_archeologico": {
+    "n": 59,
+    "mm": [
+      120.9,
+      55.2
+    ]
+  },
+  "ed_universita": {
+    "n": 56,
+    "mm": [
+      121.3,
+      61.9
+    ]
+  }
 }

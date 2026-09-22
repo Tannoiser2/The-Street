@@ -814,3 +814,51 @@ dato è stato importato da lì. Ma due confronti fra ciò che è stampato e
     invece esiste: lo script non era stato compilato affatto. Vale la pena
     ricordarlo: davanti a un «Nonexistent function» su una classe propria,
     il sospetto giusto e' un errore di compilazione piu' in alto.
+
+61. **Le illustrazioni sulle sagome, e un compromesso che va scelto coi
+    numeri.** Le sagome del PDF hanno il fondo bianco pieno e nessuna
+    trasparenza. Toglierlo "per colore" bucherebbe le nuvole, che sono bianche
+    anche dentro il disegno: il ritaglio parte percio' **dai bordi** e si
+    propaga solo fra pixel contigui. Sta in `tools/estrai_grafica.py`, che ora
+    scrive PNG con alfa per entrambe le varianti.
+
+    A colori finche' l'edificio e' intatto, **in grigio quando e' spento**: il
+    PDF ha i due stati e sono esattamente rudere e rovina. Col disegno sopra,
+    il colore del giocatore non ha piu' dove stare, e va sulla **basetta** -
+    che e' poi cio' che sul tavolo vero distingue due copie della stessa
+    sagoma.
+
+    **L'inclinazione della telecamera e' diventata un compromesso misurabile.**
+    A 62 gradi tutte le file si vedevano intere, ma un cartone in piedi
+    guardato da li' si schiaccia al 47% e con l'illustrazione sopra diventa
+    illeggibile. Abbassando si legge meglio la sagoma e peggio la fila dietro.
+    I due limiti si calcolano:
+
+    | inclinazione | sagoma dietro visibile | scorcio |
+    |---|---|---|
+    | 62° | 100% | 47% |
+    | 50° | 98% | 64% |
+    | **45°** | **82%** | **71%** |
+    | 40° | 69% | 77% |
+
+    Scelti i 45 gradi, e il test ora regge **entrambi** i limiti invece di una
+    soglia sola: almeno il 75% della sagoma dietro, e non meno del 65% di
+    scorcio.
+
+62. **Il passo fra le quote non copre il Grattacielo, ed e' giusto cosi'.**
+    Con le altezze vere prese dal cartone, la sagoma piu' alta e' il
+    Grattacielo: **160 mm** contro un passo di 85. Il test che pretendeva
+    "nessuna sagoma piu' alta del passo" affermava una cosa falsa e l'ho
+    riscritto: il passo copre la sagoma **tipica** (mediana 66), e la piu'
+    alta lo scavalca - che e' quello che fa un grattacielo.
+
+    Che il pezzo piu' alto dei sessanta sia proprio il Grattacielo e' anche
+    una conferma indipendente che la mappatura del punto 56 e' giusta: non
+    l'ho scelto io, e' venuto fuori misurando.
+
+63. **Le misure delle sagome stanno nei dati, non negli assets.** `assets/` si
+    rigenera e non e' versionata, quindi la plancia non puo' dipenderne per
+    sapere quanto e' alta una sagoma. Larghezza e altezza in millimetri stanno
+    percio' in `data/sagome.json` accanto al numero, e senza le immagini la
+    vista ripiega sui rettangoli colorati con le proporzioni giuste. C'e' un
+    test che gira con `assets/sagome` rimossa.

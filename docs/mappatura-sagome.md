@@ -85,6 +85,21 @@ trionfo e basi di colonne sparse lungo un sentiero — uno scavo. La conferma er
 arrivata su una mia lettura sbagliata, quindi la segnalo invece di lasciarla
 passare.
 
+## Le immagini sulla plancia
+
+`tools/estrai_grafica.py` scrive PNG **con trasparenza**: il fondo bianco viene
+tolto con un riempimento dai bordi, non per colore, altrimenti si bucherebbero
+le nuvole bianche dentro il disegno.
+
+La plancia 3D usa la variante **a colori** finché l'edificio è intatto e quella
+**in grigio** quando è spento — rudere o rovina. Il colore del giocatore passa
+sulla basetta, che è poi ciò che sul tavolo vero distingue due copie della
+stessa sagoma.
+
+Le misure in millimetri stanno in `data/sagome.json` accanto al numero, non
+negli assets: `assets/` si rigenera e non è versionata, e la plancia deve saper
+disegnare le proporzioni giuste anche senza le immagini.
+
 ## Come rifare il lavoro
 
 ```bash

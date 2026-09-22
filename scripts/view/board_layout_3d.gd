@@ -88,14 +88,26 @@ static func basetta_box(gs: GameState, b: Building) -> AABB:
 static func tile_box(col: int, era: int) -> AABB:
 	return AABB(Vector3(col_x(col), 0.0, rail_z(era)), Vector3(TESSERA_W, TESSERA_Y, SLOT_D))
 
-# Finche' non si sa quale sagoma appartiene a quale edificio (domande-aperte
-# punto 23), l'altezza e' la MEDIANA misurata per quella larghezza: un numero
-# preso dal cartone vero, non inventato.
+# Le misure della sagoma vera, da data/sagome.json. Se mancano - il file non
+# c'e', o l'edificio non e' mappato - si ripiega sulla mediana misurata per
+# quella larghezza: un numero preso dal cartone, non inventato.
 const ALTEZZA_MEDIANA: Array[float] = [66.0, 66.0, 62.0, 74.0]
 
 static func standee_size(b: Building) -> Vector2:
+	var s: Dictionary = CardDB.sagome.get(str(b.data["id"]), {})
+	if s.has("mm"):
+		var mm: Array = s["mm"]
+		return Vector2(float(mm[0]), float(mm[1]))
 	var n: int = clampi(b.width(), 1, ALTEZZA_MEDIANA.size() - 1)
 	return Vector2(span_w(b.width()), ALTEZZA_MEDIANA[n])
+
+# Il file dell'illustrazione, nello stato giusto: a colori finche' l'edificio
+# e' intatto, in grigio quando e' spento. Stringa vuota se non c'e' mappatura.
+static func sagoma_path(b: Building) -> String:
+	var s: Dictionary = CardDB.sagome.get(str(b.data["id"]), {})
+	if not s.has("n"): return ""
+	var variante := "colore" if b.state == Enums.BuildingState.INTATTO else "grigio"
+	return "res://assets/sagome/%s/%02d.png" % [variante, int(s["n"])]
 
 static func sky_rect(gs: GameState) -> AABB:
 	var z := -CIELO_STACCO
@@ -106,12 +118,17 @@ static func sky_rect(gs: GameState) -> AABB:
 # distanza calcolata perche' la strada riempia il fotogramma. Cosi' vale per
 # 5, 7 o 9 colonne senza ritoccare nulla.
 #
-# L'inclinazione non e' un gusto. I binari sono contigui (54,2 mm) e le sagome
-# sono alte fino a 74: da un angolo basso le file dietro sparirebbero dietro
-# quelle davanti. Il minimo e' atan(altezza / passo) ~ 54 gradi; 62 lascia
-# margine e mostra ancora il cielo.
+# L'inclinazione e' un compromesso fra due cose che tirano in direzioni
+# opposte, e va scelta coi numeri:
+#   - piu' alta: le file dietro si vedono meglio, perche' la fila davanti le
+#     copre meno;
+#   - piu' bassa: le sagome si vedono meglio, perche' un cartone in piedi
+#     guardato dall'alto si schiaccia col coseno.
+# A 62 gradi le file erano tutte intere ma le sagome ridotte al 47%: con le
+# illustrazioni sopra, illeggibili. A 45 gradi resta visibile l'82% di una
+# sagoma dietro quella davanti e lo scorcio sale al 71%.
 const FOV := 40.0
-const INCLINAZIONE := 62.0      # gradi sopra l'orizzonte
+const INCLINAZIONE := 45.0      # gradi sopra l'orizzonte
 const RIEMPIMENTO := 0.80       # quanta larghezza del fotogramma occupa la strada
 const ASPETTO := 1520.0 / 900.0
 
@@ -188,8 +205,17 @@ static func camera_position(gs: GameState) -> Vector3:
 static func riempimento(gs: GameState) -> float:
 	return _ingombro(camera_position(gs), camera_target(gs), table_aabb(gs))
 
-# L'angolo di sguardo, in gradi sopra l'orizzonte. Serve al test: sotto una
-# certa inclinazione le file dietro si occludono fra loro.
+# Quanta parte di una sagoma resta visibile dietro quella della fila davanti,
+# da 0 a 1. E' la meta' del compromesso dell'inclinazione; l'altra meta' e'
+# lo scorcio, che vale semplicemente cos(inclinazione).
+static func quota_visibile(altezza := 66.0) -> float:
+	var nascosto: float = maxf(0.0, altezza - SLOT_D * tan(deg_to_rad(INCLINAZIONE)))
+	return (altezza - nascosto) / altezza
+
+static func scorcio() -> float:
+	return cos(deg_to_rad(INCLINAZIONE))
+
+# L'angolo di sguardo, in gradi sopra l'orizzonte.
 static func camera_pitch_deg(gs: GameState) -> float:
 	var c := camera_position(gs)
 	var t := camera_target(gs)

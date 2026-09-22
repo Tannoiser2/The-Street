@@ -18,8 +18,8 @@ Produce due cose, con due gradi di affidabilità molto diversi.
    Vanno quindi usate come riferimento, NON come faccia della carta in gioco:
    quella va disegnata a runtime dai dati.
 
-2. SAGOME (pagine 1-17 dispari a colori, 2-18 pari in grigio) — mappatura NON
-   DERIVATA. Sono 60 + 60, arte pulita senza testo né numeri, nei due stati:
+2. SAGOME (pagine 1-17 dispari a colori, 2-18 pari in grigio) — mappatura
+   RICAVATA A VISTA, in data/sagome.json. Sono 60 + 60, arte pulita senza testo né numeri, nei due stati:
    il grigio è il lato inattivo del rudere. Sono l'asset giusto per il
    tabellone.
    Il loro ordine però non segue né le ere né l'ordine delle carte: sono
@@ -28,9 +28,13 @@ Produce due cose, con due gradi di affidabilità molto diversi.
    somiglianza con l'arte delle carte è stato provato e ha fallito: 10
    biiezioni su 60, margini sotto lo 0,02. Le sagome sono fustellate con sfondo
    vuoto e proporzioni diverse dalla banda d'arte della carta.
-   Vengono quindi estratte con numerazione stabile in ordine di lettura, più un
-   provino a contatto numerato: la corrispondenza numero -> id va fornita dal
-   designer o verificata a vista, una volta sola.
+   Vengono estratte con numerazione stabile in ordine di lettura; la
+   corrispondenza numero -> id sta in data/sagome.json, ricavata riconoscendo
+   le illustrazioni una per una e chiudendo il resto per esclusione sulla
+   larghezza (vedi docs/mappatura-sagome.md).
+   Escono come PNG con TRASPARENZA: il fondo bianco viene tolto con un
+   riempimento dai bordi, non per colore, altrimenti si bucherebbero le nuvole
+   bianche dentro il disegno.
 
 Uso:  python3 tools/estrai_grafica.py [cartella_destinazione]
       (default: assets/)
@@ -72,6 +76,51 @@ def illustrazioni_di_pagina(doc, n_pagina):
     return trovate
 
 
+# Il fondo delle sagome è bianco pieno, ma bianco c'è anche dentro il disegno
+# (nuvole, pietra chiara). Togliere "tutto il bianco" bucherebbe il cielo:
+# si parte quindi dai BORDI e si propaga solo attraverso pixel contigui, così
+# si rimuove il fondo e nient'altro.
+def senza_fondo(percorso, soglia=232):
+    from collections import deque
+    pix = pymupdf.Pixmap(percorso)
+    if pix.n > 3:
+        pix = pymupdf.Pixmap(pymupdf.csRGB, pix)
+    w, h, s, n = pix.width, pix.height, pix.samples, pix.n
+    fondo = bytearray(w * h)
+    coda = deque()
+
+    def chiaro(i):
+        b = i * n
+        return s[b] >= soglia and s[b + 1] >= soglia and s[b + 2] >= soglia
+
+    bordo = [y * w + x for x in range(w) for y in (0, h - 1)]
+    bordo += [y * w + x for y in range(h) for x in (0, w - 1)]
+    for i in bordo:
+        if not fondo[i] and chiaro(i):
+            fondo[i] = 1
+            coda.append(i)
+    while coda:
+        i = coda.popleft()
+        x, y = i % w, i // w
+        for dx, dy in ((1, 0), (-1, 0), (0, 1), (0, -1)):
+            nx, ny = x + dx, y + dy
+            if nx < 0 or ny < 0 or nx >= w or ny >= h:
+                continue
+            j = ny * w + nx
+            if fondo[j] or not chiaro(j):
+                continue
+            fondo[j] = 1
+            coda.append(j)
+    rgba = bytearray(w * h * 4)
+    for i in range(w * h):
+        b = i * n
+        rgba[i * 4] = s[b]
+        rgba[i * 4 + 1] = s[b + 1]
+        rgba[i * 4 + 2] = s[b + 2]
+        rgba[i * 4 + 3] = 0 if fondo[i] else 255
+    return pymupdf.Pixmap(pymupdf.csRGB, w, h, bytes(rgba), True)
+
+
 def estrai_sagome(doc, dest):
     """Sagome nei due stati, numerate in ordine di lettura. La corrispondenza
     col nome della carta non è derivabile: vedi il commento in testa."""
@@ -84,9 +133,12 @@ def estrai_sagome(doc, dest):
         for p in pagine:
             for _, info in illustrazioni_di_pagina(doc, p):
                 n += 1
-                nome = f"{n:02d}.{info['ext']}"
-                with open(os.path.join(cartella, nome), "wb") as f:
+                grezzo = os.path.join(cartella, f"_tmp.{info['ext']}")
+                with open(grezzo, "wb") as f:
                     f.write(info["image"])
+                nome = f"{n:02d}.png"
+                senza_fondo(grezzo).save(os.path.join(cartella, nome))
+                os.remove(grezzo)
                 out.setdefault(variante, {})[n] = nome
         print(f"estratte {n} sagome ({variante})")
     return out
