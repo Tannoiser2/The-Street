@@ -53,7 +53,7 @@ jobs:
 
       - name: Grafica dai PDF
         run: |
-          pip install --quiet pymupdf
+          python3 -m pip install --quiet pymupdf
           python3 tools/estrai_grafica.py
 
       - name: Export web
