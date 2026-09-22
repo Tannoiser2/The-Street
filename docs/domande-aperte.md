@@ -666,3 +666,66 @@ dato è stato importato da lì. Ma due confronti fra ciò che è stampato e
     esplicitamente. `BoardLayout3D` e' gia' scritto per servirlo - da' le
     posizioni, quindi un raggio dalla telecamera bastera' - ma il raccordo non
     c'e' ancora.
+
+52. **Le misure vere vengono dal PDF, e una smentisce quello che avevo
+    scritto.** Invece di scegliere delle proporzioni a occhio ho misurato la
+    geometria di `materiali/Carte.pdf` - solo geometria, non dati di gioco:
+
+    | pezzo | misura |
+    |---|---|
+    | tessera colonna | **63 x 271 mm**, cioe' 5 binari da **54,2 mm** |
+    | sagome | **61 / 121 / 181 mm** di larghezza, cioe' 1, 2 e 3 slot |
+    | altezze delle sagome | mediane **66 / 62 / 74 mm** per 1 / 2 / 3 slot |
+
+    La larghezza delle sagome si quantizza sul modulo da 60,3 mm: e' la prova
+    che il campo `width` dei dati e il cartone dicono la stessa cosa.
+
+    **La smentita**: al punto 44 avevo scritto che i binari sono distanziati e
+    che e' quello a lasciar vedere i sepolti. Falso. La tessera e' **una sola
+    striscia con cinque binari contigui**; a lasciar vedere le file dietro e'
+    la **basetta**, che dei 54 mm dello slot ne occupa 15 (numero del
+    designer), lasciandone 39 scoperti. Il codice ora lo dice, e un test lo
+    verifica.
+
+    Tutte le costanti della plancia 3D sono percio' in **millimetri**: i
+    numeri del designer entrano verbatim, senza passare da una mia conversione.
+
+53. **La telecamera si calcola, non si aggiusta a occhio.** Due cose sono
+    derivate dalla geometria e non scelte:
+
+    - l'**inclinazione** ha un minimo. Con binari contigui da 54,2 mm e sagome
+      alte fino a 74, sotto circa 54 gradi le file dietro spariscono dietro
+      quelle davanti. Sta a 62, e un test confronta l'inclinazione col minimo
+      calcolato invece che con una soglia a naso;
+    - la **distanza** si trova proiettando gli **otto spigoli** della scena e
+      avvicinandosi finche' entrano tutti. Una stima lineare non basta: la
+      fila davanti e' piu' vicina e la prospettiva la ingrandisce, ed e'
+      esattamente l'errore che avevo fatto - la plancia usciva dal fotogramma
+      in basso. Ora il riempimento vale 0,80 esatto a 5, 7 e 9 colonne, e la
+      telecamera arretra da sola quando le torri salgono.
+
+54. **L'input: il clic e l'anteprima del costo.** `BoardLayout3D.slot_at_ray`
+    porta un raggio della telecamera allo slot: pura, quindi provata headless
+    su **tutti** gli slot e non su un campione. `AvailableActions` elenca cosa
+    si puo' fare adesso col preventivo gia' fatto e, quando l'azione e'
+    illegale, **il motivo in italiano** - il brief chiede l'anteprima del
+    costo, e un "non puoi" senza spiegazione e' la cosa che rende
+    un'interfaccia incomprensibile.
+
+    Il test che conta non e' che la lista esista ma che **mantenga la
+    promessa**: si gioca una partita intera scegliendo solo fra le azioni
+    dichiarate eseguibili, e ogni rifiuto del comando e' un fallimento. Oggi
+    passa su 40 azioni di quattro tipi. Un'interfaccia che offre e poi rifiuta
+    e' peggio di una che non offre nulla.
+
+    `AvailableActions` sta in `rules/` e non in `view/` perche' non e' una
+    cosa di grafica: servira' ai bot della M6, che oggi tentano le azioni a
+    caso per scoprire quali passano.
+
+55. **Cosa manca ancora all'interfaccia.** In ordine di importanza: la scelta
+    del bersaglio dove il regolamento la richiede (l'Impronta, il
+    potenziamento dell'Eruzione, l'Ingegnere militare - punti 27 e 47: oggi
+    `AvailableActions` offre il primo bersaglio legale); le file laterali e le
+    plance degli avversari nella vista 3D, che per ora vivono solo nella 2D;
+    il PNG del cielo al posto del colore pieno; e l'illustrazione sulle
+    sagome, che aspetta la mappatura del punto 23.

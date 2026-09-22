@@ -14,6 +14,7 @@ func _ready() -> void:
 		RandomBot.play_turn(ctl)
 	var vista := preload("res://scripts/view/board_view_3d.gd").new()
 	add_child(vista)
+	vista.scale = Vector3.ONE * BoardLayout3D.U   # dai millimetri alle unita'
 	vista.mostra(ctl.gs)
 	var quote := 0
 	for b in ctl.gs.grid.buildings:

@@ -14,9 +14,11 @@ const TAVOLO := Color("#2b2620")
 const BASETTA := Color("#6f6a63")
 
 var gs: GameState
+var _evidenziata := -1
 
-func mostra(stato: GameState) -> void:
+func mostra(stato: GameState, colonna_evidenziata := -1) -> void:
 	gs = stato
+	_evidenziata = colonna_evidenziata
 	for f in get_children(): f.queue_free()
 	_tavolo()
 	_cielo()
@@ -49,9 +51,9 @@ func _scatola(dim: Vector3, col: Color) -> MeshInstance3D:
 
 func _tavolo() -> void:
 	var w := BoardLayout3D.board_w(gs)
-	var piano := _quad(Vector2(w + 8.0, BoardLayout3D.board_d() + 14.0), TAVOLO, false)
+	var piano := _quad(Vector2(w + 600.0, BoardLayout3D.board_d() + 900.0), TAVOLO, false)
 	piano.rotate_x(-PI / 2.0)
-	piano.position = Vector3(w / 2.0, -0.01, BoardLayout3D.board_d() / 2.0)
+	piano.position = Vector3(w / 2.0, -1.0, BoardLayout3D.board_d() / 2.0)
 	add_child(piano)
 
 # Il pannello verticale che fa da cielo. Per ora un colore pieno: al suo posto
@@ -67,19 +69,24 @@ func _tessere() -> void:
 		var t: int = gs.grid.terrains[c]
 		for era in range(1, BoardLayout3D.RAILS + 1):
 			var box := BoardLayout3D.tile_box(c, era)
-			var m := _scatola(box.size, COLORI_TERRENO[t].darkened(0.08 * (era - 1)))
+			var col: Color = COLORI_TERRENO[t].darkened(0.08 * (era - 1))
+			# La colonna puntata dal mouse si accende: senza, il giocatore non
+			# sa dove sta per cliccare, perche' in prospettiva le colonne non
+			# stanno dove sembra.
+			if c == _evidenziata: col = col.lightened(0.45)
+			var m := _scatola(box.size, col)
 			m.position = box.position + box.size / 2.0
 			add_child(m)
 
 func _edifici() -> void:
 	for b in gs.grid.buildings:
-		if b.level > 0: _basetta(b)
+		_basetta(b)
 		_sagoma(b)
 
-# Il plinto: un dado sotto la sagoma sopraelevata. La basetta vera sono gli
-# edifici sottostanti, che restano visibili perche' i binari sono distanziati.
+# Il piede che tiene in piedi il cartone: 15 mm di profondita' sui 54 dello
+# slot, cosi' il resto resta scoperto e le file dietro si vedono.
 func _basetta(b: Building) -> void:
-	var box := BoardLayout3D.base_box(gs, b)
+	var box := BoardLayout3D.basetta_box(gs, b)
 	var m := _scatola(box.size, BASETTA)
 	m.position = box.position + box.size / 2.0
 	add_child(m)
@@ -94,22 +101,29 @@ func _sagoma(b: Building) -> void:
 	# e lo Scavo finale dipende da lui - ma si spegne, perche' non produce
 	# piu' nulla e non subisce piu' eventi.
 	if b.is_buried: col = col.darkened(0.15).lerp(Color("#5a5a64"), 0.42)
-	var m := _quad(dim, col)
 	var base := BoardLayout3D.standee_base(gs, b)
-	m.position = base + Vector3(0.0, dim.y / 2.0, 0.0)
+	var m := _scatola(Vector3(dim.x, dim.y, BoardLayout3D.SAGOMA_SPESSORE), col)
+	m.position = base + Vector3(0.0, dim.y / 2.0 + BoardLayout3D.BASETTA_Y, 0.0)
 	add_child(m)
-	# Solo cio' che e' in piedi porta il nome: etichettare anche i sepolti
-	# riempirebbe la plancia di scritte accavallate.
+	# Il nome va solo a chi si vede dall'alto della propria colonna: la cima.
+	# Etichettare tutto riempiva la plancia di scritte accavallate, e le
+	# scritte accavallate non si leggono piu' di nessuna.
 	if b.is_buried: return
+	var in_cima := false
+	for c in range(b.col_from, b.col_to):
+		if gs.grid.top_of(c) == b:
+			in_cima = true
+			break
+	if not in_cima: return
 	var eti := Label3D.new()
 	eti.text = str(b.data["name"])
 	eti.font_size = 64
-	eti.pixel_size = 0.0026
+	eti.pixel_size = 0.20
 	eti.billboard = BaseMaterial3D.BILLBOARD_ENABLED
 	eti.no_depth_test = true
-	eti.position = base + Vector3(0.0, dim.y + 0.10, 0.0)
+	eti.position = base + Vector3(0.0, dim.y + BoardLayout3D.BASETTA_Y + 14.0, 0.0)
 	eti.modulate = Color(1, 1, 1, 0.95)
-	eti.outline_size = 20
+	eti.outline_size = 22
 	eti.outline_modulate = Color(0, 0, 0, 0.85)
 	add_child(eti)
 
@@ -133,6 +147,6 @@ func _telecamera() -> void:
 	cam.position = BoardLayout3D.camera_position(gs)
 	cam.look_at_from_position(BoardLayout3D.camera_position(gs),
 		BoardLayout3D.camera_target(gs), Vector3.UP)
-	cam.fov = 52.0
+	cam.fov = BoardLayout3D.FOV
 	cam.current = true
 	add_child(cam)

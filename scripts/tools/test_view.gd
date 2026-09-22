@@ -20,6 +20,10 @@ func _ready() -> void:
 	_run("3D: quote, sagome e plinti", _test_3d_quote)
 	_run("3D: cielo e telecamera", _test_3d_scena)
 	_run("3D: una partita vera sta sulla strada", _test_3d_partita)
+	_run("3D: l'inquadratura si calcola", _test_3d_inquadratura)
+	_run("3D: dal clic allo slot", _test_raggio)
+	_run("le azioni offerte, col preventivo", _test_azioni_offerte)
+	_run("  e la promessa che mantengono", _test_azioni_mantengono_la_promessa)
 	print("\n%d superati, %d falliti" % [_passed, _failed])
 	get_tree().quit(0 if _failed == 0 else 1)
 
@@ -216,24 +220,35 @@ func _test_partita() -> void:
 func _test_3d_assi() -> void:
 	_ok("l'era 1 sta davanti a tutte", BoardLayout3D.rail_z(1) < BoardLayout3D.rail_z(2))
 	_ok("  e l'era 5 in fondo", BoardLayout3D.rail_z(4) < BoardLayout3D.rail_z(5))
-	_ok("i binari sono distanziati: e' cio' che lascia vedere le basette",
-		BoardLayout3D.rail_z(2) - BoardLayout3D.rail_z(1) > BoardLayout3D.SLOT_D)
+	# Misurato dal cartone: la tessera colonna e' un'unica striscia da 271 mm
+	# con cinque binari contigui. Non c'e' nessuno stacco fra i binari, e cio'
+	# che lascia vedere le file dietro e' la basetta, che degli 54 mm dello
+	# slot ne occupa 15.
+	_approx("i binari sono contigui, non distanziati",
+		BoardLayout3D.rail_z(2) - BoardLayout3D.rail_z(1), BoardLayout3D.SLOT_D)
+	_approx("i cinque binari riempiono la tessera",
+		BoardLayout3D.RAILS * BoardLayout3D.SLOT_D, BoardLayout3D.TESSERA_D)
+	_ok("la basetta occupa meno di mezzo slot: e' cosi' che si vede dietro",
+		BoardLayout3D.BASETTA_D < BoardLayout3D.SLOT_D / 2.0)
 	_ok("le colonne procedono lungo la X", BoardLayout3D.col_x(0) < BoardLayout3D.col_x(1))
 	_ok("le quote salgono lungo la Y",
 		BoardLayout3D.level_y(2) > BoardLayout3D.level_y(1))
-	_approx("due colonne sono due slot piu' uno stacco", BoardLayout3D.span_w(2),
-		2.0 * BoardLayout3D.SLOT_W + BoardLayout3D.GAP_X)
+	_approx("una sagoma da due slot e' larga due moduli", BoardLayout3D.span_w(2),
+		2.0 * BoardLayout3D.SAGOMA_MODULO)
+	_ok("e sta dentro le due tessere che occupa",
+		BoardLayout3D.span_w(2) <= 2.0 * BoardLayout3D.TESSERA_W)
 
-	# Le tessere non si compenetrano, ne' di fianco ne' in profondita'.
-	var scontri := 0
+	# Le tessere si toccano ma non si sovrappongono: sono contigue per
+	# costruzione, non per caso.
+	var sovrapposte := 0
 	for c in 4:
-		for e in range(1, BoardLayout3D.RAILS + 1):
+		for e in range(1, BoardLayout3D.RAILS):
 			var a := BoardLayout3D.tile_box(c, e)
-			for c2 in 4:
-				for e2 in range(1, BoardLayout3D.RAILS + 1):
-					if c2 == c and e2 == e: continue
-					if a.intersects(BoardLayout3D.tile_box(c2, e2)): scontri += 1
-	_eq("nessuna tessera tocca un'altra", scontri, 0)
+			var b := BoardLayout3D.tile_box(c, e + 1)
+			if a.position.z + a.size.z > b.position.z + 0.001: sovrapposte += 1
+			var d := BoardLayout3D.tile_box(c + 1, e)
+			if a.position.x + a.size.x > d.position.x + 0.001: sovrapposte += 1
+	_eq("nessuna tessera invade quella accanto", sovrapposte, 0)
 
 # L'errore che avevo fatto: con la quota piu' bassa di una sagoma, due livelli
 # si compenetrano e la plancia diventa illeggibile. Il test lo impedisce per
@@ -255,16 +270,19 @@ func _test_3d_quote() -> void:
 		% [nome, piu_alta, BoardLayout3D.LEVEL_H], piu_alta <= BoardLayout3D.LEVEL_H,
 		"con una sagoma piu' alta del passo, due quote si compenetrano")
 
-	# Il plinto e' un dado sotto la sagoma, non una lastra che copre la
-	# colonna: la basetta vera sono gli edifici sotto, che restano visibili.
+	# La basetta e' il piede da 15 mm che regge il cartone da 4, non una
+	# lastra che copre la colonna: gli edifici sotto devono restare visibili.
 	var sopra := _metti(gs, "ed_capanne", 2, 3, 1)
-	var plinto := BoardLayout3D.base_box(gs, sopra)
-	_approx("il plinto e' profondo uno slot, non tutta la strada",
-		plinto.size.z, BoardLayout3D.SLOT_D)
-	_ok("  ed e' molto piu' sottile della profondita' dei binari",
-		plinto.size.z < BoardLayout3D.board_d() / 2.0)
-	_ok("il plinto sta sotto la sagoma",
-		plinto.position.y + plinto.size.y <= BoardLayout3D.standee_base(gs, sopra).y + 0.001)
+	var basetta := BoardLayout3D.basetta_box(gs, sopra)
+	_approx("la basetta e' profonda 15 mm", basetta.size.z, BoardLayout3D.BASETTA_D)
+	_ok("  cioe' meno di un terzo dello slot",
+		basetta.size.z < BoardLayout3D.SLOT_D / 3.0)
+	_ok("  e molto meno della profondita' della strada",
+		basetta.size.z < BoardLayout3D.board_d() / 10.0)
+	_ok("il cartone e' spesso 4 mm, come il vero",
+		is_equal_approx(BoardLayout3D.SAGOMA_SPESSORE, 4.0))
+	_approx("la basetta poggia alla quota della sagoma",
+		basetta.position.y, BoardLayout3D.standee_base(gs, sopra).y)
 
 func _test_3d_scena() -> void:
 	var gs := _gioco().gs
@@ -314,3 +332,156 @@ func _test_3d_partita() -> void:
 			if a.level == 0 and a.era_built != b2.era_built: continue
 			if a.col_from < b2.col_to and b2.col_from < a.col_to: scontri += 1
 	_eq("nessuna sagoma occupa il posto di un'altra", scontri, 0)
+
+# ---- dal clic allo slot ---------------------------------------------
+func _test_raggio() -> void:
+	var gs := _gioco().gs
+	# Un raggio verticale sul centro di ogni slot deve ritrovare quello slot.
+	# Provati tutti, non uno a campione.
+	var sbagliati := 0
+	for c in gs.grid.n_cols:
+		for era in range(1, BoardLayout3D.RAILS + 1):
+			var centro := BoardLayout3D.slot_center(c, era)
+			var o := centro + Vector3(0, 500, 0)
+			var s := BoardLayout3D.slot_at_ray(gs, o, Vector3(0, -1, 0))
+			if s.is_empty() or int(s["col"]) != c or int(s["era"]) != era: sbagliati += 1
+	_eq("ogni slot si ritrova dal proprio centro", sbagliati, 0)
+
+	# Un raggio obliquo, come quello vero della telecamera.
+	var cam := BoardLayout3D.camera_position(gs)
+	var bersaglio := BoardLayout3D.slot_center(2, 3)
+	var s2 := BoardLayout3D.slot_at_ray(gs, cam, (bersaglio - cam).normalized())
+	_ok("un raggio obliquo trova lo slot che punta", not s2.is_empty())
+	if not s2.is_empty():
+		_eq("  colonna giusta", int(s2["col"]), 2)
+		_eq("  binario giusto", int(s2["era"]), 3)
+
+	# Fuori dal tabellone non si trova nulla, e un raggio che va all'insu'
+	# nemmeno: senza questi due casi il clic prenderebbe cose a caso.
+	var fuori := BoardLayout3D.slot_at_ray(gs, Vector3(-500, 500, 0), Vector3(0, -1, 0))
+	_ok("fuori dalla strada non c'e' slot", fuori.is_empty())
+	var insu := BoardLayout3D.slot_at_ray(gs, BoardLayout3D.slot_center(1, 1) + Vector3(0, 100, 0),
+		Vector3(0, 1, 0))
+	_ok("un raggio verso l'alto non tocca il tavolo", insu.is_empty())
+
+	# L'inclinazione della telecamera: sotto una certa soglia le file dietro
+	# si nascondono dietro quelle davanti, perche' i binari sono contigui.
+	var minima := rad_to_deg(atan2(BoardLayout3D.ALTEZZA_MEDIANA[1], BoardLayout3D.SLOT_D))
+	_ok("la telecamera guarda abbastanza dall'alto (%.0f gradi, minimo %.0f)"
+		% [BoardLayout3D.camera_pitch_deg(gs), minima],
+		BoardLayout3D.camera_pitch_deg(gs) >= minima,
+		"con binari contigui e sagome alte, da piu' in basso le file si occludono")
+
+# ---- le azioni offerte ----------------------------------------------
+func _test_azioni_offerte() -> void:
+	var ctl := _gioco()
+	var gs := ctl.gs
+	ctl.place_worker(2)
+	var col := ctl.colonna_attivata()
+	_eq("il controller dice quale colonna e' attivata", col, 2)
+
+	var tutte := AvailableActions.tutte(gs, gs.current_index, col)
+	_ok("l'elenco non e' vuoto", tutte.size() > 3)
+	var senza_motivo := 0
+	var passa := 0
+	for v in tutte:
+		if not v.legale and v.motivo == "": senza_motivo += 1
+		if v.tipo == "passa": passa += 1
+	_eq("ogni azione rifiutata dice perche'", senza_motivo, 0)
+	_eq("passare c'e' sempre, ed e' l'azione facoltativa", passa, 1)
+
+	var esegui := AvailableActions.eseguibili(gs, gs.current_index, col)
+	_ok("le eseguibili sono un sottoinsieme di tutte", esegui.size() <= tutte.size())
+	var non_pagabili := 0
+	for v in esegui:
+		if not v.legale or not v.pagabile(gs.players[gs.current_index]): non_pagabili += 1
+	_eq("e sono tutte legali e pagabili", non_pagabili, 0)
+
+# La prova che conta: se l'anteprima dice che si puo' fare, il comando deve
+# accettarla. Un'interfaccia che promette e poi rifiuta e' peggio di una che
+# non offre nulla. Si gioca una partita intera scegliendo SOLO dalle
+# eseguibili, e ogni rifiuto e' un fallimento.
+func _test_azioni_mantengono_la_promessa() -> void:
+	var ctl := _gioco()
+	var gs := ctl.gs
+	var rifiuti := 0
+	var tentate := 0
+	var tipi := {}
+	var giri := 0
+	while gs.phase != Enums.Phase.FINE_PARTITA and giri < 3000:
+		giri += 1
+		if gs.phase == Enums.Phase.PIAZZA:
+			var messa := false
+			for c in gs.grid.n_cols:
+				if ctl.place_worker(c):
+					messa = true
+					break
+			if not messa:
+				ctl.pass_action()
+				continue
+		if gs.phase != Enums.Phase.AZIONE: continue
+		var col := ctl.colonna_attivata()
+		var chi := gs.current_index
+		var esegui := AvailableActions.eseguibili(gs, chi, col)
+		# la prima che non sia "passa", cosi' si prova davvero qualcosa
+		var scelta = null
+		for v in esegui:
+			if v.tipo != "passa":
+				scelta = v
+				break
+		if scelta == null:
+			ctl.pass_action()
+			continue
+		tentate += 1
+		tipi[scelta.tipo] = int(tipi.get(scelta.tipo, 0)) + 1
+		var ok := false
+		match scelta.tipo:
+			"costruisci": ok = ctl.build(str(scelta.parametri["card_id"]),
+				int(scelta.parametri["col_from"]), bool(scelta.parametri["above"]))
+			"potenzia": ok = ctl.upgrade(str(scelta.parametri["upg_id"]),
+				_per_uid(gs, int(scelta.parametri.get("uid", -1))))
+			"restaura": ok = ctl.restore(_per_uid(gs, int(scelta.parametri["uid"])))
+			"recluta": ok = ctl.recruit(str(scelta.parametri["char_id"]),
+				_per_uid(gs, int(scelta.parametri.get("uid", -1))))
+			"dinastia": ok = ctl.buy_dynasty()
+		if not ok:
+			rifiuti += 1
+			ctl.pass_action()
+	_ok("la partita finisce giocando dalle azioni offerte", gs.phase == Enums.Phase.FINE_PARTITA)
+	_ok("  e ne ha tentate parecchie (%d)" % tentate, tentate > 30)
+	_ok("  di piu' di un tipo (%s)" % str(tipi), tipi.size() >= 3)
+	_eq("nessuna azione offerta e' stata rifiutata dal comando", rifiuti, 0)
+
+func _per_uid(gs: GameState, uid: int) -> Building:
+	if uid < 0: return null
+	for b in gs.grid.buildings:
+		if b.uid == uid: return b
+	return null
+
+# ---- l'inquadratura -------------------------------------------------
+# La telecamera si calcola, non si aggiusta a occhio: deve far entrare tutta
+# la scena per 5, 7 e 9 colonne e con le torri alte, senza tagliare nulla e
+# senza sprecare mezzo fotogramma.
+func _test_3d_inquadratura() -> void:
+	for n in [2, 3, 4]:
+		var ctl := GameController.new()
+		ctl.new_game(n, 5)
+		var giri := 0
+		while ctl.gs.phase != Enums.Phase.FINE_PARTITA and giri < 4000:
+			RandomBot.play_turn(ctl)
+			giri += 1
+		var r := BoardLayout3D.riempimento(ctl.gs)
+		_ok("%d giocatori (%d colonne): tutta la scena entra nel fotogramma (%.2f)"
+			% [n, ctl.gs.grid.n_cols, r], r <= 1.0,
+			"sopra 1.0 si taglia qualcosa")
+		_ok("  e non se ne spreca meta' (%.2f)" % r, r >= 0.55,
+			"molto sotto 1.0 vuol dire telecamera troppo lontana")
+
+	# Una citta' alta deve far arretrare la telecamera, non farsi tagliare.
+	var a := _gioco().gs
+	var vicino := BoardLayout3D.camera_position(a).distance_to(BoardLayout3D.camera_target(a))
+	for era in range(1, 5):
+		_metti(a, "ed_capanne", 2, era, era)
+	var lontano := BoardLayout3D.camera_position(a).distance_to(BoardLayout3D.camera_target(a))
+	_ok("con le torri la telecamera arretra", lontano > vicino)
+	_ok("  e continua a far entrare tutto", BoardLayout3D.riempimento(a) <= 1.0)

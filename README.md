@@ -63,6 +63,20 @@ tools/scatta.sh plancia.png -- --players 3 --seed 7 --era 4      # vista 2D
 tools/scatta3d.sh strada.png -- --players 3 --seed 7 --era 4    # plancia 3D
 ```
 
+### Giocare
+
+```bash
+godot res://scenes/gioca.tscn
+```
+
+Tu sei il giocatore 0, gli altri li gioca il bot. Clicca una colonna per
+piazzare un lavoratore e attivarla, poi scegli un'azione dall'elenco: ognuna
+porta il costo, e quelle non disponibili portano il motivo.
+
+Le misure della plancia 3D sono in **millimetri**, prese dal cartone vero
+(tessera colonna 63 x 271 mm, sagome da 61 / 121 / 181 mm, basetta 15 mm,
+cartone 4 mm): i numeri del designer entrano nel codice come sono.
+
 Lo script mette `xvfb-run` da solo se non c'e' un display. Disegna una partita
 vera giocata dal RandomBot fino all'era richiesta, cosi' la plancia si guarda
 invece di immaginarla. Utile anche per mostrare al designer com'e' venuta una

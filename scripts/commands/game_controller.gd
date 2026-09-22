@@ -334,6 +334,11 @@ func buy_dynasty() -> bool:
 	_end_turn()
 	return true
 
+# L'interfaccia deve sapere a quale colonna e' legata l'azione: il regolamento
+# dice "sempre legata alla colonna che avete appena attivato".
+func colonna_attivata() -> int:
+	return _activated_col
+
 func pass_action() -> void:
 	if gs.phase == Enums.Phase.AZIONE: _end_turn()
 
