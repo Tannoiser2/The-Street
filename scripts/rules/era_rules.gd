@@ -85,6 +85,11 @@ static func resolve_event(gs: GameState) -> Array[int]:
 			b.upgrades.clear()
 			if not b.owner in persi: persi.append(b.owner)
 			gs.log_line("%s crolla in rovina" % b.data["name"])
+	# Crollare puo' voler dire finire sotterrati: un edificio gia' coperto
+	# dagli strati successivi restava in piedi finche' era intatto, e da
+	# rovina diventa archeologia. Si ricalcola qui perche' questo e' l'unico
+	# punto, oltre alla costruzione, in cui uno stato cambia da solo.
+	gs.grid.refresh_buried()
 	return persi
 
 # ev_eruzione: "chi perde un edificio pesca un potenziamento gratis (massimo

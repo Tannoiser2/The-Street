@@ -1192,6 +1192,16 @@ func _test_pila() -> void:
 		if BoardLayout3D.ha_sagoma(b): sepolti_in_piedi += 1
 	_ok("la partita ha prodotto sepolti (%d)" % sepolti, sepolti > 0)
 	_eq("  e nessuno di loro ha ancora la sagoma in piedi", sepolti_in_piedi, 0)
+	# E NESSUNO DI LORO E' INTATTO. Chi fa da base viene spianato o
+	# schiacciato prima, quindi quando finisce sotto e' gia' rovina:
+	# "intatto e sepolto" e' uno stato che al tavolo non si presenta, e che
+	# qui usciva a decine perche' un solo strato sotterrava tutti e cinque
+	# i binari della colonna.
+	var intatti_sepolti := 0
+	for b in g2.grid.buildings:
+		if b.is_buried and b.state == Enums.BuildingState.INTATTO:
+			intatti_sepolti += 1
+	_eq("  e nessuno di loro e' intatto", intatti_sepolti, 0)
 	_ok("  ma la basetta gli resta, che e' le fondamenta di chi sta sopra",
 		BoardLayout3D.basetta_box(g2, g2.grid.buildings[0]).size.y > 0.0)
 
@@ -1249,8 +1259,29 @@ func _test_carte_giocatore() -> void:
 			if b.position.x >= a.end.x - 0.001 or a.position.x >= b.end.x - 0.001:
 				continue
 			scoperto = minf(scoperto, b.position.z - a.position.z)
-		if scoperto < BoardLayout3D.VENTAGLIO_Z - 0.001: nascoste += 1
+		# Il passo scende con la carta: nel mazzetto le carte si stringono
+		# per stare in due colonne, e la fascia del titolo si stringe con
+		# loro. Si ricava dalla carta disegnata invece di riscriverlo.
+		var passo: float = BoardLayout3D.VENTAGLIO_Z \
+			* (a.size.x / BoardLayout3D.misura_carta("mercato").x)
+		if scoperto < passo - 0.001: nascoste += 1
 	_eq("di ogni carta edificio resta fuori la fascia del titolo", nascoste, 0)
+
+	# E IL MAZZETTO STA IN DUE COLONNE, se le carte sono almeno due: una
+	# colonna sola lunga il doppio allungava il tavolo piu' della strada.
+	var colonne := {}
+	for c in mazzetto: colonne[snappedf((c["aabb"] as AABB).position.x, 0.1)] = true
+	_eq("il mazzetto sta in due colonne", colonne.size(),
+		mini(BoardLayout3D.MAZZETTO_COLONNE, mazzetto.size()))
+	var largo_pieno := BoardLayout3D.misura_carta("mercato")
+	var stretta: AABB = mazzetto[0]["aabb"]
+	_ok("  con le carte strette quel poco che serve (%.2f)"
+		% (stretta.size.x / largo_pieno.x),
+		stretta.size.x <= largo_pieno.x + 0.001
+		and stretta.size.x > largo_pieno.x * 0.7)
+	_ok("  e senza deformarsi",
+		is_equal_approx(stretta.size.x / stretta.size.z,
+			largo_pieno.x / largo_pieno.y))
 
 	# E nessuna finisce addosso al vicino: ognuno sta nella sua fetta.
 	var fetta := BoardLayout3D.board_w(gs) / float(gs.n_players)

@@ -1089,3 +1089,41 @@ dato è stato importato da lì. Ma due confronti fra ciò che è stampato e
     Il PNG del cielo pero' **non e' arrivato**: nel repository non c'e'
     nessuna immagine. Finche' non c'e', il pannello resta a tinta unita.
 
+
+78. **"Intatto e sepolto" era uno stato che al tavolo non esiste.** Il
+    designer l'ha visto nel riquadro di un edificio - *"come fa il condominio
+    a essere intatto e sepolto? E' cosi' per molti edifici, infatti vedo alla
+    fine della partita solo tre sagome"* - e aveva ragione.
+
+    `Grid.refresh_buried` sotterrava **qualsiasi** edificio la cui proiezione
+    fosse coperta da uno strato piu' alto. Ma a quota zero una colonna porta
+    fino a **cinque** edifici, uno per binario d'era: il primo strato
+    costruito sopra ne sotterrava cinque invece di uno. Gli altri quattro
+    restavano INTATTI e sepolti - smettevano di produrre, regalavano lo Scavo
+    al proprietario e sparivano dal tabellone.
+
+    Le due fonti dicono la stessa cosa, e nessuna delle due permette quello
+    stato:
+
+    - il regolamento: *"E' sotterrato qualsiasi edificio su cui e' stata
+      costruita una sopraelevazione"* e *"**una rovina** e' sotterrata quando
+      l'unione degli strati successivi copre interamente la sua proiezione"*.
+      Chi fa da base viene prima spianato o schiacciato, quindi quando viene
+      sotterrato e' gia' rovina;
+    - `reference/simulatore_riferimento.py`, l'oracolo su cui il gioco e'
+      stato bilanciato, sotterra **solo la base** (una per colonna, scelta da
+      `ground_level`) e la marca `spianata` se era intatta, `sotterrata`
+      altrimenti. Nessun altro edificio della colonna viene toccato, e
+      `intact` + sepolto non si presenta mai.
+
+    Correzione adottata: si sotterra **solo una rovina**, e solo quando
+    l'intera proiezione e' coperta. Il ricalcolo gira anche dopo l'evento di
+    fine era, che e' l'unico altro punto in cui uno stato cambia da solo: un
+    edificio gia' coperto restava in piedi finche' era intatto, e crollando
+    diventa archeologia.
+
+    **Ha conseguenze sui punteggi, e vanno riviste in una partita vera**: su
+    otto partite a tre giocatori i sepolti passano da 147 su 225 a 137 su
+    243, e le sagome in piedi a fine partita da 33 a 80. Meno Scavo, piu'
+    rendita e piu' vetusta': e' il conto che il simulatore faceva gia', ma il
+    porting no.

@@ -1367,8 +1367,15 @@ func _test_colossal() -> void:
 	_ok("3. crollando e' rovina in ogni colonna", rovina_ovunque)
 
 	# 4. "valgono il proprio Scavo UNA SOLA VOLTA"
+	# Il soggetto e' una ROVINA, non un intatto: "una rovina e' sotterrata
+	# quando l'unione degli strati successivi copre interamente la sua
+	# proiezione". Un intatto non finisce mai sotto - chi costruisce sopra lo
+	# spiana prima, e diventa rovina - e il simulatore di riferimento fa lo
+	# stesso. Prima qui si copriva un intatto, che e' uno stato che al tavolo
+	# non si presenta.
 	var b2 := _scena()
 	var big2 := _put(b2, col_id, 1)
+	big2.state = Enums.BuildingState.ROVINA
 	for c in range(big2.col_from, big2.col_to):
 		_put(b2, _card_of_class("civico"), c, 1)      # coprono l'intera proiezione
 	b2.grid.refresh_buried()
@@ -1380,6 +1387,7 @@ func _test_colossal() -> void:
 	# 5. "solo quando l'INTERA proiezione e' coperta"
 	var c2 := _scena()
 	var big3 := _put(c2, col_id, 1)
+	big3.state = Enums.BuildingState.ROVINA
 	_put(c2, _card_of_class("civico"), big3.col_from, 1)   # copre una colonna sola
 	c2.grid.refresh_buried()
 	_ok("5. coperto in parte: NON e' sotterrato", not big3.is_buried)
@@ -1387,6 +1395,13 @@ func _test_colossal() -> void:
 		_put(c2, _card_of_class("civico"), c, 1)
 	c2.grid.refresh_buried()
 	_ok("   coperto per intero: e' sotterrato", big3.is_buried)
+
+	# E UN INTATTO NON SI SOTTERRA MAI, per quanto lo si copra: se ne stava
+	# in piedi nel suo binario, e chi costruisce sopra spiana la cima della
+	# colonna, non i cinque edifici che ci stanno a quota zero.
+	big3.state = Enums.BuildingState.INTATTO
+	c2.grid.refresh_buried()
+	_ok("   ma un intatto coperto resta in piedi", not big3.is_buried)
 
 
 # ---- counts_as_class --------------------------------------------------

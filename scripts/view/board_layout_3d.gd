@@ -544,6 +544,12 @@ const CARTE_GIOCATORE_GAP := 5.0
 # precedente lasciandone fuori la fascia del titolo, che e' quanto basta a
 # sapere cosa si ha.
 const VENTAGLIO_Z := 20.0     # quanto resta scoperto di una carta coperta
+# Il mazzetto sta in DUE colonne, e le carte si stringono quel tanto che basta
+# a entrarci: una colonna sola lunga il doppio allungava il tavolo davanti al
+# giocatore piu' della strada stessa. La stretta e' poca - in quattro e' 0,88,
+# in due non serve affatto - e si calcola dal posto disponibile invece di
+# essere un numero scelto a occhio.
+const MAZZETTO_COLONNE := 2
 const VENTAGLIO_Y := 0.25     # ogni carta un filo piu' alta: chi copre sta sopra
 
 # Le carte che un giocatore ha davanti. I potenziamenti no: quelli stanno
@@ -650,9 +656,14 @@ static func _ventaglio(carte: Array, player: int, x0: float, spazio: float,
 		z0: float, ordine0: int) -> Array[Dictionary]:
 	var out: Array[Dictionary] = []
 	if carte.is_empty(): return out
-	var m := misura_carta(str(carte[0]["kind"]))
-	var colonne: int = maxi(1, int(floor((spazio + CARTE_GIOCATORE_GAP)
-		/ (m.x + CARTE_GIOCATORE_GAP))))
+	var piena := misura_carta(str(carte[0]["kind"]))
+	var colonne: int = maxi(1, mini(MAZZETTO_COLONNE, carte.size()))
+	# Quanto puo' essere larga una carta perche' le colonne ci stiano tutte.
+	# Non si ingrandisce mai: al massimo resta com'e'.
+	var posto := (spazio - CARTE_GIOCATORE_GAP * (colonne - 1)) / float(colonne)
+	var scala: float = minf(1.0, posto / piena.x)
+	var m := piena * scala
+	var passo := VENTAGLIO_Z * scala
 	var per_colonna: int = int(ceil(carte.size() / float(colonne)))
 	for j in carte.size():
 		var c: int = j / per_colonna
@@ -661,7 +672,7 @@ static func _ventaglio(carte: Array, player: int, x0: float, spazio: float,
 			"player": player, "ordine": ordine0 + j,
 			"aabb": AABB(
 				Vector3(x0 + c * (m.x + CARTE_GIOCATORE_GAP), r * VENTAGLIO_Y,
-					z0 + r * VENTAGLIO_Z),
+					z0 + r * passo),
 				Vector3(m.x, TESSERA_Y, m.y))})
 	return out
 
