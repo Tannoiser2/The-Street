@@ -64,12 +64,14 @@ segnata qui invece di essere data per buona.
    un potenziamento Struttura gli darebbe resistenza), ma e' il rovescio della
    scelta fatta al punto 8: vale la pena decidere i due casi insieme.
 
-10. **Capienza dei potenziamenti** — "La capienza base e' di un potenziamento per
-    edificio, salvo le carte che ne dichiarano di piu'". Nessuna carta in
-    `cards.json` dichiara oggi una capienza diversa e non esiste un campo per
-    farlo. Adottato 1 fisso (`ActionRules.UPGRADE_CAPACITY`). Se qualche carta
-    deve poterne portare due, serve un campo nel JSON, non un caso speciale nel
-    codice.
+10. ~~**Capienza dei potenziamenti**~~ — **RISOLTA in M4, ed era un mio errore.**
+    Avevo scritto che nessuna carta dichiara una capienza diversa: avevo cercato
+    un campo, non nel testo. Quattro edifici la dichiarano nel proprio
+    `effect_text` — Chiesa, Abbazia, Accademia (2) e Duomo (3) — mentre la M2 ne
+    forzava 1 per tutti. Il regolamento dice "salvo le carte che ne dichiarano di
+    piu'", quindi era un bug, non una lettura ambigua.
+    Aggiunto il campo `upgrade_slots` alle 4 carte e allo schema; `ActionRules`
+    lo legge dalla carta. Le altre 56 non hanno il campo e restano a capienza 1.
 
 11. **Bosco: "il restauro costa 1 in meno" — 1 di cosa?** — il terreno non dice
     se lo sconto sia in pietra o in oro. Adottata la **pietra** (e' la risorsa in
