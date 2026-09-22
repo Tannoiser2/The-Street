@@ -156,13 +156,16 @@ func build(card_id: String, col_from: int, above: bool, pay_option: int = 0, des
 		gs.log_line("%s depredato: diventa rovina" % q.despoiled.data["name"])
 		building_changed.emit(q.despoiled)
 
+	# Il cambio di stato tocca le basi su cui si poggia: lo spianamento del
+	# proprio intatto, il rudere schiacciato in rovina. Il SOTTERRAMENTO no:
+	# e' una condizione di posizione e si ricalcola sotto, quando il nuovo
+	# edificio e' gia' sulla griglia (Grid.refresh_buried).
 	for base in q.bases:
 		if base in q.razed:
 			base.was_razed = true
 			base.state = Enums.BuildingState.ROVINA
 		elif base.state == Enums.BuildingState.RUDERE:
 			base.state = Enums.BuildingState.ROVINA
-		base.is_buried = true
 		building_changed.emit(base)
 
 	var b := Building.new()
@@ -177,6 +180,7 @@ func build(card_id: String, col_from: int, above: bool, pay_option: int = 0, des
 	if gs.grid.terrains[col_from] == Enums.Terrain.COLLINA: b.bonus_res += 1
 	b.charges = int(data.get("exhaustible", 0))
 	gs.grid.buildings.append(b)
+	gs.grid.refresh_buried()
 	if above:
 		for c in range(b.col_from, b.col_to): gs.grid.risen_this_era[c] = true
 	p.buildings_built += 1

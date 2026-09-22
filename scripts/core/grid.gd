@@ -60,3 +60,26 @@ func owners_alive_in(col: int) -> Array:
 
 func reset_era_flags() -> void:
 	risen_this_era.clear()
+
+# --- sotterramento ---------------------------------------------------
+# "Una rovina e' sotterrata quando l'unione degli strati successivi copre
+# INTERAMENTE la sua proiezione, anche se quegli strati appartengono a ere
+# diverse." Non basta che il nuovo edificio le stia sopra in una colonna:
+# un edificio da 1 casella costruito su uno da 2 ne sotterra solo meta',
+# e quella meta' non basta.
+# Va ricalcolato su tutti gli edifici dopo ogni costruzione, perche' un nuovo
+# strato puo' completare la copertura di un edificio coperto solo in parte
+# molte ere prima.
+func refresh_buried() -> void:
+	for b in buildings:
+		b.is_buried = is_fully_covered(b)
+
+func is_fully_covered(b: Building) -> bool:
+	for c in range(b.col_from, b.col_to):
+		var covered := false
+		for o in buildings:
+			if o != b and o.level > b.level and o.covers(c):
+				covered = true
+				break
+		if not covered: return false
+	return true
