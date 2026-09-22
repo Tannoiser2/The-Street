@@ -14,6 +14,18 @@ var _righe: Array[Rect2] = []        # i loro riquadri, per il clic
 var _colonna_sotto_mouse := -1
 var _messaggio := ""
 
+# Il mouse fa tre cose e non devono pestarsi i piedi: il sinistro trascinato
+# gira il tabellone, il sinistro premuto e rilasciato fermo sceglie, il destro
+# sposta e la rotella avvicina. Il confine fra "clic" e "trascinata" e' una
+# soglia in pixel: sotto quella il gesto resta un clic, cosi' una mano che
+# trema non fa girare il tavolo e non fa perdere la selezione.
+const SOGLIA_TRASCINAMENTO := 5.0
+
+var _orbita: CameraOrbita = null
+var _premuto := MOUSE_BUTTON_NONE
+var _partenza := Vector2.ZERO
+var _trascinato := false
+
 func _ready() -> void:
 	ctl = GameController.new()
 	ctl.new_game(3, 7)
@@ -31,6 +43,12 @@ func _ready() -> void:
 	_aggiorna()
 
 func _aggiorna() -> void:
+	# Finche' il giocatore non tocca la telecamera, l'inquadratura continua a
+	# calcolarsi da sola e arretra man mano che le torri salgono. Appena la
+	# muove, comanda lui e nessun aggiornamento gliela riporta indietro.
+	if _orbita == null or _orbita.e_iniziale():
+		_orbita = CameraOrbita.da_stato(ctl.gs)
+		vista.orbita = _orbita
 	vista.mostra(ctl.gs, _colonna_sotto_mouse)
 	vista.scale = Vector3.ONE * BoardLayout3D.U
 	_menu.queue_redraw()
@@ -45,14 +63,60 @@ func _turni_dei_bot() -> void:
 
 # ---- input ----------------------------------------------------------
 func _unhandled_input(evento: InputEvent) -> void:
-	if evento is InputEventMouseMotion:
-		var c := _colonna_puntata(evento.position)
-		if c != _colonna_sotto_mouse:
-			_colonna_sotto_mouse = c
-			_aggiorna()
-	elif evento is InputEventMouseButton and evento.pressed \
-			and evento.button_index == MOUSE_BUTTON_LEFT:
-		_clic(evento.position)
+	if evento is InputEventMouseButton:
+		_bottone(evento)
+	elif evento is InputEventMouseMotion:
+		_movimento(evento)
+	elif evento is InputEventKey and evento.pressed and not evento.echo \
+			and evento.keycode in [KEY_HOME, KEY_R]:
+		_orbita.reimposta()
+		_messaggio = "Inquadratura ripristinata."
+		_aggiorna()
+
+func _bottone(e: InputEventMouseButton) -> void:
+	match e.button_index:
+		MOUSE_BUTTON_WHEEL_UP:
+			if e.pressed: _zoom(1.0)
+		MOUSE_BUTTON_WHEEL_DOWN:
+			if e.pressed: _zoom(-1.0)
+		MOUSE_BUTTON_LEFT, MOUSE_BUTTON_RIGHT, MOUSE_BUTTON_MIDDLE:
+			if e.pressed:
+				_premuto = e.button_index
+				_partenza = e.position
+				_trascinato = false
+			else:
+				if _premuto == MOUSE_BUTTON_LEFT and not _trascinato:
+					_clic(e.position)
+				elif _trascinato:
+					# Durante la trascinata la scena non si ridisegna: a gesto
+					# finito si riallinea l'evidenziazione della colonna, che
+					# ora sta sotto un altro pixel.
+					_colonna_sotto_mouse = _colonna_puntata(e.position)
+					_aggiorna()
+				_premuto = MOUSE_BUTTON_NONE
+
+func _movimento(e: InputEventMouseMotion) -> void:
+	if _premuto != MOUSE_BUTTON_NONE:
+		if not _trascinato \
+				and e.position.distance_to(_partenza) < SOGLIA_TRASCINAMENTO:
+			return
+		_trascinato = true
+		if _premuto == MOUSE_BUTTON_LEFT:
+			_orbita.ruota(e.relative)
+		else:
+			_orbita.trasla(e.relative, get_viewport().get_visible_rect().size.y)
+		# Si muove la sola telecamera: ricostruire la scena a ogni pixel di
+		# trascinamento sarebbe uno spreco e la farebbe scattare.
+		vista.muovi_telecamera()
+		return
+	var c := _colonna_puntata(e.position)
+	if c != _colonna_sotto_mouse:
+		_colonna_sotto_mouse = c
+		_aggiorna()
+
+func _zoom(passi: float) -> void:
+	_orbita.zoom(passi)
+	vista.muovi_telecamera()
 
 # Dal pixel allo slot: si costruisce il raggio della telecamera e si chiede a
 # BoardLayout3D dove cade. La stessa geometria che disegna.
@@ -193,6 +257,14 @@ func _disegna_menu() -> void:
 	if _messaggio != "": invito += "     — " + _messaggio
 	_menu.draw_string(font, Vector2(20, 54), invito, HORIZONTAL_ALIGNMENT_LEFT, -1, 14,
 		Color("#9aa0ad"))
+
+	# I comandi della telecamera scritti dove si vedono: un tabellone che si
+	# gira e non lo dice equivale a un tabellone che non si gira.
+	var schermo := _menu.get_viewport_rect().size
+	_menu.draw_string(font, Vector2(20, schermo.y - 16),
+		"Trascina per girare il tabellone · rotella per avvicinare · "
+		+ "tasto destro per spostare · R riporta l'inquadratura di partenza",
+		HORIZONTAL_ALIGNMENT_LEFT, -1, 12, Color("#6f7683"))
 
 	# La scelta in sospeso prende il posto del menu: e' l'unica cosa da fare.
 	if not gs.pending_choice.is_empty():

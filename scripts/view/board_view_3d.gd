@@ -15,6 +15,10 @@ const BASETTA := Color("#6f6a63")
 
 var gs: GameState
 var _evidenziata := -1
+# La telecamera che il giocatore puo' girare. Se non c'e', si usa
+# l'inquadratura calcolata da BoardLayout3D e basta.
+var orbita: CameraOrbita = null
+var _cam: Camera3D = null
 
 func mostra(stato: GameState, colonna_evidenziata := -1) -> void:
 	gs = stato
@@ -174,13 +178,34 @@ func _luci() -> void:
 	add_child(amb)
 
 func _telecamera() -> void:
-	var cam := Camera3D.new()
-	cam.position = BoardLayout3D.camera_position(gs)
-	cam.look_at_from_position(BoardLayout3D.camera_position(gs),
-		BoardLayout3D.camera_target(gs), Vector3.UP)
-	cam.fov = BoardLayout3D.FOV
-	cam.current = true
-	add_child(cam)
+	_cam = Camera3D.new()
+	_cam.fov = BoardLayout3D.FOV
+	_cam.current = true
+	add_child(_cam)
+	muovi_telecamera()
+
+# Sposta la sola telecamera, senza ricostruire la scena: e' quello che serve
+# mentre si trascina, dove un rebuild a ogni pixel sarebbe uno spreco.
+#
+# La posa si costruisce nello spazio LOCALE e non con look_at_from_position,
+# che in Godot lavora in coordinate GLOBALI. Qui la differenza non e' un
+# dettaglio: le misure sono in millimetri e questo nodo e' rimpicciolito di U,
+# quindi una posizione globale in millimetri mette la telecamera cento volte
+# piu' lontano del tavolo. Il risultato e' una plancia grande come un
+# francobollo - che nessun test di geometria vede, perche' i numeri che
+# calcolano sono giusti: sbagliato e' lo spazio in cui finiscono.
+func muovi_telecamera() -> void:
+	if _cam == null: return
+	var dove := BoardLayout3D.camera_position(gs)
+	var mira := BoardLayout3D.camera_target(gs)
+	if orbita != null:
+		dove = orbita.posizione()
+		mira = orbita.mira
+	_cam.transform = Transform3D(Basis(), dove).looking_at(mira, Vector3.UP)
+	# Il piano di taglio deve stare dietro al tavolo anche quando si e'
+	# allontanato al massimo, altrimenti allontanandosi la citta' sparisce.
+	_cam.far = maxf(4000.0, dove.distance_to(mira)
+		+ BoardLayout3D.scene_aabb(gs).size.length() * 2.0)
 
 # ---- le file e le plance, sul tavolo --------------------------------
 const CARTA_SFONDO := Color("#3a3f4b")
