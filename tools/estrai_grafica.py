@@ -39,7 +39,7 @@ Produce due cose, con due gradi di affidabilità molto diversi.
 Uso:  python3 tools/estrai_grafica.py [cartella_destinazione]
       (default: assets/)
 """
-import json, os, sys
+import hashlib, json, os, sys
 
 try:
     import pymupdf
@@ -187,6 +187,77 @@ def _verifica_stati(doc):
         print(f"  i due stati combaciano in tutte le {len(col)} posizioni")
 
 
+# Tutti i gruppi di materiale del PDF, con la pagina e quanti pezzi aspettarsi.
+# Le pagine PARI sono il retro del foglio e vanno lette a specchio: vedi
+# illustrazioni_di_pagina. Il conteggio atteso non è decorativo - è il
+# controllo che accorge se il PDF cambia sotto i piedi.
+GRUPPI = [
+    ("edifici",          [19, 21, 23, 25, 27], False, 60),
+    ("eventi",           [29, 31],             False, 24),
+    ("personaggi",       [39, 41, 43],         False, 25),
+    ("monumenti",        [37],                 False, 14),
+    ("eredita",          [33, 35],             False, 16),
+    ("tessere",          [47, 49, 51, 53],     False, 14),
+]
+# I dorsi: una sola immagine ripetuta, o poche (una per era).
+GRUPPI_DORSI = [
+    ("edifici",     [28],             True),
+    ("eventi",      [30, 32],         True),
+    ("personaggi",  [40, 42, 44],     True),
+    ("monumenti",   [38],             True),
+    ("eredita",     [34, 36],         True),
+    ("dinastia",    [45, 46],         False),
+]
+
+
+def estrai_gruppo(doc, dest, nome, pagine, specchiata, attesi, ordine=None):
+    """Estrae un gruppo. Col suo ordine salva per id, altrimenti numerato."""
+    cartella = os.path.join(dest, "carte", nome)
+    os.makedirs(cartella, exist_ok=True)
+    n, per_id, saltate = 0, 0, 0
+    for p in pagine:
+        for _, info in illustrazioni_di_pagina(doc, p, specchiata):
+            n += 1
+            etichetta = f"{n:02d}"
+            if ordine and n <= len(ordine):
+                if ordine[n - 1] is None:
+                    saltate += 1          # porta il disegno di un'altra carta
+                    continue
+                etichetta = ordine[n - 1]
+                per_id += 1
+            grezzo = os.path.join(cartella, f"_tmp.{info['ext']}")
+            with open(grezzo, "wb") as f:
+                f.write(info["image"])
+            senza_fondo(grezzo).save(os.path.join(cartella, f"{etichetta}.png"))
+            os.remove(grezzo)
+    stato = "OK" if n == attesi else f"ATTESI {attesi}"
+    come = f", {per_id} per id" if per_id else ", numerate"
+    salto = f", {saltate} saltate (disegno di un'altra carta)" if saltate else ""
+    print(f"  {nome}: {n} pezzi ({stato}){come}{salto}")
+    return n
+
+
+def estrai_dorsi(doc, dest, nome, pagine, specchiata):
+    """Di un dorso basta una copia per disegno distinto."""
+    cartella = os.path.join(dest, "carte", "dorsi")
+    os.makedirs(cartella, exist_ok=True)
+    visti, scritti = set(), 0
+    for p in pagine:
+        for _, info in illustrazioni_di_pagina(doc, p, specchiata):
+            h = hashlib.sha256(info["image"]).hexdigest()
+            if h in visti:
+                continue
+            visti.add(h)
+            scritti += 1
+            grezzo = os.path.join(cartella, f"_tmp.{info['ext']}")
+            with open(grezzo, "wb") as f:
+                f.write(info["image"])
+            senza_fondo(grezzo).save(
+                os.path.join(cartella, f"{nome}_{scritti}.png"))
+            os.remove(grezzo)
+    return scritti
+
+
 def main(dest):
     cards = json.load(open(os.path.join(ROOT, "data", "cards.json"), encoding="utf-8"))
     per_era = {}
@@ -194,6 +265,9 @@ def main(dest):
         per_era.setdefault(b["era"], []).append(b)
 
     doc = pymupdf.open(PDF)
+
+    # Gli edifici sono l'unico gruppo con la mappatura VERIFICATA: si salvano
+    # direttamente col proprio id invece che numerati.
     carte_dest = os.path.join(dest, "carte", "edifici")
     os.makedirs(carte_dest, exist_ok=True)
     scritti, indice = 0, {}
@@ -212,16 +286,72 @@ def main(dest):
             indice[b["id"]] = {"file": nome, "nome": b["name"], "era": era,
                                "px": [info["width"], info["height"]]}
             scritti += 1
+    print(f"estratte {scritti} facce di edificio, mappate per id")
+
+    # Il lato ROVINA sta sul retro dello stesso foglio, quindi impaginato a
+    # specchio. Letto al contrario torna nello stesso ordine delle facce:
+    # verificato leggendo i nomi stampati sulle carte dell'era 1, dove le
+    # dodici posizioni coincidono una a una. Si salvano percio' anch'esse
+    # per id, non numerate.
+    # L'era 5 non ha lato rovina, e non e' una dimenticanza: l'era Moderna non
+    # ha evento, quindi un edificio dell'era 5 non diventa mai rudere e la sua
+    # rovina resterebbe comunque sepolta sotto chi ci costruisce sopra. Quello
+    # spazio porta infatti il dorso del mazzo.
+    rov_dest = os.path.join(dest, "carte", "edifici_rovina")
+    os.makedirs(rov_dest, exist_ok=True)
+    rovine = 0
+    for era, pagina in PAGINE_EDIFICI.items():
+        if era >= 5:
+            continue
+        ordinati = ordine_pdf(per_era[era])
+        imgs = illustrazioni_di_pagina(doc, pagina + 1, True)
+        if len(imgs) != 12:
+            sys.exit(f"pagina {pagina + 1}: attese 12 rovine, trovate {len(imgs)}")
+        for b, (_, info) in zip(ordinati, imgs):
+            with open(os.path.join(rov_dest, f"{b['id']}.{info['ext']}"), "wb") as f:
+                f.write(info["image"])
+            indice[b["id"]]["rovina"] = f"{b['id']}.{info['ext']}"
+            rovine += 1
+    print(f"estratti {rovine} lati rovina, mappati per id (l'era 5 non ne ha)")
+
+    # Gli altri gruppi hanno la mappatura in data/carte_pdf.json, ricavata
+    # leggendo i nomi stampati sulle carte. Dove c'è si salva per id; dove la
+    # posizione porta il disegno di un'altra carta (`null`) si salta.
+    ordini = {}
+    percorso_ordini = os.path.join(ROOT, "data", "carte_pdf.json")
+    if os.path.exists(percorso_ordini):
+        ordini = json.load(open(percorso_ordini, encoding="utf-8"))
+
+    print("altri gruppi:")
+    conteggi = {"edifici": scritti}
+    for nome, pagine, specchiata, attesi in GRUPPI:
+        if nome == "edifici":
+            continue
+        conteggi[nome] = estrai_gruppo(doc, dest, nome, pagine, specchiata, attesi,
+                                       ordini.get(nome))
+    for nome, pagine, specchiata in GRUPPI_DORSI:
+        estrai_dorsi(doc, dest, nome, pagine, specchiata)
+
+    # Quello che nel PDF non c'è. Meglio dirlo a ogni estrazione che
+    # scoprirlo quando serve.
+    mancanti = []
+    for chiave, etichetta in (("upgrades", "potenziamenti"),):
+        if conteggi.get(etichetta, 0) < len(cards[chiave]):
+            mancanti.append(f"{etichetta} ({len(cards[chiave])} nei dati, "
+                            f"{conteggi.get(etichetta, 0)} nel PDF)")
+    if mancanti:
+        print("  NEL PDF NON CI SONO: " + ", ".join(mancanti))
 
     sag = estrai_sagome(doc, dest)
     with open(os.path.join(dest, "indice.json"), "w", encoding="utf-8") as f:
         json.dump({"carte_edifici": indice,
                    "sagome": sag,
+                   "conteggi": conteggi,
                    "nota_sagome": "numerazione in ordine di lettura; la "
-                                  "corrispondenza con gli id non e' derivata"},
+                                  "corrispondenza con gli id sta in "
+                                  "data/sagome.json"},
                   f, ensure_ascii=False, indent=2)
-    print(f"estratte {scritti} facce di carta in {os.path.relpath(carte_dest, ROOT)}")
-    print("indice.json: carte mappate per id (verificato), sagome solo numerate")
+    print("indice.json scritto")
 
 
 if __name__ == "__main__":

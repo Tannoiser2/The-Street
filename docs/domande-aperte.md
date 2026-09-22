@@ -913,3 +913,38 @@ dato è stato importato da lì. Ma due confronti fra ciò che è stampato e
     schermo due pixel. Portati a 9 mm, che e' poi la misura di un cubetto da
     gioco vero. E' il primo posto in cui ho scelto la leggibilita' contro la
     scala esatta, e vale la pena averlo scritto.
+
+68. **Del PDF estraevo un settimo di quello che contiene.** Il designer ha
+    fatto notare che «tutte le carte non sono state importate», ed era vero:
+    l'estrattore prendeva le cinque pagine delle facce degli edifici e basta.
+    Il PDF contiene anche i **lati rovina**, gli **eventi**, i **personaggi**,
+    i **monumenti**, le **eredita'**, la **Dinastia**, le **tessere colonna** e
+    i **dorsi**. Ora li prende tutti; la mappa sta in
+    `docs/materiali-di-stampa.md`.
+
+    Le mappature le ho ricavate **leggendo i nomi stampati sulle carte**, che
+    a differenza delle sagome i nomi ce l'hanno. Tre gruppi seguono ordini
+    diversi: gli eventi l'ordine del JSON, i personaggi lo stesso ma con le
+    posizioni 4-6 permutate, monumenti ed eredita' un ordine proprio. Nessuna
+    regola valeva per tutti, quindi nessuna si poteva indovinare.
+
+69. **Mancano 28 carte, e due assenze sono di peso.** Nel PDF non c'e' nessuna
+    carta **potenziamento**: 25 nei dati, zero fra i materiali. E mancano tre
+    eventi gravi dell'era 2 - **Eruzione, Persecuzioni, Guerra civile** - le
+    cui posizioni portano una seconda stampa di tre carte dell'era 3.
+
+    L'Eruzione e' la carta di cui ho appena implementato il potenziamento
+    omaggio con tanto di sospensione della fine dell'era: esiste nelle regole e
+    nei dati, ma non ha una carta da mettere in tavola.
+
+    A differenza dei duplicati delle sagome, queste non sono copie byte per
+    byte: stessa carta e stesso testo, illustrazione rigenerata. L'ho
+    verificato prima confrontando gli hash (che le davano distinte) e poi
+    guardandole grandi, perche' il primo confronto mi aveva ingannato.
+
+70. **Il lato rovina dell'era 5 non manca: non serve.** La pagina 28 porta il
+    dorso del mazzo invece delle dodici rovine dell'era 5. Sembra una lacuna e
+    non lo e': l'era Moderna non ha evento, quindi un edificio dell'era 5 non
+    diventa mai rudere - misurato, **0 su 113** in 40 partite - e l'unico modo
+    in cui puo' finire in rovina e' essere spianato da chi ci costruisce sopra,
+    cioe' restando sepolto e invisibile. Quel lato non lo vedrebbe nessuno.
