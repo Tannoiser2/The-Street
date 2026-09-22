@@ -4,7 +4,11 @@ Registro delle ambiguità incontrate durante l'implementazione. Formato: regola,
 
 ## Già note al momento del passaggio
 
-1. **Mulino** — il requisito "pianura adiacente a fiume" è solo nel testo effetto, non nel campo `terrain`. Va gestito come caso speciale o va aggiunto un campo `terrain_adjacent`?
+1. ~~**Mulino**~~ — **RISOLTA in M4:** aggiunto il campo `terrain_adjacent` alla
+   carta e allo schema, come suggeriva la domanda stessa. `BuildRules.terrain_ok`
+   lo legge; nessun caso speciale nel codice (principio 3). Il requisito è ora
+   verificato da tre test: pianura con fiume accanto è legale, senza fiume no, e
+   un fiume a due colonne di distanza non basta.
 2. **Verticalità con arrotondamenti** — la metà "proporzionale" del premio produce frazioni. Lettura provvisoria: arrotondare per ciascun proprietario; il totale può quindi differire di ±1 dal premio.
 3. **Scavo condiviso** — chi sotterra un edificio altrui prende +1 PV. Serve tracciare in `Building` chi ha costruito la sopraelevazione.
 4. **Effetti delle carte** — tutti ancora in `effect_text`. Vedi Milestone 4.

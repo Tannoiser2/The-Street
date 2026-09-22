@@ -197,8 +197,7 @@
         "oro": 0,
         "cultura": 0
       },
-      "exhaustible": 0,
-      "effect_text": "Il suo Scavo vale solo se è Sotterrata: le pitture rupestri si scoprono scavando."
+      "exhaustible": 0
     },
     {
       "id": "ed_approdo",
@@ -330,7 +329,17 @@
         "cultura": 0
       },
       "exhaustible": 0,
-      "effect_text": "Quartiere: +1 pietra quando abiti qui."
+      "effect_text": "Quartiere: +1 pietra quando abiti qui.",
+      "effects": [
+        {
+          "hook": "on_activate",
+          "op": "resource",
+          "pietra": 1,
+          "target": {
+            "is_self": true
+          }
+        }
+      ]
     },
     {
       "id": "ed_trappole_da_pesca",
@@ -410,7 +419,18 @@
         "cultura": 0
       },
       "exhaustible": 0,
-      "effect_text": "Quartiere: +1 res ai tuoi edifici adiacenti."
+      "effect_text": "Quartiere: +1 res ai tuoi edifici adiacenti.",
+      "effects": [
+        {
+          "hook": "on_event",
+          "op": "resistance",
+          "value": 1,
+          "target": {
+            "owner": "self",
+            "adjacent_to_self": true
+          }
+        }
+      ]
     },
     {
       "id": "ed_tumulo_funerario",
@@ -437,8 +457,7 @@
         "oro": 0,
         "cultura": 0
       },
-      "exhaustible": 0,
-      "effect_text": "Doppia classe: conta come entrambe, nel bene e negli eventi."
+      "exhaustible": 0
     },
     {
       "id": "ed_teatro",
@@ -492,7 +511,30 @@
         "cultura": 0
       },
       "exhaustible": 0,
-      "effect_text": "Colossale: 2 slot adiacenti (3 pagando +1 pietra; in 2 giocatori il terzo slot è vietato), almeno uno con fiume. Eco: +2 PV (lampo) se ancora in piedi nel Moderno."
+      "effect_text": "Colossale: 2 slot adiacenti (3 pagando +1 pietra; in 2 giocatori il terzo slot è vietato), almeno uno con fiume. Eco: +2 PV (lampo) se ancora in piedi nel Moderno.",
+      "effects": [
+        {
+          "hook": "on_final_scoring",
+          "op": "vp",
+          "value": 2,
+          "condition": {
+            "op": "count_matching",
+            "min": 1,
+            "target": {
+              "is_self": true,
+              "state": [
+                "intatto"
+              ],
+              "buried": false
+            }
+          }
+        },
+        {
+          "hook": "on_build",
+          "op": "rule_override",
+          "name": "colossal"
+        }
+      ]
     },
     {
       "id": "ed_terme",
@@ -573,7 +615,18 @@
         "cultura": 0
       },
       "exhaustible": 0,
-      "effect_text": "Quartiere: +1 res ai tuoi edifici adiacenti."
+      "effect_text": "Quartiere: +1 res ai tuoi edifici adiacenti.",
+      "effects": [
+        {
+          "hook": "on_event",
+          "op": "resistance",
+          "value": 1,
+          "target": {
+            "owner": "self",
+            "adjacent_to_self": true
+          }
+        }
+      ]
     },
     {
       "id": "ed_tempio",
@@ -627,7 +680,18 @@
         "cultura": 0
       },
       "exhaustible": 0,
-      "effect_text": "Quartiere: +1 produzione agli edifici adiacenti."
+      "effect_text": "Quartiere: +1 produzione agli edifici adiacenti.",
+      "effects": [
+        {
+          "hook": "on_activate",
+          "op": "production_delta",
+          "pietra": 1,
+          "oro": 1,
+          "target": {
+            "adjacent_to_self": true
+          }
+        }
+      ]
     },
     {
       "id": "ed_emporio",
@@ -733,7 +797,14 @@
         "cultura": 0
       },
       "exhaustible": 0,
-      "effect_text": "Colossale: occupa 2 slot adiacenti, si attiva da entrambe le colonne e conta come strato in entrambe. Produce 1 oro a ogni attivazione — il Colosseo vende i biglietti."
+      "effect_text": "Colossale: occupa 2 slot adiacenti, si attiva da entrambe le colonne e conta come strato in entrambe. Produce 1 oro a ogni attivazione — il Colosseo vende i biglietti.",
+      "effects": [
+        {
+          "hook": "on_build",
+          "op": "rule_override",
+          "name": "colossal"
+        }
+      ]
     },
     {
       "id": "ed_castrum",
@@ -760,7 +831,18 @@
         "cultura": 0
       },
       "exhaustible": 0,
-      "effect_text": "+1 res ai tuoi edifici in questa colonna."
+      "effect_text": "+1 res ai tuoi edifici in questa colonna.",
+      "effects": [
+        {
+          "hook": "on_event",
+          "op": "resistance",
+          "value": 1,
+          "target": {
+            "owner": "self",
+            "same_column_as_self": true
+          }
+        }
+      ]
     },
     {
       "id": "ed_borgo",
@@ -813,7 +895,18 @@
         "cultura": 0
       },
       "exhaustible": 0,
-      "effect_text": "Quartiere: +1 res agli edifici adiacenti (anche altrui)."
+      "effect_text": "Quartiere: +1 res agli edifici adiacenti (anche altrui).",
+      "effects": [
+        {
+          "hook": "on_event",
+          "op": "resistance",
+          "value": 1,
+          "target": {
+            "owner": "any",
+            "adjacent_to_self": true
+          }
+        }
+      ]
     },
     {
       "id": "ed_cappella",
@@ -921,7 +1014,7 @@
         "cultura": 0
       },
       "exhaustible": 0,
-      "effect_text": "Requisito: la colonna è Pianura ed è adiacente a una colonna Fiume. Produce 2 oro."
+      "terrain_adjacent": "fiume"
     },
     {
       "id": "ed_chiesa",
@@ -949,7 +1042,6 @@
         "cultura": 0
       },
       "exhaustible": 0,
-      "effect_text": "Capienza potenziamenti: 2.",
       "upgrade_slots": 2
     },
     {
@@ -1003,7 +1095,17 @@
         "cultura": 0
       },
       "exhaustible": 0,
-      "effect_text": "Quando abiti qui, +1 oro."
+      "effect_text": "Quando abiti qui, +1 oro.",
+      "effects": [
+        {
+          "hook": "on_activate",
+          "op": "resource",
+          "oro": 1,
+          "target": {
+            "is_self": true
+          }
+        }
+      ]
     },
     {
       "id": "ed_castello",
@@ -1057,7 +1159,6 @@
         "cultura": 0
       },
       "exhaustible": 0,
-      "effect_text": "Capienza potenziamenti: 2.",
       "upgrade_slots": 2
     },
     {
@@ -1085,7 +1186,21 @@
         "cultura": 0
       },
       "exhaustible": 0,
-      "effect_text": "Quartiere: i tuoi edifici Militari adiacenti +1 res."
+      "effect_text": "Quartiere: i tuoi edifici Militari adiacenti +1 res.",
+      "effects": [
+        {
+          "hook": "on_event",
+          "op": "resistance",
+          "value": 1,
+          "target": {
+            "owner": "self",
+            "class": [
+              "militare"
+            ],
+            "adjacent_to_self": true
+          }
+        }
+      ]
     },
     {
       "id": "ed_bottega_dartista",
@@ -1112,7 +1227,18 @@
         "cultura": 0
       },
       "exhaustible": 0,
-      "effect_text": "I tuoi potenziamenti costano 1 oro in meno."
+      "effect_text": "I tuoi potenziamenti costano 1 oro in meno.",
+      "effects": [
+        {
+          "hook": "on_build",
+          "op": "cost_delta",
+          "oro": -1,
+          "what": "upgrade",
+          "target": {
+            "owner": "self"
+          }
+        }
+      ]
     },
     {
       "id": "ed_giardino_allitaliana",
@@ -1193,7 +1319,25 @@
         "cultura": 0
       },
       "exhaustible": 0,
-      "effect_text": "Eco: +2 PV (lampo) se ancora in piedi a fine partita."
+      "effect_text": "Eco: +2 PV (lampo) se ancora in piedi a fine partita.",
+      "effects": [
+        {
+          "hook": "on_final_scoring",
+          "op": "vp",
+          "value": 2,
+          "condition": {
+            "op": "count_matching",
+            "min": 1,
+            "target": {
+              "is_self": true,
+              "state": [
+                "intatto"
+              ],
+              "buried": false
+            }
+          }
+        }
+      ]
     },
     {
       "id": "ed_banco",
@@ -1326,7 +1470,6 @@
         "cultura": 0
       },
       "exhaustible": 0,
-      "effect_text": "Capienza potenziamenti: 2.",
       "upgrade_slots": 2
     },
     {
@@ -1355,7 +1498,6 @@
         "cultura": 0
       },
       "exhaustible": 0,
-      "effect_text": "Capienza potenziamenti: 3. Richiede livello 2+.",
       "upgrade_slots": 3
     },
     {
@@ -1410,7 +1552,19 @@
         "cultura": 0
       },
       "exhaustible": 0,
-      "effect_text": "A fine partita: +1 PV per tuo edificio in cima adiacente. Richiede livello 1+."
+      "effect_text": "A fine partita: +1 PV per tuo edificio in cima adiacente. Richiede livello 1+.",
+      "effects": [
+        {
+          "hook": "on_final_scoring",
+          "op": "vp_per",
+          "value": 1,
+          "target": {
+            "owner": "self",
+            "adjacent_to_self": true,
+            "is_top": true
+          }
+        }
+      ]
     },
     {
       "id": "ed_fondazione_darte",
@@ -1437,7 +1591,18 @@
         "cultura": 0
       },
       "exhaustible": 0,
-      "effect_text": "I tuoi potenziamenti valgono +1 PV."
+      "effect_text": "I tuoi potenziamenti valgono +1 PV.",
+      "effects": [
+        {
+          "hook": "on_final_scoring",
+          "op": "vp_per",
+          "value": 1,
+          "per": "upgrade",
+          "target": {
+            "owner": "self"
+          }
+        }
+      ]
     },
     {
       "id": "ed_condominio",
@@ -1491,7 +1656,24 @@
         "cultura": 0
       },
       "exhaustible": 0,
-      "effect_text": "Quartiere: +1 PV se adiacente a un edificio Cultura."
+      "effect_text": "Quartiere: +1 PV se adiacente a un edificio Cultura.",
+      "effects": [
+        {
+          "hook": "on_final_scoring",
+          "op": "vp",
+          "value": 1,
+          "condition": {
+            "op": "count_matching",
+            "min": 1,
+            "target": {
+              "adjacent_to_self": true,
+              "class": [
+                "cultura"
+              ]
+            }
+          }
+        }
+      ]
     },
     {
       "id": "ed_officina",
@@ -1545,7 +1727,21 @@
         "cultura": 0
       },
       "exhaustible": 0,
-      "effect_text": "Sacrario: +1 PV per ogni altro tuo edificio Militare, in piedi o Sotterrato."
+      "effect_text": "Sacrario: +1 PV per ogni altro tuo edificio Militare, in piedi o Sotterrato.",
+      "effects": [
+        {
+          "hook": "on_final_scoring",
+          "op": "vp_per",
+          "value": 1,
+          "target": {
+            "owner": "self",
+            "class": [
+              "militare"
+            ],
+            "is_self": false
+          }
+        }
+      ]
     },
     {
       "id": "ed_museo",
@@ -1572,7 +1768,18 @@
         "cultura": 0
       },
       "exhaustible": 0,
-      "effect_text": "+2 PV per ogni edificio Sotterrato sotto di sé. Richiede livello 1+."
+      "effect_text": "+2 PV per ogni edificio Sotterrato sotto di sé. Richiede livello 1+.",
+      "effects": [
+        {
+          "hook": "on_final_scoring",
+          "op": "vp_per",
+          "value": 2,
+          "target": {
+            "buried": true,
+            "below_self": true
+          }
+        }
+      ]
     },
     {
       "id": "ed_grattacielo",
@@ -1599,7 +1806,29 @@
         "cultura": 0
       },
       "exhaustible": 0,
-      "effect_text": "Svettante: +1 PV per livello a cui è costruito. Quartiere: −1 PV agli edifici in cima adiacenti altrui, valutato a fine partita. Richiede livello 2+."
+      "effect_text": "Svettante: +1 PV per livello a cui è costruito. Quartiere: −1 PV agli edifici in cima adiacenti altrui, valutato a fine partita. Richiede livello 2+.",
+      "effects": [
+        {
+          "hook": "on_final_scoring",
+          "op": "vp_per",
+          "value": 1,
+          "per": "level",
+          "target": {
+            "is_self": true
+          }
+        },
+        {
+          "hook": "on_final_scoring",
+          "op": "vp_per",
+          "value": -1,
+          "to": "target_owner",
+          "target": {
+            "owner": "others",
+            "adjacent_to_self": true,
+            "is_top": true
+          }
+        }
+      ]
     },
     {
       "id": "ed_biblioteca",
@@ -1626,7 +1855,19 @@
         "cultura": 0
       },
       "exhaustible": 0,
-      "effect_text": "+1 PV per classe diversa fra i tuoi edifici in questa colonna, Sotterrati inclusi."
+      "effect_text": "+1 PV per classe diversa fra i tuoi edifici in questa colonna, Sotterrati inclusi.",
+      "effects": [
+        {
+          "hook": "on_final_scoring",
+          "op": "vp_per",
+          "value": 1,
+          "per": "distinct_class",
+          "target": {
+            "owner": "self",
+            "same_column_as_self": true
+          }
+        }
+      ]
     },
     {
       "id": "ed_ponte_in_acciaio",
@@ -1681,7 +1922,14 @@
         "cultura": 0
       },
       "exhaustible": 0,
-      "effect_text": "Colossale: 2 slot adiacenti, si attiva da entrambe le colonne. Produce 2 oro. Richiede livello 1+."
+      "effect_text": "Colossale: 2 slot adiacenti, si attiva da entrambe le colonne. Produce 2 oro. Richiede livello 1+.",
+      "effects": [
+        {
+          "hook": "on_build",
+          "op": "rule_override",
+          "name": "colossal"
+        }
+      ]
     },
     {
       "id": "ed_parco_archeologico",
@@ -1708,7 +1956,20 @@
         "cultura": 0
       },
       "exhaustible": 0,
-      "effect_text": "Finale: fino a 2 tuoi edifici non Sotterrati nelle colonne adiacenti valgono il loro Scavo come se lo fossero."
+      "effect_text": "Finale: fino a 2 tuoi edifici non Sotterrati nelle colonne adiacenti valgono il loro Scavo come se lo fossero.",
+      "effects": [
+        {
+          "hook": "on_final_scoring",
+          "op": "vp_per",
+          "value_from": "scavo",
+          "cap": 2,
+          "target": {
+            "owner": "self",
+            "buried": false,
+            "adjacent_to_self": true
+          }
+        }
+      ]
     },
     {
       "id": "ed_universita",
@@ -1736,7 +1997,18 @@
         "cultura": 0
       },
       "exhaustible": 0,
-      "effect_text": "+1 PV per ogni tuo personaggio reclutato. Richiede livello 1+."
+      "effect_text": "+1 PV per ogni tuo personaggio reclutato. Richiede livello 1+.",
+      "effects": [
+        {
+          "hook": "on_final_scoring",
+          "op": "vp_per",
+          "value": 1,
+          "per": "recruited_character",
+          "target": {
+            "owner": "self"
+          }
+        }
+      ]
     }
   ],
   "characters": [

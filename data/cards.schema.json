@@ -141,6 +141,18 @@
               "minimum": 1
             }
           }
+        },
+        "is_self": {
+          "type": "boolean",
+          "description": "L'edificio che porta l'effetto."
+        },
+        "is_top": {
+          "type": "boolean",
+          "description": "E' in cima a una delle colonne che occupa."
+        },
+        "below_self": {
+          "type": "boolean",
+          "description": "Sta sotto la sorgente, nella stessa colonna."
         }
       }
     },
@@ -239,12 +251,30 @@
         },
         "value_from": {
           "enum": [
-            "scavo"
+            "scavo",
+            "level"
           ],
           "description": "Solo per op=vp_per: il valore viene da un campo della carta invece che da `value`."
         },
         "condition": {
           "$ref": "#/$defs/condition"
+        },
+        "to": {
+          "enum": [
+            "self",
+            "target_owner"
+          ],
+          "description": "A chi vanno i punti. Default self."
+        },
+        "per": {
+          "enum": [
+            "building",
+            "distinct_class",
+            "level",
+            "upgrade",
+            "recruited_character"
+          ],
+          "description": "Solo per op=vp_per: cosa si conta. Default building."
         }
       }
     },
@@ -428,6 +458,10 @@
             "items": {
               "$ref": "#/$defs/effect"
             }
+          },
+          "terrain_adjacent": {
+            "$ref": "#/$defs/terrain",
+            "description": "Richiede una colonna ADIACENTE di questo terreno, oltre al proprio `terrain`."
           }
         }
       }

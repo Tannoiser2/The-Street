@@ -14,7 +14,7 @@ extends RefCounted
 # dichiarano: se qualcuno struttura un effetto nuovo senza implementarlo, il
 # test lo segnala invece di lasciarlo passare per attivo.
 const APPLIED_HOOK_OPS: Array[String] = [
-	"on_event:resistance",      # i 24 eventi
+	"on_event:resistance",      # i 24 eventi e le aure degli edifici
 	"on_era_end:resource",      # ev_inverno_lungo
 	"on_acquire:resource",      # "Subito: +N pietra/oro" dei personaggi
 	"on_acquire:vp",            # "Subito: +N cultura"
@@ -90,11 +90,23 @@ static func matches(gs: GameState, b: Building, t: Dictionary, source: Building 
 
 	if t.has("column") and not _column_ok(gs, b, t["column"]): return false
 
+	if t.has("is_self"):
+		if source == null: return false
+		if (b == source) != bool(t["is_self"]): return false
+	if t.has("is_top") and _is_top(gs, b) != bool(t["is_top"]): return false
+	if t.get("below_self", false):
+		if source == null or b.level >= source.level or not _shares_column(b, source): return false
 	if t.get("adjacent_to_self", false):
 		if source == null or not _adjacent(b, source): return false
 	if t.get("same_column_as_self", false):
 		if source == null or not _shares_column(b, source): return false
 	return true
+
+# In cima ad almeno una delle colonne che occupa.
+static func _is_top(gs: GameState, b: Building) -> bool:
+	for c in range(b.col_from, b.col_to):
+		if gs.grid.top_of(c) == b: return true
+	return false
 
 # Una sola colonna dell'ingombro che soddisfi la condizione basta: l'edificio
 # e' esposto anche li'.
@@ -118,8 +130,13 @@ static func _in_range(v: int, r: Dictionary) -> bool:
 	if r.has("max") and v > int(r["max"]): return false
 	return true
 
+# "Adiacente" vuol dire accanto, non sovrapposto: le colonne si toccano ma non
+# si intersecano. Due edifici nella stessa colonna sono "same_column", non
+# "adjacent".
 static func _adjacent(a: Building, b: Building) -> bool:
-	return a != b and a.col_from <= b.col_to and b.col_from <= a.col_to
+	if a == b: return false
+	if a.col_from < b.col_to and b.col_from < a.col_to: return false
+	return a.col_to == b.col_from or b.col_to == a.col_from
 
 static func _shares_column(a: Building, b: Building) -> bool:
 	return a != b and a.col_from < b.col_to and b.col_from < a.col_to
@@ -136,6 +153,18 @@ static func event_resistance_modifier(gs: GameState, b: Building) -> int:
 		if e["hook"] != "on_event" or e["op"] != "resistance": continue
 		if matches(gs, b, e.get("target", {})):
 			mod += int(e["value"])
+	return mod + aura_resistance_modifier(gs, b)
+
+# Aure di edificio: "Quartiere: +1 res ai tuoi edifici adiacenti", Castrum,
+# Arsenale, Mura. La sorgente deve essere viva: un edificio spento non protegge.
+static func aura_resistance_modifier(gs: GameState, b: Building) -> int:
+	var mod := 0
+	for src in gs.grid.buildings:
+		if not src.is_alive(): continue
+		for e in src.data.get("effects", []):
+			if e["hook"] != "on_event" or e["op"] != "resistance": continue
+			if matches(gs, b, e.get("target", {}), src):
+				mod += int(e["value"])
 	return mod
 
 # ---- hook: on_acquire (applica) ------------------------------------

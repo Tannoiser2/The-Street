@@ -28,10 +28,19 @@ static func terrain_ok(gs: GameState, data: Dictionary, col_from: int, col_to: i
 		for c in range(col_from, col_to):
 			if g.terrains[c] == Enums.Terrain.FIUME: return true
 		return false
-	# TODO(Mulino): "pianura adiacente a fiume" è nel testo effetto; gestirlo come caso speciale.
 	var want := Enums.terrain_from_string(req)
+	var found := false
 	for c in range(max(0, col_from - 1), min(g.n_cols, col_to + 1)):
-		if g.terrains[c] == want: return true
+		if g.terrains[c] == want: found = true; break
+	if not found: return false
+	# `terrain_adjacent`: un secondo terreno richiesto in una colonna ADIACENTE
+	# (il Mulino: "la colonna e' Pianura ed e' adiacente a una colonna Fiume").
+	# E' un campo della carta, non un caso speciale nel codice.
+	var adj = data.get("terrain_adjacent")
+	if adj == null: return true
+	var want2 := Enums.terrain_from_string(adj)
+	for c in [col_from - 1, col_to]:
+		if c >= 0 and c < g.n_cols and g.terrains[c] == want2: return true
 	return false
 
 # ---- spoliazione ---------------------------------------------------

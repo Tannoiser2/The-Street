@@ -17,8 +17,18 @@ implementarli**. Questo è quello.
 >    useranno Monumenti ed Eredità («se hai già 3+ edifici Sotterrati, +1 PV»).
 >    Riuso, non proliferazione.
 >
-> **Stato: implementati i blocchi EVENTI e PERSONAGGI (dati); del secondo il
-> motore applica per ora i soli «Subito:».** Lo schema qui descritto è in
+> **Il blocco EDIFICI ha richiesto altre estensioni**, sempre dichiarate:
+> predicati di selettore `is_self`, `is_top`, `below_self`; campo `to`
+> (`self` | `target_owner`, per il malus del Grattacielo agli avversari); campo
+> `per` su `vp_per` (`building` | `distinct_class` | `level` | `upgrade` |
+> `recruited_character`); `value_from` ammette anche `level`. Più il campo
+> `terrain_adjacent` sugli edifici, che **chiude la domanda aperta 1** (Mulino)
+> con un campo invece che con un caso speciale.
+>
+> **Stato: dati strutturati per EVENTI, PERSONAGGI ed EDIFICI. Il motore
+> applica: i modificatori di resistenza degli eventi, le aure di Quartiere e di
+> colonna degli edifici, i «Subito:» dei personaggi, due override e il
+> requisito di terreno adiacente. `Effects.pending()` elenca il resto.** Lo schema qui descritto è in
 > `data/cards.schema.json`, tutti e 24 gli eventi hanno il campo `effects`, e
 > `Effects` li applica. Gli altri blocchi (personaggi, edifici, potenziamenti,
 > Monumenti, Eredità) sono ancora solo proposta: le cinque decisioni in fondo

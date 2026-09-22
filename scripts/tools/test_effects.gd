@@ -13,6 +13,8 @@ func _ready() -> void:
 	_run("modificatori di resistenza, evento per evento", _test_events)
 	_run("effetti non di resistenza", _test_non_resistance)
 	_run("override dichiarati ma non ancora applicati", _test_pending)
+	_run("aure degli edifici", _test_auras)
+	_run("requisito di terreno adiacente", _test_terrain_adjacent)
 	_run("lo schema e' davvero chiuso", _test_schema_closed)
 	print("\n%d superati, %d falliti" % [_passed, _failed])
 	get_tree().quit(0 if _failed == 0 else 1)
@@ -353,3 +355,93 @@ func _test_schema_closed() -> void:
 		cases[label].call(copy)
 		var v := SchemaValidator.new()
 		_ok("rifiuta: %s" % label, not v.validate(copy, schema))
+
+
+# ---- aure degli edifici ---------------------------------------------
+func _test_auras() -> void:
+	# Castrum: "+1 res ai tuoi edifici in questa colonna"
+	var ctl := _game()
+	var gs := ctl.gs
+	_flat(gs, Enums.Terrain.PIANURA)
+	_set_event(gs, "ev_diluvio")                 # evento su fiume: qui non morde
+	var castrum := _put(gs, "ed_castrum", 1)     # occupa le colonne 1-2
+	var mio := _put(gs, "ed_capanne", 1)
+	var lontano := _put(gs, "ed_capanne", 5)
+	var altrui := _put(gs, "ed_capanne", 2)
+	altrui.owner = 1
+	_eq("Castrum · mio edificio nella stessa colonna → +1", Effects.aura_resistance_modifier(gs, mio), 1)
+	_eq("  mio edificio lontano → 0", Effects.aura_resistance_modifier(gs, lontano), 0)
+	_eq("  edificio altrui nella colonna → 0", Effects.aura_resistance_modifier(gs, altrui), 0)
+	_eq("  il Castrum non potenzia se stesso", Effects.aura_resistance_modifier(gs, castrum), 0)
+
+	# la sorgente spenta non protegge piu'
+	castrum.state = Enums.BuildingState.RUDERE
+	_eq("  Castrum ridotto a rudere → l'aura si spegne", Effects.aura_resistance_modifier(gs, mio), 0)
+
+	# Mura: "+1 res agli edifici adiacenti (anche altrui)"
+	var ctl2 := _game()
+	var gs2 := ctl2.gs
+	_flat(gs2, Enums.Terrain.PIANURA)
+	_set_event(gs2, "ev_diluvio")
+	_put(gs2, "ed_mura", 2)                      # colonna 2
+	var vicino := _put(gs2, "ed_capanne", 3)
+	var nemico := _put(gs2, "ed_capanne", 1)
+	nemico.owner = 1
+	var stessa := _put(gs2, "ed_capanne", 2)
+	_eq("Mura · adiacente mio → +1", Effects.aura_resistance_modifier(gs2, vicino), 1)
+	_eq("  adiacente altrui → +1 (le Mura proteggono tutti)", Effects.aura_resistance_modifier(gs2, nemico), 1)
+	_eq("  stessa colonna → 0: adiacente non vuol dire sovrapposto",
+		Effects.aura_resistance_modifier(gs2, stessa), 0)
+
+	# Arsenale: solo i propri Militari adiacenti
+	var ctl3 := _game()
+	var gs3 := ctl3.gs
+	_flat(gs3, Enums.Terrain.PIANURA)
+	_set_event(gs3, "ev_diluvio")
+	_put(gs3, "ed_arsenale", 0)                  # colonne 0-1
+	var mil := _put(gs3, _card_of_class("militare"), 2)
+	var civ := _put(gs3, _card_of_class("civico"), 2)
+	_eq("Arsenale · Militare adiacente → +1", Effects.aura_resistance_modifier(gs3, mil), 1)
+	_eq("  non Militare adiacente → 0", Effects.aura_resistance_modifier(gs3, civ), 0)
+
+	# l'aura arriva davvero fino alla risoluzione dell'evento
+	var ctl4 := _game()
+	var gs4 := ctl4.gs
+	_flat(gs4, Enums.Terrain.PIANURA)
+	_set_event(gs4, "ev_faide_tribali")          # Civico -2
+	_put(gs4, "ed_villaggio_palizzato", 0)       # Quartiere: +1 ai propri adiacenti
+	var civico := _put(gs4, "ed_capanne", 2)
+	_eq("l'evento e l'aura si sommano nel modificatore finale",
+		Effects.event_resistance_modifier(gs4, civico), -1)
+
+# ---- terrain_adjacent ------------------------------------------------
+func _test_terrain_adjacent() -> void:
+	var mulino: Dictionary = CardDB.buildings["ed_mulino"]
+	_eq("il Mulino dichiara il requisito nel campo, non nel testo",
+		mulino.get("terrain_adjacent"), "fiume")
+
+	# pianura con fiume accanto: legale
+	var ctl := _game()
+	var gs := ctl.gs
+	_flat(gs, Enums.Terrain.PIANURA)
+	gs.era = int(mulino["era"])
+	gs.grid.terrains[2] = Enums.Terrain.FIUME
+	var q := BuildRules.quote_rail(gs, 0, mulino, 1)
+	_ok("pianura con una colonna fiume adiacente: legale", q.legal, q.reason)
+
+	# pianura senza fiume accanto: rifiutato
+	var ctl2 := _game()
+	var gs2 := ctl2.gs
+	_flat(gs2, Enums.Terrain.PIANURA)
+	gs2.era = int(mulino["era"])
+	var q2 := BuildRules.quote_rail(gs2, 0, mulino, 1)
+	_ok("pianura senza fiume adiacente: rifiutato", not q2.legal)
+
+	# fiume nella colonna stessa, ma non adiacente: non basta
+	var ctl3 := _game()
+	var gs3 := ctl3.gs
+	_flat(gs3, Enums.Terrain.PIANURA)
+	gs3.era = int(mulino["era"])
+	gs3.grid.terrains[4] = Enums.Terrain.FIUME
+	_ok("fiume a due colonne di distanza: rifiutato",
+		not BuildRules.quote_rail(gs3, 0, mulino, 1).legal)
