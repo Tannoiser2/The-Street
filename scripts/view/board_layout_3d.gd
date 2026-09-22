@@ -432,47 +432,59 @@ const MISURE_CARTE := {
 	"dinastia": Vector2(95.0, 95.0),
 }
 
-static func misura_carta(tipo: String) -> Vector2:
-	return MISURE_CARTE.get(tipo, Vector2(CARTA, CARTA))
+# TUTTE LE CARTE IN PIEDI ALLA STESSA ALTEZZA. Sul foglio di stampa non lo
+# sono - la Dinastia e' 95 mm, un edificio 62 - e a schermo la differenza
+# diventava enorme: le carte grandi schiacciavano le altre e il tavolo non
+# sembrava piu' un mazzo solo. Si porta ognuna alla stessa altezza tenendo
+# le sue proporzioni, cosi' i disegni non si deformano e le larghezze
+# restano diverse come sul cartone.
+#
+# Monumenti ed eredita' non entrano nel conto: sono tessere lunghe e basse,
+# impaginate di traverso, e tirarle a questa altezza le farebbe larghe mezzo
+# metro. Restano quello che sono, cioe' un altro oggetto.
+const ALTEZZA_CARTA := 72.0
+const CARTE_IN_PIEDI: Array[String] = ["mercato", "personaggio",
+	"potenziamento", "dinastia"]
 
-# Impila le carte in colonna lungo Z, ognuna con la SUA misura: una fila che
-# mescola personaggi, potenziamenti e monumenti mette insieme tre formati
-# diversi, e forzarli tutti in un quadrato deformava i disegni.
-# `x` e' il bordo verso la strada: le carte piu' strette restano allineate a
-# quel lato invece di ballare al centro.
-static func _colonna_di_carte(x: float, misure: Array) -> Array[AABB]:
-	var out: Array[AABB] = []
-	if misure.is_empty(): return out
-	var totale := 0.0
-	for m in misure: totale += m.y
-	totale += CARTA_GAP * (misure.size() - 1)
-	var z := board_d() / 2.0 - totale / 2.0
-	for m in misure:
-		out.append(AABB(Vector3(x, 0.0, z), Vector3(m.x, TESSERA_Y, m.y)))
-		z += m.y + CARTA_GAP
-	return out
+static func misura_carta(tipo: String) -> Vector2:
+	var m: Vector2 = MISURE_CARTE.get(tipo, Vector2(CARTA, CARTA))
+	if not (tipo in CARTE_IN_PIEDI) or m.y <= 0.0: return m
+	return Vector2(m.x * ALTEZZA_CARTA / m.y, ALTEZZA_CARTA)
 
 # Tutte le carte delle file, ognuna col suo riquadro: serve a disegnarle e a
 # cliccarle. `kind` dice a quale fila appartiene, `id` quale carta e'.
 static func side_cards(gs: GameState, umano := -1) -> Array[Dictionary]:
 	var out: Array[Dictionary] = []
 
-	# A SINISTRA il mercato, una colonna sola, appoggiata al proprio bordo
-	# destro cosi' le carte guardano la strada.
-	var sinistra: Array = []
-	for id in gs.market: sinistra.append(["mercato", str(id)])
-	var mis_sx: Array = []
-	for c in sinistra: mis_sx.append(misura_carta(str(c[0])))
-	var largo_sx := 0.0
-	for m in mis_sx: largo_sx = maxf(largo_sx, m.x)
-	var box_sx := _colonna_di_carte(-(largo_sx + BORDO), mis_sx)
-	for i in sinistra.size():
-		var b: AABB = box_sx[i]
-		b.position.x += largo_sx - b.size.x
-		out.append({"kind": str(sinistra[i][0]), "id": str(sinistra[i][1]), "aabb": b})
-
+	out.append_array(_fila_sinistra(gs))
 	out.append_array(_fila_destra(gs))
 	out.append_array(player_cards(gs, umano))
+	return out
+
+# A SINISTRA il mercato, in DUE FILE DA TRE. In una colonna sola le sei
+# carte erano piu' lunghe della strada e la prima finiva fuori dal
+# tabellone, sospesa nel nulla; in due file ci stanno tutte dentro.
+# Le file sono appoggiate al bordo verso la strada, cosi' le carte la
+# guardano invece di ballare al centro.
+static func _fila_sinistra(gs: GameState) -> Array[Dictionary]:
+	var out: Array[Dictionary] = []
+	if gs.market.is_empty(): return out
+	var m := misura_carta("mercato")
+	var per_fila: int = int(ceil(gs.market.size() / 2.0))
+	var righe: int = mini(per_fila, gs.market.size())
+	var alto := righe * m.y + maxf(0.0, righe - 1) * CARTA_GAP
+	var z0 := board_d() / 2.0 - alto / 2.0
+	# Il bordo destro del blocco tocca lo stacco dalla strada; la fila con la
+	# x piu' grande e' quella vicina alla strada.
+	var quante_file: int = 1 if gs.market.size() <= per_fila else 2
+	var x0 := -(BORDO + quante_file * m.x + (quante_file - 1) * CARTA_GAP)
+	for i in gs.market.size():
+		var fila := i / per_fila
+		var riga := i % per_fila
+		out.append({"kind": "mercato", "id": str(gs.market[i]),
+			"aabb": AABB(
+				Vector3(x0 + fila * (m.x + CARTA_GAP), 0.0, z0 + riga * (m.y + CARTA_GAP)),
+				Vector3(m.x, TESSERA_Y, m.y))})
 	return out
 
 # A DESTRA due file affiancate: i personaggi in colonna e, a fianco di

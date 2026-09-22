@@ -43,6 +43,7 @@ func _ready() -> void:
 	_run("  e a che velocita' si muovono i bot", _test_velocita_bot)
 	_run("il conto finale, diviso per fonte", _test_riepilogo)
 	_run("il terrapieno si paga e si vede", _test_terrapieni)
+	_run("le carte stanno in piedi alla stessa altezza", _test_misure_carte)
 	print("\n%d superati, %d falliti" % [_passed, _failed])
 	get_tree().quit(0 if _failed == 0 else 1)
 
@@ -1454,6 +1455,80 @@ func _test_terrapieni() -> void:
 	# Chi poggia su basi vere non riporta niente, e non si disegna niente.
 	_eq("senza colonne nude non c'e' terra da riportare",
 		BoardLayout3D.terrapieni(gs, sotto).size(), 0)
+
+# LE MISURE DELLE CARTE. Sul foglio di stampa non sono alte uguali - la
+# Dinastia e' 95 mm, un edificio 62 - e a schermo la differenza diventava
+# enorme: le carte grandi schiacciavano le altre e il tavolo non sembrava
+# piu' un mazzo solo. E le sei del mercato, in una colonna sola, erano piu'
+# lunghe della strada: la prima finiva fuori dal tabellone, sospesa nel nulla.
+func _test_misure_carte() -> void:
+	# Stessa altezza, proporzioni salve: il disegno non si deforma.
+	var storte := 0
+	for tipo in BoardLayout3D.CARTE_IN_PIEDI:
+		var m := BoardLayout3D.misura_carta(str(tipo))
+		if not is_equal_approx(m.y, BoardLayout3D.ALTEZZA_CARTA): storte += 1
+		var vera: Vector2 = BoardLayout3D.MISURE_CARTE[str(tipo)]
+		if not is_equal_approx(m.x / m.y, vera.x / vera.y): storte += 1
+	_eq("le carte in piedi sono alte uguali, senza deformarsi", storte, 0)
+	_ok("  e la piu' larga non e' il doppio della piu' stretta in altezza",
+		is_equal_approx(BoardLayout3D.misura_carta("dinastia").y,
+			BoardLayout3D.misura_carta("mercato").y))
+	# Le tessere lunghe restano quello che sono: tirarle a quell'altezza le
+	# farebbe larghe mezzo metro.
+	_approx("i monumenti restano tessere basse",
+		BoardLayout3D.misura_carta("monumento").y,
+		BoardLayout3D.MISURE_CARTE["monumento"].y)
+
+	# IL MERCATO STA DENTRO LA STRADA. E' il difetto che si vedeva: la prima
+	# carta usciva dal tabellone.
+	var gs := _gioco().gs
+	var mercato: Array = []
+	for c in BoardLayout3D.side_cards(gs):
+		if str(c["kind"]) == "mercato": mercato.append(c["aabb"])
+	_eq("ci sono tutte le carte del mercato", mercato.size(), gs.market.size())
+	var fuori := 0
+	for b in mercato:
+		var r: AABB = b
+		if r.position.z < -0.001 or r.end.z > BoardLayout3D.board_d() + 0.001:
+			fuori += 1
+	_eq("nessuna sborda davanti o dietro la strada", fuori, 0)
+
+	# Due file da tre: le x distinte sono due, le z tre.
+	var xs := {}
+	var zs := {}
+	for b in mercato:
+		var r: AABB = b
+		xs[snappedf(r.position.x, 0.1)] = true
+		zs[snappedf(r.position.z, 0.1)] = true
+	_eq("il mercato sta in due file", xs.size(), 2)
+	_eq("  da tre carte l'una", zs.size(), 3)
+
+	# E stanno a sinistra della strada, senza coprirla e senza accavallarsi.
+	var sopra := 0
+	for b in mercato:
+		if (b as AABB).end.x > 0.001: sopra += 1
+	_eq("il mercato resta fuori dalla strada", sopra, 0)
+	var coperte := 0
+	for i in mercato.size():
+		for j in range(i + 1, mercato.size()):
+			var a: AABB = mercato[i]
+			var b2: AABB = mercato[j]
+			if a.position.x < b2.end.x - 0.001 and b2.position.x < a.end.x - 0.001 \
+				and a.position.z < b2.end.z - 0.001 and b2.position.z < a.end.z - 0.001:
+				coperte += 1
+	_eq("  e nessuna ne copre un'altra", coperte, 0)
+
+	# Cliccabili una per una: il mercato e' il punto da cui si comincia ogni
+	# azione, e prenderne una per l'altra sarebbe il peggio.
+	var sbagliate := 0
+	for c in BoardLayout3D.side_cards(gs):
+		if str(c["kind"]) != "mercato": continue
+		var r: AABB = c["aabb"]
+		var centro := r.position + Vector3(r.size.x / 2.0, 0.0, r.size.z / 2.0)
+		var presa := BoardLayout3D.card_at_ray(gs, centro + Vector3(0, 500, 0),
+			Vector3(0, -1, 0))
+		if presa.is_empty() or str(presa["id"]) != str(c["id"]): sbagliate += 1
+	_eq("  e cliccandone una si prende proprio quella", sbagliate, 0)
 
 # LA SCENA GIOCABILE NON LA COMPILAVA NESSUN TEST. Un errore di sintassi in
 # gioca.gd passava tutta la suite - i test caricano i moduli puri, non la
