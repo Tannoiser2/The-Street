@@ -72,6 +72,13 @@ var _bottoni: Array = []             # {"rect", "voce"} per le azioni senza cart
 var _nota: PackedStringArray = PackedStringArray()
 var _nota_dove := Vector2.ZERO
 
+# Il riepilogo finale sta aperto appena la partita finisce; si chiude per
+# guardare il tavolo con le eredita' scoperte, e si riapre col suo tasto.
+var _riepilogo_aperto := true
+
+# Quanto manca al prossimo turno di bot, in secondi.
+var _attesa := 0.0
+
 var _orbita: CameraOrbita = null
 var _premuto := MOUSE_BUTTON_NONE
 var _partenza := Vector2.ZERO
@@ -93,6 +100,7 @@ func _ready() -> void:
 # vista vecchia, stato nuovo, inquadratura nuova.
 func comincia() -> void:
 	inizio.sistema()
+	_riepilogo_aperto = true
 	if vista != null:
 		remove_child(vista)
 		vista.queue_free()
@@ -157,13 +165,37 @@ func _acceso() -> Dictionary:
 			uid.append(int(v.parametri["uid"]))
 	return {"carta": _scelta, "slot": slot, "uid": uid}
 
-# Il bot gioca finche' non tocca a un umano. Se umani non ce ne sono, la
-# partita arriva in fondo tutta in un colpo e resta il tavolo finito: e' il
-# modo piu' rapido per vedere dove va a finire un seme.
+# C'e' un bot che deve muovere? Lo chiedono il motore dei turni, il tasto
+# "Avanza" e il disegno, quindi la risposta e' una sola.
+func bot_da_muovere() -> bool:
+	return ctl != null and ctl.gs.phase != Enums.Phase.FINE_PARTITA \
+		and not inizio.e_umano(ctl.gs.current_index)
+
+# Un turno di bot, e il tavolo si ridisegna. E' il passo che il giocatore
+# vede: prima i bot giocavano tutti i loro turni fra un clic e l'altro e sul
+# tabellone comparivano tre edifici insieme, senza che si capisse chi avesse
+# fatto cosa.
+func muovi_un_bot() -> void:
+	if not bot_da_muovere(): return
+	RandomBot.play_turn(ctl)
+	_attesa = maxf(inizio.pausa_bot(), 0.0)
+	_aggiorna()
+
+# Il tempo che passa muove i bot, uno alla volta. A "passo" non li muove
+# nessuno: aspettano il tasto Avanza.
+func _process(delta: float) -> void:
+	if not bot_da_muovere() or inizio.bot_a_mano() or inizio.bot_subito(): return
+	_attesa -= delta
+	if _attesa <= 0.0: muovi_un_bot()
+
+# Il turno passa ai bot. A velocita' "subito" giocano tutti i loro turni in
+# un colpo, com'e' sempre stato; altrimenti si mettono in coda e li muove il
+# tempo, cosi' si vede una mossa per volta.
 func _turni_dei_bot() -> void:
+	_attesa = maxf(inizio.pausa_bot(), 0.0)
+	if not inizio.bot_subito(): return
 	var giri := 0
-	while ctl.gs.phase != Enums.Phase.FINE_PARTITA \
-			and not inizio.e_umano(ctl.gs.current_index) and giri < 500:
+	while bot_da_muovere() and giri < 500:
 		RandomBot.play_turn(ctl)
 		giri += 1
 
@@ -625,11 +657,26 @@ func _disegna_hud() -> void:
 		_disegna_bottoni(font, p)
 
 	var schermo := _hud.get_viewport_rect().size
-	# Finita la partita l'unica cosa sensata e' rifarne un'altra: senza
-	# questo tasto bisognava ricaricare la pagina.
+	# Finita la partita si tira la somma. Il tasto per rifarne un'altra sta
+	# li' dentro: senza, bisognava ricaricare la pagina.
 	if gs.phase == Enums.Phase.FINE_PARTITA:
-		_tasto(font, "Nuova partita", Vector2(20.0, schermo.y - 58.0), true,
-			{"che": "menu"}, 150.0)
+		if _riepilogo_aperto:
+			_disegna_riepilogo(font, gs)
+		else:
+			_tasto(font, "Riepilogo", Vector2(20.0, schermo.y - 58.0), true,
+				{"che": "riepilogo"}, 150.0)
+			_tasto(font, "Nuova partita", Vector2(186.0, schermo.y - 58.0), false,
+				{"che": "menu"}, 150.0)
+	# La velocita' dei bot si cambia anche a partita iniziata: un tasto solo
+	# che gira fra i cinque modi, perche' in fondo allo schermo per cinque
+	# nomi non c'e' posto.
+	if inizio.bot > 0 and gs.phase != Enums.Phase.FINE_PARTITA:
+		var t := _tasto(font, "Bot: " + inizio.nome_velocita(),
+			Vector2(schermo.x - 190.0, schermo.y - 58.0), false,
+			{"che": "gira_velocita"}, 170.0)
+		if inizio.bot_a_mano() and bot_da_muovere():
+			_tasto(font, "Avanza", Vector2(t.position.x - 118.0, t.position.y),
+				true, {"che": "avanza"}, 110.0)
 	_hud.draw_string(font, Vector2(20, schermo.y - 16),
 		"Trascina per girare il tabellone · rotella per avvicinare · "
 		+ "tasto destro per spostare · R riporta l'inquadratura",
@@ -669,6 +716,7 @@ func _invito(gs: GameState) -> String:
 		invito = "Partita finita. Vincitore: giocatore %d" % Scoring.winner(gs)
 	elif _io() < 0:
 		invito = "Tocca al giocatore %d" % gs.current_index
+		if inizio.bot_a_mano(): invito += " — premi Avanza per farlo muovere"
 	elif not gs.pending_choice.is_empty():
 		invito = str(gs.pending_choice["prompt"])
 	elif gs.phase == Enums.Phase.PIAZZA:
@@ -681,6 +729,93 @@ func _invito(gs: GameState) -> String:
 	if _messaggio != "": invito += "     — " + _messaggio
 	return invito
 
+# ---- il riepilogo finale ---------------------------------------------
+# Alla fine restava un numero solo - "vincitore: giocatore 3" - e non si
+# capiva DOVE fossero andati i punti. Il motore li divide gia' per canale
+# mentre la partita va avanti: qui si mettono in tabella, una riga per
+# giocatore e una colonna per fonte, in ordine di arrivo.
+# Le eredita' segrete a questo punto sono scoperte sul tavolo, quindi sotto
+# ogni riga si dice quale era e quanto ha fruttato.
+# 76 non bastavano: "Monumenti" usciva tagliato a meta'. L'intestazione e'
+# scritta piccola ma i nomi delle voci sono quelli del regolamento, e
+# abbreviarli avrebbe reso la tabella un rebus.
+const RIEP_COL := 86.0        # larghezza di una colonna di punti
+const RIEP_NOME := 176.0      # la prima colonna: posto, colore, giocatore
+
+func _disegna_riepilogo(font: Font, gs: GameState) -> void:
+	var cols := Riepilogo.colonne(gs)
+	var righe := Riepilogo.righe(gs)
+	var schermo := _hud.get_viewport_rect().size
+	var largo: float = minf(RIEP_NOME + (cols.size() + 1) * RIEP_COL + 48.0,
+		schermo.x - 40.0)
+	var alto := 128.0 + righe.size() * 46.0 + 56.0
+	var r := Rect2(Vector2((schermo.x - largo) / 2.0, (schermo.y - alto) / 2.0),
+		Vector2(largo, alto))
+	# Piu' coperto degli altri pannelli: questo e' una tabella di numeri e ci
+	# cadono sotto le carte del tavolo, che la rendevano illeggibile.
+	_hud.draw_rect(r, Color(0.07, 0.08, 0.10, 0.97), true)
+	_hud.draw_rect(r, Color(1, 1, 1, 0.18), false, 1.0)
+	var x := r.position.x + 24.0
+	var y := r.position.y + 46.0
+	_hud.draw_string(font, Vector2(x, y), "Riepilogo finale",
+		HORIZONTAL_ALIGNMENT_LEFT, -1, 24, CHIARO)
+	y += 36.0
+
+	# L'intestazione: i nomi delle fonti, allineati a destra come i numeri
+	# che stanno sotto, cosi' le cifre si leggono in colonna.
+	var cx := x + RIEP_NOME
+	for c in cols:
+		_hud.draw_string(font, Vector2(cx, y), str(c["nome"]),
+			HORIZONTAL_ALIGNMENT_RIGHT, RIEP_COL - 10.0, 12, SPENTO)
+		cx += RIEP_COL
+	_hud.draw_string(font, Vector2(cx, y), "Totale",
+		HORIZONTAL_ALIGNMENT_RIGHT, RIEP_COL - 10.0, 12, CHIARO)
+	y += 12.0
+	_hud.draw_line(Vector2(x, y), Vector2(r.end.x - 24.0, y),
+		Color(1, 1, 1, 0.15), 1.0)
+	y += 28.0
+
+	for riga in righe:
+		var pl := int(riga["player"])
+		_hud.draw_rect(Rect2(Vector2(x, y - 11.0), Vector2(11, 11)),
+			VISTA.colore_giocatore(pl), true)
+		_hud.draw_string(font, Vector2(x + 20.0, y),
+			"%d.  %s" % [int(riga["posto"]), _nome_giocatore(pl)],
+			HORIZONTAL_ALIGNMENT_LEFT, RIEP_NOME - 24.0, 14, CHIARO)
+		cx = x + RIEP_NOME
+		for c in cols:
+			var n := Riepilogo.punti(riga, str(c["id"]))
+			# Lo zero si scrive come un trattino: una colonna di zeri veri
+			# nasconde i numeri che contano.
+			_hud.draw_string(font, Vector2(cx, y), str(n) if n != 0 else "–",
+				HORIZONTAL_ALIGNMENT_RIGHT, RIEP_COL - 10.0, 14,
+				CHIARO if n != 0 else Color("#5b616c"))
+			cx += RIEP_COL
+		_hud.draw_string(font, Vector2(cx, y), str(int(riga["vp"])),
+			HORIZONTAL_ALIGNMENT_RIGHT, RIEP_COL - 10.0, 18, CHIARO)
+
+		# Sotto la riga: l'eredita' segreta, che adesso e' scoperta sul tavolo,
+		# e quel che resta fuori dalle colonne.
+		var sotto := "nessuna eredita'"
+		if str(riga["eredita_nome"]) != "":
+			sotto = "eredita': %s · %d" % [riga["eredita_nome"],
+				int(riga["eredita_punti"])]
+		sotto += " · %d edifici in piedi" % int(riga["edifici"])
+		var resto := Riepilogo.altro(gs, riga)
+		if resto != 0: sotto += " · altro %d" % resto
+		_hud.draw_string(font, Vector2(x + 20.0, y + 17.0), sotto,
+			HORIZONTAL_ALIGNMENT_LEFT, largo - 48.0, 12, SPENTO)
+		y += 46.0
+
+	var t := _tasto(font, "Nuova partita", Vector2(x, r.end.y - 48.0), true,
+		{"che": "menu"}, 150.0)
+	_tasto(font, "Guarda il tavolo", Vector2(t.end.x + 10.0, t.position.y),
+		false, {"che": "tavolo"}, 160.0)
+
+func _nome_giocatore(i: int) -> String:
+	if not inizio.e_umano(i): return "giocatore %d (bot)" % i
+	return "tu" if inizio.umani() <= 1 else "giocatore %d" % i
+
 # ---- la schermata d'inizio -------------------------------------------
 # Prima la partita cominciava da sola: tre giocatori e seme 7, scritti nel
 # codice. Per provarne altri bisognava ricompilare, e in due o in quattro non
@@ -691,11 +826,15 @@ func _invito(gs: GameState) -> String:
 # turno sullo stesso schermo; con zero si guarda giocare.
 const SCELTA_LARGO := 560.0
 const SCELTA_ALTO := 296.0
+const RIGA_ALTA := 46.0
 
 func _disegna_scelta(font: Font) -> void:
 	var schermo := _hud.get_viewport_rect().size
+	# Il pannello cresce con la riga della velocita', che c'e' solo se al
+	# tavolo siede almeno un bot.
+	var alto := SCELTA_ALTO + (RIGA_ALTA if inizio.bot > 0 else 0.0)
 	var r := Rect2(Vector2((schermo.x - SCELTA_LARGO) / 2.0,
-		(schermo.y - SCELTA_ALTO) / 2.0), Vector2(SCELTA_LARGO, SCELTA_ALTO))
+		(schermo.y - alto) / 2.0), Vector2(SCELTA_LARGO, alto))
 	_hud.draw_rect(r, SFONDO, true)
 	_hud.draw_rect(r, Color(1, 1, 1, 0.18), false, 1.0)
 	var x := r.position.x + 28.0
@@ -709,6 +848,8 @@ func _disegna_scelta(font: Font) -> void:
 		inizio.giocatori, "giocatori")
 	y = _riga_scelta(font, "di cui bot", x, y,
 		range(0, inizio.giocatori + 1), inizio.bot, "bot")
+	if inizio.bot > 0:
+		y = _riga_velocita(font, x, y)
 
 	# Il seme resta in vista e si puo' cambiare: tutto il progetto e'
 	# deterministico, quindi con lo stesso numero si rigioca la stessa
@@ -726,9 +867,22 @@ func _disegna_scelta(font: Font) -> void:
 	if inizio.umani() == 0:
 		# Senza nessun umano i bot giocano tutto in un colpo: meglio dirlo
 		# prima, o il tavolo gia' finito sembra un difetto.
-		coda = "Senza umani la partita si gioca da sola: vedrai il tavolo finito."
+		coda = "Senza umani la partita si gioca da sola: "
+		coda += "vedrai il tavolo gia' finito." if inizio.bot_subito() \
+			else "la guardi e basta, alla velocita' che hai scelto."
 	_hud.draw_string(font, Vector2(x, r.end.y - 18.0), coda,
 		HORIZONTAL_ALIGNMENT_LEFT, -1, 12, Color("#6f7683"))
+
+# La velocita' dei bot: i nomi al posto dei numeri, ma e' la stessa riga.
+func _riga_velocita(font: Font, x: float, y: float) -> float:
+	_hud.draw_string(font, Vector2(x, y + 20.0), "che si muovono",
+		HORIZONTAL_ALIGNMENT_LEFT, -1, 14, SPENTO)
+	var bx := x + 130.0
+	for i in ScelteInizio.VELOCITA.size():
+		var t := _tasto(font, str(ScelteInizio.VELOCITA[i]["nome"]),
+			Vector2(bx, y), i == inizio.velocita, {"che": "velocita", "n": i})
+		bx += t.size.x + 8.0
+	return y + RIGA_ALTA
 
 # Una riga di scelta: l'etichetta e i numeri, quello scelto acceso.
 func _riga_scelta(font: Font, etichetta: String, x: float, y: float,
@@ -740,7 +894,7 @@ func _riga_scelta(font: Font, etichetta: String, x: float, y: float,
 		var t := _tasto(font, str(n), Vector2(bx, y), n == scelto,
 			{"che": che, "n": n}, 40.0)
 		bx += t.size.x + 8.0
-	return y + 46.0
+	return y + RIGA_ALTA
 
 # Un tasto: lo disegna e lo mette fra quelli cliccabili. `dato` e' quello che
 # il clic eseguira', cosi' il disegno e il clic non possono divergere.
@@ -762,6 +916,13 @@ func _applica_scelta(d: Dictionary) -> void:
 		"giocatori": inizio.con_giocatori(int(d["n"]))
 		"bot": inizio.con_bot(int(d["n"]))
 		"seme": inizio.rimescola()
+		"velocita": inizio.con_velocita(int(d["n"]))
+		"gira_velocita": inizio.velocita_dopo()
+		"riepilogo": _riepilogo_aperto = true
+		"tavolo": _riepilogo_aperto = false
+		"avanza":
+			muovi_un_bot()
+			return
 		"via":
 			comincia()
 			return

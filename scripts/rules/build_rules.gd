@@ -13,7 +13,11 @@ class BuildQuote:
 	var level: int = 0
 	var bases: Array = []          # Building che finiranno sotterrati
 	var razed: Array = []          # tuoi intatti che verrebbero spianati
-	var terrapieno_cols: int = 0
+	# LE COLONNE, non quante sono: la vista deve sapere DOVE la terra e' stata
+	# riportata, per disegnare il riempimento sotto l'edificio. Prima era un
+	# contatore e il terrapieno non si vedeva: l'edificio restava sospeso
+	# sopra il vuoto in quella colonna.
+	var terrapieno_cols: Array[int] = []
 	var continuity_bonus: int = 0
 	var despoiled: Building = null   # rudere depredato, diventa rovina prima di costruire
 	var terrapieno_free_applied: bool = false
@@ -136,7 +140,7 @@ static func quote_above(gs: GameState, player: int, data: Dictionary, col_from: 
 			q.reason = "la colonna %d è già salita di un livello in quest'era" % c; return q
 		var top := g.top_of(c)
 		if top == null:
-			q.terrapieno_cols += 1
+			q.terrapieno_cols.append(c)
 			top_level = max(top_level, 0)
 			continue
 		match top.state:
@@ -165,7 +169,7 @@ static func quote_above(gs: GameState, player: int, data: Dictionary, col_from: 
 	var c := base_cost(data)
 	# ev_bonifiche: "Il primo terrapieno di ogni giocatore in quest'era costa 0."
 	# Lettura adottata: il primo SLOT di terrapieno, non l'intera costruzione.
-	var billable := q.terrapieno_cols
+	var billable := q.terrapieno_cols.size()
 	if billable > 0 and Effects.has_override(gs, "first_terrapieno_free") \
 			and not gs.players[player].terrapieno_free_used:
 		billable -= 1

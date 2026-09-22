@@ -40,6 +40,9 @@ func _ready() -> void:
 	_run("chi sta sopra poggia su chi sta sotto", _test_pila)
 	_run("le carte del giocatore non si coprono", _test_carte_giocatore)
 	_run("chi siede al tavolo lo si sceglie", _test_scelte_inizio)
+	_run("  e a che velocita' si muovono i bot", _test_velocita_bot)
+	_run("il conto finale, diviso per fonte", _test_riepilogo)
+	_run("il terrapieno si paga e si vede", _test_terrapieni)
 	print("\n%d superati, %d falliti" % [_passed, _failed])
 	get_tree().quit(0 if _failed == 0 else 1)
 
@@ -1164,6 +1167,22 @@ func _test_pila() -> void:
 	_ok("la partita ha prodotto pile (%d sopraelevati)" % quanti, quanti > 0)
 	_eq("  e nessuno di loro galleggia in aria", appesi, 0)
 
+	# E NESSUNA SAGOMA RESTA INGLOBATA NELLA PILA. A quota zero una colonna
+	# porta fino a cinque edifici, uno per binario d'era, e chi costruisce
+	# sopra ne spiana uno solo: gli altri restano INTATTI e finiscono
+	# sepolti. Le loro sagome attraversavano la pila da parte a parte,
+	# perche' un livello sale di 10 mm e una sagoma ne e' alta 66.
+	var sepolti := 0
+	var sepolti_in_piedi := 0
+	for b in g2.grid.buildings:
+		if not b.is_buried: continue
+		sepolti += 1
+		if BoardLayout3D.ha_sagoma(b): sepolti_in_piedi += 1
+	_ok("la partita ha prodotto sepolti (%d)" % sepolti, sepolti > 0)
+	_eq("  e nessuno di loro ha ancora la sagoma in piedi", sepolti_in_piedi, 0)
+	_ok("  ma la basetta gli resta, che e' le fondamenta di chi sta sopra",
+		BoardLayout3D.basetta_box(g2, g2.grid.buildings[0]).size.y > 0.0)
+
 # LE CARTE COMPRATE SI COPRIVANO A VICENDA. Il passo si stringeva per tenerle
 # tutte su una riga: con tre carte larghe 125 mm in una fetta da 147 scendeva
 # a 12 mm, e di ogni carta si vedeva una striscia. Adesso si va a capo.
@@ -1260,6 +1279,182 @@ func _test_scelte_inizio() -> void:
 	_ok("  e la descrizione dice chi gioca: \"%s\"" % s.descrizione(),
 		s.descrizione().contains("bot") and s.descrizione().contains(str(s.seme)))
 
+# LA VELOCITA' DEI BOT. Prima giocavano tutti i loro turni fra un clic e
+# l'altro: sul tabellone comparivano tre edifici insieme e non si capiva chi
+# avesse fatto cosa. Adesso si sceglie il passo, e i due casi che non sono
+# un'attesa - "subito" e "passo" - si chiedono per nome invece di confrontare
+# numeri, perche' e' li' che si sbaglia.
+func _test_velocita_bot() -> void:
+	var s := ScelteInizio.new()
+	_ok("di suo i bot si muovono a vista (%s)" % s.nome_velocita(),
+		not s.bot_subito() and not s.bot_a_mano())
+
+	# Le velocita' vanno dalla piu' lenta alla piu' svelta, senza buchi: e'
+	# l'ordine in cui la schermata le mette in fila.
+	var prima := 99.0
+	var scale := 0
+	for i in range(1, ScelteInizio.VELOCITA.size()):
+		s.con_velocita(i)
+		if s.pausa_bot() < prima: scale += 1
+		prima = s.pausa_bot()
+	_eq("ogni velocita' e' piu' svelta della prima",
+		scale, ScelteInizio.VELOCITA.size() - 1)
+
+	s.con_velocita(0)
+	_ok("la prima e' a mano: non e' un'attesa", s.bot_a_mano() and not s.bot_subito())
+	s.con_velocita(ScelteInizio.VELOCITA.size() - 1)
+	_ok("l'ultima e' tutto in un colpo", s.bot_subito() and not s.bot_a_mano())
+
+	# Fuori scala non si va, e il tasto in partita gira in tondo invece di
+	# fermarsi sull'ultima.
+	s.con_velocita(99)
+	_eq("  e fuori scala non si va", s.velocita, ScelteInizio.VELOCITA.size() - 1)
+	s.velocita_dopo()
+	_eq("  e dall'ultima si torna alla prima", s.velocita, 0)
+	var giro := 0
+	for i in ScelteInizio.VELOCITA.size():
+		s.velocita_dopo()
+		giro += 1
+	_eq("  e un giro intero riporta dov'era", s.velocita, 0)
+
+	# La descrizione dice a che velocita' vanno, ma solo se un bot c'e'.
+	s.con_giocatori(3)
+	s.con_bot(2)
+	s.con_velocita(ScelteInizio.VELOCITA_NORMALE)
+	_ok("la descrizione dice il passo dei bot: \"%s\"" % s.descrizione(),
+		s.descrizione().contains(s.nome_velocita()))
+	s.con_bot(0)
+	_ok("  e tace quando bot non ce ne sono: \"%s\"" % s.descrizione(),
+		not s.descrizione().contains("bot %s" % s.nome_velocita()))
+
+# IL CONTO FINALE. Alla fine restava un numero solo - "vincitore: giocatore
+# 3" - e non si capiva dove fossero andati i punti. Il nucleo li divide gia'
+# per canale mentre la partita va avanti: qui si controlla che la tabella non
+# ne perda per strada, perche' un riepilogo che non torna col totale e'
+# peggio di nessun riepilogo.
+func _test_riepilogo() -> void:
+	var ctl := _gioco()
+	var giri := 0
+	while ctl.gs.phase != Enums.Phase.FINE_PARTITA and giri < 4000:
+		RandomBot.play_turn(ctl)
+		giri += 1
+	var gs := ctl.gs
+	_eq("la partita e' arrivata in fondo", gs.phase, Enums.Phase.FINE_PARTITA)
+
+	var righe := Riepilogo.righe(gs)
+	_eq("c'e' una riga per giocatore", righe.size(), gs.players.size())
+	var visti := {}
+	for r in righe: visti[int(r["player"])] = true
+	_eq("  e ogni giocatore compare una volta sola", visti.size(), gs.players.size())
+
+	# La tabella e' in ordine di arrivo, e il primo e' quello che il gioco
+	# chiama vincitore: due modi di ordinare avrebbero finito per litigare.
+	_eq("il primo della tabella e' il vincitore",
+		int(righe[0]["player"]), Scoring.winner(gs))
+	var scesa := true
+	for i in range(1, righe.size()):
+		if int(righe[i]["vp"]) > int(righe[i - 1]["vp"]): scesa = false
+	_ok("  e i punti scendono riga dopo riga", scesa)
+
+	# NESSUN PUNTO SI PERDE PER STRADA: la somma delle colonne mostrate piu'
+	# l'eventuale "altro" deve fare il totale segnato.
+	var cols := Riepilogo.colonne(gs)
+	var storte := 0
+	for r in righe:
+		var somma := 0
+		for c in cols: somma += Riepilogo.punti(r, str(c["id"]))
+		if somma + Riepilogo.altro(gs, r) != int(r["vp"]): storte += 1
+	_eq("le colonne sommate fanno il totale", storte, 0)
+
+	# E i canali che il nucleo usa davvero devono essere TUTTI fra le
+	# colonne: se un giorno ne aggiunge uno, deve finire in tabella invece
+	# che in "altro".
+	var noti := {}
+	for c in cols: noti[str(c["id"])] = true
+	var fuori := PackedStringArray()
+	for pl in gs.players:
+		for canale in pl.vp_breakdown:
+			if int(pl.vp_breakdown[canale]) != 0 and not noti.has(str(canale)):
+				fuori.append(str(canale))
+	_eq("nessun canale resta fuori dalla tabella (%s)" % ", ".join(fuori),
+		fuori.size(), 0)
+
+	# Le colonne mostrate hanno dato punti a qualcuno: una colonna di zeri
+	# ruba spazio a quelle che contano.
+	var vuote := 0
+	for c in cols:
+		var qualcuno := false
+		for r in righe:
+			if Riepilogo.punti(r, str(c["id"])) != 0: qualcuno = true
+		if not qualcuno: vuote += 1
+	_eq("nessuna colonna e' tutta vuota (%d colonne)" % cols.size(), vuote, 0)
+
+	# L'eredita' segreta: a fine partita e' scoperta sul tavolo, e il
+	# riepilogo dice quale era e quanto ha fruttato.
+	var senza_nome := 0
+	for r in righe:
+		if str(r["eredita"]) != "" and str(r["eredita_nome"]) == "": senza_nome += 1
+	_eq("ogni eredita' ha il suo nome", senza_nome, 0)
+	var coperte := 0
+	for c in BoardLayout3D.player_cards(gs):
+		if str(c["kind"]) == "eredita_coperta": coperte += 1
+	_eq("a partita finita nessun obiettivo resta coperto", coperte, 0)
+	# E prima della fine restano coperti, che e' il punto di averli segreti.
+	var gs2 := _gioco().gs
+	var coperte2 := 0
+	for c in BoardLayout3D.player_cards(gs2, 0):
+		if str(c["kind"]) == "eredita_coperta": coperte2 += 1
+	_eq("  ma in partita si vede solo il proprio", coperte2, gs2.players.size() - 1)
+
+# IL TERRAPIENO. Le regole lo facevano pagare da sempre - 1 pietra per ogni
+# colonna senza base - ma sul tavolo non si vedeva, e l'edificio restava
+# sospeso sopra il vuoto proprio nella colonna che aveva pagato per
+# riempirla. Il preventivo sapeva quante erano; adesso sa anche QUALI, e
+# l'edificio se le porta dietro.
+func _test_terrapieni() -> void:
+	var ctl := _gioco()
+	var gs := ctl.gs
+	# una base in colonna 1, la 2 nuda: un edificio da due caselle che parte
+	# dalla 1 deve riportare terra sulla 2
+	var sotto := _metti(gs, "ed_capanne", 1, 1, 0, 0)
+	sotto.state = Enums.BuildingState.ROVINA
+	var d: Dictionary = CardDB.buildings[_largo(2)]
+	var q := BuildRules.quote_above(gs, 0, d, 1)
+	_ok("il preventivo passa (%s)" % q.reason, q.legal)
+	_eq("  e dice quale colonna va riempita", q.terrapieno_cols, [2] as Array[int])
+	_ok("  e la fa pagare", q.terrapieno_pietra > 0)
+
+	# Costruito davvero, l'edificio se le porta dietro: e' da li' che la
+	# vista sa dove disegnare la terra.
+	var p: PlayerState = gs.players[0]
+	p.pietra = 99
+	p.oro = 99
+	ctl.place_worker(1)
+	var quanti := gs.grid.buildings.size()
+	_ok("si costruisce col terrapieno", ctl.build(str(d["id"]), 1, true))
+	if gs.grid.buildings.size() <= quanti: return
+	var su: Building = gs.grid.buildings[gs.grid.buildings.size() - 1]
+	_eq("  e l'edificio si ricorda dove", su.terrapieno_cols, [2] as Array[int])
+
+	# E il blocco di terra riempie il vuoto: parte dal piano del tavolo e
+	# arriva esatto sotto il piede, senza scalini.
+	var boxes := BoardLayout3D.terrapieni(gs, su)
+	_eq("si disegna un blocco per colonna riempita", boxes.size(), 1)
+	var box: AABB = boxes[0]
+	var piede := BoardLayout3D.basetta_box(gs, su)
+	_approx("  che parte dal piano del tavolo", box.position.y, BoardLayout3D.TESSERA_Y)
+	_approx("  e arriva esatto sotto il piede", box.end.y, piede.position.y)
+	_ok("  con la stessa profondita' del piede",
+		is_equal_approx(box.position.z, piede.position.z)
+		and is_equal_approx(box.size.z, piede.size.z))
+	_ok("  e sta nella colonna che ha pagato",
+		box.position.x >= BoardLayout3D.col_x(2) - BoardLayout3D.TESSERA_W
+		and box.end.x <= BoardLayout3D.col_x(3) + BoardLayout3D.TESSERA_W)
+
+	# Chi poggia su basi vere non riporta niente, e non si disegna niente.
+	_eq("senza colonne nude non c'e' terra da riportare",
+		BoardLayout3D.terrapieni(gs, sotto).size(), 0)
+
 # LA SCENA GIOCABILE NON LA COMPILAVA NESSUN TEST. Un errore di sintassi in
 # gioca.gd passava tutta la suite - i test caricano i moduli puri, non la
 # scena - e si vedeva solo aprendo il gioco, con lo schermo grigio e nessun
@@ -1274,6 +1469,7 @@ func _test_scena_giocabile() -> void:
 			"res://scripts/view/camera_orbita.gd",
 			"res://scripts/view/descrizione_azione.gd",
 			"res://scripts/view/scelte_inizio.gd",
+			"res://scripts/view/riepilogo.gd",
 			"res://scripts/rules/available_actions.gd"]:
 		_ok("%s si compila" % percorso.get_file(), ResourceLoader.load(percorso) != null)
 	var scena := ResourceLoader.load("res://scenes/gioca.tscn") as PackedScene
@@ -1301,9 +1497,26 @@ func _test_scena_giocabile() -> void:
 	# sola senza restare appesa ad aspettare un umano che non c'e'.
 	n.inizio.con_giocatori(3)
 	n.inizio.con_bot(3)
+	n.inizio.con_velocita(4)          # subito: tutti i turni in un colpo
 	n.comincia()
-	_ok("  e con tutti bot la partita va avanti da sola",
+	_ok("  e con tutti bot a velocita' subito la partita va avanti da sola",
 		n.ctl.gs.era > 1 or n.ctl.gs.phase == Enums.Phase.FINE_PARTITA)
+
+	# A passo invece nessuno si muove finche' non glielo si chiede: e' il
+	# modo per guardare i bot una mossa alla volta.
+	n.inizio.con_velocita(0)
+	n.comincia()
+	var mosse := func(gs2: GameState) -> int:
+		var q := 0
+		for pl in gs2.players: q += pl.workers_used
+		return q
+	_ok("  e a passo il tavolo resta fermo",
+		n.ctl.gs.era == 1 and mosse.call(n.ctl.gs) == 0 and n.bot_da_muovere())
+	var chi: int = n.ctl.gs.current_index
+	n.muovi_un_bot()
+	_ok("  e ogni Avanza e' un turno, uno solo (%d mosse, ora tocca a %d)"
+		% [mosse.call(n.ctl.gs), n.ctl.gs.current_index],
+		mosse.call(n.ctl.gs) == 1 and n.ctl.gs.current_index != chi)
 	n.torna_alla_scelta()
 	_ok("  e si torna alla scelta", n.ctl == null and n.vista == null)
 	n.queue_free()

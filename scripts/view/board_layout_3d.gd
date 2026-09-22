@@ -132,6 +132,25 @@ static func z_basi(gs: GameState, col_from: int, col_to: int, livello: int,
 	if quante == 0: return (BANDA_SU + BANDA_GIU) / 2.0
 	return somma / float(quante)
 
+# IL TERRAPIENO: la terra riportata sotto una colonna che non aveva niente
+# da offrire come base. Il regolamento la fa pagare (1 pietra per colonna) e
+# il preventivo la contava gia', ma sul tavolo non si vedeva: l'edificio
+# restava sospeso sopra il vuoto proprio nella colonna che aveva pagato per
+# riempire. E' un blocco che va dal piano del tavolo fino al piede
+# dell'edificio, largo la fetta di basetta di quella colonna.
+static func terrapieno_box(gs: GameState, b: Building, col: int) -> AABB:
+	var base := basetta_box(gs, b)
+	var fetta := base.size.x / float(b.width())
+	return AABB(
+		Vector3(base.position.x + (col - b.col_from) * fetta, TESSERA_Y,
+			base.position.z),
+		Vector3(fetta, maxf(base.position.y - TESSERA_Y, 0.0), base.size.z))
+
+static func terrapieni(gs: GameState, b: Building) -> Array[AABB]:
+	var out: Array[AABB] = []
+	for col in b.terrapieno_cols: out.append(terrapieno_box(gs, b, int(col)))
+	return out
+
 # La basetta: ogni sagoma ne ha una. 15 mm di profondita' per 4 mm di cartone.
 static func basetta_box(gs: GameState, b: Building) -> AABB:
 	var c := standee_base(gs, b)
@@ -159,8 +178,18 @@ static func standee_size(b: Building) -> Vector2:
 # Chi e' CROLLATO IN ROVINA non ha piu' una sagoma in piedi: resta la
 # basetta, che fa da fondamenta a chi ci costruisce sopra. Il RUDERE invece e'
 # "in piedi ma spento" e la sagoma ce l'ha ancora, in grigio.
+# Chi ha ancora una sagoma in piedi. Due casi la perdono, e resta il piede:
+#
+# - CHI E' CROLLATO IN ROVINA: non e' piu' un edificio, e' il basamento di
+#   chi ci costruira' sopra.
+# - CHI E' SEPOLTO: sta sotto gli strati, quindi in piedi non puo' esserci.
+#   Non e' un caso raro: a quota zero una colonna porta fino a cinque
+#   edifici, uno per binario d'era, e chi costruisce sopra ne spiana uno
+#   solo - quello in cima. Gli altri restano INTATTI e finiscono sepolti:
+#   su otto partite a tre sono 76 su 225, e le loro sagome attraversavano
+#   la pila da parte a parte, inglobate negli strati.
 static func ha_sagoma(b: Building) -> bool:
-	return b.state != Enums.BuildingState.ROVINA
+	return b.state != Enums.BuildingState.ROVINA and not b.is_buried
 
 static func sagoma_path(b: Building) -> String:
 	var s: Dictionary = CardDB.sagome.get(str(b.data["id"]), {})
@@ -500,7 +529,10 @@ static func carte_giocatore(gs: GameState, player: int, umano := -1) -> Array[Di
 	# nessuna parte: sta davanti al suo giocatore, scoperto per lui e coperto
 	# per gli altri - come sul tavolo vero.
 	if p.legacy_id != "":
-		if player == umano:
+		# A partita finita si girano tutte, come al tavolo vero: e' il momento
+		# in cui si scopre cosa stava inseguendo ciascuno, e senza quello il
+		# riepilogo direbbe "eredita': 7 punti" senza dire di quale.
+		if player == umano or gs.phase == Enums.Phase.FINE_PARTITA:
 			out.append({"kind": "eredita", "id": p.legacy_id})
 		else:
 			out.append({"kind": "eredita_coperta", "id": "eredita_1"})

@@ -167,7 +167,7 @@ static func piazzamenti(gs: GameState, player: int, col: int,
 			# suo i conti delle regole.
 			out.append(_voce("costruisci", "Costruisci %s %s" % [d["name"], dove], q,
 				{"card_id": card_id, "col_from": c, "above": sopra, "level": q.level,
-				"spiana": spianati, "terrapieni": q.terrapieno_cols}))
+				"spiana": spianati, "terrapieni": q.terrapieno_cols.size()}))
 	return out
 
 # Gli edifici che possono ricevere un potenziamento: uno per bersaglio.

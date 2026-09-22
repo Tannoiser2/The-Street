@@ -18,15 +18,32 @@ extends RefCounted
 const MIN_GIOCATORI := 2
 const MAX_GIOCATORI := 4
 
+# Quanto si aspetta fra un turno di bot e l'altro. Prima i bot giocavano
+# tutti i loro turni in un colpo solo fra un clic e l'altro: sul tabellone
+# comparivano tre edifici insieme e non si capiva chi avesse fatto cosa.
+# "subito" e' quel comportamento di prima, tenuto perche' serve a sbrigare
+# una partita intera; "passo" non aspetta il tempo ma il giocatore, che
+# avanza un turno per volta - il modo per studiare davvero cosa fanno.
+const VELOCITA: Array[Dictionary] = [
+	{"nome": "passo", "pausa": -1.0},
+	{"nome": "lenta", "pausa": 1.4},
+	{"nome": "normale", "pausa": 0.6},
+	{"nome": "veloce", "pausa": 0.2},
+	{"nome": "subito", "pausa": 0.0},
+]
+const VELOCITA_NORMALE := 2
+
 var giocatori := 3
 var bot := 2
 var seme := 7
+var velocita := VELOCITA_NORMALE
 
 # Ogni scelta passa di qui, cosi' non esiste uno stato che il gioco non sappia
 # cominciare: i giocatori restano fra 2 e 4 e i bot fra 0 e quanti sono.
 func sistema() -> void:
 	giocatori = clampi(giocatori, MIN_GIOCATORI, MAX_GIOCATORI)
 	bot = clampi(bot, 0, giocatori)
+	velocita = clampi(velocita, 0, VELOCITA.size() - 1)
 
 func con_giocatori(n: int) -> void:
 	giocatori = n
@@ -35,6 +52,30 @@ func con_giocatori(n: int) -> void:
 func con_bot(n: int) -> void:
 	bot = n
 	sistema()
+
+func con_velocita(i: int) -> void:
+	velocita = i
+	sistema()
+
+# Gira alla velocita' dopo, e dall'ultima torna alla prima: serve al tasto
+# in partita, che di posto per cinque nomi non ne ha.
+func velocita_dopo() -> void:
+	con_velocita((velocita + 1) % VELOCITA.size())
+
+# Secondi fra un turno di bot e l'altro. Negativo vuol dire "a mano", zero
+# "tutti in un colpo": due casi che non sono un'attesa, e chi chiama deve
+# chiederli per nome invece di confrontare numeri.
+func pausa_bot() -> float:
+	return float(VELOCITA[velocita]["pausa"])
+
+func nome_velocita() -> String:
+	return str(VELOCITA[velocita]["nome"])
+
+func bot_a_mano() -> bool:
+	return pausa_bot() < 0.0
+
+func bot_subito() -> bool:
+	return is_zero_approx(pausa_bot())
 
 func umani() -> int:
 	return giocatori - bot
@@ -64,4 +105,6 @@ func descrizione() -> String:
 	elif bot == 0: chi = "tutti umani"
 	elif u == 1: chi = "tu contro %d bot" % bot
 	else: chi = "%d umani e %d bot" % [u, bot]
-	return "%d giocatori · %s · seme %d" % [giocatori, chi, seme]
+	var come := ""
+	if bot > 0: come = " · bot %s" % nome_velocita()
+	return "%d giocatori · %s%s · seme %d" % [giocatori, chi, come, seme]
