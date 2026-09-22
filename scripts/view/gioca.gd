@@ -1,5 +1,9 @@
 # res://scripts/view/gioca.gd
-# La plancia giocabile: tu sei il giocatore 0, gli altri li gioca il bot.
+# La plancia giocabile. Si comincia dalla schermata di scelta - quanti
+# giocatori, quanti bot - e i posti sono in ordine: prima gli umani, poi i
+# bot. Se gli umani sono piu' di uno si gioca a turno sullo stesso schermo,
+# e l'interfaccia e' sempre di chi ha il turno: le sue risorse in alto, il
+# suo obiettivo segreto scoperto, i suoi posti accesi.
 # Ogni modifica passa dal GameController, mai da qui: questo script legge lo
 # stato, mostra le opzioni e chiama i comandi.
 #
@@ -12,7 +16,33 @@
 # un riquadro che segue il mouse, e solo per la carta puntata.
 extends Node3D
 
-const UMANO := 0
+# Chi siede al tavolo. Finche' `ctl` e' null siamo alla schermata di scelta:
+# e' quello, e non una variabile in piu', a dire in che schermo siamo.
+# Pubblica di proposito: e' la scelta che la schermata d'inizio mostra e che
+# i test pilotano per cominciare una partita senza cliccare.
+var inizio := ScelteInizio.new()
+
+# La vista si preloada una volta sola: dallo stesso script viene anche il
+# colore dei giocatori, che serve all'interfaccia pure a tavolo sparecchiato.
+const VISTA := preload("res://scripts/view/board_view_3d.gd")
+
+# Il giocatore per cui l'interfaccia sta lavorando: chi ha il turno, se e'
+# umano. -1 quando tocca a un bot o la partita non e' cominciata, e allora
+# non si puo' fare niente - nemmeno vedere l'obiettivo segreto di nessuno.
+func _io() -> int:
+	if ctl == null: return -1
+	return ctl.gs.current_index if inizio.e_umano(ctl.gs.current_index) else -1
+
+# Di chi mostrare risorse e punteggio in alto. Di norma e' chi ha il turno;
+# in una partita di soli bot non c'e' nessun umano e si guarda giocare quello
+# di turno, che e' meglio di una riga vuota.
+func _in_vetrina() -> int:
+	if ctl == null: return -1
+	# A partita finita si mostra il vincitore, non chi ha mosso per ultimo:
+	# e' l'unico giocatore che interessi ancora, e vederne un altro accanto
+	# alla riga "vincitore: giocatore 3" confondeva e basta.
+	if ctl.gs.phase == Enums.Phase.FINE_PARTITA: return Scoring.winner(ctl.gs)
+	return ctl.gs.current_index
 
 # Il mouse fa tre cose e non devono pestarsi i piedi: il sinistro trascinato
 # gira il tabellone, il sinistro premuto e rilasciato fermo sceglie, il destro
@@ -31,6 +61,10 @@ var _messaggio := ""
 # i bersagli accesi.
 var _scelta: Dictionary = {}
 var _bersagli: Array = []            # AvailableActions.Voce, una per bersaglio
+# Il bersaglio acceso che il mouse sta puntando adesso, null se nessuno: e'
+# quello che la barra di stato descrive. Si ricalcola sempre dai `_bersagli`
+# correnti, mai conservato oltre, cosi' non puo' restare indietro.
+var _sotto_mouse: AvailableActions.Voce = null
 var _bottoni: Array = []             # {"rect", "voce"} per le azioni senza carta
 
 # Il riquadro che segue il mouse: sostituisce tutte le scritte che prima
@@ -44,12 +78,6 @@ var _partenza := Vector2.ZERO
 var _trascinato := false
 
 func _ready() -> void:
-	ctl = GameController.new()
-	ctl.new_game(3, 7)
-	vista = preload("res://scripts/view/board_view_3d.gd").new()
-	vista.umano = UMANO
-	add_child(vista)
-	vista.scale = Vector3.ONE * BoardLayout3D.U
 	var strato := CanvasLayer.new()
 	add_child(strato)
 	_hud = Control.new()
@@ -57,10 +85,50 @@ func _ready() -> void:
 	_hud.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_hud.draw.connect(_disegna_hud)
 	strato.add_child(_hud)
+	inizio.rimescola()
+	_hud.queue_redraw()
+
+# Dalla schermata di scelta al tavolo. E' anche il punto da cui si ricomincia
+# a fine partita, quindi rifa' tutto da capo invece di rattoppare: via la
+# vista vecchia, stato nuovo, inquadratura nuova.
+func comincia() -> void:
+	inizio.sistema()
+	if vista != null:
+		remove_child(vista)
+		vista.queue_free()
+	_deseleziona(false)
+	_messaggio = ""
+	_orbita = null
+	_colonna_sotto_mouse = -1
+	ctl = GameController.new()
+	ctl.new_game(inizio.giocatori, inizio.seme)
+	vista = VISTA.new()
+	add_child(vista)
+	vista.scale = Vector3.ONE * BoardLayout3D.U
 	_turni_dei_bot()
 	_aggiorna()
 
+# Torna alla schermata di scelta: il tavolo sparisce e si ricomincia.
+func torna_alla_scelta() -> void:
+	if vista != null:
+		remove_child(vista)
+		vista.queue_free()
+		vista = null
+	ctl = null
+	_orbita = null
+	_deseleziona(false)
+	_nota = PackedStringArray()
+	_messaggio = ""
+	inizio.rimescola()
+	_hud.queue_redraw()
+
 func _aggiorna() -> void:
+	if ctl == null:
+		_hud.queue_redraw()
+		return
+	# A turno sullo stesso schermo: l'obiettivo segreto scoperto e' quello di
+	# chi ha il turno, e di nessun altro.
+	vista.umano = _io()
 	# Finche' il giocatore non tocca la telecamera, l'inquadratura continua a
 	# calcolarsi da sola e arretra man mano che le torri salgono. Appena la
 	# muove, comanda lui e nessun aggiornamento gliela riporta indietro.
@@ -69,6 +137,9 @@ func _aggiorna() -> void:
 		vista.orbita = _orbita
 	vista.mostra(ctl.gs, _colonna_sotto_mouse, _acceso())
 	vista.scale = Vector3.ONE * BoardLayout3D.U
+	# Il tavolo e' cambiato sotto un mouse fermo: quel che la barra prometteva
+	# puo' non esistere piu', quindi si richiede a partire dai bersagli nuovi.
+	_sotto_mouse = _bersaglio_sotto(_nota_dove)
 	_hud.queue_redraw()
 
 # Cosa la vista deve accendere: la carta scelta, i posti dove puo' andare, gli
@@ -86,11 +157,13 @@ func _acceso() -> Dictionary:
 			uid.append(int(v.parametri["uid"]))
 	return {"carta": _scelta, "slot": slot, "uid": uid}
 
-# Il bot gioca finche' non tocca all'umano.
+# Il bot gioca finche' non tocca a un umano. Se umani non ce ne sono, la
+# partita arriva in fondo tutta in un colpo e resta il tavolo finito: e' il
+# modo piu' rapido per vedere dove va a finire un seme.
 func _turni_dei_bot() -> void:
 	var giri := 0
 	while ctl.gs.phase != Enums.Phase.FINE_PARTITA \
-			and ctl.gs.current_index != UMANO and giri < 500:
+			and not inizio.e_umano(ctl.gs.current_index) and giri < 500:
 		RandomBot.play_turn(ctl)
 		giri += 1
 
@@ -101,7 +174,9 @@ func _unhandled_input(evento: InputEvent) -> void:
 	elif evento is InputEventMouseMotion:
 		_movimento(evento)
 	elif evento is InputEventKey and evento.pressed and not evento.echo:
-		if evento.keycode in [KEY_HOME, KEY_R]:
+		if ctl == null and evento.keycode in [KEY_ENTER, KEY_KP_ENTER, KEY_SPACE]:
+			comincia()
+		elif evento.keycode in [KEY_HOME, KEY_R] and _orbita != null:
 			_orbita.reimposta()
 			_messaggio = "Inquadratura ripristinata."
 			_aggiorna()
@@ -130,6 +205,9 @@ func _pulsante(e: InputEventMouseButton) -> void:
 				_premuto = MOUSE_BUTTON_NONE
 
 func _movimento(e: InputEventMouseMotion) -> void:
+	if ctl == null:
+		_nota_dove = e.position
+		return
 	if _premuto != MOUSE_BUTTON_NONE:
 		if not _trascinato \
 				and e.position.distance_to(_partenza) < SOGLIA_TRASCINAMENTO:
@@ -145,6 +223,7 @@ func _movimento(e: InputEventMouseMotion) -> void:
 		return
 	_nota_dove = e.position
 	_nota = _descrivi_sotto(e.position)
+	_sotto_mouse = _bersaglio_sotto(e.position)
 	var col := _colonna_puntata(e.position)
 	if col != _colonna_sotto_mouse:
 		_colonna_sotto_mouse = col
@@ -153,6 +232,7 @@ func _movimento(e: InputEventMouseMotion) -> void:
 		_hud.queue_redraw()      # il riquadro segue comunque il mouse
 
 func _zoom(passi: float) -> void:
+	if _orbita == null: return
 	_orbita.zoom(passi)
 	vista.muovi_telecamera()
 
@@ -166,20 +246,20 @@ func _direzione(pixel: Vector2) -> Vector3:
 	return Vector3.DOWN if cam == null else cam.project_ray_normal(pixel)
 
 func _colonna_puntata(pixel: Vector2) -> int:
-	if get_viewport().get_camera_3d() == null: return -1
+	if ctl == null or get_viewport().get_camera_3d() == null: return -1
 	var slot := BoardLayout3D.slot_at_ray(ctl.gs, _origine(pixel), _direzione(pixel))
 	return int(slot.get("col", -1)) if not slot.is_empty() else -1
 
 func _carta_puntata(pixel: Vector2) -> Dictionary:
-	if get_viewport().get_camera_3d() == null: return {}
-	return BoardLayout3D.card_at_ray(ctl.gs, _origine(pixel), _direzione(pixel), UMANO)
+	if ctl == null or get_viewport().get_camera_3d() == null: return {}
+	return BoardLayout3D.card_at_ray(ctl.gs, _origine(pixel), _direzione(pixel), _io())
 
 func _edificio_puntato(pixel: Vector2) -> Building:
-	if get_viewport().get_camera_3d() == null: return null
+	if ctl == null or get_viewport().get_camera_3d() == null: return null
 	return _edificio(BoardLayout3D.at_ray_building(ctl.gs, _origine(pixel), _direzione(pixel)))
 
 func _edificio(uid: int) -> Building:
-	if uid < 0: return null
+	if uid < 0 or ctl == null: return null
 	for b in ctl.gs.grid.buildings:
 		if b.uid == uid: return b
 	return null
@@ -246,19 +326,26 @@ func _descrivi_sotto(pixel: Vector2) -> PackedStringArray:
 
 # ---- il clic ---------------------------------------------------------
 func _clic(pixel: Vector2) -> void:
+	# I tasti della schermata valgono sempre - anche a partita finita, che e'
+	# proprio quando "Nuova partita" serve - quindi si provano per primi.
+	for b in _bottoni:
+		if b.has("scelta") and (b["rect"] as Rect2).has_point(pixel):
+			_applica_scelta(b["scelta"])
+			return
+	if ctl == null: return
 	var gs := ctl.gs
 	if gs.phase == Enums.Phase.FINE_PARTITA: return
 	# Una scelta in sospeso viene prima di tutto: finche' non e' risolta il
 	# gioco non prosegue, quindi il clic serve solo a quella.
 	if not gs.pending_choice.is_empty():
-		if int(gs.pending_choice["player"]) != UMANO: return
+		if int(gs.pending_choice["player"]) != _io(): return
 		var scelto := _edificio_puntato(pixel)
 		if scelto != null and ctl.choose(scelto.uid):
 			_messaggio = "Scelto."
 			_turni_dei_bot()
 			_aggiorna()
 		return
-	if gs.current_index != UMANO: return
+	if _io() < 0: return
 
 	# I pulsanti delle azioni che non hanno una carta sul tavolo.
 	for b in _bottoni:
@@ -292,7 +379,7 @@ func _clic(pixel: Vector2) -> void:
 # "Sopra un vostro edificio ancora in piedi": abitare da' +2 resistenza.
 func _da_abitare(col: int) -> Building:
 	for b in ctl.gs.grid.in_column(col):
-		if b.owner == UMANO and b.is_standing(): return b
+		if b.owner == _io() and b.is_standing(): return b
 	return null
 
 func _piazza_lavoratore(pixel: Vector2) -> void:
@@ -311,31 +398,40 @@ func _piazza_lavoratore(pixel: Vector2) -> void:
 # spianare un proprio edificio - si clicca dove lo si vede, e non serve piu'
 # nessun tasto da tenere premuto.
 func _prova_bersaglio(pixel: Vector2) -> bool:
+	var v := _bersaglio_sotto(pixel)
+	if v == null: return false
+	_esegui(v)
+	return true
+
+# Il bersaglio acceso sotto quel pixel, null se il mouse e' altrove. Lo
+# chiedono in due: il clic per eseguirlo, la barra di stato per dire cosa
+# sarebbe. E' la stessa domanda, quindi e' la stessa funzione: non puo'
+# succedere che la barra annunci una mossa e il clic ne faccia un'altra.
+func _bersaglio_sotto(pixel: Vector2) -> AvailableActions.Voce:
+	if ctl == null or _bersagli.is_empty(): return null
+	if get_viewport().get_camera_3d() == null: return null
 	var b := _edificio_puntato(pixel)
 	if b != null:
 		for v in _bersagli:
-			if int(v.parametri.get("uid", -1)) == b.uid:
-				_esegui(v)
-				return true
+			if int(v.parametri.get("uid", -1)) == b.uid: return v
 	var riquadri: Array = []
 	var voci: Array = []
 	for v in _bersagli:
 		if not v.parametri.has("col_from"): continue
 		var d: Dictionary = CardDB.buildings[str(v.parametri["card_id"])]
-		riquadri.append(BoardLayout3D.box_piazzamento(int(v.parametri["col_from"]),
-			int(d["width"]), int(v.parametri.get("level", 0)), ctl.gs.era))
+		riquadri.append(BoardLayout3D.box_piazzamento(ctl.gs,
+			int(v.parametri["col_from"]), int(d["width"]),
+			int(v.parametri.get("level", 0)), ctl.gs.era))
 		voci.append(v)
 	var i := BoardLayout3D.riquadro_al_raggio(riquadri, _origine(pixel), _direzione(pixel))
-	if i < 0: return false
-	_esegui(voci[i])
-	return true
+	return voci[i] if i >= 0 else null
 
 # Le colonne dove il lavoratore puo' ancora andare. Sono quelle che aprono
 # un'azione: se la carta si sceglie PRIMA di piazzare, i posti da accendere
 # sono quelli raggiungibili da una qualsiasi di queste.
 func _colonne_possibili() -> Array[int]:
 	var out: Array[int] = []
-	var p: PlayerState = ctl.gs.players[UMANO]
+	var p: PlayerState = ctl.gs.players[_io()]
 	if p.workers_used >= p.workers: return out
 	for c in ctl.gs.grid.n_cols:
 		if c in p.worker_cols: continue     # "un solo vostro lavoratore per colonna"
@@ -344,9 +440,9 @@ func _colonne_possibili() -> Array[int]:
 
 func _voci_per(kind: String, id: String, col: int) -> Array:
 	match kind:
-		"mercato": return AvailableActions.piazzamenti(ctl.gs, UMANO, col, id)
-		"potenziamento": return AvailableActions.bersagli_potenziamento(ctl.gs, UMANO, col, id)
-		"personaggio": return AvailableActions.bersagli_reclutamento(ctl.gs, UMANO, col, id)
+		"mercato": return AvailableActions.piazzamenti(ctl.gs, _io(), col, id)
+		"potenziamento": return AvailableActions.bersagli_potenziamento(ctl.gs, _io(), col, id)
+		"personaggio": return AvailableActions.bersagli_reclutamento(ctl.gs, _io(), col, id)
 	return []
 
 # I bersagli di una carta. Se il lavoratore e' gia' piazzato valgono solo
@@ -401,7 +497,7 @@ func _seleziona(c: Dictionary) -> void:
 	_aggiorna()
 
 func _scegli_restauro() -> void:
-	var voci := AvailableActions.restauri(ctl.gs, UMANO, ctl.colonna_attivata())
+	var voci := AvailableActions.restauri(ctl.gs, _io(), ctl.colonna_attivata())
 	var buoni: Array = []
 	for v in voci:
 		if v.legale: buoni.append(v)
@@ -417,6 +513,7 @@ func _scegli_restauro() -> void:
 func _deseleziona(ridisegna := true) -> void:
 	_scelta = {}
 	_bersagli = []
+	_sotto_mouse = null
 	if ridisegna: _aggiorna()
 
 func _nome_carta(kind: String, id: String) -> String:
@@ -467,6 +564,9 @@ func _esegui(v) -> void:
 const SFONDO := Color(0.09, 0.10, 0.13, 0.86)
 const CHIARO := Color("#e8e6df")
 const SPENTO := Color("#8b919c")
+# Solo per il conto che non torna: e' l'unica cosa in tutta la barra che
+# dice "questa mossa e' permessa ma non te la puoi permettere".
+const ROSSO := Color("#e8795f")
 
 func _riquadro(font: Font, righe: PackedStringArray, dove: Vector2,
 		larghezza := 340.0) -> void:
@@ -486,20 +586,88 @@ func _riquadro(font: Font, righe: PackedStringArray, dove: Vector2,
 
 func _disegna_hud() -> void:
 	var font: Font = ThemeDB.fallback_font
-	var gs := ctl.gs
-	var p: PlayerState = gs.players[UMANO]
 	_bottoni = []
+	if ctl == null:
+		_disegna_scelta(font)
+		return
+	var gs := ctl.gs
+	var v := _in_vetrina()
+	var p: PlayerState = gs.players[v]
 
-	_hud.draw_string(font, Vector2(20, 30),
-		"Era %d · %s · tu: %d PV, %d pietra, %d oro, lavoratori %d/%d" % [
-			gs.era, str(gs.current_event.get("name", "nessun evento")),
-			p.vp, p.pietra, p.oro, p.workers_used, p.workers],
+	# Di chi e' il turno, col suo colore. Giocando a turno sullo stesso
+	# schermo e' la prima cosa da sapere, e il colore e' lo stesso delle
+	# basette sul tavolo.
+	var chi := "giocatore %d" % v
+	if _io() >= 0:
+		chi = "tu" if inizio.umani() <= 1 else "tocca a te, giocatore %d" % v
+	var testa := "Era %d · %s · %s: %d PV, %d pietra, %d oro, lavoratori %d/%d" % [
+		gs.era, str(gs.current_event.get("name", "nessun evento")), chi,
+		p.vp, p.pietra, p.oro, p.workers_used, p.workers]
+	_striscia(font, testa, 41.0, 12.0, 18)
+	_hud.draw_rect(Rect2(Vector2(20, 17), Vector2(13, 13)),
+		VISTA.colore_giocatore(v), true)
+	_hud.draw_string(font, Vector2(41, 30), testa,
 		HORIZONTAL_ALIGNMENT_LEFT, -1, 18, CHIARO)
 
+	# Col mouse su un posto acceso la barra smette di dare istruzioni e dice
+	# che mossa sarebbe e quanto costa: i riquadri accesi si somigliano tutti,
+	# e questo e' l'ultimo momento in cui si puo' cambiare idea gratis.
+	if _sotto_mouse != null:
+		_riga_azione(font, _sotto_mouse, p)
+	else:
+		var invito := _invito(gs)
+		_striscia(font, invito, 20.0, 39.0, 14)
+		_hud.draw_string(font, Vector2(20, 54), invito,
+			HORIZONTAL_ALIGNMENT_LEFT, -1, 14, SPENTO)
+
+	if gs.phase == Enums.Phase.AZIONE and _io() >= 0 \
+			and gs.pending_choice.is_empty():
+		_disegna_bottoni(font, p)
+
+	var schermo := _hud.get_viewport_rect().size
+	# Finita la partita l'unica cosa sensata e' rifarne un'altra: senza
+	# questo tasto bisognava ricaricare la pagina.
+	if gs.phase == Enums.Phase.FINE_PARTITA:
+		_tasto(font, "Nuova partita", Vector2(20.0, schermo.y - 58.0), true,
+			{"che": "menu"}, 150.0)
+	_hud.draw_string(font, Vector2(20, schermo.y - 16),
+		"Trascina per girare il tabellone · rotella per avvicinare · "
+		+ "tasto destro per spostare · R riporta l'inquadratura",
+		HORIZONTAL_ALIGNMENT_LEFT, -1, 12, Color("#6f7683"))
+
+	if not _nota.is_empty():
+		_riquadro(font, _nota, _nota_dove + Vector2(18, 18))
+
+# Che mossa sarebbe cliccare qui, e quanto costa. Il conto che non torna esce
+# in coda e in rosso: il posto resta acceso perche' la mossa e' permessa, ed
+# e' il prezzo a non essere alla portata - sono due cose diverse e il
+# giocatore deve vederle diverse.
+func _riga_azione(font: Font, v: AvailableActions.Voce, p: PlayerState) -> void:
+	var riga := DescrizioneAzione.riga(ctl.gs, v, _io())
+	var manca := DescrizioneAzione.ammanco(v, p)
+	if manca != "": manca = "  ·  " + manca
+	_striscia(font, riga + manca, 20.0, 39.0, 14)
+	_hud.draw_string(font, Vector2(20, 54), riga, HORIZONTAL_ALIGNMENT_LEFT, -1, 14, CHIARO)
+	if manca == "": return
+	var x := 20.0 + font.get_string_size(riga, HORIZONTAL_ALIGNMENT_LEFT, -1, 14).x
+	_hud.draw_string(font, Vector2(x, 54), manca,
+		HORIZONTAL_ALIGNMENT_LEFT, -1, 14, ROSSO)
+
+# La riga di stato cade sul cielo dipinto, che e' chiaro: senza una striscia
+# scura sotto, meta' frase si perde fra le nuvole. Larga quanto il testo e
+# non quanto lo schermo, per non coprire il tabellone piu' del necessario.
+func _striscia(font: Font, testo: String, sx: float, cima: float,
+		corpo: int) -> void:
+	var largo := font.get_string_size(testo, HORIZONTAL_ALIGNMENT_LEFT, -1, corpo).x
+	_hud.draw_rect(Rect2(Vector2(12.0, cima),
+		Vector2(sx - 12.0 + largo + 12.0, corpo + 8.0)), SFONDO, true)
+
+# Cosa il gioco si aspetta adesso, quando il mouse non e' su niente.
+func _invito(gs: GameState) -> String:
 	var invito := ""
 	if gs.phase == Enums.Phase.FINE_PARTITA:
 		invito = "Partita finita. Vincitore: giocatore %d" % Scoring.winner(gs)
-	elif gs.current_index != UMANO:
+	elif _io() < 0:
 		invito = "Tocca al giocatore %d" % gs.current_index
 	elif not gs.pending_choice.is_empty():
 		invito = str(gs.pending_choice["prompt"])
@@ -511,36 +679,112 @@ func _disegna_hud() -> void:
 	else:
 		invito = "Clicca un posto acceso. Esc per lasciar perdere."
 	if _messaggio != "": invito += "     — " + _messaggio
-	_hud.draw_string(font, Vector2(20, 54), invito, HORIZONTAL_ALIGNMENT_LEFT, -1, 14, SPENTO)
+	return invito
 
-	if gs.phase == Enums.Phase.AZIONE and gs.current_index == UMANO \
-			and gs.pending_choice.is_empty():
-		_disegna_bottoni(font, p)
+# ---- la schermata d'inizio -------------------------------------------
+# Prima la partita cominciava da sola: tre giocatori e seme 7, scritti nel
+# codice. Per provarne altri bisognava ricompilare, e in due o in quattro non
+# ci si giocava affatto.
+#
+# I posti sono in ordine - prima gli umani, poi i bot - quindi chi gioca da
+# solo e' sempre il giocatore 0 e sa dove guardare. Con piu' umani si gioca a
+# turno sullo stesso schermo; con zero si guarda giocare.
+const SCELTA_LARGO := 560.0
+const SCELTA_ALTO := 296.0
 
+func _disegna_scelta(font: Font) -> void:
 	var schermo := _hud.get_viewport_rect().size
-	_hud.draw_string(font, Vector2(20, schermo.y - 16),
-		"Trascina per girare il tabellone · rotella per avvicinare · "
-		+ "tasto destro per spostare · R riporta l'inquadratura",
+	var r := Rect2(Vector2((schermo.x - SCELTA_LARGO) / 2.0,
+		(schermo.y - SCELTA_ALTO) / 2.0), Vector2(SCELTA_LARGO, SCELTA_ALTO))
+	_hud.draw_rect(r, SFONDO, true)
+	_hud.draw_rect(r, Color(1, 1, 1, 0.18), false, 1.0)
+	var x := r.position.x + 28.0
+	var y := r.position.y + 46.0
+	_hud.draw_string(font, Vector2(x, y), "La Strada delle Ere",
+		HORIZONTAL_ALIGNMENT_LEFT, -1, 26, CHIARO)
+	y += 40.0
+
+	y = _riga_scelta(font, "Giocatori", x, y,
+		range(ScelteInizio.MIN_GIOCATORI, ScelteInizio.MAX_GIOCATORI + 1),
+		inizio.giocatori, "giocatori")
+	y = _riga_scelta(font, "di cui bot", x, y,
+		range(0, inizio.giocatori + 1), inizio.bot, "bot")
+
+	# Il seme resta in vista e si puo' cambiare: tutto il progetto e'
+	# deterministico, quindi con lo stesso numero si rigioca la stessa
+	# partita - e un difetto si racconta col suo seme.
+	_hud.draw_string(font, Vector2(x, y + 20.0), "Seme %d" % inizio.seme,
+		HORIZONTAL_ALIGNMENT_LEFT, -1, 14, SPENTO)
+	_tasto(font, "cambia", Vector2(x + 130.0, y), false, {"che": "seme"})
+	y += 50.0
+
+	var via := _tasto(font, "Comincia", Vector2(x, y), true, {"che": "via"}, 150.0)
+	_hud.draw_string(font, Vector2(via.end.x + 16.0, y + 20.0),
+		inizio.descrizione(), HORIZONTAL_ALIGNMENT_LEFT, -1, 14, SPENTO)
+	var coda := "I posti sono in ordine: prima gli umani, poi i bot. "
+	coda += "Invio per cominciare."
+	if inizio.umani() == 0:
+		# Senza nessun umano i bot giocano tutto in un colpo: meglio dirlo
+		# prima, o il tavolo gia' finito sembra un difetto.
+		coda = "Senza umani la partita si gioca da sola: vedrai il tavolo finito."
+	_hud.draw_string(font, Vector2(x, r.end.y - 18.0), coda,
 		HORIZONTAL_ALIGNMENT_LEFT, -1, 12, Color("#6f7683"))
 
-	if not _nota.is_empty():
-		_riquadro(font, _nota, _nota_dove + Vector2(18, 18))
+# Una riga di scelta: l'etichetta e i numeri, quello scelto acceso.
+func _riga_scelta(font: Font, etichetta: String, x: float, y: float,
+		numeri, scelto: int, che: String) -> float:
+	_hud.draw_string(font, Vector2(x, y + 20.0), etichetta,
+		HORIZONTAL_ALIGNMENT_LEFT, -1, 14, SPENTO)
+	var bx := x + 130.0
+	for n in numeri:
+		var t := _tasto(font, str(n), Vector2(bx, y), n == scelto,
+			{"che": che, "n": n}, 40.0)
+		bx += t.size.x + 8.0
+	return y + 46.0
+
+# Un tasto: lo disegna e lo mette fra quelli cliccabili. `dato` e' quello che
+# il clic eseguira', cosi' il disegno e il clic non possono divergere.
+func _tasto(font: Font, testo: String, dove: Vector2, acceso: bool,
+		dato: Dictionary, minimo := 0.0) -> Rect2:
+	var largo := maxf(minimo,
+		font.get_string_size(testo, HORIZONTAL_ALIGNMENT_LEFT, -1, 14).x + 24.0)
+	var r := Rect2(dove, Vector2(largo, 32.0))
+	_hud.draw_rect(r, Color(1, 1, 1, 0.12) if acceso else Color(0, 0, 0, 0.25), true)
+	_hud.draw_rect(r, Color(1, 1, 1, 0.55 if acceso else 0.20), false, 1.0)
+	var m := font.get_string_size(testo, HORIZONTAL_ALIGNMENT_LEFT, -1, 14).x
+	_hud.draw_string(font, r.position + Vector2((largo - m) / 2.0, 21.0), testo,
+		HORIZONTAL_ALIGNMENT_LEFT, -1, 14, CHIARO if acceso else SPENTO)
+	_bottoni.append({"rect": r, "scelta": dato})
+	return r
+
+func _applica_scelta(d: Dictionary) -> void:
+	match str(d["che"]):
+		"giocatori": inizio.con_giocatori(int(d["n"]))
+		"bot": inizio.con_bot(int(d["n"]))
+		"seme": inizio.rimescola()
+		"via":
+			comincia()
+			return
+		"menu":
+			torna_alla_scelta()
+			return
+	_hud.queue_redraw()
 
 # Le azioni che non hanno una carta da cliccare sul tavolo. Sono tre, e stanno
 # in un angolo: non e' piu' un menu, e' quello che avanza.
 func _disegna_bottoni(font: Font, p: PlayerState) -> void:
 	var schermo := _hud.get_viewport_rect().size
 	var voci: Array = []
-	var din := AvailableActions.dinastia(ctl.gs, UMANO)
+	var din := AvailableActions.dinastia(ctl.gs, _io())
 	voci.append({"voce": din, "testo": "Dinastia  %dp %do" % [din.pietra, din.oro],
 		"attiva": din.legale and din.pagabile(p)})
-	var restauri := AvailableActions.restauri(ctl.gs, UMANO, ctl.colonna_attivata())
+	var restauri := AvailableActions.restauri(ctl.gs, _io(), ctl.colonna_attivata())
 	var quanti := 0
 	for r in restauri:
 		if r.legale: quanti += 1
 	voci.append({"voce": null, "modo": "restauro",
 		"testo": "Restaura  (%d)" % quanti, "attiva": quanti > 0})
-	var tutte := AvailableActions.tutte(ctl.gs, UMANO, ctl.colonna_attivata())
+	var tutte := AvailableActions.tutte(ctl.gs, _io(), ctl.colonna_attivata())
 	voci.append({"voce": tutte[tutte.size() - 1], "testo": "Passa", "attiva": true})
 
 	var y := schermo.y - 58.0

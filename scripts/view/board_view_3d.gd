@@ -6,6 +6,11 @@ extends Node3D
 const COLORI_GIOCATORE: Array[Color] = [
 	Color("#d9534f"), Color("#4a90d9"), Color("#5cb85c"), Color("#c9a227"),
 ]
+# Il colore di un giocatore, preso in prestito anche dall'interfaccia: a
+# turno sullo stesso schermo, sapere di che colore sei e' la prima cosa.
+static func colore_giocatore(i: int) -> Color:
+	return COLORI_GIOCATORE[i % COLORI_GIOCATORE.size()]
+
 const COLORI_TERRENO: Array[Color] = [
 	Color("#9c9069"), Color("#4a7fa0"), Color("#8b7a62"), Color("#4c7049"),
 ]
@@ -135,7 +140,7 @@ func _acceso_carta(c: Dictionary) -> bool:
 # dell'era in corso, e un alone attorno agli edifici che possono riceverla.
 func _posti_liberi() -> void:
 	for pz in evidenze.get("slot", []):
-		var box: AABB = BoardLayout3D.box_piazzamento(int(pz["col_from"]),
+		var box: AABB = BoardLayout3D.box_piazzamento(gs, int(pz["col_from"]),
 			int(pz["width"]), int(pz.get("level", 0)), gs.era)
 		# Verde a terra, ambra in alto: due quote e due colori, cosi' si
 		# capisce a colpo d'occhio che sono due cose diverse.

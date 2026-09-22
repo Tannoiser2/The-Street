@@ -100,16 +100,37 @@ static func slot_center(col: int, era: int) -> Vector3:
 # restano scoperti, ed e' cosi' che si vedono le file in fondo.
 static func standee_base(gs: GameState, b: Building) -> Vector3:
 	var x := col_x(b.col_from) + b.width() * TESSERA_W / 2.0
-	var z: float
+	return Vector3(x, level_y(b.level), z_sagoma(gs, b))
+
+# Dove sta, in profondita', il piede di un edificio.
+# A terra e' il davanti del suo binario. SOPRA, invece, poggia su quello che
+# lo regge: la z viene dalle basi sotto. Prima ogni sopraelevato finiva in
+# mezzo alla fascia del disegno mentre le sue fondamenta restavano al loro
+# binario - per l'era 1 sono 57 mm piu' avanti - e a schermo l'edificio
+# galleggiava in aria a fianco della pila che avrebbe dovuto reggerlo.
+static func z_sagoma(gs: GameState, b: Building, giri := 0) -> float:
 	if b.level == 0:
 		# sul davanti dello slot, cioe' dal lato della telecamera
-		z = rail_z(b.era_built) + SLOT_D - BASETTA_D / 2.0
-	else:
-		# Senza binario: al centro della FASCIA, sopra il baricentro di cio'
-		# che la sorregge - non al centro della tessera, che scenderebbe sul
-		# testo.
-		z = (BANDA_SU + BANDA_GIU) / 2.0
-	return Vector3(x, level_y(b.level), z)
+		return rail_z(b.era_built) + SLOT_D - BASETTA_D / 2.0
+	return z_basi(gs, b.col_from, b.col_to, b.level, giri)
+
+# La z di cio' che regge una pila alla quota `livello` fra due colonne: la
+# media delle basi trovate, perche' un edificio largo puo' poggiare su due
+# basi di ere diverse e allora sta in mezzo, come farebbe il cartone vero.
+# Se sotto non c'e' niente - tutto terrapieno - si torna al centro della
+# fascia: e' l'unico caso in cui non c'e' una base da seguire.
+static func z_basi(gs: GameState, col_from: int, col_to: int, livello: int,
+		giri := 0) -> float:
+	var somma := 0.0
+	var quante := 0
+	if giri < RAILS:
+		for s in gs.grid.buildings:
+			if s.level != livello - 1: continue
+			if s.col_to <= col_from or s.col_from >= col_to: continue
+			somma += z_sagoma(gs, s, giri + 1)
+			quante += 1
+	if quante == 0: return (BANDA_SU + BANDA_GIU) / 2.0
+	return somma / float(quante)
 
 # La basetta: ogni sagoma ne ha una. 15 mm di profondita' per 4 mm di cartone.
 static func basetta_box(gs: GameState, b: Building) -> AABB:
@@ -506,30 +527,41 @@ static func player_boards(gs: GameState) -> Array[Dictionary]:
 			Vector3(largo - 8.0, TESSERA_Y, BACCHETTA_D))})
 	return out
 
-# Le carte comprate, stese sotto la bacchetta. Il passo si stringe da solo
-# quando le carte sono tante: restano dentro il posto del giocatore e si
-# sovrappongono come un mazzo aperto a ventaglio, invece di sbordare addosso
-# al vicino.
+# Le carte comprate, stese sotto la bacchetta. NESSUNA COPRE L'ALTRA: si
+# riempie una riga finche' ci sta dentro il posto del giocatore, poi si va a
+# capo, e la riga nuova comincia sotto la carta piu' profonda di quella prima.
+#
+# Prima il passo si stringeva da solo per tenerle tutte su una riga sola, e
+# con tre carte larghe 125 mm in una fetta da 147 il passo scendeva a 12: un
+# mucchio in cui si leggeva solo l'ultima. Meglio che il posto del giocatore
+# si allunghi verso di lui - li' il tavolo e' vuoto - che avere carte che non
+# si distinguono.
 static func player_cards(gs: GameState, umano := -1) -> Array[Dictionary]:
 	var out: Array[Dictionary] = []
 	var largo := board_w(gs) / float(gs.n_players)
-	var z := board_d() + BORDO + BACCHETTA_D + CARTE_GIOCATORE_GAP
+	var z0 := board_d() + BORDO + BACCHETTA_D + CARTE_GIOCATORE_GAP
 	for i in gs.n_players:
 		var carte := carte_giocatore(gs, i, umano)
 		if carte.is_empty(): continue
-		var w_max := 0.0
-		for c in carte: w_max = maxf(w_max, misura_carta(str(c["kind"])).x)
 		var spazio := largo - 8.0
-		var passo := w_max + CARTE_GIOCATORE_GAP
-		if carte.size() > 1:
-			passo = minf(passo, maxf(12.0, (spazio - w_max) / float(carte.size() - 1)))
 		var x0 := i * largo + 4.0
+		var x := x0
+		var z := z0
+		var profonda := 0.0          # la carta piu' profonda della riga in corso
 		for j in carte.size():
 			var m := misura_carta(str(carte[j]["kind"]))
+			# A capo quando la carta non ci sta piu'. La prima di una riga ci
+			# resta comunque, anche se da sola sborda: e' meglio di una riga
+			# vuota e di un giro infinito.
+			if x > x0 and x + m.x > x0 + spazio:
+				x = x0
+				z += profonda + CARTE_GIOCATORE_GAP
+				profonda = 0.0
 			out.append({"kind": str(carte[j]["kind"]), "id": str(carte[j]["id"]),
 				"player": i, "ordine": j,
-				"aabb": AABB(Vector3(x0 + j * passo, 0.0, z),
-					Vector3(m.x, TESSERA_Y, m.y))})
+				"aabb": AABB(Vector3(x, 0.0, z), Vector3(m.x, TESSERA_Y, m.y))})
+			x += m.x + CARTE_GIOCATORE_GAP
+			profonda = maxf(profonda, m.y)
 	return out
 
 # Tutto il tavolo: strada, file e plance. E' questo che l'inquadratura deve
@@ -558,6 +590,18 @@ static func slot_at_ray(gs: GameState, origine: Vector3, direzione: Vector3) -> 
 	var era := RAILS - int(floor((p.z - BANDA_SU) / SLOT_D))
 	return {"col": col, "era": clampi(era, 1, RAILS), "punto": p}
 
+# L'ingombro che il raggio incontra: SI CLICCA QUELLO CHE SI VEDE. Chi non ha
+# piu' la sagoma in piedi - una rovina, o una base su cui si e' costruito -
+# offre la sola basetta, altrimenti il raggio continuerebbe a colpire un
+# cartone che a schermo non c'e' piu', e per giunta davanti a chi lo copre.
+static func ingombro(gs: GameState, b: Building) -> AABB:
+	if not ha_sagoma(b): return basetta_box(gs, b)
+	var base := standee_base(gs, b)
+	var dim := standee_size(b)
+	return AABB(
+		Vector3(base.x - dim.x / 2.0, base.y, base.z - SAGOMA_SPESSORE * 2.0),
+		Vector3(dim.x, dim.y + BASETTA_Y, SAGOMA_SPESSORE * 4.0))
+
 # L'edificio colpito da un raggio: la sagoma sta IN PIEDI, quindi non basta
 # intersecare il piano del tavolo come per gli slot e le carte. Si prova
 # l'ingombro di ciascuna, e vince la piu' vicina alla telecamera.
@@ -566,12 +610,7 @@ static func at_ray_building(gs: GameState, origine: Vector3, direzione: Vector3)
 	var migliore := -1
 	var piu_vicino := INF
 	for b in gs.grid.buildings:
-		var base := standee_base(gs, b)
-		var dim := standee_size(b)
-		var box := AABB(
-			Vector3(base.x - dim.x / 2.0, base.y, base.z - SAGOMA_SPESSORE * 2.0),
-			Vector3(dim.x, dim.y + BASETTA_Y, SAGOMA_SPESSORE * 4.0))
-		var t := _colpisce(box, origine, direzione)
+		var t := _colpisce(ingombro(gs, b), origine, direzione)
 		if t >= 0.0 and t < piu_vicino:
 			piu_vicino = t
 			migliore = b.uid
@@ -601,21 +640,23 @@ static func _colpisce(box: AABB, o: Vector3, d: Vector3) -> float:
 # in alto sulla pila invece di un tasto da tenere premuto - e "spianare il mio
 # edificio" diventa un riquadro sopra quell'edificio, che prima non c'era modo
 # di chiedere.
-static func box_piazzamento(col_from: int, larghezza: int, livello: int,
-		era: int) -> AABB:
+static func box_piazzamento(gs: GameState, col_from: int, larghezza: int,
+		livello: int, era: int) -> AABB:
 	if livello == 0:
 		# A terra si va sul binario dell'era in corso: e' li' che la sagoma
 		# andra' a finire.
 		return AABB(Vector3(col_x(col_from), level_y(0), rail_z(era)),
 			Vector3(larghezza * TESSERA_W, 0.0, SLOT_D))
-	# Sopra non c'e' un binario: la sagoma poggia al centro della fascia,
-	# sopra il baricentro di cio' che la sorregge. Il riquadro si tira un po'
-	# dentro, cosi' quando un binario ci finisce sotto - nell'era 3 cadono
-	# alla stessa z - restano due rettangoli distinti e cliccabili invece di
-	# uno sopra l'altro.
-	var z := (BANDA_SU + BANDA_GIU) / 2.0 - SLOT_D / 2.0
-	return AABB(Vector3(col_x(col_from) + 9.0, level_y(livello), z + 6.0),
-		Vector3(larghezza * TESSERA_W - 18.0, 0.0, SLOT_D - 12.0))
+	# Sopra non c'e' un binario: il riquadro va DOVE FINIRA' LA SAGOMA, cioe'
+	# sopra le basi, con lo stesso conto che usa standee_base. Se qui e la
+	# sagoma rispondessero due z diverse, il giocatore accenderebbe un posto e
+	# l'edificio comparirebbe altrove.
+	# Si tira un po' dentro, cosi' quando un binario ci finisce sotto restano
+	# due rettangoli distinti e cliccabili invece di uno sopra l'altro.
+	var profondo := SLOT_D - 12.0
+	var z := z_basi(gs, col_from, col_from + larghezza, livello) - profondo / 2.0
+	return AABB(Vector3(col_x(col_from) + 9.0, level_y(livello), z),
+		Vector3(larghezza * TESSERA_W - 18.0, 0.0, profondo))
 
 # Quale riquadro colpisce il raggio, fra quelli dati: il piu' vicino, o -1.
 # I riquadri sono piatti, quindi si ingrossano un filo in altezza per dare
@@ -647,7 +688,10 @@ static func card_at_ray(gs: GameState, origine: Vector3, direzione: Vector3,
 	var t := (TESSERA_Y - origine.y) / direzione.y
 	if t < 0.0: return {}
 	var p := origine + direzione * t
-	for c in side_cards(gs):
+	# `umano` va passato: senza, la vista disegnava l'obiettivo del giocatore
+	# scoperto e il clic rispondeva con la carta coperta - sulla tua stessa
+	# eredita' il riquadro diceva "lo vede solo il suo giocatore".
+	for c in side_cards(gs, umano):
 		var r: AABB = c["aabb"]
 		if p.x >= r.position.x and p.x <= r.position.x + r.size.x \
 				and p.z >= r.position.z and p.z <= r.position.z + r.size.z:

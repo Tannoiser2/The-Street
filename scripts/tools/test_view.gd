@@ -36,6 +36,10 @@ func _ready() -> void:
 	_run("  e la promessa che mantengono", _test_azioni_mantengono_la_promessa)
 	_run("i bersagli: dove si puo' mettere una carta", _test_bersagli)
 	_run("  e il riquadro acceso e' quello che si clicca", _test_riquadri)
+	_run("  e la barra dice che mossa sarebbe, e quanto costa", _test_descrizione)
+	_run("chi sta sopra poggia su chi sta sotto", _test_pila)
+	_run("le carte del giocatore non si coprono", _test_carte_giocatore)
+	_run("chi siede al tavolo lo si sceglie", _test_scelte_inizio)
 	print("\n%d superati, %d falliti" % [_passed, _failed])
 	get_tree().quit(0 if _failed == 0 else 1)
 
@@ -990,8 +994,8 @@ func _test_riquadri() -> void:
 		var riquadri: Array = []
 		for v in voci:
 			var w := int(CardDB.buildings[card_id]["width"])
-			riquadri.append(BoardLayout3D.box_piazzamento(int(v.parametri["col_from"]),
-				w, int(v.parametri["level"]), gs.era))
+			riquadri.append(BoardLayout3D.box_piazzamento(gs,
+				int(v.parametri["col_from"]), w, int(v.parametri["level"]), gs.era))
 		for i in voci.size():
 			var b: AABB = riquadri[i]
 			var centro := b.position + Vector3(b.size.x / 2.0, 0.0, b.size.z / 2.0)
@@ -1018,6 +1022,244 @@ func _test_riquadri() -> void:
 	_ok("si puo' chiedere di spianare un proprio edificio (%d modi)" % spianamenti,
 		spianamenti > 0)
 
+# La barra di stato: passando sopra un riquadro acceso deve dire CHE MOSSA
+# sarebbe e quanto costa. Serviva perche' i riquadri accesi si somigliano
+# tutti: la stessa carta, due caselle piu' in la', e' una costruzione a
+# terra oppure lo spianamento di una propria bottega ancora intatta. Prima la
+# differenza si scopriva cliccando, cioe' dopo.
+# DescrizioneAzione e' pura, quindi le frasi si provano qui senza schermo.
+func _test_descrizione() -> void:
+	var ctl := _gioco()
+	var gs := ctl.gs
+	# Tre situazioni nello stesso tabellone, perche' sono le tre mosse che il
+	# riquadro acceso non sa distinguere da solo: terra libera, una rovina su
+	# cui salire, un proprio edificio intatto da spianare.
+	_metti(gs, "ed_capanne", 2, 1, 0, 0)
+	var rovina := _metti(gs, "ed_capanne", 6, 1, 0, 0)
+	rovina.state = Enums.BuildingState.ROVINA
+	var p: PlayerState = gs.players[0]
+
+	var righe := 0
+	var senza_prezzo := 0
+	var tipo_sbagliato := 0
+	var spianate := 0
+	var sopraelevazioni := 0
+	var costruzioni := 0
+	# Si interrogano tutte le colonne come fa la plancia quando il lavoratore
+	# non e' ancora piazzato: AvailableActions e' pura e la colonna e' un suo
+	# parametro, quindi la domanda si puo' fare per una colonna ipotetica.
+	for col in gs.grid.n_cols:
+		for card_id in gs.market:
+			for v in AvailableActions.piazzamenti(gs, 0, col, card_id):
+				var riga := DescrizioneAzione.riga(gs, v, 0)
+				righe += 1
+				# il nome dell'edificio e il conto ci sono sempre
+				if not riga.contains(str(CardDB.buildings[card_id]["name"])) \
+						or not riga.contains(DescrizioneAzione.prezzo(v)):
+					senza_prezzo += 1
+				var tipo := DescrizioneAzione.tipo(v)
+				var spiana: PackedStringArray = v.parametri["spiana"]
+				if not spiana.is_empty():
+					spianate += 1
+					# spianare e' la mossa che costa un proprio edificio: la
+					# parola deve dirlo, e deve dire quale
+					if tipo != "Spianata" or not riga.contains(spiana[0]):
+						tipo_sbagliato += 1
+				elif bool(v.parametri["above"]):
+					sopraelevazioni += 1
+					if tipo != "Sopraelevazione": tipo_sbagliato += 1
+				else:
+					costruzioni += 1
+					if tipo != "Costruzione": tipo_sbagliato += 1
+
+	_ok("ogni posto acceso ha la sua riga (%d)" % righe, righe > 0)
+	_eq("  col nome dell'edificio e il prezzo", senza_prezzo, 0)
+	_ok("  la partita offre le tre mosse: %d a terra, %d sopra, %d spianando"
+		% [costruzioni, sopraelevazioni, spianate],
+		costruzioni > 0 and sopraelevazioni > 0 and spianate > 0)
+	_eq("  e ognuna si chiama col suo nome", tipo_sbagliato, 0)
+
+	# Il prezzo si scrive in italiano, non "0 pietra 0 oro".
+	var gratis := AvailableActions.Voce.new()
+	_eq("quel che non costa si dice gratis", DescrizioneAzione.prezzo(gratis), "gratis")
+	var caro := AvailableActions.Voce.new()
+	caro.pietra = 3
+	caro.oro = 1
+	_eq("  e il resto col suo conto", DescrizioneAzione.prezzo(caro), "3 pietra 1 oro")
+
+	# Legale e pagabile sono due cose diverse: il posto resta acceso, ma la
+	# barra deve dire quanto manca invece di far scoprire il rifiuto al clic.
+	var avanzo := Vector2i(p.pietra, p.oro)
+	p.pietra = 1
+	p.oro = 0
+	_eq("col borsellino vuoto la barra dice quanto manca",
+		DescrizioneAzione.ammanco(caro, p), "ti manca 2 pietra e 1 oro")
+	p.pietra = avanzo.x
+	p.oro = avanzo.y
+	_eq("  e non dice niente quando il conto torna",
+		DescrizioneAzione.ammanco(AvailableActions.Voce.new(), p), "")
+
+	# Il lavoratore non ancora piazzato: cliccare il posto lo mette, ed e' una
+	# conseguenza che nel riquadro acceso non si vede.
+	var v2 := AvailableActions.Voce.new()
+	v2.tipo = "costruisci"
+	v2.parametri = {"card_id": gs.market[0], "col_from": 0, "above": false,
+		"level": 0, "spiana": PackedStringArray(), "terrapieni": 0, "attiva": 4}
+	_ok("e se il lavoratore non c'e' ancora, dice quale colonna attiva",
+		DescrizioneAzione.riga(gs, v2, 0).contains("attiva la colonna 4"))
+
+# LE SAGOME SOPRAELEVATE GALLEGGIAVANO IN ARIA. Un edificio sopra finiva
+# sempre in mezzo alla fascia del disegno, mentre le sue fondamenta restavano
+# al binario della loro era - per l'era 1 sono 57 mm piu' avanti - e a
+# schermo stava per conto suo, a fianco della pila che avrebbe dovuto
+# reggerlo. Nessun test se ne accorgeva perche' nessuno confrontava la
+# posizione di chi sta sopra con quella di chi sta sotto.
+func _test_pila() -> void:
+	var gs := _gioco().gs
+	# la pila piu' semplice: una base dell'era 1, un edificio sopra
+	var sotto := _metti(gs, "ed_capanne", 2, 1, 0, 0)
+	sotto.state = Enums.BuildingState.ROVINA
+	var sopra := _metti(gs, "ed_capanne", 2, 3, 1, 0)
+	_approx("chi sta sopra prende la profondita' della sua base",
+		BoardLayout3D.standee_base(gs, sopra).z,
+		BoardLayout3D.standee_base(gs, sotto).z)
+	var giu := BoardLayout3D.basetta_box(gs, sotto)
+	var su := BoardLayout3D.basetta_box(gs, sopra)
+	_approx("  e la sua basetta poggia sul tetto di quella sotto",
+		su.position.y, giu.end.y)
+	_ok("  con i due piedi uno sopra l'altro, non uno a fianco all'altro",
+		su.position.z < giu.end.z and giu.position.z < su.end.z)
+
+	# E il riquadro acceso deve stare dove finira' la sagoma: se i due conti
+	# divergono, il giocatore accende un posto e l'edificio compare altrove.
+	var riq := BoardLayout3D.box_piazzamento(gs, 2, 1, 1, gs.era)
+	var centro := riq.position.z + riq.size.z / 2.0
+	_approx("il riquadro acceso e' dove la sagoma andra' a finire",
+		centro, BoardLayout3D.standee_base(gs, sopra).z)
+
+	# In una partita vera nessun sopraelevato deve restare senza appoggio.
+	var ctl := _gioco()
+	var giri := 0
+	while ctl.gs.phase != Enums.Phase.FINE_PARTITA and giri < 4000:
+		RandomBot.play_turn(ctl)
+		giri += 1
+	var g2 := ctl.gs
+	var quanti := 0
+	var appesi := 0
+	for b in g2.grid.buildings:
+		if b.level == 0: continue
+		quanti += 1
+		var mio := BoardLayout3D.basetta_box(g2, b)
+		var appoggiato := false
+		for s2 in g2.grid.buildings:
+			if s2.level != b.level - 1: continue
+			if s2.col_to <= b.col_from or s2.col_from >= b.col_to: continue
+			var suo := BoardLayout3D.basetta_box(g2, s2)
+			# si tocca in profondita' e si tocca di lato: e' appoggiato
+			if mio.position.z < suo.end.z and suo.position.z < mio.end.z \
+				and mio.position.x < suo.end.x and suo.position.x < mio.end.x:
+				appoggiato = true
+				break
+		if not appoggiato: appesi += 1
+	_ok("la partita ha prodotto pile (%d sopraelevati)" % quanti, quanti > 0)
+	_eq("  e nessuno di loro galleggia in aria", appesi, 0)
+
+# LE CARTE COMPRATE SI COPRIVANO A VICENDA. Il passo si stringeva per tenerle
+# tutte su una riga: con tre carte larghe 125 mm in una fetta da 147 scendeva
+# a 12 mm, e di ogni carta si vedeva una striscia. Adesso si va a capo.
+func _test_carte_giocatore() -> void:
+	var gs := _gioco().gs
+	# un giocatore carico: obiettivo, dinastia, monumenti e personaggi
+	var p: PlayerState = gs.players[0]
+	p.has_dynasty = true
+	for id in CardDB.monuments:
+		p.monuments_claimed.append(str(id))
+		if p.monuments_claimed.size() >= 2: break
+	for id in gs.char_row: p.specialized_characters.append(str(id))
+	var carte := BoardLayout3D.player_cards(gs, 0)
+	_ok("il giocatore ha parecchie carte davanti (%d)" % carte.size(),
+		carte.size() >= 5)
+
+	var coperte := 0
+	for i in carte.size():
+		for j in range(i + 1, carte.size()):
+			var a: AABB = carte[i]["aabb"]
+			var b: AABB = carte[j]["aabb"]
+			if a.position.x < b.end.x - 0.001 and b.position.x < a.end.x - 0.001 \
+				and a.position.z < b.end.z - 0.001 and b.position.z < a.end.z - 0.001:
+				coperte += 1
+	_eq("nessuna carta ne copre un'altra", coperte, 0)
+
+	# E nessuna finisce addosso al vicino: ognuno sta nella sua fetta.
+	var fetta := BoardLayout3D.board_w(gs) / float(gs.n_players)
+	var sconfinate := 0
+	for c in carte:
+		var b2: AABB = c["aabb"]
+		var mio: int = int(c["player"])
+		if b2.position.x < mio * fetta - 0.001: sconfinate += 1
+		if b2.end.x > (mio + 1) * fetta + 0.001: sconfinate += 1
+	_eq("  e nessuna sborda nel posto del vicino", sconfinate, 0)
+
+	# Le carte restano cliccabili: ognuna deve rispondere al raggio, e deve
+	# rispondere PROPRIO LEI. Era questo che il mucchio rendeva impossibile.
+	var sbagliate := 0
+	for c in carte:
+		var b3: AABB = c["aabb"]
+		var centro := b3.position + Vector3(b3.size.x / 2.0, 0.0, b3.size.z / 2.0)
+		var colpita := BoardLayout3D.card_at_ray(gs,
+			centro + Vector3(0, 500, 0), Vector3(0, -1, 0), 0)
+		if colpita.is_empty() or str(colpita["id"]) != str(c["id"]): sbagliate += 1
+	_eq("  e cliccandone una si prende proprio quella", sbagliate, 0)
+
+# CHI SIEDE AL TAVOLO. Prima erano due numeri dentro gioca.gd - tre giocatori,
+# seme 7 - e in due o in quattro non ci si giocava affatto. ScelteInizio e'
+# pura, quindi si prova headless che nessuna combinazione impossibile passi.
+func _test_scelte_inizio() -> void:
+	var s := ScelteInizio.new()
+	_eq("umani piu' bot fa i giocatori", s.umani() + s.bot, s.giocatori)
+
+	# Il regolamento sta su 2, 3 e 4: fuori di li' i terreni non sono tabulati.
+	s.con_giocatori(9)
+	_eq("in nove non si gioca: si scende al massimo", s.giocatori, 4)
+	s.con_giocatori(1)
+	_eq("  e da soli nemmeno: si sale al minimo", s.giocatori, 2)
+
+	s.con_giocatori(4)
+	s.con_bot(4)
+	_eq("tutti bot si puo': e' la partita che si guarda", s.umani(), 0)
+	s.con_bot(99)
+	_eq("  ma non piu' bot che giocatori", s.bot, 4)
+	s.con_bot(0)
+	_eq("  e nemmeno meno di zero: tutti umani", s.umani(), 4)
+
+	# E stringendo il tavolo i bot devono stringersi con lui, altrimenti si
+	# resterebbe con piu' bot che posti.
+	s.con_giocatori(4)
+	s.con_bot(3)
+	s.con_giocatori(2)
+	_ok("stringendo il tavolo i bot si stringono (%d su %d)" % [s.bot, s.giocatori],
+		s.bot <= s.giocatori)
+
+	# I primi posti sono degli umani: chi gioca da solo e' il giocatore 0 e sa
+	# dove guardare.
+	s.con_giocatori(3)
+	s.con_bot(2)
+	_ok("l'umano e' il primo", s.e_umano(0))
+	_ok("  e gli altri sono bot", not s.e_umano(1) and not s.e_umano(2))
+	_eq("  e i posti umani sono quelli", s.posti_umani(), [0] as Array[int])
+	_ok("  fuori dal tavolo non c'e' nessuno", not s.e_umano(-1) and not s.e_umano(3))
+
+	# Il seme resta scelto e visibile: e' quello che rende una partita
+	# ripetibile, e un difetto raccontabile.
+	var semi := {}
+	for i in 40:
+		s.rimescola()
+		semi[s.seme] = true
+		if s.seme < 1: _ok("seme fuori scala", false)
+	_ok("il seme cambia rimescolando (%d valori su 40)" % semi.size(), semi.size() > 1)
+	_ok("  e la descrizione dice chi gioca: \"%s\"" % s.descrizione(),
+		s.descrizione().contains("bot") and s.descrizione().contains(str(s.seme)))
+
 # LA SCENA GIOCABILE NON LA COMPILAVA NESSUN TEST. Un errore di sintassi in
 # gioca.gd passava tutta la suite - i test caricano i moduli puri, non la
 # scena - e si vedeva solo aprendo il gioco, con lo schermo grigio e nessun
@@ -1030,13 +1272,38 @@ func _test_scena_giocabile() -> void:
 			"res://scripts/view/board_view_3d.gd",
 			"res://scripts/view/board_layout_3d.gd",
 			"res://scripts/view/camera_orbita.gd",
+			"res://scripts/view/descrizione_azione.gd",
+			"res://scripts/view/scelte_inizio.gd",
 			"res://scripts/rules/available_actions.gd"]:
 		_ok("%s si compila" % percorso.get_file(), ResourceLoader.load(percorso) != null)
 	var scena := ResourceLoader.load("res://scenes/gioca.tscn") as PackedScene
 	_ok("la scena giocabile si carica", scena != null)
 	if scena == null: return
 	var n := scena.instantiate()
-	add_child(n)          # qui gira _ready: nuova partita, bot, primo disegno
+	add_child(n)          # qui gira _ready: la schermata di scelta
 	_ok("  e si avvia senza fermarsi", n.get_child_count() > 0)
-	_ok("  con la partita in piedi", n.ctl != null and n.ctl.gs != null)
+	_ok("  e si apre sulla scelta, non su una partita decisa da noi",
+		n.ctl == null)
+
+	# Quel che farebbe il clic su "Comincia": in due, uno dei quali bot.
+	n.inizio.con_giocatori(2)
+	n.inizio.con_bot(1)
+	n.comincia()
+	_ok("  e cominciando si ha una partita in piedi",
+		n.ctl != null and n.ctl.gs != null)
+	_eq("  coi giocatori scelti", n.ctl.gs.n_players, 2)
+	_ok("  e col tavolo disegnato", n.vista != null)
+	# Col bot al secondo posto, il turno torna sempre all'umano.
+	_ok("  e il turno e' dell'umano", n.inizio.e_umano(n.ctl.gs.current_index)
+		or n.ctl.gs.phase == Enums.Phase.FINE_PARTITA)
+
+	# Tutti bot: si guarda giocare, e la partita deve arrivare in fondo da
+	# sola senza restare appesa ad aspettare un umano che non c'e'.
+	n.inizio.con_giocatori(3)
+	n.inizio.con_bot(3)
+	n.comincia()
+	_ok("  e con tutti bot la partita va avanti da sola",
+		n.ctl.gs.era > 1 or n.ctl.gs.phase == Enums.Phase.FINE_PARTITA)
+	n.torna_alla_scelta()
+	_ok("  e si torna alla scelta", n.ctl == null and n.vista == null)
 	n.queue_free()

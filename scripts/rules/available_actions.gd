@@ -157,10 +157,17 @@ static func piazzamenti(gs: GameState, player: int, col: int,
 			# acceso ALLA SUA QUOTA, cosi' "costruire sopra" e' un riquadro
 			# che sta in alto invece di un tasto da tenere premuto.
 			var dove := "sopra" if sopra else "a terra"
-			if sopra and not q.razed.is_empty():
-				dove = "spianando " + str(q.razed[0].data["name"])
+			var spianati := PackedStringArray()
+			for r in q.razed: spianati.append(str(r.data["name"]))
+			if sopra and not spianati.is_empty():
+				dove = "spianando " + ", ".join(spianati)
+			# Cosa si spiana e quanti terrapieni servono vengono dal preventivo e
+			# viaggiano con la voce: sono la differenza fra due riquadri accesi
+			# identici, e l'interfaccia deve poterla dire senza rifare per conto
+			# suo i conti delle regole.
 			out.append(_voce("costruisci", "Costruisci %s %s" % [d["name"], dove], q,
-				{"card_id": card_id, "col_from": c, "above": sopra, "level": q.level}))
+				{"card_id": card_id, "col_from": c, "above": sopra, "level": q.level,
+				"spiana": spianati, "terrapieni": q.terrapieno_cols}))
 	return out
 
 # Gli edifici che possono ricevere un potenziamento: uno per bersaglio.
