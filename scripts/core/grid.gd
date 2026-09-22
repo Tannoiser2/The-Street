@@ -70,9 +70,19 @@ func reset_era_flags() -> void:
 # Va ricalcolato su tutti gli edifici dopo ogni costruzione, perche' un nuovo
 # strato puo' completare la copertura di un edificio coperto solo in parte
 # molte ere prima.
+# UNA ROVINA, non un edificio qualunque. La regola parla di rovine, e il
+# simulatore di riferimento - su cui il gioco e' stato bilanciato - non
+# sotterra mai un intatto: costruendo sopra, la base viene spianata
+# (intatto -> rovina) oppure sotterrata (gia' rudere o rovina), e nessun
+# altro edificio della colonna viene toccato.
+# Senza questo, a quota zero una colonna porta fino a cinque edifici - uno
+# per binario d'era - e il primo strato costruito sopra ne sotterrava
+# CINQUE invece di uno: restavano "intatti e sepolti", smettevano di
+# produrre e regalavano lo Scavo al proprietario. A fine partita sul
+# tabellone restavano in piedi tre sagome su quaranta.
 func refresh_buried() -> void:
 	for b in buildings:
-		b.is_buried = is_fully_covered(b)
+		b.is_buried = b.state == Enums.BuildingState.ROVINA and is_fully_covered(b)
 
 func is_fully_covered(b: Building) -> bool:
 	for c in range(b.col_from, b.col_to):

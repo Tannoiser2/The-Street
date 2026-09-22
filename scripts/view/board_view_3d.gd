@@ -275,29 +275,136 @@ func _sagoma(b: Building) -> void:
 		m.position = centro
 		add_child(m)
 		return
-	# Il cartone ha uno spessore, e un piano solo non ce l'ha: appena si gira
-	# il tabellone la sagoma spariva di taglio come un adesivo. Si impilano
-	# quindi alcune copie del disegno lungo lo spessore - le interne piu'
-	# scure, come il cuore del cartoncino - e da qualunque angolo si vede un
-	# pezzo pieno.
-	var strati := 4
-	var passo := BoardLayout3D.SAGOMA_SPESSORE_VISTA / float(strati - 1)
-	for i in strati:
-		var m := _quad(dim, Color.WHITE)
-		var mat := m.material_override as StandardMaterial3D
-		mat.albedo_texture = tex
-		mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA_SCISSOR
-		mat.alpha_scissor_threshold = 0.5
-		mat.texture_filter = BaseMaterial3D.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
-		mat.cull_mode = BaseMaterial3D.CULL_DISABLED
-		# Solo la faccia davanti porta il colore pieno: le altre fanno da
-		# taglio e vanno in ombra, altrimenti lo spessore sembra vetro.
-		var buio := 1.0 if i == strati - 1 else 0.45
-		mat.albedo_color = Color(buio, buio, buio)
-		if b.is_buried: mat.albedo_color *= Color(0.62, 0.62, 0.66)
-		m.position = centro + Vector3(0.0, 0.0,
-			-BoardLayout3D.SAGOMA_SPESSORE_VISTA / 2.0 + i * passo)
-		add_child(m)
+	# UNA SAGOMA SOLA, SPESSA. Prima si impilavano quattro copie del disegno
+	# lungo lo spessore per far sembrare pieno il cartone: da vicino si
+	# vedevano per quello che erano, quattro figure appaiate. Adesso e' un
+	# pezzo unico - il contorno ritagliato dall'alfa dell'illustrazione ed
+	# estruso nello spessore - con la stampa sulle due facce e il taglio
+	# scuro sul bordo, come il cartoncino vero.
+	var mesh := mesh_sagoma(tex, dim, BoardLayout3D.SAGOMA_SPESSORE_VISTA)
+	if mesh == null:
+		# L'alfa non ha dato un contorno: meglio un piano con la stampa che
+		# niente. Succede se l'immagine e' piena fino ai bordi.
+		var piatta := _quad(dim, Color.WHITE)
+		_stampa(piatta.material_override as StandardMaterial3D, tex)
+		piatta.position = centro
+		add_child(piatta)
+		return
+	var m := MeshInstance3D.new()
+	m.mesh = mesh
+	# La mesh e' condivisa fra tutte le copie della stessa sagoma, quindi i
+	# materiali vanno sull'istanza e non sulla mesh.
+	var stampa := StandardMaterial3D.new()
+	_stampa(stampa, tex)
+	var taglio := StandardMaterial3D.new()
+	taglio.albedo_color = TAGLIO_CARTONE
+	taglio.cull_mode = BaseMaterial3D.CULL_DISABLED
+	m.set_surface_override_material(0, stampa)
+	if mesh.get_surface_count() > 1: m.set_surface_override_material(1, taglio)
+	m.position = centro
+	add_child(m)
+
+func _stampa(mat: StandardMaterial3D, tex: Texture2D) -> void:
+	mat.albedo_color = Color.WHITE
+	mat.albedo_texture = tex
+	mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA_SCISSOR
+	mat.alpha_scissor_threshold = 0.5
+	mat.texture_filter = BaseMaterial3D.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
+	mat.cull_mode = BaseMaterial3D.CULL_DISABLED
+
+# ---- il cartone estruso ----------------------------------------------
+# Il contorno della sagoma viene dall'ALFA dell'illustrazione, non da un
+# rettangolo: le sagome sono fustellate, e una scatola dietro il disegno
+# sporgerebbe da tutte le parti. BitMap.opaque_to_polygons fa il ritaglio,
+# poi il contorno si estrude nello spessore.
+#
+# Il risultato si tiene in cache: la scena si ricostruisce a ogni clic e a
+# ogni mossa dei bot, e rifare il ritaglio sessanta volte al secondo sarebbe
+# uno spreco. La chiave comprende le misure, perche' la stessa illustrazione
+# puo' servire sagome di taglia diversa.
+static var _sagome_estruse := {}
+
+# Quanto si semplifica il contorno, in pixel dell'immagine. Sotto l'unita'
+# il bordo sfrangiato della compressione produce migliaia di vertici; sopra i
+# tre si perdono i campanili.
+const CONTORNO_EPSILON := 2.0
+const TAGLIO_CARTONE := Color(0.38, 0.35, 0.31)
+
+static func mesh_sagoma(tex: Texture2D, dim: Vector2, spessore: float) -> ArrayMesh:
+	if tex == null: return null
+	# Le texture caricate da file hanno un percorso; quelle costruite a
+	# mano (i test) no, e senza identita' finirebbero nella stessa voce.
+	var nome := tex.resource_path if tex.resource_path != "" \
+		else "id%d" % tex.get_instance_id()
+	var chiave := "%s|%.1f|%.1f|%.1f" % [nome, dim.x, dim.y, spessore]
+	if _sagome_estruse.has(chiave): return _sagome_estruse[chiave]
+	var img := tex.get_image()
+	if img == null: return null
+	# Nell'export la texture puo' stare compressa per la scheda video: si
+	# decomprime per poterne leggere l'alfa, e se non si puo' si torna
+	# indietro col piano invece di far saltare la scena.
+	if img.is_compressed(): img.decompress()
+	if img.is_compressed(): return null
+	if img.get_format() != Image.FORMAT_RGBA8: img.convert(Image.FORMAT_RGBA8)
+	var w := float(img.get_width())
+	var h := float(img.get_height())
+	if w <= 0.0 or h <= 0.0: return null
+	var bm := BitMap.new()
+	bm.create_from_image_alpha(img, 0.5)
+	var poligoni := bm.opaque_to_polygons(Rect2i(0, 0, int(w), int(h)),
+		CONTORNO_EPSILON)
+	var mesh := _estrudi(poligoni, Vector2(w, h), dim, spessore)
+	_sagome_estruse[chiave] = mesh
+	return mesh
+
+static func _estrudi(poligoni: Array, pixel: Vector2, dim: Vector2,
+		spessore: float) -> ArrayMesh:
+	var facce := SurfaceTool.new()
+	facce.begin(Mesh.PRIMITIVE_TRIANGLES)
+	var bordo := SurfaceTool.new()
+	bordo.begin(Mesh.PRIMITIVE_TRIANGLES)
+	var mezzo := spessore / 2.0
+	var triangoli := 0
+	for poly in poligoni:
+		if poly.size() < 3: continue
+		var tri := Geometry2D.triangulate_polygon(poly)
+		if tri.is_empty(): continue
+		triangoli += tri.size() / 3
+		# Le due facce stampate, davanti e dietro. La stampa e' la stessa:
+		# sul cartone vero il disegno c'e' da entrambi i lati.
+		for lato in [1.0, -1.0]:
+			for k in tri.size():
+				var p: Vector2 = poly[tri[k]]
+				facce.set_uv(Vector2(p.x / pixel.x, p.y / pixel.y))
+				facce.set_normal(Vector3(0.0, 0.0, lato))
+				facce.add_vertex(_in_mm(p, pixel, dim, lato * mezzo))
+		# Il taglio: una striscia lungo tutto il contorno.
+		for i in poly.size():
+			var a: Vector2 = poly[i]
+			var b: Vector2 = poly[(i + 1) % poly.size()]
+			var a3 := _in_mm(a, pixel, dim, mezzo)
+			var b3 := _in_mm(b, pixel, dim, mezzo)
+			var a4 := _in_mm(a, pixel, dim, -mezzo)
+			var b4 := _in_mm(b, pixel, dim, -mezzo)
+			var lungo := (b3 - a3)
+			var n := Vector3(lungo.y, -lungo.x, 0.0).normalized()
+			for v in [a3, b3, b4, a3, b4, a4]:
+				bordo.set_normal(n)
+				bordo.add_vertex(v)
+	if triangoli == 0: return null
+	var mesh := ArrayMesh.new()
+	facce.index()
+	facce.commit(mesh)
+	bordo.index()
+	bordo.commit(mesh)
+	return mesh
+
+# Dal pixel dell'immagine al millimetro sulla sagoma, centrata sull'origine.
+# La y si ribalta: nell'immagine cresce verso il basso, sul tavolo verso
+# l'alto.
+static func _in_mm(p: Vector2, pixel: Vector2, dim: Vector2, z: float) -> Vector3:
+	return Vector3(p.x / pixel.x * dim.x - dim.x / 2.0,
+		(1.0 - p.y / pixel.y) * dim.y - dim.y / 2.0, z)
 	# Niente nome sopra la sagoma. Le scritte che galleggiano sul tavolo
 	# coprivano proprio quello che dovevano far vedere: adesso il nome esce
 	# quando ci passi sopra col mouse, e solo quello puntato.
