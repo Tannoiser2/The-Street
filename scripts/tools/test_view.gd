@@ -31,9 +31,11 @@ func _ready() -> void:
 	_run("  e cliccare funziona da ogni angolo", _test_orbita_e_clic)
 	_run("  e finisce davvero dove dice, nella scena", _test_telecamera_nel_mondo)
 	_run("3D: la tessera si disegna intera", _test_tessera_intera)
+	_run("la scena giocabile si compila e si avvia", _test_scena_giocabile)
 	_run("le azioni offerte, col preventivo", _test_azioni_offerte)
 	_run("  e la promessa che mantengono", _test_azioni_mantengono_la_promessa)
 	_run("i bersagli: dove si puo' mettere una carta", _test_bersagli)
+	_run("  e il riquadro acceso e' quello che si clicca", _test_riquadri)
 	print("\n%d superati, %d falliti" % [_passed, _failed])
 	get_tree().quit(0 if _failed == 0 else 1)
 
@@ -565,20 +567,25 @@ func _test_3d_inquadratura() -> void:
 func _test_tavolo() -> void:
 	var ctl := _gioco()
 	var gs := ctl.gs
-	var carte := BoardLayout3D.side_cards(gs)
-	_eq("una carta per ogni carta in fila", carte.size(),
-		gs.market.size() + gs.char_row.size() + gs.upg_row.size() + gs.monuments_open.size())
+	var carte := BoardLayout3D.side_cards(gs, 0)
+	var possedute := 0
+	for i in gs.n_players: possedute += BoardLayout3D.carte_giocatore(gs, i, 0).size()
+	_eq("una carta per ogni carta sul tavolo", carte.size(),
+		gs.market.size() + gs.char_row.size() + gs.upg_row.size()
+		+ gs.monuments_open.size() + possedute)
+	_ok("e ogni giocatore ha davanti il suo obiettivo segreto", possedute >= gs.n_players)
 	var tipi := {}
 	for c in carte: tipi[str(c["kind"])] = true
 	_ok("ci sono mercato, personaggi e potenziamenti",
 		tipi.has("mercato") and tipi.has("personaggio") and tipi.has("potenziamento"))
 
-	# Le file stanno AI LATI della strada, non sopra: la strada deve restare
-	# libera, altrimenti coprirebbero le sagome.
+	# Nessuna carta sta SOPRA la strada: le file ai lati, le carte possedute
+	# davanti. Se una ci finisse sopra coprirebbe le sagome.
 	var sopra_la_strada := 0
 	for c in carte:
 		var r: AABB = c["aabb"]
-		if r.position.x + r.size.x > 0.0 and r.position.x < BoardLayout3D.board_w(gs):
+		if _si_accavallano(r.position.x, r.size.x, 0.0, BoardLayout3D.board_w(gs)) \
+				and _si_accavallano(r.position.z, r.size.z, 0.0, BoardLayout3D.board_d()):
 			sopra_la_strada += 1
 	_eq("nessuna carta sta sopra la strada", sopra_la_strada, 0)
 
@@ -958,3 +965,78 @@ func _test_bersagli() -> void:
 	# Una carta che non c'e' non accende nulla, invece di far saltare tutto.
 	_eq("una carta sconosciuta non offre posti",
 		AvailableActions.piazzamenti(gs, 0, col, "ed_inventato").size(), 0)
+
+# La promessa dell'interfaccia nuova: quello che si accende e' quello che si
+# clicca. Il riquadro lo calcola una funzione sola - box_piazzamento - e la
+# usano sia il disegno sia il raggio del clic, quindi non possono divergere.
+# Qui si verifica che ogni riquadro sia davvero raggiungibile, e che
+# "costruire sopra" stia PIU' IN ALTO di "costruire a terra": e' quello che
+# rende cliccabile un'opzione che prima si poteva chiedere solo tenendo
+# premuto un tasto, e che quindi non chiedeva nessuno.
+func _test_riquadri() -> void:
+	var ctl := _gioco()
+	var gs := ctl.gs
+	# una torre: un edificio a terra su cui si possa costruire sopra
+	_metti(gs, "ed_capanne", 2, 1, 0, 0)
+	_metti(gs, "ed_capanne", 3, 1, 0, 0)
+	ctl.place_worker(2)
+	var col := ctl.colonna_attivata()
+
+	var trovati := 0
+	var sopra_piu_in_alto := 0
+	var sopra_totali := 0
+	for card_id in gs.market:
+		var voci := AvailableActions.piazzamenti(gs, 0, col, card_id)
+		var riquadri: Array = []
+		for v in voci:
+			var w := int(CardDB.buildings[card_id]["width"])
+			riquadri.append(BoardLayout3D.box_piazzamento(int(v.parametri["col_from"]),
+				w, int(v.parametri["level"]), gs.era))
+		for i in voci.size():
+			var b: AABB = riquadri[i]
+			var centro := b.position + Vector3(b.size.x / 2.0, 0.0, b.size.z / 2.0)
+			# un raggio verticale dall'alto sul centro del riquadro
+			var k := BoardLayout3D.riquadro_al_raggio(riquadri,
+				centro + Vector3(0, 400, 0), Vector3(0, -1, 0))
+			if k >= 0: trovati += 1
+			if int(voci[i].parametri["level"]) > 0:
+				sopra_totali += 1
+				if b.position.y > BoardLayout3D.level_y(0) + 0.001: sopra_piu_in_alto += 1
+
+	_ok("ogni riquadro acceso e' raggiungibile dal raggio (%d)" % trovati, trovati > 0)
+	_ok("  e la partita ne offre di quelli sopra (%d)" % sopra_totali, sopra_totali > 0)
+	_eq("  che stanno tutti piu' in alto di quelli a terra",
+		sopra_piu_in_alto, sopra_totali)
+
+	# E il piu' importante: fra i piazzamenti offerti ci sono sia quelli che
+	# poggiano su una rovina sia quelli che SPIANANO un proprio edificio
+	# intatto - la mossa che l'interfaccia vecchia non sapeva chiedere.
+	var spianamenti := 0
+	for card_id in gs.market:
+		for v in AvailableActions.piazzamenti(gs, 0, col, card_id):
+			if v.etichetta.contains("spianando"): spianamenti += 1
+	_ok("si puo' chiedere di spianare un proprio edificio (%d modi)" % spianamenti,
+		spianamenti > 0)
+
+# LA SCENA GIOCABILE NON LA COMPILAVA NESSUN TEST. Un errore di sintassi in
+# gioca.gd passava tutta la suite - i test caricano i moduli puri, non la
+# scena - e si vedeva solo aprendo il gioco, con lo schermo grigio e nessun
+# messaggio. E' successo: una sostituzione aveva mangiato tre funzioni e i
+# 156 test erano tutti verdi.
+# Qui la scena si carica DAVVERO e si avvia: se non compila, o se _ready
+# scoppia, il test lo dice.
+func _test_scena_giocabile() -> void:
+	for percorso in ["res://scripts/view/gioca.gd",
+			"res://scripts/view/board_view_3d.gd",
+			"res://scripts/view/board_layout_3d.gd",
+			"res://scripts/view/camera_orbita.gd",
+			"res://scripts/rules/available_actions.gd"]:
+		_ok("%s si compila" % percorso.get_file(), ResourceLoader.load(percorso) != null)
+	var scena := ResourceLoader.load("res://scenes/gioca.tscn") as PackedScene
+	_ok("la scena giocabile si carica", scena != null)
+	if scena == null: return
+	var n := scena.instantiate()
+	add_child(n)          # qui gira _ready: nuova partita, bot, primo disegno
+	_ok("  e si avvia senza fermarsi", n.get_child_count() > 0)
+	_ok("  con la partita in piedi", n.ctl != null and n.ctl.gs != null)
+	n.queue_free()

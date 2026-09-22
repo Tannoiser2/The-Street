@@ -38,9 +38,14 @@ const BANDA_SU := 30.0
 const BANDA_GIU := 160.0
 const SLOT_D := (BANDA_GIU - BANDA_SU) / float(RAILS)   # 26 mm per binario
 const SAGOMA_MODULO := 60.3      # 1/2/3 slot -> 60,3 / 120,6 / 180,9 mm
-const SAGOMA_SPESSORE := 4.0     # cartone
+const SAGOMA_SPESSORE := 4.0     # cartone vero, misurato
+# A schermo 4 mm non si vedono: una sagoma disegnata cosi' sembra un adesivo.
+# Il DISEGNO la ingrossa, i conti no - il raggio del clic e la geometria usano
+# sempre la misura vera. E' una scelta di leggibilita', scritta qui perche'
+# non sembri una misura sbagliata.
+const SAGOMA_SPESSORE_VISTA := 9.0
 const BASETTA_D := 15.0          # il piede che tiene in piedi la sagoma
-const BASETTA_Y := 5.0
+const BASETTA_Y := 10.0
 # Le sagome sono contigue sul binario, ma la basetta ne occupa 15 mm sui 54:
 # il resto dello slot resta scoperto, ed e' quello che lascia vedere le file
 # dietro senza bisogno di allontanare i binari.
@@ -49,7 +54,7 @@ const BASETTA_Y := 5.0
 # fa da fondamenta a chi ci costruisce sopra. Un edificio non si trova mai
 # sopra una sagoma in piedi - le basi diventano tutte rovina nel momento in
 # cui ci si costruisce - quindi non c'e' niente da scavalcare.
-const LEVEL_H := 5.0
+const LEVEL_H := BASETTA_Y
 # Il cielo e' un pannello in piedi ATTACCATO al bordo alto delle tessere e
 # largo esattamente quanto loro: e' il fondale della strada, non una parete
 # della stanza. Prima stava 90 mm piu' indietro e sbordava di due tessere per
@@ -176,6 +181,7 @@ const CARTELLE_CARTE := {
 	"potenziamento": ["potenziamenti", "png"],
 	"monumento": ["monumenti", "png"],
 	"eredita": ["eredita", "png"],
+	"eredita_coperta": ["dorsi", "png"],
 	"dinastia": ["dorsi", "png"],
 }
 
@@ -372,6 +378,7 @@ const MISURE_CARTE := {
 	"potenziamento": Vector2(28.0, 68.0),
 	"monumento": Vector2(125.6, 25.2),
 	"eredita": Vector2(125.7, 45.2),
+	"eredita_coperta": Vector2(125.7, 45.2),
 	"dinastia": Vector2(95.0, 95.0),
 }
 
@@ -397,36 +404,62 @@ static func _colonna_di_carte(x: float, misure: Array) -> Array[AABB]:
 
 # Tutte le carte delle file, ognuna col suo riquadro: serve a disegnarle e a
 # cliccarle. `kind` dice a quale fila appartiene, `id` quale carta e'.
-static func side_cards(gs: GameState) -> Array[Dictionary]:
+static func side_cards(gs: GameState, umano := -1) -> Array[Dictionary]:
 	var out: Array[Dictionary] = []
+
+	# A SINISTRA il mercato, una colonna sola, appoggiata al proprio bordo
+	# destro cosi' le carte guardano la strada.
 	var sinistra: Array = []
 	for id in gs.market: sinistra.append(["mercato", str(id)])
-	var destra: Array = []
-	for id in gs.char_row: destra.append(["personaggio", str(id)])
-	for id in gs.upg_row: destra.append(["potenziamento", str(id)])
-	for id in gs.monuments_open: destra.append(["monumento", str(id)])
-
 	var mis_sx: Array = []
 	for c in sinistra: mis_sx.append(misura_carta(str(c[0])))
 	var largo_sx := 0.0
 	for m in mis_sx: largo_sx = maxf(largo_sx, m.x)
-	# La fila di sinistra si appoggia al proprio bordo destro, quella di
-	# destra al proprio sinistro: cosi' le carte guardano la strada.
 	var box_sx := _colonna_di_carte(-(largo_sx + BORDO), mis_sx)
 	for i in sinistra.size():
 		var b: AABB = box_sx[i]
 		b.position.x += largo_sx - b.size.x
 		out.append({"kind": str(sinistra[i][0]), "id": str(sinistra[i][1]), "aabb": b})
 
-	var mis_dx: Array = []
-	for c in destra: mis_dx.append(misura_carta(str(c[0])))
-	var box_dx := _colonna_di_carte(board_w(gs) + BORDO, mis_dx)
-	for i in destra.size():
-		out.append({"kind": str(destra[i][0]), "id": str(destra[i][1]), "aabb": box_dx[i]})
+	out.append_array(_fila_destra(gs))
+	out.append_array(player_cards(gs, umano))
+	return out
 
-	# Anche le carte comprate sono carte sul tavolo: si guardano e si
-	# indicano come le altre.
-	out.append_array(player_cards(gs))
+# A DESTRA due file affiancate: i personaggi in colonna e, a fianco di
+# ciascuno, il potenziamento della sua riga. Sono tre e tre, e messi cosi' si
+# leggono a coppie invece che in un elenco unico lungo il doppio.
+# I monumenti stanno appena sotto, in fondo alle due file.
+static func _fila_destra(gs: GameState) -> Array[Dictionary]:
+	var out: Array[Dictionary] = []
+	var m_pers := misura_carta("personaggio")
+	var m_pot := misura_carta("potenziamento")
+	var m_mon := misura_carta("monumento")
+	var righe: int = maxi(gs.char_row.size(), gs.upg_row.size())
+
+	var alto_righe := righe * m_pers.y + maxf(0.0, righe - 1) * CARTA_GAP
+	var alto_mon := gs.monuments_open.size() * m_mon.y \
+		+ maxf(0.0, gs.monuments_open.size() - 1) * CARTA_GAP
+	var totale := alto_righe + (CARTA_GAP * 3.0 + alto_mon if alto_mon > 0.0 else 0.0)
+	var z := board_d() / 2.0 - totale / 2.0
+	var x := board_w(gs) + BORDO
+
+	for i in righe:
+		if i < gs.char_row.size():
+			out.append({"kind": "personaggio", "id": str(gs.char_row[i]),
+				"aabb": AABB(Vector3(x, 0.0, z), Vector3(m_pers.x, TESSERA_Y, m_pers.y))})
+		if i < gs.upg_row.size():
+			# Il potenziamento e' piu' corto del personaggio: si centra sulla
+			# sua riga, cosi' le due file restano allineate a occhio.
+			out.append({"kind": "potenziamento", "id": str(gs.upg_row[i]),
+				"aabb": AABB(
+					Vector3(x + m_pers.x + CARTA_GAP, 0.0, z + (m_pers.y - m_pot.y) / 2.0),
+					Vector3(m_pot.x, TESSERA_Y, m_pot.y))})
+		z += m_pers.y + CARTA_GAP
+	z += CARTA_GAP * 2.0
+	for id in gs.monuments_open:
+		out.append({"kind": "monumento", "id": str(id),
+			"aabb": AABB(Vector3(x, 0.0, z), Vector3(m_mon.x, TESSERA_Y, m_mon.y))})
+		z += m_mon.y + CARTA_GAP
 	return out
 
 # ---- il posto del giocatore -----------------------------------------
@@ -439,9 +472,17 @@ const CARTE_GIOCATORE_GAP := 5.0
 # Le carte che un giocatore ha davanti. I potenziamenti no: quelli stanno
 # infilati sotto l'edificio, ed e' li' che il regolamento li vuole. L'Eredita'
 # nemmeno: e' segreta fino alla fine.
-static func carte_giocatore(gs: GameState, player: int) -> Array[Dictionary]:
+static func carte_giocatore(gs: GameState, player: int, umano := -1) -> Array[Dictionary]:
 	var out: Array[Dictionary] = []
 	var p: PlayerState = gs.players[player]
+	# L'OBIETTIVO SEGRETO. Ce l'hanno tutti dall'inizio e non si vedeva da
+	# nessuna parte: sta davanti al suo giocatore, scoperto per lui e coperto
+	# per gli altri - come sul tavolo vero.
+	if p.legacy_id != "":
+		if player == umano:
+			out.append({"kind": "eredita", "id": p.legacy_id})
+		else:
+			out.append({"kind": "eredita_coperta", "id": "eredita_1"})
 	if p.has_dynasty: out.append({"kind": "dinastia", "id": "dinastia_1"})
 	for m in p.monuments_claimed: out.append({"kind": "monumento", "id": str(m)})
 	var visti := {}
@@ -469,12 +510,12 @@ static func player_boards(gs: GameState) -> Array[Dictionary]:
 # quando le carte sono tante: restano dentro il posto del giocatore e si
 # sovrappongono come un mazzo aperto a ventaglio, invece di sbordare addosso
 # al vicino.
-static func player_cards(gs: GameState) -> Array[Dictionary]:
+static func player_cards(gs: GameState, umano := -1) -> Array[Dictionary]:
 	var out: Array[Dictionary] = []
 	var largo := board_w(gs) / float(gs.n_players)
 	var z := board_d() + BORDO + BACCHETTA_D + CARTE_GIOCATORE_GAP
 	for i in gs.n_players:
-		var carte := carte_giocatore(gs, i)
+		var carte := carte_giocatore(gs, i, umano)
 		if carte.is_empty(): continue
 		var w_max := 0.0
 		for c in carte: w_max = maxf(w_max, misura_carta(str(c["kind"])).x)
@@ -555,9 +596,53 @@ static func _colpisce(box: AABB, o: Vector3, d: Vector3) -> float:
 	if t1 < maxf(t0, 0.0): return -1.0
 	return maxf(t0, 0.0)
 
+# Il riquadro di un piazzamento: dove si accende e dove si clicca, che sono
+# la stessa cosa. Alla quota del livello, cosi' "costruire sopra" e' un posto
+# in alto sulla pila invece di un tasto da tenere premuto - e "spianare il mio
+# edificio" diventa un riquadro sopra quell'edificio, che prima non c'era modo
+# di chiedere.
+static func box_piazzamento(col_from: int, larghezza: int, livello: int,
+		era: int) -> AABB:
+	if livello == 0:
+		# A terra si va sul binario dell'era in corso: e' li' che la sagoma
+		# andra' a finire.
+		return AABB(Vector3(col_x(col_from), level_y(0), rail_z(era)),
+			Vector3(larghezza * TESSERA_W, 0.0, SLOT_D))
+	# Sopra non c'e' un binario: la sagoma poggia al centro della fascia,
+	# sopra il baricentro di cio' che la sorregge. Il riquadro si tira un po'
+	# dentro, cosi' quando un binario ci finisce sotto - nell'era 3 cadono
+	# alla stessa z - restano due rettangoli distinti e cliccabili invece di
+	# uno sopra l'altro.
+	var z := (BANDA_SU + BANDA_GIU) / 2.0 - SLOT_D / 2.0
+	return AABB(Vector3(col_x(col_from) + 9.0, level_y(livello), z + 6.0),
+		Vector3(larghezza * TESSERA_W - 18.0, 0.0, SLOT_D - 12.0))
+
+# Quale riquadro colpisce il raggio, fra quelli dati: il piu' vicino, o -1.
+# I riquadri sono piatti, quindi si ingrossano un filo in altezza per dare
+# al raggio qualcosa da prendere.
+static func riquadro_al_raggio(riquadri: Array, origine: Vector3,
+		direzione: Vector3) -> int:
+	var migliore := -1
+	var piu_vicino := INF
+	for i in riquadri.size():
+		var b: AABB = riquadri[i]
+		# Un filo piu' generoso del disegno: un binario e' profondo 26 mm, a
+		# schermo una quindicina di pixel, e chiedere il pixel esatto sarebbe
+		# scortese. Il margine e' meta' binario, quindi non arriva mai a
+		# toccare il riquadro di un'altra riga.
+		b = b.grow(6.0)
+		b.position.y = riquadri[i].position.y - 3.0
+		b.size.y = 6.0
+		var t := _colpisce(b, origine, direzione)
+		if t >= 0.0 and t < piu_vicino:
+			piu_vicino = t
+			migliore = i
+	return migliore
+
 # La carta di una fila sotto un raggio, se ce n'e' una. Stessa geometria del
 # disegno: il giocatore clicca cio' che vede.
-static func card_at_ray(gs: GameState, origine: Vector3, direzione: Vector3) -> Dictionary:
+static func card_at_ray(gs: GameState, origine: Vector3, direzione: Vector3,
+		umano := -1) -> Dictionary:
 	if absf(direzione.y) < 0.00001: return {}
 	var t := (TESSERA_Y - origine.y) / direzione.y
 	if t < 0.0: return {}
