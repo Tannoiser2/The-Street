@@ -32,7 +32,7 @@ scripts/                 (progetto Godot nella radice del repo: res:// == repo)
   commands/            GameController                                 (unica porta d'ingresso)
   data/                CardDB (autoload)
   ai/                  RandomBot, headless_runner
-  tools/               SchemaValidator, validazione dei dati
+  tools/               SchemaValidator, validazione dei dati, test
 scenes/                  scene di avvio (runner headless, test)
 reference/
   regolamento-completo.html   la specifica
