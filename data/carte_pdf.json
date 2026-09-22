@@ -87,6 +87,33 @@
     "er_il_massaio",
     "er_lantiquario"
   ],
+  "potenziamenti": [
+    "po_pittura_rupestre",
+    null,
+    "po_palizzata",
+    "po_idolo",
+    "po_granaio_comune",
+    "po_statua",
+    null,
+    "po_altare",
+    "po_bastioni",
+    "po_banchina",
+    "po_contrafforte",
+    null,
+    "po_campanile",
+    "po_merlatura",
+    "po_stalli_mercantili",
+    "po_opera_darte",
+    null,
+    "po_affreschi",
+    "po_cupola",
+    "po_giardino_pensile",
+    "po_installazione",
+    null,
+    "po_targa_storica",
+    "po_ascensore_panoramico",
+    "po_boutique"
+  ],
   "_mancanti": {
     "eventi": [
       "ev_eruzione",
@@ -94,32 +121,12 @@
       "ev_guerra_civile"
     ],
     "potenziamenti": [
-      "po_pittura_rupestre",
-      "po_palizzata",
-      "po_idolo",
-      "po_granaio_comune",
       "po_fondamenta_in_pietra",
-      "po_statua",
-      "po_altare",
-      "po_bastioni",
-      "po_banchina",
       "po_iscrizione",
-      "po_contrafforte",
-      "po_campanile",
-      "po_merlatura",
-      "po_stalli_mercantili",
       "po_reliquia",
-      "po_opera_darte",
-      "po_affreschi",
-      "po_cupola",
-      "po_giardino_pensile",
       "po_cannoniere",
-      "po_installazione",
-      "po_targa_storica",
-      "po_ascensore_panoramico",
-      "po_boutique",
       "po_memoriale"
     ]
   },
-  "_note_mancanti": "eventi: le posizioni 10, 11 e 12 dovrebbero portare i tre eventi gravi dell'era 2 e portano invece una seconda stampa di Grande incendio, Scisma e Anni della fame - stessa carta, illustrazione rigenerata. potenziamenti: nel PDF non c'e' nessuna carta potenziamento."
+  "_note_mancanti": "eventi: le posizioni 10, 11 e 12 dovrebbero portare i tre eventi gravi dell'era 2 e portano invece una seconda stampa di Grande incendio, Scisma e Anni della fame - stessa carta, illustrazione rigenerata. potenziamenti: stanno in materiali/Potenziamenti.pdf, 25 posizioni per 25 carte, ma la prima carta di ogni era e' stampata due volte (posizioni 2, 7, 12, 17, 22 sono la copia byte per byte della posizione precedente) e un potenziamento per era non c'e'."
 }

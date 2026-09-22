@@ -5,6 +5,9 @@
 # Sistema
 .DS_Store
 
-# Grafica estratta da materiali/Carte.pdf: file derivati, non versionati.
+# Grafica estratta dai PDF in materiali/: file derivati, non versionati.
 # Si rigenerano con `python3 tools/estrai_grafica.py` (serve pymupdf).
 assets/
+
+# Cache di Python dei tool.
+__pycache__/

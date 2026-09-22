@@ -928,10 +928,13 @@ dato è stato importato da lì. Ma due confronti fra ciò che è stampato e
     posizioni 4-6 permutate, monumenti ed eredita' un ordine proprio. Nessuna
     regola valeva per tutti, quindi nessuna si poteva indovinare.
 
-69. **Mancano 28 carte, e due assenze sono di peso.** Nel PDF non c'e' nessuna
-    carta **potenziamento**: 25 nei dati, zero fra i materiali. E mancano tre
-    eventi gravi dell'era 2 - **Eruzione, Persecuzioni, Guerra civile** - le
-    cui posizioni portano una seconda stampa di tre carte dell'era 3.
+69. **Mancano tre eventi gravi dell'era 2** - **Eruzione, Persecuzioni, Guerra
+    civile** - le cui posizioni portano una seconda stampa di tre carte
+    dell'era 3.
+
+    (Qui avevo scritto anche che mancavano tutti e 25 i potenziamenti. Era
+    sbagliato: stanno in un PDF a parte, `materiali/Potenziamenti.pdf`, che
+    allora non avevo. Quello che ne manca davvero e' al punto 71.)
 
     L'Eruzione e' la carta di cui ho appena implementato il potenziamento
     omaggio con tanto di sospensione della fine dell'era: esiste nelle regole e
@@ -948,3 +951,29 @@ dato è stato importato da lì. Ma due confronti fra ciò che è stampato e
     diventa mai rudere - misurato, **0 su 113** in 40 partite - e l'unico modo
     in cui puo' finire in rovina e' essere spianato da chi ci costruisce sopra,
     cioe' restando sepolto e invisibile. Quel lato non lo vedrebbe nessuno.
+
+71. **Nel PDF dei potenziamenti manca una carta per era, e al suo posto c'e'
+    una ristampa.** `materiali/Potenziamenti.pdf` ha 25 posizioni per 25 carte,
+    ma la prima carta di ogni era e' stampata due volte e un potenziamento non
+    c'e':
+
+    | era | posizione ripetuta | manca |
+    |---|---|---|
+    | 1 | 2 (copia di 1, *Pittura rupestre*) | **Fondamenta in pietra** |
+    | 2 | 7 (copia di 6, *Statua*) | **Iscrizione** |
+    | 3 | 12 (copia di 11, *Contrafforte*) | **Reliquia** |
+    | 4 | 17 (copia di 16, *Opera d'arte*) | **Cannoniere** |
+    | 5 | 22 (copia di 21, *Installazione*) | **Memoriale** |
+
+    E' lo stesso difetto degli eventi del punto 69, ma qui le ripetizioni sono
+    copie **byte per byte** - la stessa immagine incorporata due volte - non
+    illustrazioni rigenerate. La regolarita' (sempre la prima carta del gruppo
+    di cinque) fa pensare a un errore di impaginazione, non a cinque
+    dimenticanze.
+
+    Nessuna carta stampata e' estranea ai dati, e il testo delle 20 presenti
+    coincide voce per voce con `data/cards.json`: qui, a differenza delle carte
+    edificio del punto 20, i numeri del PDF **non** sono obsoleti.
+
+    Intanto il gioco gira lo stesso: i potenziamenti li disegna dai dati, la
+    grafica manca solo per cinque su venticinque.

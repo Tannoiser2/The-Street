@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-"""Estrae la grafica da materiali/Carte.pdf per l'interfaccia (M5).
+"""Estrae la grafica dai PDF di stampa in materiali/ per l'interfaccia (M5).
 
-Produce due cose, con due gradi di affidabilità molto diversi.
+Produce tre cose, con gradi di affidabilità molto diversi.
 
 1. FACCE DELLE CARTE (pagine 19, 21, 23, 25, 27) — mappatura VERIFICATA.
    Ogni pagina porta 12 immagini incorporate, una per carta, 334x363 px: non
@@ -36,6 +36,22 @@ Produce due cose, con due gradi di affidabilità molto diversi.
    riempimento dai bordi, non per colore, altrimenti si bucherebbero le nuvole
    bianche dentro il disegno.
 
+3. POTENZIAMENTI (materiali/Potenziamenti.pdf) — mappatura VERIFICATA.
+   Stanno in un PDF a parte perché hanno un formato tutto loro: 28x68 mm, la
+   linguetta stretta e alta che si infila sotto la sagoma dell'edificio.
+   Una pagina di facce e una di dorsi, 25 posizioni ciascuna, cinque per era
+   in ordine di dati.
+   Le 25 posizioni NON sono 25 carte diverse: la prima carta di ogni era è
+   stampata due volte (le posizioni 2, 7, 12, 17 e 22 sono la copia byte per
+   byte della posizione precedente) e al suo posto manca un potenziamento per
+   era - Fondamenta in pietra, Iscrizione, Reliquia, Cannoniere, Memoriale.
+   Le facce distinte sono quindi 20 su 25. È lo stesso difetto degli eventi
+   dell'era 2, e va segnalato al designer, non aggirato.
+   I dorsi sono 5 disegni distinti, uno per era, ognuno ripetuto cinque volte.
+   Il testo stampato sulle 20 carte presenti coincide con data/cards.json,
+   controllato voce per voce: qui, a differenza delle carte edificio, i numeri
+   del PDF non sono obsoleti.
+
 Uso:  python3 tools/estrai_grafica.py [cartella_destinazione]
       (default: assets/)
 """
@@ -48,6 +64,7 @@ except ImportError:
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 PDF = os.path.join(ROOT, "materiali", "Carte.pdf")
+PDF_POTENZIAMENTI = os.path.join(ROOT, "materiali", "Potenziamenti.pdf")
 PAGINE_EDIFICI = {1: 19, 2: 21, 3: 23, 4: 25, 5: 27}
 PAGINE_SAGOME_COLORE = list(range(1, 19, 2))
 PAGINE_SAGOME_GRIGIO = list(range(2, 19, 2))
@@ -208,6 +225,9 @@ GRUPPI_DORSI = [
     ("eredita",     [34, 36],         True),
     ("dinastia",    [45, 46],         False),
 ]
+# Il secondo PDF ha una pagina sola per parte, e non è impaginato a specchio.
+GRUPPI_POTENZIAMENTI = [("potenziamenti", [1], False, 25)]
+GRUPPI_DORSI_POTENZIAMENTI = [("potenziamenti", [2], False)]
 
 
 def estrai_gruppo(doc, dest, nome, pagine, specchiata, attesi, ordine=None):
@@ -234,7 +254,7 @@ def estrai_gruppo(doc, dest, nome, pagine, specchiata, attesi, ordine=None):
     come = f", {per_id} per id" if per_id else ", numerate"
     salto = f", {saltate} saltate (disegno di un'altra carta)" if saltate else ""
     print(f"  {nome}: {n} pezzi ({stato}){come}{salto}")
-    return n
+    return n, per_id
 
 
 def estrai_dorsi(doc, dest, nome, pagine, specchiata):
@@ -324,29 +344,45 @@ def main(dest):
 
     print("altri gruppi:")
     conteggi = {"edifici": scritti}
+    per_id = {"edifici": scritti}
     for nome, pagine, specchiata, attesi in GRUPPI:
         if nome == "edifici":
             continue
-        conteggi[nome] = estrai_gruppo(doc, dest, nome, pagine, specchiata, attesi,
-                                       ordini.get(nome))
+        conteggi[nome], per_id[nome] = estrai_gruppo(
+            doc, dest, nome, pagine, specchiata, attesi, ordini.get(nome))
     for nome, pagine, specchiata in GRUPPI_DORSI:
         estrai_dorsi(doc, dest, nome, pagine, specchiata)
 
-    # Quello che nel PDF non c'è. Meglio dirlo a ogni estrazione che
-    # scoprirlo quando serve.
+    # I potenziamenti stanno nel secondo PDF, con lo stesso trattamento.
+    doc_pot = pymupdf.open(PDF_POTENZIAMENTI)
+    print("potenziamenti (PDF a parte):")
+    for nome, pagine, specchiata, attesi in GRUPPI_POTENZIAMENTI:
+        conteggi[nome], per_id[nome] = estrai_gruppo(
+            doc_pot, dest, nome, pagine, specchiata, attesi, ordini.get(nome))
+    for nome, pagine, specchiata in GRUPPI_DORSI_POTENZIAMENTI:
+        d = estrai_dorsi(doc_pot, dest, nome, pagine, specchiata)
+        print(f"  dorsi: {d} disegni distinti (uno per era)")
+
+    # Quello che nei PDF non c'è. Meglio dirlo a ogni estrazione che scoprirlo
+    # quando serve. Si conta quante carte sono uscite COL PROPRIO ID: le
+    # posizioni ci sono tutte, sono le carte a mancare.
     mancanti = []
-    for chiave, etichetta in (("upgrades", "potenziamenti"),):
-        if conteggi.get(etichetta, 0) < len(cards[chiave]):
-            mancanti.append(f"{etichetta} ({len(cards[chiave])} nei dati, "
-                            f"{conteggi.get(etichetta, 0)} nel PDF)")
+    for chiave, etichetta in (("upgrades", "potenziamenti"), ("events", "eventi")):
+        nei_dati = len(cards[chiave])
+        estratte = per_id.get(etichetta, 0)
+        if estratte < nei_dati:
+            senza = ordini.get("_mancanti", {}).get(etichetta, [])
+            nomi = ", ".join(senza) if senza else "non censite"
+            mancanti.append(f"{etichetta}: {nei_dati - estratte} su {nei_dati} ({nomi})")
     if mancanti:
-        print("  NEL PDF NON CI SONO: " + ", ".join(mancanti))
+        print("NEI PDF NON CI SONO -> " + "; ".join(mancanti))
 
     sag = estrai_sagome(doc, dest)
     with open(os.path.join(dest, "indice.json"), "w", encoding="utf-8") as f:
         json.dump({"carte_edifici": indice,
                    "sagome": sag,
                    "conteggi": conteggi,
+                   "per_id": per_id,
                    "nota_sagome": "numerazione in ordine di lettura; la "
                                   "corrispondenza con gli id sta in "
                                   "data/sagome.json"},

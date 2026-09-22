@@ -1,8 +1,15 @@
 # Materiali di stampa: cosa c'è nel PDF e cosa manca
 
-`materiali/Carte.pdf` — 54 pagine — è la fonte **grafica**, mai quella dei dati
-(il PDF è a una calibrazione precedente alla v1.5: vedi `docs/domande-aperte.md`
-punto 20). Qui c'è la mappa di cosa contiene, ricavata misurando la geometria e
+I PDF in `materiali/` sono la fonte **grafica**, mai quella dei dati (`Carte.pdf`
+è a una calibrazione precedente alla v1.5: vedi `docs/domande-aperte.md` punto
+20). Sono due:
+
+- `materiali/Carte.pdf` — 54 pagine — tutto il resto del gioco;
+- `materiali/Potenziamenti.pdf` — 2 pagine — i soli potenziamenti, che hanno un
+  formato a parte: 28×68 mm, la linguetta stretta e alta che si infila sotto la
+  sagoma dell'edificio.
+
+Qui c'è la mappa di cosa contengono, ricavata misurando la geometria e
 **leggendo i nomi stampati sulle carte**, una per una.
 
 `tools/estrai_grafica.py` estrae tutto e lo salva per id dove la mappatura è
@@ -24,13 +31,32 @@ nota. Le posizioni e gli id stanno in `data/carte_pdf.json` e
 | Dinastia | 45, 46 | 1 (×4 copie) | — |
 | tessere colonna | 47, 49, 51, 53 | 14 | numerate |
 | dorsi | 28, 30, 32, 34, 36, 38, 40, 42, 44 | uno per mazzo o per era | — |
+| potenziamenti | `Potenziamenti.pdf` 1 | 25 posizioni, 20 carte | `data/carte_pdf.json`, ordine JSON, cinque per era |
+| dorsi dei potenziamenti | `Potenziamenti.pdf` 2 | 5 (uno per era) | — |
 
 ## Cosa manca
 
-### I 25 potenziamenti non ci sono
+### Cinque potenziamenti non ci sono, uno per era
 
-Nel PDF **non c'è nessuna carta potenziamento**. Sono 25 nei dati, zero fra i
-materiali. L'estrattore lo dice a ogni esecuzione.
+`Potenziamenti.pdf` ha 25 posizioni per 25 carte, ma non sono 25 carte diverse:
+in ogni era la **prima carta è stampata due volte** e un potenziamento manca.
+
+| era | posizione ripetuta | manca |
+|---|---|---|
+| 1 | 2 (copia di 1, *Pittura rupestre*) | **Fondamenta in pietra** |
+| 2 | 7 (copia di 6, *Statua*) | **Iscrizione** |
+| 3 | 12 (copia di 11, *Contrafforte*) | **Reliquia** |
+| 4 | 17 (copia di 16, *Opera d'arte*) | **Cannoniere** |
+| 5 | 22 (copia di 21, *Installazione*) | **Memoriale** |
+
+Le ripetizioni qui sono copie **byte per byte**, non illustrazioni rigenerate
+come nel caso degli eventi qui sotto: è la stessa immagine incorporata due
+volte. Le facce distinte sono quindi **20 su 25**. Nessuna carta stampata è
+estranea ai dati.
+
+Il testo delle 20 presenti **coincide con `data/cards.json`**, controllato voce
+per voce: qui, a differenza delle carte edificio, i numeri del PDF non sono
+obsoleti.
 
 ### Tre eventi dell'era 2 non ci sono
 
