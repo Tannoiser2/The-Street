@@ -38,7 +38,7 @@ static func resolve_event(gs: GameState) -> void:
 	if force == 0: return
 	for b in gs.grid.buildings:
 		if not b.is_standing(): continue
-		var eff: int = b.effective_resistance() + event_modifier(gs, b)
+		var eff: int = b.effective_resistance() + Effects.event_resistance_modifier(gs, b)
 		if eff >= force:
 			var vmax := int(CardDB.constants["vetusta_max"])
 			if _on_terrain(gs, b, Enums.Terrain.BOSCO):
@@ -54,20 +54,8 @@ static func resolve_event(gs: GameState) -> void:
 			b.upgrades.clear()
 			gs.log_line("%s crolla in rovina" % b.data["name"])
 
-# Modificatori dell'evento corrente.
-# TODO: tradurre i 24 effect_text in modificatori strutturati. Per ora sono gestiti
-# i due pattern più comuni; il resto va implementato carta per carta.
-static func event_modifier(gs: GameState, b: Building) -> int:
-	var txt: String = gs.current_event.get("effect_text", "")
-	var mod := 0
-	if txt.contains("colonne fiume") and _on_terrain(gs, b, Enums.Terrain.FIUME):
-		mod -= 1
-	for cls in Enums.CLASSES:
-		var cap := cls.capitalize()
-		if txt.contains(cap + " +1") and cls in b.classes(): mod += 1
-		if txt.contains(cap + " −1") and cls in b.classes(): mod -= 1
-		if txt.contains(cap + " −2") and cls in b.classes(): mod -= 2
-	return mod
+# I modificatori dell'evento vengono dal campo `effects` della carta (M4):
+# nessuna stringa interpretata a runtime. Vedi Effects.event_resistance_modifier.
 
 static func _on_terrain(gs: GameState, b: Building, t: int) -> bool:
 	for c in range(b.col_from, b.col_to):
@@ -116,6 +104,7 @@ static func bury_characters(gs: GameState) -> void:
 # sopravvissuto"), e la sepoltura precede l'azzeramento dei personaggi.
 static func end_era(gs: GameState) -> void:
 	resolve_event(gs)
+	Effects.era_end_resources(gs)
 	# Il censimento delle ere 1-4 si paga qui. Quello dell'era 5 NON si paga:
 	# l'era Moderna non ha evento e il suo censimento E' il "Censimento finale",
 	# voce 1 del conteggio di fine partita (Scoring._census_final). Pagarlo

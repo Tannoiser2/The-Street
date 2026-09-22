@@ -69,6 +69,11 @@ static func quote_restore(gs: GameState, player: int, target: Building) -> Actio
 		return ActionQuote.no("l'edificio e' sotterrato")
 	if target.state != Enums.BuildingState.RUDERE:
 		return ActionQuote.no("non e' un rudere")
+	# ev_secolarizzazioni: "durante l'era, restaurare un rudere Religione non
+	# costa risorse (richiede comunque l'azione) e vale sui ruderi gia' presenti."
+	var free := Effects.find_override(gs, "free_restore_of_class")
+	if not free.is_empty() and Effects.matches(gs, target, free.get("target", {})):
+		return ActionQuote.yes(0, 0, target)
 	var c: Dictionary = target.data["cost"]
 	var p := int(ceil(float(int(c["pietra"])) / 2.0))
 	var o := int(ceil(float(int(c["oro"])) / 2.0))

@@ -2321,7 +2321,19 @@
       "force": 2,
       "severity": "lieve",
       "kind": "geografico",
-      "effect_text": "Forza 2. Edifici su colonne fiume: −1 res."
+      "effect_text": "Forza 2. Edifici su colonne fiume: −1 res.",
+      "effects": [
+        {
+          "hook": "on_event",
+          "op": "resistance",
+          "value": -1,
+          "target": {
+            "terrain": [
+              "fiume"
+            ]
+          }
+        }
+      ]
     },
     {
       "id": "ev_eta_degli_spiriti",
@@ -2330,7 +2342,29 @@
       "force": 2,
       "severity": "lieve",
       "kind": "classe",
-      "effect_text": "Forza 2. Religione +1 res · Commercio −1 res."
+      "effect_text": "Forza 2. Religione +1 res · Commercio −1 res.",
+      "effects": [
+        {
+          "hook": "on_event",
+          "op": "resistance",
+          "value": 1,
+          "target": {
+            "class": [
+              "religione"
+            ]
+          }
+        },
+        {
+          "hook": "on_event",
+          "op": "resistance",
+          "value": -1,
+          "target": {
+            "class": [
+              "commercio"
+            ]
+          }
+        }
+      ]
     },
     {
       "id": "ev_migrazione",
@@ -2339,7 +2373,17 @@
       "force": 2,
       "severity": "lieve",
       "kind": "comportamentale",
-      "effect_text": "Forza 2. Edifici non protetti: −1 res extra."
+      "effect_text": "Forza 2. Edifici non protetti: −1 res extra.",
+      "effects": [
+        {
+          "hook": "on_event",
+          "op": "resistance",
+          "value": -1,
+          "target": {
+            "protected": false
+          }
+        }
+      ]
     },
     {
       "id": "ev_inverno_lungo",
@@ -2348,7 +2392,28 @@
       "force": 2,
       "severity": "grave",
       "kind": "geografico",
-      "effect_text": "Forza 2. Edifici su bosco e collina: −1 res. Tutti i giocatori perdono 1 pietra."
+      "effect_text": "Forza 2. Edifici su bosco e collina: −1 res. Tutti i giocatori perdono 1 pietra.",
+      "effects": [
+        {
+          "hook": "on_event",
+          "op": "resistance",
+          "value": -1,
+          "target": {
+            "terrain": [
+              "bosco",
+              "collina"
+            ]
+          }
+        },
+        {
+          "hook": "on_era_end",
+          "op": "resource",
+          "pietra": -1,
+          "target": {
+            "owner": "any"
+          }
+        }
+      ]
     },
     {
       "id": "ev_faide_tribali",
@@ -2357,7 +2422,29 @@
       "force": 2,
       "severity": "grave",
       "kind": "classe",
-      "effect_text": "Forza 2. Militare +1 res · Civico −2 res."
+      "effect_text": "Forza 2. Militare +1 res · Civico −2 res.",
+      "effects": [
+        {
+          "hook": "on_event",
+          "op": "resistance",
+          "value": 1,
+          "target": {
+            "class": [
+              "militare"
+            ]
+          }
+        },
+        {
+          "hook": "on_event",
+          "op": "resistance",
+          "value": -2,
+          "target": {
+            "class": [
+              "civico"
+            ]
+          }
+        }
+      ]
     },
     {
       "id": "ev_carestia_primitiva",
@@ -2366,7 +2453,21 @@
       "force": 2,
       "severity": "grave",
       "kind": "comportamentale",
-      "effect_text": "Forza 2. Edifici a livello 0 non protetti che producono risorse: −2 res."
+      "effect_text": "Forza 2. Edifici a livello 0 non protetti che producono risorse: −2 res.",
+      "effects": [
+        {
+          "hook": "on_event",
+          "op": "resistance",
+          "value": -2,
+          "target": {
+            "level": {
+              "max": 0
+            },
+            "protected": false,
+            "produces": true
+          }
+        }
+      ]
     },
     {
       "id": "ev_terremoto",
@@ -2375,7 +2476,19 @@
       "force": 3,
       "severity": "lieve",
       "kind": "geografico",
-      "effect_text": "Forza 3. Edifici da 2 o 3 caselle: −1 res."
+      "effect_text": "Forza 3. Edifici da 2 o 3 caselle: −1 res.",
+      "effects": [
+        {
+          "hook": "on_event",
+          "op": "resistance",
+          "value": -1,
+          "target": {
+            "width": {
+              "min": 2
+            }
+          }
+        }
+      ]
     },
     {
       "id": "ev_pax_imperiale",
@@ -2384,7 +2497,29 @@
       "force": 3,
       "severity": "lieve",
       "kind": "classe",
-      "effect_text": "Forza 3. Ingegneria +1 res · Militare −1 res."
+      "effect_text": "Forza 3. Ingegneria +1 res · Militare −1 res.",
+      "effects": [
+        {
+          "hook": "on_event",
+          "op": "resistance",
+          "value": 1,
+          "target": {
+            "class": [
+              "ingegneria"
+            ]
+          }
+        },
+        {
+          "hook": "on_event",
+          "op": "resistance",
+          "value": -1,
+          "target": {
+            "class": [
+              "militare"
+            ]
+          }
+        }
+      ]
     },
     {
       "id": "ev_invasione",
@@ -2393,7 +2528,17 @@
       "force": 3,
       "severity": "lieve",
       "kind": "comportamentale",
-      "effect_text": "Forza 3. Edifici non protetti: −1 res extra."
+      "effect_text": "Forza 3. Edifici non protetti: −1 res extra.",
+      "effects": [
+        {
+          "hook": "on_event",
+          "op": "resistance",
+          "value": -1,
+          "target": {
+            "protected": false
+          }
+        }
+      ]
     },
     {
       "id": "ev_eruzione",
@@ -2402,7 +2547,25 @@
       "force": 3,
       "severity": "grave",
       "kind": "geografico",
-      "effect_text": "Forza 3. Edifici su collina: −2 res. Chi perde un edificio pesca un potenziamento gratis (massimo uno per giocatore)."
+      "effect_text": "Forza 3. Edifici su collina: −2 res. Chi perde un edificio pesca un potenziamento gratis (massimo uno per giocatore).",
+      "effects": [
+        {
+          "hook": "on_event",
+          "op": "resistance",
+          "value": -2,
+          "target": {
+            "terrain": [
+              "collina"
+            ]
+          }
+        },
+        {
+          "hook": "on_event",
+          "op": "rule_override",
+          "name": "free_upgrade_on_loss",
+          "cap": 1
+        }
+      ]
     },
     {
       "id": "ev_persecuzioni",
@@ -2411,7 +2574,29 @@
       "force": 3,
       "severity": "grave",
       "kind": "classe",
-      "effect_text": "Forza 3. Religione −2 res · Civico +1 res."
+      "effect_text": "Forza 3. Religione −2 res · Civico +1 res.",
+      "effects": [
+        {
+          "hook": "on_event",
+          "op": "resistance",
+          "value": -2,
+          "target": {
+            "class": [
+              "religione"
+            ]
+          }
+        },
+        {
+          "hook": "on_event",
+          "op": "resistance",
+          "value": 1,
+          "target": {
+            "class": [
+              "civico"
+            ]
+          }
+        }
+      ]
     },
     {
       "id": "ev_guerra_civile",
@@ -2420,7 +2605,19 @@
       "force": 3,
       "severity": "grave",
       "kind": "comportamentale",
-      "effect_text": "Forza 3. Nelle colonne con edifici di 2+ giocatori: tutti −1 res."
+      "effect_text": "Forza 3. Nelle colonne con edifici di 2+ giocatori: tutti −1 res.",
+      "effects": [
+        {
+          "hook": "on_event",
+          "op": "resistance",
+          "value": -1,
+          "target": {
+            "column": {
+              "min_owners": 2
+            }
+          }
+        }
+      ]
     },
     {
       "id": "ev_incursioni_fluviali",
@@ -2429,7 +2626,19 @@
       "force": 4,
       "severity": "lieve",
       "kind": "geografico",
-      "effect_text": "Forza 4. Edifici su colonne fiume: −1 res."
+      "effect_text": "Forza 4. Edifici su colonne fiume: −1 res.",
+      "effects": [
+        {
+          "hook": "on_event",
+          "op": "resistance",
+          "value": -1,
+          "target": {
+            "terrain": [
+              "fiume"
+            ]
+          }
+        }
+      ]
     },
     {
       "id": "ev_guerra",
@@ -2438,7 +2647,29 @@
       "force": 4,
       "severity": "lieve",
       "kind": "classe",
-      "effect_text": "Forza 4. Militare +1 res · Civico −1 res."
+      "effect_text": "Forza 4. Militare +1 res · Civico −1 res.",
+      "effects": [
+        {
+          "hook": "on_event",
+          "op": "resistance",
+          "value": 1,
+          "target": {
+            "class": [
+              "militare"
+            ]
+          }
+        },
+        {
+          "hook": "on_event",
+          "op": "resistance",
+          "value": -1,
+          "target": {
+            "class": [
+              "civico"
+            ]
+          }
+        }
+      ]
     },
     {
       "id": "ev_peste",
@@ -2447,7 +2678,19 @@
       "force": 4,
       "severity": "lieve",
       "kind": "comportamentale",
-      "effect_text": "Forza 4. Colonne con 3+ edifici in piedi: tutti −1 res."
+      "effect_text": "Forza 4. Colonne con 3+ edifici in piedi: tutti −1 res.",
+      "effects": [
+        {
+          "hook": "on_event",
+          "op": "resistance",
+          "value": -1,
+          "target": {
+            "column": {
+              "min_standing": 3
+            }
+          }
+        }
+      ]
     },
     {
       "id": "ev_grande_incendio",
@@ -2456,7 +2699,29 @@
       "force": 4,
       "severity": "grave",
       "kind": "geografico",
-      "effect_text": "Forza 4. Edifici a livello 0 o 1: −1 res; a livello 2+: −2 res."
+      "effect_text": "Forza 4. Edifici a livello 0 o 1: −1 res; a livello 2+: −2 res.",
+      "effects": [
+        {
+          "hook": "on_event",
+          "op": "resistance",
+          "value": -1,
+          "target": {
+            "level": {
+              "max": 1
+            }
+          }
+        },
+        {
+          "hook": "on_event",
+          "op": "resistance",
+          "value": -2,
+          "target": {
+            "level": {
+              "min": 2
+            }
+          }
+        }
+      ]
     },
     {
       "id": "ev_scisma",
@@ -2465,7 +2730,39 @@
       "force": 4,
       "severity": "grave",
       "kind": "classe",
-      "effect_text": "Forza 4. Religione −2 res · Cultura −1 res · Commercio +1 res."
+      "effect_text": "Forza 4. Religione −2 res · Cultura −1 res · Commercio +1 res.",
+      "effects": [
+        {
+          "hook": "on_event",
+          "op": "resistance",
+          "value": -2,
+          "target": {
+            "class": [
+              "religione"
+            ]
+          }
+        },
+        {
+          "hook": "on_event",
+          "op": "resistance",
+          "value": -1,
+          "target": {
+            "class": [
+              "cultura"
+            ]
+          }
+        },
+        {
+          "hook": "on_event",
+          "op": "resistance",
+          "value": 1,
+          "target": {
+            "class": [
+              "commercio"
+            ]
+          }
+        }
+      ]
     },
     {
       "id": "ev_anni_della_fame",
@@ -2474,7 +2771,14 @@
       "force": 4,
       "severity": "grave",
       "kind": "comportamentale",
-      "effect_text": "Forza 4. Nessuna produzione durante l’ultimo round dell’era."
+      "effect_text": "Forza 4. Nessuna produzione durante l’ultimo round dell’era.",
+      "effects": [
+        {
+          "hook": "on_activate",
+          "op": "rule_override",
+          "name": "no_production_last_round"
+        }
+      ]
     },
     {
       "id": "ev_alluvione",
@@ -2483,7 +2787,19 @@
       "force": 5,
       "severity": "lieve",
       "kind": "geografico",
-      "effect_text": "Forza 5. Edifici su colonne fiume: −1 res."
+      "effect_text": "Forza 5. Edifici su colonne fiume: −1 res.",
+      "effects": [
+        {
+          "hook": "on_event",
+          "op": "resistance",
+          "value": -1,
+          "target": {
+            "terrain": [
+              "fiume"
+            ]
+          }
+        }
+      ]
     },
     {
       "id": "ev_controriforma",
@@ -2492,7 +2808,29 @@
       "force": 5,
       "severity": "lieve",
       "kind": "classe",
-      "effect_text": "Forza 5. Religione +1 res · Cultura −1 res."
+      "effect_text": "Forza 5. Religione +1 res · Cultura −1 res.",
+      "effects": [
+        {
+          "hook": "on_event",
+          "op": "resistance",
+          "value": 1,
+          "target": {
+            "class": [
+              "religione"
+            ]
+          }
+        },
+        {
+          "hook": "on_event",
+          "op": "resistance",
+          "value": -1,
+          "target": {
+            "class": [
+              "cultura"
+            ]
+          }
+        }
+      ]
     },
     {
       "id": "ev_rivoluzione_industriale",
@@ -2501,7 +2839,19 @@
       "force": 5,
       "severity": "lieve",
       "kind": "comportamentale",
-      "effect_text": "Forza 5. Edifici con Scavo 2+: −1 res."
+      "effect_text": "Forza 5. Edifici con Scavo 2+: −1 res.",
+      "effects": [
+        {
+          "hook": "on_event",
+          "op": "resistance",
+          "value": -1,
+          "target": {
+            "scavo": {
+              "min": 2
+            }
+          }
+        }
+      ]
     },
     {
       "id": "ev_bonifiche",
@@ -2510,7 +2860,25 @@
       "force": 5,
       "severity": "grave",
       "kind": "geografico",
-      "effect_text": "Forza 5. Edifici su pianura: −2 res. Il primo terrapieno di ogni giocatore in quest’era costa 0."
+      "effect_text": "Forza 5. Edifici su pianura: −2 res. Il primo terrapieno di ogni giocatore in quest’era costa 0.",
+      "effects": [
+        {
+          "hook": "on_event",
+          "op": "resistance",
+          "value": -2,
+          "target": {
+            "terrain": [
+              "pianura"
+            ]
+          }
+        },
+        {
+          "hook": "on_build",
+          "op": "rule_override",
+          "name": "first_terrapieno_free",
+          "cap": 1
+        }
+      ]
     },
     {
       "id": "ev_secolarizzazioni",
@@ -2519,7 +2887,29 @@
       "force": 5,
       "severity": "grave",
       "kind": "classe",
-      "effect_text": "Forza 5. Religione −2 res · durante l’era, restaurare un rudere Religione non costa risorse (richiede comunque l’azione) e vale sui ruderi già presenti."
+      "effect_text": "Forza 5. Religione −2 res · durante l’era, restaurare un rudere Religione non costa risorse (richiede comunque l’azione) e vale sui ruderi già presenti.",
+      "effects": [
+        {
+          "hook": "on_event",
+          "op": "resistance",
+          "value": -2,
+          "target": {
+            "class": [
+              "religione"
+            ]
+          }
+        },
+        {
+          "hook": "on_build",
+          "op": "rule_override",
+          "name": "free_restore_of_class",
+          "target": {
+            "class": [
+              "religione"
+            ]
+          }
+        }
+      ]
     },
     {
       "id": "ev_speculazione_edilizia",
@@ -2528,7 +2918,19 @@
       "force": 5,
       "severity": "grave",
       "kind": "comportamentale",
-      "effect_text": "Forza 5. Ogni edificio con Vetustà 2+: −1 res."
+      "effect_text": "Forza 5. Ogni edificio con Vetustà 2+: −1 res.",
+      "effects": [
+        {
+          "hook": "on_event",
+          "op": "resistance",
+          "value": -1,
+          "target": {
+            "vetusta": {
+              "min": 2
+            }
+          }
+        }
+      ]
     }
   ],
   "monuments": [
