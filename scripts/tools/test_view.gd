@@ -1207,19 +1207,50 @@ func _test_carte_giocatore() -> void:
 		p.monuments_claimed.append(str(id))
 		if p.monuments_claimed.size() >= 2: break
 	for id in gs.char_row: p.specialized_characters.append(str(id))
+	# E le carte degli edifici costruiti: "costruire significa pagare il
+	# costo della carta e mettere la sagoma sul tabellone", quindi la carta
+	# resta davanti a chi l'ha presa. Prima spariva nel nulla.
+	for c in range(0, 5): _metti(gs, "ed_capanne", c, 1, 0, 0)
 	var carte := BoardLayout3D.player_cards(gs, 0)
 	_ok("il giocatore ha parecchie carte davanti (%d)" % carte.size(),
 		carte.size() >= 5)
+	var edifici := 0
+	for c in carte:
+		if int(c["player"]) == 0 and str(c["kind"]) == "mercato": edifici += 1
+	_eq("  fra cui le carte degli edifici che ha costruito", edifici, 5)
 
+	# Le carte diverse dagli edifici non si coprono: sono poche e si
+	# leggono per intero.
+	var stese: Array = []
+	var mazzetto: Array = []
+	for c in carte:
+		if str(c["kind"]) == "mercato": mazzetto.append(c)
+		else: stese.append(c)
 	var coperte := 0
-	for i in carte.size():
-		for j in range(i + 1, carte.size()):
-			var a: AABB = carte[i]["aabb"]
-			var b: AABB = carte[j]["aabb"]
+	for i in stese.size():
+		for j in range(i + 1, stese.size()):
+			var a: AABB = stese[i]["aabb"]
+			var b: AABB = stese[j]["aabb"]
 			if a.position.x < b.end.x - 0.001 and b.position.x < a.end.x - 0.001 \
 				and a.position.z < b.end.z - 0.001 and b.position.z < a.end.z - 0.001:
 				coperte += 1
-	_eq("nessuna carta ne copre un'altra", coperte, 0)
+	_eq("nessuna carta stesa ne copre un'altra", coperte, 0)
+
+	# Le carte edificio invece si impilano a ventaglio, ma di ognuna resta
+	# fuori la fascia del titolo: e' quello che le rende ancora leggibili.
+	var nascoste := 0
+	for i in mazzetto.size():
+		var a: AABB = mazzetto[i]["aabb"]
+		var scoperto := a.size.z
+		for j in mazzetto.size():
+			if j == i: continue
+			var b: AABB = mazzetto[j]["aabb"]
+			if b.position.y <= a.position.y: continue
+			if b.position.x >= a.end.x - 0.001 or a.position.x >= b.end.x - 0.001:
+				continue
+			scoperto = minf(scoperto, b.position.z - a.position.z)
+		if scoperto < BoardLayout3D.VENTAGLIO_Z - 0.001: nascoste += 1
+	_eq("di ogni carta edificio resta fuori la fascia del titolo", nascoste, 0)
 
 	# E nessuna finisce addosso al vicino: ognuno sta nella sua fetta.
 	var fetta := BoardLayout3D.board_w(gs) / float(gs.n_players)
@@ -1234,13 +1265,26 @@ func _test_carte_giocatore() -> void:
 	# Le carte restano cliccabili: ognuna deve rispondere al raggio, e deve
 	# rispondere PROPRIO LEI. Era questo che il mucchio rendeva impossibile.
 	var sbagliate := 0
-	for c in carte:
+	for c in stese:
 		var b3: AABB = c["aabb"]
 		var centro := b3.position + Vector3(b3.size.x / 2.0, 0.0, b3.size.z / 2.0)
 		var colpita := BoardLayout3D.card_at_ray(gs,
 			centro + Vector3(0, 500, 0), Vector3(0, -1, 0), 0)
 		if colpita.is_empty() or str(colpita["id"]) != str(c["id"]): sbagliate += 1
 	_eq("  e cliccandone una si prende proprio quella", sbagliate, 0)
+
+	# E nel ventaglio vince quella SOPRA: puntando la fascia scoperta di una
+	# carta deve rispondere lei, non quella nascosta sotto.
+	var sotto := 0
+	for i in mazzetto.size():
+		var b4: AABB = mazzetto[i]["aabb"]
+		var punto := b4.position + Vector3(b4.size.x / 2.0, 0.0,
+			BoardLayout3D.VENTAGLIO_Z / 2.0)
+		var presa := BoardLayout3D.card_at_ray(gs, punto + Vector3(0, 500, 0),
+			Vector3(0, -1, 0), 0)
+		if presa.is_empty() or int(presa.get("ordine", -1)) != int(mazzetto[i]["ordine"]):
+			sotto += 1
+	_eq("  e nel mazzetto risponde la carta sopra, non quella coperta", sotto, 0)
 
 # CHI SIEDE AL TAVOLO. Prima erano due numeri dentro gioca.gd - tre giocatori,
 # seme 7 - e in due o in quattro non ci si giocava affatto. ScelteInizio e'

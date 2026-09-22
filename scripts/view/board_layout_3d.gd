@@ -538,6 +538,13 @@ static func _fila_destra(gs: GameState) -> Array[Dictionary]:
 # bacchetta sottile, e sotto ci si impilano le carte comprate.
 const BACCHETTA_D := 7.0
 const CARTE_GIOCATORE_GAP := 5.0
+# Le carte degli edifici si accumulano - una decina a testa a fine partita -
+# e distese una a fianco all'altra allungherebbero il tavolo di mezzo metro.
+# Si impilano a ventaglio come si fa al tavolo vero: ognuna copre la
+# precedente lasciandone fuori la fascia del titolo, che e' quanto basta a
+# sapere cosa si ha.
+const VENTAGLIO_Z := 20.0     # quanto resta scoperto di una carta coperta
+const VENTAGLIO_Y := 0.25     # ogni carta un filo piu' alta: chi copre sta sopra
 
 # Le carte che un giocatore ha davanti. I potenziamenti no: quelli stanno
 # infilati sotto l'edificio, ed e' li' che il regolamento li vuole. L'Eredita'
@@ -566,6 +573,14 @@ static func carte_giocatore(gs: GameState, player: int, umano := -1) -> Array[Di
 		if visti.has(str(c)): continue
 		visti[str(c)] = true
 		out.append({"kind": "personaggio", "id": str(c)})
+	# LE CARTE DEGLI EDIFICI COSTRUITI. "Costruire significa pagare il costo
+	# della carta e mettere la sagoma sul tabellone": la carta resta davanti
+	# a chi l'ha presa - il regolamento ci fa infilare sotto i personaggi a
+	# fine era - e prima spariva nel nulla. Vanno in fondo, a ventaglio,
+	# nell'ordine in cui sono state costruite.
+	for b in gs.grid.buildings:
+		if b.owner != player: continue
+		out.append({"kind": "mercato", "id": str(b.data["id"]), "ventaglio": true})
 	return out
 
 # La bacchetta del colore: una per giocatore, davanti alla strada.
@@ -600,7 +615,13 @@ static func player_cards(gs: GameState, umano := -1) -> Array[Dictionary]:
 		var x := x0
 		var z := z0
 		var profonda := 0.0          # la carta piu' profonda della riga in corso
+		var ventaglio: Array = []
 		for j in carte.size():
+			# Le carte degli edifici vanno in fondo, tutte insieme: distese
+			# come le altre allungherebbero il tavolo di mezzo metro.
+			if bool(carte[j].get("ventaglio", false)):
+				ventaglio.append(carte[j])
+				continue
 			var m := misura_carta(str(carte[j]["kind"]))
 			# A capo quando la carta non ci sta piu'. La prima di una riga ci
 			# resta comunque, anche se da sola sborda: e' meglio di una riga
@@ -614,6 +635,34 @@ static func player_cards(gs: GameState, umano := -1) -> Array[Dictionary]:
 				"aabb": AABB(Vector3(x, 0.0, z), Vector3(m.x, TESSERA_Y, m.y))})
 			x += m.x + CARTE_GIOCATORE_GAP
 			profonda = maxf(profonda, m.y)
+		if not ventaglio.is_empty():
+			var z_v := z + (profonda if profonda > 0.0 else 0.0) \
+				+ (CARTE_GIOCATORE_GAP if profonda > 0.0 else 0.0)
+			out.append_array(_ventaglio(ventaglio, i, x0, spazio, z_v, carte.size()))
+	return out
+
+# Il mazzetto delle carte edificio, impilato a ventaglio: ognuna copre la
+# precedente lasciandone fuori la fascia del titolo. Si riempie una colonna
+# per volta, tante quante ne stanno nel posto del giocatore, e ogni carta
+# sta un filo piu' in alto della precedente - se no due carte complanari si
+# contendono lo stesso pixel e lo schermo sfarfalla.
+static func _ventaglio(carte: Array, player: int, x0: float, spazio: float,
+		z0: float, ordine0: int) -> Array[Dictionary]:
+	var out: Array[Dictionary] = []
+	if carte.is_empty(): return out
+	var m := misura_carta(str(carte[0]["kind"]))
+	var colonne: int = maxi(1, int(floor((spazio + CARTE_GIOCATORE_GAP)
+		/ (m.x + CARTE_GIOCATORE_GAP))))
+	var per_colonna: int = int(ceil(carte.size() / float(colonne)))
+	for j in carte.size():
+		var c: int = j / per_colonna
+		var r: int = j % per_colonna
+		out.append({"kind": str(carte[j]["kind"]), "id": str(carte[j]["id"]),
+			"player": player, "ordine": ordine0 + j,
+			"aabb": AABB(
+				Vector3(x0 + c * (m.x + CARTE_GIOCATORE_GAP), r * VENTAGLIO_Y,
+					z0 + r * VENTAGLIO_Z),
+				Vector3(m.x, TESSERA_Y, m.y))})
 	return out
 
 # Tutto il tavolo: strada, file e plance. E' questo che l'inquadratura deve
@@ -743,9 +792,16 @@ static func card_at_ray(gs: GameState, origine: Vector3, direzione: Vector3,
 	# `umano` va passato: senza, la vista disegnava l'obiettivo del giocatore
 	# scoperto e il clic rispondeva con la carta coperta - sulla tua stessa
 	# eredita' il riquadro diceva "lo vede solo il suo giocatore".
+	# Nel ventaglio le carte si coprono, quindi non basta la prima che si
+	# trova: vince QUELLA SOPRA, cioe' la piu' alta. Altrimenti si
+	# cliccherebbe una carta e ne risponderebbe un'altra, nascosta sotto.
+	var vinta := {}
+	var quota := -INF
 	for c in side_cards(gs, umano):
 		var r: AABB = c["aabb"]
 		if p.x >= r.position.x and p.x <= r.position.x + r.size.x \
 				and p.z >= r.position.z and p.z <= r.position.z + r.size.z:
-			return c
-	return {}
+			if r.position.y >= quota:
+				quota = r.position.y
+				vinta = c
+	return vinta

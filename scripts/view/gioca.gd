@@ -401,6 +401,16 @@ func _clic(pixel: Vector2) -> void:
 		_seleziona(c)
 		return
 
+	# CON UNA CARTA SCELTA, un clic fuori dai posti accesi non fa niente. Non
+	# e' pignoleria: prima piazzava un lavoratore di nascosto, e il giocatore
+	# si ritrovava una colonna attivata che non aveva chiesto - e con meno
+	# posti accesi di prima, perche' il lavoratore li aveva ristretti a
+	# quella colonna. Sembrava che la carta non si comprasse mai.
+	if not _scelta.is_empty():
+		_messaggio = "Li' non ci va. Clicca un posto acceso, o Esc per cambiare carta."
+		_aggiorna()
+		return
+
 	# Senza carta scelta, il clic su una colonna mette il lavoratore e basta:
 	# si attiva la colonna per la produzione anche senza fare azioni.
 	if gs.phase == Enums.Phase.PIAZZA:
@@ -504,6 +514,13 @@ func _bersagli_di(kind: String, id: String) -> Array:
 	return out
 
 func _seleziona(c: Dictionary) -> void:
+	# Le carte gia' davanti a un giocatore non si scelgono: sono il suo
+	# mazzetto, non il mercato. Senza questo, cliccare una propria carta
+	# accendeva i posti e poi la costruzione veniva rifiutata, perche' quella
+	# carta dal mercato era gia' uscita.
+	if c.has("player"):
+		_deseleziona()
+		return
 	var kind := str(c["kind"])
 	var id := str(c["id"])
 	if str(_scelta.get("kind", "")) == kind and str(_scelta.get("id", "")) == id:
