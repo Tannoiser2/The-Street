@@ -40,6 +40,20 @@ godot --headless res://scenes/test_actions.tscn
 godot --headless res://scenes/headless_runner.tscn -- --games 100 --players 3 --seed 1
 ```
 
+### Confronto con l'oracolo (M3)
+
+Esporta gli stati finali di partite deterministiche e vi riapplica le formule di
+punteggio del simulatore Python, per confrontare le regole senza che la
+calibrazione dei dati interferisca:
+
+```bash
+godot --headless res://scenes/export_states.tscn -- --games 60 --players 3 --seed 1 --out /tmp/stati_3p.json
+python3 tools/oracle_check.py /tmp/stati_3p.json
+```
+
+Esce 1 se compare uno scarto non spiegato. Le differenze residue attese sono
+documentate in `docs/domande-aperte.md` (punti 2 e 16).
+
 Il runner va lanciato **come scena, non con `--script`**: in modalità `--script`
 Godot non istanzia gli Autoload, quindi `CardDB` non esisterebbe e il nucleo non
 compilerebbe.
