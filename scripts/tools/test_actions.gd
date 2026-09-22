@@ -123,6 +123,37 @@ func _test_upgrade() -> void:
 	_give(gs6.current_player(), 0, 0)
 	_ok("rifiuta se manca l'oro", not ctl6.upgrade("po_palizzata", b6))
 
+	# capienza dichiarata dalla carta: "salvo le carte che ne dichiarano di piu'"
+	_eq("capienza base senza campo", ActionRules.upgrade_capacity(CardDB.buildings["ed_capanne"]), 1)
+	for id in ["ed_chiesa", "ed_abbazia", "ed_accademia", "ed_duomo"]:
+		var want := int(CardDB.buildings[id]["upgrade_slots"])
+		_eq("  %s dichiara capienza %d" % [id, want], ActionRules.upgrade_capacity(CardDB.buildings[id]), want)
+
+	# Il Duomo ne accetta 3 e rifiuta il quarto. Si interroga la regola pura:
+	# passando dal controller ogni potenziamento consumerebbe il turno e il
+	# bersaglio smetterebbe di essere dell'attuale giocatore.
+	var ctl7 := _game()
+	var gs7 := ctl7.gs
+	var me7 := gs7.current_index
+	var duomo := _put(gs7, me7, "ed_duomo", 2)
+	gs7.upg_row = ["po_palizzata"]
+	var legal_at: Array[bool] = []
+	for i in 4:
+		legal_at.append(ActionRules.quote_upgrade(gs7, me7, "po_palizzata", duomo).legal)
+		duomo.upgrades.append("po_palizzata")
+	_eq("il Duomo accetta i primi 3 potenziamenti e rifiuta il quarto",
+		legal_at, [true, true, true, false] as Array[bool])
+
+	var ctl8 := _game()
+	var gs8 := ctl8.gs
+	var me8 := gs8.current_index
+	var capanne := _put(gs8, me8, "ed_capanne", 2)
+	gs8.upg_row = ["po_palizzata"]
+	var base_legal := ActionRules.quote_upgrade(gs8, me8, "po_palizzata", capanne).legal
+	capanne.upgrades.append("po_palizzata")
+	var base_second := ActionRules.quote_upgrade(gs8, me8, "po_palizzata", capanne).legal
+	_eq("senza campo la capienza resta 1", [base_legal, base_second], [true, false])
+
 # ---- restaurare -----------------------------------------------------
 func _test_restore() -> void:
 	var c: Dictionary = CardDB.buildings["ed_dolmen"]["cost"]

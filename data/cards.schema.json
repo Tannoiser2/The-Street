@@ -4,103 +4,327 @@
   "title": "La Strada delle Ere — database carte",
   "description": "Fonte unica dei dati di gioco. Godot carica questo file; un validatore lo controlla prima di ogni build.",
   "type": "object",
-  "required": ["meta", "constants", "terrains", "buildings", "characters", "upgrades", "events", "monuments", "legacies"],
+  "required": [
+    "meta",
+    "constants",
+    "terrains",
+    "buildings",
+    "characters",
+    "upgrades",
+    "events",
+    "monuments",
+    "legacies"
+  ],
   "$defs": {
-    "cls": { "enum": ["militare", "religione", "commercio", "cultura", "civico", "ingegneria"] },
-    "terrain": { "enum": ["pianura", "fiume", "collina", "bosco"] },
-    "era": { "type": "integer", "minimum": 1, "maximum": 5 },
+    "cls": {
+      "enum": [
+        "militare",
+        "religione",
+        "commercio",
+        "cultura",
+        "civico",
+        "ingegneria"
+      ]
+    },
+    "terrain": {
+      "enum": [
+        "pianura",
+        "fiume",
+        "collina",
+        "bosco"
+      ]
+    },
+    "era": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 5
+    },
     "res": {
       "type": "object",
       "properties": {
-        "pietra": { "type": "integer", "minimum": 0 },
-        "oro": { "type": "integer", "minimum": 0 }
+        "pietra": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "oro": {
+          "type": "integer",
+          "minimum": 0
+        }
       },
       "additionalProperties": false
     },
-    "id": { "type": "string", "pattern": "^[a-z]{2}_[a-z0-9_]+$" }
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z]{2}_[a-z0-9_]+$"
+    }
   },
   "properties": {
     "meta": {
       "type": "object",
-      "required": ["game", "ruleset"],
-      "properties": { "ruleset": { "type": "string" } }
+      "required": [
+        "game",
+        "ruleset"
+      ],
+      "properties": {
+        "ruleset": {
+          "type": "string"
+        }
+      }
     },
-    "constants": { "type": "object" },
+    "constants": {
+      "type": "object"
+    },
     "terrains": {
-      "type": "array", "minItems": 4, "maxItems": 4,
+      "type": "array",
+      "minItems": 4,
+      "maxItems": 4,
       "items": {
         "type": "object",
-        "required": ["id", "base_production", "identity"],
+        "required": [
+          "id",
+          "base_production",
+          "identity"
+        ],
         "properties": {
-          "id": { "$ref": "#/$defs/terrain" },
-          "base_production": { "$ref": "#/$defs/res" }
+          "id": {
+            "$ref": "#/$defs/terrain"
+          },
+          "base_production": {
+            "$ref": "#/$defs/res"
+          }
         }
       }
     },
     "buildings": {
-      "type": "array", "minItems": 60, "maxItems": 60,
+      "type": "array",
+      "minItems": 60,
+      "maxItems": 60,
       "items": {
         "type": "object",
-        "required": ["id", "name", "era", "classes", "width", "cost", "resistance", "rendita", "lampo", "scavo", "level_required", "production", "flexible"],
+        "required": [
+          "id",
+          "name",
+          "era",
+          "classes",
+          "width",
+          "cost",
+          "resistance",
+          "rendita",
+          "lampo",
+          "scavo",
+          "level_required",
+          "production",
+          "flexible"
+        ],
         "properties": {
-          "id": { "$ref": "#/$defs/id" },
-          "era": { "$ref": "#/$defs/era" },
-          "classes": { "type": "array", "minItems": 1, "maxItems": 2, "items": { "$ref": "#/$defs/cls" } },
-          "terrain": { "oneOf": [{ "type": "null" }, { "type": "string" }] },
-          "width": { "enum": [1, 2, 3] },
-          "cost": { "$ref": "#/$defs/res" },
-          "flexible": { "type": "boolean" },
-          "resistance": { "type": "integer", "minimum": 0, "maximum": 6 },
-          "rendita": { "type": "integer", "minimum": 0 },
-          "lampo": { "type": "integer", "minimum": 0 },
-          "scavo": { "enum": [0, 2, 3, 5, 6, 8] },
-          "level_required": { "type": "integer", "minimum": 0, "maximum": 4 },
+          "id": {
+            "$ref": "#/$defs/id"
+          },
+          "era": {
+            "$ref": "#/$defs/era"
+          },
+          "classes": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 2,
+            "items": {
+              "$ref": "#/$defs/cls"
+            }
+          },
+          "terrain": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "type": "string"
+              }
+            ]
+          },
+          "width": {
+            "enum": [
+              1,
+              2,
+              3
+            ]
+          },
+          "cost": {
+            "$ref": "#/$defs/res"
+          },
+          "flexible": {
+            "type": "boolean"
+          },
+          "resistance": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 6
+          },
+          "rendita": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "lampo": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "scavo": {
+            "enum": [
+              0,
+              2,
+              3,
+              5,
+              6,
+              8
+            ]
+          },
+          "level_required": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 4
+          },
           "production": {
             "type": "object",
             "properties": {
-              "pietra": { "type": "integer" }, "oro": { "type": "integer" }, "cultura": { "type": "integer" }
+              "pietra": {
+                "type": "integer"
+              },
+              "oro": {
+                "type": "integer"
+              },
+              "cultura": {
+                "type": "integer"
+              }
             }
           },
-          "exhaustible": { "type": "integer", "minimum": 0 },
-          "effect_text": { "type": "string" }
+          "exhaustible": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "effect_text": {
+            "type": "string"
+          },
+          "upgrade_slots": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 3,
+            "description": "Capienza di potenziamenti. Assente = capienza base 1."
+          }
         }
       }
     },
     "characters": {
-      "type": "array", "minItems": 26, "maxItems": 26,
+      "type": "array",
+      "minItems": 26,
+      "maxItems": 26,
       "items": {
         "type": "object",
-        "required": ["id", "name", "class", "timing", "effect_text"],
+        "required": [
+          "id",
+          "name",
+          "class",
+          "timing",
+          "effect_text"
+        ],
         "properties": {
-          "era": { "oneOf": [{ "type": "null" }, { "$ref": "#/$defs/era" }] },
-          "class": { "$ref": "#/$defs/cls" },
-          "timing": { "enum": ["subito", "era", "misto", "finale", "permanente"] },
-          "is_dynasty": { "type": "boolean" },
-          "imprint": { "type": "boolean" }
+          "era": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/$defs/era"
+              }
+            ]
+          },
+          "class": {
+            "$ref": "#/$defs/cls"
+          },
+          "timing": {
+            "enum": [
+              "subito",
+              "era",
+              "misto",
+              "finale",
+              "permanente"
+            ]
+          },
+          "is_dynasty": {
+            "type": "boolean"
+          },
+          "imprint": {
+            "type": "boolean"
+          }
         }
       }
     },
     "upgrades": {
-      "type": "array", "minItems": 25, "maxItems": 25,
+      "type": "array",
+      "minItems": 25,
+      "maxItems": 25,
       "items": {
         "type": "object",
-        "required": ["id", "name", "era", "class", "cost", "family"],
-        "properties": { "family": { "enum": ["arte", "struttura", "altro"] } }
-      }
-    },
-    "events": {
-      "type": "array", "minItems": 24, "maxItems": 24,
-      "items": {
-        "type": "object",
-        "required": ["id", "name", "era", "force", "severity", "effect_text"],
+        "required": [
+          "id",
+          "name",
+          "era",
+          "class",
+          "cost",
+          "family"
+        ],
         "properties": {
-          "era": { "type": "integer", "minimum": 1, "maximum": 4 },
-          "force": { "type": "integer", "minimum": 2, "maximum": 5 },
-          "severity": { "enum": ["lieve", "grave"] }
+          "family": {
+            "enum": [
+              "arte",
+              "struttura",
+              "altro"
+            ]
+          }
         }
       }
     },
-    "monuments": { "type": "array", "minItems": 14, "maxItems": 14 },
-    "legacies": { "type": "array", "minItems": 16, "maxItems": 16 }
+    "events": {
+      "type": "array",
+      "minItems": 24,
+      "maxItems": 24,
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "era",
+          "force",
+          "severity",
+          "effect_text"
+        ],
+        "properties": {
+          "era": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 4
+          },
+          "force": {
+            "type": "integer",
+            "minimum": 2,
+            "maximum": 5
+          },
+          "severity": {
+            "enum": [
+              "lieve",
+              "grave"
+            ]
+          }
+        }
+      }
+    },
+    "monuments": {
+      "type": "array",
+      "minItems": 14,
+      "maxItems": 14
+    },
+    "legacies": {
+      "type": "array",
+      "minItems": 16,
+      "maxItems": 16
+    }
   }
 }

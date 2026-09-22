@@ -34,8 +34,13 @@ class ActionQuote:
 # "Potenziare costa 1 oro nelle prime tre ere e 2 nelle ultime due. Infilate la
 # carta sotto un vostro edificio in piedi di quella colonna."
 # "La capienza base e' di un potenziamento per edificio, salvo le carte che ne
-# dichiarano di piu'." Nessuna carta dichiara oggi una capienza diversa: 1.
-const UPGRADE_CAPACITY := 1
+# dichiarano di piu'." Quattro edifici ne dichiarano di piu' nel proprio testo
+# (Chiesa, Abbazia, Accademia: 2 · Duomo: 3): il valore sta nel campo
+# `upgrade_slots` della carta, non in un caso speciale nel codice.
+const UPGRADE_CAPACITY_BASE := 1
+
+static func upgrade_capacity(data: Dictionary) -> int:
+	return int(data.get("upgrade_slots", UPGRADE_CAPACITY_BASE))
 
 static func quote_upgrade(gs: GameState, player: int, upg_id: String, target: Building) -> ActionQuote:
 	if not upg_id in gs.upg_row:
@@ -46,8 +51,9 @@ static func quote_upgrade(gs: GameState, player: int, upg_id: String, target: Bu
 		return ActionQuote.no("l'edificio non e' tuo")
 	if not target.is_standing():
 		return ActionQuote.no("l'edificio non e' in piedi")
-	if target.upgrades.size() >= UPGRADE_CAPACITY:
-		return ActionQuote.no("l'edificio ha gia' un potenziamento")
+	var cap := upgrade_capacity(target.data)
+	if target.upgrades.size() >= cap:
+		return ActionQuote.no("l'edificio ha gia' %d potenziamenti (capienza %d)" % [target.upgrades.size(), cap])
 	var data: Dictionary = CardDB.upgrades[upg_id]
 	var cost: Dictionary = data["cost"]
 	return ActionQuote.yes(int(cost.get("pietra", 0)), int(cost.get("oro", 0)), target)

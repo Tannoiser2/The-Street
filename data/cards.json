@@ -959,7 +959,8 @@
         "cultura": 0
       },
       "exhaustible": 0,
-      "effect_text": "Capienza potenziamenti: 2."
+      "effect_text": "Capienza potenziamenti: 2.",
+      "upgrade_slots": 2
     },
     {
       "id": "ed_mercato",
@@ -1068,7 +1069,8 @@
         "cultura": 0
       },
       "exhaustible": 0,
-      "effect_text": "Capienza potenziamenti: 2."
+      "effect_text": "Capienza potenziamenti: 2.",
+      "upgrade_slots": 2
     },
     {
       "id": "ed_arsenale",
@@ -1338,7 +1340,8 @@
         "cultura": 0
       },
       "exhaustible": 0,
-      "effect_text": "Capienza potenziamenti: 2."
+      "effect_text": "Capienza potenziamenti: 2.",
+      "upgrade_slots": 2
     },
     {
       "id": "ed_duomo",
@@ -1366,7 +1369,8 @@
         "cultura": 0
       },
       "exhaustible": 0,
-      "effect_text": "Capienza potenziamenti: 3. Richiede livello 2+."
+      "effect_text": "Capienza potenziamenti: 3. Richiede livello 2+.",
+      "upgrade_slots": 3
     },
     {
       "id": "ed_fortezza_bastionata",
