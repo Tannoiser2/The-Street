@@ -565,3 +565,62 @@ dato è stato importato da lì. Ma due confronti fra ciò che è stampato e
     edificio intatto con capienza libera, in ordine di uid. E' la seconda
     approssimazione di questo tipo, dopo l'Ingegnere militare (punto 27): sono
     entrambe scelte, non regole, e vanno riaperte in M5.
+
+## Emerse durante la Milestone 5 (interfaccia)
+
+41. **La plancia si puo' guardare, e questo cambia come si verifica.** Godot in
+    modalita' `--headless` usa un driver di disegno finto e **non produce
+    immagini**: per mesi l'unico modo di controllare l'interfaccia sarebbe
+    stato affermare che i nodi esistono. Con un display virtuale (`xvfb-run`)
+    piu' la modalita' Movie Maker di Godot si ottiene invece un PNG di una
+    partita vera. Lo script e' `tools/scatta.sh`.
+
+    Due conseguenze. La prima: ogni scelta grafica si verifica guardandola, non
+    immaginandola — i primi tre difetti (il tratteggio dei sotterrati che
+    copriva il nome, la riga dei cubetti illeggibile sul fondo scuro, la fascia
+    laterale che non diceva a che quota fosse) li ho visti cosi', non
+    ragionandoci. La seconda: si puo' mostrare al designer com'e' venuta una
+    regola senza fargli compilare niente.
+
+42. **La geometria e' un modulo puro, e si prova headless.** `BoardLayout` non
+    e' un `Node` e non disegna: calcola soltanto dei riquadri. Serve due volte
+    - a disegnare e, quando ci sara' l'input, a capire dove il giocatore ha
+    cliccato - cosi' le due cose non possono divergere. E resta provabile in
+    CI: `scenes/test_view.tscn` verifica fra l'altro che, in una partita
+    giocata fino in fondo, **nessun riquadro esca dalla plancia** e **nessuna
+    coppia di riquadri alla stessa quota si sovrapponga**, che e' l'invariante
+    di regola «un edificio sta tutto a un solo livello» vista dallo schermo.
+
+43. **Due viste, perche' un edificio sopraelevato non sta su nessun binario.**
+    La vista dall'alto mostra 5 binari x N colonne, ma un edificio a livello >0
+    non appartiene al binario di un'era: sta sopra le sue basi. L'ho risolto
+    con una fascia in vista laterale sopra la griglia, una riga per quota,
+    allineata alle stesse colonne. **Da confermare col designer**: e' la
+    lettura giusta, o preferisce una vista unica (isometrica, o le sagome
+    sovrapposte alla griglia)?
+
+44. **Cosa mostrare di un edificio sotterrato.** Sul tavolo vero un edificio
+    sotterrato e' fisicamente coperto: si sa cosa c'e' sotto perche' lo si e'
+    visto costruire, non perche' lo si legga. A schermo l'ho disegnato con un
+    velo e un tratteggio leggero, quindi **piu' visibile del vero**. E' una
+    scelta a favore del giocatore (lo Scavo finale dipende da cosa c'e'
+    sotto), ma e' una scelta: **da confermare**.
+
+45. **La faccia della carta va disegnata dai dati.** Le immagini estratte dal
+    PDF (`assets/carte`) portano numeri della calibrazione precedente alla v1.5
+    (punti 20 e 23), quindi non si possono mostrare come sono: direbbero al
+    giocatore valori falsi. Per ora la vista disegna nome, resistenza,
+    Vetusta', numero di potenziamenti e i segni di lavoratore e personaggio
+    sepolto. **Domanda**: quando il PDF sara' aggiornato, si usa l'illustrazione
+    come sfondo con i numeri ridisegnati sopra, oppure la carta a schermo resta
+    interamente disegnata?
+
+46. **I colori dei giocatori sono provvisori.** Rosso, blu, verde e giallo,
+    scelti per distinguersi su fondo scuro. Se il gioco fisico ha colori
+    ufficiali, vanno quelli.
+
+47. **Le due scelte del giocatore ancora decise dal bot.** Ora che la M5 e'
+    partita diventano lavoro vero, non piu' approssimazioni: il bersaglio del
+    potenziamento gratuito dell'Eruzione (punto 40) e l'Ingegnere militare
+    (punto 27). Entrambe aspettano l'input del giocatore, che e' il prossimo
+    pezzo dell'interfaccia.

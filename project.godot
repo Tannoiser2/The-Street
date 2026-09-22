@@ -7,3 +7,8 @@ config/features=PackedStringArray("4.7")
 
 [autoload]
 CardDB="*res://scripts/data/card_db.gd"
+
+[display]
+
+window/size/viewport_width=1520
+window/size/viewport_height=900

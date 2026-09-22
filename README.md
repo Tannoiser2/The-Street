@@ -46,9 +46,26 @@ godot --headless res://scenes/test_actions.tscn
 # Test del motore degli effetti (M4): i 24 eventi, e la chiusura dello schema
 godot --headless res://scenes/test_effects.tscn
 
+# Geometria della plancia (M5): gira headless come gli altri
+godot --headless res://scenes/test_view.tscn
+
 # Partite headless con RandomBot
 godot --headless res://scenes/headless_runner.tscn -- --games 100 --players 3 --seed 1
 ```
+
+### Guardare la plancia (M5)
+
+`--headless` usa un driver di disegno finto: **non produce immagini**. Per
+vedere davvero l'interfaccia serve un display, vero o virtuale:
+
+```bash
+tools/scatta.sh plancia.png -- --players 3 --seed 7 --era 4
+```
+
+Lo script mette `xvfb-run` da solo se non c'e' un display. Disegna una partita
+vera giocata dal RandomBot fino all'era richiesta, cosi' la plancia si guarda
+invece di immaginarla. Utile anche per mostrare al designer com'e' venuta una
+regola senza fargli compilare nulla.
 
 ### Grafica (preparazione M5)
 
