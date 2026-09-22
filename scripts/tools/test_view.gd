@@ -44,6 +44,7 @@ func _ready() -> void:
 	_run("il conto finale, diviso per fonte", _test_riepilogo)
 	_run("il terrapieno si paga e si vede", _test_terrapieni)
 	_run("le carte stanno in piedi alla stessa altezza", _test_misure_carte)
+	_run("la sagoma e' un pezzo solo, spesso", _test_sagoma_estrusa)
 	print("\n%d superati, %d falliti" % [_passed, _failed])
 	get_tree().quit(0 if _failed == 0 else 1)
 
@@ -1615,6 +1616,60 @@ func _test_misure_carte() -> void:
 			Vector3(0, -1, 0))
 		if presa.is_empty() or str(presa["id"]) != str(c["id"]): sbagliate += 1
 	_eq("  e cliccandone una si prende proprio quella", sbagliate, 0)
+
+# LA SAGOMA ERA QUATTRO COPIE DEL DISEGNO impilate lungo lo spessore per far
+# sembrare pieno il cartone. Da vicino si vedevano per quello che erano:
+# quattro figure appaiate. Adesso e' un pezzo unico, col contorno ritagliato
+# dall'alfa dell'illustrazione ed estruso.
+func _test_sagoma_estrusa() -> void:
+	# Un'illustrazione finta: una losanga opaca al centro di un'immagine
+	# trasparente. Serve una forma NON rettangolare, perche' e' tutto il
+	# punto: una scatola dietro il disegno sporgerebbe dalla sagoma.
+	var lato := 64
+	var img := Image.create(lato, lato, false, Image.FORMAT_RGBA8)
+	img.fill(Color(0, 0, 0, 0))
+	for y in lato:
+		for x in lato:
+			if absf(x - lato / 2.0) + absf(y - lato / 2.0) < lato / 3.0:
+				img.set_pixel(x, y, Color(0.8, 0.6, 0.4, 1.0))
+	var tex := ImageTexture.create_from_image(img)
+
+	var dim := Vector2(60.0, 66.0)
+	var spessore := 9.0
+	var vista := preload("res://scripts/view/board_view_3d.gd")
+	var mesh: ArrayMesh = vista.mesh_sagoma(tex, dim, spessore)
+	_ok("il contorno si ritaglia e si estrude", mesh != null)
+	if mesh == null: return
+	_eq("una superficie per la stampa e una per il taglio",
+		mesh.get_surface_count(), 2)
+
+	var box := mesh.get_aabb()
+	_approx("e' spessa quanto il cartone disegnato", box.size.z, spessore)
+	_ok("  e sta dentro le misure della sagoma (%.1f x %.1f)"
+		% [box.size.x, box.size.y],
+		box.size.x <= dim.x + 0.001 and box.size.y <= dim.y + 0.001)
+	# La losanga occupa i due terzi del quadrato: se il contorno fosse il
+	# rettangolo dell'immagine invece della figura, sarebbe largo tutto.
+	_ok("  e segue la figura, non il rettangolo (%.1f su %.1f)"
+		% [box.size.x, dim.x], box.size.x < dim.x * 0.95)
+	_ok("  ed e' centrata sull'origine",
+		absf(box.position.z + spessore / 2.0) < 0.001)
+
+	# La cache: la scena si ricostruisce a ogni clic e a ogni mossa dei bot,
+	# e rifare il ritaglio ogni volta sarebbe uno spreco.
+	var ancora: ArrayMesh = vista.mesh_sagoma(tex, dim, spessore)
+	_ok("la stessa sagoma non si ritaglia due volte", ancora == mesh)
+	var altra: ArrayMesh = vista.mesh_sagoma(tex, dim * 2.0, spessore)
+	_ok("  ma una taglia diversa e' un pezzo diverso", altra != mesh)
+
+	# Un'immagine piena fino ai bordi non ha un contorno da ritagliare: si
+	# deve ripiegare sul piano, non far saltare la scena.
+	var pieno := Image.create(8, 8, false, Image.FORMAT_RGBA8)
+	pieno.fill(Color(1, 1, 1, 1))
+	var tex2 := ImageTexture.create_from_image(pieno)
+	var m2: ArrayMesh = vista.mesh_sagoma(tex2, dim, spessore)
+	_ok("un'immagine senza ritaglio non fa saltare niente (%s)"
+		% ("piano" if m2 == null else "estrusa"), true)
 
 # LA SCENA GIOCABILE NON LA COMPILAVA NESSUN TEST. Un errore di sintassi in
 # gioca.gd passava tutta la suite - i test caricano i moduli puri, non la
