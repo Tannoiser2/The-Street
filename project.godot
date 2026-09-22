@@ -13,3 +13,14 @@ CardDB="*res://scripts/data/card_db.gd"
 
 window/size/viewport_width=1520
 window/size/viewport_height=900
+
+[importer_defaults]
+
+; La grafica viene da fotografie di cartoncino: in WebP con perdita pesa una
+; frazione, e la differenza non si vede su una sagoma alta 70 mm sul tavolo.
+; Senza questa riga il pacchetto web passava da 10 a 49 MB solo di texture.
+texture={
+"compress/mode": 1,
+"compress/lossy_quality": 0.82,
+"mipmaps/generate": true
+}

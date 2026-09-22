@@ -72,19 +72,58 @@ func _cielo() -> void:
 	p.position = r.position + Vector3(r.size.x / 2.0, r.size.y / 2.0, 0.0)
 	add_child(p)
 
+# Una carta stesa sul tavolo: lo spessore del cartoncino piu' il disegno
+# sopra. Il disegno e' un piano a se' e non la faccia della scatola, perche'
+# una BoxMesh porterebbe la stessa texture anche sui fianchi.
+# Senza immagine resta il rettangolo colorato: assets/ si rigenera dai PDF e
+# non e' versionata, quindi la plancia deve reggere anche senza.
+func _carta_stesa(box: AABB, percorso: String, tinta: Color,
+		giu := false) -> void:
+	var m := _scatola(box.size, tinta)
+	m.position = box.position + box.size / 2.0
+	add_child(m)
+	if percorso == "" or not ResourceLoader.exists(percorso): return
+	var tex := load(percorso) as Texture2D
+	if tex == null: return
+	var piano := _quad(Vector2(box.size.x, box.size.z), Color.WHITE, true)
+	piano.rotate_x(-PI / 2.0)
+	# Il titolo della carta va dalla parte opposta a chi guarda, come una
+	# carta vera appoggiata sul tavolo davanti a se'.
+	if giu: piano.rotate_y(PI)
+	var mat := piano.material_override as StandardMaterial3D
+	mat.albedo_texture = tex
+	mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA_SCISSOR
+	mat.alpha_scissor_threshold = 0.5
+	mat.texture_filter = BaseMaterial3D.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
+	piano.position = Vector3(box.position.x + box.size.x / 2.0,
+		box.end.y + 0.4, box.position.z + box.size.z / 2.0)
+	add_child(piano)
+
 func _tessere() -> void:
 	for c in gs.grid.n_cols:
 		var t: int = gs.grid.terrains[c]
-		for era in range(1, BoardLayout3D.RAILS + 1):
-			var box := BoardLayout3D.tile_box(c, era)
-			var col: Color = COLORI_TERRENO[t].darkened(0.08 * (era - 1))
-			# La colonna puntata dal mouse si accende: senza, il giocatore non
-			# sa dove sta per cliccare, perche' in prospettiva le colonne non
-			# stanno dove sembra.
-			if c == _evidenziata: col = col.lightened(0.45)
-			var m := _scatola(box.size, col)
-			m.position = box.position + box.size / 2.0
-			add_child(m)
+		# La tessera stampata e' UNA per colonna, 63 x 271 mm: copre tutti e
+		# cinque i binari, che sono righe su di lei e non pezzi a se'. Si
+		# unisce quindi il primo slot con l'ultimo.
+		var box := BoardLayout3D.tile_box(c, 1).merge(
+			BoardLayout3D.tile_box(c, BoardLayout3D.RAILS))
+		var col: Color = COLORI_TERRENO[t]
+		var percorso := BoardLayout3D.tessera_path(gs, c)
+		if percorso != "" and ResourceLoader.exists(percorso): col = Color("#1d1b17")
+		_carta_stesa(box, percorso, col)
+		# La colonna puntata dal mouse si accende: senza, il giocatore non sa
+		# dove sta per cliccare, perche' in prospettiva le colonne non stanno
+		# dove sembra. Col disegno sopra non si puo' piu' schiarire il colore
+		# della scatola, quindi si posa una velatura chiara sopra la tessera.
+		if c == _evidenziata:
+			var velo := _quad(Vector2(box.size.x, box.size.z),
+				Color(1, 1, 1, 0.22), true)
+			velo.rotate_x(-PI / 2.0)
+			var mat := velo.material_override as StandardMaterial3D
+			mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+			velo.position = Vector3(box.position.x + box.size.x / 2.0,
+				box.end.y + 0.8, box.position.z + box.size.z / 2.0)
+			add_child(velo)
 
 func _edifici() -> void:
 	for b in gs.grid.buildings:
@@ -214,9 +253,15 @@ const PLANCIA_SFONDO := Color("#2d323c")
 func _file_laterali() -> void:
 	for c in BoardLayout3D.side_cards(gs):
 		var r: AABB = c["aabb"]
-		var m := _scatola(r.size, CARTA_SFONDO)
-		m.position = r.position + r.size / 2.0
-		add_child(m)
+		var percorso := BoardLayout3D.carta_path(str(c["kind"]), str(c["id"]))
+		var sfondo := CARTA_SFONDO
+		if percorso != "" and ResourceLoader.exists(percorso): sfondo = Color("#1d1b17")
+		_carta_stesa(r, percorso, sfondo)
+		# Il nome e i numeri restano scritti sopra anche col disegno vero, e
+		# non e' una ridondanza: a questa distanza il testo stampato non si
+		# legge, e soprattutto i NUMERI DEL PDF SONO VECCHI - su 44 edifici su
+		# 60 lo Scavo stampato non e' quello della v1.5. Questi vengono dai
+		# dati, che sono la fonte.
 		_scritta(r.position + Vector3(r.size.x / 2.0, 30.0, r.size.z / 2.0),
 			_titolo_carta(c), 0.14, Color("#e8e6df"))
 		_scritta(r.position + Vector3(r.size.x / 2.0, 16.0, r.size.z / 2.0),

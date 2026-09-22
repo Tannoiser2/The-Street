@@ -147,5 +147,5 @@
     "Carte.pdf": "06530822fdf30035",
     "Potenziamenti.pdf": "3914b0297b2997e4"
   },
-  "_nota_controlli": "`_copie_byte`: le posizioni che portano la copia byte per byte di un'altra, riconoscibili a macchina. Gli eventi hanno l'elenco vuoto perche' le loro ristampe hanno l'illustrazione rigenerata e nessuna impronta le tradisce: quelle sono dichiarate a mano fra i `null`. `_impronte_pdf`: se non combaciano, il PDF e' stato rifatto e la mappatura ricavata a vista va ricontrollata. Fra le tessere le due copie sono volute e non sono un difetto: la 7 e' una seconda Collina delle Cave (serve avere due volte lo stesso terreno su una strada da 9 colonne) e la 11 e' la seconda copia del segnalino pietra/oro."
+  "_nota_controlli": "`_copie_byte`: le posizioni che portano la copia byte per byte di un'altra, riconoscibili a macchina. Gli eventi hanno l'elenco vuoto perche' le loro ristampe hanno l'illustrazione rigenerata e nessuna impronta le tradisce: quelle sono dichiarate a mano fra i `null`. `_impronte_pdf`: se non combaciano, il PDF e' stato rifatto e la mappatura ricavata a vista va ricontrollata. Fra le tessere la 11 e' la seconda copia del segnalino pietra/oro, che non e' una tessera colonna. La 7, invece, e' una seconda Collina delle Cave dove servirebbe una terza tessera FIUME: vedi data/tessere_pdf.json e domande-aperte punto 72."
 }

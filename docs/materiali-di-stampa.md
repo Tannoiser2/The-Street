@@ -29,7 +29,7 @@ nota. Le posizioni e gli id stanno in `data/carte_pdf.json` e
 | monumenti | 37 | 14 | idem, ordine proprio |
 | eredità | 33, 35 | 16 | idem, ordine proprio |
 | Dinastia | 45, 46 | 1 (×4 copie) | — |
-| tessere colonna | 47, 49, 51, 53 | 12 tessere + 2 segnalini | numerate |
+| tessere colonna | 47, 49, 51, 53 | 11 tessere + 1 ristampa + 2 segnalini | `data/tessere_pdf.json`, lette a vista |
 | dorsi | 28, 30, 32, 34, 36, 38, 40, 42, 44 | uno per mazzo o per era | — |
 | potenziamenti | `Potenziamenti.pdf` 1 | 25 posizioni, 20 carte | `data/carte_pdf.json`, ordine JSON, cinque per era |
 | dorsi dei potenziamenti | `Potenziamenti.pdf` 2 | 5 (uno per era) | — |
@@ -73,13 +73,17 @@ Non sono copie byte per byte: stessa carta, stesso testo, stessa forza, con
 l'illustrazione **rigenerata**. Da qui la differenza con le sagome, dove i
 duplicati sono identici al byte.
 
-### Due ripetizioni che non sono difetti
+### Una tessera fiume in meno, e una collina di troppo
 
-Fra le «tessere» le posizioni ripetute sono volute: la **7** è una seconda
-*Collina delle Cave* — su una strada da 9 colonne lo stesso terreno serve due
-volte — e la **11** è la seconda copia del segnalino pietra/oro. Sono censite
-in `data/carte_pdf.json` sotto `_copie_byte`, così il controllo automatico non
-le segnala più.
+Le tessere colonna sono **11 disegni distinti su 12 posizioni**: la **7** è una
+seconda stampa di *Collina delle Cave*, copia byte per byte della **6**. (La
+**11** invece è la seconda copia del segnalino pietra/oro, che non è una
+tessera: quella è voluta.)
+
+Il mix a quattro giocatori chiede pianura 3, fiume 3, collina 2, bosco 1.
+Stampate: pianura 4, collina 2, **fiume 2**, bosco 3. Manca **un fiume**, ed è
+esattamente la posizione che il duplicato spreca — lo stesso difetto dei
+potenziamenti e degli eventi. Vedi `docs/domande-aperte.md` punto 73.
 
 ### Due sagome portano il disegno di un'altra
 
@@ -116,3 +120,18 @@ sua — il PDF è stato corretto e il tool lo dice.
 Restano fuori le ristampe con l'**illustrazione rigenerata**, come i tre eventi
 dell'era 2: hanno impronte diverse e nessuna macchina le distingue da una carta
 vera. Quelle sono dichiarate a mano fra i `null`.
+
+## Le tessere colonna: undici varianti di quattro terreni
+
+Ogni tessera stampata è una **variante nominata** di uno dei quattro terreni
+del modello — *Pianura dei Cantieri*, *Collina del Castello*, *Fiume Porto*,
+*Bosco Sacro*… La produzione coincide sempre col terreno; la regola quasi mai.
+La mappatura tessera → terreno, con la regola stampata trascritta, sta in
+`data/tessere_pdf.json`; la domanda che ne nasce è al punto 72 delle domande
+aperte.
+
+La plancia le usa come **grafica del terreno**: a ogni colonna tocca la k-esima
+tessera del suo terreno, dove k conta quante colonne dello stesso terreno
+vengono prima. Deterministico, quindi due pianure vicine non portano lo stesso
+disegno — e quando le tessere di un terreno finiscono si ricomincia da capo,
+che è come il difetto del punto 73 si vede a schermo.

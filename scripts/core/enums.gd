@@ -29,3 +29,8 @@ static func terrain_from_string(s: String) -> int:
 		"bosco": return Terrain.BOSCO
 	push_error("Terreno sconosciuto: %s" % s)
 	return -1
+
+const TERRAIN_NAMES: Array[String] = ["pianura", "fiume", "collina", "bosco"]
+
+static func terrain_to_string(t: int) -> String:
+	return TERRAIN_NAMES[t] if t >= 0 and t < TERRAIN_NAMES.size() else ""
