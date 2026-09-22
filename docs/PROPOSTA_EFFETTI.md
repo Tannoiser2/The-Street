@@ -1,8 +1,13 @@
 # M4 — Proposta di schema chiuso per gli effetti delle carte
 
 Il brief chiede di **proporre uno schema chiuso di tipi di effetto prima di
-implementarli**. Questo è quello. Nulla è stato implementato: serve la tua
-approvazione, e in fondo ci sono le decisioni che spettano a te.
+implementarli**. Questo è quello.
+
+> **Stato: il blocco EVENTI è implementato.** Lo schema qui descritto è in
+> `data/cards.schema.json`, tutti e 24 gli eventi hanno il campo `effects`, e
+> `Effects` li applica. Gli altri blocchi (personaggi, edifici, potenziamenti,
+> Monumenti, Eredità) sono ancora solo proposta: le cinque decisioni in fondo
+> restano aperte.
 
 Base: la lettura di tutti i 165 `effect_text` e `condition_text`.
 

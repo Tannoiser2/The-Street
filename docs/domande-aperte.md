@@ -148,3 +148,23 @@ Non sono domande, ma vale la pena che restino a verbale.
   illegittimi, e molti legittimi non venivano mai riconosciuti. Corretto con
   `Grid.refresh_buried()`, ricalcolato dopo ogni costruzione: i sotterrati
   passano da 443 a 932 e le violazioni a zero.
+
+
+## Emerse durante la Milestone 4 (effetti, blocco eventi)
+
+18. **"Il primo terrapieno di ogni giocatore in quest'era costa 0"** (ev_bonifiche)
+    — non è detto se sia il primo *slot* di terrapieno o la prima *costruzione*
+    che ne richiede uno. Una costruzione larga può averne due o tre.
+    Lettura adottata: **il primo slot**, quindi una costruzione con due colonne
+    nude ne paga comunque una. Da confermare.
+
+19. **Due override dichiarati ma non ancora applicati** — sono nei dati e nello
+    schema, e `Effects.NOT_YET_APPLIED` li elenca, con un test che verifica che
+    l'elenco sia esatto: non possono essere dimenticati in silenzio.
+    - `no_production_last_round` (ev_anni della fame): serve il concetto di
+      "ultimo round dell'era", che oggi il motore non ha — l'era finisce quando
+      tutti hanno esaurito i lavoratori, senza una nozione esplicita di round.
+    - `free_upgrade_on_loss` (ev_eruzione): "chi perde un edificio pesca un
+      potenziamento gratis". Richiede di pescare dal mazzo durante la risoluzione
+      dell'evento, e di decidere che cosa significhi "perdere" (rudere? rovina?
+      entrambi?). Serve la tua risposta prima di implementarlo.

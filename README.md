@@ -36,6 +36,9 @@ godot --headless res://scenes/test_schema_validator.tscn
 # Test unitari delle azioni (M2): legalità, effetto e casi di rifiuto
 godot --headless res://scenes/test_actions.tscn
 
+# Test del motore degli effetti (M4): i 24 eventi, e la chiusura dello schema
+godot --headless res://scenes/test_effects.tscn
+
 # Partite headless con RandomBot
 godot --headless res://scenes/headless_runner.tscn -- --games 100 --players 3 --seed 1
 ```
