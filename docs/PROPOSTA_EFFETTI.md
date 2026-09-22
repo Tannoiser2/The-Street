@@ -3,7 +3,22 @@
 Il brief chiede di **proporre uno schema chiuso di tipi di effetto prima di
 implementarli**. Questo è quello.
 
-> **Stato: il blocco EVENTI è implementato.** Lo schema qui descritto è in
+> **Lo schema è cresciuto in tre punti nel blocco personaggi, e va detto.**
+> La proposta diceva: «se servisse un undicesimo nome di `rule_override`, è il
+> segnale che lo schema va rivisto con te — non allungato di nascosto». È
+> successo. Le tre estensioni:
+> 1. `rule_override` passa da 10 a **11 nomi**: `free_upgrade_of_class`, per il
+>    Vescovo («il prossimo potenziamento su un tuo edificio Religione costa 0»).
+>    È il fratello di `free_restore_of_class`, che già c'era.
+> 2. `vp_per` guadagna `value_from: "scavo"`, perché l'Archeologo assegna PV
+>    pari allo *Scavo della carta*, non a una costante. Ho preferito questo a un
+>    dodicesimo override: è generale e riusabile.
+> 3. Gli effetti guadagnano `condition`, un gate con lo stesso vocabolario che
+>    useranno Monumenti ed Eredità («se hai già 3+ edifici Sotterrati, +1 PV»).
+>    Riuso, non proliferazione.
+>
+> **Stato: implementati i blocchi EVENTI e PERSONAGGI (dati); del secondo il
+> motore applica per ora i soli «Subito:».** Lo schema qui descritto è in
 > `data/cards.schema.json`, tutti e 24 gli eventi hanno il campo `effects`, e
 > `Effects` li applica. Gli altri blocchi (personaggi, edifici, potenziamenti,
 > Monumenti, Eredità) sono ancora solo proposta: le cinque decisioni in fondo

@@ -300,20 +300,41 @@ func _test_non_resistance() -> void:
 
 # ---- registro degli override non applicati --------------------------
 func _test_pending() -> void:
-	var declared := {}
-	for id in CardDB.events:
-		for e in CardDB.events[id].get("effects", []):
-			if e["op"] == "rule_override": declared[e["name"]] = true
-	var applied: Array[String] = []
-	for n in declared:
-		if not n in Effects.NOT_YET_APPLIED: applied.append(n)
-	applied.sort()
-	_eq("override degli eventi gia' applicati", applied,
-		["first_terrapieno_free", "free_restore_of_class"] as Array[String])
-	_eq("override dichiarati ma non ancora applicati", Effects.NOT_YET_APPLIED,
-		["no_production_last_round", "free_upgrade_on_loss"] as Array[String])
-	for n in Effects.NOT_YET_APPLIED:
-		_ok("  %s e' dichiarato nei dati, quindi non si perde" % n, declared.has(n))
+	# Il registro e' calcolato dai dati, non scritto a mano: se qualcuno
+	# struttura un effetto nuovo senza implementarlo, compare qui da solo.
+	var pend := Effects.pending()
+	print("     inerti oggi (%d): %s" % [pend.size(), ", ".join(pend)])
+	_ok("il registro dei pendenti si calcola dai dati", pend.size() > 0)
+	for k in Effects.APPLIED_HOOK_OPS:
+		_ok("  applicato: %s" % k, not k in pend)
+	for n in Effects.APPLIED_OVERRIDES:
+		_ok("  applicato: %s" % n, not n in pend)
+	# i due override degli eventi noti come inerti devono restare segnalati
+	for n in ["no_production_last_round", "free_upgrade_on_loss"]:
+		_ok("  ancora inerte, e segnalato: %s" % n, n in pend)
+
+	# i 25 personaggi hanno tutti effetti strutturati
+	var senza: Array[String] = []
+	for id in CardDB.characters:
+		if CardDB.characters[id].get("is_dynasty", false): continue
+		if CardDB.characters[id].get("effects", []).is_empty(): senza.append(id)
+	_eq("tutti i 25 personaggi hanno un campo effects", senza, [] as Array[String])
+
+	# "Subito:" applicato davvero
+	var ctl := _game()
+	var gs := ctl.gs
+	var p: PlayerState = gs.players[0]
+	p.pietra = 0
+	p.oro = 0
+	Effects.apply_on_acquire(gs, 0, CardDB.characters["pe_banchiere"])
+	_eq("Banchiere: Subito +3 oro", [p.pietra, p.oro], [0, 3])
+	Effects.apply_on_acquire(gs, 0, CardDB.characters["pe_capotribu"])
+	_eq("  Capotribu: Subito +2 pietra", [p.pietra, p.oro], [2, 3])
+	var vp0: int = p.vp
+	Effects.apply_on_acquire(gs, 0, CardDB.characters["pe_mecenate"])
+	_eq("  Mecenate: Subito +1 cultura", p.vp, vp0 + 1)
+	Effects.apply_on_acquire(gs, 0, CardDB.characters["pe_sciamano"])
+	_eq("  Sciamano non ha 'Subito', quindi non cambia nulla", [p.pietra, p.oro], [2, 3])
 
 # ---- chiusura dello schema ------------------------------------------
 func _test_schema_closed() -> void:

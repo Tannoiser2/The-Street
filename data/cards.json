@@ -1748,7 +1748,25 @@
       "is_dynasty": false,
       "timing": "misto",
       "imprint": false,
-      "effect_text": "Subito: +2 pietra. Per l'era: l'edificio protetto da questo lavoratore ha +1 res."
+      "effect_text": "Subito: +2 pietra. Per l'era: l'edificio protetto da questo lavoratore ha +1 res.",
+      "effects": [
+        {
+          "hook": "on_acquire",
+          "op": "resource",
+          "pietra": 2,
+          "oro": 0
+        },
+        {
+          "hook": "on_event",
+          "op": "resistance",
+          "value": 1,
+          "duration": "era",
+          "target": {
+            "owner": "self",
+            "protected": true
+          }
+        }
+      ]
     },
     {
       "id": "pe_sciamano",
@@ -1758,7 +1776,21 @@
       "is_dynasty": false,
       "timing": "era",
       "imprint": false,
-      "effect_text": "Per l'era: i tuoi edifici Religione hanno +1 res."
+      "effect_text": "Per l'era: i tuoi edifici Religione hanno +1 res.",
+      "effects": [
+        {
+          "hook": "on_event",
+          "op": "resistance",
+          "value": 1,
+          "duration": "era",
+          "target": {
+            "owner": "self",
+            "class": [
+              "religione"
+            ]
+          }
+        }
+      ]
     },
     {
       "id": "pe_mercante_di_ossidiana",
@@ -1768,7 +1800,22 @@
       "is_dynasty": false,
       "timing": "misto",
       "imprint": false,
-      "effect_text": "Subito: +1 oro. Per l'era: fino a 2 scambi pietra↔oro alla pari."
+      "effect_text": "Subito: +1 oro. Per l'era: fino a 2 scambi pietra↔oro alla pari.",
+      "effects": [
+        {
+          "hook": "on_acquire",
+          "op": "resource",
+          "pietra": 0,
+          "oro": 1
+        },
+        {
+          "hook": "on_activate",
+          "op": "rule_override",
+          "name": "resource_exchange",
+          "duration": "era",
+          "times": 2
+        }
+      ]
     },
     {
       "id": "pe_incisore",
@@ -1778,7 +1825,15 @@
       "is_dynasty": false,
       "timing": "subito",
       "imprint": true,
-      "effect_text": "Subito — Impronta: infila questa carta sotto un tuo edificio; Scavo +3 permanente. Max 1 impronta per edificio."
+      "effect_text": "Subito — Impronta: infila questa carta sotto un tuo edificio; Scavo +3 permanente. Max 1 impronta per edificio.",
+      "effects": [
+        {
+          "hook": "on_acquire",
+          "op": "scavo_delta",
+          "value": 3,
+          "duration": "permanent"
+        }
+      ]
     },
     {
       "id": "pe_costruttore_di_zattere",
@@ -1788,7 +1843,27 @@
       "is_dynasty": false,
       "timing": "misto",
       "imprint": false,
-      "effect_text": "Subito: +1 pietra. Per l'era: −1 pietra alle costruzioni su slot con fiume."
+      "effect_text": "Subito: +1 pietra. Per l'era: −1 pietra alle costruzioni su slot con fiume.",
+      "effects": [
+        {
+          "hook": "on_acquire",
+          "op": "resource",
+          "pietra": 1,
+          "oro": 0
+        },
+        {
+          "hook": "on_build",
+          "op": "cost_delta",
+          "pietra": -1,
+          "what": "building",
+          "duration": "era",
+          "target": {
+            "terrain": [
+              "fiume"
+            ]
+          }
+        }
+      ]
     },
     {
       "id": "pe_architetto",
@@ -1798,7 +1873,27 @@
       "is_dynasty": false,
       "timing": "misto",
       "imprint": false,
-      "effect_text": "Subito: +1 pietra. Per l'era: −1 pietra agli edifici da 2 o 3 caselle."
+      "effect_text": "Subito: +1 pietra. Per l'era: −1 pietra agli edifici da 2 o 3 caselle.",
+      "effects": [
+        {
+          "hook": "on_acquire",
+          "op": "resource",
+          "pietra": 1,
+          "oro": 0
+        },
+        {
+          "hook": "on_build",
+          "op": "cost_delta",
+          "pietra": -1,
+          "what": "building",
+          "duration": "era",
+          "target": {
+            "width": {
+              "min": 2
+            }
+          }
+        }
+      ]
     },
     {
       "id": "pe_legionario",
@@ -1808,7 +1903,15 @@
       "is_dynasty": false,
       "timing": "era",
       "imprint": false,
-      "effect_text": "Per l'era: la sua protezione vale +3 invece di +2; se l'edificio protetto sopravvive all'evento, +1 cultura."
+      "effect_text": "Per l'era: la sua protezione vale +3 invece di +2; se l'edificio protetto sopravvive all'evento, +1 cultura.",
+      "effects": [
+        {
+          "hook": "on_era_end",
+          "op": "protection_delta",
+          "value": 1,
+          "duration": "era"
+        }
+      ]
     },
     {
       "id": "pe_sacerdotessa",
@@ -1818,7 +1921,28 @@
       "is_dynasty": false,
       "timing": "misto",
       "imprint": false,
-      "effect_text": "Subito: +1 oro. Per l'era: il primo edificio Religione che costruisci ti rimborsa 1 oro."
+      "effect_text": "Subito: +1 oro. Per l'era: il primo edificio Religione che costruisci ti rimborsa 1 oro.",
+      "effects": [
+        {
+          "hook": "on_acquire",
+          "op": "resource",
+          "pietra": 0,
+          "oro": 1
+        },
+        {
+          "hook": "on_build",
+          "op": "resource",
+          "oro": 1,
+          "duration": "era",
+          "times": 1,
+          "target": {
+            "owner": "self",
+            "class": [
+              "religione"
+            ]
+          }
+        }
+      ]
     },
     {
       "id": "pe_console",
@@ -1828,7 +1952,29 @@
       "is_dynasty": false,
       "timing": "misto",
       "imprint": false,
-      "effect_text": "Subito: +1 oro. Per l'era: quando attivi una colonna con un tuo strato Civico, +1 oro (max 2)."
+      "effect_text": "Subito: +1 oro. Per l'era: quando attivi una colonna con un tuo strato Civico, +1 oro (max 2).",
+      "effects": [
+        {
+          "hook": "on_acquire",
+          "op": "resource",
+          "pietra": 0,
+          "oro": 1
+        },
+        {
+          "hook": "on_activate",
+          "op": "resource",
+          "oro": 1,
+          "duration": "era",
+          "cap": 2,
+          "target": {
+            "owner": "self",
+            "class": [
+              "civico"
+            ],
+            "same_column_as_self": true
+          }
+        }
+      ]
     },
     {
       "id": "pe_retore",
@@ -1838,7 +1984,21 @@
       "is_dynasty": false,
       "timing": "subito",
       "imprint": true,
-      "effect_text": "Subito — Impronta: infila questa carta sotto un tuo edificio Cultura; Scavo +5 permanente. Max 1 impronta per edificio."
+      "effect_text": "Subito — Impronta: infila questa carta sotto un tuo edificio Cultura; Scavo +5 permanente. Max 1 impronta per edificio.",
+      "effects": [
+        {
+          "hook": "on_acquire",
+          "op": "scavo_delta",
+          "value": 5,
+          "duration": "permanent",
+          "target": {
+            "owner": "self",
+            "class": [
+              "cultura"
+            ]
+          }
+        }
+      ]
     },
     {
       "id": "pe_mastro_costruttore",
@@ -1848,7 +2008,28 @@
       "is_dynasty": false,
       "timing": "misto",
       "imprint": false,
-      "effect_text": "Subito: +1 pietra. Per l'era: puoi costruire in qualsiasi slot; la tua prima costruzione successiva ha +1 res permanente."
+      "effect_text": "Subito: +1 pietra. Per l'era: puoi costruire in qualsiasi slot; la tua prima costruzione successiva ha +1 res permanente.",
+      "effects": [
+        {
+          "hook": "on_acquire",
+          "op": "resource",
+          "pietra": 1,
+          "oro": 0
+        },
+        {
+          "hook": "on_build",
+          "op": "rule_override",
+          "name": "ignore_terrain_requirement",
+          "duration": "era"
+        },
+        {
+          "hook": "on_build",
+          "op": "resistance",
+          "value": 1,
+          "duration": "permanent",
+          "times": 1
+        }
+      ]
     },
     {
       "id": "pe_vescovo",
@@ -1858,7 +2039,33 @@
       "is_dynasty": false,
       "timing": "misto",
       "imprint": false,
-      "effect_text": "Subito: il prossimo potenziamento su un tuo edificio Religione in quest'era costa 0. Per l'era: capienza dei tuoi Religione +1."
+      "effect_text": "Subito: il prossimo potenziamento su un tuo edificio Religione in quest'era costa 0. Per l'era: capienza dei tuoi Religione +1.",
+      "effects": [
+        {
+          "hook": "on_build",
+          "op": "rule_override",
+          "name": "free_upgrade_of_class",
+          "times": 1,
+          "target": {
+            "owner": "self",
+            "class": [
+              "religione"
+            ]
+          }
+        },
+        {
+          "hook": "on_build",
+          "op": "upgrade_slots_delta",
+          "value": 1,
+          "duration": "era",
+          "target": {
+            "owner": "self",
+            "class": [
+              "religione"
+            ]
+          }
+        }
+      ]
     },
     {
       "id": "pe_cavaliere",
@@ -1868,7 +2075,15 @@
       "is_dynasty": false,
       "timing": "era",
       "imprint": false,
-      "effect_text": "Per l'era: la sua protezione vale +4 invece di +2; se l'edificio protetto sopravvive, +1 cultura."
+      "effect_text": "Per l'era: la sua protezione vale +4 invece di +2; se l'edificio protetto sopravvive, +1 cultura.",
+      "effects": [
+        {
+          "hook": "on_era_end",
+          "op": "protection_delta",
+          "value": 2,
+          "duration": "era"
+        }
+      ]
     },
     {
       "id": "pe_mercante",
@@ -1878,7 +2093,25 @@
       "is_dynasty": false,
       "timing": "misto",
       "imprint": false,
-      "effect_text": "Subito: +1 oro. Per l'era: quando un avversario attiva una colonna con tuoi strati visibili, +1 oro (max 2)."
+      "effect_text": "Subito: +1 oro. Per l'era: quando un avversario attiva una colonna con tuoi strati visibili, +1 oro (max 2).",
+      "effects": [
+        {
+          "hook": "on_acquire",
+          "op": "resource",
+          "pietra": 0,
+          "oro": 1
+        },
+        {
+          "hook": "on_activate",
+          "op": "resource",
+          "oro": 1,
+          "duration": "era",
+          "cap": 2,
+          "target": {
+            "owner": "others"
+          }
+        }
+      ]
     },
     {
       "id": "pe_cronista",
@@ -1888,7 +2121,26 @@
       "is_dynasty": false,
       "timing": "misto",
       "imprint": false,
-      "effect_text": "Subito: se la colonna contiene edifici di 3+ ere diverse, +1 cultura. Per l'era: quando attivi una colonna che contiene edifici di 3+ ere diverse (in qualsiasi condizione), +1 cultura (max 2 ulteriori)."
+      "effect_text": "Subito: se la colonna contiene edifici di 3+ ere diverse, +1 cultura. Per l'era: quando attivi una colonna che contiene edifici di 3+ ere diverse (in qualsiasi condizione), +1 cultura (max 2 ulteriori).",
+      "effects": [
+        {
+          "hook": "on_acquire",
+          "op": "vp",
+          "value": 1
+        },
+        {
+          "hook": "on_activate",
+          "op": "vp",
+          "value": 1,
+          "duration": "era",
+          "cap": 2,
+          "target": {
+            "column": {
+              "min_eras": 3
+            }
+          }
+        }
+      ]
     },
     {
       "id": "pe_mecenate",
@@ -1898,7 +2150,23 @@
       "is_dynasty": false,
       "timing": "misto",
       "imprint": false,
-      "effect_text": "Subito: +1 cultura. Per l'era: i potenziamenti Arte che acquisti valgono +1 PV."
+      "effect_text": "Subito: +1 cultura. Per l'era: i potenziamenti Arte che acquisti valgono +1 PV.",
+      "effects": [
+        {
+          "hook": "on_acquire",
+          "op": "vp",
+          "value": 1
+        },
+        {
+          "hook": "on_final_scoring",
+          "op": "vp_per",
+          "value": 1,
+          "duration": "era",
+          "target": {
+            "owner": "self"
+          }
+        }
+      ]
     },
     {
       "id": "pe_banchiere",
@@ -1908,7 +2176,15 @@
       "is_dynasty": false,
       "timing": "subito",
       "imprint": false,
-      "effect_text": "Subito: +3 oro."
+      "effect_text": "Subito: +3 oro.",
+      "effects": [
+        {
+          "hook": "on_acquire",
+          "op": "resource",
+          "pietra": 0,
+          "oro": 3
+        }
+      ]
     },
     {
       "id": "pe_ingegnere_militare",
@@ -1918,7 +2194,34 @@
       "is_dynasty": false,
       "timing": "era",
       "imprint": false,
-      "effect_text": "Per l'era: i tuoi edifici Militari hanno +1 res; uno a tua scelta +2."
+      "effect_text": "Per l'era: i tuoi edifici Militari hanno +1 res; uno a tua scelta +2.",
+      "effects": [
+        {
+          "hook": "on_event",
+          "op": "resistance",
+          "value": 1,
+          "duration": "era",
+          "target": {
+            "owner": "self",
+            "class": [
+              "militare"
+            ]
+          }
+        },
+        {
+          "hook": "on_event",
+          "op": "resistance",
+          "value": 1,
+          "duration": "era",
+          "times": 1,
+          "target": {
+            "owner": "self",
+            "class": [
+              "militare"
+            ]
+          }
+        }
+      ]
     },
     {
       "id": "pe_cardinale",
@@ -1928,7 +2231,27 @@
       "is_dynasty": false,
       "timing": "misto",
       "imprint": false,
-      "effect_text": "Subito: +1 oro. Per l'era: −1 oro agli edifici Religione (minimo 0)."
+      "effect_text": "Subito: +1 oro. Per l'era: −1 oro agli edifici Religione (minimo 0).",
+      "effects": [
+        {
+          "hook": "on_acquire",
+          "op": "resource",
+          "pietra": 0,
+          "oro": 1
+        },
+        {
+          "hook": "on_build",
+          "op": "cost_delta",
+          "oro": -1,
+          "what": "building",
+          "duration": "era",
+          "target": {
+            "class": [
+              "religione"
+            ]
+          }
+        }
+      ]
     },
     {
       "id": "pe_artista_di_corte",
@@ -1938,7 +2261,21 @@
       "is_dynasty": false,
       "timing": "misto",
       "imprint": false,
-      "effect_text": "Subito: +1 cultura. Per l'era: il primo potenziamento che piazzi su un edificio altrui è gratis e incassi 1 oro dal proprietario."
+      "effect_text": "Subito: +1 cultura. Per l'era: il primo potenziamento che piazzi su un edificio altrui è gratis e incassi 1 oro dal proprietario.",
+      "effects": [
+        {
+          "hook": "on_acquire",
+          "op": "vp",
+          "value": 1
+        },
+        {
+          "hook": "on_build",
+          "op": "rule_override",
+          "name": "upgrade_on_others_building",
+          "duration": "era",
+          "times": 1
+        }
+      ]
     },
     {
       "id": "pe_archeologo",
@@ -1948,7 +2285,35 @@
       "is_dynasty": false,
       "timing": "finale",
       "imprint": false,
-      "effect_text": "Finale: scegli una tua Rovina non Sotterrata: vale il suo Scavo. Se hai già 3+ edifici Sotterrati, +1 PV."
+      "effect_text": "Finale: scegli una tua Rovina non Sotterrata: vale il suo Scavo. Se hai già 3+ edifici Sotterrati, +1 PV.",
+      "effects": [
+        {
+          "hook": "on_final_scoring",
+          "op": "vp_per",
+          "value_from": "scavo",
+          "times": 1,
+          "target": {
+            "owner": "self",
+            "state": [
+              "rovina"
+            ],
+            "buried": false
+          }
+        },
+        {
+          "hook": "on_final_scoring",
+          "op": "vp",
+          "value": 1,
+          "condition": {
+            "op": "count_matching",
+            "min": 3,
+            "target": {
+              "owner": "self",
+              "buried": true
+            }
+          }
+        }
+      ]
     },
     {
       "id": "pe_urbanista",
@@ -1958,7 +2323,21 @@
       "is_dynasty": false,
       "timing": "finale",
       "imprint": false,
-      "effect_text": "Finale: +1 PV per ogni tuo strato in catene da 4+ ere (max +4)."
+      "effect_text": "Finale: +1 PV per ogni tuo strato in catene da 4+ ere (max +4).",
+      "effects": [
+        {
+          "hook": "on_final_scoring",
+          "op": "vp_per",
+          "value": 1,
+          "cap": 4,
+          "target": {
+            "owner": "self",
+            "column": {
+              "min_eras": 4
+            }
+          }
+        }
+      ]
     },
     {
       "id": "pe_industriale",
@@ -1968,7 +2347,22 @@
       "is_dynasty": false,
       "timing": "misto",
       "imprint": false,
-      "effect_text": "Subito: +2 oro. Per l'era: le tue prime 2 produzioni di oro danno +1."
+      "effect_text": "Subito: +2 oro. Per l'era: le tue prime 2 produzioni di oro danno +1.",
+      "effects": [
+        {
+          "hook": "on_acquire",
+          "op": "resource",
+          "pietra": 0,
+          "oro": 2
+        },
+        {
+          "hook": "on_activate",
+          "op": "production_delta",
+          "oro": 1,
+          "duration": "era",
+          "times": 2
+        }
+      ]
     },
     {
       "id": "pe_soprintendente",
@@ -1978,7 +2372,19 @@
       "is_dynasty": false,
       "timing": "finale",
       "imprint": false,
-      "effect_text": "Finale: fino a 3 tuoi edifici Sotterrati hanno Scavo +2."
+      "effect_text": "Finale: fino a 3 tuoi edifici Sotterrati hanno Scavo +2.",
+      "effects": [
+        {
+          "hook": "on_final_scoring",
+          "op": "scavo_delta",
+          "value": 2,
+          "cap": 3,
+          "target": {
+            "owner": "self",
+            "buried": true
+          }
+        }
+      ]
     },
     {
       "id": "pe_veterano",
@@ -1988,7 +2394,24 @@
       "is_dynasty": false,
       "timing": "finale",
       "imprint": false,
-      "effect_text": "Finale: +1 PV per ogni tuo edificio Militare in piedi (max +4)."
+      "effect_text": "Finale: +1 PV per ogni tuo edificio Militare in piedi (max +4).",
+      "effects": [
+        {
+          "hook": "on_final_scoring",
+          "op": "vp_per",
+          "value": 1,
+          "cap": 4,
+          "target": {
+            "owner": "self",
+            "class": [
+              "militare"
+            ],
+            "state": [
+              "intatto"
+            ]
+          }
+        }
+      ]
     },
     {
       "id": "pe_dinastia",

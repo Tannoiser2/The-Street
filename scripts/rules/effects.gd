@@ -9,10 +9,32 @@
 class_name Effects
 extends RefCounted
 
-# Override dichiarati nei dati ma NON ancora applicati dal motore.
-# Elencarli qui e' deliberato: un test verifica che questo insieme sia esatto,
-# cosi' non si puo' credere per sbaglio che siano attivi.
-const NOT_YET_APPLIED: Array[String] = ["no_production_last_round", "free_upgrade_on_loss"]
+# Che cosa il motore applica DAVVERO, oggi. Tutto il resto e' dichiarato nei
+# dati ma inerte. Un test confronta questi due elenchi con cio' che le carte
+# dichiarano: se qualcuno struttura un effetto nuovo senza implementarlo, il
+# test lo segnala invece di lasciarlo passare per attivo.
+const APPLIED_HOOK_OPS: Array[String] = [
+	"on_event:resistance",      # i 24 eventi
+	"on_era_end:resource",      # ev_inverno_lungo
+	"on_acquire:resource",      # "Subito: +N pietra/oro" dei personaggi
+	"on_acquire:vp",            # "Subito: +N cultura"
+]
+const APPLIED_OVERRIDES: Array[String] = ["first_terrapieno_free", "free_restore_of_class"]
+
+# Elenco di tutto cio' che le carte dichiarano ma il motore non applica ancora.
+static func pending() -> Array[String]:
+	var out: Array[String] = []
+	for block in [CardDB.events, CardDB.characters, CardDB.buildings, CardDB.upgrades]:
+		for id in block:
+			for e in block[id].get("effects", []):
+				var key: String = "%s:%s" % [e["hook"], e["op"]]
+				if e["op"] == "rule_override":
+					if not e["name"] in APPLIED_OVERRIDES and not e["name"] in out:
+						out.append(e["name"])
+				elif not key in APPLIED_HOOK_OPS and not key in out:
+					out.append(key)
+	out.sort()
+	return out
 
 # ---- accesso -------------------------------------------------------
 static func of_event(gs: GameState) -> Array:
@@ -115,6 +137,22 @@ static func event_resistance_modifier(gs: GameState, b: Building) -> int:
 		if matches(gs, b, e.get("target", {})):
 			mod += int(e["value"])
 	return mod
+
+# ---- hook: on_acquire (applica) ------------------------------------
+# "Subito:" dei personaggi. Applica solo resource e vp; gli altri op su
+# on_acquire (l'Impronta dei due scultori) richiedono un edificio bersaglio
+# che il comando di reclutamento non passa ancora.
+static func apply_on_acquire(gs: GameState, player: int, card: Dictionary) -> void:
+	var p: PlayerState = gs.players[player]
+	for e in card.get("effects", []):
+		if e["hook"] != "on_acquire": continue
+		match str(e["op"]):
+			"resource":
+				p.gain(int(e.get("pietra", 0)), int(e.get("oro", 0)))
+				gs.log_line("%s: %+d pietra %+d oro" % [card["name"], int(e.get("pietra", 0)), int(e.get("oro", 0))])
+			"vp":
+				p.add_vp("cultura", int(e["value"]))
+				gs.log_line("%s: %+d cultura" % [card["name"], int(e["value"])])
 
 # ---- op: resource (applica) ----------------------------------------
 # Unico effetto che modifica lo stato: lo fa il chiamante in rules/, non qui.

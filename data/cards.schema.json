@@ -222,7 +222,7 @@
           ]
         },
         "name": {
-          "description": "Solo per op=rule_override. L'elenco e' CHIUSO: un nome nuovo va concordato col designer, non aggiunto di nascosto.",
+          "description": "Solo per op=rule_override. L'elenco e' CHIUSO. Cresciuto da 10 a 11 nel blocco personaggi: free_upgrade_of_class (Vescovo) non era previsto dalla proposta. Un nome nuovo va concordato col designer.",
           "enum": [
             "ignore_terrain_requirement",
             "first_terrapieno_free",
@@ -233,8 +233,41 @@
             "counts_as_class",
             "colossal",
             "scavo_only_if_buried",
-            "upgrade_on_others_building"
+            "upgrade_on_others_building",
+            "free_upgrade_of_class"
           ]
+        },
+        "value_from": {
+          "enum": [
+            "scavo"
+          ],
+          "description": "Solo per op=vp_per: il valore viene da un campo della carta invece che da `value`."
+        },
+        "condition": {
+          "$ref": "#/$defs/condition"
+        }
+      }
+    },
+    "condition": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "op",
+        "min"
+      ],
+      "description": "Gate di un effetto. Stesso vocabolario che useranno Monumenti ed Eredita'.",
+      "properties": {
+        "op": {
+          "enum": [
+            "count_matching"
+          ]
+        },
+        "min": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "target": {
+          "$ref": "#/$defs/selector"
         }
       }
     }
