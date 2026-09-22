@@ -36,6 +36,7 @@ const APPLIED: Array[String] = [
 	"personaggio:on_activate:resource",      # Console, Mercante
 	"personaggio:on_activate:vp",            # Cronista
 	"personaggio:on_acquire:protection_delta",   # Capotribu', Legionario, Cavaliere
+	"personaggio:on_acquire:scavo_delta",    # le due Impronte, Incisore e Retore
 	"personaggio:on_era_end:vp",             # Legionario e Cavaliere, se l'edificio regge
 	"potenziamento:on_activate:resource",    # Granaio, Boutique, Banchina
 	"potenziamento:on_acquire:vp",

@@ -2097,7 +2097,10 @@
           "hook": "on_acquire",
           "op": "scavo_delta",
           "value": 3,
-          "duration": "permanent"
+          "duration": "permanent",
+          "target": {
+            "is_self": true
+          }
         }
       ]
     },
@@ -2265,7 +2268,7 @@
           "value": 5,
           "duration": "permanent",
           "target": {
-            "owner": "self",
+            "is_self": true,
             "class": [
               "cultura"
             ]

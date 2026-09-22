@@ -78,8 +78,14 @@ static func _try_restore(ctl: GameController, col: int) -> bool:
 
 static func _try_recruit(ctl: GameController, col: int) -> bool:
 	var gs := ctl.gs
+	var me := gs.current_index
 	for char_id in gs.char_row.duplicate():
-		if ctl.recruit(char_id): return true
+		# le Impronte vogliono un edificio bersaglio: si prova coi propri
+		if CardDB.characters[char_id].get("imprint", false):
+			for b in gs.grid.buildings:
+				if b.owner == me and b.is_standing() and b.imprint == "":
+					if ctl.recruit(char_id, b): return true
+		elif ctl.recruit(char_id): return true
 	return false
 
 static func _shuffle(gs: GameState, a: Array) -> void:

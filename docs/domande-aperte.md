@@ -392,3 +392,24 @@ dato è stato importato da lì. Ma due confronti fra ciò che è stampato e
     contano ~20 edifici protetti con protezione totale 42 su 30 partite — il
     surplus oltre il +2 viene dai personaggi. I PV medi salgono da 54,2/44,8/45,2
     a 58,2/49,3/47,1: più edifici sopravvivono agli eventi.
+
+31. **L'Impronta e lo scheletro sono lo stesso gesto fisico.** Il regolamento
+    descrive entrambi come «infilare la carta sotto un edificio», e per entrambi
+    pone un limite di uno per edificio, ma li enuncia separatamente.
+
+    Lettura adottata: **due cose distinte**, ciascuna col proprio limite. Un
+    edificio può quindi portare un'Impronta *e* uno scheletro.
+    Conseguenza che ho invece escluso: la carta dell'Incisore o del Retore è già
+    sotto un edificio dal momento in cui la giochi, quindi **non viene sepolta
+    una seconda volta** a fine era. Senza questa esclusione avrebbe pagato due
+    volte — lo Scavo permanente *e* i punti scheletro.
+
+    Se invece l'intenzione era che l'Impronta occupi lo slot dello scheletro (un
+    edificio o porta un'Impronta o ospita un personaggio, non entrambi), è un
+    controllo in più in `EraRules.bury_characters`.
+
+32. **Il bersaglio dell'Impronta è una scelta, non l'edificio abitato.** «Infila
+    questa carta sotto **un tuo edificio**»: il comando `recruit` accetta quindi
+    un bersaglio esplicito, come `build` accetta la colonna. Il bot casuale
+    prende il primo proprio edificio libero, che è un segnaposto: la scelta vera
+    la farà l'interfaccia.

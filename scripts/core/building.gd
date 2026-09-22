@@ -19,6 +19,7 @@ var vetusta: int = 0          # cubetti bianchi: +1 per evento superato
 var protection: int = 0       # +2 per lavoratore piazzato; si azzera a fine era
 var protected_by: int = -1    # giocatore il cui lavoratore lo abita; -1 = nessuno
 var upgrades: Array = []      # id dei potenziamenti infilati sotto
+var imprint: String = ""      # Impronta infilata sotto: "un edificio puo' portarne una sola"
 var buried_character: String = ""   # personaggio sepolto qui (meccanica Scheletri)
 var buried_character_era: int = 0
 var charges: int = 0          # cubetti carica per edifici Esauribili

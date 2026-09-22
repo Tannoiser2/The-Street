@@ -98,10 +98,14 @@ static func quote_restore(gs: GameState, player: int, target: Building) -> Actio
 # Lettura adottata: fra gli edifici INTATTI. Il regolamento elenca "la sua classe
 # conta per il reclutamento" fra le proprieta' dell'intatto, e il rudere e'
 # esplicitamente "spento". Vedi docs/domande-aperte.md.
-static func quote_recruit(gs: GameState, player: int, char_id: String, col: int) -> ActionQuote:
+static func quote_recruit(gs: GameState, player: int, char_id: String, col: int,
+		imprint_target: Building = null) -> ActionQuote:
 	if not char_id in gs.char_row:
 		return ActionQuote.no("personaggio non disponibile nella fila")
 	var data: Dictionary = CardDB.characters[char_id]
+	if data.get("imprint", false):
+		var why := imprint_reason(gs, player, data, imprint_target)
+		if why != "": return ActionQuote.no(why)
 	var cls: String = data["class"]
 	var found := false
 	for b in gs.grid.alive_in_column(col):
@@ -127,6 +131,20 @@ static func quote_dynasty(gs: GameState, player: int) -> ActionQuote:
 		return ActionQuote.no("nessuna Dinastia disponibile")
 	var c: Dictionary = by_era[str(gs.era)]
 	return ActionQuote.yes(int(c.get("pietra", 0)), int(c.get("oro", 0)))
+
+# "Impronta: infila questa carta sotto un tuo edificio" — il bersaglio e' una
+# SCELTA del giocatore, non l'edificio abitato: va passato al comando.
+# "Un edificio puo' portarne una sola."
+static func imprint_reason(gs: GameState, player: int, data: Dictionary,
+		target: Building) -> String:
+	if target == null: return "l'Impronta richiede un edificio bersaglio"
+	if target.owner != player: return "l'edificio non e' tuo"
+	if not target.is_standing(): return "l'edificio non e' in piedi"
+	if target.imprint != "": return "l'edificio porta gia' un'Impronta"
+	for e in data.get("effects", []):
+		if not Effects.matches(gs, target, e.get("target", {}), target, player):
+			return "l'edificio non soddisfa il requisito dell'Impronta"
+	return ""
 
 static func dynasty_id() -> String:
 	for id in CardDB.characters:

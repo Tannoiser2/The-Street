@@ -20,6 +20,7 @@ func _ready() -> void:
 	_run("effetti per l'era dei personaggi", _test_characters_era)
 	_run("hook di attivazione", _test_on_activate)
 	_run("lavoratore ed edificio protetto", _test_protection)
+	_run("Impronte", _test_imprints)
 	_run("lo schema e' davvero chiuso", _test_schema_closed)
 	print("\n%d superati, %d falliti" % [_passed, _failed])
 	get_tree().quit(0 if _failed == 0 else 1)
@@ -1009,3 +1010,86 @@ func _test_protection() -> void:
 	abitato.protection = base
 	_eq("evento sui non protetti: colpisce il nudo", Effects.event_resistance_modifier(j, nudo), -1)
 	_eq("  risparmia quello abitato", Effects.event_resistance_modifier(j, abitato), 0)
+
+
+# ---- Impronte ---------------------------------------------------------
+func _turno_impronta(cid: String) -> Array:
+	var ctl := _game()
+	var gs := ctl.gs
+	_flat(gs, Enums.Terrain.PIANURA)
+	var cls: String = CardDB.characters[cid]["class"]
+	var b := _put(gs, _card_of_class(cls), 2)     # soddisfa la classe richiesta
+	b.owner = gs.current_index
+	gs.char_row = [cid]
+	gs.char_decks[gs.era] = []
+	ctl.place_worker(2, b)
+	gs.current_player().oro = 9
+	return [ctl, gs, b]
+
+func _test_imprints() -> void:
+	# Incisore: Scavo +3 sull'edificio scelto, e solo su quello
+	var a := _turno_impronta("pe_incisore")
+	var ctl: GameController = a[0]
+	var gs: GameState = a[1]
+	var b: Building = a[2]
+	var altro := _put(gs, _card_of_class("civico"), 5)
+	altro.owner = gs.current_index
+	var s0 := b.scavo_value()
+	var s_altro := altro.scavo_value()
+	_ok("Incisore posato sull'edificio scelto", ctl.recruit("pe_incisore", b))
+	_eq("  Scavo +3 sul bersaglio", b.scavo_value(), s0 + 3)
+	_eq("  nessun altro edificio e' toccato", altro.scavo_value(), s_altro)
+	_eq("  l'edificio registra l'Impronta", b.imprint, "pe_incisore")
+
+	# Retore: +5, ma solo su edificio Cultura
+	var c := _turno_impronta("pe_retore")
+	var ctl2: GameController = c[0]
+	var gs2: GameState = c[1]
+	var b2: Building = c[2]
+	var s1 := b2.scavo_value()
+	_ok("Retore su edificio Cultura", ctl2.recruit("pe_retore", b2))
+	_eq("  Scavo +5", b2.scavo_value(), s1 + 5)
+
+	var d := _turno_impronta("pe_retore")
+	var ctl3: GameController = d[0]
+	var gs3: GameState = d[1]
+	var non_cult := _put(gs3, _card_of_class("militare"), 4)
+	non_cult.owner = gs3.current_index
+	_ok("Retore rifiutato su edificio non Cultura", not ctl3.recruit("pe_retore", non_cult))
+
+	# senza bersaglio, e su edificio altrui
+	var e2 := _turno_impronta("pe_incisore")
+	var ctl4: GameController = e2[0]
+	_ok("Impronta senza bersaglio: rifiutata", not ctl4.recruit("pe_incisore"))
+	var f := _turno_impronta("pe_incisore")
+	var ctl5: GameController = f[0]
+	var gs5: GameState = f[1]
+	var altrui := _put(gs5, _card_of_class("cultura"), 4)
+	altrui.owner = (gs5.current_index + 1) % gs5.n_players
+	_ok("Impronta su edificio altrui: rifiutata", not ctl5.recruit("pe_incisore", altrui))
+
+	# "Un edificio puo' portarne una sola"
+	var g := _turno_impronta("pe_incisore")
+	var ctl6: GameController = g[0]
+	var gs6: GameState = g[1]
+	var b6: Building = g[2]
+	ctl6.recruit("pe_incisore", b6)
+	var q := ActionRules.quote_recruit(gs6, b6.owner, "pe_incisore", 2, b6)
+	_ok("un secondo Impronta sullo stesso edificio: rifiutato", not q.legal, q.reason)
+
+	# la carta e' gia' sotto l'edificio: non va sepolta di nuovo come scheletro
+	var h := _turno_impronta("pe_incisore")
+	var ctl7: GameController = h[0]
+	var gs7: GameState = h[1]
+	var b7: Building = h[2]
+	var chi := gs7.current_index
+	ctl7.recruit("pe_incisore", b7)
+	_eq("l'Impronta non resta fra i personaggi dell'era",
+		gs7.players[chi].specialized_characters, [] as Array[String])
+	gs7.era = 2
+	EraRules.bury_characters(gs7)
+	_eq("  e quindi non diventa anche scheletro", b7.buried_character, "")
+
+	# ma conta come reclutamento, per l'Universita'
+	_eq("  conta comunque come personaggio reclutato",
+		gs7.players[chi].recruited_total, 1)

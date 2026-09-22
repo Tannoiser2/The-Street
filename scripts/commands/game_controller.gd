@@ -242,10 +242,12 @@ func restore(target: Building) -> bool:
 	return true
 
 # Reclutare: il lavoratore appena piazzato si specializza fino a fine era.
-func recruit(char_id: String) -> bool:
+# `imprint_target` serve solo ai due personaggi Impronta, che si infilano sotto
+# un edificio a scelta del giocatore.
+func recruit(char_id: String, imprint_target: Building = null) -> bool:
 	if gs.phase != Enums.Phase.AZIONE: return false
 	var p := gs.current_player()
-	var q := ActionRules.quote_recruit(gs, p.index, char_id, _activated_col)
+	var q := ActionRules.quote_recruit(gs, p.index, char_id, _activated_col, imprint_target)
 	if not q.legal:
 		gs.log_line("Reclutamento rifiutato: %s" % q.reason)
 		return false
@@ -255,9 +257,17 @@ func recruit(char_id: String) -> bool:
 	p.recruited_total += 1
 	# Il lavoratore appena piazzato si specializza: l'edificio che abita e' il
 	# bersaglio degli effetti che parlano di "questo lavoratore".
+	var data: Dictionary = CardDB.characters[char_id]
+	var host: Building = imprint_target if data.get("imprint", false) else _last_protected
 	if _last_protected != null:
 		p.character_targets[char_id] = _last_protected.uid
-	Effects.apply_on_acquire(gs, p.index, CardDB.characters[char_id], _last_protected)
+	Effects.apply_on_acquire(gs, p.index, data, host)
+	if data.get("imprint", false):
+		# La carta e' gia' infilata sotto l'edificio: non resta in mano al
+		# giocatore, quindi non viene sepolta di nuovo a fine era come scheletro.
+		imprint_target.imprint = char_id
+		p.specialized_characters.erase(char_id)
+		gs.log_line("%s: Impronta sotto %s" % [data["name"], imprint_target.data["name"]])
 	gs.char_row.erase(char_id)
 	_refill(gs.char_row, gs.char_decks[gs.era], int(CardDB.constants["side_rows"]))
 	gs.log_line("Reclutato %s" % CardDB.characters[char_id]["name"])
