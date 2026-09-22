@@ -39,6 +39,7 @@ func _ready() -> void:
 	_run("  e la barra dice che mossa sarebbe, e quanto costa", _test_descrizione)
 	_run("chi sta sopra poggia su chi sta sotto", _test_pila)
 	_run("le carte del giocatore non si coprono", _test_carte_giocatore)
+	_run("chi siede al tavolo lo si sceglie", _test_scelte_inizio)
 	print("\n%d superati, %d falliti" % [_passed, _failed])
 	get_tree().quit(0 if _failed == 0 else 1)
 
@@ -1210,6 +1211,55 @@ func _test_carte_giocatore() -> void:
 		if colpita.is_empty() or str(colpita["id"]) != str(c["id"]): sbagliate += 1
 	_eq("  e cliccandone una si prende proprio quella", sbagliate, 0)
 
+# CHI SIEDE AL TAVOLO. Prima erano due numeri dentro gioca.gd - tre giocatori,
+# seme 7 - e in due o in quattro non ci si giocava affatto. ScelteInizio e'
+# pura, quindi si prova headless che nessuna combinazione impossibile passi.
+func _test_scelte_inizio() -> void:
+	var s := ScelteInizio.new()
+	_eq("umani piu' bot fa i giocatori", s.umani() + s.bot, s.giocatori)
+
+	# Il regolamento sta su 2, 3 e 4: fuori di li' i terreni non sono tabulati.
+	s.con_giocatori(9)
+	_eq("in nove non si gioca: si scende al massimo", s.giocatori, 4)
+	s.con_giocatori(1)
+	_eq("  e da soli nemmeno: si sale al minimo", s.giocatori, 2)
+
+	s.con_giocatori(4)
+	s.con_bot(4)
+	_eq("tutti bot si puo': e' la partita che si guarda", s.umani(), 0)
+	s.con_bot(99)
+	_eq("  ma non piu' bot che giocatori", s.bot, 4)
+	s.con_bot(0)
+	_eq("  e nemmeno meno di zero: tutti umani", s.umani(), 4)
+
+	# E stringendo il tavolo i bot devono stringersi con lui, altrimenti si
+	# resterebbe con piu' bot che posti.
+	s.con_giocatori(4)
+	s.con_bot(3)
+	s.con_giocatori(2)
+	_ok("stringendo il tavolo i bot si stringono (%d su %d)" % [s.bot, s.giocatori],
+		s.bot <= s.giocatori)
+
+	# I primi posti sono degli umani: chi gioca da solo e' il giocatore 0 e sa
+	# dove guardare.
+	s.con_giocatori(3)
+	s.con_bot(2)
+	_ok("l'umano e' il primo", s.e_umano(0))
+	_ok("  e gli altri sono bot", not s.e_umano(1) and not s.e_umano(2))
+	_eq("  e i posti umani sono quelli", s.posti_umani(), [0] as Array[int])
+	_ok("  fuori dal tavolo non c'e' nessuno", not s.e_umano(-1) and not s.e_umano(3))
+
+	# Il seme resta scelto e visibile: e' quello che rende una partita
+	# ripetibile, e un difetto raccontabile.
+	var semi := {}
+	for i in 40:
+		s.rimescola()
+		semi[s.seme] = true
+		if s.seme < 1: _ok("seme fuori scala", false)
+	_ok("il seme cambia rimescolando (%d valori su 40)" % semi.size(), semi.size() > 1)
+	_ok("  e la descrizione dice chi gioca: \"%s\"" % s.descrizione(),
+		s.descrizione().contains("bot") and s.descrizione().contains(str(s.seme)))
+
 # LA SCENA GIOCABILE NON LA COMPILAVA NESSUN TEST. Un errore di sintassi in
 # gioca.gd passava tutta la suite - i test caricano i moduli puri, non la
 # scena - e si vedeva solo aprendo il gioco, con lo schermo grigio e nessun
@@ -1223,13 +1273,37 @@ func _test_scena_giocabile() -> void:
 			"res://scripts/view/board_layout_3d.gd",
 			"res://scripts/view/camera_orbita.gd",
 			"res://scripts/view/descrizione_azione.gd",
+			"res://scripts/view/scelte_inizio.gd",
 			"res://scripts/rules/available_actions.gd"]:
 		_ok("%s si compila" % percorso.get_file(), ResourceLoader.load(percorso) != null)
 	var scena := ResourceLoader.load("res://scenes/gioca.tscn") as PackedScene
 	_ok("la scena giocabile si carica", scena != null)
 	if scena == null: return
 	var n := scena.instantiate()
-	add_child(n)          # qui gira _ready: nuova partita, bot, primo disegno
+	add_child(n)          # qui gira _ready: la schermata di scelta
 	_ok("  e si avvia senza fermarsi", n.get_child_count() > 0)
-	_ok("  con la partita in piedi", n.ctl != null and n.ctl.gs != null)
+	_ok("  e si apre sulla scelta, non su una partita decisa da noi",
+		n.ctl == null)
+
+	# Quel che farebbe il clic su "Comincia": in due, uno dei quali bot.
+	n.inizio.con_giocatori(2)
+	n.inizio.con_bot(1)
+	n.comincia()
+	_ok("  e cominciando si ha una partita in piedi",
+		n.ctl != null and n.ctl.gs != null)
+	_eq("  coi giocatori scelti", n.ctl.gs.n_players, 2)
+	_ok("  e col tavolo disegnato", n.vista != null)
+	# Col bot al secondo posto, il turno torna sempre all'umano.
+	_ok("  e il turno e' dell'umano", n.inizio.e_umano(n.ctl.gs.current_index)
+		or n.ctl.gs.phase == Enums.Phase.FINE_PARTITA)
+
+	# Tutti bot: si guarda giocare, e la partita deve arrivare in fondo da
+	# sola senza restare appesa ad aspettare un umano che non c'e'.
+	n.inizio.con_giocatori(3)
+	n.inizio.con_bot(3)
+	n.comincia()
+	_ok("  e con tutti bot la partita va avanti da sola",
+		n.ctl.gs.era > 1 or n.ctl.gs.phase == Enums.Phase.FINE_PARTITA)
+	n.torna_alla_scelta()
+	_ok("  e si torna alla scelta", n.ctl == null and n.vista == null)
 	n.queue_free()
