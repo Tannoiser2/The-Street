@@ -10,9 +10,9 @@ const SCHEMA := "res://data/cards.schema.json"
 func _ready() -> void:
 	var failures := 0
 	failures += _validate_schema()
-	failures += _check_sources_in_sync()
+	failures += _check_no_duplicate_data()
 	if failures == 0:
-		print("\nOK: i dati rispettano lo schema e le copie sono allineate.")
+		print("\nOK: i dati rispettano lo schema e la fonte e' unica.")
 	else:
 		printerr("\nFALLITO: %d controlli non superati." % failures)
 	get_tree().quit(0 if failures == 0 else 1)
@@ -39,24 +39,34 @@ func _validate_schema() -> int:
 	for e in v.errors: printerr("   - %s" % e)
 	return 1
 
-# Principio 3 del brief: fonte unica. Oggi data/cards.json esiste in due copie
-# (radice del repo e godot/data/). Finche' restano due file, questo controllo
-# impedisce che divergano in silenzio. Vedi docs/domande-aperte.md.
-func _check_sources_in_sync() -> int:
-	var proj := ProjectSettings.globalize_path("res://")
-	var bad := 0
-	for name in ["cards.json", "cards.schema.json"]:
-		var root_copy := proj.path_join("../data/").path_join(name)
-		var f := FileAccess.open(root_copy, FileAccess.READ)
-		if f == null:
-			print("sincronia .... copia radice %s non leggibile, controllo saltato" % name)
+# Principio 3 del brief: fonte unica. Il progetto Godot vive nella radice del
+# repository, quindi res://data/cards.json E' il file master data/cards.json:
+# una sola copia, nessuna sincronizzazione possibile da sbagliare.
+# Questa guardia impedisce che un duplicato rientri di soppiatto.
+func _check_no_duplicate_data() -> int:
+	var strays: Array[String] = []
+	_scan("res://", strays)
+	if strays.is_empty():
+		print("fonte unica ... OK (una sola copia di cards.json, in res://data/)")
+		return 0
+	printerr("fonte unica ... trovate copie fuori da res://data/:")
+	for s in strays: printerr("   - %s" % s)
+	printerr("   La fonte unica e' data/cards.json. Rimuovi i duplicati.")
+	return 1
+
+func _scan(dir_path: String, strays: Array[String]) -> void:
+	var d := DirAccess.open(dir_path)
+	if d == null: return
+	d.list_dir_begin()
+	var entry := d.get_next()
+	while entry != "":
+		if entry.begins_with("."):
+			entry = d.get_next()
 			continue
-		var a := f.get_as_text()
-		var g := FileAccess.open("res://data/".path_join(name), FileAccess.READ)
-		var b := g.get_as_text() if g != null else ""
-		if a == b:
-			print("sincronia .... OK (%s identico fra data/ e godot/data/)" % name)
-		else:
-			printerr("sincronia .... DIVERGE: data/%s != godot/data/%s" % [name, name])
-			bad += 1
-	return bad
+		var full := dir_path.path_join(entry)
+		if d.current_is_dir():
+			_scan(full, strays)
+		elif entry in ["cards.json", "cards.schema.json"] and not full.begins_with("res://data/"):
+			strays.append(full)
+		entry = d.get_next()
+	d.list_dir_end()

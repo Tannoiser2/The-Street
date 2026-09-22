@@ -11,17 +11,31 @@ Registro delle ambiguità incontrate durante l'implementazione. Formato: regola,
 
 ## Emerse durante la Milestone 1
 
-5. **Doppia copia di `cards.json`** — il file esiste identico in `data/cards.json`
-   (dichiarata fonte unica nel brief) e in `godot/data/cards.json` (quella che
-   `CardDB` carica davvero, perché `res://` è la cartella `godot/`). Finché
-   restano due file possono divergere in silenzio, contro il principio 3.
-   Lettura provvisoria adottata: **nessuna ristrutturazione** — il test
-   `validate_data.tscn` confronta le due copie e fallisce se differiscono.
-   Da decidere: symlink, copia in fase di build, o spostare il progetto Godot
-   alla radice del repo?
+5. ~~**Doppia copia di `cards.json`**~~ — **RISOLTA**. Il designer ha confermato
+   che il master è `data/cards.json` e ha lasciato la scelta del metodo.
+   Adottata la seconda delle due opzioni pulite proposte: `project.godot` è stato
+   spostato nella radice del repository, quindi `res://data/cards.json` *è* il
+   master. La copia in `godot/data/` è stata eliminata e non esiste più nulla da
+   sincronizzare. Scartato lo script di copia pre-build: avrebbe lasciato due
+   file e un passaggio che si può dimenticare.
+   `validate_data.tscn` ora fallisce se una copia di `cards.json` ricompare
+   fuori da `res://data/`.
 
 6. **Verticalità, denominatore della metà proporzionale** — `Scoring._verticality`
    divide la seconda metà del premio contando *tutti* gli edifici della colonna
    (`in_column`), quindi anche i sotterrati e le rovine, non solo quelli in piedi.
    Cambia sensibilmente il punteggio. Lettura provvisoria: lasciato com'è,
    nessuna modifica in M1. Va confermato prima dell'allineamento all'oracolo (M3).
+
+7. **Conteggio delle carte: il brief dice 181, il JSON ne ha 165** — scarto di 16.
+   Somma effettiva: 60 edifici + 26 personaggi + 25 potenziamenti + 24 eventi
+   + 14 monumenti + 16 eredita = 165 (169 contando i 4 terreni).
+   I dati pero' sono internamente coerenti: 5 personaggi per era x 5 ere + 1
+   Dinastia = 26, e i 25 reclutabili coincidono con le "25 abilita reali" citate
+   in `reference/README.md`. Anche lo schema fissa min=max su tutte le collezioni
+   e i conteggi tornano.
+   Lettura provvisoria: il numero 181 nel brief e' verosimilmente vecchio, i dati
+   sono completi. Nessuna modifica fatta.
+   Da notare: `characters` e' l'unica collezione **senza** `minItems`/`maxItems`
+   nello schema, quindi e' anche l'unica in cui mancherebbero carte senza che la
+   validazione se ne accorga. Se 26 e' il numero giusto, conviene fissarlo.

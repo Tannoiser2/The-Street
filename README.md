@@ -4,14 +4,23 @@ Pacchetto di partenza per l'implementazione digitale del gioco da tavolo, rulese
 
 **Inizia da `docs/BRIEF_CLAUDE_CODE.md`.**
 
+Il progetto Godot vive nella **radice del repository**: `res://` coincide con il
+repo, quindi `res://data/cards.json` *è* il file master `data/cards.json`. Una
+sola copia, nessuno script di sincronizzazione, nessuna possibilità di divergenza.
+
 - `data/` — database delle carte (fonte unica) e schema di validazione
-- `godot/` — progetto Godot con lo scheletro del nucleo di regole
+- `scripts/` — nucleo di regole, strato comandi, bot e strumenti
+- `scenes/` — scene di avvio (runner headless, test)
 - `reference/` — regolamento e simulatore Python usato come oracolo
 - `docs/` — brief di sviluppo e registro delle domande aperte
+- `materiali/` — PDF di stampa, **solo grafica**: i dati non si leggono mai da qui
+
+`reference/` e `materiali/` contengono un file `.gdignore`: Godot le salta
+completamente, così non finiscono né nell'importazione né in un export.
 
 ## Comandi
 
-Richiede Godot 4.7 headless. Dalla cartella `godot/`:
+Richiede Godot 4.7 headless. Dalla radice del repository:
 
 ```bash
 # Importa il progetto: NECESSARIO dopo aver aggiunto o rinominato una classe
