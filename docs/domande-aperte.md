@@ -1052,3 +1052,40 @@ dato è stato importato da lì. Ma due confronti fra ciò che è stampato e
     d'angolo e si accetta che le file dietro si vedano meno; ora comunque la
     telecamera la muovi tu.
 
+76. **Chiuse dal PDF del 22 settembre, e una che resta aperta.**
+
+    Il designer ha ricaricato tutti e due i PDF. Confrontati posizione per
+    posizione con le copie precedenti, ecco cosa e' cambiato davvero.
+
+    **Chiusi.** I cinque potenziamenti mancanti (punto 71) ci sono: 25
+    posizioni, 25 carte distinte, nell'ordine esatto dei dati. E le tre
+    sagome sbagliate sono rifatte: il **Ponte** raffigura un ponte e non piu'
+    un foro romano, **Ospedale dei pellegrini** e **Mercato** hanno un
+    disegno proprio. Sessanta disegni distinti per sessanta edifici, e le
+    larghezze sul cartone combaciano una per una con `width`.
+
+    **Resta aperto il punto 69: i tre eventi gravi dell'era 2.** Le posizioni
+    10, 11 e 12 portano ancora una seconda stampa di Grande incendio, Scisma
+    e Anni della fame - stessa carta, stesso testo, illustrazione rigenerata
+    - invece di **Eruzione, Persecuzioni e Guerra civile**. Ricontrollato a
+    vista sul PDF nuovo, perche' li' l'impronta non aiuta: sono ventiquattro
+    immagini tutte diverse fra loro, e solo leggendo i titoli si vede che tre
+    carte sono stampate due volte.
+
+    L'Eruzione e' la carta di cui il motore implementa il potenziamento
+    omaggio con tanto di sospensione della fine dell'era: esiste nelle regole
+    e nei dati, ma non ha ancora una carta da mettere in tavola.
+
+    **Restano aperti anche** il punto 73 (manca una tessera FIUME: le tessere
+    sono identiche al byte a prima) e il punto 74 (le "caselle disegnate"
+    sulle tessere: nel PDF nuovo non ci sono, le tessere non sono state
+    toccate).
+
+77. **Il cielo era una parete, ora e' un fondale.** Stava 90 mm dietro il
+    bordo delle tessere e sbordava di due tessere per lato: si vedeva che era
+    un'altra cosa. Ora e' largo esattamente quanto la fila di tessere e
+    attaccato al loro bordo alto, come ha chiesto il designer.
+
+    Il PNG del cielo pero' **non e' arrivato**: nel repository non c'e'
+    nessuna immagine. Finche' non c'e', il pannello resta a tinta unita.
+

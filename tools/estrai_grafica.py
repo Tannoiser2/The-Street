@@ -465,6 +465,20 @@ def main(dest):
     if mancanti:
         print("NEI PDF NON CI SONO -> " + "; ".join(mancanti))
 
+    # Lo sfondo del cielo sta in materiali/ come gli altri originali, ma
+    # quella cartella ha un .gdignore: Godot non ci guarda dentro. Va quindi
+    # copiato fra gli asset, dove il resto della grafica gia' vive.
+    sfondo = os.path.join(ROOT, "materiali", "Sfondo.png")
+    if os.path.exists(sfondo):
+        os.makedirs(dest, exist_ok=True)
+        with open(sfondo, "rb") as a, open(os.path.join(dest, "sfondo.png"), "wb") as b:
+            b.write(a.read())
+        pix = pymupdf.Pixmap(sfondo)
+        print(f"sfondo del cielo: {pix.width}x{pix.height} px "
+              f"(rapporto {pix.width / pix.height:.3f})")
+    else:
+        print("sfondo del cielo: manca materiali/Sfondo.png")
+
     sag = estrai_sagome(doc, dest)
     with open(os.path.join(dest, "indice.json"), "w", encoding="utf-8") as f:
         json.dump({"carte_edifici": indice,

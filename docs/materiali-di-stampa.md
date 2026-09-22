@@ -36,7 +36,19 @@ nota. Le posizioni e gli id stanno in `data/carte_pdf.json` e
 
 ## Cosa manca
 
-### Cinque potenziamenti non ci sono, uno per era
+### ~~Cinque potenziamenti non ci sono~~ — risolto il 22 settembre
+
+`Potenziamenti.pdf` è stato rifatto: **25 posizioni, 25 carte distinte**, nell'ordine
+esatto di `data/cards.json`. Le cinque ristampe sono sparite e le cinque carte che
+mancavano — *Fondamenta in pietra, Iscrizione, Reliquia, Cannoniere, Memoriale* — ci
+sono. Il testo coincide con i dati carta per carta; due voci sono riscritte meglio e
+dicono la stessa cosa (*Reliquia*: «Arte +2 PV su edificio Religione, altrimenti +1»;
+*Cannoniere*: «Struttura +1 res., +2 su edificio Militare»).
+
+Quello che segue è il difetto com'era, tenuto perché è lo stesso schema che gli eventi
+hanno ancora.
+
+#### Com'era: cinque potenziamenti mancanti, uno per era
 
 `Potenziamenti.pdf` ha 25 posizioni per 25 carte, ma non sono 25 carte diverse:
 in ogni era la **prima carta è stampata due volte** e un potenziamento manca.
@@ -85,10 +97,18 @@ Stampate: pianura 4, collina 2, **fiume 2**, bosco 3. Manca **un fiume**, ed è
 esattamente la posizione che il duplicato spreca — lo stesso difetto dei
 potenziamenti e degli eventi. Vedi `docs/domande-aperte.md` punto 73.
 
-### Due sagome portano il disegno di un'altra
+### ~~Due sagome portano il disegno di un'altra~~ — risolto il 22 settembre
 
-Vedi `docs/mappatura-sagome.md`: mancano i disegni di **Ospedale dei
-pellegrini** e **Mercato**, e la sagoma del **Ponte** raffigura un foro romano.
+Erano tre difetti e sono stati corretti tutti: **Ospedale dei pellegrini** e
+**Mercato** hanno ora un disegno proprio invece di ripetere quello di un altro, e la
+sagoma del **Ponte** raffigura un ponte e non più un foro romano.
+
+Sono **60 disegni distinti per 60 edifici**, e le larghezze sul cartone — 41 da 1
+slot, 16 da 2, 3 da 3 — combaciano una per una con `width` in `data/cards.json`.
+
+Il PDF nuovo ha cambiato **sei posizioni e solo quelle**: 23, 24, 33, 34, 35, 36.
+Tutto il resto di `Carte.pdf` è identico al byte, confrontato posizione per posizione
+con la copia precedente.
 
 ## Due cose che sembrano mancanze e non lo sono
 
