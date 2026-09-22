@@ -116,7 +116,12 @@ static func bury_characters(gs: GameState) -> void:
 # sopravvissuto"), e la sepoltura precede l'azzeramento dei personaggi.
 static func end_era(gs: GameState) -> void:
 	resolve_event(gs)
-	census(gs)
+	# Il censimento delle ere 1-4 si paga qui. Quello dell'era 5 NON si paga:
+	# l'era Moderna non ha evento e il suo censimento E' il "Censimento finale",
+	# voce 1 del conteggio di fine partita (Scoring._census_final). Pagarlo
+	# anche qui lo conterebbe due volte.
+	if gs.era < 5:
+		census(gs)
 	bury_characters(gs)
 	disperse(gs)
 	for b in gs.grid.buildings: b.protection = 0
