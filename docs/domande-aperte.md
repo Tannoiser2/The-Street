@@ -214,12 +214,18 @@ dato è stato importato da lì. Ma due confronti fra ciò che è stampato e
     funerario** stampano «1 slot», `cards.json` dice `width: 2`. Nelle ere 2–5
     non c'è una sola divergenza.
 
-    Non è un problema di grafica: se queste carte andassero in stampa,
-    contraddirebbero le regole che il motore implementa. Da decidere: si
-    ristampa il PDF dai dati v1.5, o i dati tornano a quei valori? Le due
-    larghezze dell'era 1 vanno decise a parte, perché non seguono lo stesso
-    schema dello Scavo — potrebbero essere un cambio voluto della v1.5, o un
-    refuso in un file o nell'altro.
+    **RISOLTA dal designer:** *"Usa i dati (infatti le sagome sono già a due
+    slot) l'errore è sulle carte quindi per il momento usa il PDF così com'è e
+    lo correggerò appena posso"*.
+    Quindi: `data/cards.json` resta la fonte, **nessun dato modificato**, e il
+    PDF si usa com'è per la sola grafica. Le sagome fustellate confermano la
+    v1.5 in modo indipendente: Villaggio palizzato e Tumulo funerario sono
+    sagome da due caselle, come dice il campo `width`.
+
+    **Conseguenza da non dimenticare in M5:** le facce delle carte estratte dal
+    PDF portano 44 valori di Scavo obsoleti. Non vanno mostrate come faccia
+    della carta in gioco — quella va disegnata dai dati. Servono come
+    riferimento grafico, non come contenuto.
 
 21. **Nessun testo estraibile, ma l'ordine È derivabile.** Tutte e 54 le pagine
     hanno zero testo: nomi ed effetti sono curve o raster. Un'illustrazione non
@@ -247,3 +253,19 @@ dato è stato importato da lì. Ma due confronti fra ciò che è stampato e
     mercato, Collina delle cave, Fiume antico, Bosco sacro…) e un riquadro
     «Prosperità Urbana» in fondo. `data/cards.json` modella 4 terreni generici.
     Se le 9 carte portano effetti distinti, oggi non sono nei dati. Da chiarire.
+
+23. **Corrispondenza sagoma → carta: non derivabile.** Le 60 sagome (più le 60
+    grigie del lato inattivo) sono l'arte pulita giusta per il tabellone, senza
+    testo né numeri. Ma il loro ordine di impaginazione non segue né le ere né
+    l'ordine delle carte: sono impaccate per forma, per risparmiare cartoncino.
+    Il Teatro dell'era 2 sta in dodicesima posizione, in mezzo all'era 1.
+
+    Ho provato ad accoppiarle automaticamente alle carte per somiglianza
+    d'immagine, ed è fallito: 10 biiezioni su 60, margine sul secondo candidato
+    sotto lo 0,02. Le sagome sono fustellate con sfondo vuoto e proporzioni
+    molto diverse dalla banda d'arte della carta.
+
+    Sono quindi estratte con numerazione stabile in ordine di lettura, più un
+    provino a contatto numerato. Serve la corrispondenza numero → id: o la dai
+    tu, o la ricavo a vista e la fai validare. È lavoro da farsi una volta sola,
+    ma un errore qui metterebbe l'edificio sbagliato sul tabellone in silenzio.

@@ -43,6 +43,21 @@ godot --headless res://scenes/test_effects.tscn
 godot --headless res://scenes/headless_runner.tscn -- --games 100 --players 3 --seed 1
 ```
 
+### Grafica (preparazione M5)
+
+Estrae da `materiali/Carte.pdf` le facce delle carte e le sagome nei due stati.
+I file finiscono in `assets/` e **non sono versionati**: si rigenerano.
+
+```bash
+pip install pymupdf
+python3 tools/estrai_grafica.py
+```
+
+Le carte estratte portano numeri obsoleti (il PDF è a una calibrazione
+precedente alla v1.5): servono come riferimento grafico, non come contenuto.
+La faccia della carta in gioco va disegnata dai dati. Vedi
+`docs/domande-aperte.md` punti 20 e 23.
+
 ### Confronto con l'oracolo (M3)
 
 Esporta gli stati finali di partite deterministiche e vi riapplica le formule di
