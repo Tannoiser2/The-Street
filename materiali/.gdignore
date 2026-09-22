@@ -1,0 +1,3 @@
+PDF dei materiali di stampa: servono solo alla grafica.
+I dati di gioco non si leggono mai da qui (brief, principio 3): la fonte e' data/cards.json.
+Godot salta questa cartella.

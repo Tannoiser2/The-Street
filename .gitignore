@@ -1,0 +1,16 @@
+# Cache di import di Godot: rigenerata da `godot --headless --import`.
+# I file *.uid invece vanno versionati (Godot 4.4+).
+.godot/
+
+# Sistema
+.DS_Store
+
+# Grafica estratta dai PDF in materiali/: file derivati, non versionati.
+# Si rigenerano con `python3 tools/estrai_grafica.py` (serve pymupdf).
+assets/
+
+# Cache di Python dei tool.
+__pycache__/
+
+# Export web: artefatto di build, si rigenera con tools/esporta_web.sh
+build/

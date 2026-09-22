@@ -1,0 +1,22 @@
+{
+  "_nota": "Le tessere colonna stampate in materiali/Carte.pdf (pagine 47, 49, 51, 53), lette una per una. `n` e' la posizione in ordine di lettura, la stessa che usa tools/estrai_grafica.py. Ogni tessera e' una VARIANTE NOMINATA di uno dei quattro terreni di data/cards.json: la produzione stampata coincide con quella del terreno (pianura/collina/bosco 2 pietra, fiume 1 pietra + 1 oro), la regola stampata no - vedi _regole_non_implementate.",
+  "tessere": [
+    {"n": 1,  "id": "te_pianura_dei_cantieri", "terreno": "pianura", "nome": "Pianura dei Cantieri",  "regola": "Gli edifici da 2-3 caselle costruiti qui costano 1 pietra in meno."},
+    {"n": 2,  "id": "te_pianura_del_mercato",  "terreno": "pianura", "nome": "Pianura del Mercato",   "regola": "Quando la attivi puoi convertire 2 pietra in 1 oro, una volta per attivazione."},
+    {"n": 3,  "id": "te_pianura_dei_cereali",  "terreno": "pianura", "nome": "Pianura dei Cereali",   "regola": "Se all'inizio dell'attivazione non possiedi edifici intatti qui, +1 pietra."},
+    {"n": 4,  "id": "te_pianura_delle_strade", "terreno": "pianura", "nome": "Pianura delle Strade",  "regola": "I requisiti di terreno possono considerare anche una colonna adiacente."},
+    {"n": 5,  "id": "te_collina_del_castello", "terreno": "collina", "nome": "Collina del Castello",  "regola": "Il primo edificio che ciascun giocatore costruisce qui in ogni era ottiene +1 resistenza."},
+    {"n": 6,  "id": "te_collina_delle_cave",   "terreno": "collina", "nome": "Collina delle Cave",    "regola": "Costruire sopra qui costa 1 pietra in meno."},
+    {"n": 7,  "id": null},
+    {"n": 8,  "id": "te_fiume_porto",          "terreno": "fiume",   "nome": "Fiume Porto",           "regola": "Quando costruisci qui pagando almeno 1 oro, -1 pietra sul costo."},
+    {"n": 9,  "id": "te_fiume_guado",          "terreno": "fiume",   "nome": "Fiume Guado",           "regola": "Questa colonna e le due adiacenti contano come fiume, ma solo per i requisiti di costruzione."},
+    {"n": 10, "id": null},
+    {"n": 11, "id": null},
+    {"n": 12, "id": "te_bosco_sacro",          "terreno": "bosco",   "nome": "Bosco Sacro",           "regola": "Gli edifici Religione e Cultura qui hanno +1 resistenza."},
+    {"n": 13, "id": "te_bosco_di_caccia",      "terreno": "bosco",   "nome": "Bosco di Caccia",       "regola": "Se all'inizio dell'attivazione non possiedi edifici intatti qui, +1 pietra."},
+    {"n": 14, "id": "te_bosco_dalto_fusto",    "terreno": "bosco",   "nome": "Bosco d'Alto Fusto",    "regola": "Restaurare un tuo edificio qui costa 1 pietra in meno."}
+  ],
+  "_posizioni_senza_tessera": "7 e' la copia byte per byte della 6 (Collina delle Cave); 10 e 11 sono le due copie del segnalino pietra/oro, che non e' una tessera colonna.",
+  "_regole_non_implementate": "Il motore ha QUATTRO terreni con una regola ciascuno (data/cards.json, `terrains`); il cartone ha UNDICI tessere con undici regole diverse. Solo 'Pianura dei Cantieri' coincide alla lettera con la regola del suo terreno. Le altre dieci sono regole che il modello non ha. Vedi docs/domande-aperte.md punto 72: finche' il designer non decide, le tessere si usano come GRAFICA del terreno e le loro regole non vengono applicate.",
+  "_quante_ne_servono": "Il mix per 4 giocatori (data/cards.json, terrain_mix_by_players) chiede pianura 3, fiume 3, collina 2, bosco 1. Stampate: pianura 4, collina 2, fiume 2, bosco 3. Il FIUME e' in difetto di una, e la posizione sprecata dal duplicato e' esattamente una. Vedi domande-aperte punto 72."
+}
