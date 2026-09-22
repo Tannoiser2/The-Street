@@ -54,7 +54,11 @@ const LEVEL_H := 5.0
 # largo esattamente quanto loro: e' il fondale della strada, non una parete
 # della stanza. Prima stava 90 mm piu' indietro e sbordava di due tessere per
 # lato, e si vedeva che era un'altra cosa.
-const CIELO_H := 620.0
+# L'altezza non e' scelta: viene dal rapporto dell'immagine di sfondo, cosi'
+# il panorama non si deforma. Il valore qui e' quello di materiali/Sfondo.png
+# (1672x941); la vista passa il rapporto vero della texture che ha caricato.
+const CIELO_RAPPORTO := 1672.0 / 941.0
+const SFONDO_PATH := "res://assets/sfondo.png"
 
 static func col_x(col: int) -> float:
 	return col * TESSERA_W
@@ -172,6 +176,7 @@ const CARTELLE_CARTE := {
 	"potenziamento": ["potenziamenti", "png"],
 	"monumento": ["monumenti", "png"],
 	"eredita": ["eredita", "png"],
+	"dinastia": ["dorsi", "png"],
 }
 
 static func carta_path(tipo: String, id: String) -> String:
@@ -179,9 +184,10 @@ static func carta_path(tipo: String, id: String) -> String:
 	var d: Array = CARTELLE_CARTE[tipo]
 	return "res://assets/carte/%s/%s.%s" % [d[0], id, d[1]]
 
-static func sky_rect(gs: GameState) -> AABB:
+static func sky_rect(gs: GameState, rapporto := CIELO_RAPPORTO) -> AABB:
+	var largo := board_w(gs)
 	return AABB(Vector3(0.0, 0.0, 0.0),
-		Vector3(board_w(gs), CIELO_H, 0.0))
+		Vector3(largo, largo / maxf(rapporto, 0.05), 0.0))
 
 # L'inquadratura e' DERIVATA, non aggiustata a occhio: inclinazione fissa e
 # distanza calcolata perche' la strada riempia il fotogramma. Cosi' vale per
@@ -366,6 +372,7 @@ const MISURE_CARTE := {
 	"potenziamento": Vector2(28.0, 68.0),
 	"monumento": Vector2(125.6, 25.2),
 	"eredita": Vector2(125.7, 45.2),
+	"dinastia": Vector2(95.0, 95.0),
 }
 
 static func misura_carta(tipo: String) -> Vector2:
@@ -416,9 +423,38 @@ static func side_cards(gs: GameState) -> Array[Dictionary]:
 	var box_dx := _colonna_di_carte(board_w(gs) + BORDO, mis_dx)
 	for i in destra.size():
 		out.append({"kind": str(destra[i][0]), "id": str(destra[i][1]), "aabb": box_dx[i]})
+
+	# Anche le carte comprate sono carte sul tavolo: si guardano e si
+	# indicano come le altre.
+	out.append_array(player_cards(gs))
 	return out
 
-# Le plance dei giocatori, davanti alla strada: e' il posto del giocatore.
+# ---- il posto del giocatore -----------------------------------------
+# Non c'e' piu' un rettangolo colorato che finge di essere un tabellone: il
+# giocatore possiede delle CARTE, e quelle si vedono. Del suo colore resta una
+# bacchetta sottile, e sotto ci si impilano le carte comprate.
+const BACCHETTA_D := 7.0
+const CARTE_GIOCATORE_GAP := 5.0
+
+# Le carte che un giocatore ha davanti. I potenziamenti no: quelli stanno
+# infilati sotto l'edificio, ed e' li' che il regolamento li vuole. L'Eredita'
+# nemmeno: e' segreta fino alla fine.
+static func carte_giocatore(gs: GameState, player: int) -> Array[Dictionary]:
+	var out: Array[Dictionary] = []
+	var p: PlayerState = gs.players[player]
+	if p.has_dynasty: out.append({"kind": "dinastia", "id": "dinastia_1"})
+	for m in p.monuments_claimed: out.append({"kind": "monumento", "id": str(m)})
+	var visti := {}
+	for c in p.specialized_characters:
+		visti[str(c)] = true
+		out.append({"kind": "personaggio", "id": str(c)})
+	for c in p.final_characters:
+		if visti.has(str(c)): continue
+		visti[str(c)] = true
+		out.append({"kind": "personaggio", "id": str(c)})
+	return out
+
+# La bacchetta del colore: una per giocatore, davanti alla strada.
 static func player_boards(gs: GameState) -> Array[Dictionary]:
 	var out: Array[Dictionary] = []
 	var largo := board_w(gs) / float(gs.n_players)
@@ -426,7 +462,33 @@ static func player_boards(gs: GameState) -> Array[Dictionary]:
 	for i in gs.n_players:
 		out.append({"player": i, "aabb": AABB(
 			Vector3(i * largo + 4.0, 0.0, z),
-			Vector3(largo - 8.0, TESSERA_Y, PLANCIA_D))})
+			Vector3(largo - 8.0, TESSERA_Y, BACCHETTA_D))})
+	return out
+
+# Le carte comprate, stese sotto la bacchetta. Il passo si stringe da solo
+# quando le carte sono tante: restano dentro il posto del giocatore e si
+# sovrappongono come un mazzo aperto a ventaglio, invece di sbordare addosso
+# al vicino.
+static func player_cards(gs: GameState) -> Array[Dictionary]:
+	var out: Array[Dictionary] = []
+	var largo := board_w(gs) / float(gs.n_players)
+	var z := board_d() + BORDO + BACCHETTA_D + CARTE_GIOCATORE_GAP
+	for i in gs.n_players:
+		var carte := carte_giocatore(gs, i)
+		if carte.is_empty(): continue
+		var w_max := 0.0
+		for c in carte: w_max = maxf(w_max, misura_carta(str(c["kind"])).x)
+		var spazio := largo - 8.0
+		var passo := w_max + CARTE_GIOCATORE_GAP
+		if carte.size() > 1:
+			passo = minf(passo, maxf(12.0, (spazio - w_max) / float(carte.size() - 1)))
+		var x0 := i * largo + 4.0
+		for j in carte.size():
+			var m := misura_carta(str(carte[j]["kind"]))
+			out.append({"kind": str(carte[j]["kind"]), "id": str(carte[j]["id"]),
+				"player": i, "ordine": j,
+				"aabb": AABB(Vector3(x0 + j * passo, 0.0, z),
+					Vector3(m.x, TESSERA_Y, m.y))})
 	return out
 
 # Tutto il tavolo: strada, file e plance. E' questo che l'inquadratura deve

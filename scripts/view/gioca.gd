@@ -2,17 +2,17 @@
 # La plancia giocabile: tu sei il giocatore 0, gli altri li gioca il bot.
 # Ogni modifica passa dal GameController, mai da qui: questo script legge lo
 # stato, mostra le opzioni e chiama i comandi.
+#
+# COME SI GIOCA, ed e' anche il motivo per cui l'elenco a menu non c'e' piu':
+# le carte stanno sul tavolo, quindi si scelgono sul tavolo. Clicchi una carta
+# del mercato e si accendono tutti i posti dove quell'edificio puo' andare;
+# clicchi un potenziamento o un personaggio e si accendono gli edifici che
+# possono riceverlo; clicchi il posto acceso e l'azione e' fatta.
+# Niente scritte che galleggiano sopra le carte: il nome e i numeri escono in
+# un riquadro che segue il mouse, e solo per la carta puntata.
 extends Node3D
 
 const UMANO := 0
-
-var ctl: GameController
-var vista: Node3D
-var _menu: Control
-var _voci: Array = []                # AvailableActions.Voce mostrate ora
-var _righe: Array[Rect2] = []        # i loro riquadri, per il clic
-var _colonna_sotto_mouse := -1
-var _messaggio := ""
 
 # Il mouse fa tre cose e non devono pestarsi i piedi: il sinistro trascinato
 # gira il tabellone, il sinistro premuto e rilasciato fermo sceglie, il destro
@@ -20,6 +20,23 @@ var _messaggio := ""
 # soglia in pixel: sotto quella il gesto resta un clic, cosi' una mano che
 # trema non fa girare il tavolo e non fa perdere la selezione.
 const SOGLIA_TRASCINAMENTO := 5.0
+
+var ctl: GameController
+var vista: Node3D
+var _hud: Control
+var _colonna_sotto_mouse := -1
+var _messaggio := ""
+
+# La carta scelta, {} se nessuna: {"kind": ..., "id": ...}. Da lei discendono
+# i bersagli accesi.
+var _scelta: Dictionary = {}
+var _bersagli: Array = []            # AvailableActions.Voce, una per bersaglio
+var _bottoni: Array = []             # {"rect", "voce"} per le azioni senza carta
+
+# Il riquadro che segue il mouse: sostituisce tutte le scritte che prima
+# galleggiavano sul tavolo.
+var _nota: PackedStringArray = PackedStringArray()
+var _nota_dove := Vector2.ZERO
 
 var _orbita: CameraOrbita = null
 var _premuto := MOUSE_BUTTON_NONE
@@ -34,11 +51,11 @@ func _ready() -> void:
 	vista.scale = Vector3.ONE * BoardLayout3D.U
 	var strato := CanvasLayer.new()
 	add_child(strato)
-	_menu = Control.new()
-	_menu.set_anchors_preset(Control.PRESET_FULL_RECT)
-	_menu.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_menu.draw.connect(_disegna_menu)
-	strato.add_child(_menu)
+	_hud = Control.new()
+	_hud.set_anchors_preset(Control.PRESET_FULL_RECT)
+	_hud.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_hud.draw.connect(_disegna_hud)
+	strato.add_child(_hud)
 	_turni_dei_bot()
 	_aggiorna()
 
@@ -49,9 +66,24 @@ func _aggiorna() -> void:
 	if _orbita == null or _orbita.e_iniziale():
 		_orbita = CameraOrbita.da_stato(ctl.gs)
 		vista.orbita = _orbita
-	vista.mostra(ctl.gs, _colonna_sotto_mouse)
+	vista.mostra(ctl.gs, _colonna_sotto_mouse, _acceso())
 	vista.scale = Vector3.ONE * BoardLayout3D.U
-	_menu.queue_redraw()
+	_hud.queue_redraw()
+
+# Cosa la vista deve accendere: la carta scelta, i posti dove puo' andare, gli
+# edifici che possono riceverla.
+func _acceso() -> Dictionary:
+	if _scelta.is_empty(): return {}
+	var slot: Array = []
+	var uid: Array = []
+	for v in _bersagli:
+		if v.parametri.has("col_from"):
+			var d: Dictionary = CardDB.buildings[str(v.parametri["card_id"])]
+			slot.append({"col_from": int(v.parametri["col_from"]),
+				"width": int(d["width"]), "above": bool(v.parametri.get("above", false))})
+		elif v.parametri.has("uid"):
+			uid.append(int(v.parametri["uid"]))
+	return {"carta": _scelta, "slot": slot, "uid": uid}
 
 # Il bot gioca finche' non tocca all'umano.
 func _turni_dei_bot() -> void:
@@ -61,19 +93,21 @@ func _turni_dei_bot() -> void:
 		RandomBot.play_turn(ctl)
 		giri += 1
 
-# ---- input ----------------------------------------------------------
+# ---- input -----------------------------------------------------------
 func _unhandled_input(evento: InputEvent) -> void:
 	if evento is InputEventMouseButton:
-		_bottone(evento)
+		_pulsante(evento)
 	elif evento is InputEventMouseMotion:
 		_movimento(evento)
-	elif evento is InputEventKey and evento.pressed and not evento.echo \
-			and evento.keycode in [KEY_HOME, KEY_R]:
-		_orbita.reimposta()
-		_messaggio = "Inquadratura ripristinata."
-		_aggiorna()
+	elif evento is InputEventKey and evento.pressed and not evento.echo:
+		if evento.keycode in [KEY_HOME, KEY_R]:
+			_orbita.reimposta()
+			_messaggio = "Inquadratura ripristinata."
+			_aggiorna()
+		elif evento.keycode == KEY_ESCAPE:
+			_deseleziona()
 
-func _bottone(e: InputEventMouseButton) -> void:
+func _pulsante(e: InputEventMouseButton) -> void:
 	match e.button_index:
 		MOUSE_BUTTON_WHEEL_UP:
 			if e.pressed: _zoom(1.0)
@@ -89,8 +123,7 @@ func _bottone(e: InputEventMouseButton) -> void:
 					_clic(e.position)
 				elif _trascinato:
 					# Durante la trascinata la scena non si ridisegna: a gesto
-					# finito si riallinea l'evidenziazione della colonna, che
-					# ora sta sotto un altro pixel.
+					# finito si riallinea quel che sta sotto il mouse.
 					_colonna_sotto_mouse = _colonna_puntata(e.position)
 					_aggiorna()
 				_premuto = MOUSE_BUTTON_NONE
@@ -109,25 +142,20 @@ func _movimento(e: InputEventMouseMotion) -> void:
 		# trascinamento sarebbe uno spreco e la farebbe scattare.
 		vista.muovi_telecamera()
 		return
-	var c := _colonna_puntata(e.position)
-	if c != _colonna_sotto_mouse:
-		_colonna_sotto_mouse = c
+	_nota_dove = e.position
+	_nota = _descrivi_sotto(e.position)
+	var col := _colonna_puntata(e.position)
+	if col != _colonna_sotto_mouse:
+		_colonna_sotto_mouse = col
 		_aggiorna()
+	else:
+		_hud.queue_redraw()      # il riquadro segue comunque il mouse
 
 func _zoom(passi: float) -> void:
 	_orbita.zoom(passi)
 	vista.muovi_telecamera()
 
-# Dal pixel allo slot: si costruisce il raggio della telecamera e si chiede a
-# BoardLayout3D dove cade. La stessa geometria che disegna.
-func _colonna_puntata(pixel: Vector2) -> int:
-	var cam := get_viewport().get_camera_3d()
-	if cam == null: return -1
-	var o := cam.project_ray_origin(pixel) / BoardLayout3D.U
-	var d := cam.project_ray_normal(pixel)
-	var slot := BoardLayout3D.slot_at_ray(ctl.gs, o, d)
-	return int(slot.get("col", -1)) if not slot.is_empty() else -1
-
+# ---- dal pixel al tavolo ---------------------------------------------
 func _origine(pixel: Vector2) -> Vector3:
 	var cam := get_viewport().get_camera_3d()
 	return Vector3.ZERO if cam == null else cam.project_ray_origin(pixel) / BoardLayout3D.U
@@ -136,75 +164,219 @@ func _direzione(pixel: Vector2) -> Vector3:
 	var cam := get_viewport().get_camera_3d()
 	return Vector3.DOWN if cam == null else cam.project_ray_normal(pixel)
 
+func _colonna_puntata(pixel: Vector2) -> int:
+	if get_viewport().get_camera_3d() == null: return -1
+	var slot := BoardLayout3D.slot_at_ray(ctl.gs, _origine(pixel), _direzione(pixel))
+	return int(slot.get("col", -1)) if not slot.is_empty() else -1
+
 func _carta_puntata(pixel: Vector2) -> Dictionary:
-	var cam := get_viewport().get_camera_3d()
-	if cam == null: return {}
+	if get_viewport().get_camera_3d() == null: return {}
 	return BoardLayout3D.card_at_ray(ctl.gs, _origine(pixel), _direzione(pixel))
 
-func _descrivi(c: Dictionary) -> String:
+func _edificio_puntato(pixel: Vector2) -> Building:
+	if get_viewport().get_camera_3d() == null: return null
+	return _edificio(BoardLayout3D.at_ray_building(ctl.gs, _origine(pixel), _direzione(pixel)))
+
+func _edificio(uid: int) -> Building:
+	if uid < 0: return null
+	for b in ctl.gs.grid.buildings:
+		if b.uid == uid: return b
+	return null
+
+# ---- il riquadro che segue il mouse ----------------------------------
+# Quello che prima stava scritto sul tavolo, e lo copriva. I numeri vengono
+# dai DATI e non dal disegno stampato: su 44 edifici su 60 lo Scavo del PDF
+# non e' quello della v1.5.
+func _descrivi_sotto(pixel: Vector2) -> PackedStringArray:
+	var out := PackedStringArray()
+	var b := _edificio_puntato(pixel)
+	if b != null:
+		var stato := "intatto"
+		match b.state:
+			Enums.BuildingState.RUDERE: stato = "rudere"
+			Enums.BuildingState.ROVINA: stato = "rovina"
+		if b.is_buried: stato += ", sepolto"
+		out.append(str(b.data["name"]))
+		out.append("G%d · %s · res %d · vetusta %d" % [b.owner, stato,
+			b.effective_resistance(), b.vetusta])
+		if not b.upgrades.is_empty():
+			var nomi := PackedStringArray()
+			for u in b.upgrades: nomi.append(str(CardDB.upgrades[u]["name"]))
+			out.append("potenziamenti: " + ", ".join(nomi))
+		return out
+	var c := _carta_puntata(pixel)
+	if c.is_empty(): return out
 	var id := str(c["id"])
 	match str(c["kind"]):
 		"mercato":
 			var d: Dictionary = CardDB.buildings[id]
 			var co: Dictionary = d["cost"]
-			return "%s — %dp %do · res %d · scavo %d · %s" % [d["name"],
+			out.append(str(d["name"]))
+			out.append("%dp %do · res %d · scavo %d · %d slot" % [
 				int(co.get("pietra", 0)), int(co.get("oro", 0)),
-				int(d["resistance"]), int(d["scavo"]), ", ".join(d["classes"])]
+				int(d["resistance"]), int(d["scavo"]), int(d["width"])])
+			out.append(", ".join(d["classes"]))
 		"personaggio":
 			var pe: Dictionary = CardDB.characters[id]
-			return "%s (%s) — %s" % [pe["name"], pe["class"], pe.get("effect_text", "")]
+			out.append(str(pe["name"]))
+			out.append("personaggio · %s" % pe["class"])
+			if str(pe.get("effect_text", "")) != "": out.append(str(pe["effect_text"]))
 		"potenziamento":
 			var po: Dictionary = CardDB.upgrades[id]
-			return "%s (%s) — %s" % [po["name"], po["family"], po.get("effect_text", "")]
+			out.append(str(po["name"]))
+			out.append("potenziamento · %s" % po["family"])
+			if str(po.get("effect_text", "")) != "": out.append(str(po["effect_text"]))
 		"monumento":
 			if CardDB.monuments.has(id):
 				var mo: Dictionary = CardDB.monuments[id]
-				return "%s — %s" % [mo["name"], mo.get("effect_text", "")]
-	return id
+				out.append(str(mo["name"]))
+				out.append(str(mo.get("effect_text", "")))
+		"dinastia":
+			out.append("Dinastia")
+	return out
 
+# ---- il clic ---------------------------------------------------------
 func _clic(pixel: Vector2) -> void:
-	if ctl.gs.phase == Enums.Phase.FINE_PARTITA: return
+	var gs := ctl.gs
+	if gs.phase == Enums.Phase.FINE_PARTITA: return
 	# Una scelta in sospeso viene prima di tutto: finche' non e' risolta il
 	# gioco non prosegue, quindi il clic serve solo a quella.
-	if not ctl.gs.pending_choice.is_empty():
-		if int(ctl.gs.pending_choice["player"]) != UMANO: return
-		var t := BoardLayout3D.at_ray_building(ctl.gs, _origine(pixel), _direzione(pixel))
-		if t < 0: return
-		if ctl.choose(t):
+	if not gs.pending_choice.is_empty():
+		if int(gs.pending_choice["player"]) != UMANO: return
+		var scelto := _edificio_puntato(pixel)
+		if scelto != null and ctl.choose(scelto.uid):
 			_messaggio = "Scelto."
 			_turni_dei_bot()
 			_aggiorna()
 		return
-	if ctl.gs.current_index != UMANO: return
-	# Prima il menu: se il clic cade su una voce, quella vince sul tabellone.
-	for i in _righe.size():
-		if _righe[i].has_point(pixel):
-			_esegui(_voci[i])
+	if gs.current_index != UMANO: return
+
+	# I pulsanti delle azioni che non hanno una carta sul tavolo.
+	for b in _bottoni:
+		if (b["rect"] as Rect2).has_point(pixel):
+			_deseleziona(false)
+			if str(b.get("modo", "")) == "restauro":
+				_scegli_restauro()
+			else:
+				_esegui(b["voce"])
 			return
-	# Poi le carte delle file: cliccarne una la descrive, cosi' si puo'
-	# guardare cosa c'e' in mercato senza dover chiudere il menu.
-	var carta := _carta_puntata(pixel)
-	if not carta.is_empty():
-		_messaggio = _descrivi(carta)
+
+	if gs.phase == Enums.Phase.PIAZZA:
+		_piazza_lavoratore(pixel)
+		return
+
+	# Col bersaglio gia' acceso, il clic sul posto acceso esegue.
+	if not _scelta.is_empty() and _prova_bersaglio(pixel): return
+
+	# Altrimenti il clic sceglie una carta.
+	var c := _carta_puntata(pixel)
+	if not c.is_empty():
+		_seleziona(c)
+		return
+	_deseleziona()
+
+func _piazza_lavoratore(pixel: Vector2) -> void:
+	var col := _colonna_puntata(pixel)
+	if col < 0: return
+	# "Sopra un vostro edificio ancora in piedi": abitare da' +2 resistenza.
+	var abita: Building = null
+	for b in ctl.gs.grid.in_column(col):
+		if b.owner == UMANO and b.is_standing():
+			abita = b
+			break
+	if ctl.place_worker(col, abita):
+		_messaggio = "Colonna %d attivata." % col
+	else:
+		_messaggio = "Non puoi piazzare un lavoratore nella colonna %d." % col
+	_aggiorna()
+
+# Il clic e' caduto su un bersaglio acceso? Allora l'azione si fa.
+func _prova_bersaglio(pixel: Vector2) -> bool:
+	var b := _edificio_puntato(pixel)
+	if b != null:
+		for v in _bersagli:
+			if int(v.parametri.get("uid", -1)) == b.uid:
+				_esegui(v)
+				return true
+	var slot := BoardLayout3D.slot_at_ray(ctl.gs, _origine(pixel), _direzione(pixel))
+	if slot.is_empty(): return false
+	var col := int(slot["col"])
+	# Fra i piazzamenti che coprono questa colonna vince il piu' economico, e
+	# a parita' quello a terra: sopra si costruisce apposta, non per sbaglio,
+	# e per farlo si tiene premuto Maiusc.
+	var sopra := Input.is_key_pressed(KEY_SHIFT)
+	var migliore = null
+	for v in _bersagli:
+		if not v.parametri.has("col_from"): continue
+		var c0 := int(v.parametri["col_from"])
+		var w := int(CardDB.buildings[str(v.parametri["card_id"])]["width"])
+		if col < c0 or col >= c0 + w: continue
+		if bool(v.parametri.get("above", false)) != sopra: continue
+		if migliore == null or v.pietra + v.oro < migliore.pietra + migliore.oro:
+			migliore = v
+	if migliore == null: return false
+	_esegui(migliore)
+	return true
+
+func _seleziona(c: Dictionary) -> void:
+	var kind := str(c["kind"])
+	var id := str(c["id"])
+	if str(_scelta.get("kind", "")) == kind and str(_scelta.get("id", "")) == id:
+		_deseleziona()
+		return
+	var col := ctl.colonna_attivata()
+	var voci: Array = []
+	match kind:
+		"mercato": voci = AvailableActions.piazzamenti(ctl.gs, UMANO, col, id)
+		"potenziamento": voci = AvailableActions.bersagli_potenziamento(ctl.gs, UMANO, col, id)
+		"personaggio": voci = AvailableActions.bersagli_reclutamento(ctl.gs, UMANO, col, id)
+		_:
+			_deseleziona()
+			return
+	# Un personaggio senza bersaglio da scegliere non ha niente da accendere:
+	# si recluta e basta, e chiedere un secondo clic sarebbe finto.
+	if voci.size() == 1 and not voci[0].parametri.has("uid") \
+			and not voci[0].parametri.has("col_from"):
+		_esegui(voci[0])
+		return
+	if voci.is_empty():
+		_messaggio = "%s: nessun posto dove metterla adesso." % _nome_carta(kind, id)
+		_deseleziona()
+		return
+	_scelta = {"kind": kind, "id": id}
+	_bersagli = voci
+	_messaggio = "%s: scegli dove." % _nome_carta(kind, id)
+	_aggiorna()
+
+func _scegli_restauro() -> void:
+	var voci := AvailableActions.restauri(ctl.gs, UMANO, ctl.colonna_attivata())
+	var buoni: Array = []
+	for v in voci:
+		if v.legale: buoni.append(v)
+	if buoni.is_empty():
+		_messaggio = "Nessun rudere da restaurare in questa colonna."
 		_aggiorna()
 		return
-	if ctl.gs.phase == Enums.Phase.PIAZZA:
-		var col := _colonna_puntata(pixel)
-		if col < 0: return
-		# "Sopra un vostro edificio ancora in piedi": abitare da' +2 resistenza.
-		var abita: Building = null
-		for b in ctl.gs.grid.in_column(col):
-			if b.owner == UMANO and b.is_standing():
-				abita = b
-				break
-		if ctl.place_worker(col, abita):
-			_messaggio = "Colonna %d attivata." % col
-		else:
-			_messaggio = "Non puoi piazzare un lavoratore nella colonna %d." % col
-		_aggiorna()
+	_scelta = {"kind": "restauro", "id": "restauro"}
+	_bersagli = buoni
+	_messaggio = "Restauro: scegli il rudere."
+	_aggiorna()
+
+func _deseleziona(ridisegna := true) -> void:
+	_scelta = {}
+	_bersagli = []
+	if ridisegna: _aggiorna()
+
+func _nome_carta(kind: String, id: String) -> String:
+	match kind:
+		"mercato": return str(CardDB.buildings[id]["name"])
+		"personaggio": return str(CardDB.characters[id]["name"])
+		"potenziamento": return str(CardDB.upgrades[id]["name"])
+		"monumento":
+			return str(CardDB.monuments[id]["name"]) if CardDB.monuments.has(id) else id
+	return id
 
 func _esegui(v) -> void:
-	var gs := ctl.gs
 	var fatto := false
 	match v.tipo:
 		"costruisci":
@@ -222,75 +394,103 @@ func _esegui(v) -> void:
 			ctl.pass_action()
 			fatto = true
 	_messaggio = v.etichetta if fatto else "Rifiutata: %s" % v.etichetta
+	_deseleziona(false)
 	_turni_dei_bot()
 	_aggiorna()
 
-func _edificio(uid: int) -> Building:
-	if uid < 0: return null
-	for b in ctl.gs.grid.buildings:
-		if b.uid == uid: return b
-	return null
+# ---- quel poco che resta a schermo ------------------------------------
+const SFONDO := Color(0.09, 0.10, 0.13, 0.86)
+const CHIARO := Color("#e8e6df")
+const SPENTO := Color("#8b919c")
 
-# ---- il menu ---------------------------------------------------------
-func _disegna_menu() -> void:
+func _riquadro(font: Font, righe: PackedStringArray, dove: Vector2,
+		larghezza := 340.0) -> void:
+	var alto := 14.0 + righe.size() * 19.0
+	var r := Rect2(dove, Vector2(larghezza, alto))
+	var schermo := _hud.get_viewport_rect().size
+	if r.end.x > schermo.x - 8.0: r.position.x = schermo.x - 8.0 - r.size.x
+	if r.end.y > schermo.y - 8.0: r.position.y = schermo.y - 8.0 - r.size.y
+	_hud.draw_rect(r, SFONDO, true)
+	_hud.draw_rect(r, Color(1, 1, 1, 0.16), false, 1.0)
+	var y := r.position.y + 21.0
+	for i in righe.size():
+		_hud.draw_string(font, Vector2(r.position.x + 10.0, y), righe[i],
+			HORIZONTAL_ALIGNMENT_LEFT, r.size.x - 20.0, 14 if i == 0 else 12,
+			CHIARO if i == 0 else SPENTO)
+		y += 19.0
+
+func _disegna_hud() -> void:
 	var font: Font = ThemeDB.fallback_font
 	var gs := ctl.gs
 	var p: PlayerState = gs.players[UMANO]
-	_voci = []
-	_righe = []
+	_bottoni = []
 
-	var testa := "Era %d · %s · tu: %d PV, %d pietra, %d oro, lavoratori %d/%d" % [
-		gs.era, str(gs.current_event.get("name", "nessun evento")),
-		p.vp, p.pietra, p.oro, p.workers_used, p.workers]
-	_menu.draw_string(font, Vector2(20, 30), testa, HORIZONTAL_ALIGNMENT_LEFT, -1, 18,
-		Color("#e8e6df"))
+	_hud.draw_string(font, Vector2(20, 30),
+		"Era %d · %s · tu: %d PV, %d pietra, %d oro, lavoratori %d/%d" % [
+			gs.era, str(gs.current_event.get("name", "nessun evento")),
+			p.vp, p.pietra, p.oro, p.workers_used, p.workers],
+		HORIZONTAL_ALIGNMENT_LEFT, -1, 18, CHIARO)
 
 	var invito := ""
 	if gs.phase == Enums.Phase.FINE_PARTITA:
 		invito = "Partita finita. Vincitore: giocatore %d" % Scoring.winner(gs)
 	elif gs.current_index != UMANO:
 		invito = "Tocca al giocatore %d" % gs.current_index
+	elif not gs.pending_choice.is_empty():
+		invito = str(gs.pending_choice["prompt"])
 	elif gs.phase == Enums.Phase.PIAZZA:
 		invito = "Clicca una colonna per piazzare un lavoratore e attivarla."
+	elif _scelta.is_empty():
+		invito = "Clicca una carta per vedere dove puoi metterla."
 	else:
-		invito = "Scegli un'azione (e' facoltativa)."
+		invito = "Clicca un posto acceso. Esc per lasciar perdere."
 	if _messaggio != "": invito += "     — " + _messaggio
-	_menu.draw_string(font, Vector2(20, 54), invito, HORIZONTAL_ALIGNMENT_LEFT, -1, 14,
-		Color("#9aa0ad"))
+	_hud.draw_string(font, Vector2(20, 54), invito, HORIZONTAL_ALIGNMENT_LEFT, -1, 14, SPENTO)
 
-	# I comandi della telecamera scritti dove si vedono: un tabellone che si
-	# gira e non lo dice equivale a un tabellone che non si gira.
-	var schermo := _menu.get_viewport_rect().size
-	_menu.draw_string(font, Vector2(20, schermo.y - 16),
+	if gs.phase == Enums.Phase.AZIONE and gs.current_index == UMANO \
+			and gs.pending_choice.is_empty():
+		_disegna_bottoni(font, p)
+
+	var schermo := _hud.get_viewport_rect().size
+	_hud.draw_string(font, Vector2(20, schermo.y - 16),
 		"Trascina per girare il tabellone · rotella per avvicinare · "
-		+ "tasto destro per spostare · R riporta l'inquadratura di partenza",
+		+ "tasto destro per spostare · Maiusc mentre clicchi per costruire sopra · "
+		+ "R riporta l'inquadratura",
 		HORIZONTAL_ALIGNMENT_LEFT, -1, 12, Color("#6f7683"))
 
-	# La scelta in sospeso prende il posto del menu: e' l'unica cosa da fare.
-	if not gs.pending_choice.is_empty():
-		if int(gs.pending_choice["player"]) != UMANO: return
-		_menu.draw_string(font, Vector2(20, 90), str(gs.pending_choice["prompt"]),
-			HORIZONTAL_ALIGNMENT_LEFT, -1, 16, Color("#c9a227"))
-		_menu.draw_string(font, Vector2(20, 112),
-			"Clicca l'edificio che vuoi (%d possibili)." % (gs.pending_choice["options"] as Array).size(),
-			HORIZONTAL_ALIGNMENT_LEFT, -1, 13, Color("#9aa0ad"))
-		return
-	if gs.phase != Enums.Phase.AZIONE or gs.current_index != UMANO: return
-	var col := ctl.colonna_attivata()
-	_voci = AvailableActions.tutte(gs, UMANO, col)
-	var y := 90.0
-	for v in _voci:
-		var r := Rect2(Vector2(20, y), Vector2(560, 22))
-		_righe.append(r)
-		var colore := Color("#7c828e")          # illegale
-		var testo: String = v.etichetta
-		if v.legale:
-			if v.pietra + v.oro > 0: testo += "  —  %dp %do" % [v.pietra, v.oro]
-			colore = Color("#e8e6df") if v.pagabile(p) else Color("#c98f3c")
-			if not v.pagabile(p): testo += "   (risorse insufficienti)"
-		elif v.motivo != "":
-			testo += "  —  " + v.motivo
-		_menu.draw_rect(r, Color(1, 1, 1, 0.05), true)
-		_menu.draw_string(font, r.position + Vector2(8, 16), testo,
-			HORIZONTAL_ALIGNMENT_LEFT, r.size.x - 12, 13, colore)
-		y += 25.0
+	if not _nota.is_empty():
+		_riquadro(font, _nota, _nota_dove + Vector2(18, 18))
+
+# Le azioni che non hanno una carta da cliccare sul tavolo. Sono tre, e stanno
+# in un angolo: non e' piu' un menu, e' quello che avanza.
+func _disegna_bottoni(font: Font, p: PlayerState) -> void:
+	var schermo := _hud.get_viewport_rect().size
+	var voci: Array = []
+	var din := AvailableActions.dinastia(ctl.gs, UMANO)
+	voci.append({"voce": din, "testo": "Dinastia  %dp %do" % [din.pietra, din.oro],
+		"attiva": din.legale and din.pagabile(p)})
+	var restauri := AvailableActions.restauri(ctl.gs, UMANO, ctl.colonna_attivata())
+	var quanti := 0
+	for r in restauri:
+		if r.legale: quanti += 1
+	voci.append({"voce": null, "modo": "restauro",
+		"testo": "Restaura  (%d)" % quanti, "attiva": quanti > 0})
+	var tutte := AvailableActions.tutte(ctl.gs, UMANO, ctl.colonna_attivata())
+	voci.append({"voce": tutte[tutte.size() - 1], "testo": "Passa", "attiva": true})
+
+	var y := schermo.y - 58.0
+	var x := 20.0
+	for v in voci:
+		var largo := font.get_string_size(str(v["testo"]), HORIZONTAL_ALIGNMENT_LEFT,
+			-1, 14).x + 24.0
+		var r := Rect2(Vector2(x, y), Vector2(largo, 28.0))
+		_hud.draw_rect(r, SFONDO, true)
+		_hud.draw_rect(r, Color(1, 1, 1, 0.22 if bool(v["attiva"]) else 0.08), false, 1.0)
+		_hud.draw_string(font, r.position + Vector2(12, 19), str(v["testo"]),
+			HORIZONTAL_ALIGNMENT_LEFT, -1, 14,
+			CHIARO if bool(v["attiva"]) else SPENTO)
+		if bool(v["attiva"]):
+			var b := {"rect": r, "voce": v["voce"]}
+			if v.has("modo"): b["modo"] = v["modo"]
+			_bottoni.append(b)
+		x += largo + 10.0

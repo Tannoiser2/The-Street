@@ -30,8 +30,10 @@ func _ready() -> void:
 	_run("3D: la telecamera gira attorno al tavolo", _test_orbita)
 	_run("  e cliccare funziona da ogni angolo", _test_orbita_e_clic)
 	_run("  e finisce davvero dove dice, nella scena", _test_telecamera_nel_mondo)
+	_run("3D: la tessera si disegna intera", _test_tessera_intera)
 	_run("le azioni offerte, col preventivo", _test_azioni_offerte)
 	_run("  e la promessa che mantengono", _test_azioni_mantengono_la_promessa)
+	_run("i bersagli: dove si puo' mettere una carta", _test_bersagli)
 	print("\n%d superati, %d falliti" % [_passed, _failed])
 	get_tree().quit(0 if _failed == 0 else 1)
 
@@ -878,3 +880,81 @@ func _test_rovine() -> void:
 			if e.state == Enums.BuildingState.ROVINA: rovine += 1
 	_ok("in partita gli edifici crollano davvero (%d su %d in 5 partite)"
 		% [rovine, totali], rovine > totali / 5)
+
+# La tessera e' 63 x 271 mm, e il test che serviva non e' "la funzione che la
+# misura restituisce 271" - quella era giusta e non la chiamava nessuno - ma
+# "il rettangolo che finisce sul tavolo e' profondo 271". Qui si costruisce la
+# vista vera e si misurano i piani disegnati.
+# Il difetto che questo test prende: il disegno della tessera veniva steso su
+# un riquadro alto 130 mm, cioe' la fascia dei binari, e la carta ci entrava
+# schiacciata a meta'. A occhio si vede, ma solo se si sa cosa cercare.
+func _test_tessera_intera() -> void:
+	var gs := _gioco().gs
+	var vista: Node3D = preload("res://scripts/view/board_view_3d.gd").new()
+	add_child(vista)
+	vista.mostra(gs)
+	var piu_profondo := 0.0
+	var quanti := 0
+	for f in vista.get_children():
+		if not (f is MeshInstance3D): continue
+		var q := (f as MeshInstance3D).mesh as QuadMesh
+		if q == null: continue
+		if not is_equal_approx(q.size.x, BoardLayout3D.TESSERA_W): continue
+		piu_profondo = maxf(piu_profondo, q.size.y)
+		if is_equal_approx(q.size.y, BoardLayout3D.TESSERA_D): quanti += 1
+	_approx("il piano della tessera e' profondo quanto la tessera",
+		piu_profondo, BoardLayout3D.TESSERA_D)
+	_eq("  e ce n'e' uno per colonna", quanti, gs.grid.n_cols)
+	vista.queue_free()
+
+# L'interfaccia nuova non offre piu' una lista: accende sul tabellone i posti
+# dove la carta puo' andare. Quei posti li calcolano queste funzioni, e se
+# sbagliano il giocatore clicca un riquadro acceso e si sente dire di no.
+func _test_bersagli() -> void:
+	var ctl := _gioco()
+	var gs := ctl.gs
+	ctl.place_worker(2)
+	var col := ctl.colonna_attivata()
+
+	# Ogni piazzamento offerto deve essere legale e pagabile: e' la promessa
+	# che l'accensione fa al giocatore.
+	var offerti := 0
+	var bugie := 0
+	for card_id in gs.market:
+		for v in AvailableActions.piazzamenti(gs, 0, col, card_id):
+			offerti += 1
+			if not v.legale: bugie += 1
+			var c0 := int(v.parametri["col_from"])
+			var w := int(CardDB.buildings[card_id]["width"])
+			# il piazzamento deve coprire la colonna attivata o una adiacente
+			if c0 > col or c0 + w <= col: bugie += 1
+	_ok("i piazzamenti offerti sono parecchi (%d)" % offerti, offerti > 0)
+	_eq("  e sono tutti legali e coprono la colonna attivata", bugie, 0)
+
+	# Il piu' economico fra i piazzamenti deve coincidere con quello che la
+	# vecchia lista compatta sceglieva: le due strade portano allo stesso
+	# posto, altrimenti una delle due mente.
+	for v in AvailableActions.costruzioni(gs, 0, col):
+		if not v.legale: continue
+		var id := str(v.parametri["card_id"])
+		var minimo := 999
+		for p2 in AvailableActions.piazzamenti(gs, 0, col, id):
+			minimo = mini(minimo, p2.pietra + p2.oro)
+		_eq("  %s: il piu' economico e' lo stesso della lista" % id,
+			minimo, v.pietra + v.oro)
+
+	# I bersagli dei potenziamenti e dei personaggi sono edifici veri.
+	var uid_validi := {}
+	for b in gs.grid.buildings: uid_validi[b.uid] = true
+	var fuori := 0
+	for u in gs.upg_row:
+		for v in AvailableActions.bersagli_potenziamento(gs, 0, col, u):
+			if not uid_validi.has(int(v.parametri["uid"])): fuori += 1
+	for c in gs.char_row:
+		for v in AvailableActions.bersagli_reclutamento(gs, 0, col, c):
+			if v.parametri.has("uid") and not uid_validi.has(int(v.parametri["uid"])): fuori += 1
+	_eq("i bersagli indicati sono edifici che esistono", fuori, 0)
+
+	# Una carta che non c'e' non accende nulla, invece di far saltare tutto.
+	_eq("una carta sconosciuta non offre posti",
+		AvailableActions.piazzamenti(gs, 0, col, "ed_inventato").size(), 0)
