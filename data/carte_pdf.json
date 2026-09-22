@@ -128,5 +128,24 @@
       "po_memoriale"
     ]
   },
-  "_note_mancanti": "eventi: le posizioni 10, 11 e 12 dovrebbero portare i tre eventi gravi dell'era 2 e portano invece una seconda stampa di Grande incendio, Scisma e Anni della fame - stessa carta, illustrazione rigenerata. potenziamenti: stanno in materiali/Potenziamenti.pdf, 25 posizioni per 25 carte, ma la prima carta di ogni era e' stampata due volte (posizioni 2, 7, 12, 17, 22 sono la copia byte per byte della posizione precedente) e un potenziamento per era non c'e'."
+  "_note_mancanti": "eventi: le posizioni 10, 11 e 12 dovrebbero portare i tre eventi gravi dell'era 2 e portano invece una seconda stampa di Grande incendio, Scisma e Anni della fame - stessa carta, illustrazione rigenerata. potenziamenti: stanno in materiali/Potenziamenti.pdf, 25 posizioni per 25 carte, ma la prima carta di ogni era e' stampata due volte (posizioni 2, 7, 12, 17, 22 sono la copia byte per byte della posizione precedente) e un potenziamento per era non c'e'.",
+  "_copie_byte": {
+    "potenziamenti": [
+      2,
+      7,
+      12,
+      17,
+      22
+    ],
+    "eventi": [],
+    "tessere": [
+      7,
+      11
+    ]
+  },
+  "_impronte_pdf": {
+    "Carte.pdf": "06530822fdf30035",
+    "Potenziamenti.pdf": "3914b0297b2997e4"
+  },
+  "_nota_controlli": "`_copie_byte`: le posizioni che portano la copia byte per byte di un'altra, riconoscibili a macchina. Gli eventi hanno l'elenco vuoto perche' le loro ristampe hanno l'illustrazione rigenerata e nessuna impronta le tradisce: quelle sono dichiarate a mano fra i `null`. `_impronte_pdf`: se non combaciano, il PDF e' stato rifatto e la mappatura ricavata a vista va ricontrollata. Fra le tessere le due copie sono volute e non sono un difetto: la 7 e' una seconda Collina delle Cave (serve avere due volte lo stesso terreno su una strada da 9 colonne) e la 11 e' la seconda copia del segnalino pietra/oro."
 }

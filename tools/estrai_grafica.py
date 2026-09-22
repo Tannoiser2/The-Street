@@ -235,9 +235,16 @@ def estrai_gruppo(doc, dest, nome, pagine, specchiata, attesi, ordine=None):
     cartella = os.path.join(dest, "carte", nome)
     os.makedirs(cartella, exist_ok=True)
     n, per_id, saltate = 0, 0, 0
+    viste = {}          # impronta -> prima posizione in cui e' comparsa
+    copie = {}          # posizione -> posizione di cui e' la copia identica
     for p in pagine:
         for _, info in illustrazioni_di_pagina(doc, p, specchiata):
             n += 1
+            impronta = hashlib.sha256(info["image"]).hexdigest()
+            if impronta in viste:
+                copie[n] = viste[impronta]
+            else:
+                viste[impronta] = n
             etichetta = f"{n:02d}"
             if ordine and n <= len(ordine):
                 if ordine[n - 1] is None:
@@ -254,7 +261,60 @@ def estrai_gruppo(doc, dest, nome, pagine, specchiata, attesi, ordine=None):
     come = f", {per_id} per id" if per_id else ", numerate"
     salto = f", {saltate} saltate (disegno di un'altra carta)" if saltate else ""
     print(f"  {nome}: {n} pezzi ({stato}){come}{salto}")
-    return n, per_id
+    return n, per_id, copie
+
+
+# Una posizione che porta la stampa di un'altra carta a volte si riconosce da
+# sola: quando la copia e' byte per byte, l'impronta della seconda coincide con
+# quella della prima. Quali siano sta scritto in data/carte_pdf.json sotto
+# `_copie_byte`, e qui si controlla che il PDF dica ancora la stessa cosa.
+#
+# Serve a una cosa sola, ma importante: quando il designer ricarica un PDF
+# corretto, la mappatura fatta a vista diventa vecchia in silenzio. Con questo
+# controllo il PDF nuovo lo dice da solo, e non tocca rileggere le carte una
+# per una per accorgersene.
+#
+# Le ristampe con l'ILLUSTRAZIONE RIGENERATA (i tre eventi dell'era 2) hanno
+# impronte diverse e nessuna macchina le vede: restano dichiarate a mano.
+def verifica_ristampe(nome, copie, atteso):
+    trovate = sorted(copie)
+    if atteso is None:
+        if trovate:
+            print(f"  {nome}: posizioni ripetute {trovate}, non censite in "
+                  f"data/carte_pdf.json (`_copie_byte`)")
+        return
+    atteso = sorted(atteso)
+    if trovate == atteso:
+        return
+    nuove = [n for n in trovate if n not in atteso]
+    sparite = [n for n in atteso if n not in trovate]
+    print(f"  ATTENZIONE {nome}: le ristampe non sono piu' quelle dichiarate.")
+    if sparite:
+        print(f"    non sono piu' copie: {sparite} -> il PDF e' cambiato, "
+              f"la mappatura in data/carte_pdf.json va rifatta a vista")
+    if nuove:
+        print(f"    copie nuove: {', '.join(f'{n} = {copie[n]}' for n in nuove)}")
+
+
+# I PDF sono la fonte grafica e cambiano sotto i piedi quando il designer ne
+# ricarica uno. L'impronta e' l'unico modo per accorgersene senza riaprire le
+# carte: se non combacia, tutto cio' che e' stato ricavato a vista va rivisto.
+def verifica_pdf(ordini):
+    attese = ordini.get("_impronte_pdf", {})
+    for percorso in (PDF, PDF_POTENZIAMENTI):
+        nome = os.path.basename(percorso)
+        h = hashlib.sha256()
+        with open(percorso, "rb") as f:
+            for blocco in iter(lambda: f.read(1 << 20), b""):
+                h.update(blocco)
+        ora = h.hexdigest()[:16]
+        prima = attese.get(nome)
+        if prima is None:
+            print(f"  {nome}: impronta {ora}, non ancora censita")
+        elif prima != ora:
+            print(f"  ATTENZIONE {nome}: impronta {ora}, era {prima}. "
+                  f"Il PDF e' stato rifatto: la mappatura ricavata a vista "
+                  f"(data/carte_pdf.json, data/sagome.json) va ricontrollata.")
 
 
 def estrai_dorsi(doc, dest, nome, pagine, specchiata):
@@ -342,14 +402,19 @@ def main(dest):
     if os.path.exists(percorso_ordini):
         ordini = json.load(open(percorso_ordini, encoding="utf-8"))
 
+    print("impronte dei PDF:")
+    verifica_pdf(ordini)
+
+    copie_attese = ordini.get("_copie_byte", {})
     print("altri gruppi:")
     conteggi = {"edifici": scritti}
     per_id = {"edifici": scritti}
     for nome, pagine, specchiata, attesi in GRUPPI:
         if nome == "edifici":
             continue
-        conteggi[nome], per_id[nome] = estrai_gruppo(
+        conteggi[nome], per_id[nome], copie = estrai_gruppo(
             doc, dest, nome, pagine, specchiata, attesi, ordini.get(nome))
+        verifica_ristampe(nome, copie, copie_attese.get(nome))
     for nome, pagine, specchiata in GRUPPI_DORSI:
         estrai_dorsi(doc, dest, nome, pagine, specchiata)
 
@@ -357,8 +422,9 @@ def main(dest):
     doc_pot = pymupdf.open(PDF_POTENZIAMENTI)
     print("potenziamenti (PDF a parte):")
     for nome, pagine, specchiata, attesi in GRUPPI_POTENZIAMENTI:
-        conteggi[nome], per_id[nome] = estrai_gruppo(
+        conteggi[nome], per_id[nome], copie = estrai_gruppo(
             doc_pot, dest, nome, pagine, specchiata, attesi, ordini.get(nome))
+        verifica_ristampe(nome, copie, copie_attese.get(nome))
     for nome, pagine, specchiata in GRUPPI_DORSI_POTENZIAMENTI:
         d = estrai_dorsi(doc_pot, dest, nome, pagine, specchiata)
         print(f"  dorsi: {d} disegni distinti (uno per era)")

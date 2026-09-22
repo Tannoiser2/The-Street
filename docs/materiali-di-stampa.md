@@ -29,7 +29,7 @@ nota. Le posizioni e gli id stanno in `data/carte_pdf.json` e
 | monumenti | 37 | 14 | idem, ordine proprio |
 | eredità | 33, 35 | 16 | idem, ordine proprio |
 | Dinastia | 45, 46 | 1 (×4 copie) | — |
-| tessere colonna | 47, 49, 51, 53 | 14 | numerate |
+| tessere colonna | 47, 49, 51, 53 | 12 tessere + 2 segnalini | numerate |
 | dorsi | 28, 30, 32, 34, 36, 38, 40, 42, 44 | uno per mazzo o per era | — |
 | potenziamenti | `Potenziamenti.pdf` 1 | 25 posizioni, 20 carte | `data/carte_pdf.json`, ordine JSON, cinque per era |
 | dorsi dei potenziamenti | `Potenziamenti.pdf` 2 | 5 (uno per era) | — |
@@ -73,6 +73,14 @@ Non sono copie byte per byte: stessa carta, stesso testo, stessa forza, con
 l'illustrazione **rigenerata**. Da qui la differenza con le sagome, dove i
 duplicati sono identici al byte.
 
+### Due ripetizioni che non sono difetti
+
+Fra le «tessere» le posizioni ripetute sono volute: la **7** è una seconda
+*Collina delle Cave* — su una strada da 9 colonne lo stesso terreno serve due
+volte — e la **11** è la seconda copia del segnalino pietra/oro. Sono censite
+in `data/carte_pdf.json` sotto `_copie_byte`, così il controllo automatico non
+le segnala più.
+
 ### Due sagome portano il disegno di un'altra
 
 Vedi `docs/mappatura-sagome.md`: mancano i disegni di **Ospedale dei
@@ -89,3 +97,22 @@ sopra, cioè restando sepolto e invisibile. Quel lato non servirebbe a nessuno.
 **Le pagine pari sono specchiate.** Sono il retro del foglio e devono combaciare
 alla fustellatura. L'estrattore le legge al contrario; senza, otto sagome su
 sessanta finivano accoppiate al rudere di un altro edificio.
+
+## Il controllo che accorge quando un PDF cambia
+
+La mappatura di questi materiali è ricavata **a vista**, e una mappatura a
+vista invecchia in silenzio: basta che un PDF venga rifatto perché le posizioni
+si spostino senza che niente lo dica. `tools/estrai_grafica.py` fa quindi due
+controlli a ogni estrazione.
+
+**L'impronta dei PDF** (`_impronte_pdf`): se non combacia, il file è cambiato e
+tutto ciò che era stato letto a occhio va ricontrollato.
+
+**Le ristampe riconoscibili a macchina** (`_copie_byte`): dove una posizione
+porta la copia *byte per byte* di un'altra, l'impronta la tradisce. Se
+un'attesa sparisce — cioè una posizione che prima era una copia ora è una carta
+sua — il PDF è stato corretto e il tool lo dice.
+
+Restano fuori le ristampe con l'**illustrazione rigenerata**, come i tre eventi
+dell'era 2: hanno impronte diverse e nessuna macchina le distingue da una carta
+vera. Quelle sono dichiarate a mano fra i `null`.
