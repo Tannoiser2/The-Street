@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>La Strada delle Ere — Regolamento</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,700;9..144,900&family=Public+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f6f2e9; --panel:#fffdf7; --ink:#2b2419; --soft:#6b5f4c; --line:#ddd3bf;
+  --e1:#a9762c; --e2:#b3452f; --e3:#3f5d8c; --e4:#4a7a4f; --e5:#5c5f66;
+  --accent:#8a5a2b; --chip:#efe8d8; --boxbg:#f3ece0;
+  box-sizing:border-box;
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#1b1812; --panel:#251f18; --ink:#ece5d6; --soft:#a89a80; --line:#3b352a;
+    --e1:#c99a4a; --e2:#d06a52; --e3:#7c99c9; --e4:#7bab80; --e5:#9a9da5;
+    --accent:#d0a468; --chip:#302a20; --boxbg:#2b2419;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#1b1812; --panel:#251f18; --ink:#ece5d6; --soft:#a89a80; --line:#3b352a;
+  --e1:#c99a4a; --e2:#d06a52; --e3:#7c99c9; --e4:#7bab80; --e5:#9a9da5;
+  --accent:#d0a468; --chip:#302a20; --boxbg:#2b2419;
+}
+*{box-sizing:border-box}
+html{scroll-padding-top: env(safe-area-inset-top, 0px)}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:'Public Sans',system-ui,-apple-system,sans-serif;font-size:16px;line-height:1.62}
+.wrap{max-width:720px;margin:0 auto;padding:26px 18px 80px}
+.hero{text-align:center;padding:10px 0 4px}
+h1{font-family:'Fraunces',Georgia,serif;font-weight:900;font-size:clamp(30px,7vw,46px);
+  margin:0 0 6px;letter-spacing:-.015em;line-height:1.05}
+.claim{font-family:'Fraunces',Georgia,serif;font-style:italic;font-weight:400;
+  color:var(--accent);font-size:clamp(15px,3.4vw,19px);margin:0 0 4px}
+.meta{color:var(--soft);font-size:13.5px;margin:6px 0 0;letter-spacing:.04em;text-transform:uppercase}
+.strata{height:9px;display:flex;border-radius:5px;overflow:hidden;margin:20px 0 28px}
+.strata div{flex:1}
+h2{font-family:'Fraunces',Georgia,serif;font-weight:700;font-size:25px;margin:40px 0 4px;letter-spacing:-.01em}
+h2 .num{color:var(--accent);font-size:17px;display:block;letter-spacing:.14em;
+  text-transform:uppercase;font-family:'Public Sans',sans-serif;font-weight:700;margin-bottom:2px}
+h3{font-family:'Fraunces',Georgia,serif;font-weight:700;font-size:18.5px;margin:26px 0 4px}
+h2+p,h3+p{margin-top:6px}
+p{margin:12px 0}
+.lead{font-size:17.5px}
+em{font-style:italic}
+strong{font-weight:700}
+.k{background:var(--chip);border-radius:5px;padding:1px 7px;font-weight:600;white-space:nowrap;font-size:.94em}
+.box{background:var(--boxbg);border-left:4px solid var(--accent);border-radius:0 9px 9px 0;
+  padding:14px 18px;margin:22px 0}
+.box h4{font-family:'Fraunces',Georgia,serif;font-size:16px;margin:0 0 6px;
+  text-transform:uppercase;letter-spacing:.06em;font-weight:700}
+.box p{margin:8px 0;font-size:15px}
+.tbl{width:100%;border-collapse:collapse;margin:18px 0;font-size:15px;
+  display:block;overflow-x:auto;white-space:nowrap}
+.tbl th,.tbl td{border-bottom:1px solid var(--line);padding:9px 12px;text-align:left}
+.tbl th{font-weight:700;color:var(--soft);font-size:13px;text-transform:uppercase;letter-spacing:.05em}
+.tbl tr:last-child td{border-bottom:none}
+.phase{display:flex;gap:16px;margin:22px 0;align-items:flex-start}
+.phase .n{font-family:'Fraunces',Georgia,serif;font-weight:900;font-size:40px;
+  color:var(--accent);line-height:.9;min-width:40px;opacity:.85}
+.phase .t{font-family:'Fraunces',Georgia,serif;font-weight:700;font-size:18px;margin:0 0 2px}
+.phase p{margin:6px 0}
+.faq{border-top:1px solid var(--line);padding-top:14px;margin-top:14px}
+.faq .q{font-weight:700;margin:16px 0 2px}
+.faq .a{margin:2px 0 0;color:var(--ink)}
+.era-key{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0}
+.era-key span{font-size:12.5px;font-weight:700;color:#fff;padding:3px 11px;border-radius:12px}
+footer{margin-top:54px;padding-top:18px;border-top:1px solid var(--line);
+  color:var(--soft);font-size:13px;text-align:center}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<div class="hero">
+  <h1>La Strada delle Ere</h1>
+  <p class="claim">Le città non scompaiono. Si sovrappongono.</p>
+  <p class="meta">2–4 giocatori · 60–90 minuti · età 12+</p>
+</div>
+
+<div class="strata" aria-hidden="true">
+  <div style="background:var(--e1)"></div><div style="background:var(--e2)"></div>
+  <div style="background:var(--e3)"></div><div style="background:var(--e4)"></div>
+  <div style="background:var(--e5)"></div>
+</div>
+
+<h2><span class="num">Introduzione</span>Una strada, cinquemila anni</h2>
+<p class="lead">Una manciata di capanne sorge lungo un fiume. Passano i secoli: le capanne crollano, e sopra le loro macerie qualcuno costruisce un tempio. Il tempio diventa rudere, e sul rudere si alza una chiesa. La chiesa diventa fondamenta di un palazzo, il palazzo di un museo. Nessuno ha mai spianato quella strada per ricominciare: la città è cresciuta sopra se stessa, e il suolo si è alzato di metri.</p>
+
+<p>In <em>La Strada delle Ere</em> costruite quella città, insieme e l'uno contro l'altro, attraverso cinque epoche: Preistoria, Antichità, Medioevo, Rinascimento e Moderno. Ogni era ha il suo binario sul tabellone, e in ogni era costruite nel vostro. Quando il posto finisce — e finisce sempre — l'unica alternativa è salire: costruire sopra ciò che è morto, sotterrando rovine, ruderi e, se serve, i vostri stessi edifici ancora in piedi.</p>
+
+<p>Chi vince non è chi costruisce di più, ma chi costruisce cose che <em>durano</em>, o che valgono ancora una volta finite sotto terra. Un tempio in piedi per quattro ere frutta a ogni censimento. Un tempio sepolto frutta una volta sola, alla fine, quando si scava. Entrambe sono strategie; decidere quale seguire, e quando cambiarla, è il gioco.</p>
+
+<div class="box">
+  <h4>Il cuore del gioco</h4>
+  <p>Ogni volta che costruite vi trovate davanti alla stessa domanda: <strong>prendo posto nella mia era, o salgo sulle macerie di un'altra?</strong> Espandersi lascia vivo il passato — che continua a produrre e a rendere — ma consuma il suolo della vostra epoca. Salire dà quota, archeologia e punti di verticalità, ma uccide ciò che sta sotto.</p>
+</div>
+
+<h2><span class="num">Componenti</span>Cosa trovate nella scatola</h2>
+
+<p>Il <strong>tabellone</strong> è una griglia di <strong>5 binari</strong>, uno per era, per una fila di <strong>colonne</strong> di terreno: 5 colonne in due giocatori, 7 in tre, 9 in quattro. I binari sono l'asse del tempo, le colonne l'asse dello spazio; ogni casella è un posto dove può stare un edificio.</p>
+
+<p>Ogni edificio esiste in <strong>due pezzi distinti</strong>. La <strong>carta</strong> resta sulla plancia di chi lo costruisce e porta tutti i dati: costo, resistenza, canali di punteggio, effetto, terreno richiesto, valore di scavo. La <strong>sagoma</strong> — un cartoncino sagomato senza testo — si innesta in una <strong>basetta</strong> del vostro colore e va sul tabellone: dice soltanto chi occupa quali caselle e a che livello. La sagoma ha due lati, illustrato e inattivo; la basetta porta inciso il valore di Scavo dell'edificio. È questa divisione che permette al tabellone di restare leggibile anche quando la città è alta quattro piani.</p>
+
+<table class="tbl">
+<tr><th>Componente</th><th>Quantità</th></tr>
+<tr><td>Carte colonna (terreno)</td><td>9</td></tr>
+<tr><td>Carte edificio + sagome</td><td>60 (12 per era)</td></tr>
+<tr><td>Carte personaggio</td><td>25 + 4 Dinastia</td></tr>
+<tr><td>Carte potenziamento</td><td>25</td></tr>
+<tr><td>Carte evento</td><td>24 (6 per era, ere 1–4)</td></tr>
+<tr><td>Monumenti celebri</td><td>14</td></tr>
+<tr><td>Carte Eredità (obiettivi segreti)</td><td>16</td></tr>
+<tr><td>Lavoratori e segnalini proprietà</td><td>3 + set colorato per giocatore</td></tr>
+<tr><td>Basette colorate con valore di Scavo</td><td>set per giocatore</td></tr>
+<tr><td>Segnalini crepa (ruderi)</td><td>15</td></tr>
+<tr><td>Cubetti bianchi (Vetustà) e neri (resistenza)</td><td>40 + 40</td></tr>
+<tr><td>Risorse: pietra e oro</td><td>60 + 60</td></tr>
+<tr><td>Segnapunti</td><td>1 traccia + 1 pedina per giocatore</td></tr>
+</table>
+
+<h2><span class="num">Preparazione</span>Come si apparecchia la strada</h2>
+
+<p>Disponete il tabellone al centro e componete la strada con le carte colonna, in ordine libero: <strong>5 colonne in due giocatori, 7 in tre, 9 in quattro</strong>. Ogni colonna ha un solo terreno, valido per tutte le ere — un fiume resta un fiume nel Novecento — e la proporzione consigliata privilegia pianura e fiume, con collina e bosco più rari.</p>
+
+<p>Ogni giocatore prende <strong>3 lavoratori</strong>, i segnalini del proprio colore e <span class="k">2 pietra</span>. In due giocatori, il secondo riceve anche <span class="k">1 oro</span>.</p>
+
+<p>Separate gli edifici per era in cinque mazzi e scoprite la <strong>fila mercato</strong> dell'Era 1: sei edifici visibili. Accanto, due file da tre carte per i personaggi e per i potenziamenti dell'era corrente. Ogni carta presa viene subito rimpiazzata; quando un'era finisce, le file non usate si scartano — il passato non si costruisce più, si eredita soltanto.</p>
+
+<p>Mescolate i sei eventi di ciascuna era e <strong>rivelate quello dell'Era 1</strong>: tutti devono sapere in anticipo cosa arriverà alla fine. Rivelate infine tanti <strong>Monumenti celebri</strong> quanti sono i giocatori meno uno, e distribuite <strong>2 carte Eredità</strong> a testa: ognuno ne tiene una segreta e scarta l'altra.</p>
+
+<h2><span class="num">I terreni</span>Quattro paesaggi, quattro vocazioni</h2>
+
+<table class="tbl">
+<tr><th>Terreno</th><th>Produzione base</th><th>Identità</th></tr>
+<tr><td>Pianura</td><td>2 pietra</td><td>Sviluppo: gli edifici da 2 o 3 caselle costano 1 pietra in meno</td></tr>
+<tr><td>Fiume</td><td>1 pietra + 1 oro</td><td>Liquidità: l'unico terreno che produce oro</td></tr>
+<tr><td>Collina</td><td>2 pietra</td><td>Monumentalità: ogni edificio costruito qui ha +1 resistenza</td></tr>
+<tr><td>Bosco</td><td>2 pietra</td><td>Conservazione: la Vetustà arriva a +4 e il restauro costa 1 in meno</td></tr>
+</table>
+
+<p>I requisiti stampati sulle carte sono <strong>morbidi</strong> per pianura, collina e bosco: basta che il terreno richiesto sia nella colonna dove costruite <em>o in una adiacente</em>. Il requisito <em>fiume</em> è invece <strong>stretto</strong> — l'acqua è dove è, e nessun edificio fluviale sorge a due colonne dal fiume.</p>
+
+<h2><span class="num">Struttura</span>Cinque ere, tre azioni ciascuna</h2>
+
+<p>La partita dura cinque ere. In ciascuna ogni giocatore piazza i propri lavoratori uno alla volta, in senso di turno, finché tutti li hanno usati: <strong>tre turni a testa</strong>, quattro per chi possiede la Dinastia.</p>
+
+<p>A ogni nuova era parte primo <strong>chi ha costruito meno edifici in totale</strong>; a parità si mantiene l'ordine precedente. In due giocatori, l'Era 1 si apre a snake — A, B, B, A, A, B — per compensare il vantaggio di chi occupa il suolo per primo.</p>
+
+<h2><span class="num">Il turno</span>Tre gesti, sempre gli stessi</h2>
+
+<div class="phase">
+  <div class="n">1</div>
+  <div>
+    <p class="t">Piazza un lavoratore</p>
+    <p>Mettetelo su una colonna, sopra un vostro edificio ancora in piedi oppure sulla colonna nuda. Quell'edificio riceve <span class="k">+2 resistenza</span> fino alla fine dell'era: un edificio abitato resiste, uno abbandonato no. Potete avere al massimo un vostro lavoratore per colonna.</p>
+  </div>
+</div>
+
+<div class="phase">
+  <div class="n">2</div>
+  <div>
+    <p class="t">Attiva la colonna</p>
+    <p>Il terreno produce la sua base <em>per voi</em>. Poi ogni edificio ancora in piedi in quella colonna — a qualsiasi binario e livello, di chiunque sia — paga la propria produzione al proprio proprietario. Attivare una colonna trafficata arricchisce anche gli avversari: è il prezzo di andare dove la città è viva.</p>
+  </div>
+</div>
+
+<div class="phase">
+  <div class="n">3</div>
+  <div>
+    <p class="t">Compi un'azione (facoltativa)</p>
+    <p>Potete <strong>costruire</strong>, <strong>potenziare</strong> o <strong>reclutare</strong>. Una sola, e sempre legata alla colonna che avete appena attivato.</p>
+  </div>
+</div>
+
+<div class="box">
+  <h4>Prosperità urbana</h4>
+  <p>Una colonna con almeno <strong>3 edifici in piedi appartenenti ad almeno 2 giocatori</strong> è un <strong>Centro Urbano</strong>. Ogni volta che viene attivata, <strong>ogni giocatore che vi possiede un edificio in piedi riceve 1 oro</strong> — chi attiva compreso, ma solo se ha qualcosa lì.</p>
+  <p>Non serve alcun segnalino: si guarda la colonna e si conta. Il fiume resta la fonte d'oro immediata delle prime ere; il Centro Urbano è la fonte che i giocatori costruiscono insieme, e matura dalla terza era in poi.</p>
+</div>
+
+<h2><span class="num">Costruire</span>Nel proprio binario, o sopra il passato</h2>
+
+<p>Costruire significa pagare il costo della carta e mettere la sagoma sul tabellone. Potete farlo nella colonna che avete attivato o in una adiacente, e l'edificio occupa <strong>1, 2 o 3 caselle contigue</strong> secondo la sua taglia. Ci sono due modi.</p>
+
+<h3>Costruire nel proprio binario</h3>
+<p>Scegliete caselle libere nel binario dell'era corrente. È la costruzione normale, a livello 0, ed è sempre la più economica. Il limite è banale e feroce: le caselle sono poche, e quando un'era si riempie non si riapre più.</p>
+
+<h3>Costruire sopra</h3>
+<p>Invece del binario, poggiate l'edificio su ciò che esiste già nelle colonne scelte. Ogni colonna della vostra impronta deve offrire una <strong>base valida</strong>, e almeno una deve averla davvero:</p>
+
+<table class="tbl">
+<tr><th>Cosa c'è sotto</th><th>Cosa succede</th></tr>
+<tr><td>Una rovina</td><td>Base gratuita, e vi sconta 1 pietra (le macerie sono materiale)</td></tr>
+<tr><td>Un rudere</td><td>Viene schiacciato in rovina. Se condivide una classe con la vostra carta, il nuovo edificio nasce con +1 resistenza</td></tr>
+<tr><td>Un vostro edificio intatto</td><td>Lo <strong>spianate</strong>: vi sconta in pietra metà della sua resistenza, ma il suo Scavo vale 0</td></tr>
+<tr><td>Un edificio intatto altrui</td><td>Impossibile. Blocca finché è vivo</td></tr>
+<tr><td>Terreno nudo</td><td><strong>Terrapieno</strong>: +1 pietra per ogni colonna priva di base</td></tr>
+</table>
+
+<p>Il nuovo edificio sta tutto a un livello solo, pari al più alto delle basi più uno. E una regola chiude la verticalità: <strong>una colonna può salire di un solo livello per era</strong>. Un edificio da 2 o 3 caselle si può costruire sopra solo se nessuna delle colonne della sua impronta ha già guadagnato un livello in quell'era.</p>
+
+<div class="box">
+  <h4>Spolia</h4>
+  <p>Spianare un proprio edificio intatto non costa nulla: anzi, vi <strong>sconta in pietra metà della sua resistenza</strong>, arrotondata per eccesso. I blocchi del vecchio muro diventano il nuovo. In cambio quella carta vale <strong>Scavo 0</strong>: chi demolisce non lascia archeologia.</p>
+  <p>È lo scambio più antico dell'edilizia — materiale adesso contro memoria alla fine — ed è il motivo per cui il Colosseo ha alimentato mezza Roma barocca.</p>
+</div>
+
+<h2><span class="num">Potenziare e reclutare</span>Le altre due azioni</h2>
+
+<p><strong>Potenziare</strong> costa 1 oro nelle prime tre ere e 2 nelle ultime due. Infilate la carta sotto un vostro edificio in piedi di quella colonna, lasciandone sporgere la linguetta. I potenziamenti <em>Arte</em> danno punti subito; quelli <em>Struttura</em> danno resistenza permanente, segnata con un cubetto nero. La capienza base è di un potenziamento per edificio, salvo le carte che ne dichiarano di più.</p>
+
+<p>Con la stessa azione potete <strong>restaurare</strong> un rudere di quella colonna: pagate metà del costo originale, arrotondato per eccesso, e torna intatto con la Vetustà azzerata. Se il rudere era di un avversario, <strong>diventa vostro</strong>: chi restaura si appropria.</p>
+
+<p><strong>Reclutare</strong> costa 1 oro e richiede che la classe del personaggio sia presente fra gli edifici in piedi della colonna — il Vescovo arriva dove c'è una chiesa, il Mercante dove c'è un mercato. Il lavoratore che avete appena piazzato si <em>specializza</em> in quel personaggio fino a fine era: il numero dei vostri lavoratori non cambia, cambia quello che sa fare.</p>
+
+<div class="box">
+  <h4>Scheletri</h4>
+  <p>Nelle ere 1–4, a fine era il personaggio <strong>non si scarta</strong>: infilatelo sotto la carta di un vostro edificio ancora in piedi, uno solo per edificio. È la sua sepoltura.</p>
+  <p>Se quell'edificio verrà <strong>sotterrato</strong>, a fine partita lo ritroverete come scheletro e varrà <strong>6 meno la sua era</strong>: 5 punti dalla Preistoria, 4 dall'Antichità, 3 dal Medioevo, 2 dal Rinascimento. Se invece l'edificio resta in superficie, il personaggio non vale nulla — nessuno lo ha mai ritrovato. I personaggi dell'era Moderna si scartano: dopo di loro non c'è più nessuno che possa costruirci sopra.</p>
+</div>
+
+<p>In alternativa potete acquistare una <strong>Dinastia</strong>: nessuna abilità, ma un <strong>quarto lavoratore permanente</strong>, attivo da subito e per tutte le ere che restano. Il costo segue l'epoca in cui la prendete — <span class="k">Era 1: 4 pietra</span>, <span class="k">Era 2: 2 pietra + 1 oro</span>, <span class="k">Era 3: 1 pietra + 2 oro</span>, <span class="k">Era 4: 3 oro</span> — e una sola per giocatore.</p>
+
+<h2><span class="num">Gli stati</span>Vivo, ferito, morto, sepolto</h2>
+
+<p>Un edificio attraversa fino a quattro condizioni, e il viaggio è a senso unico.</p>
+
+<p><strong>Intatto.</strong> Produce, segna rendita, la sua classe conta per il reclutamento, ospita lavoratori, subisce gli eventi. Un edificio intatto è sempre in superficie: nulla può sorgere sopra un edificio vivo.</p>
+
+<p><strong>Rudere.</strong> In piedi ma spento: la chiesa sconsacrata, l'acquedotto rotto. La sagoma si gira sul <em>lato inattivo</em>, spoglio e grigio, e resta nella sua basetta. Ci si arriva fallendo un evento di un solo punto. Non produce più nulla e affronta gli eventi successivi con <span class="k">−2 resistenza</span>, ma è l'unico stato <em>contendibile</em>: si può restaurare, depredare o lasciar morire.</p>
+
+<p><strong>Rovina.</strong> La sagoma si sfila dalla basetta e torna nella scatola: sul tabellone resta la <strong>basetta nuda</strong>, del colore di chi l'aveva costruita, col valore di Scavo inciso. L'edificio non c'è più, ma il suo suolo sì: la basetta alza il livello e fa da base a chi costruirà sopra.</p>
+
+<p><strong>Sotterrato.</strong> Non è uno stato alternativo agli altri tre: è una <em>condizione di posizione</em>. È sotterrato qualsiasi edificio su cui è stata costruita una sopraelevazione. Cessa di essere in piedi, non produce, non subisce più eventi, e a fine partita vale il suo <strong>Scavo</strong>.</p>
+
+<div class="box">
+  <h4>Tre gesti, tre stati</h4>
+  <p><strong>Intatto</strong>: sagoma in piedi nella sua basetta, lato illustrato. <strong>Rudere</strong>: si gira la sagoma sul lato inattivo, resta dov'è. <strong>Rovina</strong>: si sfila la sagoma e si lascia la basetta nuda, col valore di Scavo inciso. La carta sulla vostra plancia segue lo stesso destino: dritta, con segnalino crepa, girata sul retro.</p>
+</div>
+
+<div class="box">
+  <h4>Un edificio conserva sempre il proprio ingombro</h4>
+  <p>Una carta che diventa rudere o rovina mantiene esattamente la larghezza che aveva: cambia stato, non spazio. Un castello da 2 caselle in rovina ne occupa ancora 2, e un edificio da 1 casella costruito sopra ne sotterra solo metà. Una rovina è sotterrata quando <em>l'unione</em> degli strati successivi copre interamente la sua proiezione, anche se quegli strati appartengono a ere diverse.</p>
+</div>
+
+<h2><span class="num">Fine era</span>Il tempo presenta il conto</h2>
+
+<p>Quando tutti hanno esaurito i lavoratori, l'era si chiude in quattro passi.</p>
+
+<p><strong>L'evento</strong>, rivelato a inizio era, si risolve adesso. Ogni edificio esposto — intatto o rudere — somma la resistenza stampata, i potenziamenti Struttura, la continuità, il <span class="k">+2</span> di ogni lavoratore che lo protegge e i modificatori dell'evento, e confronta il totale con la <strong>forza</strong> dell'epoca: <span class="k">2</span> nella Preistoria, <span class="k">3</span> nell'Antichità, <span class="k">4</span> nel Medioevo, <span class="k">5</span> nel Rinascimento. Chi fallisce di un solo punto diventa rudere; chi fallisce di due o più crolla in rovina; un rudere che fallisce crolla. L'era Moderna non ha evento: la partita finisce prima che il tempo possa giudicarla.</p>
+
+<p><strong>Il censimento</strong> segue il crollo, mai il contrario: si conta solo ciò che è sopravvissuto. Ogni vostro edificio in piedi paga la sua Rendita più la <strong>Vetustà</strong>, cioè un punto per ogni evento che ha superato, fino a tre — quattro se sorge nel bosco. Segnatela con i cubetti bianchi: un monumento antico si riconosce dalla fila di cubetti che si porta dietro.</p>
+
+<p><strong>La dispersione dei secoli</strong>: ciascuno conserva al massimo <strong>5 risorse totali</strong> e scarta il resto. Fra un'era e l'altra passano generazioni, e i granai non attraversano i secoli.</p>
+
+<p><strong>Il ricambio</strong>: i lavoratori tornano ai proprietari, si scartano le file vecchie, si aprono quelle dell'era nuova e si rivela il nuovo evento.</p>
+
+<h2><span class="num">Fine partita</span>Come si contano i punti</h2>
+
+<p>Al termine dell'era Moderna la partita finisce. Alcuni punti sono già sul segnapunti — quelli <em>Lampo</em>, segnati al momento della costruzione, la Cultura prodotta, e i censimenti delle ere precedenti. Restano sette voci da calcolare.</p>
+
+<table class="tbl">
+<tr><th>#</th><th>Voce</th><th>Punti</th></tr>
+<tr><td>1</td><td>Censimento finale</td><td>Rendita + Vetustà di ogni vostro edificio in piedi</td></tr>
+<tr><td>2</td><td>Verticalità</td><td>Per colonna secondo l'altezza: 2 / 6 / 12 / 20 per 1 / 2 / 3 / 4+ livelli</td></tr>
+<tr><td>3</td><td>Continuità di luogo</td><td>+2 per colonna con 2 vostri edifici della stessa classe, +5 con 3 o più</td></tr>
+<tr><td>4</td><td>Scavo</td><td>Il valore stampato di ogni vostro edificio sotterrato; +1 per ogni edificio altrui che avete sotterrato</td></tr>
+<tr><td>5</td><td>Scheletri</td><td>6 meno l'era di ogni personaggio sepolto sotto un edificio sotterrato</td></tr>
+<tr><td>6</td><td>Obiettivi</td><td>Monumenti celebri reclamati + la vostra Eredità, se soddisfatta</td></tr>
+<tr><td>7</td><td>Effetti finali</td><td>Museo, Piazza monumentale, Biblioteca, effetti «eco», personaggi con abilità Finale</td></tr>
+</table>
+
+<p>La <strong>Verticalità</strong> si divide: metà del premio della colonna va a chi possiede l'edificio in cima, l'altra metà si ripartisce fra tutti i proprietari in proporzione agli edifici che vi hanno, sotterrati compresi. Chi ha costruito la cima ha pagato terrapieni e demolizioni per arrivarci, ma la memoria della colonna appartiene a tutti quelli che l'hanno abitata.</p>
+
+<p><strong>Vince chi ha più punti.</strong> In caso di parità, vince chi ha più edifici ancora in piedi; se persiste, chi ha più risorse residue.</p>
+
+<h2><span class="num">Regole particolari</span>Casi che meritano una riga propria</h2>
+
+<h3>Colossali</h3>
+<p>Tre edifici — Anfiteatro, Acquedotto e Stazione — occupano tre caselle e si costruiscono con una sola azione. Contano come strato in tutte le colonne che toccano, si attivano da ciascuna di esse, e se crollano diventano rovina ovunque. Valgono il proprio Scavo <em>una sola volta</em>, e solo quando l'intera proiezione è coperta.</p>
+
+<h3>Costo flessibile ◈</h3>
+<p>Quattordici carte, tutte di classe Commercio o Ingegneria pura, portano questo simbolo: una singola unità del loro costo si può pagare <strong>1 oro al posto di 2 pietra</strong>, o viceversa. Vale solo al momento dell'acquisto e per una sola unità. È credito e baratto, non un cambiavalute.</p>
+
+<h3>Spoliazione</h3>
+<p>Quando costruite potete depredare <strong>un</strong> rudere esposto nella colonna della costruzione o in una adiacente: diventa subito rovina — restando del suo proprietario — e vi sconta 1, 2 o 3 pietra secondo la sua taglia, mai più del costo in pietra della costruzione. Si risolve <em>prima</em> di costruire, quindi quel rudere non vi darà la continuità di classe, e sostituisce lo sconto macerie: i due non si sommano.</p>
+
+<h3>Impronte ed esauribili</h3>
+<p>Due personaggi — Incisore e Retore — non danno un'abilità ma un'<strong>impronta</strong>: la carta si infila sotto un edificio e ne alza il valore di Scavo in permanenza. Un edificio può portarne una sola. Alcune carte hanno invece la parola chiave <strong>Esauribile</strong>: ogni attivazione consuma un cubetto carica, e quando finiscono l'edificio diventa rudere. La cava si svuota.</p>
+
+<h2><span class="num">Varianti</span>Se volete che il tempo morda di più</h2>
+
+<p>Gli eventi sono sei per era, tre <em>lievi</em> e tre <em>gravi</em>. Nella partita normale se ne rivela uno a caso fra tutti e sei.</p>
+
+<p><strong>Presagio doppio.</strong> A inizio era se ne rivelano due: alla fine se ne pesca uno dei due. Sapete cosa <em>potrebbe</em> arrivare e dovete coprirvi su entrambi i fronti.</p>
+
+<p><strong>Età di ferro.</strong> Nelle ere 3 e 4 si rivelano e si risolvono due eventi, uno dopo l'altro. I crolli passano da circa il 40% al 54%: la storia accelera quando le città sono mature.</p>
+
+<p><strong>Secoli bui.</strong> Due eventi in ogni era. Crolla quasi due terzi di ciò che viene costruito, e l'archeologia diventa la strategia principale invece che un complemento.</p>
+
+<p><strong>Partita lunga.</strong> Quattro lavoratori a testa e +1 alla forza di tutti gli eventi.</p>
+
+<h2><span class="num">Domande frequenti</span></h2>
+
+<div class="faq">
+
+<p class="q">Posso costruire sopra l'edificio di un avversario?</p>
+<p class="a">Solo se non è più intatto. Un edificio vivo altrui blocca il suo spazio finché resiste: dovete aspettare che un evento lo ferisca. È per questo che la sopravvivenza è anche una forma di controllo del territorio.</p>
+
+<p class="q">Due edifici miei e di un avversario possono stare nella stessa colonna?</p>
+<p class="a">Certo, ed è la norma. Più edifici vivi convivono nella stessa colonna, di ere e proprietari diversi, ciascuno sul proprio ingombro e alla propria quota. Nessun edificio vivo può danneggiarne un altro: demoliscono soltanto il proprietario, il tempo e la spoliazione.</p>
+
+<p class="q">Un edificio sotterrato produce ancora?</p>
+<p class="a">No. Cessa di essere in piedi: niente produzione, niente rendita, niente eventi. In compenso non può più morire, e a fine partita vale il suo Scavo.</p>
+
+<p class="q">Se spiano un mio edificio, perdo anche il personaggio che ci avevo seppellito?</p>
+<p class="a">No. Il palazzo lo avete demolito voi, ma l'uomo sotto ci è rimasto: lo scheletro vale comunque. Perdete lo Scavo dell'edificio, non il personaggio.</p>
+
+<p class="q">Chi incassa lo Scavo di un edificio sotterrato da un altro giocatore?</p>
+<p class="a">Il proprietario dell'edificio sepolto, sempre. Chi lo ha sotterrato prende 1 punto per il disturbo.</p>
+
+<p class="q">Il terrapieno si paga per livello o per colonna?</p>
+<p class="a">Per colonna priva di base, una volta sola, qualunque sia la quota da raggiungere. Pareggiare il piano costa uguale che siate a un livello o a tre.</p>
+
+<p class="q">Posso attivare una colonna dove non ho nulla?</p>
+<p class="a">Sì, e talvolta conviene: incassate la produzione del terreno e, se è un Centro Urbano, anche l'oro della Prosperità — ma solo se vi possedete un edificio. Ricordate che attivando arricchite anche i proprietari che ci sono.</p>
+
+<p class="q">Cosa succede se nessuno può più costruire in un'era?</p>
+<p class="a">Nulla di speciale: si continua a piazzare lavoratori per attivare colonne, potenziare, restaurare e reclutare. L'azione è facoltativa, e ci sono ere in cui la cosa giusta è raccogliere e aspettare.</p>
+
+<p class="q">Un rudere può restare tale per più ere?</p>
+<p class="a">Sì, ma è raro: affronta ogni evento con −2 resistenza, quindi di solito crolla presto. Finché resiste è la cosa più contesa del tabellone — si può restaurare, depredare o schiacciare.</p>
+
+<p class="q">La Vetustà si perde se restauro un edificio?</p>
+<p class="a">Sì, si azzera. Ricostruita non è antica.</p>
+
+</div>
+
+<footer>
+  La Strada delle Ere — regolamento v1.5<br>
+  <em>Si costruisce dove qualcosa è morto.</em>
+</footer>
+
+</div>
+</body>
+</html>
