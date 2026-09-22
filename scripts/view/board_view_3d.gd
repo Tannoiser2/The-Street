@@ -86,6 +86,9 @@ func _edifici() -> void:
 	for b in gs.grid.buildings:
 		_basetta(b)
 		_sagoma(b)
+		_linguette(b)
+		_cubetti(b)
+		_segnalini(b)
 
 # Il piede che tiene in piedi il cartone: 15 mm di profondita' sui 54 dello
 # slot, cosi' il resto resta scoperto e le file dietro si vedono.
@@ -254,6 +257,47 @@ func _plance() -> void:
 		if sepolti > 0: riga += " · %d sepolti" % sepolti
 		if extra != "": riga += " · " + extra.strip_edges()
 		_scritta(centro + Vector3(0, 8, 0), riga, 0.10, Color("#9aa0ad"))
+
+# I cubetti: bianchi la Vetusta', neri la resistenza guadagnata. Sono i
+# segnalini del gioco vero, e sulla basetta si leggono senza girare il
+# tabellone - cosa che in 3D non si puo' fare.
+const CUBETTO_BIANCO := Color("#e6e3da")
+const CUBETTO_NERO := Color("#2b2b30")
+const LINGUETTA := Color("#c9a227")
+
+func _cubetti(b: Building) -> void:
+	for c in BoardLayout3D.cubetti(gs, b):
+		var lato: float = float(c["lato"])
+		var m := _scatola(Vector3(lato, lato, lato),
+			CUBETTO_BIANCO if str(c["tipo"]) == "vetusta" else CUBETTO_NERO)
+		m.position = (c["pos"] as Vector3) + Vector3(0, lato / 2.0, 0)
+		add_child(m)
+
+# "Infilate la carta sotto, lasciandone sporgere la linguetta": il
+# potenziamento si vede perche' spunta, non perche' sia scritto da qualche
+# parte.
+func _linguette(b: Building) -> void:
+	for p in BoardLayout3D.linguette(gs, b):
+		var m := _scatola(Vector3(BoardLayout3D.LINGUETTA_W, 2.0,
+			BoardLayout3D.LINGUETTA_D), LINGUETTA)
+		m.position = p
+		add_child(m)
+
+# Il lavoratore che abita l'edificio e il personaggio sepolto sotto: due cose
+# che cambiano il punteggio e che altrimenti non si vedrebbero.
+func _segnalini(b: Building) -> void:
+	var base := BoardLayout3D.standee_base(gs, b)
+	if b.protected_by >= 0:
+		var col: Color = COLORI_GIOCATORE[b.protected_by % COLORI_GIOCATORE.size()]
+		var lav := _scatola(Vector3(7.0, 20.0, 7.0), col.lightened(0.35))
+		lav.position = base + Vector3(-BoardLayout3D.span_w(b.width()) / 2.0 + 5.0,
+			BoardLayout3D.BASETTA_Y + 10.0, BoardLayout3D.BASETTA_D / 2.0 - 3.0)
+		add_child(lav)
+	if b.buried_character != "":
+		var sep := _scatola(Vector3(8.0, 8.0, 8.0), Color("#8a6f3a"))
+		sep.position = base + Vector3(BoardLayout3D.span_w(b.width()) / 2.0 - 5.0,
+			BoardLayout3D.BASETTA_Y + 4.0, BoardLayout3D.BASETTA_D / 2.0 - 3.0)
+		add_child(sep)
 
 # Una scritta che guarda sempre la telecamera: le carte sono stese sul tavolo
 # e viste di scorcio, quindi il testo stampato sopra non si leggerebbe.

@@ -887,3 +887,29 @@ dato è stato importato da lì. Ma due confronti fra ciò che è stampato e
     Mancano **Ospedale dei pellegrini** (che porta la chiesa della Cappella) e
     **Mercato** (che porta il mulino del Mulino). Terzo caso a parte: il
     **Ponte** un disegno ce l'ha, ma raffigura un foro romano.
+
+66. **I cubetti e le linguette: i segnalini del gioco vero.** Il brief chiede
+    «i cubetti di Vetusta' e resistenza» sulla plancia, e il regolamento dice
+    gia' di che colore sono: «segnatela con i cubetti **bianchi**» per la
+    Vetusta', «resistenza permanente, segnata con un cubetto **nero**» per i
+    potenziamenti Struttura. Non c'era niente da inventare.
+
+    Stanno sulla **basetta**, davanti alla sagoma, perche' in 3D il tabellone
+    non si puo' girare e vanno letti da dove si guarda. Se sono tanti si
+    stringono invece di sbordare dal pezzo: meglio affollati che fuori.
+
+    I potenziamenti si vedono dalla **linguetta**, come dice il regolamento -
+    «infilate la carta sotto, lasciandone sporgere la linguetta». La prima
+    versione la metteva dietro la sagoma, dove ovviamente non si vedeva: ora
+    spunta davanti alla basetta, dal lato di chi guarda. C'e' un test che lo
+    verifica, perche' e' un errore facile da rifare.
+
+    Aggiunti anche il segnalino del **lavoratore** che abita l'edificio (nel
+    colore di chi l'ha piazzato) e quello del **personaggio sepolto**: due
+    cose che cambiano il punteggio e che altrimenti non si vedrebbero.
+
+67. **Un cubetto da 5 mm e' invisibile, anche se e' la misura giusta.** Li
+    avevo fatti di 5 mm su una plancia larga 44 cm: fisicamente plausibili, a
+    schermo due pixel. Portati a 9 mm, che e' poi la misura di un cubetto da
+    gioco vero. E' il primo posto in cui ho scelto la leggibilita' contro la
+    scala esatta, e vale la pena averlo scritto.

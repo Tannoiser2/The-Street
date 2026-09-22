@@ -20,6 +20,8 @@ func _ready() -> void:
 	_run("3D: quote, sagome e plinti", _test_3d_quote)
 	_run("3D: cielo e telecamera", _test_3d_scena)
 	_run("3D: una partita vera sta sulla strada", _test_3d_partita)
+	_run("3D: i cubetti sulla basetta", _test_cubetti)
+	_run("3D: le linguette dei potenziamenti", _test_linguette)
 	_run("3D: le file e le plance sul tavolo", _test_tavolo)
 	_run("3D: cliccare una carta", _test_clic_sulle_carte)
 	_run("3D: l'inquadratura si calcola", _test_3d_inquadratura)
@@ -600,3 +602,68 @@ func _test_clic_sulle_carte() -> void:
 	_ok("sopra una carta non si trova uno slot",
 		BoardLayout3D.slot_at_ray(gs, c0.position + c0.size / 2.0 + Vector3(0, 400, 0),
 			Vector3(0, -1, 0)).is_empty())
+
+# ---- i cubetti e le linguette ---------------------------------------
+# I segnalini del gioco vero: bianchi la Vetusta', neri la resistenza
+# guadagnata, e la linguetta del potenziamento che spunta da sotto.
+func _test_cubetti() -> void:
+	var gs := _gioco().gs
+	var b := _metti(gs, "ed_capanne", 2, 1)
+	_eq("un edificio nuovo non ha cubetti", BoardLayout3D.cubetti(gs, b).size(), 0)
+
+	b.vetusta = 2
+	b.bonus_res = 3
+	var cc := BoardLayout3D.cubetti(gs, b)
+	_eq("un cubetto per ogni Vetusta' e per ogni resistenza", cc.size(), 5)
+	var bianchi := 0
+	var neri := 0
+	for c in cc:
+		if str(c["tipo"]) == "vetusta": bianchi += 1
+		else: neri += 1
+	_eq("  due bianchi, la Vetusta'", bianchi, 2)
+	_eq("  tre neri, la resistenza", neri, 3)
+
+	# Stanno sulla basetta, non per aria e non dentro il tavolo.
+	var basetta := BoardLayout3D.basetta_box(gs, b)
+	var fuori := 0
+	for c in cc:
+		var p: Vector3 = c["pos"]
+		if p.y < basetta.position.y: fuori += 1
+		if p.x < basetta.position.x - 1.0 or p.x > basetta.position.x + basetta.size.x + 1.0:
+			fuori += 1
+	_eq("  e tutti poggiano sulla basetta", fuori, 0)
+
+	# Tanti cubetti su una sagoma stretta si stringono invece di sbordare:
+	# meglio affollati che fuori dal pezzo.
+	b.vetusta = 4
+	b.bonus_res = 6
+	var molti := BoardLayout3D.cubetti(gs, b)
+	_eq("dieci cubetti ci stanno tutti", molti.size(), 10)
+	var larghezza := BoardLayout3D.span_w(b.width())
+	var sbordano := 0
+	for c in molti:
+		var p: Vector3 = c["pos"]
+		if absf(p.x - BoardLayout3D.standee_base(gs, b).x) > larghezza / 2.0 + 1.0:
+			sbordano += 1
+	_eq("  e nessuno sborda dalla sagoma", sbordano, 0)
+
+	# La resistenza negativa non toglie cubetti: non esistono cubetti in meno.
+	b.vetusta = 0
+	b.bonus_res = -2
+	_eq("una resistenza negativa non produce cubetti", BoardLayout3D.cubetti(gs, b).size(), 0)
+
+func _test_linguette() -> void:
+	var gs := _gioco().gs
+	var b := _metti(gs, "ed_capanne", 2, 1)
+	_eq("senza potenziamenti non spunta nulla", BoardLayout3D.linguette(gs, b).size(), 0)
+	b.upgrades.append("po_palizzata")
+	b.upgrades.append("po_statua")
+	var ll := BoardLayout3D.linguette(gs, b)
+	_eq("una linguetta per potenziamento", ll.size(), 2)
+	# Davanti alla basetta, dal lato di chi guarda: dietro la sagoma non si
+	# vedrebbero, ed e' l'errore che avevo fatto.
+	var base := BoardLayout3D.standee_base(gs, b)
+	var dietro := 0
+	for p in ll:
+		if p.z <= base.z + BoardLayout3D.BASETTA_D / 2.0: dietro += 1
+	_eq("  e spuntano davanti, non dietro la sagoma", dietro, 0)

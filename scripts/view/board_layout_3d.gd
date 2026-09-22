@@ -222,6 +222,52 @@ static func camera_pitch_deg(gs: GameState) -> float:
 	var oriz := Vector2(t.x - c.x, t.z - c.z).length()
 	return rad_to_deg(atan2(c.y - t.y, oriz))
 
+# ---- i cubetti sulla basetta ----------------------------------------
+# Il regolamento li descrive gia': "segnatela con i cubetti BIANCHI" per la
+# Vetusta', "resistenza permanente, segnata con un cubetto NERO" per i
+# potenziamenti Struttura. Stanno sulla basetta, davanti alla sagoma, dove si
+# leggono senza girare il tabellone.
+# E i potenziamenti si vedono per la linguetta: "infilate la carta sotto,
+# lasciandone sporgere la linguetta".
+const CUBETTO := 9.0       # come un cubetto da gioco vero
+const CUBETTO_GAP := 2.0
+const LINGUETTA_W := 14.0
+const LINGUETTA_D := 9.0
+
+# I cubetti di un edificio, in fila sul davanti della basetta.
+# Ogni voce: {"pos": Vector3, "tipo": "vetusta"|"resistenza"}.
+static func cubetti(gs: GameState, b: Building) -> Array[Dictionary]:
+	var out: Array[Dictionary] = []
+	var quanti := b.vetusta + maxi(0, b.bonus_res)
+	if quanti <= 0: return out
+	var passo := CUBETTO + CUBETTO_GAP
+	var base := standee_base(gs, b)
+	var larghezza := (quanti * CUBETTO + (quanti - 1) * CUBETTO_GAP)
+	# Se sono troppi per la basetta si stringono: meglio affollati che fuori.
+	var disponibile := span_w(b.width()) - 4.0
+	var scala: float = minf(1.0, disponibile / maxf(larghezza, 0.001))
+	var x0 := base.x - larghezza * scala / 2.0
+	var z := base.z + BASETTA_D / 2.0 - CUBETTO / 2.0 - 1.0
+	for i in quanti:
+		out.append({
+			"pos": Vector3(x0 + (i * passo + CUBETTO / 2.0) * scala, base.y + BASETTA_Y, z),
+			"lato": CUBETTO * scala,
+			"tipo": "vetusta" if i < b.vetusta else "resistenza",
+		})
+	return out
+
+# Le linguette dei potenziamenti, che sporgono da sotto la sagoma.
+static func linguette(gs: GameState, b: Building) -> Array[Vector3]:
+	var out: Array[Vector3] = []
+	var base := standee_base(gs, b)
+	for i in b.upgrades.size():
+		var dx := (float(i) - (b.upgrades.size() - 1) / 2.0) * (LINGUETTA_W + 2.0)
+		# Davanti alla basetta, non dietro la sagoma: una linguetta che spunta
+		# si deve vedere, e da questa parte del tavolo c'e' chi guarda.
+		out.append(Vector3(base.x + dx, base.y + 1.0,
+			base.z + BASETTA_D / 2.0 + LINGUETTA_D / 2.0 + 1.0))
+	return out
+
 # ---- le file e le plance, sul tavolo --------------------------------
 # Stanno nella scena e non in una sovrimpressione, perche' sul tavolo vero
 # sono carte: si vedono, si indicano e si cliccano come tutto il resto.
