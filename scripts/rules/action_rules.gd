@@ -49,8 +49,11 @@ static func quote_upgrade(gs: GameState, player: int, upg_id: String, target: Bu
 		return ActionQuote.no("nessun edificio bersaglio")
 	if target.owner != player:
 		return ActionQuote.no("l'edificio non e' tuo")
-	if not target.is_standing():
-		return ActionQuote.no("l'edificio non e' in piedi")
+	# Decisione del designer: un potenziamento su un rudere non ha senso.
+	# "in piedi" alla lettera includerebbe il rudere ("in piedi ma spento"),
+	# ma si potenzia solo cio' che e' vivo. Vedi docs/domande-aperte.md punto 9.
+	if not target.is_alive():
+		return ActionQuote.no("l'edificio non e' intatto")
 	var cap := upgrade_capacity(target.data)
 	if target.upgrades.size() >= cap:
 		return ActionQuote.no("l'edificio ha gia' %d potenziamenti (capienza %d)" % [target.upgrades.size(), cap])

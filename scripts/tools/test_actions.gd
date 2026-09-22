@@ -123,6 +123,17 @@ func _test_upgrade() -> void:
 	_give(gs6.current_player(), 0, 0)
 	_ok("rifiuta se manca l'oro", not ctl6.upgrade("po_palizzata", b6))
 
+	# decisione del designer (punto 9): solo su edifici intatti
+	var ctl9 := _game()
+	var gs9 := ctl9.gs
+	var rudere := _put(gs9, gs9.current_index, "ed_capanne", 2, 0, Enums.BuildingState.RUDERE)
+	gs9.upg_row = ["po_palizzata"]
+	ctl9.place_worker(2)
+	_give(gs9.current_player(), 0, 5)
+	_ok("rifiuta il potenziamento su un rudere", not ctl9.upgrade("po_palizzata", rudere))
+	rudere.state = Enums.BuildingState.INTATTO
+	_ok("  lo accetta appena l'edificio e' intatto", ctl9.upgrade("po_palizzata", rudere))
+
 	# capienza dichiarata dalla carta: "salvo le carte che ne dichiarano di piu'"
 	_eq("capienza base senza campo", ActionRules.upgrade_capacity(CardDB.buildings["ed_capanne"]), 1)
 	for id in ["ed_chiesa", "ed_abbazia", "ed_accademia", "ed_duomo"]:

@@ -48,59 +48,73 @@ Le azioni sono implementate con la lettura piu' letterale del regolamento, come
 chiede il brief. Dove due passaggi si possono leggere diversamente, la scelta e'
 segnata qui invece di essere data per buona.
 
-8. **Reclutamento: "in piedi" o "intatto"?** — la regola del reclutamento dice
-   "richiede che la classe del personaggio sia presente fra gli edifici **in
-   piedi** della colonna", ma la sezione sugli stati elenca "la sua classe conta
-   per il reclutamento" fra le proprieta' dell'**intatto**, e definisce il rudere
-   "in piedi ma spento".
-   Lettura adottata: **solo gli intatti**. E' la piu' restrittiva e coerente con
-   l'enumerazione degli stati. Se invece valgono anche i ruderi, cambia una riga
-   in `ActionRules.quote_recruit`.
+8. ~~**Reclutamento: "in piedi" o "intatto"?**~~ — **RISOLTA dal designer:**
+   *"reclutamento su edifici intatti (Il vescovo va in una chiesa attiva, non in
+   una abbandonata)"*. Confermata l'implementazione: `ActionRules.quote_recruit`
+   guarda solo gli intatti della colonna.
 
-9. **Potenziamento su un rudere** — "Infilate la carta sotto un vostro edificio
-   in piedi di quella colonna". Alla lettera "in piedi" include il rudere, che il
-   regolamento definisce tale. Lettura adottata: **letterale, il rudere si puo'
-   potenziare**. Ha un senso meccanico (un rudere affronta ancora gli eventi, e
-   un potenziamento Struttura gli darebbe resistenza), ma e' il rovescio della
-   scelta fatta al punto 8: vale la pena decidere i due casi insieme.
+9. ~~**Potenziamento su un rudere**~~ — **RISOLTA dal designer:** *"Il
+   potenziamento non ha senso farlo su un rudere"*. **Implementazione cambiata**:
+   avevo adottato la lettura letterale, per cui "in piedi" includeva il rudere.
+   Ora `quote_upgrade` richiede `is_alive()`. Con il punto 8 la coppia e'
+   coerente: si investe solo su cio' che e' vivo.
 
 10. ~~**Capienza dei potenziamenti**~~ — **RISOLTA in M4, ed era un mio errore.**
     Avevo scritto che nessuna carta dichiara una capienza diversa: avevo cercato
     un campo, non nel testo. Quattro edifici la dichiarano nel proprio
     `effect_text` — Chiesa, Abbazia, Accademia (2) e Duomo (3) — mentre la M2 ne
-    forzava 1 per tutti. Il regolamento dice "salvo le carte che ne dichiarano di
-    piu'", quindi era un bug, non una lettura ambigua.
-    Aggiunto il campo `upgrade_slots` alle 4 carte e allo schema; `ActionRules`
-    lo legge dalla carta. Le altre 56 non hanno il campo e restano a capienza 1.
+    forzava 1 per tutti. Aggiunto il campo `upgrade_slots` alle 4 carte e allo
+    schema; `ActionRules` lo legge dalla carta.
 
-11. **Bosco: "il restauro costa 1 in meno" — 1 di cosa?** — il terreno non dice
-    se lo sconto sia in pietra o in oro. Adottata la **pietra** (e' la risorsa in
-    cui si esprime il costo di quasi tutti gli edifici, e non puo' scendere sotto
-    zero). Da confermare.
+11. ~~**Bosco: "il restauro costa 1 in meno" — 1 di cosa?**~~ — **RISOLTA dal
+    designer:** *"Pietra"*. Confermata l'implementazione.
 
-12. **Piu' reclutamenti nella stessa era** — il regolamento non limita il
-    reclutamento a uno per era, e la sepoltura dice "uno solo per edificio", il
-    che presuppone che i personaggi possano essere piu' d'uno. Adottato:
-    **un personaggio per lavoratore specializzato**, quindi fino a 3 (4 con
-    Dinastia) per era. `PlayerState.specialized_character` e' diventato
-    `specialized_characters: Array[String]`.
+12. ~~**Piu' reclutamenti nella stessa era**~~ — **RISOLTA dal designer:**
+    *"nessun limite al reclutamento"*. Confermata l'implementazione: un
+    personaggio per lavoratore specializzato, quindi fino a 3 per era, 4 con
+    Dinastia.
 
-13. **Sepoltura sotto un rudere** — "infilatelo sotto la carta di un vostro
-    edificio ancora in piedi". Adottato `is_standing()`, quindi anche un rudere
-    puo' ospitare uno scheletro. Stessa famiglia di dubbi dei punti 8 e 9.
+13. ~~**Sepoltura sotto un rudere**~~ — **RISOLTA dal designer:** *"si la
+    sepoltura va dove si ha un edificio che ancora e' in piedi"*. Confermata
+    l'implementazione (`is_standing()`).
+    Da tenere presente: nel vocabolario del regolamento "in piedi" comprende il
+    rudere ("Rudere. In piedi ma spento"), quindi **un rudere puo' ospitare uno
+    scheletro**. E' l'unico punto in cui "in piedi" resta inclusivo, dopo che i
+    punti 8 e 9 hanno ristretto reclutamento e potenziamento ai soli intatti. Se
+    l'intenzione era "intatto" anche qui, e' una riga.
 
-14. **Potenziamenti Struttura: +1 fisso** — tutte e sei le carte Struttura dicono
-    "+1 res", quindi il cubetto nero e' implementato come +1 uniforme. Restano a
-    M4 i due casi condizionali gia' presenti nel testo: `po_cannoniere`
-    ("+2 su edificio Militare") e `po_merlatura` ("l'edificio conta anche come
-    Militare"). Anche gli effetti delle carte Arte e "altro" sono M4: in M2 la
-    carta viene attaccata all'edificio ma non produce ancora punti.
+14. **Potenziamenti Struttura — spiegato meglio** (era scritto male).
 
-15. **Un lavoratore per colonna** — la regola ("Potete avere al massimo un vostro
-    lavoratore per colonna") non era implementata nello scheletro. Aggiunta in M2
-    perche' e' un vincolo di legalita' del piazzamento, da cui dipendono tutte le
-    azioni. Segnalata qui perche' non era fra i TODO dichiarati.
+    Il regolamento dice che i potenziamenti **Struttura** danno "resistenza
+    permanente, segnata con un cubetto nero". Un cubetto = +1. Le carte Struttura
+    sono sei, e cinque dicono esattamente questo:
 
+    | carta | testo | implementato in M2 |
+    |---|---|---|
+    | `po_palizzata` | Struttura: +1 res. | +1 ✅ |
+    | `po_fondamenta_in_pietra` | Struttura: +1 res. | +1 ✅ |
+    | `po_bastioni` | Struttura: +1 res. | +1 ✅ |
+    | `po_contrafforte` | Struttura: +1 res. | +1 ✅ |
+    | `po_merlatura` | Struttura: +1 res. **L'edificio conta anche come Militare.** | +1, ma la seconda frase **no** |
+    | `po_cannoniere` | Struttura: +1 res **(+2 su edificio Militare)**. | +1 sempre, anche su un Militare dove dovrebbe essere +2 |
+
+    Quindi: la parte `+1` funziona su tutte e sei. Mancano **due** pezzi, ed
+    entrambi sono lavoro della M4 sul blocco potenziamenti:
+    - `po_cannoniere` deve dare +2 invece di +1 quando l'edificio e' Militare
+      (nello schema: `resistance` con `target: {class: ["militare"]}`);
+    - `po_merlatura` deve aggiungere la classe Militare all'edificio
+      (`rule_override: counts_as_class`), cosa che ne cambia anche la continuita'
+      di classe e la reazione agli eventi che colpiscono i Militari.
+
+    Discorso diverso per le altre due famiglie: **Arte** (9 carte) e **altro**
+    (10 carte). In M2 la carta viene attaccata all'edificio e pagata, ma **non
+    produce ancora nulla** — "Arte: +1 PV" non assegna punti, "Quando abiti
+    questo edificio, +1 pietra" non da' pietra. Sono i loro effetti specifici, e
+    sono esattamente cio' che la M4 deve strutturare. Nessun potenziamento non
+    Struttura ha oggi un effetto attivo.
+
+15. ~~**Un lavoratore per colonna**~~ — **CONFERMATA dal designer.** La regola
+    non era implementata nello scheletro; aggiunta in M2 e ora confermata.
 
 ## Emerse durante la Milestone 3 (allineamento all'oracolo)
 

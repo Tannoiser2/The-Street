@@ -59,7 +59,7 @@ static func _try_upgrade(ctl: GameController, col: int) -> bool:
 	var me := gs.current_index
 	for upg_id in gs.upg_row.duplicate():
 		for b in gs.grid.in_column(col):
-			if b.owner == me and b.is_standing() and ctl.upgrade(upg_id, b): return true
+			if b.owner == me and b.is_alive() and ctl.upgrade(upg_id, b): return true
 	return false
 
 static func _try_restore(ctl: GameController, col: int) -> bool:
