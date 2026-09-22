@@ -1,5 +1,5 @@
 {
-  "_nota": "Numero della sagoma nel PDF, in ordine di estrazione (tools/estrai_grafica.py). Ricavata riconoscendo le illustrazioni una per una; vedi docs/mappatura-sagome.md per il metodo e per le sei ancora aperte.",
+  "_nota": "Numero della sagoma nel PDF in ordine di estrazione (tools/estrai_grafica.py). Ricavata riconoscendo le illustrazioni una per una e chiudendo il resto per esclusione sulla larghezza. Vedi docs/mappatura-sagome.md: due coppie condividono il disegno e tre larghezze non concordano coi dati.",
   "ed_capanne": 2,
   "ed_dolmen": 3,
   "ed_grotte_dipinte": 1,
@@ -18,6 +18,7 @@
   "ed_sacello": 19,
   "ed_torre_di_vedetta": 20,
   "ed_tempio": 17,
+  "ed_ponte": 35,
   "ed_emporio": 27,
   "ed_insulae": 18,
   "ed_foro": 15,
@@ -30,6 +31,8 @@
   "ed_conceria": 28,
   "ed_mulino": 29,
   "ed_chiesa": 30,
+  "ed_mercato": 24,
+  "ed_ospedale_dei_pellegrini": 33,
   "ed_castello": 31,
   "ed_abbazia": 34,
   "ed_arsenale": 36,
@@ -45,13 +48,16 @@
   "ed_duomo": 37,
   "ed_fortezza_bastionata": 39,
   "ed_piazza_monumentale": 42,
+  "ed_fondazione_darte": 49,
   "ed_condominio": 50,
   "ed_caffe_letterario": 51,
   "ed_officina": 52,
   "ed_monumento_ai_caduti": 55,
+  "ed_museo": 53,
   "ed_grattacielo": 58,
   "ed_biblioteca": 54,
   "ed_ponte_in_acciaio": 57,
   "ed_stazione": 60,
-  "ed_parco_archeologico": 56
+  "ed_parco_archeologico": 59,
+  "ed_universita": 56
 }
