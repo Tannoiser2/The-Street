@@ -52,7 +52,7 @@ const APPLIED: Array[String] = [
 const APPLIED_OVERRIDES: Array[String] = ["first_terrapieno_free", "free_restore_of_class",
 	"ignore_terrain_requirement", "counts_as_class", "arte_vp_bonus", "free_upgrade_of_class",
 	"no_production_last_round",
-	"free_upgrade_on_loss", "resource_exchange"]
+	"free_upgrade_on_loss", "resource_exchange", "upgrade_on_others_building"]
 
 # Override che NON richiedono codice: descrivono un comportamento che il modello
 # generico gia' fornisce. Tenerli distinti dagli APPLIED_OVERRIDES e' deliberato:
@@ -85,6 +85,24 @@ static func pending() -> Array[String]:
 				var key: String = "%s:%s:%s" % [tipo, e["hook"], e["op"]]
 				if not key in APPLIED and not key in out:
 					out.append(key)
+	out.sort()
+	return out
+
+# Tutte le chiavi che i DATI dichiarano davvero: `tipo:hook:op` per gli effetti
+# normali, il nome per gli override. Serve a provare che i registri qui sopra
+# descrivono i dati e non contengano voci inventate: una chiave elencata come
+# "applicata" ma che nei dati non esiste non maschera nulla, e nasconderebbe
+# il fatto che nessuno la legge.
+static func declared() -> Array[String]:
+	var out: Array[String] = []
+	for coppia in _blocchi():
+		var tipo: String = coppia[0]
+		var block: Dictionary = coppia[1]
+		for id in block:
+			for e in block[id].get("effects", []):
+				var k: String = str(e["name"]) if str(e["op"]) == "rule_override" \
+					else "%s:%s:%s" % [tipo, e["hook"], e["op"]]
+				if not k in out: out.append(k)
 	out.sort()
 	return out
 

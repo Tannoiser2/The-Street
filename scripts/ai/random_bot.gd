@@ -78,6 +78,12 @@ static func _try_upgrade(ctl: GameController, col: int) -> bool:
 	for upg_id in gs.upg_row.duplicate():
 		for b in gs.grid.in_column(col):
 			if b.owner == me and b.is_alive() and ctl.upgrade(upg_id, b): return true
+	# L'Artista di corte: firmare un edificio altrui e' gratis e rende per
+	# tutta la partita, quindi il bot ci prova prima di rinunciare. Senza
+	# questo tentativo la carta non entrerebbe mai in gioco nelle partite.
+	for upg_id in gs.upg_row.duplicate():
+		for b in gs.grid.in_column(col):
+			if b.owner != me and b.is_alive() and ctl.upgrade(upg_id, b): return true
 	return false
 
 static func _try_restore(ctl: GameController, col: int) -> bool:

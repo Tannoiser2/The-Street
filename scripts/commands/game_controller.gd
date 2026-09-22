@@ -234,6 +234,20 @@ func upgrade(upg_id: String, target: Building) -> bool:
 	if not vescovo.is_empty():
 		Effects.consume_override(gs, p.index, vescovo[1])
 		gs.log_line("%s: potenziamento gratuito su %s" % [vescovo[1]["name"], target.data["name"]])
+	# Artista di corte: il +1 cultura e' una tantum e va a CHI PIAZZA la carta,
+	# mentre l'oro a ogni attivazione resta attaccato all'edificio per tutta la
+	# partita - anche quando il personaggio, che dura un'era, e' gia' sparito.
+	if target.owner != p.index:
+		var artista := Effects.player_override(gs, p.index, "upgrade_on_others_building")
+		if not artista.is_empty():
+			Effects.consume_override(gs, p.index, artista[1])
+			var subito := int(artista[0].get("value", 0))
+			if subito > 0: p.add_vp("cultura", subito)
+			var rendita := int(artista[0].get("oro", 0))
+			if rendita > 0:
+				target.patrons[p.index] = int(target.patrons.get(p.index, 0)) + rendita
+			gs.log_line("%s: giocatore %d firma %s e ne incassa %d oro a ogni attivazione" % [
+				artista[1]["name"], p.index, target.data["name"], rendita])
 	p.pay(q.pietra, q.oro)
 	target.upgrades.append(upg_id)
 	# Gli effetti vengono dai dati della carta, con l'edificio ospite come

@@ -2555,6 +2555,8 @@
           "hook": "on_build",
           "op": "rule_override",
           "name": "upgrade_on_others_building",
+          "value": 1,
+          "oro": 1,
           "duration": "era",
           "times": 1
         }

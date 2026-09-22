@@ -35,6 +35,8 @@ func _ready() -> void:
 	_run("Anni della fame", _test_anni_della_fame)
 	_run("Eruzione: il potenziamento in cambio della perdita", _test_eruzione)
 	_run("Mercante di ossidiana", _test_mercante_scambi)
+	_run("Artista di corte", _test_artista)
+	_run("  e il suo incasso", _test_artista_incasso)
 	_run("lo schema e' davvero chiuso", _test_schema_closed)
 	print("\n%d superati, %d falliti" % [_passed, _failed])
 	get_tree().quit(0 if _failed == 0 else 1)
@@ -326,17 +328,28 @@ func _test_pending() -> void:
 	# struttura un effetto nuovo senza implementarlo, compare qui da solo.
 	var pend := Effects.pending()
 	print("     inerti oggi (%d): %s" % [pend.size(), ", ".join(pend)])
-	_ok("il registro dei pendenti si calcola dai dati", pend.size() > 0)
+	# Con zero pendenti, "la lista e' vuota" non prova piu' nulla da sola: lo
+	# sarebbe anche se `pending()` fosse rotta. La prova diventa che ogni voce
+	# dichiarata applicata esista DAVVERO nei dati - una chiave inventata non
+	# maschera niente, ma fa credere che qualcuno la legga.
+	var dichiarate := Effects.declared()
+	_ok("i dati dichiarano degli effetti", dichiarate.size() > 20)
+	for k in Effects.APPLIED:
+		_ok("  e %s e' fra questi" % k, k in dichiarate)
+	for n in Effects.APPLIED_OVERRIDES:
+		_ok("  e %s e' fra questi" % n, n in dichiarate)
+	for n in Effects.DESCRIPTIVE_OVERRIDES:
+		_ok("  e %s e' fra questi" % n, n in dichiarate)
 	for k in Effects.APPLIED:
 		_ok("  applicato: %s" % k, not k in pend)
 	for n in Effects.APPLIED_OVERRIDES:
 		_ok("  applicato: %s" % n, not n in pend)
 	for n in Effects.DESCRIPTIVE_OVERRIDES:
 		_ok("  descrittivo, nessun codice necessario: %s" % n, not n in pend)
-	# gli override noti come inerti devono restare segnalati: questa lista si
-	# accorcia solo quando l'effetto viene davvero implementato.
-	for n in ["upgrade_on_others_building"]:
-		_ok("  ancora inerte, e segnalato: %s" % n, n in pend)
+	# Non resta piu' nessun override inerte. La guardia diventa l'opposto: se
+	# `pending()` torna a elencarne uno, o e' un effetto nuovo nei dati senza
+	# codice, oppure qualcuno ha smesso di leggerne uno che prima leggeva.
+	_eq("nessun override dichiarato e' rimasto inerte", pend, [] as Array[String])
 
 	# i 25 personaggi hanno tutti effetti strutturati
 	var senza: Array[String] = []
@@ -1937,3 +1950,121 @@ func _test_mercante_scambi() -> void:
 	p4.reset_for_era()
 	p4.specialized_characters = ["pe_mercante_di_ossidiana"] as Array[String]
 	_ok("all'era dopo si ricomincia", ctl4.exchange(true))
+
+# ---- Artista di corte ------------------------------------------------
+# L'unica carta che rompe il divieto del regolamento, "infilate la carta sotto
+# un VOSTRO edificio". Prepara: io sono il giocatore di turno, l'edificio
+# bersaglio e' di un altro e sta nella colonna che attivero'.
+func _scena_artista(col: int, con_artista := true) -> Array:
+	var ctl := _game()
+	var gs := ctl.gs
+	_flat(gs, Enums.Terrain.PIANURA)
+	var io := gs.current_index
+	var altro: int = (io + 1) % gs.n_players
+	var b := Building.new()
+	b.uid = gs.new_uid()
+	b.data = CardDB.buildings["ed_capanne"]     # produce 1 pietra
+	b.owner = altro
+	b.era_built = gs.era
+	b.col_from = col
+	b.col_to = col + 1
+	gs.grid.buildings.append(b)
+	gs.upg_row = ["po_statua", "po_palizzata"]
+	gs.upg_decks[gs.era] = []
+	if con_artista:
+		gs.players[io].specialized_characters = ["pe_artista_di_corte"] as Array[String]
+	return [ctl, b, io, altro]
+
+func _test_artista() -> void:
+	# Senza l'Artista il divieto tiene.
+	var s0 := _scena_artista(2, false)
+	var ctl0: GameController = s0[0]
+	var q0 := ActionRules.quote_upgrade(ctl0.gs, s0[2], "po_statua", s0[1])
+	_ok("senza l'Artista l'edificio altrui e' vietato", not q0.legal)
+	_eq("  e il motivo e' quello giusto", q0.reason, "l'edificio non e' tuo")
+
+	# Con l'Artista: legale, e gratis.
+	var s := _scena_artista(2)
+	var ctl: GameController = s[0]
+	var bers: Building = s[1]
+	var io: int = s[2]
+	var q := ActionRules.quote_upgrade(ctl.gs, io, "po_statua", bers)
+	_ok("con l'Artista diventa legale", q.legal, q.reason)
+	_eq("  e costa 0", [q.pietra, q.oro], [0, 0])
+
+	# Fuori dal limite di capienza: l'edificio ne porta gia' uno.
+	bers.upgrades.append("po_idolo")
+	var q2 := ActionRules.quote_upgrade(ctl.gs, io, "po_statua", bers)
+	_ok("e non conta nel limite di capienza", q2.legal, q2.reason)
+	bers.upgrades.clear()
+
+	# Il comando: +1 PV una tantum a me, e l'edificio mi registra.
+	ctl.place_worker(2)
+	var p: PlayerState = ctl.gs.players[io]
+	p.pietra = 0
+	p.oro = 0
+	var prima: int = p.vp
+	_ok("il potenziamento passa", ctl.upgrade("po_statua", bers))
+	_eq("  senza spendere nulla", [p.pietra, p.oro], [0, 0])
+	# La Statua da' 2 PV a chi la piazza, piu' 1 di cultura dell'Artista.
+	_eq("  +2 della Statua e +1 dell'Artista, a me", p.vp - prima, 3)
+	_eq("  e l'edificio altrui mi registra come firmatario", int(bers.patrons.get(io, 0)), 1)
+
+	# Una sola volta per era.
+	var s2 := _scena_artista(2)
+	var ctl2: GameController = s2[0]
+	var b2: Building = s2[1]
+	var io2: int = s2[2]
+	var b2b := Building.new()
+	b2b.uid = ctl2.gs.new_uid()
+	b2b.data = CardDB.buildings["ed_capanne"]
+	b2b.owner = s2[3]
+	b2b.era_built = ctl2.gs.era
+	b2b.col_from = 2
+	b2b.col_to = 3
+	ctl2.gs.grid.buildings.append(b2b)
+	ctl2.place_worker(2)
+	_ok("il primo passa", ctl2.upgrade("po_statua", b2))
+	var q3 := ActionRules.quote_upgrade(ctl2.gs, io2, "po_palizzata", b2b)
+	_ok("il secondo edificio altrui nella stessa era e' rifiutato", not q3.legal)
+	_eq("  col divieto di sempre", q3.reason, "l'edificio non e' tuo")
+
+func _test_artista_incasso() -> void:
+	# L'incasso a ogni attivazione, e il fatto che sopravviva al personaggio.
+	var s := _scena_artista(2)
+	var ctl: GameController = s[0]
+	var gs := ctl.gs
+	var bers: Building = s[1]
+	var io: int = s[2]
+	var altro: int = s[3]
+	ctl.place_worker(2)
+	_ok("firma l'edificio altrui", ctl.upgrade("po_statua", bers))
+
+	# Le Capanne producono 1 pietra al PROPRIETARIO; a me va solo l'oro.
+	var res := _attiva(gs, altro, 2)
+	_eq("il proprietario incassa la sua produzione", res[altro], [1 + 2, 0])
+	_eq("  e il firmatario il suo oro", res[io], [0, 1])
+
+	# Il personaggio dura un'era; l'incasso dura la partita.
+	gs.players[io].reset_for_era()
+	gs.era += 1
+	_ok("il personaggio non c'e' piu'", gs.players[io].specialized_characters.is_empty())
+	var res2 := _attiva(gs, altro, 2)
+	_eq("l'incasso resta anche senza il personaggio", res2[io], [0, 1])
+
+	# Se l'edificio smette di essere vivo, non paga piu' nessuno.
+	bers.state = Enums.BuildingState.ROVINA
+	var res3 := _attiva(gs, altro, 2)
+	_eq("un edificio in rovina non paga il firmatario", res3[io], [0, 0])
+
+	# Non e' una produzione: l'Industriale non la alza.
+	var t := _scena_artista(2)
+	var ctl_t: GameController = t[0]
+	var gs_t := ctl_t.gs
+	var io_t: int = t[2]
+	var altro_t: int = t[3]
+	ctl_t.place_worker(2)
+	_ok("firma", ctl_t.upgrade("po_statua", t[1]))
+	gs_t.players[io_t].specialized_characters = ["pe_industriale"] as Array[String]
+	var res4 := _attiva(gs_t, altro_t, 2)
+	_eq("l'incasso del firmatario non e' una produzione di oro", res4[io_t], [0, 1])

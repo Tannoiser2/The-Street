@@ -20,6 +20,11 @@ var vetusta: int = 0          # cubetti bianchi: +1 per evento superato
 var protection: int = 0       # +2 per lavoratore piazzato; si azzera a fine era
 var protected_by: int = -1    # giocatore il cui lavoratore lo abita; -1 = nessuno
 var upgrades: Array = []      # id dei potenziamenti infilati sotto
+# Artista di corte: chi ha infilato una carta sotto un edificio ALTRUI incassa
+# da quell'edificio per il resto della partita. Indice giocatore -> oro per
+# attivazione. Sta sull'edificio e non sul personaggio perche' il personaggio
+# dura un'era mentre questo incasso dura la partita.
+var patrons: Dictionary = {}
 var extra_classes: Array[String] = []  # classi acquisite (po_merlatura: "conta anche come Militare")
 var imprint: String = ""      # Impronta infilata sotto: "un edificio puo' portarne una sola"
 var buried_character: String = ""   # personaggio sepolto qui (meccanica Scheletri)

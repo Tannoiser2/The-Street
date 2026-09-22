@@ -36,6 +36,14 @@ static func activate(gs: GameState, player: int, col: int) -> void:
 		ow.gain(pp + ex.x, po + ex.y)
 		if pc > 0:
 			ow.add_vp("cultura", pc)
+		# Artista di corte: chi ha firmato l'edificio altrui incassa la sua
+		# quota. Non e' una produzione dell'edificio ma un taglio dell'artista,
+		# quindi non conta per l'Industriale, come l'oro della Prosperita'.
+		for chi in b.patrons:
+			var quota := int(b.patrons[chi])
+			if quota <= 0: continue
+			gs.players[int(chi)].gain(0, quota)
+			gs.log_line("%s: giocatore %d incassa %d oro come firmatario" % [b.data["name"], int(chi), quota])
 		if int(b.data.get("exhaustible", 0)) > 0:
 			b.charges -= 1
 			if b.charges <= 0:

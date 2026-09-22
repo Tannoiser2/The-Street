@@ -52,13 +52,19 @@ static func quote_upgrade(gs: GameState, player: int, upg_id: String, target: Bu
 		return ActionQuote.no("potenziamento non disponibile nella fila")
 	if target == null:
 		return ActionQuote.no("nessun edificio bersaglio")
-	if target.owner != player:
+	# Artista di corte: "il primo potenziamento che piazzi su un edificio altrui".
+	# E' l'unica eccezione al divieto del regolamento, "infilate la carta sotto
+	# un VOSTRO edificio in piedi". Gratis, e fuori dal limite di capienza.
+	var altrui := target.owner != player
+	if altrui and Effects.player_override(gs, player, "upgrade_on_others_building").is_empty():
 		return ActionQuote.no("l'edificio non e' tuo")
 	# Decisione del designer: un potenziamento su un rudere non ha senso.
 	# "in piedi" alla lettera includerebbe il rudere ("in piedi ma spento"),
 	# ma si potenzia solo cio' che e' vivo. Vedi docs/domande-aperte.md punto 9.
 	if not target.is_alive():
 		return ActionQuote.no("l'edificio non e' intatto")
+	if altrui:
+		return ActionQuote.yes(0, 0, target)
 	var cap := upgrade_capacity_for(gs, player, target)
 	if target.upgrades.size() >= cap:
 		return ActionQuote.no("l'edificio ha gia' %d potenziamenti (capienza %d)" % [target.upgrades.size(), cap])

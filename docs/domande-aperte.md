@@ -522,20 +522,42 @@ dato è stato importato da lì. Ma due confronti fra ciò che è stampato e
     lettura giusta fosse l'opposta, basta estendere `production_bonus` al ramo
     della Prosperita' in `EraRules.activate`.
 
-    Resta **un solo effetto inerte**, l'Artista di corte: vedi punto 39.
+    Chiusi anche questi, **non resta nessun effetto inerte**: vedi punto 39.
 
-39. **Artista di corte: la risposta del designer diverge dal testo della
-    carta, e non ho voluto indovinare la differenza.** La carta dice: «il primo
-    potenziamento che piazzi su un edificio altrui e' gratis e incassi 1 oro
-    dal proprietario». La risposta dice invece che l'edificio altrui prende
-    +1 cultura e che l'oro lo incasso *ogni volta che quell'edificio si
-    attiva*. Sono due carte diverse: una paga una volta, l'altra paga per
-    sempre. Domande aperte, in attesa: il +1 cultura va al proprietario
-    dell'edificio o a chi piazza la carta; il potenziamento resta gratis;
-    l'incasso ricorrente dura l'era o la partita; e resta ferma la sola cosa
-    certa, cioe' che il regolamento vieta di potenziare un edificio altrui
-    («infilate la carta sotto un *vostro* edificio»), quindi questa carta crea
-    comunque un'eccezione.
+39. **Artista di corte: la carta che il designer ha riscritto.** Il testo
+    stampato dice «il primo potenziamento che piazzi su un edificio altrui e'
+    gratis e incassi 1 oro dal proprietario»: un incasso una tantum. La
+    decisione del designer ne fa un'altra carta, e questa e' quella viva:
+
+    - il potenziamento su un edificio **altrui** e' gratis, e **non conta nel
+      limite di capienza** dell'edificio (uno per era);
+    - chi piazza la carta prende **+1 cultura una tantum**, cioe' +1 PV subito;
+    - e incassa **1 oro a ogni attivazione di quell'edificio, per tutta la
+      partita**.
+
+    Il testo della carta va quindi riscritto: oggi contraddice la regola.
+
+    **Perche' l'incasso sta sull'edificio e non sul personaggio.** I
+    personaggi durano un'era (`specialized_characters` si svuota a ogni
+    `reset_for_era`), mentre questo incasso dura la partita. Se l'avessi
+    cercato fra gli effetti attivi del giocatore, avrebbe smesso di pagare
+    alla fine dell'era in cui si recluta l'Artista. Sta percio' su
+    `Building.patrons`, che dice quanto oro quell'edificio paga a chi non ne
+    e' proprietario. C'e' un test che svuota i personaggi, avanza l'era e
+    verifica che l'incasso continui.
+
+    **Due conseguenze.** Il potenziamento lo piazzi tu ma l'edificio e' suo:
+    i PV della carta vanno a te, mentre un bonus di Struttura (il cubetto
+    nero) resta attaccato all'edificio, e quindi **rinforza l'avversario**.
+    Conviene percio' firmare con una carta Arte, non con una Struttura. E
+    l'incasso del firmatario **non e' una produzione**: e' un taglio
+    dell'artista, quindi l'Industriale non lo alza, come non alza l'oro della
+    Prosperita'.
+
+    **L'unica cosa rimasta ferma dal testo originale** e' che il regolamento
+    vieta di potenziare un edificio altrui («infilate la carta sotto un
+    *vostro* edificio»): questa carta e' l'unica eccezione a quel divieto in
+    tutto il gioco.
 
 40. **Un bersaglio scelto dal giocatore, approssimato in attesa della M5.**
     Il potenziamento gratuito dell'Eruzione va «piazzato subito», ma su *quale*
