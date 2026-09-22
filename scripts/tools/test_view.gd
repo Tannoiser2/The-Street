@@ -26,6 +26,7 @@ func _ready() -> void:
 	_run("3D: cliccare una carta", _test_clic_sulle_carte)
 	_run("3D: l'inquadratura si calcola", _test_3d_inquadratura)
 	_run("3D: dal clic allo slot", _test_raggio)
+	_run("3D: chi crolla perde la sagoma e resta la basetta", _test_rovine)
 	_run("3D: la telecamera gira attorno al tavolo", _test_orbita)
 	_run("  e cliccare funziona da ogni angolo", _test_orbita_e_clic)
 	_run("  e finisce davvero dove dice, nella scena", _test_telecamera_nel_mondo)
@@ -238,10 +239,23 @@ func _test_3d_assi() -> void:
 	# slot ne occupa 15.
 	_approx("i binari sono contigui, non distanziati",
 		absf(BoardLayout3D.rail_z(2) - BoardLayout3D.rail_z(1)), BoardLayout3D.SLOT_D)
-	_approx("i cinque binari riempiono la tessera",
-		BoardLayout3D.RAILS * BoardLayout3D.SLOT_D, BoardLayout3D.TESSERA_D)
-	_ok("la basetta occupa meno di mezzo slot: e' cosi' che si vede dietro",
-		BoardLayout3D.BASETTA_D < BoardLayout3D.SLOT_D / 2.0)
+	# I binari riempiono la FASCIA DEL DISEGNO, non tutta la tessera: sotto
+	# ci sono icone, regola e "Prosperita' Urbana", che devono restare
+	# leggibili per tutta la partita.
+	_approx("i cinque binari riempiono la fascia del disegno",
+		BoardLayout3D.RAILS * BoardLayout3D.SLOT_D,
+		BoardLayout3D.BANDA_GIU - BoardLayout3D.BANDA_SU)
+	_ok("la fascia sta dentro la tessera e lascia scoperto il testo",
+		BoardLayout3D.BANDA_SU > 0.0
+		and BoardLayout3D.BANDA_GIU < BoardLayout3D.TESSERA_D - 50.0,
+		"fascia %.0f-%.0f su %.0f mm" % [BoardLayout3D.BANDA_SU,
+			BoardLayout3D.BANDA_GIU, BoardLayout3D.TESSERA_D])
+	_ok("nessuna sagoma finisce sul testo della tessera",
+		BoardLayout3D.rail_z(1) + BoardLayout3D.SLOT_D <= BoardLayout3D.BANDA_GIU + 0.001)
+	_ok("la basetta sta dentro il suo binario",
+		BoardLayout3D.BASETTA_D < BoardLayout3D.SLOT_D,
+		"basetta %.0f su un binario di %.0f mm" % [BoardLayout3D.BASETTA_D,
+			BoardLayout3D.SLOT_D])
 	_ok("le colonne procedono lungo la X", BoardLayout3D.col_x(0) < BoardLayout3D.col_x(1))
 	_ok("le quote salgono lungo la Y",
 		BoardLayout3D.level_y(2) > BoardLayout3D.level_y(1))
@@ -291,15 +305,16 @@ func _test_3d_quote() -> void:
 	altezze.sort()
 	var mediana: float = altezze[altezze.size() / 2]
 
-	# Il passo fra le quote e' l'altezza del rialzo, una misura fisica del
-	# gioco: la sagoma TIPICA ci sta sotto, ma una sagoma alta lo scavalca -
-	# ed e' giusto che lo faccia, perche' e' quello che fa un grattacielo.
-	# Il test regge il caso tipico, non pretende l'impossibile dal caso limite.
-	_ok("il passo fra le quote copre la sagoma tipica (mediana %.0f su %.0f)"
-		% [mediana, BoardLayout3D.LEVEL_H], mediana <= BoardLayout3D.LEVEL_H)
-	_ok("  e la piu' alta lo scavalca, come deve (%s: %.0f mm)" % [nome, piu_alta],
-		piu_alta > BoardLayout3D.LEVEL_H)
-	_eq("  ed e' il Grattacielo", nome, "Grattacielo")
+	# Il passo fra le quote e' lo spessore di cio' che sta sotto, e sotto c'e'
+	# solo la BASETTA: chi crolla in rovina perde la sagoma. Un edificio non
+	# si trova mai sopra una sagoma in piedi, perche' le basi diventano tutte
+	# rovina nel momento in cui ci si costruisce sopra - quindi non c'e'
+	# niente da scavalcare, e il passo non deve piu' coprire una sagoma.
+	_approx("il passo fra le quote e' la basetta, non una sagoma",
+		BoardLayout3D.LEVEL_H, BoardLayout3D.BASETTA_Y)
+	_ok("  e le sagome sono tutte piu' alte del passo (mediana %.0f, max %.0f)"
+		% [mediana, piu_alta], mediana > BoardLayout3D.LEVEL_H)
+	_eq("  la piu' alta e' il Grattacielo", nome, "Grattacielo")
 
 	# Le misure vengono dal cartone: ogni edificio deve averle.
 	var senza := 0
@@ -312,8 +327,8 @@ func _test_3d_quote() -> void:
 	var sopra := _metti(gs, "ed_capanne", 2, 3, 1)
 	var basetta := BoardLayout3D.basetta_box(gs, sopra)
 	_approx("la basetta e' profonda 15 mm", basetta.size.z, BoardLayout3D.BASETTA_D)
-	_ok("  cioe' meno di un terzo dello slot",
-		basetta.size.z < BoardLayout3D.SLOT_D / 3.0)
+	_ok("  cioe' meno di un binario, che ne e' profondo %.0f"
+		% BoardLayout3D.SLOT_D, basetta.size.z < BoardLayout3D.SLOT_D)
 	_ok("  e molto meno della profondita' della strada",
 		basetta.size.z < BoardLayout3D.board_d() / 10.0)
 	_ok("il cartone e' spesso 4 mm, come il vero",
@@ -407,11 +422,17 @@ func _test_raggio() -> void:
 	# Niente soglia a naso: due limiti, e l'angolo deve rispettarli entrambi.
 	var visibile := BoardLayout3D.quota_visibile()
 	var scorcio := BoardLayout3D.scorcio()
-	_ok("dietro la fila davanti resta visibile almeno il 75%% di una sagoma (%.0f%%)"
-		% (visibile * 100.0), visibile >= 0.75)
-	_ok("  e una sagoma non e' schiacciata sotto il 65%% (%.0f%%)"
-		% (scorcio * 100.0), scorcio >= 0.65,
-		"con l'illustrazione sopra, piu' schiacciata di cosi' non si legge")
+	# Le due soglie di prima - 75% visibile e 65% di scorcio - non stanno piu'
+	# insieme da quando i binari si sono stretti a 26 mm per entrare nella
+	# fascia del disegno: la prima vuole almeno 62 gradi, la seconda al
+	# massimo 49. Si e' tenuta la visibilita' dov'era e il prezzo lo paga lo
+	# scorcio. Le soglie qui sotto sono quelle nuove, non le vecchie
+	# allentate di nascosto.
+	_ok("dietro la fila davanti resta visibile almeno il 70%% di una sagoma (%.0f%%)"
+		% (visibile * 100.0), visibile >= 0.70)
+	_ok("  e una sagoma non e' schiacciata sotto il 45%% (%.0f%%)"
+		% (scorcio * 100.0), scorcio >= 0.45,
+		"a 70 gradi erano quasi coricate e non si riconoscevano piu'")
 	_ok("  e la telecamera usa davvero quell'inclinazione",
 		is_equal_approx(BoardLayout3D.camera_pitch_deg(gs), BoardLayout3D.INCLINAZIONE))
 
@@ -810,3 +831,41 @@ func _test_telecamera_nel_mondo() -> void:
 			* BoardLayout3D.U)
 	_ok("  e continua a guardarla", not cam.is_position_behind(orb.mira * BoardLayout3D.U))
 	vista.queue_free()
+
+# ---- le rovine ------------------------------------------------------
+# Un edificio crollato non e' piu' in piedi: resta il piede, che fa da
+# fondamenta a chi ci costruisce sopra. Disegnarlo come un rudere era il
+# motivo per cui in partita sembrava che nessun edificio crollasse mai.
+func _test_rovine() -> void:
+	var gs := _gioco().gs
+	var b := _metti(gs, "ed_capanne", 1, 2)
+	_ok("un edificio intatto ha la sua sagoma", BoardLayout3D.ha_sagoma(b))
+	b.state = Enums.BuildingState.RUDERE
+	_ok("  il rudere ce l'ha ancora: e' in piedi, solo spento",
+		BoardLayout3D.ha_sagoma(b))
+	_ok("  e la mostra in grigio", BoardLayout3D.sagoma_path(b).contains("grigio"))
+	b.state = Enums.BuildingState.ROVINA
+	_ok("  chi e' crollato no", not BoardLayout3D.ha_sagoma(b))
+	var piede := BoardLayout3D.basetta_box(gs, b)
+	_ok("  ma la basetta resta, e regge la quota sopra",
+		piede.size.y > 0.0 and piede.size.z > 0.0)
+	_approx("  che e' esattamente il passo fra le quote",
+		piede.size.y, BoardLayout3D.LEVEL_H)
+
+	# E non e' un caso di laboratorio: in partita le rovine sono la meta'
+	# degli edifici. Se questo conto va a zero, la regola sopra non serve piu'
+	# a niente e qualcosa si e' rotto negli eventi.
+	var rovine := 0
+	var totali := 0
+	for s in 5:
+		var ctl := GameController.new()
+		ctl.new_game(3, 100 + s)
+		var giri := 0
+		while ctl.gs.phase != Enums.Phase.FINE_PARTITA and giri < 4000:
+			RandomBot.play_turn(ctl)
+			giri += 1
+		for e in ctl.gs.grid.buildings:
+			totali += 1
+			if e.state == Enums.BuildingState.ROVINA: rovine += 1
+	_ok("in partita gli edifici crollano davvero (%d su %d in 5 partite)"
+		% [rovine, totali], rovine > totali / 5)

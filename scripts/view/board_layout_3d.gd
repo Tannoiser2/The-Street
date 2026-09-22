@@ -25,9 +25,18 @@ const U := 0.01                  # 1 unita' Godot = 100 mm
 
 const RAILS := 5
 const TESSERA_W := 63.0          # larghezza di una tessera colonna
-const TESSERA_D := 271.0         # profondita': i cinque binari, contigui
+const TESSERA_D := 271.0         # profondita' della tessera intera
 const TESSERA_Y := 2.0           # spessore della tessera stesa sul tavolo
-const SLOT_D := TESSERA_D / float(RAILS)     # 54,2 mm per binario
+# I BINARI STANNO NELLA FASCIA DEL DISEGNO, non su tutta la tessera. Sotto
+# l'illustrazione la tessera porta le icone di produzione, la regola e la
+# fascia "Prosperita' Urbana": una sagoma piazzata li' le coprirebbe, ed e'
+# roba che si deve leggere per tutta la partita.
+# La fascia e' misurata sull'immagine stampata, riga per riga: il cielo
+# comincia a 30 mm dal bordo alto e la cornice d'oro sotto il disegno cade a
+# 160. Centotrenta millimetri per cinque binari.
+const BANDA_SU := 30.0
+const BANDA_GIU := 160.0
+const SLOT_D := (BANDA_GIU - BANDA_SU) / float(RAILS)   # 26 mm per binario
 const SAGOMA_MODULO := 60.3      # 1/2/3 slot -> 60,3 / 120,6 / 180,9 mm
 const SAGOMA_SPESSORE := 4.0     # cartone
 const BASETTA_D := 15.0          # il piede che tiene in piedi la sagoma
@@ -35,7 +44,12 @@ const BASETTA_Y := 5.0
 # Le sagome sono contigue sul binario, ma la basetta ne occupa 15 mm sui 54:
 # il resto dello slot resta scoperto, ed e' quello che lascia vedere le file
 # dietro senza bisogno di allontanare i binari.
-const LEVEL_H := 85.0            # passo fra le quote: mai meno di una sagoma
+# Il passo fra le quote e' lo spessore di cio' che sta sotto, e sotto c'e'
+# solo la BASETTA: chi crolla in rovina perde la sagoma e resta il piede, che
+# fa da fondamenta a chi ci costruisce sopra. Un edificio non si trova mai
+# sopra una sagoma in piedi - le basi diventano tutte rovina nel momento in
+# cui ci si costruisce - quindi non c'e' niente da scavalcare.
+const LEVEL_H := 5.0
 const CIELO_STACCO := 90.0
 const CIELO_H := 620.0
 
@@ -47,7 +61,12 @@ static func col_x(col: int) -> float:
 # X e la colonna 0 finirebbe a destra: chi legge "colonna 2" guarderebbe dalla
 # parte sbagliata.
 static func rail_z(era: int) -> float:
-	return (RAILS - era) * SLOT_D
+	return BANDA_SU + (RAILS - era) * SLOT_D
+
+# La tessera intera, che e' piu' lunga della fascia dei binari.
+static func tessera_box(col: int) -> AABB:
+	return AABB(Vector3(col_x(col), 0.0, 0.0),
+		Vector3(TESSERA_W, TESSERA_Y, TESSERA_D))
 
 static func span_w(n_col: int) -> float:
 	return n_col * SAGOMA_MODULO
@@ -74,9 +93,10 @@ static func standee_base(gs: GameState, b: Building) -> Vector3:
 		# sul davanti dello slot, cioe' dal lato della telecamera
 		z = rail_z(b.era_built) + SLOT_D - BASETTA_D / 2.0
 	else:
-		# Senza binario: al centro della profondita' della colonna, sopra il
-		# baricentro di cio' che la sorregge.
-		z = board_d() / 2.0
+		# Senza binario: al centro della FASCIA, sopra il baricentro di cio'
+		# che la sorregge - non al centro della tessera, che scenderebbe sul
+		# testo.
+		z = (BANDA_SU + BANDA_GIU) / 2.0
 	return Vector3(x, level_y(b.level), z)
 
 # La basetta: ogni sagoma ne ha una. 15 mm di profondita' per 4 mm di cartone.
@@ -103,6 +123,12 @@ static func standee_size(b: Building) -> Vector2:
 
 # Il file dell'illustrazione, nello stato giusto: a colori finche' l'edificio
 # e' intatto, in grigio quando e' spento. Stringa vuota se non c'e' mappatura.
+# Chi e' CROLLATO IN ROVINA non ha piu' una sagoma in piedi: resta la
+# basetta, che fa da fondamenta a chi ci costruisce sopra. Il RUDERE invece e'
+# "in piedi ma spento" e la sagoma ce l'ha ancora, in grigio.
+static func ha_sagoma(b: Building) -> bool:
+	return b.state != Enums.BuildingState.ROVINA
+
 static func sagoma_path(b: Building) -> String:
 	var s: Dictionary = CardDB.sagome.get(str(b.data["id"]), {})
 	if not s.has("n"): return ""
@@ -162,14 +188,19 @@ static func sky_rect(gs: GameState) -> AABB:
 # L'inclinazione e' un compromesso fra due cose che tirano in direzioni
 # opposte, e va scelta coi numeri:
 #   - piu' alta: le file dietro si vedono meglio, perche' la fila davanti le
-#     copre meno;
+#     copre meno, e resta scoperta piu' tessera davanti - dove stanno le
+#     icone di produzione e la regola, che si leggono per tutta la partita;
 #   - piu' bassa: le sagome si vedono meglio, perche' un cartone in piedi
 #     guardato dall'alto si schiaccia col coseno.
-# A 62 gradi le file erano tutte intere ma le sagome ridotte al 47%: con le
-# illustrazioni sopra, illeggibili. A 45 gradi resta visibile l'82% di una
-# sagoma dietro quella davanti e lo scorcio sale al 71%.
+# Finche' i binari erano larghi 54 mm, 45 gradi teneva l'82% di una sagoma
+# dietro e il 71% di scorcio. Con i binari stretti a 26 mm - stanno nella
+# fascia del disegno - a 45 gradi ne restava visibile il 39%, e la fila
+# davanti copriva anche il testo della tessera.
+# A 62 gradi la VISIBILITA' torna dov'era (74%) e il prezzo lo paga lo
+# scorcio, che scende dal 71 al 47%. A 70 le sagome sono quasi coricate e non
+# si riconoscono piu': provato, guardato, scartato.
 const FOV := 40.0
-const INCLINAZIONE := 45.0      # gradi sopra l'orizzonte
+const INCLINAZIONE := 62.0      # gradi sopra l'orizzonte
 const RIEMPIMENTO := 0.80       # quanta larghezza del fotogramma occupa la strada
 const ASPETTO := 1520.0 / 900.0
 
@@ -417,7 +448,10 @@ static func slot_at_ray(gs: GameState, origine: Vector3, direzione: Vector3) -> 
 	var col := int(floor(p.x / TESSERA_W))
 	if col < 0 or col >= gs.grid.n_cols: return {}
 	if p.z < 0.0 or p.z >= board_d(): return {}
-	var era := RAILS - int(floor(p.z / SLOT_D))
+	# I binari occupano solo la fascia del disegno, ma si clicca tutta la
+	# tessera: fuori dalla fascia vale il binario piu' vicino, altrimenti
+	# meta' tessera sarebbe morta al clic senza che si capisca perche'.
+	var era := RAILS - int(floor((p.z - BANDA_SU) / SLOT_D))
 	return {"col": col, "era": clampi(era, 1, RAILS), "punto": p}
 
 # L'edificio colpito da un raggio: la sagoma sta IN PIEDI, quindi non basta
