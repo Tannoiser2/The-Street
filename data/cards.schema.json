@@ -197,7 +197,8 @@
             "protection_delta",
             "scavo_delta",
             "upgrade_slots_delta",
-            "rule_override"
+            "rule_override",
+            "rendita_delta"
           ]
         },
         "target": {

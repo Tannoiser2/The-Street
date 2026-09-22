@@ -205,10 +205,10 @@ func upgrade(upg_id: String, target: Building) -> bool:
 	if not p.can_pay(q.pietra, q.oro): return false
 	p.pay(q.pietra, q.oro)
 	target.upgrades.append(upg_id)
-	# "quelli Struttura danno resistenza permanente, segnata con un cubetto nero".
-	# Gli effetti specifici (Arte, "altro", i condizionali) sono M4.
-	if CardDB.upgrades[upg_id]["family"] == "struttura":
-		target.bonus_res += 1
+	# Gli effetti vengono dai dati della carta, con l'edificio ospite come
+	# sorgente dei selettori. Prima il cubetto nero dei Struttura era un caso
+	# speciale sulla famiglia: ora e' un effetto `resistance` come gli altri.
+	Effects.apply_on_acquire(gs, p.index, CardDB.upgrades[upg_id], target)
 	gs.upg_row.erase(upg_id)
 	_refill(gs.upg_row, gs.upg_decks[gs.era], int(CardDB.constants["side_rows"]))
 	gs.log_line("%s potenziato con %s" % [target.data["name"], CardDB.upgrades[upg_id]["name"]])

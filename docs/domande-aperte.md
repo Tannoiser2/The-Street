@@ -87,7 +87,19 @@ segnata qui invece di essere data per buona.
     punti 8 e 9 hanno ristretto reclutamento e potenziamento ai soli intatti. Se
     l'intenzione era "intatto" anche qui, e' una riga.
 
-14. **Potenziamenti Struttura — spiegato meglio** (era scritto male).
+14. ~~**Potenziamenti Struttura**~~ — **RISOLTA in M4**: i due pezzi che
+    mancavano sono implementati. `po_cannoniere` dà ora +2 su edificio Militare
+    e +1 altrove; `po_merlatura` dichiara `counts_as_class`, che resta però fra
+    gli inerti (la classe aggiunta tocca continuità ed eventi, e va fatta con
+    cura). E le due famiglie che non facevano nulla ora funzionano: tutti e 9 i
+    potenziamenti Arte assegnano PV, condizionali compresi (Idolo e Reliquia
+    valgono di più su edificio Religione), e degli «altro» funzionano Scavo,
+    ibridi e PV secchi.
+    Resta inerte solo `po_stalli_mercantili` (l'affitto +1), più i tre «quando
+    abiti qui» che aspettano il hook di attivazione. Qui sotto il testo
+    originale, per riferimento.
+
+    **Potenziamenti Struttura — spiegato meglio** (era scritto male).
 
     Il regolamento dice che i potenziamenti **Struttura** danno "resistenza
     permanente, segnata con un cubetto nero". Un cubetto = +1. Le carte Struttura
@@ -292,3 +304,14 @@ dato è stato importato da lì. Ma due confronti fra ciò che è stampato e
     massimo 2 PV invece dello Scavo di due edifici, che può valere 12.
     I casi con `cap` corretto restano Urbanista e Veterano, che dicono «max +4»
     riferito ai punti.
+
+26. **Personaggi dell'era 5 e punteggio finale: un problema di tempi.** Quattro
+    personaggi dell'era 5 hanno abilità «Finale:» — Archeologo, Soprintendente,
+    Urbanista, Veterano — ma `EraRules.end_era` azzera `specialized_characters`
+    alla chiusura dell'era 5, **prima** che `Scoring.final_scoring` giri. Al
+    momento del conteggio quei personaggi non esistono più.
+    Non l'ho corretto perché tocca il blocco personaggi e va deciso dove vivono:
+    il regolamento dice che i personaggi dell'era Moderna «si scartano», ma
+    parla della sepoltura (niente scheletro), non delle loro abilità finali.
+    Serve un elenco che sopravviva alla fine dell'era, tipo
+    `PlayerState.final_characters`. Da fare col prossimo blocco.

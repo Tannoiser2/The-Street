@@ -2725,7 +2725,23 @@
         "oro": 1
       },
       "family": "arte",
-      "effect_text": "Arte: +1 PV. Scavo dell'edificio +2."
+      "effect_text": "Arte: +1 PV. Scavo dell'edificio +2.",
+      "effects": [
+        {
+          "hook": "on_acquire",
+          "op": "vp",
+          "value": 1
+        },
+        {
+          "hook": "on_acquire",
+          "op": "scavo_delta",
+          "value": 2,
+          "duration": "permanent",
+          "target": {
+            "is_self": true
+          }
+        }
+      ]
     },
     {
       "id": "po_palizzata",
@@ -2736,7 +2752,18 @@
         "oro": 1
       },
       "family": "struttura",
-      "effect_text": "Struttura: +1 res."
+      "effect_text": "Struttura: +1 res.",
+      "effects": [
+        {
+          "hook": "on_acquire",
+          "op": "resistance",
+          "value": 1,
+          "duration": "permanent",
+          "target": {
+            "is_self": true
+          }
+        }
+      ]
     },
     {
       "id": "po_idolo",
@@ -2747,7 +2774,29 @@
         "oro": 1
       },
       "family": "arte",
-      "effect_text": "Arte: +1 PV (+1 extra su edificio Religione)."
+      "effect_text": "Arte: +1 PV (+1 extra su edificio Religione).",
+      "effects": [
+        {
+          "hook": "on_acquire",
+          "op": "vp",
+          "value": 1
+        },
+        {
+          "hook": "on_acquire",
+          "op": "vp",
+          "value": 1,
+          "condition": {
+            "op": "count_matching",
+            "min": 1,
+            "target": {
+              "is_self": true,
+              "class": [
+                "religione"
+              ]
+            }
+          }
+        }
+      ]
     },
     {
       "id": "po_granaio_comune",
@@ -2758,7 +2807,17 @@
         "oro": 1
       },
       "family": "altro",
-      "effect_text": "Quando abiti questo edificio, +1 pietra."
+      "effect_text": "Quando abiti questo edificio, +1 pietra.",
+      "effects": [
+        {
+          "hook": "on_activate",
+          "op": "resource",
+          "pietra": 1,
+          "target": {
+            "is_self": true
+          }
+        }
+      ]
     },
     {
       "id": "po_fondamenta_in_pietra",
@@ -2769,7 +2828,18 @@
         "oro": 1
       },
       "family": "struttura",
-      "effect_text": "Struttura: +1 res."
+      "effect_text": "Struttura: +1 res.",
+      "effects": [
+        {
+          "hook": "on_acquire",
+          "op": "resistance",
+          "value": 1,
+          "duration": "permanent",
+          "target": {
+            "is_self": true
+          }
+        }
+      ]
     },
     {
       "id": "po_statua",
@@ -2780,7 +2850,14 @@
         "oro": 1
       },
       "family": "arte",
-      "effect_text": "Arte: +2 PV."
+      "effect_text": "Arte: +2 PV.",
+      "effects": [
+        {
+          "hook": "on_acquire",
+          "op": "vp",
+          "value": 2
+        }
+      ]
     },
     {
       "id": "po_altare",
@@ -2791,7 +2868,23 @@
         "oro": 1
       },
       "family": "arte",
-      "effect_text": "Arte: +1 PV. Scavo +2."
+      "effect_text": "Arte: +1 PV. Scavo +2.",
+      "effects": [
+        {
+          "hook": "on_acquire",
+          "op": "vp",
+          "value": 1
+        },
+        {
+          "hook": "on_acquire",
+          "op": "scavo_delta",
+          "value": 2,
+          "duration": "permanent",
+          "target": {
+            "is_self": true
+          }
+        }
+      ]
     },
     {
       "id": "po_bastioni",
@@ -2802,7 +2895,18 @@
         "oro": 1
       },
       "family": "struttura",
-      "effect_text": "Struttura: +1 res."
+      "effect_text": "Struttura: +1 res.",
+      "effects": [
+        {
+          "hook": "on_acquire",
+          "op": "resistance",
+          "value": 1,
+          "duration": "permanent",
+          "target": {
+            "is_self": true
+          }
+        }
+      ]
     },
     {
       "id": "po_banchina",
@@ -2813,7 +2917,27 @@
         "oro": 1
       },
       "family": "altro",
-      "effect_text": "Solo su slot fiume: quando abiti qui, +1 oro."
+      "effect_text": "Solo su slot fiume: quando abiti qui, +1 oro.",
+      "effects": [
+        {
+          "hook": "on_activate",
+          "op": "resource",
+          "oro": 1,
+          "target": {
+            "is_self": true
+          },
+          "condition": {
+            "op": "count_matching",
+            "min": 1,
+            "target": {
+              "is_self": true,
+              "terrain": [
+                "fiume"
+              ]
+            }
+          }
+        }
+      ]
     },
     {
       "id": "po_iscrizione",
@@ -2824,7 +2948,18 @@
         "oro": 1
       },
       "family": "altro",
-      "effect_text": "Scavo dell'edificio +2."
+      "effect_text": "Scavo dell'edificio +2.",
+      "effects": [
+        {
+          "hook": "on_acquire",
+          "op": "scavo_delta",
+          "value": 2,
+          "duration": "permanent",
+          "target": {
+            "is_self": true
+          }
+        }
+      ]
     },
     {
       "id": "po_contrafforte",
@@ -2835,7 +2970,18 @@
         "oro": 1
       },
       "family": "struttura",
-      "effect_text": "Struttura: +1 res."
+      "effect_text": "Struttura: +1 res.",
+      "effects": [
+        {
+          "hook": "on_acquire",
+          "op": "resistance",
+          "value": 1,
+          "duration": "permanent",
+          "target": {
+            "is_self": true
+          }
+        }
+      ]
     },
     {
       "id": "po_campanile",
@@ -2846,7 +2992,23 @@
         "oro": 1
       },
       "family": "altro",
-      "effect_text": "Ibrido: +1 PV e +1 res."
+      "effect_text": "Ibrido: +1 PV e +1 res.",
+      "effects": [
+        {
+          "hook": "on_acquire",
+          "op": "vp",
+          "value": 1
+        },
+        {
+          "hook": "on_acquire",
+          "op": "resistance",
+          "value": 1,
+          "duration": "permanent",
+          "target": {
+            "is_self": true
+          }
+        }
+      ]
     },
     {
       "id": "po_merlatura",
@@ -2857,7 +3019,28 @@
         "oro": 1
       },
       "family": "struttura",
-      "effect_text": "Struttura: +1 res. L'edificio conta anche come Militare."
+      "effect_text": "Struttura: +1 res. L'edificio conta anche come Militare.",
+      "effects": [
+        {
+          "hook": "on_acquire",
+          "op": "resistance",
+          "value": 1,
+          "duration": "permanent",
+          "target": {
+            "is_self": true
+          }
+        },
+        {
+          "hook": "on_acquire",
+          "op": "rule_override",
+          "name": "counts_as_class",
+          "target": {
+            "class": [
+              "militare"
+            ]
+          }
+        }
+      ]
     },
     {
       "id": "po_stalli_mercantili",
@@ -2868,7 +3051,18 @@
         "oro": 1
       },
       "family": "altro",
-      "effect_text": "L'affitto incassato da questo edificio è +1."
+      "effect_text": "L'affitto incassato da questo edificio è +1.",
+      "effects": [
+        {
+          "hook": "on_acquire",
+          "op": "rendita_delta",
+          "value": 1,
+          "duration": "permanent",
+          "target": {
+            "is_self": true
+          }
+        }
+      ]
     },
     {
       "id": "po_reliquia",
@@ -2879,7 +3073,29 @@
         "oro": 1
       },
       "family": "arte",
-      "effect_text": "Arte: +2 PV su edificio Religione, altrimenti +1."
+      "effect_text": "Arte: +2 PV su edificio Religione, altrimenti +1.",
+      "effects": [
+        {
+          "hook": "on_acquire",
+          "op": "vp",
+          "value": 1
+        },
+        {
+          "hook": "on_acquire",
+          "op": "vp",
+          "value": 1,
+          "condition": {
+            "op": "count_matching",
+            "min": 1,
+            "target": {
+              "is_self": true,
+              "class": [
+                "religione"
+              ]
+            }
+          }
+        }
+      ]
     },
     {
       "id": "po_opera_darte",
@@ -2890,7 +3106,14 @@
         "oro": 2
       },
       "family": "arte",
-      "effect_text": "Arte: +3 PV."
+      "effect_text": "Arte: +3 PV.",
+      "effects": [
+        {
+          "hook": "on_acquire",
+          "op": "vp",
+          "value": 3
+        }
+      ]
     },
     {
       "id": "po_affreschi",
@@ -2901,7 +3124,14 @@
         "oro": 2
       },
       "family": "arte",
-      "effect_text": "Arte: +2 PV."
+      "effect_text": "Arte: +2 PV.",
+      "effects": [
+        {
+          "hook": "on_acquire",
+          "op": "vp",
+          "value": 2
+        }
+      ]
     },
     {
       "id": "po_cupola",
@@ -2912,7 +3142,23 @@
         "oro": 2
       },
       "family": "altro",
-      "effect_text": "Ibrido: +2 PV e +1 res."
+      "effect_text": "Ibrido: +2 PV e +1 res.",
+      "effects": [
+        {
+          "hook": "on_acquire",
+          "op": "vp",
+          "value": 2
+        },
+        {
+          "hook": "on_acquire",
+          "op": "resistance",
+          "value": 1,
+          "duration": "permanent",
+          "target": {
+            "is_self": true
+          }
+        }
+      ]
     },
     {
       "id": "po_giardino_pensile",
@@ -2923,7 +3169,14 @@
         "oro": 2
       },
       "family": "arte",
-      "effect_text": "Arte: +2 PV."
+      "effect_text": "Arte: +2 PV.",
+      "effects": [
+        {
+          "hook": "on_acquire",
+          "op": "vp",
+          "value": 2
+        }
+      ]
     },
     {
       "id": "po_cannoniere",
@@ -2934,7 +3187,37 @@
         "oro": 2
       },
       "family": "struttura",
-      "effect_text": "Struttura: +1 res (+2 su edificio Militare)."
+      "effect_text": "Struttura: +1 res (+2 su edificio Militare).",
+      "effects": [
+        {
+          "hook": "on_acquire",
+          "op": "resistance",
+          "value": 1,
+          "duration": "permanent",
+          "target": {
+            "is_self": true
+          }
+        },
+        {
+          "hook": "on_acquire",
+          "op": "resistance",
+          "value": 1,
+          "duration": "permanent",
+          "target": {
+            "is_self": true
+          },
+          "condition": {
+            "op": "count_matching",
+            "min": 1,
+            "target": {
+              "is_self": true,
+              "class": [
+                "militare"
+              ]
+            }
+          }
+        }
+      ]
     },
     {
       "id": "po_installazione",
@@ -2945,7 +3228,14 @@
         "oro": 2
       },
       "family": "arte",
-      "effect_text": "Arte: +3 PV."
+      "effect_text": "Arte: +3 PV.",
+      "effects": [
+        {
+          "hook": "on_acquire",
+          "op": "vp",
+          "value": 3
+        }
+      ]
     },
     {
       "id": "po_targa_storica",
@@ -2956,7 +3246,18 @@
         "oro": 2
       },
       "family": "altro",
-      "effect_text": "Finale: +2 Scavo a ogni edificio Sotterrato sotto questo edificio."
+      "effect_text": "Finale: +2 Scavo a ogni edificio Sotterrato sotto questo edificio.",
+      "effects": [
+        {
+          "hook": "on_final_scoring",
+          "op": "scavo_delta",
+          "value": 2,
+          "target": {
+            "buried": true,
+            "below_self": true
+          }
+        }
+      ]
     },
     {
       "id": "po_ascensore_panoramico",
@@ -2967,7 +3268,14 @@
         "oro": 2
       },
       "family": "altro",
-      "effect_text": "+2 PV."
+      "effect_text": "+2 PV.",
+      "effects": [
+        {
+          "hook": "on_acquire",
+          "op": "vp",
+          "value": 2
+        }
+      ]
     },
     {
       "id": "po_boutique",
@@ -2978,7 +3286,17 @@
         "oro": 2
       },
       "family": "altro",
-      "effect_text": "Quando abiti questo edificio, +2 oro."
+      "effect_text": "Quando abiti questo edificio, +2 oro.",
+      "effects": [
+        {
+          "hook": "on_activate",
+          "op": "resource",
+          "oro": 2,
+          "target": {
+            "is_self": true
+          }
+        }
+      ]
     },
     {
       "id": "po_memoriale",
@@ -2989,7 +3307,14 @@
         "oro": 2
       },
       "family": "altro",
-      "effect_text": "+2 PV."
+      "effect_text": "+2 PV.",
+      "effects": [
+        {
+          "hook": "on_acquire",
+          "op": "vp",
+          "value": 2
+        }
+      ]
     }
   ],
   "events": [

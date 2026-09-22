@@ -14,6 +14,7 @@ var state: int = Enums.BuildingState.INTATTO
 var is_buried: bool = false   # condizione di posizione: qualcosa è stato costruito sopra
 var was_razed: bool = false   # spianato dal proprietario da intatto -> Scavo 0
 var bonus_res: int = 0        # cubetti neri: collina, continuità, potenziamenti Struttura
+var bonus_scavo: int = 0      # Impronte e potenziamenti che alzano lo Scavo
 var vetusta: int = 0          # cubetti bianchi: +1 per evento superato
 var protection: int = 0       # +2 per lavoratore piazzato; si azzera a fine era
 var upgrades: Array = []      # id dei potenziamenti infilati sotto
@@ -49,4 +50,4 @@ func effective_resistance() -> int:
 
 func scavo_value() -> int:
 	if was_razed: return 0
-	return int(data["scavo"])
+	return int(data["scavo"]) + bonus_scavo

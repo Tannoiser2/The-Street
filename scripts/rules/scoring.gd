@@ -5,6 +5,9 @@ class_name Scoring
 extends RefCounted
 
 static func final_scoring(gs: GameState) -> void:
+	# I modificatori di Scavo (Targa storica, Soprintendente) vanno applicati
+	# prima che _scavo conti: dopo sarebbe troppo tardi.
+	Effects.apply_scavo_modifiers(gs)
 	_census_final(gs)
 	_verticality(gs)
 	_continuity(gs)

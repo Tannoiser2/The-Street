@@ -16,6 +16,7 @@ func _ready() -> void:
 	_run("aure degli edifici", _test_auras)
 	_run("requisito di terreno adiacente", _test_terrain_adjacent)
 	_run("punteggio finale degli edifici", _test_final_scoring)
+	_run("potenziamenti", _test_upgrades)
 	_run("lo schema e' davvero chiuso", _test_schema_closed)
 	print("\n%d superati, %d falliti" % [_passed, _failed])
 	get_tree().quit(0 if _failed == 0 else 1)
@@ -558,3 +559,112 @@ func _test_final_scoring() -> void:
 	var r := _final(q)
 	_eq("  il malus colpisce l'avversario in cima accanto", r[1], -1)
 	_eq("  e non tocca il proprietario del Grattacielo", r[0], 3)
+
+
+# ---- potenziamenti ---------------------------------------------------
+func _posa(gs: GameState, upg: String, host: Building) -> void:
+	host.upgrades.append(upg)
+	Effects.apply_on_acquire(gs, host.owner, CardDB.upgrades[upg], host)
+
+func _test_upgrades() -> void:
+	var senza := _card_of_class("civico")       # ne' Religione ne' Militare
+	var rel := _card_of_class("religione")
+	var mil := _card_of_class("militare")
+
+	# Struttura: il cubetto nero
+	var a := _scena()
+	var h := _put(a, senza, 1)
+	var prima := h.bonus_res
+	_posa(a, "po_palizzata", h)
+	_eq("Struttura: +1 resistenza all'ospite", h.bonus_res, prima + 1)
+
+	# po_cannoniere: "+1 res (+2 su edificio Militare)"
+	var b := _scena()
+	var civ := _put(b, senza, 1)
+	var m := _put(b, mil, 4)
+	var r0 := civ.bonus_res
+	var r1 := m.bonus_res
+	_posa(b, "po_cannoniere", civ)
+	_posa(b, "po_cannoniere", m)
+	_eq("Cannoniere su edificio non Militare → +1", civ.bonus_res, r0 + 1)
+	_eq("  su edificio Militare → +2", m.bonus_res, r1 + 2)
+
+	# Arte: punti secchi
+	var c := _scena()
+	var h2 := _put(c, senza, 1)
+	var v0: int = c.players[0].vp
+	_posa(c, "po_statua", h2)
+	_eq("Arte: Statua → +2 PV", c.players[0].vp, v0 + 2)
+	_posa(c, "po_opera_darte", h2)
+	_eq("  Opera d'arte → +3 PV", c.players[0].vp, v0 + 5)
+
+	# po_idolo: "+1 PV (+1 extra su edificio Religione)"
+	var d := _scena()
+	var nr := _put(d, senza, 1)
+	var v1: int = d.players[0].vp
+	_posa(d, "po_idolo", nr)
+	_eq("Idolo su edificio non Religione → +1 PV", d.players[0].vp, v1 + 1)
+	var e2 := _scena()
+	var sr := _put(e2, rel, 1)
+	var v2: int = e2.players[0].vp
+	_posa(e2, "po_idolo", sr)
+	_eq("  su edificio Religione → +2 PV", e2.players[0].vp, v2 + 2)
+
+	# po_reliquia: "+2 PV su edificio Religione, altrimenti +1"
+	var f := _scena()
+	var f1 := _put(f, senza, 1)
+	var f2 := _put(f, rel, 4)
+	var v3: int = f.players[0].vp
+	_posa(f, "po_reliquia", f1)
+	_eq("Reliquia su edificio non Religione → +1 PV", f.players[0].vp, v3 + 1)
+	_posa(f, "po_reliquia", f2)
+	_eq("  su edificio Religione → +2 PV", f.players[0].vp, v3 + 3)
+
+	# po_iscrizione: "Scavo dell'edificio +2"
+	var g := _scena()
+	var h3 := _put(g, senza, 1)
+	var s0 := h3.scavo_value()
+	_posa(g, "po_iscrizione", h3)
+	_eq("Iscrizione: Scavo dell'ospite +2", h3.scavo_value(), s0 + 2)
+
+	# ibrido: "+1 PV e +1 res"
+	var i := _scena()
+	var h4 := _put(i, senza, 1)
+	var v4: int = i.players[0].vp
+	var rr := h4.bonus_res
+	_posa(i, "po_campanile", h4)
+	_ok("Campanile: ibrido, +1 PV e +1 res",
+		i.players[0].vp == v4 + 1 and h4.bonus_res == rr + 1,
+		"PV %d->%d, res %d->%d" % [v4, i.players[0].vp, rr, h4.bonus_res])
+
+	# po_targa_storica: "+2 Scavo a ogni edificio Sotterrato sotto questo edificio"
+	var j := _scena()
+	var sotto := _put(j, senza, 2, 0)
+	sotto.is_buried = true
+	var sopra := _put(j, senza, 2, 1)
+	sopra.upgrades.append("po_targa_storica")
+	var ss := sotto.scavo_value()
+	Effects.apply_scavo_modifiers(j)
+	_eq("Targa storica: +2 Scavo al sotterrato sotto di se'", sotto.scavo_value(), ss + 2)
+	var k := _scena()
+	var altrove := _put(k, senza, 5, 0)
+	altrove.is_buried = true
+	var alto := _put(k, senza, 2, 1)
+	alto.upgrades.append("po_targa_storica")
+	var s2 := altrove.scavo_value()
+	Effects.apply_scavo_modifiers(k)
+	_eq("  non tocca i sotterrati di altre colonne", altrove.scavo_value(), s2)
+
+	# end-to-end attraverso il comando, non solo la regola pura
+	var ctl := _game()
+	var gs := ctl.gs
+	_flat(gs, Enums.Terrain.PIANURA)
+	var target := _put(gs, senza, 2)
+	target.owner = gs.current_index
+	gs.upg_row = ["po_statua"]
+	ctl.place_worker(2)
+	var pl: PlayerState = gs.current_player()
+	pl.oro = 9
+	var v5: int = pl.vp
+	_ok("il comando upgrade applica l'effetto", ctl.upgrade("po_statua", target))
+	_eq("  +2 PV arrivati davvero", pl.vp, v5 + 2)

@@ -20,6 +20,9 @@ const APPLIED_HOOK_OPS: Array[String] = [
 	"on_acquire:vp",            # "Subito: +N cultura"
 	"on_final_scoring:vp",      # Osservatorio, Acquedotto, Caffe' letterario
 	"on_final_scoring:vp_per",  # Museo, Biblioteca, Grattacielo, Universita'...
+	"on_acquire:resistance",    # potenziamenti Struttura
+	"on_acquire:scavo_delta",   # Iscrizione, Pittura rupestre, Altare, Targa storica
+	"on_final_scoring:scavo_delta",
 ]
 const APPLIED_OVERRIDES: Array[String] = ["first_terrapieno_free", "free_restore_of_class"]
 
@@ -178,10 +181,15 @@ static func aura_resistance_modifier(gs: GameState, b: Building) -> int:
 # "Subito:" dei personaggi. Applica solo resource e vp; gli altri op su
 # on_acquire (l'Impronta dei due scultori) richiedono un edificio bersaglio
 # che il comando di reclutamento non passa ancora.
-static func apply_on_acquire(gs: GameState, player: int, card: Dictionary) -> void:
+# `host` e' l'edificio su cui la carta viene posata: per un potenziamento e' la
+# sorgente di ogni selettore, perche' quasi tutti i suoi effetti parlano
+# dell'edificio che lo porta ("+2 PV su edificio Religione", "+1 res").
+static func apply_on_acquire(gs: GameState, player: int, card: Dictionary,
+		host: Building = null) -> void:
 	var p: PlayerState = gs.players[player]
 	for e in card.get("effects", []):
 		if e["hook"] != "on_acquire": continue
+		if not _condition_met(gs, host, e.get("condition", {})): continue
 		match str(e["op"]):
 			"resource":
 				p.gain(int(e.get("pietra", 0)), int(e.get("oro", 0)))
@@ -189,6 +197,20 @@ static func apply_on_acquire(gs: GameState, player: int, card: Dictionary) -> vo
 			"vp":
 				p.add_vp("cultura", int(e["value"]))
 				gs.log_line("%s: %+d cultura" % [card["name"], int(e["value"])])
+			"resistance":
+				for b in _bersagli(gs, host, e):
+					b.bonus_res += int(e["value"])
+			"scavo_delta":
+				for b in _bersagli(gs, host, e):
+					b.bonus_scavo += int(e["value"])
+
+static func _bersagli(gs: GameState, src: Building, e: Dictionary) -> Array[Building]:
+	var out: Array[Building] = []
+	if src == null: return out
+	for b in gs.grid.buildings:
+		if matches(gs, b, e.get("target", {}), src): out.append(b)
+	if e.has("times"): out = out.slice(0, int(e["times"]))
+	return out
 
 # ---- hook: on_final_scoring (applica) -------------------------------
 # Voce 7 del conteggio, "Effetti finali". Ogni edificio in gioco porta i propri
@@ -199,12 +221,33 @@ const VP_CHANNEL := "effetti_finali"
 
 static func apply_final_scoring(gs: GameState) -> void:
 	for src in gs.grid.buildings:
-		for e in src.data.get("effects", []):
-			if e["hook"] != "on_final_scoring": continue
-			if not _condition_met(gs, src, e.get("condition", {})): continue
-			match str(e["op"]):
-				"vp": _award(gs, src.owner, int(e.get("value", 0)), src)
-				"vp_per": _apply_vp_per(gs, src, e)
+		for card in _carte_di(src):
+			for e in card.get("effects", []):
+				if e["hook"] != "on_final_scoring": continue
+				if e["op"] == "scavo_delta": continue      # gia' applicato nel pre-passo
+				if not _condition_met(gs, src, e.get("condition", {})): continue
+				match str(e["op"]):
+					"vp": _award(gs, src.owner, int(e.get("value", 0)), src)
+					"vp_per": _apply_vp_per(gs, src, e)
+
+# La carta dell'edificio piu' i potenziamenti che porta: per tutte, la sorgente
+# dei selettori e' l'edificio stesso.
+static func _carte_di(b: Building) -> Array[Dictionary]:
+	var out: Array[Dictionary] = [b.data]
+	for uid in b.upgrades:
+		if CardDB.upgrades.has(uid): out.append(CardDB.upgrades[uid])
+	return out
+
+# Pre-passo: i modificatori di Scavo vanno applicati PRIMA che Scoring._scavo
+# conti i punti, altrimenti arrivano tardi.
+static func apply_scavo_modifiers(gs: GameState) -> void:
+	for src in gs.grid.buildings:
+		for card in _carte_di(src):
+			for e in card.get("effects", []):
+				if e["hook"] != "on_final_scoring" or e["op"] != "scavo_delta": continue
+				if not _condition_met(gs, src, e.get("condition", {})): continue
+				for b in _bersagli(gs, src, e):
+					b.bonus_scavo += int(e["value"])
 
 static func _condition_met(gs: GameState, src: Building, cond: Dictionary) -> bool:
 	if cond.is_empty(): return true

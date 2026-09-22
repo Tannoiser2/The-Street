@@ -60,7 +60,10 @@ func _snapshot(gs: GameState, seed_v: int, players: int, before: Dictionary) -> 
 			"classes": b.data["classes"],
 			"rendita": int(b.data["rendita"]),
 			"lampo": int(b.data["lampo"]),
-			"scavo": int(b.data["scavo"]),
+			# Scavo effettivo, bonus da Impronte e potenziamenti inclusi, ma
+			# SENZA l'azzeramento dello spianato: quello lo applica l'oracolo
+			# per conto suo, cosi' il confronto resta sulla stessa regola.
+			"scavo": int(b.data["scavo"]) + b.bonus_scavo,
 			"vetusta": b.vetusta,
 			"buried_character_era": b.buried_character_era if b.buried_character != "" else 0,
 		})
