@@ -192,30 +192,56 @@ Il PDF è stato aperto **solo per la grafica**, come prescrive il brief: nessun
 dato è stato importato da lì. Ma due confronti fra ciò che è stampato e
 `data/cards.json` non tornano, e vanno segnalati.
 
-20. **Il PDF è a una calibrazione di dati più vecchia della v1.5.** Due conferme
-    indipendenti, sull'era 1 (pagina 19):
-    - **Scavo**: tutti e 12 i valori stampati coincidono con
-      `cards_simulatore_legacy.json` (scala 0–4) e **11 su 12 differiscono da
-      `data/cards.json`** (scala 0–6). Esempio verificato ad alta risoluzione:
-      Capanne stampa «scavo 1», il JSON dice 2.
-    - **Larghezza**: il badge «N slot» è la larghezza in caselle. Coincide su
-      10 carte su 12, ma **Villaggio palizzato e Tumulo funerario stampano
-      "1 slot" mentre il JSON dice `width: 2`**.
+20. **Il PDF è alla calibrazione precedente alla v1.5.** Verificate tutte e
+    cinque le ere (pagine 19, 21, 23, 25, 27), leggendo carta per carta.
+
+    **Scavo — il risultato non lascia margini.** Sono 44 gli edifici su 60 in cui
+    `cards_simulatore_legacy.json` e `data/cards.json` danno un valore diverso.
+    Su **tutti e 44** il PDF stampa il valore del legacy, e su **nessuno** quello
+    della v1.5. Gli altri 16 hanno lo stesso valore nei due file, quindi non
+    discriminano (l'intera era 5 ha Scavo 0 ovunque).
+
+    | era | carte che discriminano | il PDF concorda con legacy |
+    |---|---:|---:|
+    | 1 | 11 | 11 |
+    | 2 | 12 | 12 |
+    | 3 | 11 | 11 |
+    | 4 | 10 | 10 |
+    | 5 | 0 | — |
+
+    **Larghezza** — il badge «N slot» coincide su **58 carte su 60**. Le due
+    eccezioni sono entrambe nell'era 1: **Villaggio palizzato** e **Tumulo
+    funerario** stampano «1 slot», `cards.json` dice `width: 2`. Nelle ere 2–5
+    non c'è una sola divergenza.
 
     Non è un problema di grafica: se queste carte andassero in stampa,
     contraddirebbero le regole che il motore implementa. Da decidere: si
-    ristampa il PDF dai dati v1.5, o i dati vanno riportati a quei valori?
-    Verificata a fondo la sola era 1; le altre quattro si controllano in pochi
-    minuti se serve.
+    ristampa il PDF dai dati v1.5, o i dati tornano a quei valori? Le due
+    larghezze dell'era 1 vanno decise a parte, perché non seguono lo stesso
+    schema dello Scavo — potrebbero essere un cambio voluto della v1.5, o un
+    refuso in un file o nell'altro.
 
-21. **Nessun testo estraibile, e l'ordine non coincide col JSON.** Tutte e 54 le
-    pagine hanno zero testo: nomi ed effetti sono curve o raster. Quindi
-    un'illustrazione non si può associare a un id leggendo il nome.
-    L'ordine di impaginazione è quasi quello del JSON ma non esattamente: sia
-    nell'era 1 sia nell'era 4 le posizioni 5-6-7 risultano ruotate (era 1 —
-    JSON: Menhir, Palafitte, Cava; PDF: Palafitte, Cava, Menhir). Un
-    accoppiamento per indice sbaglierebbe **3 carte per pagina, in silenzio**.
-    Sembra sistematico, ma è verificato su 2 pagine di 5.
+21. **Nessun testo estraibile, ma l'ordine È derivabile.** Tutte e 54 le pagine
+    hanno zero testo: nomi ed effetti sono curve o raster. Un'illustrazione non
+    si può quindi associare a un id leggendo il nome stampato.
+
+    L'ordine di impaginazione però segue una regola esatta, verificata su tutte
+    e cinque le pagine: **è l'ordine di `cards.json` con la quinta carta spostata
+    in settima posizione**. In simboli, JSON `[1,2,3,4,5,6,7,…]` → PDF
+    `[1,2,3,4,6,7,5,8,…]`.
+
+    | era | quinta carta nel JSON | sua posizione nel PDF |
+    |---|---|---|
+    | 1 | Menhir | 7ª |
+    | 2 | Torre di vedetta | 7ª |
+    | 3 | Conceria | 7ª |
+    | 4 | Banco | 7ª |
+    | 5 | Monumento ai caduti | 7ª |
+
+    Cinque conferme su cinque, nessuna eccezione. **Non serve quindi una tabella
+    di corrispondenza dal designer**: l'accoppiamento carta↔illustrazione si
+    ricava. Resta comunque prudente far verificare il risultato con un provino a
+    contatto, visto che un errore qui sarebbe silenzioso.
 
 22. **Le 9 carte colonna hanno nomi propri** (Pianura dei cantieri, Pianura del
     mercato, Collina delle cave, Fiume antico, Bosco sacro…) e un riquadro
