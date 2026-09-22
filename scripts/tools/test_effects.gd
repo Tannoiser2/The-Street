@@ -23,6 +23,7 @@ func _ready() -> void:
 	_run("Impronte", _test_imprints)
 	_run("Monumenti ed Eredita'", _test_objectives)
 	_run("Sacerdotessa e Mastro costruttore", _test_on_build)
+	_run("Colossali", _test_colossal)
 	_run("lo schema e' davvero chiuso", _test_schema_closed)
 	print("\n%d superati, %d falliti" % [_passed, _failed])
 	get_tree().quit(0 if _failed == 0 else 1)
@@ -319,6 +320,8 @@ func _test_pending() -> void:
 		_ok("  applicato: %s" % k, not k in pend)
 	for n in Effects.APPLIED_OVERRIDES:
 		_ok("  applicato: %s" % n, not n in pend)
+	for n in Effects.DESCRIPTIVE_OVERRIDES:
+		_ok("  descrittivo, nessun codice necessario: %s" % n, not n in pend)
 	# i due override degli eventi noti come inerti devono restare segnalati
 	for n in ["no_production_last_round", "free_upgrade_on_loss"]:
 		_ok("  ancora inerte, e segnalato: %s" % n, n in pend)
@@ -1292,3 +1295,66 @@ func _test_on_build() -> void:
 	_ok("preventivo legale", costo.legal, costo.reason)
 	_ok("costruzione riuscita", ctl.build(rel, 2, false))
 	_eq("  costruendo col comando, il rimborso arriva", pl.oro, prima - costo.oro + 1)
+
+
+# ---- Colossali --------------------------------------------------------
+# Il regolamento attribuisce loro cinque proprieta'. Questi test verificano che
+# il modello generico le fornisca gia' tutte: se e' cosi', `colossal` e' una
+# parola chiave descrittiva e non richiede codice dedicato.
+func _test_colossal() -> void:
+	var ids: Array[String] = []
+	for id in CardDB.buildings:
+		for e in CardDB.buildings[id].get("effects", []):
+			if e["op"] == "rule_override" and e["name"] == "colossal": ids.append(id)
+	ids.sort()
+	_eq("i Colossali sono tre", ids.size(), 3)
+	for id in ids:
+		_ok("  %s occupa piu' di una casella (width %d)" % [id, int(CardDB.buildings[id]["width"])],
+			int(CardDB.buildings[id]["width"]) > 1)
+
+	var col_id: String = ids[0]
+	var w: int = int(CardDB.buildings[col_id]["width"])
+
+	# 1. "si attivano da CIASCUNA delle colonne che toccano"
+	var a := _scena()
+	var big := _put(a, col_id, 1)
+	var attivazioni := 0
+	for c in range(big.col_from, big.col_to):
+		if big in a.grid.alive_in_column(c): attivazioni += 1
+	_eq("1. si attiva da ciascuna colonna che tocca", attivazioni, w)
+
+	# 2. "contano come strato in TUTTE le colonne che toccano"
+	var strati := 0
+	for c in range(big.col_from, big.col_to):
+		if big in a.grid.in_column(c): strati += 1
+	_eq("2. conta come strato in tutte le colonne", strati, w)
+
+	# 3. "se crollano diventano rovina OVUNQUE"
+	big.state = Enums.BuildingState.ROVINA
+	var rovina_ovunque := true
+	for c in range(big.col_from, big.col_to):
+		for b in a.grid.in_column(c):
+			if b == big and b.state != Enums.BuildingState.ROVINA: rovina_ovunque = false
+	_ok("3. crollando e' rovina in ogni colonna", rovina_ovunque)
+
+	# 4. "valgono il proprio Scavo UNA SOLA VOLTA"
+	var b2 := _scena()
+	var big2 := _put(b2, col_id, 1)
+	for c in range(big2.col_from, big2.col_to):
+		_put(b2, _card_of_class("civico"), c, 1)      # coprono l'intera proiezione
+	b2.grid.refresh_buried()
+	Scoring.final_scoring(b2)
+	var atteso: int = big2.scavo_value()
+	_eq("4. lo Scavo si conta una volta sola, non per colonna",
+		int(b2.players[big2.owner].vp_breakdown.get("scavo", 0)), atteso)
+
+	# 5. "solo quando l'INTERA proiezione e' coperta"
+	var c2 := _scena()
+	var big3 := _put(c2, col_id, 1)
+	_put(c2, _card_of_class("civico"), big3.col_from, 1)   # copre una colonna sola
+	c2.grid.refresh_buried()
+	_ok("5. coperto in parte: NON e' sotterrato", not big3.is_buried)
+	for c in range(big3.col_from + 1, big3.col_to):
+		_put(c2, _card_of_class("civico"), c, 1)
+	c2.grid.refresh_buried()
+	_ok("   coperto per intero: e' sotterrato", big3.is_buried)

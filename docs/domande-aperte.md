@@ -428,3 +428,38 @@ dato è stato importato da lì. Ma due confronti fra ciò che è stampato e
     edifici di entrambi). Adottato: **l'ordine di turno dell'era corrente**.
     Il regolamento non lo dice, perché al tavolo la simultaneità non capita
     quasi mai: qui invece la valutazione è puntuale e va decisa.
+
+35. **I Colossali: larghezza 2 o 3? Le tre fonti non concordano.**
+
+    | fonte | dice |
+    |---|---|
+    | campo `width` in `cards.json` | **3** per tutti e tre |
+    | regolamento, sezione «Colossali» | «occupano **tre** caselle» |
+    | testo delle carte | «**2** slot adiacenti» |
+
+    Due fonti su tre dicono 3, e il badge stampato sulle carte dice «3 slot»:
+    quindi il testo effetto contraddice **la carta stessa**, non solo il JSON.
+    Probabile residuo di una versione precedente, coerente con il fatto che il
+    PDF è a una calibrazione più vecchia (punto 20).
+
+    Lettura adottata: **width 3**, nessun dato modificato. Di conseguenza non ho
+    implementato la regola variabile dell'Acquedotto — «3 pagando +1 pietra; in
+    2 giocatori il terzo slot è vietato» — perché presuppone che la base sia 2.
+    Se invece quella regola è viva, servono due campi nuovi (larghezza minima e
+    massima, più il costo del terzo slot) e un vincolo sul numero di giocatori.
+    A 2 giocatori la strada ha 5 colonne: un edificio da 3 ne occupa il 60%,
+    che è forse proprio il motivo per cui la vecchia regola lo vietava.
+
+36. **`colossal` non richiede codice, e questo è un risultato.** La sezione
+    «Colossali» del regolamento elenca cinque proprietà: si attivano da ciascuna
+    colonna che toccano, contano come strato in tutte, crollando diventano rovina
+    ovunque, valgono il proprio Scavo una volta sola, e solo a proiezione
+    interamente coperta.
+
+    **Tutte e cinque derivano già dal modello generico**, cioè dal fatto che un
+    edificio largo è *un* oggetto che copre più colonne. Le ho verificate una per
+    una con dei test invece di scrivere codice che non serviva.
+
+    Per non dire il falso, `colossal` non è fra gli override «applicati» ma in
+    una terza categoria, `DESCRIPTIVE_OVERRIDES`: marcarlo applicato farebbe
+    credere che una riga lo legga.

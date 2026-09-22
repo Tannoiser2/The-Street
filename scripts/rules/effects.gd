@@ -49,6 +49,17 @@ const APPLIED: Array[String] = [
 const APPLIED_OVERRIDES: Array[String] = ["first_terrapieno_free", "free_restore_of_class",
 	"ignore_terrain_requirement"]
 
+# Override che NON richiedono codice: descrivono un comportamento che il modello
+# generico gia' fornisce. Tenerli distinti dagli APPLIED_OVERRIDES e' deliberato:
+# marcarli "applicati" farebbe credere che una riga di codice li legga.
+#
+# `colossal` elenca cinque proprieta' - si attiva da ciascuna colonna che tocca,
+# conta come strato in tutte, crollando diventa rovina ovunque, vale lo Scavo una
+# volta sola e solo a proiezione interamente coperta - e tutte e cinque derivano
+# dal fatto che un edificio largo e' UN oggetto che copre piu' colonne.
+# Verificate una per una in test_effects.gd, sezione "Colossali".
+const DESCRIPTIVE_OVERRIDES: Array[String] = ["colossal"]
+
 static func _blocchi() -> Array:
 	return [["evento", CardDB.events], ["personaggio", CardDB.characters],
 			["edificio", CardDB.buildings], ["potenziamento", CardDB.upgrades]]
@@ -62,8 +73,9 @@ static func pending() -> Array[String]:
 		for id in block:
 			for e in block[id].get("effects", []):
 				if e["op"] == "rule_override":
-					if not e["name"] in APPLIED_OVERRIDES and not e["name"] in out:
-						out.append(e["name"])
+					if e["name"] in APPLIED_OVERRIDES or e["name"] in DESCRIPTIVE_OVERRIDES:
+						continue
+					if not e["name"] in out: out.append(e["name"])
 					continue
 				var key: String = "%s:%s:%s" % [tipo, e["hook"], e["op"]]
 				if not key in APPLIED and not key in out:
