@@ -15,6 +15,10 @@ const BASETTA := Color("#6f6a63")
 
 var gs: GameState
 var _evidenziata := -1
+# La telecamera che il giocatore puo' girare. Se non c'e', si usa
+# l'inquadratura calcolata da BoardLayout3D e basta.
+var orbita: CameraOrbita = null
+var _cam: Camera3D = null
 
 func mostra(stato: GameState, colonna_evidenziata := -1) -> void:
 	gs = stato
@@ -68,19 +72,58 @@ func _cielo() -> void:
 	p.position = r.position + Vector3(r.size.x / 2.0, r.size.y / 2.0, 0.0)
 	add_child(p)
 
+# Una carta stesa sul tavolo: lo spessore del cartoncino piu' il disegno
+# sopra. Il disegno e' un piano a se' e non la faccia della scatola, perche'
+# una BoxMesh porterebbe la stessa texture anche sui fianchi.
+# Senza immagine resta il rettangolo colorato: assets/ si rigenera dai PDF e
+# non e' versionata, quindi la plancia deve reggere anche senza.
+func _carta_stesa(box: AABB, percorso: String, tinta: Color,
+		giu := false) -> void:
+	var m := _scatola(box.size, tinta)
+	m.position = box.position + box.size / 2.0
+	add_child(m)
+	if percorso == "" or not ResourceLoader.exists(percorso): return
+	var tex := load(percorso) as Texture2D
+	if tex == null: return
+	var piano := _quad(Vector2(box.size.x, box.size.z), Color.WHITE, true)
+	piano.rotate_x(-PI / 2.0)
+	# Il titolo della carta va dalla parte opposta a chi guarda, come una
+	# carta vera appoggiata sul tavolo davanti a se'.
+	if giu: piano.rotate_y(PI)
+	var mat := piano.material_override as StandardMaterial3D
+	mat.albedo_texture = tex
+	mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA_SCISSOR
+	mat.alpha_scissor_threshold = 0.5
+	mat.texture_filter = BaseMaterial3D.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
+	piano.position = Vector3(box.position.x + box.size.x / 2.0,
+		box.end.y + 0.4, box.position.z + box.size.z / 2.0)
+	add_child(piano)
+
 func _tessere() -> void:
 	for c in gs.grid.n_cols:
 		var t: int = gs.grid.terrains[c]
-		for era in range(1, BoardLayout3D.RAILS + 1):
-			var box := BoardLayout3D.tile_box(c, era)
-			var col: Color = COLORI_TERRENO[t].darkened(0.08 * (era - 1))
-			# La colonna puntata dal mouse si accende: senza, il giocatore non
-			# sa dove sta per cliccare, perche' in prospettiva le colonne non
-			# stanno dove sembra.
-			if c == _evidenziata: col = col.lightened(0.45)
-			var m := _scatola(box.size, col)
-			m.position = box.position + box.size / 2.0
-			add_child(m)
+		# La tessera stampata e' UNA per colonna, 63 x 271 mm: copre tutti e
+		# cinque i binari, che sono righe su di lei e non pezzi a se'. Si
+		# unisce quindi il primo slot con l'ultimo.
+		var box := BoardLayout3D.tile_box(c, 1).merge(
+			BoardLayout3D.tile_box(c, BoardLayout3D.RAILS))
+		var col: Color = COLORI_TERRENO[t]
+		var percorso := BoardLayout3D.tessera_path(gs, c)
+		if percorso != "" and ResourceLoader.exists(percorso): col = Color("#1d1b17")
+		_carta_stesa(box, percorso, col)
+		# La colonna puntata dal mouse si accende: senza, il giocatore non sa
+		# dove sta per cliccare, perche' in prospettiva le colonne non stanno
+		# dove sembra. Col disegno sopra non si puo' piu' schiarire il colore
+		# della scatola, quindi si posa una velatura chiara sopra la tessera.
+		if c == _evidenziata:
+			var velo := _quad(Vector2(box.size.x, box.size.z),
+				Color(1, 1, 1, 0.22), true)
+			velo.rotate_x(-PI / 2.0)
+			var mat := velo.material_override as StandardMaterial3D
+			mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+			velo.position = Vector3(box.position.x + box.size.x / 2.0,
+				box.end.y + 0.8, box.position.z + box.size.z / 2.0)
+			add_child(velo)
 
 func _edifici() -> void:
 	for b in gs.grid.buildings:
@@ -174,13 +217,34 @@ func _luci() -> void:
 	add_child(amb)
 
 func _telecamera() -> void:
-	var cam := Camera3D.new()
-	cam.position = BoardLayout3D.camera_position(gs)
-	cam.look_at_from_position(BoardLayout3D.camera_position(gs),
-		BoardLayout3D.camera_target(gs), Vector3.UP)
-	cam.fov = BoardLayout3D.FOV
-	cam.current = true
-	add_child(cam)
+	_cam = Camera3D.new()
+	_cam.fov = BoardLayout3D.FOV
+	_cam.current = true
+	add_child(_cam)
+	muovi_telecamera()
+
+# Sposta la sola telecamera, senza ricostruire la scena: e' quello che serve
+# mentre si trascina, dove un rebuild a ogni pixel sarebbe uno spreco.
+#
+# La posa si costruisce nello spazio LOCALE e non con look_at_from_position,
+# che in Godot lavora in coordinate GLOBALI. Qui la differenza non e' un
+# dettaglio: le misure sono in millimetri e questo nodo e' rimpicciolito di U,
+# quindi una posizione globale in millimetri mette la telecamera cento volte
+# piu' lontano del tavolo. Il risultato e' una plancia grande come un
+# francobollo - che nessun test di geometria vede, perche' i numeri che
+# calcolano sono giusti: sbagliato e' lo spazio in cui finiscono.
+func muovi_telecamera() -> void:
+	if _cam == null: return
+	var dove := BoardLayout3D.camera_position(gs)
+	var mira := BoardLayout3D.camera_target(gs)
+	if orbita != null:
+		dove = orbita.posizione()
+		mira = orbita.mira
+	_cam.transform = Transform3D(Basis(), dove).looking_at(mira, Vector3.UP)
+	# Il piano di taglio deve stare dietro al tavolo anche quando si e'
+	# allontanato al massimo, altrimenti allontanandosi la citta' sparisce.
+	_cam.far = maxf(4000.0, dove.distance_to(mira)
+		+ BoardLayout3D.scene_aabb(gs).size.length() * 2.0)
 
 # ---- le file e le plance, sul tavolo --------------------------------
 const CARTA_SFONDO := Color("#3a3f4b")
@@ -189,9 +253,15 @@ const PLANCIA_SFONDO := Color("#2d323c")
 func _file_laterali() -> void:
 	for c in BoardLayout3D.side_cards(gs):
 		var r: AABB = c["aabb"]
-		var m := _scatola(r.size, CARTA_SFONDO)
-		m.position = r.position + r.size / 2.0
-		add_child(m)
+		var percorso := BoardLayout3D.carta_path(str(c["kind"]), str(c["id"]))
+		var sfondo := CARTA_SFONDO
+		if percorso != "" and ResourceLoader.exists(percorso): sfondo = Color("#1d1b17")
+		_carta_stesa(r, percorso, sfondo)
+		# Il nome e i numeri restano scritti sopra anche col disegno vero, e
+		# non e' una ridondanza: a questa distanza il testo stampato non si
+		# legge, e soprattutto i NUMERI DEL PDF SONO VECCHI - su 44 edifici su
+		# 60 lo Scavo stampato non e' quello della v1.5. Questi vengono dai
+		# dati, che sono la fonte.
 		_scritta(r.position + Vector3(r.size.x / 2.0, 30.0, r.size.z / 2.0),
 			_titolo_carta(c), 0.14, Color("#e8e6df"))
 		_scritta(r.position + Vector3(r.size.x / 2.0, 16.0, r.size.z / 2.0),

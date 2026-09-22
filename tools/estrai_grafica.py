@@ -154,6 +154,7 @@ def estrai_sagome(doc, dest):
                              ("grigio", PAGINE_SAGOME_GRIGIO)):
         cartella = os.path.join(dest, "sagome", variante)
         os.makedirs(cartella, exist_ok=True)
+        _svuota(cartella)
         n = 0
         for p in pagine:
             for _, info in illustrazioni_di_pagina(doc, p, variante == "grigio"):
@@ -230,10 +231,23 @@ GRUPPI_POTENZIAMENTI = [("potenziamenti", [1], False, 25)]
 GRUPPI_DORSI_POTENZIAMENTI = [("potenziamenti", [2], False)]
 
 
+# La cartella si svuota prima di riempirla. Senza, il giorno che la mappatura
+# cambia - ed e' appena successo con le tessere, passate da numerate a per id -
+# restano a terra i file vecchi: nessuno li aggiorna piu' e nessuno se ne
+# accorge, finche' qualcosa non carica quelli invece dei nuovi.
+def _svuota(cartella):
+    if not os.path.isdir(cartella):
+        return
+    for f in os.listdir(cartella):
+        if f.lower().endswith((".png", ".jpg", ".jpeg", ".webp")):
+            os.remove(os.path.join(cartella, f))
+
+
 def estrai_gruppo(doc, dest, nome, pagine, specchiata, attesi, ordine=None):
     """Estrae un gruppo. Col suo ordine salva per id, altrimenti numerato."""
     cartella = os.path.join(dest, "carte", nome)
     os.makedirs(cartella, exist_ok=True)
+    _svuota(cartella)
     n, per_id, saltate = 0, 0, 0
     viste = {}          # impronta -> prima posizione in cui e' comparsa
     copie = {}          # posizione -> posizione di cui e' la copia identica
@@ -401,6 +415,14 @@ def main(dest):
     percorso_ordini = os.path.join(ROOT, "data", "carte_pdf.json")
     if os.path.exists(percorso_ordini):
         ordini = json.load(open(percorso_ordini, encoding="utf-8"))
+
+    # Le tessere colonna hanno la loro mappatura a parte, perche' non sono
+    # carte di cards.json ma varianti nominate dei quattro terreni: l'ordine
+    # si ricava da li' cosi' escono col proprio id invece che numerate.
+    percorso_tessere = os.path.join(ROOT, "data", "tessere_pdf.json")
+    if os.path.exists(percorso_tessere):
+        tess = json.load(open(percorso_tessere, encoding="utf-8"))
+        ordini["tessere"] = [t["id"] for t in tess["tessere"]]
 
     print("impronte dei PDF:")
     verifica_pdf(ordini)

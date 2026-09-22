@@ -26,6 +26,9 @@ func _ready() -> void:
 	_run("3D: cliccare una carta", _test_clic_sulle_carte)
 	_run("3D: l'inquadratura si calcola", _test_3d_inquadratura)
 	_run("3D: dal clic allo slot", _test_raggio)
+	_run("3D: la telecamera gira attorno al tavolo", _test_orbita)
+	_run("  e cliccare funziona da ogni angolo", _test_orbita_e_clic)
+	_run("  e finisce davvero dove dice, nella scena", _test_telecamera_nel_mondo)
 	_run("le azioni offerte, col preventivo", _test_azioni_offerte)
 	_run("  e la promessa che mantengono", _test_azioni_mantengono_la_promessa)
 	print("\n%d superati, %d falliti" % [_passed, _failed])
@@ -667,3 +670,143 @@ func _test_linguette() -> void:
 	for p in ll:
 		if p.z <= base.z + BoardLayout3D.BASETTA_D / 2.0: dietro += 1
 	_eq("  e spuntano davanti, non dietro la sagoma", dietro, 0)
+
+# ---- la telecamera che il giocatore muove ----------------------------
+func _test_orbita() -> void:
+	var gs := _gioco().gs
+	var o := CameraOrbita.da_stato(gs)
+
+	# Parte esattamente dall'inquadratura calcolata: girare il tabellone e' in
+	# piu', non al posto di quella. Se questa cade, la prima schermata della
+	# partita non e' piu' quella scelta coi numeri.
+	_ok("parte dall'inquadratura calcolata",
+		o.posizione().is_equal_approx(BoardLayout3D.camera_position(gs)),
+		"attesa %s, ottenuta %s" % [BoardLayout3D.camera_position(gs), o.posizione()])
+	_ok("  e guarda lo stesso punto", o.mira.is_equal_approx(BoardLayout3D.camera_target(gs)))
+	_ok("  e si dichiara iniziale", o.e_iniziale())
+
+	# Girare cambia il punto di vista ma non la distanza: e' un'orbita, non
+	# una passeggiata. Provata a giri interi, non a un angolo solo.
+	var d0 := o.distanza
+	var lontano := 0.0
+	# I pixel si ricavano dalla sensibilita', non scritti a mano: cosi' il
+	# giro resta un giro anche il giorno che la sensibilita' cambia - e quel
+	# giorno e' arrivato subito, perche' 0,5 gradi per pixel era troppo.
+	var pixel_per_scatto := 360.0 / 36.0 / CameraOrbita.GRADI_PER_PIXEL
+	for i in 36:
+		o.ruota(Vector2(pixel_per_scatto, 0.0))
+		lontano = maxf(lontano, absf((o.posizione() - o.mira).length() - d0))
+	_ok("girare non cambia la distanza dalla mira", lontano < 0.001,
+		"scarto massimo %f mm" % lontano)
+	_ok("dopo un giro intero si torna al punto di partenza",
+		o.posizione().is_equal_approx(BoardLayout3D.camera_position(gs)),
+		"ottenuta %s" % o.posizione())
+
+	# L'inclinazione non passa i due limiti: sotto si guarderebbe il tavolo di
+	# taglio, sopra si perderebbe il senso dell'altezza.
+	for i in 200: o.ruota(Vector2(0.0, 60.0))
+	_approx("l'inclinazione si ferma in basso", o.inclinazione, CameraOrbita.INCLINAZIONE_MIN)
+	_ok("  e la telecamera resta sopra la mira", o.posizione().y > o.mira.y)
+	for i in 400: o.ruota(Vector2(0.0, -60.0))
+	_approx("l'inclinazione si ferma in alto", o.inclinazione, CameraOrbita.INCLINAZIONE_MAX)
+
+	# Lo zoom: moltiplicativo, quindi avanti e indietro tornano al punto esatto.
+	o.reimposta()
+	_ok("il ripristino riporta all'inquadratura calcolata",
+		o.posizione().is_equal_approx(BoardLayout3D.camera_position(gs)) and o.e_iniziale())
+	o.zoom(3.0)
+	_ok("avvicinare riduce la distanza", o.distanza < d0)
+	_ok("  e non e' piu' l'inquadratura iniziale", not o.e_iniziale())
+	o.zoom(-3.0)
+	_approx("avanti e indietro tornano alla distanza di prima", o.distanza, d0)
+	for i in 100: o.zoom(1.0)
+	_approx("lo zoom si ferma da vicino", o.distanza, d0 * CameraOrbita.ZOOM_MIN)
+	for i in 200: o.zoom(-1.0)
+	_approx("lo zoom si ferma da lontano", o.distanza, d0 * CameraOrbita.ZOOM_MAX)
+
+	# Lo spostamento: la mira si muove nel piano del tavolo e non se ne va.
+	o.reimposta()
+	var y0 := o.mira.y
+	o.trasla(Vector2(60.0, 0.0), 900.0)
+	_approx("spostare non cambia la quota della mira", o.mira.y, y0)
+	_ok("  e la mira si e' mossa", not o.mira.is_equal_approx(BoardLayout3D.camera_target(gs)))
+	var tavolo := BoardLayout3D.table_aabb_piatto(gs)
+	var largo: float = maxf(tavolo.size.x, tavolo.size.z)
+	for i in 400: o.trasla(Vector2(80.0, 80.0), 900.0)
+	_ok("la mira non scappa dal tavolo",
+		o.mira.x <= tavolo.end.x + largo * 0.5 + 0.001 \
+		and o.mira.z <= tavolo.end.z + largo * 0.5 + 0.001,
+		"finita in %s" % o.mira)
+
+# Girare il tabellone non deve rompere il clic. E' il rischio vero di questa
+# modifica: la mira si costruisce dal raggio della telecamera, quindi se la
+# telecamera si muove e il conto non la segue, si clicca una colonna e se ne
+# seleziona un'altra - in silenzio.
+func _test_orbita_e_clic() -> void:
+	var gs := _gioco().gs
+	var sbagliati := 0
+	var provati := 0
+	for giro in [0.0, 37.0, 90.0, 143.0, 180.0, 251.0, 300.0]:
+		for alzo in [15.0, 45.0, 75.0]:
+			var o := CameraOrbita.da_stato(gs)
+			o.imbardata = giro
+			o.inclinazione = alzo
+			var cam := o.posizione()
+			for c in gs.grid.n_cols:
+				for era in range(1, BoardLayout3D.RAILS + 1):
+					var centro := BoardLayout3D.slot_center(c, era)
+					var s := BoardLayout3D.slot_at_ray(gs, cam, (centro - cam).normalized())
+					provati += 1
+					if s.is_empty() or int(s["col"]) != c or int(s["era"]) != era:
+						sbagliati += 1
+	_eq("da ogni angolo, il raggio verso uno slot trova quello slot", sbagliati, 0)
+	_ok("  e li ha provati tutti", provati == 7 * 3 * gs.grid.n_cols * BoardLayout3D.RAILS,
+		"provati %d" % provati)
+
+# I test di geometria guardano i numeri che BoardLayout3D calcola, e quelli
+# possono essere giusti mentre la telecamera finisce da un'altra parte: basta
+# posarla nello spazio sbagliato. E' successo - la plancia era un francobollo
+# e nessuno dei test lo vedeva - quindi qui si costruisce la vista vera e si
+# misura dove la telecamera e' andata a finire NEL MONDO.
+func _test_telecamera_nel_mondo() -> void:
+	var gs := _gioco().gs
+	var vista: Node3D = preload("res://scripts/view/board_view_3d.gd").new()
+	add_child(vista)
+	vista.scale = Vector3.ONE * BoardLayout3D.U
+	vista.mostra(gs)
+	var cam: Camera3D = null
+	for f in vista.get_children():
+		if f is Camera3D: cam = f
+	_ok("la vista crea una telecamera", cam != null)
+	if cam == null:
+		vista.queue_free()
+		return
+
+	# Le misure sono in millimetri e la vista e' rimpicciolita di U: nel mondo
+	# la telecamera deve stare a U volte la posizione calcolata.
+	var atteso := BoardLayout3D.camera_position(gs) * BoardLayout3D.U
+	var scarto := cam.global_position.distance_to(atteso)
+	_ok("sta dove la geometria dice, in coordinate del mondo", scarto < 0.001,
+		"attesa %s, trovata %s" % [atteso, cam.global_position])
+
+	# E guarda il tavolo: il centro della strada deve cadere dentro al
+	# fotogramma, non dietro le spalle.
+	var mira := BoardLayout3D.camera_target(gs) * BoardLayout3D.U
+	_ok("e guarda il centro del tavolo", not cam.is_position_behind(mira))
+	var sullo_schermo := cam.unproject_position(mira)
+	var finestra := Vector2(cam.get_viewport().get_visible_rect().size)
+	_ok("  che cade dentro al fotogramma",
+		Rect2(Vector2.ZERO, finestra).has_point(sullo_schermo),
+		"finito a %s su una finestra %s" % [sullo_schermo, finestra])
+
+	# Girata di tre quarti: deve restare alla stessa distanza dalla mira.
+	var orb := CameraOrbita.da_stato(gs)
+	orb.ruota(Vector2(270.0 / CameraOrbita.GRADI_PER_PIXEL, 0.0))
+	vista.orbita = orb
+	vista.muovi_telecamera()
+	_approx("girata di tre quarti, resta alla stessa distanza dalla mira",
+		cam.global_position.distance_to(orb.mira * BoardLayout3D.U),
+		BoardLayout3D.camera_position(gs).distance_to(BoardLayout3D.camera_target(gs))
+			* BoardLayout3D.U)
+	_ok("  e continua a guardarla", not cam.is_position_behind(orb.mira * BoardLayout3D.U))
+	vista.queue_free()

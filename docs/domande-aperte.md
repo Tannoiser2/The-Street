@@ -977,3 +977,45 @@ dato è stato importato da lì. Ma due confronti fra ciò che è stampato e
 
     Intanto il gioco gira lo stesso: i potenziamenti li disegna dai dati, la
     grafica manca solo per cinque su venticinque.
+
+72. **Le tessere colonna stampate hanno regole che il motore non ha.** Il
+    modello conosce QUATTRO terreni con una regola ciascuno
+    (`data/cards.json`, `terrains`); il cartone stampa UNDICI tessere con
+    undici regole diverse, ognuna una variante nominata di un terreno.
+
+    La produzione coincide sempre (pianura, collina e bosco 2 pietra; fiume
+    1 pietra + 1 oro). La regola no: solo **Pianura dei Cantieri** ripete
+    alla lettera la regola del suo terreno ("gli edifici da 2-3 caselle
+    costano 1 pietra in meno"). Le altre dieci sono regole nuove - la
+    Pianura del Mercato converte 2 pietra in 1 oro, il Fiume Guado fa
+    contare come fiume anche le due colonne adiacenti, il Bosco Sacro da'
+    +1 resistenza a Religione e Cultura.
+
+    Perfino la regola della **collina** diverge: i dati dicono "ogni
+    edificio costruito qui ha +1 resistenza permanente", la Collina del
+    Castello stampa "il primo edificio che ciascun giocatore costruisce qui
+    in ogni era ottiene +1 resistenza". Non e' la stessa cosa.
+
+    Sono due giochi diversi: quattro terreni uguali fra loro, oppure undici
+    tessere che si comportano ognuna a modo suo. Finche' non lo decidi le
+    tessere si usano come **grafica** del terreno e le loro regole non
+    vengono applicate: il motore resta quello dei dati.
+
+73. **Le tessere FIUME sono una in meno di quante ne servono.** Il mix a
+    quattro giocatori (`terrain_mix_by_players`) chiede pianura 3, fiume 3,
+    collina 2, bosco 1. Stampate: pianura 4, collina 2, **fiume 2**, bosco 3.
+
+    E la posizione sprecata e' esattamente una: la settima e' una seconda
+    stampa di *Collina delle Cave*, copia byte per byte della sesta - lo
+    stesso difetto dei potenziamenti e degli eventi. Undici tessere
+    distinte su dodici posizioni, e quella che manca e' un fiume.
+
+    (Qui mi ero sbagliato: avevo scritto che il duplicato era voluto,
+    "serve avere due volte lo stesso terreno su una strada da 9 colonne".
+    Col mix alla mano non regge - di colline ne servono al massimo due e
+    due sono gia' stampate - ed era una spiegazione inventata per una cosa
+    che non avevo verificato.)
+
+    A schermo si vede: a quattro giocatori la terza colonna di fiume ripete
+    il disegno della prima.
+

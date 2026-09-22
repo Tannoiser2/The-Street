@@ -17,13 +17,33 @@ var ruleset: String = ""
 # proporzioni giuste anche quando le immagini non ci sono, perche' assets/ si
 # rigenera e non e' versionata.
 var sagome: Dictionary = {}       # id edificio -> {"n": int, "mm": [w, h]}
+# Le tessere colonna stampate: varianti nominate dei quattro terreni. Anche
+# queste NON sono dati di gioco - le loro regole non sono implementate, vedi
+# data/tessere_pdf.json - servono solo a mettere il cartone vero sul tavolo.
+var tessere: Array = []           # in ordine di stampa, solo quelle con un id
+var tessere_per_terreno: Dictionary = {}   # "pianura" -> [id, id, ...]
 
 const DB_PATH := "res://data/cards.json"
 const SAGOME_PATH := "res://data/sagome.json"
+const TESSERE_PATH := "res://data/tessere_pdf.json"
 
 func _ready() -> void:
 	load_db(DB_PATH)
 	load_sagome(SAGOME_PATH)
+	load_tessere(TESSERE_PATH)
+
+func load_tessere(path: String) -> bool:
+	var f := FileAccess.open(path, FileAccess.READ)
+	if f == null: return false        # senza, le colonne restano a tinta unita
+	var parsed = JSON.parse_string(f.get_as_text())
+	if typeof(parsed) != TYPE_DICTIONARY: return false
+	for t in parsed.get("tessere", []):
+		if t.get("id") == null: continue
+		tessere.append(t)
+		var terr := str(t["terreno"])
+		if not tessere_per_terreno.has(terr): tessere_per_terreno[terr] = []
+		tessere_per_terreno[terr].append(str(t["id"]))
+	return true
 
 func load_sagome(path: String) -> bool:
 	var f := FileAccess.open(path, FileAccess.READ)

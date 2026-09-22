@@ -109,6 +109,47 @@ static func sagoma_path(b: Building) -> String:
 	var variante := "colore" if b.state == Enums.BuildingState.INTATTO else "grigio"
 	return "res://assets/sagome/%s/%02d.png" % [variante, int(s["n"])]
 
+# ---- il cartone vero al posto dei rettangoli colorati ----------------
+# Quale tessera stampata va su una colonna. Il motore conosce quattro terreni,
+# il cartone ne stampa undici varianti nominate: si sceglie la k-esima fra
+# quelle del terreno giusto, dove k conta quante colonne dello stesso terreno
+# vengono prima. Deterministico, quindi due colonne di pianura vicine non
+# portano lo stesso disegno.
+#
+# Se le tessere di un terreno finiscono si ricomincia da capo: succede col
+# FIUME a quattro giocatori, che ne chiede tre e sul cartone ce ne sono due.
+# Non e' una scelta, e' il difetto di stampa del punto 72 delle domande
+# aperte che si vede a schermo.
+static func tessera_id(gs: GameState, col: int) -> String:
+	if col < 0 or col >= gs.grid.n_cols: return ""
+	var terr := Enums.terrain_to_string(gs.grid.terrains[col])
+	var quali: Array = CardDB.tessere_per_terreno.get(terr, [])
+	if quali.is_empty(): return ""
+	var k := 0
+	for c in col:
+		if gs.grid.terrains[c] == gs.grid.terrains[col]: k += 1
+	return str(quali[k % quali.size()])
+
+static func tessera_path(gs: GameState, col: int) -> String:
+	var id := tessera_id(gs, col)
+	return "" if id == "" else "res://assets/carte/tessere/%s.png" % id
+
+# Le carte delle file laterali. Gli edifici escono dal PDF in JPEG, gli altri
+# gruppi in PNG col fondo tolto: l'estensione non e' uniforme e non si puo'
+# indovinare, quindi sta qui in un posto solo.
+const CARTELLE_CARTE := {
+	"mercato": ["edifici", "jpeg"],
+	"personaggio": ["personaggi", "png"],
+	"potenziamento": ["potenziamenti", "png"],
+	"monumento": ["monumenti", "png"],
+	"eredita": ["eredita", "png"],
+}
+
+static func carta_path(tipo: String, id: String) -> String:
+	if not CARTELLE_CARTE.has(tipo): return ""
+	var d: Array = CARTELLE_CARTE[tipo]
+	return "res://assets/carte/%s/%s.%s" % [d[0], id, d[1]]
+
 static func sky_rect(gs: GameState) -> AABB:
 	var z := -CIELO_STACCO
 	return AABB(Vector3(-TESSERA_W * 2.0, -20.0, z),
@@ -282,30 +323,65 @@ const PLANCIA_D := 54.0      # profondita' della plancia di un giocatore
 # il tavolo si allarga di una carta per lato invece di allungarsi.
 # Centrata sulla strada: una fila lunga sborda davanti e dietro in parti
 # uguali invece di allungare il tavolo da un lato solo.
-static func _colonna_di_carte(x: float, quante: int) -> Array[AABB]:
+# Le misure vere delle carte, misurate sul PDF (solo geometria, non dati).
+# L'orientamento e' quello dell'immagine stampata: monumenti ed eredita' sono
+# impaginati DI TRAVERSO - sulla carta vera il titolo si legge girando la
+# testa - e sul tavolo si posano per il lungo, che e' l'unico modo di
+# leggerli a schermo.
+const MISURE_CARTE := {
+	"mercato": Vector2(62.6, 61.8),
+	"personaggio": Vector2(66.0, 93.2),
+	"potenziamento": Vector2(28.0, 68.0),
+	"monumento": Vector2(125.6, 25.2),
+	"eredita": Vector2(125.7, 45.2),
+}
+
+static func misura_carta(tipo: String) -> Vector2:
+	return MISURE_CARTE.get(tipo, Vector2(CARTA, CARTA))
+
+# Impila le carte in colonna lungo Z, ognuna con la SUA misura: una fila che
+# mescola personaggi, potenziamenti e monumenti mette insieme tre formati
+# diversi, e forzarli tutti in un quadrato deformava i disegni.
+# `x` e' il bordo verso la strada: le carte piu' strette restano allineate a
+# quel lato invece di ballare al centro.
+static func _colonna_di_carte(x: float, misure: Array) -> Array[AABB]:
 	var out: Array[AABB] = []
-	if quante <= 0: return out
-	var passo := CARTA + CARTA_GAP
-	var z0 := board_d() / 2.0 - (quante * CARTA + (quante - 1) * CARTA_GAP) / 2.0
-	for i in quante:
-		out.append(AABB(Vector3(x, 0.0, z0 + i * passo),
-			Vector3(CARTA, TESSERA_Y, CARTA)))
+	if misure.is_empty(): return out
+	var totale := 0.0
+	for m in misure: totale += m.y
+	totale += CARTA_GAP * (misure.size() - 1)
+	var z := board_d() / 2.0 - totale / 2.0
+	for m in misure:
+		out.append(AABB(Vector3(x, 0.0, z), Vector3(m.x, TESSERA_Y, m.y)))
+		z += m.y + CARTA_GAP
 	return out
 
 # Tutte le carte delle file, ognuna col suo riquadro: serve a disegnarle e a
 # cliccarle. `kind` dice a quale fila appartiene, `id` quale carta e'.
 static func side_cards(gs: GameState) -> Array[Dictionary]:
 	var out: Array[Dictionary] = []
-	var x_sx := -(CARTA + BORDO)
-	var box_sx := _colonna_di_carte(x_sx, gs.market.size())
-	for i in gs.market.size():
-		out.append({"kind": "mercato", "id": str(gs.market[i]), "aabb": box_sx[i]})
+	var sinistra: Array = []
+	for id in gs.market: sinistra.append(["mercato", str(id)])
 	var destra: Array = []
 	for id in gs.char_row: destra.append(["personaggio", str(id)])
 	for id in gs.upg_row: destra.append(["potenziamento", str(id)])
 	for id in gs.monuments_open: destra.append(["monumento", str(id)])
-	var x_dx := board_w(gs) + BORDO
-	var box_dx := _colonna_di_carte(x_dx, destra.size())
+
+	var mis_sx: Array = []
+	for c in sinistra: mis_sx.append(misura_carta(str(c[0])))
+	var largo_sx := 0.0
+	for m in mis_sx: largo_sx = maxf(largo_sx, m.x)
+	# La fila di sinistra si appoggia al proprio bordo destro, quella di
+	# destra al proprio sinistro: cosi' le carte guardano la strada.
+	var box_sx := _colonna_di_carte(-(largo_sx + BORDO), mis_sx)
+	for i in sinistra.size():
+		var b: AABB = box_sx[i]
+		b.position.x += largo_sx - b.size.x
+		out.append({"kind": str(sinistra[i][0]), "id": str(sinistra[i][1]), "aabb": b})
+
+	var mis_dx: Array = []
+	for c in destra: mis_dx.append(misura_carta(str(c[0])))
+	var box_dx := _colonna_di_carte(board_w(gs) + BORDO, mis_dx)
 	for i in destra.size():
 		out.append({"kind": str(destra[i][0]), "id": str(destra[i][1]), "aabb": box_dx[i]})
 	return out
