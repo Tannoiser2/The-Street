@@ -36,6 +36,7 @@ func _ready() -> void:
 	_run("  e la promessa che mantengono", _test_azioni_mantengono_la_promessa)
 	_run("i bersagli: dove si puo' mettere una carta", _test_bersagli)
 	_run("  e il riquadro acceso e' quello che si clicca", _test_riquadri)
+	_run("  e la barra dice che mossa sarebbe, e quanto costa", _test_descrizione)
 	print("\n%d superati, %d falliti" % [_passed, _failed])
 	get_tree().quit(0 if _failed == 0 else 1)
 
@@ -1018,6 +1019,92 @@ func _test_riquadri() -> void:
 	_ok("si puo' chiedere di spianare un proprio edificio (%d modi)" % spianamenti,
 		spianamenti > 0)
 
+# La barra di stato: passando sopra un riquadro acceso deve dire CHE MOSSA
+# sarebbe e quanto costa. Serviva perche' i riquadri accesi si somigliano
+# tutti: la stessa carta, due caselle piu' in la', e' una costruzione a
+# terra oppure lo spianamento di una propria bottega ancora intatta. Prima la
+# differenza si scopriva cliccando, cioe' dopo.
+# DescrizioneAzione e' pura, quindi le frasi si provano qui senza schermo.
+func _test_descrizione() -> void:
+	var ctl := _gioco()
+	var gs := ctl.gs
+	# Tre situazioni nello stesso tabellone, perche' sono le tre mosse che il
+	# riquadro acceso non sa distinguere da solo: terra libera, una rovina su
+	# cui salire, un proprio edificio intatto da spianare.
+	_metti(gs, "ed_capanne", 2, 1, 0, 0)
+	var rovina := _metti(gs, "ed_capanne", 6, 1, 0, 0)
+	rovina.state = Enums.BuildingState.ROVINA
+	var p: PlayerState = gs.players[0]
+
+	var righe := 0
+	var senza_prezzo := 0
+	var tipo_sbagliato := 0
+	var spianate := 0
+	var sopraelevazioni := 0
+	var costruzioni := 0
+	# Si interrogano tutte le colonne come fa la plancia quando il lavoratore
+	# non e' ancora piazzato: AvailableActions e' pura e la colonna e' un suo
+	# parametro, quindi la domanda si puo' fare per una colonna ipotetica.
+	for col in gs.grid.n_cols:
+		for card_id in gs.market:
+			for v in AvailableActions.piazzamenti(gs, 0, col, card_id):
+				var riga := DescrizioneAzione.riga(gs, v, 0)
+				righe += 1
+				# il nome dell'edificio e il conto ci sono sempre
+				if not riga.contains(str(CardDB.buildings[card_id]["name"])) \
+						or not riga.contains(DescrizioneAzione.prezzo(v)):
+					senza_prezzo += 1
+				var tipo := DescrizioneAzione.tipo(v)
+				var spiana: PackedStringArray = v.parametri["spiana"]
+				if not spiana.is_empty():
+					spianate += 1
+					# spianare e' la mossa che costa un proprio edificio: la
+					# parola deve dirlo, e deve dire quale
+					if tipo != "Spianata" or not riga.contains(spiana[0]):
+						tipo_sbagliato += 1
+				elif bool(v.parametri["above"]):
+					sopraelevazioni += 1
+					if tipo != "Sopraelevazione": tipo_sbagliato += 1
+				else:
+					costruzioni += 1
+					if tipo != "Costruzione": tipo_sbagliato += 1
+
+	_ok("ogni posto acceso ha la sua riga (%d)" % righe, righe > 0)
+	_eq("  col nome dell'edificio e il prezzo", senza_prezzo, 0)
+	_ok("  la partita offre le tre mosse: %d a terra, %d sopra, %d spianando"
+		% [costruzioni, sopraelevazioni, spianate],
+		costruzioni > 0 and sopraelevazioni > 0 and spianate > 0)
+	_eq("  e ognuna si chiama col suo nome", tipo_sbagliato, 0)
+
+	# Il prezzo si scrive in italiano, non "0 pietra 0 oro".
+	var gratis := AvailableActions.Voce.new()
+	_eq("quel che non costa si dice gratis", DescrizioneAzione.prezzo(gratis), "gratis")
+	var caro := AvailableActions.Voce.new()
+	caro.pietra = 3
+	caro.oro = 1
+	_eq("  e il resto col suo conto", DescrizioneAzione.prezzo(caro), "3 pietra 1 oro")
+
+	# Legale e pagabile sono due cose diverse: il posto resta acceso, ma la
+	# barra deve dire quanto manca invece di far scoprire il rifiuto al clic.
+	var avanzo := Vector2i(p.pietra, p.oro)
+	p.pietra = 1
+	p.oro = 0
+	_eq("col borsellino vuoto la barra dice quanto manca",
+		DescrizioneAzione.ammanco(caro, p), "ti manca 2 pietra e 1 oro")
+	p.pietra = avanzo.x
+	p.oro = avanzo.y
+	_eq("  e non dice niente quando il conto torna",
+		DescrizioneAzione.ammanco(AvailableActions.Voce.new(), p), "")
+
+	# Il lavoratore non ancora piazzato: cliccare il posto lo mette, ed e' una
+	# conseguenza che nel riquadro acceso non si vede.
+	var v2 := AvailableActions.Voce.new()
+	v2.tipo = "costruisci"
+	v2.parametri = {"card_id": gs.market[0], "col_from": 0, "above": false,
+		"level": 0, "spiana": PackedStringArray(), "terrapieni": 0, "attiva": 4}
+	_ok("e se il lavoratore non c'e' ancora, dice quale colonna attiva",
+		DescrizioneAzione.riga(gs, v2, 0).contains("attiva la colonna 4"))
+
 # LA SCENA GIOCABILE NON LA COMPILAVA NESSUN TEST. Un errore di sintassi in
 # gioca.gd passava tutta la suite - i test caricano i moduli puri, non la
 # scena - e si vedeva solo aprendo il gioco, con lo schermo grigio e nessun
@@ -1030,6 +1117,7 @@ func _test_scena_giocabile() -> void:
 			"res://scripts/view/board_view_3d.gd",
 			"res://scripts/view/board_layout_3d.gd",
 			"res://scripts/view/camera_orbita.gd",
+			"res://scripts/view/descrizione_azione.gd",
 			"res://scripts/rules/available_actions.gd"]:
 		_ok("%s si compila" % percorso.get_file(), ResourceLoader.load(percorso) != null)
 	var scena := ResourceLoader.load("res://scenes/gioca.tscn") as PackedScene

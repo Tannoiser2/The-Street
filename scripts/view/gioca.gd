@@ -31,6 +31,10 @@ var _messaggio := ""
 # i bersagli accesi.
 var _scelta: Dictionary = {}
 var _bersagli: Array = []            # AvailableActions.Voce, una per bersaglio
+# Il bersaglio acceso che il mouse sta puntando adesso, null se nessuno: e'
+# quello che la barra di stato descrive. Si ricalcola sempre dai `_bersagli`
+# correnti, mai conservato oltre, cosi' non puo' restare indietro.
+var _sotto_mouse: AvailableActions.Voce = null
 var _bottoni: Array = []             # {"rect", "voce"} per le azioni senza carta
 
 # Il riquadro che segue il mouse: sostituisce tutte le scritte che prima
@@ -69,6 +73,9 @@ func _aggiorna() -> void:
 		vista.orbita = _orbita
 	vista.mostra(ctl.gs, _colonna_sotto_mouse, _acceso())
 	vista.scale = Vector3.ONE * BoardLayout3D.U
+	# Il tavolo e' cambiato sotto un mouse fermo: quel che la barra prometteva
+	# puo' non esistere piu', quindi si richiede a partire dai bersagli nuovi.
+	_sotto_mouse = _bersaglio_sotto(_nota_dove)
 	_hud.queue_redraw()
 
 # Cosa la vista deve accendere: la carta scelta, i posti dove puo' andare, gli
@@ -145,6 +152,7 @@ func _movimento(e: InputEventMouseMotion) -> void:
 		return
 	_nota_dove = e.position
 	_nota = _descrivi_sotto(e.position)
+	_sotto_mouse = _bersaglio_sotto(e.position)
 	var col := _colonna_puntata(e.position)
 	if col != _colonna_sotto_mouse:
 		_colonna_sotto_mouse = col
@@ -311,12 +319,21 @@ func _piazza_lavoratore(pixel: Vector2) -> void:
 # spianare un proprio edificio - si clicca dove lo si vede, e non serve piu'
 # nessun tasto da tenere premuto.
 func _prova_bersaglio(pixel: Vector2) -> bool:
+	var v := _bersaglio_sotto(pixel)
+	if v == null: return false
+	_esegui(v)
+	return true
+
+# Il bersaglio acceso sotto quel pixel, null se il mouse e' altrove. Lo
+# chiedono in due: il clic per eseguirlo, la barra di stato per dire cosa
+# sarebbe. E' la stessa domanda, quindi e' la stessa funzione: non puo'
+# succedere che la barra annunci una mossa e il clic ne faccia un'altra.
+func _bersaglio_sotto(pixel: Vector2) -> AvailableActions.Voce:
+	if _bersagli.is_empty() or get_viewport().get_camera_3d() == null: return null
 	var b := _edificio_puntato(pixel)
 	if b != null:
 		for v in _bersagli:
-			if int(v.parametri.get("uid", -1)) == b.uid:
-				_esegui(v)
-				return true
+			if int(v.parametri.get("uid", -1)) == b.uid: return v
 	var riquadri: Array = []
 	var voci: Array = []
 	for v in _bersagli:
@@ -326,9 +343,7 @@ func _prova_bersaglio(pixel: Vector2) -> bool:
 			int(d["width"]), int(v.parametri.get("level", 0)), ctl.gs.era))
 		voci.append(v)
 	var i := BoardLayout3D.riquadro_al_raggio(riquadri, _origine(pixel), _direzione(pixel))
-	if i < 0: return false
-	_esegui(voci[i])
-	return true
+	return voci[i] if i >= 0 else null
 
 # Le colonne dove il lavoratore puo' ancora andare. Sono quelle che aprono
 # un'azione: se la carta si sceglie PRIMA di piazzare, i posti da accendere
@@ -417,6 +432,7 @@ func _scegli_restauro() -> void:
 func _deseleziona(ridisegna := true) -> void:
 	_scelta = {}
 	_bersagli = []
+	_sotto_mouse = null
 	if ridisegna: _aggiorna()
 
 func _nome_carta(kind: String, id: String) -> String:
@@ -467,6 +483,9 @@ func _esegui(v) -> void:
 const SFONDO := Color(0.09, 0.10, 0.13, 0.86)
 const CHIARO := Color("#e8e6df")
 const SPENTO := Color("#8b919c")
+# Solo per il conto che non torna: e' l'unica cosa in tutta la barra che
+# dice "questa mossa e' permessa ma non te la puoi permettere".
+const ROSSO := Color("#e8795f")
 
 func _riquadro(font: Font, righe: PackedStringArray, dove: Vector2,
 		larghezza := 340.0) -> void:
@@ -496,6 +515,54 @@ func _disegna_hud() -> void:
 			p.vp, p.pietra, p.oro, p.workers_used, p.workers],
 		HORIZONTAL_ALIGNMENT_LEFT, -1, 18, CHIARO)
 
+	# Col mouse su un posto acceso la barra smette di dare istruzioni e dice
+	# che mossa sarebbe e quanto costa: i riquadri accesi si somigliano tutti,
+	# e questo e' l'ultimo momento in cui si puo' cambiare idea gratis.
+	if _sotto_mouse != null:
+		_riga_azione(font, _sotto_mouse, p)
+	else:
+		var invito := _invito(gs)
+		_striscia(font, invito)
+		_hud.draw_string(font, Vector2(20, 54), invito,
+			HORIZONTAL_ALIGNMENT_LEFT, -1, 14, SPENTO)
+
+	if gs.phase == Enums.Phase.AZIONE and gs.current_index == UMANO \
+			and gs.pending_choice.is_empty():
+		_disegna_bottoni(font, p)
+
+	var schermo := _hud.get_viewport_rect().size
+	_hud.draw_string(font, Vector2(20, schermo.y - 16),
+		"Trascina per girare il tabellone · rotella per avvicinare · "
+		+ "tasto destro per spostare · R riporta l'inquadratura",
+		HORIZONTAL_ALIGNMENT_LEFT, -1, 12, Color("#6f7683"))
+
+	if not _nota.is_empty():
+		_riquadro(font, _nota, _nota_dove + Vector2(18, 18))
+
+# Che mossa sarebbe cliccare qui, e quanto costa. Il conto che non torna esce
+# in coda e in rosso: il posto resta acceso perche' la mossa e' permessa, ed
+# e' il prezzo a non essere alla portata - sono due cose diverse e il
+# giocatore deve vederle diverse.
+func _riga_azione(font: Font, v: AvailableActions.Voce, p: PlayerState) -> void:
+	var riga := DescrizioneAzione.riga(ctl.gs, v, UMANO)
+	var manca := DescrizioneAzione.ammanco(v, p)
+	if manca != "": manca = "  ·  " + manca
+	_striscia(font, riga + manca)
+	_hud.draw_string(font, Vector2(20, 54), riga, HORIZONTAL_ALIGNMENT_LEFT, -1, 14, CHIARO)
+	if manca == "": return
+	var x := 20.0 + font.get_string_size(riga, HORIZONTAL_ALIGNMENT_LEFT, -1, 14).x
+	_hud.draw_string(font, Vector2(x, 54), manca,
+		HORIZONTAL_ALIGNMENT_LEFT, -1, 14, ROSSO)
+
+# La riga di stato cade sul cielo dipinto, che e' chiaro: senza una striscia
+# scura sotto, meta' frase si perde fra le nuvole. Larga quanto il testo e
+# non quanto lo schermo, per non coprire il tabellone piu' del necessario.
+func _striscia(font: Font, testo: String) -> void:
+	var largo := font.get_string_size(testo, HORIZONTAL_ALIGNMENT_LEFT, -1, 14).x
+	_hud.draw_rect(Rect2(Vector2(12.0, 39.0), Vector2(largo + 16.0, 22.0)), SFONDO, true)
+
+# Cosa il gioco si aspetta adesso, quando il mouse non e' su niente.
+func _invito(gs: GameState) -> String:
 	var invito := ""
 	if gs.phase == Enums.Phase.FINE_PARTITA:
 		invito = "Partita finita. Vincitore: giocatore %d" % Scoring.winner(gs)
@@ -511,20 +578,7 @@ func _disegna_hud() -> void:
 	else:
 		invito = "Clicca un posto acceso. Esc per lasciar perdere."
 	if _messaggio != "": invito += "     — " + _messaggio
-	_hud.draw_string(font, Vector2(20, 54), invito, HORIZONTAL_ALIGNMENT_LEFT, -1, 14, SPENTO)
-
-	if gs.phase == Enums.Phase.AZIONE and gs.current_index == UMANO \
-			and gs.pending_choice.is_empty():
-		_disegna_bottoni(font, p)
-
-	var schermo := _hud.get_viewport_rect().size
-	_hud.draw_string(font, Vector2(20, schermo.y - 16),
-		"Trascina per girare il tabellone · rotella per avvicinare · "
-		+ "tasto destro per spostare · R riporta l'inquadratura",
-		HORIZONTAL_ALIGNMENT_LEFT, -1, 12, Color("#6f7683"))
-
-	if not _nota.is_empty():
-		_riquadro(font, _nota, _nota_dove + Vector2(18, 18))
+	return invito
 
 # Le azioni che non hanno una carta da cliccare sul tavolo. Sono tre, e stanno
 # in un angolo: non e' piu' un menu, e' quello che avanza.
