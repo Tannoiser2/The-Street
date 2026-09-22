@@ -71,7 +71,12 @@ godot res://scenes/gioca.tscn
 
 Tu sei il giocatore 0, gli altri li gioca il bot. Clicca una colonna per
 piazzare un lavoratore e attivarla, poi scegli un'azione dall'elenco: ognuna
-porta il costo, e quelle non disponibili portano il motivo.
+porta il costo, e quelle non disponibili portano il motivo. Cliccando una
+carta delle file la si legge senza chiudere il menu.
+
+Sul tavolo: la strada al centro, il mercato lungo il fianco sinistro,
+personaggi, potenziamenti e monumenti lungo il destro, le plance dei giocatori
+davanti. La colonna 0 e' a sinistra e l'era 1 e' la fila piu' vicina.
 
 Le misure della plancia 3D sono in **millimetri**, prese dal cartone vero
 (tessera colonna 63 x 271 mm, sagome da 61 / 121 / 181 mm, basetta 15 mm,

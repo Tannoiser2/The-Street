@@ -64,6 +64,33 @@ func _colonna_puntata(pixel: Vector2) -> int:
 	var slot := BoardLayout3D.slot_at_ray(ctl.gs, o, d)
 	return int(slot.get("col", -1)) if not slot.is_empty() else -1
 
+func _carta_puntata(pixel: Vector2) -> Dictionary:
+	var cam := get_viewport().get_camera_3d()
+	if cam == null: return {}
+	var o := cam.project_ray_origin(pixel) / BoardLayout3D.U
+	return BoardLayout3D.card_at_ray(ctl.gs, o, cam.project_ray_normal(pixel))
+
+func _descrivi(c: Dictionary) -> String:
+	var id := str(c["id"])
+	match str(c["kind"]):
+		"mercato":
+			var d: Dictionary = CardDB.buildings[id]
+			var co: Dictionary = d["cost"]
+			return "%s — %dp %do · res %d · scavo %d · %s" % [d["name"],
+				int(co.get("pietra", 0)), int(co.get("oro", 0)),
+				int(d["resistance"]), int(d["scavo"]), ", ".join(d["classes"])]
+		"personaggio":
+			var pe: Dictionary = CardDB.characters[id]
+			return "%s (%s) — %s" % [pe["name"], pe["class"], pe.get("effect_text", "")]
+		"potenziamento":
+			var po: Dictionary = CardDB.upgrades[id]
+			return "%s (%s) — %s" % [po["name"], po["family"], po.get("effect_text", "")]
+		"monumento":
+			if CardDB.monuments.has(id):
+				var mo: Dictionary = CardDB.monuments[id]
+				return "%s — %s" % [mo["name"], mo.get("effect_text", "")]
+	return id
+
 func _clic(pixel: Vector2) -> void:
 	if ctl.gs.phase == Enums.Phase.FINE_PARTITA: return
 	if ctl.gs.current_index != UMANO: return
@@ -72,6 +99,13 @@ func _clic(pixel: Vector2) -> void:
 		if _righe[i].has_point(pixel):
 			_esegui(_voci[i])
 			return
+	# Poi le carte delle file: cliccarne una la descrive, cosi' si puo'
+	# guardare cosa c'e' in mercato senza dover chiudere il menu.
+	var carta := _carta_puntata(pixel)
+	if not carta.is_empty():
+		_messaggio = _descrivi(carta)
+		_aggiorna()
+		return
 	if ctl.gs.phase == Enums.Phase.PIAZZA:
 		var col := _colonna_puntata(pixel)
 		if col < 0: return

@@ -729,3 +729,43 @@ dato è stato importato da lì. Ma due confronti fra ciò che è stampato e
     plance degli avversari nella vista 3D, che per ora vivono solo nella 2D;
     il PNG del cielo al posto del colore pieno; e l'illustrazione sulle
     sagome, che aspetta la mappatura del punto 23.
+
+56. **Le colonne erano specchiate, e l'ho scoperto solo guardando.** Con l'era
+    1 davanti, la telecamera guardava verso le z crescenti; in quella
+    configurazione l'asse X appare invertito sullo schermo, quindi la
+    **colonna 0 finiva a destra**. Nessun test lo prendeva - la geometria era
+    coerente con se stessa e il clic funzionava - ma chi legge «colonna 2»
+    avrebbe guardato dalla parte sbagliata.
+
+    Risolto girando i binari (`rail_z(era) = (RAILS - era) * SLOT_D`) invece
+    che la X: la telecamera sta ora dal lato delle z maggiori, l'era 1 resta
+    davanti e la colonna 0 torna a sinistra. **Verificato confrontando i
+    terreni**: la partita stampa «fiume, bosco, pianura, collina, fiume,
+    pianura, collina» da colonna 0 e l'immagine li mostra in quell'ordine da
+    sinistra.
+
+    Un test che affermava una direzione e' stato riscritto per verificare la
+    non-sovrapposizione **senza dipendere dal verso dell'asse**: cosi' resta
+    vero se un giorno si gira di nuovo il tavolo.
+
+57. **Le file e le plance stanno sul tavolo, non in sovrimpressione.** Sono
+    carte: si vedono, si indicano e si cliccano come tutto il resto, con lo
+    stesso raggio che serve agli slot. Il mercato corre lungo il fianco
+    sinistro della strada, personaggi, potenziamenti e monumenti lungo il
+    destro, le plance dei giocatori davanti, dal lato di chi guarda.
+
+    Ai lati e non davanti per una ragione di fotogramma: il tavolo e' piu'
+    largo che alto, quindi allargarlo di una carta per lato costa molto meno
+    che allungarlo di tre file. Le due colonne sono centrate sulla strada, e
+    l'inquadratura ora fa entrare **tutto il tavolo**, non la sola strada.
+
+    Sulla plancia di ciascun giocatore ci sono PV, risorse, lavoratori usati,
+    Dinastia, personaggi dell'era, edifici in piedi e personaggi sepolti: le
+    «carte possedute» che chiede il brief. Manca ancora il dettaglio dei
+    cubetti di Vetusta' e resistenza carta per carta, che oggi si legge sulla
+    sagoma.
+
+58. **Cosa resta dell'interfaccia.** La scelta del bersaglio dove il
+    regolamento la richiede (punto 55), il PNG del cielo al posto del colore
+    pieno, l'illustrazione sulle sagome (che aspetta la mappatura del punto
+    23), e il dettaglio dei cubetti sulla plancia del giocatore.

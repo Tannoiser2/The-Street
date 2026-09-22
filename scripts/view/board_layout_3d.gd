@@ -42,8 +42,12 @@ const CIELO_H := 620.0
 static func col_x(col: int) -> float:
 	return col * TESSERA_W
 
+# L'era 1 sta DAVANTI, cioe' dalla parte della telecamera, che guarda verso
+# le z calanti. Con la telecamera dall'altro lato lo schermo specchierebbe la
+# X e la colonna 0 finirebbe a destra: chi legge "colonna 2" guarderebbe dalla
+# parte sbagliata.
 static func rail_z(era: int) -> float:
-	return (era - 1) * SLOT_D
+	return (RAILS - era) * SLOT_D
 
 static func span_w(n_col: int) -> float:
 	return n_col * SAGOMA_MODULO
@@ -67,7 +71,8 @@ static func standee_base(gs: GameState, b: Building) -> Vector3:
 	var x := col_x(b.col_from) + b.width() * TESSERA_W / 2.0
 	var z: float
 	if b.level == 0:
-		z = rail_z(b.era_built) + BASETTA_D / 2.0
+		# sul davanti dello slot, cioe' dal lato della telecamera
+		z = rail_z(b.era_built) + SLOT_D - BASETTA_D / 2.0
 	else:
 		# Senza binario: al centro della profondita' della colonna, sopra il
 		# baricentro di cio' che la sorregge.
@@ -93,7 +98,7 @@ static func standee_size(b: Building) -> Vector2:
 	return Vector2(span_w(b.width()), ALTEZZA_MEDIANA[n])
 
 static func sky_rect(gs: GameState) -> AABB:
-	var z := board_d() + CIELO_STACCO
+	var z := -CIELO_STACCO
 	return AABB(Vector3(-TESSERA_W * 2.0, -20.0, z),
 		Vector3(board_w(gs) + TESSERA_W * 4.0, CIELO_H, 0.0))
 
@@ -121,7 +126,17 @@ static func altezza_scena(gs: GameState) -> float:
 	return level_y(m) + ALTEZZA_MEDIANA[0] + BASETTA_Y
 
 static func camera_target(gs: GameState) -> Vector3:
-	return Vector3(board_w(gs) / 2.0, altezza_scena(gs) * 0.38, board_d() * 0.55)
+	var t := table_aabb_piatto(gs)
+	return Vector3(t.position.x + t.size.x / 2.0, altezza_scena(gs) * 0.38,
+		t.position.z + t.size.z * 0.55)
+
+# Come table_aabb ma senza chiamare camera_*: serve alla mira, e senza questa
+# separazione le due funzioni si chiamerebbero a vicenda senza fine.
+static func table_aabb_piatto(gs: GameState) -> AABB:
+	var tutto := AABB(Vector3.ZERO, Vector3(board_w(gs), 0.0, board_d()))
+	for c in side_cards(gs): tutto = tutto.merge(c["aabb"])
+	for p in player_boards(gs): tutto = tutto.merge(p["aabb"])
+	return tutto
 
 # L'ingombro di tutta la scena: la strada piu' le torri.
 static func scene_aabb(gs: GameState) -> AABB:
@@ -154,9 +169,9 @@ static func _ingombro(cam: Vector3, mira: Vector3, scatola: AABB) -> float:
 # risultato e' esatto per 5, 7 o 9 colonne e per qualsiasi altezza.
 static func camera_position(gs: GameState) -> Vector3:
 	var p := deg_to_rad(INCLINAZIONE)
-	var dir := Vector3(0.0, sin(p), -cos(p))
+	var dir := Vector3(0.0, sin(p), cos(p))
 	var mira := camera_target(gs)
-	var scatola := scene_aabb(gs)
+	var scatola := table_aabb(gs)
 	var d := board_w(gs) + board_d() + altezza_scena(gs)
 	for i in 8:
 		var fattore := _ingombro(mira + dir * d, mira, scatola)
@@ -171,7 +186,7 @@ static func camera_position(gs: GameState) -> Vector3:
 # il fotogramma. Il test ci si appoggia, cosi' l'inquadratura non si giudica
 # a occhio.
 static func riempimento(gs: GameState) -> float:
-	return _ingombro(camera_position(gs), camera_target(gs), scene_aabb(gs))
+	return _ingombro(camera_position(gs), camera_target(gs), table_aabb(gs))
 
 # L'angolo di sguardo, in gradi sopra l'orizzonte. Serve al test: sotto una
 # certa inclinazione le file dietro si occludono fra loro.
@@ -180,6 +195,67 @@ static func camera_pitch_deg(gs: GameState) -> float:
 	var t := camera_target(gs)
 	var oriz := Vector2(t.x - c.x, t.z - c.z).length()
 	return rad_to_deg(atan2(c.y - t.y, oriz))
+
+# ---- le file e le plance, sul tavolo --------------------------------
+# Stanno nella scena e non in una sovrimpressione, perche' sul tavolo vero
+# sono carte: si vedono, si indicano e si cliccano come tutto il resto.
+# La carta misura 62,6 x 61,8 mm nel PDF: quadrata, in pratica.
+const CARTA := 62.5
+const CARTA_GAP := 8.0
+const BORDO := 26.0          # stacco fra la strada e le file
+const PLANCIA_D := 54.0      # profondita' della plancia di un giocatore
+
+# Il mercato corre lungo il fianco SINISTRO della strada; personaggi,
+# potenziamenti e monumenti lungo il DESTRO. Cosi' la strada resta libera e
+# il tavolo si allarga di una carta per lato invece di allungarsi.
+# Centrata sulla strada: una fila lunga sborda davanti e dietro in parti
+# uguali invece di allungare il tavolo da un lato solo.
+static func _colonna_di_carte(x: float, quante: int) -> Array[AABB]:
+	var out: Array[AABB] = []
+	if quante <= 0: return out
+	var passo := CARTA + CARTA_GAP
+	var z0 := board_d() / 2.0 - (quante * CARTA + (quante - 1) * CARTA_GAP) / 2.0
+	for i in quante:
+		out.append(AABB(Vector3(x, 0.0, z0 + i * passo),
+			Vector3(CARTA, TESSERA_Y, CARTA)))
+	return out
+
+# Tutte le carte delle file, ognuna col suo riquadro: serve a disegnarle e a
+# cliccarle. `kind` dice a quale fila appartiene, `id` quale carta e'.
+static func side_cards(gs: GameState) -> Array[Dictionary]:
+	var out: Array[Dictionary] = []
+	var x_sx := -(CARTA + BORDO)
+	var box_sx := _colonna_di_carte(x_sx, gs.market.size())
+	for i in gs.market.size():
+		out.append({"kind": "mercato", "id": str(gs.market[i]), "aabb": box_sx[i]})
+	var destra: Array = []
+	for id in gs.char_row: destra.append(["personaggio", str(id)])
+	for id in gs.upg_row: destra.append(["potenziamento", str(id)])
+	for id in gs.monuments_open: destra.append(["monumento", str(id)])
+	var x_dx := board_w(gs) + BORDO
+	var box_dx := _colonna_di_carte(x_dx, destra.size())
+	for i in destra.size():
+		out.append({"kind": str(destra[i][0]), "id": str(destra[i][1]), "aabb": box_dx[i]})
+	return out
+
+# Le plance dei giocatori, davanti alla strada: e' il posto del giocatore.
+static func player_boards(gs: GameState) -> Array[Dictionary]:
+	var out: Array[Dictionary] = []
+	var largo := board_w(gs) / float(gs.n_players)
+	var z := board_d() + BORDO      # davanti alla strada, dal lato di chi guarda
+	for i in gs.n_players:
+		out.append({"player": i, "aabb": AABB(
+			Vector3(i * largo + 4.0, 0.0, z),
+			Vector3(largo - 8.0, TESSERA_Y, PLANCIA_D))})
+	return out
+
+# Tutto il tavolo: strada, file e plance. E' questo che l'inquadratura deve
+# far entrare, non la sola strada.
+static func table_aabb(gs: GameState) -> AABB:
+	var tutto := scene_aabb(gs)
+	for c in side_cards(gs): tutto = tutto.merge(c["aabb"])
+	for p in player_boards(gs): tutto = tutto.merge(p["aabb"])
+	return tutto
 
 # ---- dal clic allo slot --------------------------------------------
 # Pura anche questa: prende un raggio (origine e direzione, in millimetri) e
@@ -193,5 +269,19 @@ static func slot_at_ray(gs: GameState, origine: Vector3, direzione: Vector3) -> 
 	var col := int(floor(p.x / TESSERA_W))
 	if col < 0 or col >= gs.grid.n_cols: return {}
 	if p.z < 0.0 or p.z >= board_d(): return {}
-	var era := int(floor(p.z / SLOT_D)) + 1
+	var era := RAILS - int(floor(p.z / SLOT_D))
 	return {"col": col, "era": clampi(era, 1, RAILS), "punto": p}
+
+# La carta di una fila sotto un raggio, se ce n'e' una. Stessa geometria del
+# disegno: il giocatore clicca cio' che vede.
+static func card_at_ray(gs: GameState, origine: Vector3, direzione: Vector3) -> Dictionary:
+	if absf(direzione.y) < 0.00001: return {}
+	var t := (TESSERA_Y - origine.y) / direzione.y
+	if t < 0.0: return {}
+	var p := origine + direzione * t
+	for c in side_cards(gs):
+		var r: AABB = c["aabb"]
+		if p.x >= r.position.x and p.x <= r.position.x + r.size.x \
+				and p.z >= r.position.z and p.z <= r.position.z + r.size.z:
+			return c
+	return {}

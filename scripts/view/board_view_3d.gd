@@ -23,6 +23,8 @@ func mostra(stato: GameState, colonna_evidenziata := -1) -> void:
 	_tavolo()
 	_cielo()
 	_tessere()
+	_file_laterali()
+	_plance()
 	_edifici()
 	_luci()
 	_telecamera()
@@ -51,9 +53,11 @@ func _scatola(dim: Vector3, col: Color) -> MeshInstance3D:
 
 func _tavolo() -> void:
 	var w := BoardLayout3D.board_w(gs)
-	var piano := _quad(Vector2(w + 600.0, BoardLayout3D.board_d() + 900.0), TAVOLO, false)
+	var t := BoardLayout3D.table_aabb_piatto(gs)
+	var piano := _quad(Vector2(t.size.x + 700.0, t.size.z + 900.0), TAVOLO, false)
 	piano.rotate_x(-PI / 2.0)
-	piano.position = Vector3(w / 2.0, -1.0, BoardLayout3D.board_d() / 2.0)
+	piano.position = Vector3(t.position.x + t.size.x / 2.0, -1.0,
+		t.position.z + t.size.z / 2.0)
 	add_child(piano)
 
 # Il pannello verticale che fa da cielo. Per ora un colore pieno: al suo posto
@@ -150,3 +154,95 @@ func _telecamera() -> void:
 	cam.fov = BoardLayout3D.FOV
 	cam.current = true
 	add_child(cam)
+
+# ---- le file e le plance, sul tavolo --------------------------------
+const CARTA_SFONDO := Color("#3a3f4b")
+const PLANCIA_SFONDO := Color("#2d323c")
+
+func _file_laterali() -> void:
+	for c in BoardLayout3D.side_cards(gs):
+		var r: AABB = c["aabb"]
+		var m := _scatola(r.size, CARTA_SFONDO)
+		m.position = r.position + r.size / 2.0
+		add_child(m)
+		_scritta(r.position + Vector3(r.size.x / 2.0, 30.0, r.size.z / 2.0),
+			_titolo_carta(c), 0.14, Color("#e8e6df"))
+		_scritta(r.position + Vector3(r.size.x / 2.0, 16.0, r.size.z / 2.0),
+			_dettaglio_carta(c), 0.11, Color("#9aa0ad"))
+
+func _titolo_carta(c: Dictionary) -> String:
+	var id := str(c["id"])
+	match str(c["kind"]):
+		"mercato": return str(CardDB.buildings[id]["name"])
+		"personaggio": return str(CardDB.characters[id]["name"])
+		"potenziamento": return str(CardDB.upgrades[id]["name"])
+		"monumento": return str(CardDB.monuments[id]["name"]) if CardDB.monuments.has(id) else id
+	return id
+
+# Il costo e i numeri che servono a decidere: il giocatore non deve girare
+# la carta per sapere se se la puo' permettere.
+func _dettaglio_carta(c: Dictionary) -> String:
+	var id := str(c["id"])
+	match str(c["kind"]):
+		"mercato":
+			var d: Dictionary = CardDB.buildings[id]
+			var co: Dictionary = d["cost"]
+			return "%dp %do · res %d · scavo %d" % [int(co.get("pietra", 0)),
+				int(co.get("oro", 0)), int(d["resistance"]), int(d["scavo"])]
+		"personaggio":
+			return "personaggio · %s" % CardDB.characters[id]["class"]
+		"potenziamento":
+			return "potenziamento · %s" % CardDB.upgrades[id]["family"]
+		"monumento":
+			return "monumento"
+	return ""
+
+func _plance() -> void:
+	for p in BoardLayout3D.player_boards(gs):
+		var r: AABB = p["aabb"]
+		var i: int = int(p["player"])
+		var ps: PlayerState = gs.players[i]
+		var suo: Color = COLORI_GIOCATORE[i % COLORI_GIOCATORE.size()]
+		var sfondo := PLANCIA_SFONDO.lerp(suo, 0.22)
+		if i == gs.current_index: sfondo = sfondo.lightened(0.18)
+		var m := _scatola(r.size, sfondo)
+		m.position = r.position + r.size / 2.0
+		add_child(m)
+		var centro := r.position + Vector3(r.size.x / 2.0, 0.0, r.size.z / 2.0)
+		var turno := "  ←" if i == gs.current_index else ""
+		_scritta(centro + Vector3(0, 34, 0), "G%d — %d PV%s" % [i, ps.vp, turno], 0.15, suo.lightened(0.5))
+		_scritta(centro + Vector3(0, 20, 0),
+			"%dp %do · lav %d/%d" % [ps.pietra, ps.oro, ps.workers_used, ps.workers],
+			0.12, Color("#c8ccd4"))
+		var extra := ""
+		if ps.has_dynasty: extra += "Dinastia "
+		for cid in ps.specialized_characters:
+			extra += "%s " % CardDB.characters[cid]["name"]
+		# Gli edifici in piedi e i personaggi sepolti: le "carte possedute"
+		# che il brief chiede sulla plancia del giocatore.
+		var vivi := 0
+		var sepolti := 0
+		for b in gs.grid.buildings:
+			if b.owner != i: continue
+			if b.is_alive(): vivi += 1
+			if b.buried_character != "": sepolti += 1
+		var riga := "%d edifici" % vivi
+		if sepolti > 0: riga += " · %d sepolti" % sepolti
+		if extra != "": riga += " · " + extra.strip_edges()
+		_scritta(centro + Vector3(0, 8, 0), riga, 0.10, Color("#9aa0ad"))
+
+# Una scritta che guarda sempre la telecamera: le carte sono stese sul tavolo
+# e viste di scorcio, quindi il testo stampato sopra non si leggerebbe.
+func _scritta(dove: Vector3, testo: String, dimensione: float, colore: Color) -> void:
+	if testo == "": return
+	var e := Label3D.new()
+	e.text = testo
+	e.font_size = 64
+	e.pixel_size = dimensione
+	e.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+	e.no_depth_test = true
+	e.position = dove
+	e.modulate = colore
+	e.outline_size = 22
+	e.outline_modulate = Color(0, 0, 0, 0.85)
+	add_child(e)

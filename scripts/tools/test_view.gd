@@ -20,6 +20,8 @@ func _ready() -> void:
 	_run("3D: quote, sagome e plinti", _test_3d_quote)
 	_run("3D: cielo e telecamera", _test_3d_scena)
 	_run("3D: una partita vera sta sulla strada", _test_3d_partita)
+	_run("3D: le file e le plance sul tavolo", _test_tavolo)
+	_run("3D: cliccare una carta", _test_clic_sulle_carte)
 	_run("3D: l'inquadratura si calcola", _test_3d_inquadratura)
 	_run("3D: dal clic allo slot", _test_raggio)
 	_run("le azioni offerte, col preventivo", _test_azioni_offerte)
@@ -218,14 +220,19 @@ func _test_partita() -> void:
 # ---- geometria 3D ---------------------------------------------------
 # Il tavolo: X le colonne, Z i binari con l'ERA 1 DAVANTI, Y le quote.
 func _test_3d_assi() -> void:
-	_ok("l'era 1 sta davanti a tutte", BoardLayout3D.rail_z(1) < BoardLayout3D.rail_z(2))
-	_ok("  e l'era 5 in fondo", BoardLayout3D.rail_z(4) < BoardLayout3D.rail_z(5))
+	# "Davanti" e' dal lato della telecamera, che guarda verso le z calanti:
+	# l'era 1 ha percio' la z maggiore, non la minore.
+	var cam := BoardLayout3D.camera_position(_gioco().gs)
+	_ok("l'era 1 sta davanti a tutte",
+		absf(cam.z - BoardLayout3D.rail_z(1)) < absf(cam.z - BoardLayout3D.rail_z(2)))
+	_ok("  e l'era 5 in fondo",
+		absf(cam.z - BoardLayout3D.rail_z(5)) > absf(cam.z - BoardLayout3D.rail_z(4)))
 	# Misurato dal cartone: la tessera colonna e' un'unica striscia da 271 mm
 	# con cinque binari contigui. Non c'e' nessuno stacco fra i binari, e cio'
 	# che lascia vedere le file dietro e' la basetta, che degli 54 mm dello
 	# slot ne occupa 15.
 	_approx("i binari sono contigui, non distanziati",
-		BoardLayout3D.rail_z(2) - BoardLayout3D.rail_z(1), BoardLayout3D.SLOT_D)
+		absf(BoardLayout3D.rail_z(2) - BoardLayout3D.rail_z(1)), BoardLayout3D.SLOT_D)
 	_approx("i cinque binari riempiono la tessera",
 		BoardLayout3D.RAILS * BoardLayout3D.SLOT_D, BoardLayout3D.TESSERA_D)
 	_ok("la basetta occupa meno di mezzo slot: e' cosi' che si vede dietro",
@@ -240,15 +247,23 @@ func _test_3d_assi() -> void:
 
 	# Le tessere si toccano ma non si sovrappongono: sono contigue per
 	# costruzione, non per caso.
+	# Contigue vuol dire che si toccano senza invadersi: gli intervalli hanno
+	# un estremo in comune e nient'altro. Scritto senza dipendere dal verso
+	# dell'asse, cosi' resta vero se un giorno si gira il tavolo.
 	var sovrapposte := 0
 	for c in 4:
 		for e in range(1, BoardLayout3D.RAILS):
 			var a := BoardLayout3D.tile_box(c, e)
 			var b := BoardLayout3D.tile_box(c, e + 1)
-			if a.position.z + a.size.z > b.position.z + 0.001: sovrapposte += 1
+			if _si_accavallano(a.position.z, a.size.z, b.position.z, b.size.z):
+				sovrapposte += 1
 			var d := BoardLayout3D.tile_box(c + 1, e)
-			if a.position.x + a.size.x > d.position.x + 0.001: sovrapposte += 1
+			if _si_accavallano(a.position.x, a.size.x, d.position.x, d.size.x):
+				sovrapposte += 1
 	_eq("nessuna tessera invade quella accanto", sovrapposte, 0)
+
+func _si_accavallano(a: float, la: float, b: float, lb: float) -> bool:
+	return a < b + lb - 0.001 and b < a + la - 0.001
 
 # L'errore che avevo fatto: con la quota piu' bassa di una sagoma, due livelli
 # si compenetrano e la plancia diventa illeggibile. Il test lo impedisce per
@@ -289,15 +304,15 @@ func _test_3d_scena() -> void:
 	_metti(gs, "ed_capanne", 0, 1)
 	var cielo := BoardLayout3D.sky_rect(gs)
 	_ok("il cielo sta dietro l'ultimo binario",
-		cielo.position.z > BoardLayout3D.rail_z(BoardLayout3D.RAILS) + BoardLayout3D.SLOT_D)
+		cielo.position.z < BoardLayout3D.rail_z(BoardLayout3D.RAILS))
 	_ok("  ed e' piu' largo della strada", cielo.size.x > BoardLayout3D.board_w(gs))
 	_ok("  e in piedi, non steso", cielo.size.y > 0.0 and cielo.size.z == 0.0)
 
 	var cam := BoardLayout3D.camera_position(gs)
-	_ok("la telecamera sta davanti alla prima fila", cam.z < BoardLayout3D.rail_z(1))
+	_ok("la telecamera sta davanti alla prima fila", cam.z > BoardLayout3D.rail_z(1))
 	_ok("  e alzata, per vedere oltre l'era 1", cam.y > 1.0)
 	var mira := BoardLayout3D.camera_target(gs)
-	_ok("  e guarda verso il fondo della strada", mira.z > cam.z)
+	_ok("  e guarda verso il fondo della strada", mira.z < cam.z)
 
 func _test_3d_partita() -> void:
 	# Una partita vera: ogni sagoma deve stare sulla strada e nessuna coppia
@@ -485,3 +500,80 @@ func _test_3d_inquadratura() -> void:
 	var lontano := BoardLayout3D.camera_position(a).distance_to(BoardLayout3D.camera_target(a))
 	_ok("con le torri la telecamera arretra", lontano > vicino)
 	_ok("  e continua a far entrare tutto", BoardLayout3D.riempimento(a) <= 1.0)
+
+# ---- le file e le plance sul tavolo ---------------------------------
+func _test_tavolo() -> void:
+	var ctl := _gioco()
+	var gs := ctl.gs
+	var carte := BoardLayout3D.side_cards(gs)
+	_eq("una carta per ogni carta in fila", carte.size(),
+		gs.market.size() + gs.char_row.size() + gs.upg_row.size() + gs.monuments_open.size())
+	var tipi := {}
+	for c in carte: tipi[str(c["kind"])] = true
+	_ok("ci sono mercato, personaggi e potenziamenti",
+		tipi.has("mercato") and tipi.has("personaggio") and tipi.has("potenziamento"))
+
+	# Le file stanno AI LATI della strada, non sopra: la strada deve restare
+	# libera, altrimenti coprirebbero le sagome.
+	var sopra_la_strada := 0
+	for c in carte:
+		var r: AABB = c["aabb"]
+		if r.position.x + r.size.x > 0.0 and r.position.x < BoardLayout3D.board_w(gs):
+			sopra_la_strada += 1
+	_eq("nessuna carta sta sopra la strada", sopra_la_strada, 0)
+
+	# E non si accavallano fra loro.
+	var scontri := 0
+	for i in carte.size():
+		for j in range(i + 1, carte.size()):
+			var a: AABB = carte[i]["aabb"]
+			var b: AABB = carte[j]["aabb"]
+			if _si_accavallano(a.position.x, a.size.x, b.position.x, b.size.x) \
+					and _si_accavallano(a.position.z, a.size.z, b.position.z, b.size.z):
+				scontri += 1
+	_eq("e nessuna copre un'altra", scontri, 0)
+
+	# Le plance stanno davanti, dal lato di chi guarda.
+	var plance := BoardLayout3D.player_boards(gs)
+	_eq("una plancia per giocatore", plance.size(), gs.n_players)
+	var cam := BoardLayout3D.camera_position(gs)
+	var davanti := 0
+	for p in plance:
+		var r: AABB = p["aabb"]
+		if absf(cam.z - r.position.z) < absf(cam.z - BoardLayout3D.rail_z(1)): davanti += 1
+	_eq("tutte davanti alla strada", davanti, gs.n_players)
+
+	# Il tavolo contiene tutto: strada, file e plance.
+	var t := BoardLayout3D.table_aabb(gs)
+	var fuori := 0
+	for c in carte:
+		if not t.encloses((c["aabb"] as AABB).grow(-0.01)): fuori += 1
+	for p in plance:
+		if not t.encloses((p["aabb"] as AABB).grow(-0.01)): fuori += 1
+	_eq("il tavolo le contiene tutte", fuori, 0)
+
+# Cliccare una carta: stessa geometria del disegno, provata su TUTTE.
+func _test_clic_sulle_carte() -> void:
+	var gs := _gioco().gs
+	var carte := BoardLayout3D.side_cards(gs)
+	_ok("ci sono carte da cliccare", carte.size() > 5)
+	var sbagliate := 0
+	for c in carte:
+		var r: AABB = c["aabb"]
+		var centro := r.position + r.size / 2.0
+		var trovata := BoardLayout3D.card_at_ray(gs, centro + Vector3(0, 400, 0),
+			Vector3(0, -1, 0))
+		if trovata.is_empty() or str(trovata["id"]) != str(c["id"]): sbagliate += 1
+	_eq("ogni carta si ritrova dal proprio centro", sbagliate, 0)
+
+	# Sulla strada non c'e' nessuna carta: il clic deve cadere sullo slot.
+	var sopra_strada := BoardLayout3D.slot_center(1, 2)
+	_ok("sopra la strada non si trova una carta",
+		BoardLayout3D.card_at_ray(gs, sopra_strada + Vector3(0, 400, 0), Vector3(0, -1, 0)).is_empty())
+	_ok("  e invece si trova lo slot",
+		not BoardLayout3D.slot_at_ray(gs, sopra_strada + Vector3(0, 400, 0), Vector3(0, -1, 0)).is_empty())
+	# E viceversa: sopra una carta non c'e' uno slot della strada.
+	var c0: AABB = carte[0]["aabb"]
+	_ok("sopra una carta non si trova uno slot",
+		BoardLayout3D.slot_at_ray(gs, c0.position + c0.size / 2.0 + Vector3(0, 400, 0),
+			Vector3(0, -1, 0)).is_empty())

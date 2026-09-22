@@ -19,6 +19,10 @@ func _ready() -> void:
 	var quote := 0
 	for b in ctl.gs.grid.buildings:
 		if b.level > 0: quote += 1
+	var terreni := []
+	for c in ctl.gs.grid.n_cols:
+		terreni.append(["pianura", "fiume", "collina", "bosco"][ctl.gs.grid.terrains[c]])
+	print("terreni da colonna 0: ", ", ".join(terreni))
 	print("plancia 3D: era %d, %d edifici (%d sopraelevati), %d colonne" % [
 		ctl.gs.era, ctl.gs.grid.buildings.size(), quote, ctl.gs.grid.n_cols])
 
