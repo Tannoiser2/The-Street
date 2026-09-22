@@ -21,9 +21,13 @@ class BuildQuote:
 
 # ---- requisiti di terreno -----------------------------------------
 # Morbidi per pianura/collina/bosco (colonna o adiacente), stretti per fiume.
-static func terrain_ok(gs: GameState, data: Dictionary, col_from: int, col_to: int) -> bool:
+static func terrain_ok(gs: GameState, data: Dictionary, col_from: int, col_to: int,
+		player: int = -1) -> bool:
 	var req = data.get("terrain")
 	if req == null: return true
+	# Mastro costruttore: "puoi costruire in qualsiasi slot".
+	if player >= 0 and Effects.has_active_override(gs, player, "ignore_terrain_requirement"):
+		return true
 	var g := gs.grid
 	if req == "fiume":
 		for c in range(col_from, col_to):
@@ -81,7 +85,7 @@ static func quote_rail(gs: GameState, player: int, data: Dictionary, col_from: i
 		q.reason = "caselle occupate nel binario"; return q
 	if int(data["level_required"]) > 0:
 		q.reason = "richiede livello %d: va costruito sopra" % data["level_required"]; return q
-	if not terrain_ok(gs, data, col_from, col_to):
+	if not terrain_ok(gs, data, col_from, col_to, player):
 		q.reason = "terreno non adatto"; return q
 	var dr := despoil_reason(gs, despoil, col_from, col_to)
 	if dr != "":
@@ -117,7 +121,7 @@ static func quote_above(gs: GameState, player: int, data: Dictionary, col_from: 
 		q.reason = "fuori dalla strada"; return q
 	if int(data["era"]) != gs.era:
 		q.reason = "non è un edificio dell'era corrente"; return q
-	if not terrain_ok(gs, data, col_from, col_to):
+	if not terrain_ok(gs, data, col_from, col_to, player):
 		q.reason = "terreno non adatto"; return q
 	var dr := despoil_reason(gs, despoil, col_from, col_to)
 	if dr != "":

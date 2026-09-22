@@ -22,6 +22,7 @@ func _ready() -> void:
 	_run("lavoratore ed edificio protetto", _test_protection)
 	_run("Impronte", _test_imprints)
 	_run("Monumenti ed Eredita'", _test_objectives)
+	_run("Sacerdotessa e Mastro costruttore", _test_on_build)
 	_run("lo schema e' davvero chiuso", _test_schema_closed)
 	print("\n%d superati, %d falliti" % [_passed, _failed])
 	get_tree().quit(0 if _failed == 0 else 1)
@@ -1218,3 +1219,76 @@ func _test_objectives() -> void:
 	for id in CardDB.legacies:
 		if CardDB.legacies[id].get("condition", {}).is_empty(): senza.append(id)
 	_eq("tutti e 30 gli obiettivi hanno una condizione", senza, [] as Array[String])
+
+
+# ---- Sacerdotessa e Mastro costruttore --------------------------------
+func _test_on_build() -> void:
+	var rel := _card_of_class("religione")
+	var altro := _card_of_class("commercio")
+
+	# Sacerdotessa: "il PRIMO edificio Religione che costruisci ti rimborsa 1 oro"
+	var a := _scena()
+	a.players[0].specialized_characters = ["pe_sacerdotessa"] as Array[String]
+	var oro0: int = a.players[0].oro
+	Effects.apply_on_build(a, 0, _put(a, rel, 1))
+	_eq("Sacerdotessa: il primo Religione rimborsa 1 oro", a.players[0].oro, oro0 + 1)
+	Effects.apply_on_build(a, 0, _put(a, rel, 3))
+	_eq("  il secondo no: il rimborso e' uno solo", a.players[0].oro, oro0 + 1)
+
+	var b := _scena()
+	b.players[0].specialized_characters = ["pe_sacerdotessa"] as Array[String]
+	var oro1: int = b.players[0].oro
+	Effects.apply_on_build(b, 0, _put(b, altro, 1))
+	_eq("  un edificio di altra classe non rimborsa", b.players[0].oro, oro1)
+
+	# il contatore si azzera a ogni era
+	var c := _scena()
+	c.players[0].specialized_characters = ["pe_sacerdotessa"] as Array[String]
+	var oro2: int = c.players[0].oro
+	Effects.apply_on_build(c, 0, _put(c, rel, 1))
+	c.players[0].reset_for_era()
+	c.players[0].specialized_characters = ["pe_sacerdotessa"] as Array[String]
+	Effects.apply_on_build(c, 0, _put(c, rel, 3))
+	_eq("  ma nell'era successiva torna disponibile", c.players[0].oro, oro2 + 2)
+
+	# Mastro costruttore: "la tua prima costruzione successiva ha +1 res permanente"
+	var d := _scena()
+	d.players[0].specialized_characters = ["pe_mastro_costruttore"] as Array[String]
+	var b1 := _put(d, altro, 1)
+	var r0 := b1.bonus_res
+	Effects.apply_on_build(d, 0, b1)
+	_eq("Mastro costruttore: la prima costruzione nasce con +1 res", b1.bonus_res, r0 + 1)
+	var b2 := _put(d, altro, 3)
+	var r1 := b2.bonus_res
+	Effects.apply_on_build(d, 0, b2)
+	_eq("  la seconda no", b2.bonus_res, r1)
+
+	# "puoi costruire in qualsiasi slot": il requisito di terreno cade
+	var e2 := _scena()                                  # tutto pianura
+	var carta: Dictionary = CardDB.buildings[_card_of_class("religione")]
+	_ok("la carta di prova ha un requisito di terreno", carta.get("terrain") != null)
+	_ok("senza il Mastro il terreno sbagliato blocca",
+		not BuildRules.terrain_ok(e2, carta, 1, 2, 0))
+	e2.players[0].specialized_characters = ["pe_mastro_costruttore"] as Array[String]
+	_ok("  col Mastro si costruisce lo stesso",
+		BuildRules.terrain_ok(e2, carta, 1, 2, 0))
+	_ok("  ma vale solo per chi lo ha reclutato",
+		not BuildRules.terrain_ok(e2, carta, 1, 2, 1))
+
+	# end-to-end: il rimborso arriva davvero costruendo col comando
+	var ctl := _game()
+	var gs := ctl.gs
+	_terreno_per(gs, rel)                 # senza, il preventivo e' illegale
+	var me := gs.current_index
+	gs.players[me].specialized_characters = ["pe_sacerdotessa"] as Array[String]
+	gs.era = int(CardDB.buildings[rel]["era"])
+	gs.market = [rel]
+	ctl.place_worker(2)
+	var pl: PlayerState = gs.current_player()
+	pl.pietra = 9
+	pl.oro = 9
+	var prima: int = pl.oro
+	var costo := BuildRules.quote_rail(gs, me, CardDB.buildings[rel], 2)
+	_ok("preventivo legale", costo.legal, costo.reason)
+	_ok("costruzione riuscita", ctl.build(rel, 2, false))
+	_eq("  costruendo col comando, il rimborso arriva", pl.oro, prima - costo.oro + 1)

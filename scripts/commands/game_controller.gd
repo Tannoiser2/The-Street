@@ -207,6 +207,7 @@ func build(card_id: String, col_from: int, above: bool, pay_option: int = 0, des
 	b.charges = int(data.get("exhaustible", 0))
 	gs.grid.buildings.append(b)
 	gs.grid.refresh_buried()
+	Effects.apply_on_build(gs, p.index, b)
 	if above:
 		for c in range(b.col_from, b.col_to): gs.grid.risen_this_era[c] = true
 	p.buildings_built += 1

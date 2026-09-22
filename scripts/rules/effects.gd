@@ -37,6 +37,8 @@ const APPLIED: Array[String] = [
 	"personaggio:on_activate:vp",            # Cronista
 	"personaggio:on_acquire:protection_delta",   # Capotribu', Legionario, Cavaliere
 	"personaggio:on_acquire:scavo_delta",    # le due Impronte, Incisore e Retore
+	"personaggio:on_build:resource",         # Sacerdotessa
+	"personaggio:on_build:resistance",       # Mastro costruttore
 	"personaggio:on_era_end:vp",             # Legionario e Cavaliere, se l'edificio regge
 	"potenziamento:on_activate:resource",    # Granaio, Boutique, Banchina
 	"potenziamento:on_acquire:vp",
@@ -44,7 +46,8 @@ const APPLIED: Array[String] = [
 	"potenziamento:on_acquire:scavo_delta",
 	"potenziamento:on_final_scoring:scavo_delta",
 ]
-const APPLIED_OVERRIDES: Array[String] = ["first_terrapieno_free", "free_restore_of_class"]
+const APPLIED_OVERRIDES: Array[String] = ["first_terrapieno_free", "free_restore_of_class",
+	"ignore_terrain_requirement"]
 
 static func _blocchi() -> Array:
 	return [["evento", CardDB.events], ["personaggio", CardDB.characters],
@@ -300,6 +303,41 @@ static func _paga_vp(gs: GameState, player: int, e: Dictionary, carta: Dictionar
 	p.add_vp("cultura", dato)
 	gs.log_line("%s: attivazione, %+d cultura a giocatore %d" % [carta["name"], dato, player])
 
+# ---- hook: on_build (applica) --------------------------------------
+# Scatta dopo che l'edificio e' sulla griglia. `built` e' l'edificio appena
+# costruito: senza bersaglio l'effetto va a lui, con bersaglio solo se lo
+# soddisfa (la Sacerdotessa rimborsa solo i Religione).
+static func apply_on_build(gs: GameState, player: int, built: Building) -> void:
+	for voce in _sorgenti_attive(gs, player):
+		var ef: Dictionary = voce[0]
+		var src: Building = voce[1]
+		var own: int = voce[2]
+		if ef["hook"] != "on_build": continue
+		if ef["op"] in ["cost_delta", "upgrade_slots_delta", "rule_override"]: continue
+		if own != player: continue
+		if not matches(gs, built, ef.get("target", {}), src, own): continue
+		var carta: Dictionary = voce[3] if voce.size() > 3 else {}
+		if carta.is_empty(): continue
+		match str(ef["op"]):
+			"resource":
+				var quanto := _quota(gs.players[player], ef, carta, max(int(ef.get("pietra", 0)), int(ef.get("oro", 0))))
+				if quanto <= 0: continue
+				gs.players[player].gain(int(ef.get("pietra", 0)), int(ef.get("oro", 0)))
+				gs.log_line("%s: rimborso di %+d pietra %+d oro" % [carta["name"], int(ef.get("pietra", 0)), int(ef.get("oro", 0))])
+			"resistance":
+				if _quota(gs.players[player], ef, carta, int(ef["value"])) <= 0: continue
+				built.bonus_res += int(ef["value"])
+				gs.log_line("%s: %s nasce con +%d resistenza" % [carta["name"], built.data["name"], int(ef["value"])])
+
+# Un override attivo per il giocatore, che venga da un personaggio o da una
+# carta in gioco. Distinto da has_override, che guarda l'evento dell'era.
+static func has_active_override(gs: GameState, player: int, name: String) -> bool:
+	for voce in _sorgenti_attive(gs, player):
+		var ef: Dictionary = voce[0]
+		if ef["op"] == "rule_override" and str(ef["name"]) == name and int(voce[2]) == player:
+			return true
+	return false
+
 # ---- op: cost_delta ------------------------------------------------
 # Sconti e rincari su una costruzione o un potenziamento ANCORA DA FARE.
 # Il selettore va valutato su un edificio che non esiste: si costruisce una
@@ -343,12 +381,12 @@ static func _sorgenti_attive(gs: GameState, player: int) -> Array:
 	for cid in gs.players[player].specialized_characters:
 		if not CardDB.characters.has(cid): continue
 		for e in CardDB.characters[cid].get("effects", []):
-			out.append([e, null, player])
+			out.append([e, null, player, CardDB.characters[cid]])
 	for b in gs.grid.buildings:
 		if not b.is_alive(): continue
 		for card in _carte_di(b):
 			for e in card.get("effects", []):
-				out.append([e, b, b.owner])
+				out.append([e, b, b.owner, card])
 	return out
 
 static func _terrain_name(t: int) -> String:
