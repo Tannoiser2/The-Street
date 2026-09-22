@@ -206,6 +206,10 @@ func build(card_id: String, col_from: int, above: bool, pay_option: int = 0, des
 	b.col_from = col_from
 	b.col_to = col_from + int(data["width"])
 	b.level = q.level
+	# Dove si e' riportata terra per poggiarlo: lo sa il preventivo, e da
+	# qui in poi deve saperlo l'edificio, se no la vista lo disegna
+	# sospeso sopra il vuoto.
+	b.terrapieno_cols = q.terrapieno_cols.duplicate()
 	b.bonus_res = q.continuity_bonus
 	if gs.grid.terrains[col_from] == Enums.Terrain.COLLINA: b.bonus_res += 1
 	b.charges = int(data.get("exhaustible", 0))

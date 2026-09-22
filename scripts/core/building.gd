@@ -13,6 +13,10 @@ var level: int = 0            # 0 = nel binario; >0 = sopraelevato
 var state: int = Enums.BuildingState.INTATTO
 var is_buried: bool = false   # condizione di posizione: qualcosa è stato costruito sopra
 var was_razed: bool = false   # spianato dal proprietario da intatto -> Scavo 0
+# Le colonne in cui, per poggiare qui, e' stata riportata terra: sotto non
+# c'era niente e si e' pagato un terrapieno. Serve alla vista per riempire
+# il vuoto sotto l'edificio, che altrimenti resta sospeso.
+var terrapieno_cols: Array[int] = []
 var bonus_res: int = 0        # cubetti neri: collina, continuità, potenziamenti Struttura
 var bonus_scavo: int = 0      # Impronte e potenziamenti che alzano lo Scavo
 var bonus_rendita: int = 0    # Stalli mercantili: "l'affitto incassato da questo edificio e' +1"

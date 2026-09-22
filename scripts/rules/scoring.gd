@@ -64,15 +64,34 @@ static func _skeletons(gs: GameState) -> void:
 		if b.buried_character != "" and b.is_buried:
 			gs.players[b.owner].add_vp("scheletri", 6 - b.buried_character_era)
 
+# L'ordine di arrivo, dal primo all'ultimo. Prima si contava solo il
+# vincitore, ma il riepilogo finale li vuole tutti in fila, e due modi di
+# ordinare gli stessi giocatori avrebbero finito per non essere d'accordo.
+# I pareggi si sciolgono come dice il regolamento - piu' edifici in piedi,
+# poi piu' risorse - e a parita' piena passa avanti chi ha giocato prima,
+# cosi' la classifica e' sempre la stessa e non dipende dall'ordinamento.
+static func classifica(gs: GameState) -> Array[int]:
+	var out: Array[int] = []
+	for i in gs.players.size(): out.append(i)
+	out.sort_custom(func(a: int, b: int) -> bool: return _precede(gs, a, b))
+	return out
+
+static func _precede(gs: GameState, a: int, b: int) -> bool:
+	var pa: PlayerState = gs.players[a]
+	var pb: PlayerState = gs.players[b]
+	if pa.vp != pb.vp: return pa.vp > pb.vp
+	var va := in_piedi(gs, a)
+	var vb := in_piedi(gs, b)
+	if va != vb: return va > vb
+	if pa.total_resources() != pb.total_resources():
+		return pa.total_resources() > pb.total_resources()
+	return a < b
+
+static func in_piedi(gs: GameState, player: int) -> int:
+	var q := 0
+	for b in gs.grid.buildings:
+		if b.owner == player and b.is_alive(): q += 1
+	return q
+
 static func winner(gs: GameState) -> int:
-	var best := 0
-	for i in range(1, gs.players.size()):
-		var a: PlayerState = gs.players[i]
-		var cur: PlayerState = gs.players[best]
-		if a.vp > cur.vp: best = i
-		elif a.vp == cur.vp:
-			var alive_a := gs.grid.buildings.filter(func(b): return b.owner == i and b.is_alive()).size()
-			var alive_c := gs.grid.buildings.filter(func(b): return b.owner == best and b.is_alive()).size()
-			if alive_a > alive_c or (alive_a == alive_c and a.total_resources() > cur.total_resources()):
-				best = i
-	return best
+	return classifica(gs)[0]

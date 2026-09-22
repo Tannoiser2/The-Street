@@ -40,6 +40,10 @@ func _ready() -> void:
 	_run("chi sta sopra poggia su chi sta sotto", _test_pila)
 	_run("le carte del giocatore non si coprono", _test_carte_giocatore)
 	_run("chi siede al tavolo lo si sceglie", _test_scelte_inizio)
+	_run("  e a che velocita' si muovono i bot", _test_velocita_bot)
+	_run("il conto finale, diviso per fonte", _test_riepilogo)
+	_run("il terrapieno si paga e si vede", _test_terrapieni)
+	_run("le carte stanno in piedi alla stessa altezza", _test_misure_carte)
 	print("\n%d superati, %d falliti" % [_passed, _failed])
 	get_tree().quit(0 if _failed == 0 else 1)
 
@@ -357,6 +361,17 @@ func _test_3d_scena() -> void:
 	_ok("  e sta dietro l'ultimo binario",
 		cielo.position.z <= BoardLayout3D.rail_z(BoardLayout3D.RAILS))
 	_ok("  e in piedi, non steso", cielo.size.y > 0.0 and cielo.size.z == 0.0)
+
+	# E NON E' PIU' UN MURO. A pannello intero saliva quasi quanto e'
+	# profonda la strada, e la meta' alta era cielo vuoto: adesso si mostra
+	# la striscia bassa, quella dell'orizzonte.
+	var intero := BoardLayout3D.sky_rect(gs, BoardLayout3D.CIELO_RAPPORTO, 1.0)
+	_approx("il fondale mostra la quota scelta dell'immagine",
+		cielo.size.y, intero.size.y * BoardLayout3D.CIELO_QUOTA)
+	_ok("  cioe' la meta' o meno", cielo.size.y <= intero.size.y / 2.0 + 0.001)
+	_ok("  e resta piu' basso della strada e' profonda",
+		cielo.size.y < BoardLayout3D.board_d())
+	_approx("  restando largo quanto le tessere", cielo.size.x, intero.size.x)
 
 	var cam := BoardLayout3D.camera_position(gs)
 	_ok("la telecamera sta davanti alla prima fila", cam.z > BoardLayout3D.rail_z(1))
@@ -1164,6 +1179,22 @@ func _test_pila() -> void:
 	_ok("la partita ha prodotto pile (%d sopraelevati)" % quanti, quanti > 0)
 	_eq("  e nessuno di loro galleggia in aria", appesi, 0)
 
+	# E NESSUNA SAGOMA RESTA INGLOBATA NELLA PILA. A quota zero una colonna
+	# porta fino a cinque edifici, uno per binario d'era, e chi costruisce
+	# sopra ne spiana uno solo: gli altri restano INTATTI e finiscono
+	# sepolti. Le loro sagome attraversavano la pila da parte a parte,
+	# perche' un livello sale di 10 mm e una sagoma ne e' alta 66.
+	var sepolti := 0
+	var sepolti_in_piedi := 0
+	for b in g2.grid.buildings:
+		if not b.is_buried: continue
+		sepolti += 1
+		if BoardLayout3D.ha_sagoma(b): sepolti_in_piedi += 1
+	_ok("la partita ha prodotto sepolti (%d)" % sepolti, sepolti > 0)
+	_eq("  e nessuno di loro ha ancora la sagoma in piedi", sepolti_in_piedi, 0)
+	_ok("  ma la basetta gli resta, che e' le fondamenta di chi sta sopra",
+		BoardLayout3D.basetta_box(g2, g2.grid.buildings[0]).size.y > 0.0)
+
 # LE CARTE COMPRATE SI COPRIVANO A VICENDA. Il passo si stringeva per tenerle
 # tutte su una riga: con tre carte larghe 125 mm in una fetta da 147 scendeva
 # a 12 mm, e di ogni carta si vedeva una striscia. Adesso si va a capo.
@@ -1176,19 +1207,50 @@ func _test_carte_giocatore() -> void:
 		p.monuments_claimed.append(str(id))
 		if p.monuments_claimed.size() >= 2: break
 	for id in gs.char_row: p.specialized_characters.append(str(id))
+	# E le carte degli edifici costruiti: "costruire significa pagare il
+	# costo della carta e mettere la sagoma sul tabellone", quindi la carta
+	# resta davanti a chi l'ha presa. Prima spariva nel nulla.
+	for c in range(0, 5): _metti(gs, "ed_capanne", c, 1, 0, 0)
 	var carte := BoardLayout3D.player_cards(gs, 0)
 	_ok("il giocatore ha parecchie carte davanti (%d)" % carte.size(),
 		carte.size() >= 5)
+	var edifici := 0
+	for c in carte:
+		if int(c["player"]) == 0 and str(c["kind"]) == "mercato": edifici += 1
+	_eq("  fra cui le carte degli edifici che ha costruito", edifici, 5)
 
+	# Le carte diverse dagli edifici non si coprono: sono poche e si
+	# leggono per intero.
+	var stese: Array = []
+	var mazzetto: Array = []
+	for c in carte:
+		if str(c["kind"]) == "mercato": mazzetto.append(c)
+		else: stese.append(c)
 	var coperte := 0
-	for i in carte.size():
-		for j in range(i + 1, carte.size()):
-			var a: AABB = carte[i]["aabb"]
-			var b: AABB = carte[j]["aabb"]
+	for i in stese.size():
+		for j in range(i + 1, stese.size()):
+			var a: AABB = stese[i]["aabb"]
+			var b: AABB = stese[j]["aabb"]
 			if a.position.x < b.end.x - 0.001 and b.position.x < a.end.x - 0.001 \
 				and a.position.z < b.end.z - 0.001 and b.position.z < a.end.z - 0.001:
 				coperte += 1
-	_eq("nessuna carta ne copre un'altra", coperte, 0)
+	_eq("nessuna carta stesa ne copre un'altra", coperte, 0)
+
+	# Le carte edificio invece si impilano a ventaglio, ma di ognuna resta
+	# fuori la fascia del titolo: e' quello che le rende ancora leggibili.
+	var nascoste := 0
+	for i in mazzetto.size():
+		var a: AABB = mazzetto[i]["aabb"]
+		var scoperto := a.size.z
+		for j in mazzetto.size():
+			if j == i: continue
+			var b: AABB = mazzetto[j]["aabb"]
+			if b.position.y <= a.position.y: continue
+			if b.position.x >= a.end.x - 0.001 or a.position.x >= b.end.x - 0.001:
+				continue
+			scoperto = minf(scoperto, b.position.z - a.position.z)
+		if scoperto < BoardLayout3D.VENTAGLIO_Z - 0.001: nascoste += 1
+	_eq("di ogni carta edificio resta fuori la fascia del titolo", nascoste, 0)
 
 	# E nessuna finisce addosso al vicino: ognuno sta nella sua fetta.
 	var fetta := BoardLayout3D.board_w(gs) / float(gs.n_players)
@@ -1203,13 +1265,26 @@ func _test_carte_giocatore() -> void:
 	# Le carte restano cliccabili: ognuna deve rispondere al raggio, e deve
 	# rispondere PROPRIO LEI. Era questo che il mucchio rendeva impossibile.
 	var sbagliate := 0
-	for c in carte:
+	for c in stese:
 		var b3: AABB = c["aabb"]
 		var centro := b3.position + Vector3(b3.size.x / 2.0, 0.0, b3.size.z / 2.0)
 		var colpita := BoardLayout3D.card_at_ray(gs,
 			centro + Vector3(0, 500, 0), Vector3(0, -1, 0), 0)
 		if colpita.is_empty() or str(colpita["id"]) != str(c["id"]): sbagliate += 1
 	_eq("  e cliccandone una si prende proprio quella", sbagliate, 0)
+
+	# E nel ventaglio vince quella SOPRA: puntando la fascia scoperta di una
+	# carta deve rispondere lei, non quella nascosta sotto.
+	var sotto := 0
+	for i in mazzetto.size():
+		var b4: AABB = mazzetto[i]["aabb"]
+		var punto := b4.position + Vector3(b4.size.x / 2.0, 0.0,
+			BoardLayout3D.VENTAGLIO_Z / 2.0)
+		var presa := BoardLayout3D.card_at_ray(gs, punto + Vector3(0, 500, 0),
+			Vector3(0, -1, 0), 0)
+		if presa.is_empty() or int(presa.get("ordine", -1)) != int(mazzetto[i]["ordine"]):
+			sotto += 1
+	_eq("  e nel mazzetto risponde la carta sopra, non quella coperta", sotto, 0)
 
 # CHI SIEDE AL TAVOLO. Prima erano due numeri dentro gioca.gd - tre giocatori,
 # seme 7 - e in due o in quattro non ci si giocava affatto. ScelteInizio e'
@@ -1260,6 +1335,256 @@ func _test_scelte_inizio() -> void:
 	_ok("  e la descrizione dice chi gioca: \"%s\"" % s.descrizione(),
 		s.descrizione().contains("bot") and s.descrizione().contains(str(s.seme)))
 
+# LA VELOCITA' DEI BOT. Prima giocavano tutti i loro turni fra un clic e
+# l'altro: sul tabellone comparivano tre edifici insieme e non si capiva chi
+# avesse fatto cosa. Adesso si sceglie il passo, e i due casi che non sono
+# un'attesa - "subito" e "passo" - si chiedono per nome invece di confrontare
+# numeri, perche' e' li' che si sbaglia.
+func _test_velocita_bot() -> void:
+	var s := ScelteInizio.new()
+	_ok("di suo i bot si muovono a vista (%s)" % s.nome_velocita(),
+		not s.bot_subito() and not s.bot_a_mano())
+
+	# Le velocita' vanno dalla piu' lenta alla piu' svelta, senza buchi: e'
+	# l'ordine in cui la schermata le mette in fila.
+	var prima := 99.0
+	var scale := 0
+	for i in range(1, ScelteInizio.VELOCITA.size()):
+		s.con_velocita(i)
+		if s.pausa_bot() < prima: scale += 1
+		prima = s.pausa_bot()
+	_eq("ogni velocita' e' piu' svelta della prima",
+		scale, ScelteInizio.VELOCITA.size() - 1)
+
+	s.con_velocita(0)
+	_ok("la prima e' a mano: non e' un'attesa", s.bot_a_mano() and not s.bot_subito())
+	s.con_velocita(ScelteInizio.VELOCITA.size() - 1)
+	_ok("l'ultima e' tutto in un colpo", s.bot_subito() and not s.bot_a_mano())
+
+	# Fuori scala non si va, e il tasto in partita gira in tondo invece di
+	# fermarsi sull'ultima.
+	s.con_velocita(99)
+	_eq("  e fuori scala non si va", s.velocita, ScelteInizio.VELOCITA.size() - 1)
+	s.velocita_dopo()
+	_eq("  e dall'ultima si torna alla prima", s.velocita, 0)
+	var giro := 0
+	for i in ScelteInizio.VELOCITA.size():
+		s.velocita_dopo()
+		giro += 1
+	_eq("  e un giro intero riporta dov'era", s.velocita, 0)
+
+	# La descrizione dice a che velocita' vanno, ma solo se un bot c'e'.
+	s.con_giocatori(3)
+	s.con_bot(2)
+	s.con_velocita(ScelteInizio.VELOCITA_NORMALE)
+	_ok("la descrizione dice il passo dei bot: \"%s\"" % s.descrizione(),
+		s.descrizione().contains(s.nome_velocita()))
+	s.con_bot(0)
+	_ok("  e tace quando bot non ce ne sono: \"%s\"" % s.descrizione(),
+		not s.descrizione().contains("bot %s" % s.nome_velocita()))
+
+# IL CONTO FINALE. Alla fine restava un numero solo - "vincitore: giocatore
+# 3" - e non si capiva dove fossero andati i punti. Il nucleo li divide gia'
+# per canale mentre la partita va avanti: qui si controlla che la tabella non
+# ne perda per strada, perche' un riepilogo che non torna col totale e'
+# peggio di nessun riepilogo.
+func _test_riepilogo() -> void:
+	var ctl := _gioco()
+	var giri := 0
+	while ctl.gs.phase != Enums.Phase.FINE_PARTITA and giri < 4000:
+		RandomBot.play_turn(ctl)
+		giri += 1
+	var gs := ctl.gs
+	_eq("la partita e' arrivata in fondo", gs.phase, Enums.Phase.FINE_PARTITA)
+
+	var righe := Riepilogo.righe(gs)
+	_eq("c'e' una riga per giocatore", righe.size(), gs.players.size())
+	var visti := {}
+	for r in righe: visti[int(r["player"])] = true
+	_eq("  e ogni giocatore compare una volta sola", visti.size(), gs.players.size())
+
+	# La tabella e' in ordine di arrivo, e il primo e' quello che il gioco
+	# chiama vincitore: due modi di ordinare avrebbero finito per litigare.
+	_eq("il primo della tabella e' il vincitore",
+		int(righe[0]["player"]), Scoring.winner(gs))
+	var scesa := true
+	for i in range(1, righe.size()):
+		if int(righe[i]["vp"]) > int(righe[i - 1]["vp"]): scesa = false
+	_ok("  e i punti scendono riga dopo riga", scesa)
+
+	# NESSUN PUNTO SI PERDE PER STRADA: la somma delle colonne mostrate piu'
+	# l'eventuale "altro" deve fare il totale segnato.
+	var cols := Riepilogo.colonne(gs)
+	var storte := 0
+	for r in righe:
+		var somma := 0
+		for c in cols: somma += Riepilogo.punti(r, str(c["id"]))
+		if somma + Riepilogo.altro(gs, r) != int(r["vp"]): storte += 1
+	_eq("le colonne sommate fanno il totale", storte, 0)
+
+	# E i canali che il nucleo usa davvero devono essere TUTTI fra le
+	# colonne: se un giorno ne aggiunge uno, deve finire in tabella invece
+	# che in "altro".
+	var noti := {}
+	for c in cols: noti[str(c["id"])] = true
+	var fuori := PackedStringArray()
+	for pl in gs.players:
+		for canale in pl.vp_breakdown:
+			if int(pl.vp_breakdown[canale]) != 0 and not noti.has(str(canale)):
+				fuori.append(str(canale))
+	_eq("nessun canale resta fuori dalla tabella (%s)" % ", ".join(fuori),
+		fuori.size(), 0)
+
+	# Le colonne mostrate hanno dato punti a qualcuno: una colonna di zeri
+	# ruba spazio a quelle che contano.
+	var vuote := 0
+	for c in cols:
+		var qualcuno := false
+		for r in righe:
+			if Riepilogo.punti(r, str(c["id"])) != 0: qualcuno = true
+		if not qualcuno: vuote += 1
+	_eq("nessuna colonna e' tutta vuota (%d colonne)" % cols.size(), vuote, 0)
+
+	# L'eredita' segreta: a fine partita e' scoperta sul tavolo, e il
+	# riepilogo dice quale era e quanto ha fruttato.
+	var senza_nome := 0
+	for r in righe:
+		if str(r["eredita"]) != "" and str(r["eredita_nome"]) == "": senza_nome += 1
+	_eq("ogni eredita' ha il suo nome", senza_nome, 0)
+	var coperte := 0
+	for c in BoardLayout3D.player_cards(gs):
+		if str(c["kind"]) == "eredita_coperta": coperte += 1
+	_eq("a partita finita nessun obiettivo resta coperto", coperte, 0)
+	# E prima della fine restano coperti, che e' il punto di averli segreti.
+	var gs2 := _gioco().gs
+	var coperte2 := 0
+	for c in BoardLayout3D.player_cards(gs2, 0):
+		if str(c["kind"]) == "eredita_coperta": coperte2 += 1
+	_eq("  ma in partita si vede solo il proprio", coperte2, gs2.players.size() - 1)
+
+# IL TERRAPIENO. Le regole lo facevano pagare da sempre - 1 pietra per ogni
+# colonna senza base - ma sul tavolo non si vedeva, e l'edificio restava
+# sospeso sopra il vuoto proprio nella colonna che aveva pagato per
+# riempirla. Il preventivo sapeva quante erano; adesso sa anche QUALI, e
+# l'edificio se le porta dietro.
+func _test_terrapieni() -> void:
+	var ctl := _gioco()
+	var gs := ctl.gs
+	# una base in colonna 1, la 2 nuda: un edificio da due caselle che parte
+	# dalla 1 deve riportare terra sulla 2
+	var sotto := _metti(gs, "ed_capanne", 1, 1, 0, 0)
+	sotto.state = Enums.BuildingState.ROVINA
+	var d: Dictionary = CardDB.buildings[_largo(2)]
+	var q := BuildRules.quote_above(gs, 0, d, 1)
+	_ok("il preventivo passa (%s)" % q.reason, q.legal)
+	_eq("  e dice quale colonna va riempita", q.terrapieno_cols, [2] as Array[int])
+	_ok("  e la fa pagare", q.terrapieno_pietra > 0)
+
+	# Costruito davvero, l'edificio se le porta dietro: e' da li' che la
+	# vista sa dove disegnare la terra.
+	var p: PlayerState = gs.players[0]
+	p.pietra = 99
+	p.oro = 99
+	ctl.place_worker(1)
+	var quanti := gs.grid.buildings.size()
+	_ok("si costruisce col terrapieno", ctl.build(str(d["id"]), 1, true))
+	if gs.grid.buildings.size() <= quanti: return
+	var su: Building = gs.grid.buildings[gs.grid.buildings.size() - 1]
+	_eq("  e l'edificio si ricorda dove", su.terrapieno_cols, [2] as Array[int])
+
+	# E il blocco di terra riempie il vuoto: parte dal piano del tavolo e
+	# arriva esatto sotto il piede, senza scalini.
+	var boxes := BoardLayout3D.terrapieni(gs, su)
+	_eq("si disegna un blocco per colonna riempita", boxes.size(), 1)
+	var box: AABB = boxes[0]
+	var piede := BoardLayout3D.basetta_box(gs, su)
+	_approx("  che parte dal piano del tavolo", box.position.y, BoardLayout3D.TESSERA_Y)
+	_approx("  e arriva esatto sotto il piede", box.end.y, piede.position.y)
+	_ok("  con la stessa profondita' del piede",
+		is_equal_approx(box.position.z, piede.position.z)
+		and is_equal_approx(box.size.z, piede.size.z))
+	_ok("  e sta nella colonna che ha pagato",
+		box.position.x >= BoardLayout3D.col_x(2) - BoardLayout3D.TESSERA_W
+		and box.end.x <= BoardLayout3D.col_x(3) + BoardLayout3D.TESSERA_W)
+
+	# Chi poggia su basi vere non riporta niente, e non si disegna niente.
+	_eq("senza colonne nude non c'e' terra da riportare",
+		BoardLayout3D.terrapieni(gs, sotto).size(), 0)
+
+# LE MISURE DELLE CARTE. Sul foglio di stampa non sono alte uguali - la
+# Dinastia e' 95 mm, un edificio 62 - e a schermo la differenza diventava
+# enorme: le carte grandi schiacciavano le altre e il tavolo non sembrava
+# piu' un mazzo solo. E le sei del mercato, in una colonna sola, erano piu'
+# lunghe della strada: la prima finiva fuori dal tabellone, sospesa nel nulla.
+func _test_misure_carte() -> void:
+	# Stessa altezza, proporzioni salve: il disegno non si deforma.
+	var storte := 0
+	for tipo in BoardLayout3D.CARTE_IN_PIEDI:
+		var m := BoardLayout3D.misura_carta(str(tipo))
+		if not is_equal_approx(m.y, BoardLayout3D.ALTEZZA_CARTA): storte += 1
+		var vera: Vector2 = BoardLayout3D.MISURE_CARTE[str(tipo)]
+		if not is_equal_approx(m.x / m.y, vera.x / vera.y): storte += 1
+	_eq("le carte in piedi sono alte uguali, senza deformarsi", storte, 0)
+	_ok("  e la piu' larga non e' il doppio della piu' stretta in altezza",
+		is_equal_approx(BoardLayout3D.misura_carta("dinastia").y,
+			BoardLayout3D.misura_carta("mercato").y))
+	# Le tessere lunghe restano quello che sono: tirarle a quell'altezza le
+	# farebbe larghe mezzo metro.
+	_approx("i monumenti restano tessere basse",
+		BoardLayout3D.misura_carta("monumento").y,
+		BoardLayout3D.MISURE_CARTE["monumento"].y)
+
+	# IL MERCATO STA DENTRO LA STRADA. E' il difetto che si vedeva: la prima
+	# carta usciva dal tabellone.
+	var gs := _gioco().gs
+	var mercato: Array = []
+	for c in BoardLayout3D.side_cards(gs):
+		if str(c["kind"]) == "mercato": mercato.append(c["aabb"])
+	_eq("ci sono tutte le carte del mercato", mercato.size(), gs.market.size())
+	var fuori := 0
+	for b in mercato:
+		var r: AABB = b
+		if r.position.z < -0.001 or r.end.z > BoardLayout3D.board_d() + 0.001:
+			fuori += 1
+	_eq("nessuna sborda davanti o dietro la strada", fuori, 0)
+
+	# Due file da tre: le x distinte sono due, le z tre.
+	var xs := {}
+	var zs := {}
+	for b in mercato:
+		var r: AABB = b
+		xs[snappedf(r.position.x, 0.1)] = true
+		zs[snappedf(r.position.z, 0.1)] = true
+	_eq("il mercato sta in due file", xs.size(), 2)
+	_eq("  da tre carte l'una", zs.size(), 3)
+
+	# E stanno a sinistra della strada, senza coprirla e senza accavallarsi.
+	var sopra := 0
+	for b in mercato:
+		if (b as AABB).end.x > 0.001: sopra += 1
+	_eq("il mercato resta fuori dalla strada", sopra, 0)
+	var coperte := 0
+	for i in mercato.size():
+		for j in range(i + 1, mercato.size()):
+			var a: AABB = mercato[i]
+			var b2: AABB = mercato[j]
+			if a.position.x < b2.end.x - 0.001 and b2.position.x < a.end.x - 0.001 \
+				and a.position.z < b2.end.z - 0.001 and b2.position.z < a.end.z - 0.001:
+				coperte += 1
+	_eq("  e nessuna ne copre un'altra", coperte, 0)
+
+	# Cliccabili una per una: il mercato e' il punto da cui si comincia ogni
+	# azione, e prenderne una per l'altra sarebbe il peggio.
+	var sbagliate := 0
+	for c in BoardLayout3D.side_cards(gs):
+		if str(c["kind"]) != "mercato": continue
+		var r: AABB = c["aabb"]
+		var centro := r.position + Vector3(r.size.x / 2.0, 0.0, r.size.z / 2.0)
+		var presa := BoardLayout3D.card_at_ray(gs, centro + Vector3(0, 500, 0),
+			Vector3(0, -1, 0))
+		if presa.is_empty() or str(presa["id"]) != str(c["id"]): sbagliate += 1
+	_eq("  e cliccandone una si prende proprio quella", sbagliate, 0)
+
 # LA SCENA GIOCABILE NON LA COMPILAVA NESSUN TEST. Un errore di sintassi in
 # gioca.gd passava tutta la suite - i test caricano i moduli puri, non la
 # scena - e si vedeva solo aprendo il gioco, con lo schermo grigio e nessun
@@ -1274,6 +1599,7 @@ func _test_scena_giocabile() -> void:
 			"res://scripts/view/camera_orbita.gd",
 			"res://scripts/view/descrizione_azione.gd",
 			"res://scripts/view/scelte_inizio.gd",
+			"res://scripts/view/riepilogo.gd",
 			"res://scripts/rules/available_actions.gd"]:
 		_ok("%s si compila" % percorso.get_file(), ResourceLoader.load(percorso) != null)
 	var scena := ResourceLoader.load("res://scenes/gioca.tscn") as PackedScene
@@ -1301,9 +1627,26 @@ func _test_scena_giocabile() -> void:
 	# sola senza restare appesa ad aspettare un umano che non c'e'.
 	n.inizio.con_giocatori(3)
 	n.inizio.con_bot(3)
+	n.inizio.con_velocita(4)          # subito: tutti i turni in un colpo
 	n.comincia()
-	_ok("  e con tutti bot la partita va avanti da sola",
+	_ok("  e con tutti bot a velocita' subito la partita va avanti da sola",
 		n.ctl.gs.era > 1 or n.ctl.gs.phase == Enums.Phase.FINE_PARTITA)
+
+	# A passo invece nessuno si muove finche' non glielo si chiede: e' il
+	# modo per guardare i bot una mossa alla volta.
+	n.inizio.con_velocita(0)
+	n.comincia()
+	var mosse := func(gs2: GameState) -> int:
+		var q := 0
+		for pl in gs2.players: q += pl.workers_used
+		return q
+	_ok("  e a passo il tavolo resta fermo",
+		n.ctl.gs.era == 1 and mosse.call(n.ctl.gs) == 0 and n.bot_da_muovere())
+	var chi: int = n.ctl.gs.current_index
+	n.muovi_un_bot()
+	_ok("  e ogni Avanza e' un turno, uno solo (%d mosse, ora tocca a %d)"
+		% [mosse.call(n.ctl.gs), n.ctl.gs.current_index],
+		mosse.call(n.ctl.gs) == 1 and n.ctl.gs.current_index != chi)
 	n.torna_alla_scelta()
 	_ok("  e si torna alla scelta", n.ctl == null and n.vista == null)
 	n.queue_free()

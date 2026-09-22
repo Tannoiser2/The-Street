@@ -17,6 +17,7 @@ const COLORI_TERRENO: Array[Color] = [
 const CIELO := Color("#4a76b8")
 const TAVOLO := Color("#2b2620")
 const BASETTA := Color("#6f6a63")
+const TERRAPIENO := Color("#6e5b41")
 
 var gs: GameState
 var _evidenziata := -1
@@ -94,6 +95,12 @@ func _cielo() -> void:
 		var mat := p.material_override as StandardMaterial3D
 		mat.albedo_texture = tex
 		mat.texture_filter = BaseMaterial3D.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
+		# Del panorama si mostra solo la striscia bassa - orizzonte e terra -
+		# invece di schiacciare tutta l'immagine in meta' pannello: si taglia
+		# il cielo vuoto in alto e quel che resta tiene le sue proporzioni.
+		var quota := clampf(BoardLayout3D.CIELO_QUOTA, 0.05, 1.0)
+		mat.uv1_scale = Vector3(1.0, quota, 1.0)
+		mat.uv1_offset = Vector3(0.0, 1.0 - quota, 0.0)
 	p.position = r.position + Vector3(r.size.x / 2.0, r.size.y / 2.0, 0.0)
 	add_child(p)
 
@@ -209,6 +216,7 @@ func _tessere() -> void:
 
 func _edifici() -> void:
 	for b in gs.grid.buildings:
+		_terrapieni(b)
 		_basetta(b)
 		# Chi e' CROLLATO IN ROVINA non ha piu' una sagoma in piedi: resta il
 		# piede, che fa da fondamenta a chi ci costruisce sopra. Il rudere
@@ -224,6 +232,18 @@ func _edifici() -> void:
 
 # Il piede che tiene in piedi il cartone: 15 mm di profondita' sui 26 dello
 # slot, cosi' il resto resta scoperto e le file dietro si vedono.
+# La terra riportata sotto le colonne che non avevano una base. Si paga (1
+# pietra a colonna) ed e' l'unica cosa che regge l'edificio li' sotto:
+# senza, restava sospeso sopra il vuoto proprio dove aveva pagato per
+# riempire. Colore di terra e non del giocatore: il terrapieno non e' un suo
+# pezzo di cartone, e' il terreno alzato.
+func _terrapieni(b: Building) -> void:
+	for box in BoardLayout3D.terrapieni(gs, b):
+		if box.size.y <= 0.0: continue
+		var m := _scatola(box.size, TERRAPIENO)
+		m.position = box.position + box.size / 2.0
+		add_child(m)
+
 func _basetta(b: Building) -> void:
 	var box := BoardLayout3D.basetta_box(gs, b)
 	# Col disegno sopra, il colore del giocatore non ha piu' dove stare: va
