@@ -19,6 +19,7 @@ func _ready() -> void:
 	_run("potenziamenti", _test_upgrades)
 	_run("effetti per l'era dei personaggi", _test_characters_era)
 	_run("hook di attivazione", _test_on_activate)
+	_run("lavoratore ed edificio protetto", _test_protection)
 	_run("lo schema e' davvero chiuso", _test_schema_closed)
 	print("\n%d superati, %d falliti" % [_passed, _failed])
 	get_tree().quit(0 if _failed == 0 else 1)
@@ -894,3 +895,117 @@ func _test_on_activate() -> void:
 	var pre_n := _ric(n, 0)
 	EraRules.activate(n, 0, 1)
 	_ok("l'attivazione vera include l'effetto", n.players[0].oro > pre_n[1])
+
+
+# ---- lavoratore ed edificio protetto ---------------------------------
+# Prepara un turno reale: colonna con un edificio della classe voluta, gia'
+# intatto e del giocatore di turno, e il personaggio disponibile nella fila.
+func _turno_con(cid: String) -> Array:
+	var ctl := _game()
+	var gs := ctl.gs
+	_flat(gs, Enums.Terrain.PIANURA)
+	var cls: String = CardDB.characters[cid]["class"]
+	var b := _put(gs, _card_of_class(cls), 2)
+	b.owner = gs.current_index
+	gs.char_row = [cid]
+	gs.char_decks[gs.era] = []
+	return [ctl, gs, b]
+
+func _test_protection() -> void:
+	var base := int(CardDB.constants["protection_bonus"])
+
+	# abitare un proprio edificio: +2 e il legame registrato
+	var a := _turno_con("pe_legionario")
+	var ctl: GameController = a[0]
+	var gs: GameState = a[1]
+	var b: Building = a[2]
+	_ok("lavoratore piazzato sull'edificio", ctl.place_worker(2, b))
+	_eq("  protezione +%d" % base, b.protection, base)
+	_eq("  e l'edificio sa chi lo abita", b.protected_by, gs.current_index)
+
+	# edificio altrui: niente protezione
+	var c := _turno_con("pe_legionario")
+	var ctl2: GameController = c[0]
+	var gs2: GameState = c[1]
+	var b2: Building = c[2]
+	b2.owner = (gs2.current_index + 1) % gs2.n_players
+	ctl2.place_worker(2, b2)
+	_eq("un edificio altrui non si abita", b2.protection, 0)
+
+	# edificio in un'altra colonna: niente protezione
+	var d := _turno_con("pe_legionario")
+	var ctl3: GameController = d[0]
+	var gs3: GameState = d[1]
+	var lontano := _put(gs3, _card_of_class("civico"), 5)
+	lontano.owner = gs3.current_index
+	ctl3.place_worker(2, lontano)
+	_eq("un edificio di un'altra colonna non si abita", lontano.protection, 0)
+
+	# Legionario: "la sua protezione vale +3 invece di +2"
+	var e2 := _turno_con("pe_legionario")
+	var ctl4: GameController = e2[0]
+	var gs4: GameState = e2[1]
+	var b4: Building = e2[2]
+	ctl4.place_worker(2, b4)
+	gs4.current_player().oro = 9
+	_ok("Legionario reclutato", ctl4.recruit("pe_legionario"))
+	_eq("  la protezione sale a %d" % (base + 1), b4.protection, base + 1)
+
+	# Cavaliere: +4 invece di +2
+	var f := _turno_con("pe_cavaliere")
+	var ctl5: GameController = f[0]
+	var gs5: GameState = f[1]
+	var b5: Building = f[2]
+	ctl5.place_worker(2, b5)
+	gs5.current_player().oro = 9
+	_ok("Cavaliere reclutato", ctl5.recruit("pe_cavaliere"))
+	_eq("  la protezione sale a %d" % (base + 2), b5.protection, base + 2)
+
+	# Capotribu: "+1 res all'edificio protetto da questo lavoratore"
+	var g := _turno_con("pe_capotribu")
+	var ctl6: GameController = g[0]
+	var gs6: GameState = g[1]
+	var b6: Building = g[2]
+	ctl6.place_worker(2, b6)
+	gs6.current_player().oro = 9
+	_ok("Capotribu reclutato", ctl6.recruit("pe_capotribu"))
+	_eq("  +1 solo all'edificio abitato", b6.protection, base + 1)
+
+	# "se l'edificio protetto sopravvive all'evento, +1 cultura"
+	var h := _turno_con("pe_legionario")
+	var ctl7: GameController = h[0]
+	var gs7: GameState = h[1]
+	var b7: Building = h[2]
+	ctl7.place_worker(2, b7)
+	gs7.current_player().oro = 9
+	ctl7.recruit("pe_legionario")
+	var pl: PlayerState = gs7.players[gs7.players.size() - 1]
+	for p2 in gs7.players:
+		if p2.character_targets.has("pe_legionario"): pl = p2
+	var vp0: int = pl.vp
+	Effects.apply_era_end_characters(gs7)
+	_eq("Legionario: l'edificio ha retto → +1 cultura", pl.vp, vp0 + 1)
+
+	var i2 := _turno_con("pe_legionario")
+	var ctl8: GameController = i2[0]
+	var gs8: GameState = i2[1]
+	var b8: Building = i2[2]
+	ctl8.place_worker(2, b8)
+	gs8.current_player().oro = 9
+	ctl8.recruit("pe_legionario")
+	var pl2: PlayerState = gs8.players[0]
+	for p3 in gs8.players:
+		if p3.character_targets.has("pe_legionario"): pl2 = p3
+	b8.state = Enums.BuildingState.RUDERE      # l'evento lo ha ferito
+	var vp1: int = pl2.vp
+	Effects.apply_era_end_characters(gs8)
+	_eq("  ridotto a rudere → nessuna cultura", pl2.vp, vp1)
+
+	# il selettore "non protetto" ora discrimina davvero
+	var j := _scena()
+	_set_event(j, "ev_migrazione")             # "Edifici non protetti: -1 res extra"
+	var nudo := _put(j, _card_of_class("civico"), 1)
+	var abitato := _put(j, _card_of_class("civico"), 3)
+	abitato.protection = base
+	_eq("evento sui non protetti: colpisce il nudo", Effects.event_resistance_modifier(j, nudo), -1)
+	_eq("  risparmia quello abitato", Effects.event_resistance_modifier(j, abitato), 0)

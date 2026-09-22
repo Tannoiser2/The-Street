@@ -11,7 +11,10 @@ static func play_turn(ctl: GameController) -> void:
 	var gs := ctl.gs
 	var p := gs.current_player()
 	var col := _free_column(gs, p)
-	if col < 0 or not ctl.place_worker(col):
+	# "Mettetelo su una colonna, sopra un vostro edificio ancora in piedi
+	# oppure sulla colonna nuda": abitare da' +2 resistenza, quindi conviene
+	# quasi sempre. Senza questo, la protezione non entra mai in gioco.
+	if col < 0 or not ctl.place_worker(col, _own_standing(gs, p, col)):
 		ctl.pass_action()
 		return
 
@@ -34,6 +37,11 @@ static func _free_column(gs: GameState, p: PlayerState) -> int:
 		if not c in p.worker_cols: cols.append(c)
 	if cols.is_empty(): return -1
 	return cols[gs.rng.randi_range(0, cols.size() - 1)]
+
+static func _own_standing(gs: GameState, p: PlayerState, col: int) -> Building:
+	for b in gs.grid.in_column(col):
+		if b.owner == p.index and b.is_standing(): return b
+	return null
 
 static func _try_build(ctl: GameController, col: int) -> bool:
 	var gs := ctl.gs

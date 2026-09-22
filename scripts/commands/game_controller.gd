@@ -13,6 +13,7 @@ signal game_ended(winner: int)
 
 var gs: GameState
 var _activated_col: int = -1      # colonna attivata nel turno corrente
+var _last_protected: Building = null  # edificio abitato dal lavoratore di questo turno
 
 # ---- setup ---------------------------------------------------------
 func new_game(n_players: int, seed_value: int) -> void:
@@ -121,8 +122,11 @@ func place_worker(col: int, protect: Building = null) -> bool:
 	if col in p.worker_cols: return false
 	p.workers_used += 1
 	p.worker_cols.append(col)
+	_last_protected = null
 	if protect != null and protect.owner == p.index and protect.covers(col) and protect.is_standing():
 		protect.protection += int(CardDB.constants["protection_bonus"])
+		protect.protected_by = p.index
+		_last_protected = protect
 	EraRules.activate(gs, p.index, col)
 	_activated_col = col
 	gs.phase = Enums.Phase.AZIONE
@@ -249,7 +253,11 @@ func recruit(char_id: String) -> bool:
 	p.pay(q.pietra, q.oro)
 	p.specialized_characters.append(char_id)
 	p.recruited_total += 1
-	Effects.apply_on_acquire(gs, p.index, CardDB.characters[char_id])
+	# Il lavoratore appena piazzato si specializza: l'edificio che abita e' il
+	# bersaglio degli effetti che parlano di "questo lavoratore".
+	if _last_protected != null:
+		p.character_targets[char_id] = _last_protected.uid
+	Effects.apply_on_acquire(gs, p.index, CardDB.characters[char_id], _last_protected)
 	gs.char_row.erase(char_id)
 	_refill(gs.char_row, gs.char_decks[gs.era], int(CardDB.constants["side_rows"]))
 	gs.log_line("Reclutato %s" % CardDB.characters[char_id]["name"])

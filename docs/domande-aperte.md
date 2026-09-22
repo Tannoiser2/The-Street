@@ -322,7 +322,19 @@ dato è stato importato da lì. Ma due confronti fra ciò che è stampato e
     Serve un elenco che sopravviva alla fine dell'era, tipo
     `PlayerState.final_characters`. Da fare col prossimo blocco.
 
-27. **Capotribù e Ingegnere militare: approssimazione dichiarata.** Due
+27. ~~**Capotribù e Ingegnere militare: approssimazione dichiarata**~~ —
+    **RISOLTA per il Capotribù.** Il legame lavoratore→edificio abitato esiste
+    ora (`Building.protected_by` e `PlayerState.character_targets`), e il
+    Capotribù dà il suo +1 al solo edificio che il suo lavoratore abita, non a
+    tutti i propri edifici protetti. Stessa cosa per Legionario e Cavaliere, che
+    non erano implementati affatto.
+    **Resta aperto l'Ingegnere militare**: «uno a tua scelta +2» è una scelta
+    del giocatore, e con un bot casuale cade sul primo Militare incontrato. Il
+    totale è corretto, la distribuzione no. Si chiude quando l'interfaccia
+    potrà chiedere la scelta (M5).
+    Qui sotto il testo originale.
+
+    **Capotribù e Ingegnere militare: approssimazione dichiarata.** Due
     personaggi parlano di un edificio *scelto*, e il motore non ha ancora quel
     livello di dettaglio.
     - Capotribù: «l'edificio protetto da **questo lavoratore** ha +1 res». Non
@@ -363,3 +375,20 @@ dato è stato importato da lì. Ma due confronti fra ciò che è stampato e
     preferisco chiedertelo. La più probabile per il Ponte è «+1 della risorsa
     che già produce», che però non è esprimibile senza un terzo valore nello
     schema (tipo `same_as_base`).
+
+30. **La protezione non era mai entrata in gioco.** Il regolamento la mette al
+    centro del turno — «un edificio abitato resiste, uno abbandonato no» — ma
+    `RandomBot` chiamava `place_worker(col)` senza mai passare un edificio da
+    abitare. Misurato prima della correzione: **0 edifici protetti su 830**, in
+    30 partite.
+
+    Conseguenze, tutte silenziose: il predicato `protected` non ha mai
+    discriminato nulla, i tre eventi «Edifici non protetti: −1 res extra»
+    colpivano sempre tutti, e Legionario, Cavaliere e Capotribù non avevano nulla
+    a cui attaccarsi. Nessun test se n'era accorto, perché tutti verificavano il
+    comportamento *dato* un edificio protetto, mai che ce ne fosse uno.
+
+    Ora il bot abita un proprio edificio in piedi quando c'è, e a metà partita si
+    contano ~20 edifici protetti con protezione totale 42 su 30 partite — il
+    surplus oltre il +2 viene dai personaggi. I PV medi salgono da 54,2/44,8/45,2
+    a 58,2/49,3/47,1: più edifici sopravvivono agli eventi.

@@ -35,6 +35,8 @@ const APPLIED: Array[String] = [
 	"edificio:on_activate:resource",         # Focolare comune, Ospedale dei pellegrini
 	"personaggio:on_activate:resource",      # Console, Mercante
 	"personaggio:on_activate:vp",            # Cronista
+	"personaggio:on_acquire:protection_delta",   # Capotribu', Legionario, Cavaliere
+	"personaggio:on_era_end:vp",             # Legionario e Cavaliere, se l'edificio regge
 	"potenziamento:on_activate:resource",    # Granaio, Boutique, Banchina
 	"potenziamento:on_acquire:vp",
 	"potenziamento:on_acquire:resistance",
@@ -191,6 +193,31 @@ static func character_resistance_modifier(gs: GameState, b: Building) -> int:
 				if matches(gs, b, e.get("target", {}), null, p.index):
 					mod += int(e["value"])
 	return mod
+
+# ---- hook: on_era_end per i personaggi ------------------------------
+# "se l'edificio protetto sopravvive all'evento, +1 cultura". Va valutato DOPO
+# la risoluzione dell'evento e PRIMA che protezioni e personaggi si azzerino.
+static func apply_era_end_characters(gs: GameState) -> void:
+	for p in gs.players:
+		for cid in p.specialized_characters:
+			if not CardDB.characters.has(cid): continue
+			var carta: Dictionary = CardDB.characters[cid]
+			for e in carta.get("effects", []):
+				if e["hook"] != "on_era_end" or e["op"] != "vp": continue
+				var cond: Dictionary = e.get("condition", {})
+				if str(cond.get("op", "")) == "protected_survived":
+					if not _protetto_sopravvissuto(gs, p, cid): continue
+				elif not _condition_met(gs, null, cond, p.index): continue
+				p.add_vp("cultura", int(e["value"]))
+				gs.log_line("%s: l'edificio protetto ha retto, +%d cultura" % [carta["name"], int(e["value"])])
+
+static func _protetto_sopravvissuto(gs: GameState, p: PlayerState, cid: String) -> bool:
+	if not p.character_targets.has(cid): return false
+	var uid: int = int(p.character_targets[cid])
+	for b in gs.grid.buildings:
+		if b.uid == uid:
+			return b.state == Enums.BuildingState.INTATTO and not b.is_buried
+	return false
 
 # ---- hook: on_activate (applica) -----------------------------------
 # Scatta quando un giocatore attiva una colonna. La COLONNA ATTIVATA e' un
@@ -373,6 +400,12 @@ static func apply_on_acquire(gs: GameState, player: int, card: Dictionary,
 			"scavo_delta":
 				for b in _bersagli(gs, host, e):
 					b.bonus_scavo += int(e["value"])
+			"protection_delta":
+				# "la sua protezione vale +3 invece di +2", "l'edificio protetto
+				# da questo lavoratore ha +1 res": vanno all'edificio abitato.
+				if host != null:
+					host.protection += int(e["value"])
+					gs.log_line("%s: %s protetto meglio (+%d)" % [card["name"], host.data["name"], int(e["value"])])
 
 static func _bersagli(gs: GameState, src: Building, e: Dictionary) -> Array[Building]:
 	var out: Array[Building] = []
@@ -441,7 +474,7 @@ static func apply_scavo_modifiers(gs: GameState) -> void:
 static func _condition_met(gs: GameState, src: Building, cond: Dictionary,
 		owner: int = -1) -> bool:
 	if cond.is_empty(): return true
-	if str(cond["op"]) != "count_matching": return true
+	if str(cond["op"]) != "count_matching": return true   # protected_survived: vedi _era_end_characters
 	var n := 0
 	for b in gs.grid.buildings:
 		if matches(gs, b, cond.get("target", {}), src, owner): n += 1

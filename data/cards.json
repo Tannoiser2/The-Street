@@ -2025,18 +2025,12 @@
         {
           "hook": "on_acquire",
           "op": "resource",
-          "pietra": 2,
-          "oro": 0
+          "pietra": 2
         },
         {
-          "hook": "on_event",
-          "op": "resistance",
-          "value": 1,
-          "duration": "era",
-          "target": {
-            "owner": "self",
-            "protected": true
-          }
+          "hook": "on_acquire",
+          "op": "protection_delta",
+          "value": 1
         }
       ]
     },
@@ -2178,10 +2172,18 @@
       "effect_text": "Per l'era: la sua protezione vale +3 invece di +2; se l'edificio protetto sopravvive all'evento, +1 cultura.",
       "effects": [
         {
-          "hook": "on_era_end",
+          "hook": "on_acquire",
           "op": "protection_delta",
+          "value": 1
+        },
+        {
+          "hook": "on_era_end",
+          "op": "vp",
           "value": 1,
-          "duration": "era"
+          "condition": {
+            "op": "protected_survived",
+            "min": 1
+          }
         }
       ]
     },
@@ -2349,10 +2351,18 @@
       "effect_text": "Per l'era: la sua protezione vale +4 invece di +2; se l'edificio protetto sopravvive, +1 cultura.",
       "effects": [
         {
-          "hook": "on_era_end",
+          "hook": "on_acquire",
           "op": "protection_delta",
-          "value": 2,
-          "duration": "era"
+          "value": 2
+        },
+        {
+          "hook": "on_era_end",
+          "op": "vp",
+          "value": 1,
+          "condition": {
+            "op": "protected_survived",
+            "min": 1
+          }
         }
       ]
     },

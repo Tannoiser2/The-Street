@@ -106,6 +106,7 @@ static func bury_characters(gs: GameState) -> void:
 static func end_era(gs: GameState) -> void:
 	resolve_event(gs)
 	Effects.era_end_resources(gs)
+	Effects.apply_era_end_characters(gs)
 	# Il censimento delle ere 1-4 si paga qui. Quello dell'era 5 NON si paga:
 	# l'era Moderna non ha evento e il suo censimento E' il "Censimento finale",
 	# voce 1 del conteggio di fine partita (Scoring._census_final). Pagarlo
@@ -119,7 +120,9 @@ static func end_era(gs: GameState) -> void:
 	# secondo criterio di spareggio.
 	if gs.era < 5:
 		disperse(gs)
-	for b in gs.grid.buildings: b.protection = 0
+	for b in gs.grid.buildings:
+		b.protection = 0
+		b.protected_by = -1
 	# I personaggi dell'era Moderna non si seppelliscono, ma le loro abilita'
 	# "Finale:" si pagano dopo: vanno messi da parte prima dell'azzeramento.
 	if gs.era >= 5:

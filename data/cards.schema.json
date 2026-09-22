@@ -294,11 +294,12 @@
         "op",
         "min"
       ],
-      "description": "Gate di un effetto. Stesso vocabolario che useranno Monumenti ed Eredita'.",
+      "description": "Gate di un effetto. count_matching conta i bersagli; protected_survived guarda se l'edificio protetto dal lavoratore che ha reclutato questo personaggio ha superato l'evento.",
       "properties": {
         "op": {
           "enum": [
-            "count_matching"
+            "count_matching",
+            "protected_survived"
           ]
         },
         "min": {

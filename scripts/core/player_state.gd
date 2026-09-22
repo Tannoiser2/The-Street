@@ -32,6 +32,9 @@ var final_characters: Array[String] = []
 # Quanto ha gia' reso un effetto in quest'era, per carta. Serve ai tetti
 # ("max 2") e ai conteggi ("le tue prime 2 produzioni").
 var effect_used: Dictionary = {}
+# personaggio -> uid dell'edificio protetto dal lavoratore che lo ha reclutato.
+# Serve al Legionario e al Cavaliere ("se l'edificio protetto sopravvive").
+var character_targets: Dictionary = {}
 
 func reset_for_era() -> void:
 	workers_used = 0
@@ -39,6 +42,7 @@ func reset_for_era() -> void:
 	worker_cols.clear()
 	terrapieno_free_used = false
 	effect_used.clear()
+	character_targets.clear()
 
 func _init(i: int) -> void:
 	index = i
