@@ -119,5 +119,10 @@ static func end_era(gs: GameState) -> void:
 	if gs.era < 5:
 		disperse(gs)
 	for b in gs.grid.buildings: b.protection = 0
+	# I personaggi dell'era Moderna non si seppelliscono, ma le loro abilita'
+	# "Finale:" si pagano dopo: vanno messi da parte prima dell'azzeramento.
+	if gs.era >= 5:
+		for p in gs.players:
+			p.final_characters.append_array(p.specialized_characters)
 	for p in gs.players: p.reset_for_era()
 	gs.grid.reset_era_flags()

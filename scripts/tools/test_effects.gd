@@ -17,6 +17,7 @@ func _ready() -> void:
 	_run("requisito di terreno adiacente", _test_terrain_adjacent)
 	_run("punteggio finale degli edifici", _test_final_scoring)
 	_run("potenziamenti", _test_upgrades)
+	_run("effetti per l'era dei personaggi", _test_characters_era)
 	_run("lo schema e' davvero chiuso", _test_schema_closed)
 	print("\n%d superati, %d falliti" % [_passed, _failed])
 	get_tree().quit(0 if _failed == 0 else 1)
@@ -309,7 +310,7 @@ func _test_pending() -> void:
 	var pend := Effects.pending()
 	print("     inerti oggi (%d): %s" % [pend.size(), ", ".join(pend)])
 	_ok("il registro dei pendenti si calcola dai dati", pend.size() > 0)
-	for k in Effects.APPLIED_HOOK_OPS:
+	for k in Effects.APPLIED:
 		_ok("  applicato: %s" % k, not k in pend)
 	for n in Effects.APPLIED_OVERRIDES:
 		_ok("  applicato: %s" % n, not n in pend)
@@ -459,6 +460,12 @@ func _final(gs: GameState) -> Array[int]:
 	for p in gs.players:
 		out.append(int(p.vp_breakdown.get(Effects.VP_CHANNEL, 0)))
 	return out
+
+# Prepara il terreno richiesto dalla carta: senza, il preventivo e' illegale e
+# il test passerebbe a vuoto confrontando due zeri.
+func _terreno_per(gs: GameState, card_id: String) -> void:
+	var req = CardDB.buildings[card_id].get("terrain")
+	if req != null: _flat(gs, Enums.terrain_from_string(req))
 
 func _scena() -> GameState:
 	var gs := _game().gs
@@ -668,3 +675,110 @@ func _test_upgrades() -> void:
 	var v5: int = pl.vp
 	_ok("il comando upgrade applica l'effetto", ctl.upgrade("po_statua", target))
 	_eq("  +2 PV arrivati davvero", pl.vp, v5 + 2)
+
+
+# ---- effetti per l'era dei personaggi ---------------------------------
+func _test_characters_era() -> void:
+	var rel := _card_of_class("religione")
+	var mil := _card_of_class("militare")
+	var civ := _card_of_class("civico")
+
+	# Sciamano: "Per l'era: i tuoi edifici Religione hanno +1 res".
+	# E' il caso che il registro nascondeva: prima non dava nulla.
+	var a := _scena()
+	_set_event(a, "ev_diluvio")
+	var mio_rel := _put(a, rel, 1)
+	var mio_civ := _put(a, civ, 3)
+	var suo_rel := _put(a, rel, 5)
+	suo_rel.owner = 1
+	a.players[0].specialized_characters = ["pe_sciamano"] as Array[String]
+	_eq("Sciamano: il mio Religione → +1", Effects.character_resistance_modifier(a, mio_rel), 1)
+	_eq("  il mio Civico → 0", Effects.character_resistance_modifier(a, mio_civ), 0)
+	_eq("  il Religione altrui → 0", Effects.character_resistance_modifier(a, suo_rel), 0)
+	_eq("  e arriva nel modificatore finale dell'evento",
+		Effects.event_resistance_modifier(a, mio_rel), 1)
+
+	# Ingegnere militare: "i tuoi edifici Militari hanno +1 res"
+	var b := _scena()
+	_set_event(b, "ev_diluvio")
+	var m := _put(b, mil, 2)
+	b.players[0].specialized_characters = ["pe_ingegnere_militare"] as Array[String]
+	_ok("Ingegnere militare: il mio Militare guadagna resistenza",
+		Effects.character_resistance_modifier(b, m) >= 1)
+
+	# Cardinale: "−1 oro agli edifici Religione (minimo 0)"
+	var c := _scena()
+	_terreno_per(c, rel)
+	c.era = int(CardDB.buildings[rel]["era"])
+	var pieno := BuildRules.quote_rail(c, 0, CardDB.buildings[rel], 1)
+	c.players[0].specialized_characters = ["pe_cardinale"] as Array[String]
+	var scontato := BuildRules.quote_rail(c, 0, CardDB.buildings[rel], 1)
+	_ok("preventivi legali", pieno.legal and scontato.legal, pieno.reason + " / " + scontato.reason)
+	_eq("Cardinale: 1 oro in meno sui Religione", scontato.oro, max(0, pieno.oro - 1))
+	var non_rel := _card_of_class("commercio")
+	var d := _scena()
+	_terreno_per(d, non_rel)
+	d.era = int(CardDB.buildings[non_rel]["era"])
+	var p1 := BuildRules.quote_rail(d, 0, CardDB.buildings[non_rel], 1)
+	d.players[0].specialized_characters = ["pe_cardinale"] as Array[String]
+	var p2 := BuildRules.quote_rail(d, 0, CardDB.buildings[non_rel], 1)
+	_ok("  preventivo legale anche qui", p1.legal and p2.legal, p1.reason)
+	_eq("  non tocca le altre classi", p2.oro, p1.oro)
+
+	# Architetto: "−1 pietra agli edifici da 2 o 3 caselle"
+	var e2 := _scena()
+	var largo: String = ""
+	for id in CardDB.buildings:
+		if int(CardDB.buildings[id]["width"]) >= 2 and int(CardDB.buildings[id]["cost"]["pietra"]) >= 1:
+			largo = id; break
+	_ok("trovato un edificio largo con costo in pietra", largo != "")
+	_terreno_per(e2, largo)
+	e2.era = int(CardDB.buildings[largo]["era"])
+	var q1 := BuildRules.quote_rail(e2, 0, CardDB.buildings[largo], 1)
+	e2.players[0].specialized_characters = ["pe_architetto"] as Array[String]
+	var q2 := BuildRules.quote_rail(e2, 0, CardDB.buildings[largo], 1)
+	_ok("Architetto: preventivo legale", q1.legal and q2.legal, q1.reason)
+	_eq("  1 pietra in meno sugli edifici larghi", q2.pietra, max(0, q1.pietra - 1))
+
+	# Bottega d'artista: "I tuoi potenziamenti costano 1 oro in meno"
+	var f := _scena()
+	var host := _put(f, civ, 2)
+	f.upg_row = ["po_statua"]
+	var u1 := ActionRules.quote_upgrade(f, 0, "po_statua", host)
+	_put(f, "ed_bottega_dartista", 5)
+	var u2 := ActionRules.quote_upgrade(f, 0, "po_statua", host)
+	_eq("Bottega d'artista: 1 oro in meno sui potenziamenti", u2.oro, max(0, u1.oro - 1))
+
+	# Vescovo: "capienza dei tuoi Religione +1"
+	var g := _scena()
+	var chiesa := _put(g, rel, 2)
+	var base := ActionRules.upgrade_capacity_for(g, 0, chiesa)
+	g.players[0].specialized_characters = ["pe_vescovo"] as Array[String]
+	_eq("Vescovo: capienza +1 sui Religione",
+		ActionRules.upgrade_capacity_for(g, 0, chiesa), base + 1)
+	var h := _scena()
+	var caserma := _put(h, mil, 2)
+	var base2 := ActionRules.upgrade_capacity_for(h, 0, caserma)
+	h.players[0].specialized_characters = ["pe_vescovo"] as Array[String]
+	_eq("  non tocca le altre classi", ActionRules.upgrade_capacity_for(h, 0, caserma), base2)
+
+	# Veterano: "Finale: +1 PV per ogni tuo edificio Militare in piedi (max +4)"
+	var i := _scena()
+	for c2 in [1, 2, 3]: _put(i, mil, c2)
+	i.players[0].final_characters = ["pe_veterano"] as Array[String]
+	_eq("Veterano: +1 PV per Militare in piedi", _final(i)[0], 3)
+	var j := _scena()
+	for c3 in range(6): _put(j, mil, c3)
+	j.players[0].final_characters = ["pe_veterano"] as Array[String]
+	_eq("  ma non oltre il tetto di 4", _final(j)[0], 4)
+
+	# i personaggi dell'era 5 devono arrivare al conteggio (punto 26)
+	var k := _game().gs
+	k.era = 5
+	k.current_event = {}
+	k.players[0].specialized_characters = ["pe_veterano"] as Array[String]
+	EraRules.end_era(k)
+	_eq("a fine era 5 i personaggi passano all'elenco finale",
+		k.players[0].final_characters, ["pe_veterano"] as Array[String])
+	_eq("  e specialized_characters si azzera come sempre",
+		k.players[0].specialized_characters, [] as Array[String])

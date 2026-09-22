@@ -86,10 +86,12 @@ static func quote_rail(gs: GameState, player: int, data: Dictionary, col_from: i
 	if dr != "":
 		q.reason = dr; return q
 	var c := base_cost(data)
-	var p := c.x - pianura_discount(gs, data, col_from)
+	var sconto := Effects.cost_delta(gs, player, "building",
+		Effects.sonda(data, player, col_from, 0))
+	var p := c.x - pianura_discount(gs, data, col_from) + sconto.x
 	p = _apply_despoil(q, despoil, p)
 	q.pietra = max(0, p)
-	q.oro = c.y
+	q.oro = max(0, c.y + sconto.y)
 	q.level = 0
 	q.legal = true
 	return q
@@ -169,8 +171,10 @@ static func quote_above(gs: GameState, player: int, data: Dictionary, col_from: 
 	# Lo sconto macerie non si somma alla spoliazione: la sostituisce.
 	if rubble_discount and despoil == null: p -= int(CardDB.constants["rubble_discount_pietra"])
 	p = _apply_despoil(q, despoil, p)
-	q.pietra = max(0, p)
-	q.oro = c.y
+	var sconto := Effects.cost_delta(gs, player, "building",
+		Effects.sonda(data, player, col_from, q.level))
+	q.pietra = max(0, p + sconto.x)
+	q.oro = max(0, c.y + sconto.y)
 	q.legal = true
 	return q
 

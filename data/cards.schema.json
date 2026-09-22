@@ -235,7 +235,7 @@
           ]
         },
         "name": {
-          "description": "Solo per op=rule_override. L'elenco e' CHIUSO. Cresciuto da 10 a 11 nel blocco personaggi: free_upgrade_of_class (Vescovo) non era previsto dalla proposta. Un nome nuovo va concordato col designer.",
+          "description": "Solo per op=rule_override. L'elenco e' CHIUSO. Cresciuto da 10 a 12: free_upgrade_of_class (Vescovo) e arte_vp_bonus (Mecenate, che modifica l'effetto di un'altra carta). Un nome nuovo va concordato col designer.",
           "enum": [
             "ignore_terrain_requirement",
             "first_terrapieno_free",
@@ -247,7 +247,8 @@
             "colossal",
             "scavo_only_if_buried",
             "upgrade_on_others_building",
-            "free_upgrade_of_class"
+            "free_upgrade_of_class",
+            "arte_vp_bonus"
           ]
         },
         "value_from": {

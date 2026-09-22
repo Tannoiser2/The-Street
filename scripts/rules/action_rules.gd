@@ -42,6 +42,11 @@ const UPGRADE_CAPACITY_BASE := 1
 static func upgrade_capacity(data: Dictionary) -> int:
 	return int(data.get("upgrade_slots", UPGRADE_CAPACITY_BASE))
 
+# La capienza puo' crescere per un effetto attivo (il Vescovo: "capienza dei
+# tuoi Religione +1").
+static func upgrade_capacity_for(gs: GameState, player: int, host: Building) -> int:
+	return upgrade_capacity(host.data) + Effects.upgrade_slots_bonus(gs, player, host)
+
 static func quote_upgrade(gs: GameState, player: int, upg_id: String, target: Building) -> ActionQuote:
 	if not upg_id in gs.upg_row:
 		return ActionQuote.no("potenziamento non disponibile nella fila")
@@ -54,12 +59,15 @@ static func quote_upgrade(gs: GameState, player: int, upg_id: String, target: Bu
 	# ma si potenzia solo cio' che e' vivo. Vedi docs/domande-aperte.md punto 9.
 	if not target.is_alive():
 		return ActionQuote.no("l'edificio non e' intatto")
-	var cap := upgrade_capacity(target.data)
+	var cap := upgrade_capacity_for(gs, player, target)
 	if target.upgrades.size() >= cap:
 		return ActionQuote.no("l'edificio ha gia' %d potenziamenti (capienza %d)" % [target.upgrades.size(), cap])
 	var data: Dictionary = CardDB.upgrades[upg_id]
 	var cost: Dictionary = data["cost"]
-	return ActionQuote.yes(int(cost.get("pietra", 0)), int(cost.get("oro", 0)), target)
+	# Sconti sui potenziamenti: Bottega d'artista, e il Cardinale sui Religione.
+	var sconto := Effects.cost_delta(gs, player, "upgrade", target)
+	return ActionQuote.yes(max(0, int(cost.get("pietra", 0)) + sconto.x),
+						   max(0, int(cost.get("oro", 0)) + sconto.y), target)
 
 # ---- restaurare ----------------------------------------------------
 # "pagate meta' del costo originale, arrotondato per eccesso, e torna intatto

@@ -2430,13 +2430,10 @@
           "value": 1
         },
         {
-          "hook": "on_final_scoring",
-          "op": "vp_per",
-          "value": 1,
-          "duration": "era",
-          "target": {
-            "owner": "self"
-          }
+          "hook": "on_acquire",
+          "op": "rule_override",
+          "name": "arte_vp_bonus",
+          "duration": "era"
         }
       ]
     },

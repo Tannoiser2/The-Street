@@ -305,7 +305,13 @@ dato è stato importato da lì. Ma due confronti fra ciò che è stampato e
     I casi con `cap` corretto restano Urbanista e Veterano, che dicono «max +4»
     riferito ai punti.
 
-26. **Personaggi dell'era 5 e punteggio finale: un problema di tempi.** Quattro
+26. ~~**Personaggi dell'era 5 e punteggio finale**~~ — **RISOLTA:**
+    `PlayerState.final_characters` raccoglie i personaggi alla chiusura dell'era
+    5, prima dell'azzeramento, e il conteggio finale li legge. Archeologo,
+    Soprintendente, Urbanista e Veterano ora contano davvero.
+    Qui sotto il testo originale.
+
+    **Personaggi dell'era 5 e punteggio finale: un problema di tempi.** Quattro
     personaggi dell'era 5 hanno abilità «Finale:» — Archeologo, Soprintendente,
     Urbanista, Veterano — ma `EraRules.end_era` azzera `specialized_characters`
     alla chiusura dell'era 5, **prima** che `Scoring.final_scoring` giri. Al
@@ -315,3 +321,29 @@ dato è stato importato da lì. Ma due confronti fra ciò che è stampato e
     parla della sepoltura (niente scheletro), non delle loro abilità finali.
     Serve un elenco che sopravviva alla fine dell'era, tipo
     `PlayerState.final_characters`. Da fare col prossimo blocco.
+
+27. **Capotribù e Ingegnere militare: approssimazione dichiarata.** Due
+    personaggi parlano di un edificio *scelto*, e il motore non ha ancora quel
+    livello di dettaglio.
+    - Capotribù: «l'edificio protetto da **questo lavoratore** ha +1 res». Non
+      tracciamo quale edificio protegga un dato lavoratore, quindi l'effetto è
+      modellato su *tutti* i propri edifici protetti. Con un solo lavoratore che
+      protegge, coincide; con due o più è più generoso del dovuto.
+    - Ingegnere militare: «i tuoi edifici Militari hanno +1 res; **uno a tua
+      scelta** +2». Il secondo effetto è modellato con `times: 1`, quindi cade
+      sul primo Militare incontrato invece che su uno scelto. Il totale è
+      corretto, la distribuzione no — e conta, perché decide quale edificio
+      sopravvive.
+
+    Entrambi si risolvono tracciando il legame lavoratore→edificio protetto, che
+    serve anche a Legionario e Cavaliere. Da fare insieme.
+
+28. **Il mio registro degli inerti mentiva, ed è stato riparato.** La chiave era
+    la coppia `hook:op`, non il tipo di carta. Risultato: lo Sciamano risultava
+    applicato perché `on_event:resistance` lo era per eventi ed edifici, mentre
+    nessun codice scorreva i personaggi come sorgente — **non ha mai dato un
+    punto di resistenza**, e il test che avrebbe dovuto accorgersene diceva che
+    andava tutto bene.
+    Ora la chiave è `tipo:hook:op`. Il numero onesto degli inerti è passato da
+    12 a 25 nel momento della riparazione, ed è sceso a 16 implementando questo
+    blocco. Vale la pena ricordarlo quando quel numero sembra buono.

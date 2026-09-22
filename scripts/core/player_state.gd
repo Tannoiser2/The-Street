@@ -25,6 +25,10 @@ var terrapieno_free_used: bool = false
 # Personaggi reclutati in tutta la partita: non si azzera a fine era.
 # Serve all'Universita' ("+1 PV per ogni tuo personaggio reclutato").
 var recruited_total: int = 0
+# Personaggi che devono arrivare al conteggio finale. I loro "Finale:" si
+# pagano dopo che l'era e' chiusa, quindi non possono stare in
+# specialized_characters, che l'era azzera. Vedi domande-aperte punto 26.
+var final_characters: Array[String] = []
 
 func reset_for_era() -> void:
 	workers_used = 0

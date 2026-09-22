@@ -13,30 +13,50 @@ extends RefCounted
 # dati ma inerte. Un test confronta questi due elenchi con cio' che le carte
 # dichiarano: se qualcuno struttura un effetto nuovo senza implementarlo, il
 # test lo segnala invece di lasciarlo passare per attivo.
-const APPLIED_HOOK_OPS: Array[String] = [
-	"on_event:resistance",      # i 24 eventi e le aure degli edifici
-	"on_era_end:resource",      # ev_inverno_lungo
-	"on_acquire:resource",      # "Subito: +N pietra/oro" dei personaggi
-	"on_acquire:vp",            # "Subito: +N cultura"
-	"on_final_scoring:vp",      # Osservatorio, Acquedotto, Caffe' letterario
-	"on_final_scoring:vp_per",  # Museo, Biblioteca, Grattacielo, Universita'...
-	"on_acquire:resistance",    # potenziamenti Struttura
-	"on_acquire:scavo_delta",   # Iscrizione, Pittura rupestre, Altare, Targa storica
-	"on_final_scoring:scavo_delta",
+# La chiave e' "tipo:hook:op", NON solo "hook:op". La distinzione non e'
+# pedanteria: con la granularita' precedente lo Sciamano risultava applicato
+# perche' "on_event:resistance" lo era per eventi ed edifici, mentre nessun
+# codice scorreva i personaggi come sorgente. Il registro diceva il falso.
+const APPLIED: Array[String] = [
+	"evento:on_event:resistance",
+	"evento:on_era_end:resource",
+	"edificio:on_event:resistance",          # aure di Quartiere e di colonna
+	"edificio:on_final_scoring:vp",
+	"edificio:on_final_scoring:vp_per",
+	"personaggio:on_acquire:resource",       # i "Subito:"
+	"personaggio:on_acquire:vp",
+	"personaggio:on_event:resistance",       # Sciamano, Capotribu, Ingegnere militare
+	"personaggio:on_build:cost_delta",       # Costruttore di zattere, Architetto, Cardinale
+	"personaggio:on_build:upgrade_slots_delta",  # Vescovo
+	"personaggio:on_final_scoring:vp",
+	"personaggio:on_final_scoring:vp_per",
+	"personaggio:on_final_scoring:scavo_delta",  # Soprintendente
+	"edificio:on_build:cost_delta",          # Bottega d'artista
+	"potenziamento:on_acquire:vp",
+	"potenziamento:on_acquire:resistance",
+	"potenziamento:on_acquire:scavo_delta",
+	"potenziamento:on_final_scoring:scavo_delta",
 ]
 const APPLIED_OVERRIDES: Array[String] = ["first_terrapieno_free", "free_restore_of_class"]
 
-# Elenco di tutto cio' che le carte dichiarano ma il motore non applica ancora.
+static func _blocchi() -> Array:
+	return [["evento", CardDB.events], ["personaggio", CardDB.characters],
+			["edificio", CardDB.buildings], ["potenziamento", CardDB.upgrades]]
+
+# Tutto cio' che le carte dichiarano ma il motore non applica, per tipo di carta.
 static func pending() -> Array[String]:
 	var out: Array[String] = []
-	for block in [CardDB.events, CardDB.characters, CardDB.buildings, CardDB.upgrades]:
+	for coppia in _blocchi():
+		var tipo: String = coppia[0]
+		var block: Dictionary = coppia[1]
 		for id in block:
 			for e in block[id].get("effects", []):
-				var key: String = "%s:%s" % [e["hook"], e["op"]]
 				if e["op"] == "rule_override":
 					if not e["name"] in APPLIED_OVERRIDES and not e["name"] in out:
 						out.append(e["name"])
-				elif not key in APPLIED_HOOK_OPS and not key in out:
+					continue
+				var key: String = "%s:%s:%s" % [tipo, e["hook"], e["op"]]
+				if not key in APPLIED and not key in out:
 					out.append(key)
 	out.sort()
 	return out
@@ -57,13 +77,17 @@ static func has_override(gs: GameState, name: String) -> bool:
 # ---- selettore -----------------------------------------------------
 # I predicati presenti valgono in AND. `source` serve solo ai predicati di
 # adiacenza; se manca, quei predicati non possono essere soddisfatti.
-static func matches(gs: GameState, b: Building, t: Dictionary, source: Building = null) -> bool:
+# Un personaggio non sta sul tabellone: non ha un edificio sorgente, ma ha un
+# proprietario. `owner` serve a risolvere "self"/"others" in quel caso.
+static func matches(gs: GameState, b: Building, t: Dictionary,
+		source: Building = null, owner: int = -1) -> bool:
 	if t.is_empty(): return true
 
-	if t.has("owner") and source != null:
+	var mio: int = source.owner if source != null else owner
+	if t.has("owner") and mio >= 0:
 		match str(t["owner"]):
-			"self": if b.owner != source.owner: return false
-			"others": if b.owner == source.owner: return false
+			"self": if b.owner != mio: return false
+			"others": if b.owner == mio: return false
 
 	if t.has("class"):
 		var hit := false
@@ -151,6 +175,70 @@ static func _adjacent(a: Building, b: Building) -> bool:
 static func _shares_column(a: Building, b: Building) -> bool:
 	return a.col_from < b.col_to and b.col_from < a.col_to
 
+# "Per l'era: i tuoi edifici Religione hanno +1 res" e simili. Il personaggio
+# non e' sul tabellone: la sorgente e' il giocatore che lo ha reclutato.
+static func character_resistance_modifier(gs: GameState, b: Building) -> int:
+	var mod := 0
+	for p in gs.players:
+		for cid in p.specialized_characters:
+			if not CardDB.characters.has(cid): continue
+			for e in CardDB.characters[cid].get("effects", []):
+				if e["hook"] != "on_event" or e["op"] != "resistance": continue
+				if matches(gs, b, e.get("target", {}), null, p.index):
+					mod += int(e["value"])
+	return mod
+
+# ---- op: cost_delta ------------------------------------------------
+# Sconti e rincari su una costruzione o un potenziamento ANCORA DA FARE.
+# Il selettore va valutato su un edificio che non esiste: si costruisce una
+# sonda con i dati della carta e la posizione scelta, e la si passa a matches.
+static func sonda(data: Dictionary, owner: int, col_from: int, level: int) -> Building:
+	var b := Building.new()
+	b.data = data
+	b.owner = owner
+	b.col_from = col_from
+	b.col_to = col_from + int(data.get("width", 1))
+	b.level = level
+	return b
+
+static func cost_delta(gs: GameState, player: int, what: String, probe: Building) -> Vector2i:
+	var d := Vector2i.ZERO
+	for e in _sorgenti_attive(gs, player):
+		var eff: Dictionary = e[0]
+		var src: Building = e[1]
+		var own: int = e[2]
+		if eff["hook"] != "on_build" or eff["op"] != "cost_delta": continue
+		if str(eff.get("what", "building")) != what: continue
+		if not matches(gs, probe, eff.get("target", {}), src, own): continue
+		d += Vector2i(int(eff.get("pietra", 0)), int(eff.get("oro", 0)))
+	return d
+
+# Capienza extra dei potenziamenti (il Vescovo: "capienza dei tuoi Religione +1").
+static func upgrade_slots_bonus(gs: GameState, player: int, host: Building) -> int:
+	var n := 0
+	for e in _sorgenti_attive(gs, player):
+		var eff: Dictionary = e[0]
+		if eff["hook"] != "on_build" or eff["op"] != "upgrade_slots_delta": continue
+		if not matches(gs, host, eff.get("target", {}), e[1], e[2]): continue
+		n += int(eff["value"])
+	return n
+
+# Gli effetti che il giocatore ha attivi ora: i suoi personaggi dell'era, e le
+# carte degli edifici vivi (proprie o altrui: il selettore decide a chi valgono).
+# Ogni voce e' [effetto, edificio sorgente o null, proprietario].
+static func _sorgenti_attive(gs: GameState, player: int) -> Array:
+	var out := []
+	for cid in gs.players[player].specialized_characters:
+		if not CardDB.characters.has(cid): continue
+		for e in CardDB.characters[cid].get("effects", []):
+			out.append([e, null, player])
+	for b in gs.grid.buildings:
+		if not b.is_alive(): continue
+		for card in _carte_di(b):
+			for e in card.get("effects", []):
+				out.append([e, b, b.owner])
+	return out
+
 static func _terrain_name(t: int) -> String:
 	return ["pianura", "fiume", "collina", "bosco"][t]
 
@@ -163,7 +251,7 @@ static func event_resistance_modifier(gs: GameState, b: Building) -> int:
 		if e["hook"] != "on_event" or e["op"] != "resistance": continue
 		if matches(gs, b, e.get("target", {})):
 			mod += int(e["value"])
-	return mod + aura_resistance_modifier(gs, b)
+	return mod + aura_resistance_modifier(gs, b) + character_resistance_modifier(gs, b)
 
 # Aure di edificio: "Quartiere: +1 res ai tuoi edifici adiacenti", Castrum,
 # Arsenale, Mura. La sorgente deve essere viva: un edificio spento non protegge.
@@ -220,6 +308,16 @@ static func _bersagli(gs: GameState, src: Building, e: Dictionary) -> Array[Buil
 const VP_CHANNEL := "effetti_finali"
 
 static func apply_final_scoring(gs: GameState) -> void:
+	for p in gs.players:
+		for cid in p.final_characters:
+			if not CardDB.characters.has(cid): continue
+			for e in CardDB.characters[cid].get("effects", []):
+				if e["hook"] != "on_final_scoring": continue
+				if e["op"] == "scavo_delta": continue
+				if not _condition_met(gs, null, e.get("condition", {}), p.index): continue
+				match str(e["op"]):
+					"vp": _award(gs, p.index, int(e.get("value", 0)), CardDB.characters[cid])
+					"vp_per": _apply_vp_per(gs, null, e, p.index, CardDB.characters[cid])
 	for src in gs.grid.buildings:
 		for card in _carte_di(src):
 			for e in card.get("effects", []):
@@ -227,8 +325,8 @@ static func apply_final_scoring(gs: GameState) -> void:
 				if e["op"] == "scavo_delta": continue      # gia' applicato nel pre-passo
 				if not _condition_met(gs, src, e.get("condition", {})): continue
 				match str(e["op"]):
-					"vp": _award(gs, src.owner, int(e.get("value", 0)), src)
-					"vp_per": _apply_vp_per(gs, src, e)
+					"vp": _award(gs, src.owner, int(e.get("value", 0)), src.data)
+					"vp_per": _apply_vp_per(gs, src, e, src.owner, src.data)
 
 # La carta dell'edificio piu' i potenziamenti che porta: per tutte, la sorgente
 # dei selettori e' l'edificio stesso.
@@ -248,19 +346,30 @@ static func apply_scavo_modifiers(gs: GameState) -> void:
 				if not _condition_met(gs, src, e.get("condition", {})): continue
 				for b in _bersagli(gs, src, e):
 					b.bonus_scavo += int(e["value"])
+	for p in gs.players:
+		for cid in p.final_characters:
+			for e in CardDB.characters.get(cid, {}).get("effects", []):
+				if e["hook"] != "on_final_scoring" or e["op"] != "scavo_delta": continue
+				var hits: Array[Building] = []
+				for b in gs.grid.buildings:
+					if matches(gs, b, e.get("target", {}), null, p.index): hits.append(b)
+				if e.has("times"): hits = hits.slice(0, int(e["times"]))
+				for b in hits: b.bonus_scavo += int(e["value"])
 
-static func _condition_met(gs: GameState, src: Building, cond: Dictionary) -> bool:
+static func _condition_met(gs: GameState, src: Building, cond: Dictionary,
+		owner: int = -1) -> bool:
 	if cond.is_empty(): return true
 	if str(cond["op"]) != "count_matching": return true
 	var n := 0
 	for b in gs.grid.buildings:
-		if matches(gs, b, cond.get("target", {}), src): n += 1
+		if matches(gs, b, cond.get("target", {}), src, owner): n += 1
 	return n >= int(cond["min"])
 
-static func _apply_vp_per(gs: GameState, src: Building, e: Dictionary) -> void:
+static func _apply_vp_per(gs: GameState, src: Building, e: Dictionary,
+		owner: int, carta: Dictionary) -> void:
 	var hits: Array[Building] = []
 	for b in gs.grid.buildings:
-		if matches(gs, b, e.get("target", {}), src): hits.append(b)
+		if matches(gs, b, e.get("target", {}), src, owner): hits.append(b)
 	# `times` limita QUANTI bersagli si contano ("fino a 2 tuoi edifici").
 	# `cap` limita i PUNTI totali ("max +4"). Sono due cose diverse.
 	if e.has("times"): hits = hits.slice(0, int(e["times"]))
@@ -268,7 +377,7 @@ static func _apply_vp_per(gs: GameState, src: Building, e: Dictionary) -> void:
 	# A chi vanno i punti: di norma al proprietario della carta; col malus del
 	# Grattacielo vanno invece a ciascun proprietario colpito.
 	if str(e.get("to", "self")) == "target_owner":
-		for b in hits: _award(gs, b.owner, int(e.get("value", 0)), src)
+		for b in hits: _award(gs, b.owner, int(e.get("value", 0)), carta)
 		return
 
 	var pts := 0
@@ -278,11 +387,11 @@ static func _apply_vp_per(gs: GameState, src: Building, e: Dictionary) -> void:
 			pts += b.level if field == "level" else int(b.data["scavo"])
 	else:
 		var v := int(e.get("value", 0))
-		pts = v * _conta(gs, src, hits, str(e.get("per", "building")))
+		pts = v * _conta(gs, owner, hits, str(e.get("per", "building")))
 	if e.has("cap"): pts = min(pts, int(e["cap"]))
-	_award(gs, src.owner, pts, src)
+	_award(gs, owner, pts, carta)
 
-static func _conta(gs: GameState, src: Building, hits: Array[Building], per: String) -> int:
+static func _conta(gs: GameState, owner: int, hits: Array[Building], per: String) -> int:
 	match per:
 		"distinct_class":
 			var cls := {}
@@ -298,13 +407,13 @@ static func _conta(gs: GameState, src: Building, hits: Array[Building], per: Str
 			for b in hits: n2 += b.upgrades.size()
 			return n2
 		"recruited_character":
-			return gs.players[src.owner].recruited_total
+			return gs.players[owner].recruited_total
 	return hits.size()
 
-static func _award(gs: GameState, player: int, pts: int, src: Building) -> void:
+static func _award(gs: GameState, player: int, pts: int, carta: Dictionary) -> void:
 	if pts == 0: return
 	gs.players[player].add_vp(VP_CHANNEL, pts)
-	gs.log_line("%s: %+d PV a giocatore %d" % [src.data["name"], pts, player])
+	gs.log_line("%s: %+d PV a giocatore %d" % [carta["name"], pts, player])
 
 # ---- op: resource (applica) ----------------------------------------
 # Unico effetto che modifica lo stato: lo fa il chiamante in rules/, non qui.
