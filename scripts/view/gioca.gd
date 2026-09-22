@@ -339,8 +339,9 @@ func _bersaglio_sotto(pixel: Vector2) -> AvailableActions.Voce:
 	for v in _bersagli:
 		if not v.parametri.has("col_from"): continue
 		var d: Dictionary = CardDB.buildings[str(v.parametri["card_id"])]
-		riquadri.append(BoardLayout3D.box_piazzamento(int(v.parametri["col_from"]),
-			int(d["width"]), int(v.parametri.get("level", 0)), ctl.gs.era))
+		riquadri.append(BoardLayout3D.box_piazzamento(ctl.gs,
+			int(v.parametri["col_from"]), int(d["width"]),
+			int(v.parametri.get("level", 0)), ctl.gs.era))
 		voci.append(v)
 	var i := BoardLayout3D.riquadro_al_raggio(riquadri, _origine(pixel), _direzione(pixel))
 	return voci[i] if i >= 0 else null

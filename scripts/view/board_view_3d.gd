@@ -135,7 +135,7 @@ func _acceso_carta(c: Dictionary) -> bool:
 # dell'era in corso, e un alone attorno agli edifici che possono riceverla.
 func _posti_liberi() -> void:
 	for pz in evidenze.get("slot", []):
-		var box: AABB = BoardLayout3D.box_piazzamento(int(pz["col_from"]),
+		var box: AABB = BoardLayout3D.box_piazzamento(gs, int(pz["col_from"]),
 			int(pz["width"]), int(pz.get("level", 0)), gs.era)
 		# Verde a terra, ambra in alto: due quote e due colori, cosi' si
 		# capisce a colpo d'occhio che sono due cose diverse.

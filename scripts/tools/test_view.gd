@@ -37,6 +37,8 @@ func _ready() -> void:
 	_run("i bersagli: dove si puo' mettere una carta", _test_bersagli)
 	_run("  e il riquadro acceso e' quello che si clicca", _test_riquadri)
 	_run("  e la barra dice che mossa sarebbe, e quanto costa", _test_descrizione)
+	_run("chi sta sopra poggia su chi sta sotto", _test_pila)
+	_run("le carte del giocatore non si coprono", _test_carte_giocatore)
 	print("\n%d superati, %d falliti" % [_passed, _failed])
 	get_tree().quit(0 if _failed == 0 else 1)
 
@@ -991,8 +993,8 @@ func _test_riquadri() -> void:
 		var riquadri: Array = []
 		for v in voci:
 			var w := int(CardDB.buildings[card_id]["width"])
-			riquadri.append(BoardLayout3D.box_piazzamento(int(v.parametri["col_from"]),
-				w, int(v.parametri["level"]), gs.era))
+			riquadri.append(BoardLayout3D.box_piazzamento(gs,
+				int(v.parametri["col_from"]), w, int(v.parametri["level"]), gs.era))
 		for i in voci.size():
 			var b: AABB = riquadri[i]
 			var centro := b.position + Vector3(b.size.x / 2.0, 0.0, b.size.z / 2.0)
@@ -1104,6 +1106,109 @@ func _test_descrizione() -> void:
 		"level": 0, "spiana": PackedStringArray(), "terrapieni": 0, "attiva": 4}
 	_ok("e se il lavoratore non c'e' ancora, dice quale colonna attiva",
 		DescrizioneAzione.riga(gs, v2, 0).contains("attiva la colonna 4"))
+
+# LE SAGOME SOPRAELEVATE GALLEGGIAVANO IN ARIA. Un edificio sopra finiva
+# sempre in mezzo alla fascia del disegno, mentre le sue fondamenta restavano
+# al binario della loro era - per l'era 1 sono 57 mm piu' avanti - e a
+# schermo stava per conto suo, a fianco della pila che avrebbe dovuto
+# reggerlo. Nessun test se ne accorgeva perche' nessuno confrontava la
+# posizione di chi sta sopra con quella di chi sta sotto.
+func _test_pila() -> void:
+	var gs := _gioco().gs
+	# la pila piu' semplice: una base dell'era 1, un edificio sopra
+	var sotto := _metti(gs, "ed_capanne", 2, 1, 0, 0)
+	sotto.state = Enums.BuildingState.ROVINA
+	var sopra := _metti(gs, "ed_capanne", 2, 3, 1, 0)
+	_approx("chi sta sopra prende la profondita' della sua base",
+		BoardLayout3D.standee_base(gs, sopra).z,
+		BoardLayout3D.standee_base(gs, sotto).z)
+	var giu := BoardLayout3D.basetta_box(gs, sotto)
+	var su := BoardLayout3D.basetta_box(gs, sopra)
+	_approx("  e la sua basetta poggia sul tetto di quella sotto",
+		su.position.y, giu.end.y)
+	_ok("  con i due piedi uno sopra l'altro, non uno a fianco all'altro",
+		su.position.z < giu.end.z and giu.position.z < su.end.z)
+
+	# E il riquadro acceso deve stare dove finira' la sagoma: se i due conti
+	# divergono, il giocatore accende un posto e l'edificio compare altrove.
+	var riq := BoardLayout3D.box_piazzamento(gs, 2, 1, 1, gs.era)
+	var centro := riq.position.z + riq.size.z / 2.0
+	_approx("il riquadro acceso e' dove la sagoma andra' a finire",
+		centro, BoardLayout3D.standee_base(gs, sopra).z)
+
+	# In una partita vera nessun sopraelevato deve restare senza appoggio.
+	var ctl := _gioco()
+	var giri := 0
+	while ctl.gs.phase != Enums.Phase.FINE_PARTITA and giri < 4000:
+		RandomBot.play_turn(ctl)
+		giri += 1
+	var g2 := ctl.gs
+	var quanti := 0
+	var appesi := 0
+	for b in g2.grid.buildings:
+		if b.level == 0: continue
+		quanti += 1
+		var mio := BoardLayout3D.basetta_box(g2, b)
+		var appoggiato := false
+		for s2 in g2.grid.buildings:
+			if s2.level != b.level - 1: continue
+			if s2.col_to <= b.col_from or s2.col_from >= b.col_to: continue
+			var suo := BoardLayout3D.basetta_box(g2, s2)
+			# si tocca in profondita' e si tocca di lato: e' appoggiato
+			if mio.position.z < suo.end.z and suo.position.z < mio.end.z \
+				and mio.position.x < suo.end.x and suo.position.x < mio.end.x:
+				appoggiato = true
+				break
+		if not appoggiato: appesi += 1
+	_ok("la partita ha prodotto pile (%d sopraelevati)" % quanti, quanti > 0)
+	_eq("  e nessuno di loro galleggia in aria", appesi, 0)
+
+# LE CARTE COMPRATE SI COPRIVANO A VICENDA. Il passo si stringeva per tenerle
+# tutte su una riga: con tre carte larghe 125 mm in una fetta da 147 scendeva
+# a 12 mm, e di ogni carta si vedeva una striscia. Adesso si va a capo.
+func _test_carte_giocatore() -> void:
+	var gs := _gioco().gs
+	# un giocatore carico: obiettivo, dinastia, monumenti e personaggi
+	var p: PlayerState = gs.players[0]
+	p.has_dynasty = true
+	for id in CardDB.monuments:
+		p.monuments_claimed.append(str(id))
+		if p.monuments_claimed.size() >= 2: break
+	for id in gs.char_row: p.specialized_characters.append(str(id))
+	var carte := BoardLayout3D.player_cards(gs, 0)
+	_ok("il giocatore ha parecchie carte davanti (%d)" % carte.size(),
+		carte.size() >= 5)
+
+	var coperte := 0
+	for i in carte.size():
+		for j in range(i + 1, carte.size()):
+			var a: AABB = carte[i]["aabb"]
+			var b: AABB = carte[j]["aabb"]
+			if a.position.x < b.end.x - 0.001 and b.position.x < a.end.x - 0.001 \
+				and a.position.z < b.end.z - 0.001 and b.position.z < a.end.z - 0.001:
+				coperte += 1
+	_eq("nessuna carta ne copre un'altra", coperte, 0)
+
+	# E nessuna finisce addosso al vicino: ognuno sta nella sua fetta.
+	var fetta := BoardLayout3D.board_w(gs) / float(gs.n_players)
+	var sconfinate := 0
+	for c in carte:
+		var b2: AABB = c["aabb"]
+		var mio: int = int(c["player"])
+		if b2.position.x < mio * fetta - 0.001: sconfinate += 1
+		if b2.end.x > (mio + 1) * fetta + 0.001: sconfinate += 1
+	_eq("  e nessuna sborda nel posto del vicino", sconfinate, 0)
+
+	# Le carte restano cliccabili: ognuna deve rispondere al raggio, e deve
+	# rispondere PROPRIO LEI. Era questo che il mucchio rendeva impossibile.
+	var sbagliate := 0
+	for c in carte:
+		var b3: AABB = c["aabb"]
+		var centro := b3.position + Vector3(b3.size.x / 2.0, 0.0, b3.size.z / 2.0)
+		var colpita := BoardLayout3D.card_at_ray(gs,
+			centro + Vector3(0, 500, 0), Vector3(0, -1, 0), 0)
+		if colpita.is_empty() or str(colpita["id"]) != str(c["id"]): sbagliate += 1
+	_eq("  e cliccandone una si prende proprio quella", sbagliate, 0)
 
 # LA SCENA GIOCABILE NON LA COMPILAVA NESSUN TEST. Un errore di sintassi in
 # gioca.gd passava tutta la suite - i test caricano i moduli puri, non la
