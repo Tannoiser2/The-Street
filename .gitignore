@@ -11,3 +11,6 @@ assets/
 
 # Cache di Python dei tool.
 __pycache__/
+
+# Export web: artefatto di build, si rigenera con tools/esporta_web.sh
+build/

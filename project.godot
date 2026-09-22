@@ -4,6 +4,7 @@ config_version=5
 [application]
 config/name="La Strada delle Ere"
 config/features=PackedStringArray("4.7")
+run/main_scene="res://scenes/gioca.tscn"
 
 [autoload]
 CardDB="*res://scripts/data/card_db.gd"
