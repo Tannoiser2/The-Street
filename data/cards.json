@@ -3045,10 +3045,11 @@
           "op": "rule_override",
           "name": "counts_as_class",
           "target": {
-            "class": [
-              "militare"
-            ]
-          }
+            "is_self": true
+          },
+          "adds_class": [
+            "militare"
+          ]
         }
       ]
     },

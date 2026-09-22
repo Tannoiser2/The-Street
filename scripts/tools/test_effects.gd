@@ -24,6 +24,7 @@ func _ready() -> void:
 	_run("Monumenti ed Eredita'", _test_objectives)
 	_run("Sacerdotessa e Mastro costruttore", _test_on_build)
 	_run("Colossali", _test_colossal)
+	_run("counts_as_class", _test_counts_as_class)
 	_run("lo schema e' davvero chiuso", _test_schema_closed)
 	print("\n%d superati, %d falliti" % [_passed, _failed])
 	get_tree().quit(0 if _failed == 0 else 1)
@@ -1358,3 +1359,79 @@ func _test_colossal() -> void:
 		_put(c2, _card_of_class("civico"), c, 1)
 	c2.grid.refresh_buried()
 	_ok("   coperto per intero: e' sotterrato", big3.is_buried)
+
+
+# ---- counts_as_class --------------------------------------------------
+# "L'edificio conta anche come Militare" tocca quattro posti diversi: gli
+# eventi che colpiscono una classe, la continuita' di luogo, il requisito del
+# reclutamento e i selettori di classe. Vanno verificati tutti.
+func _test_counts_as_class() -> void:
+	var civ := _card_of_class("civico")
+	_ok("l'edificio di prova non e' gia' Militare",
+		not "militare" in CardDB.buildings[civ]["classes"])
+
+	# la classe effettiva
+	var a := _scena()
+	var h := _put(a, civ, 2)
+	_ok("prima: non e' Militare", not "militare" in h.classes())
+	_posa(a, "po_merlatura", h)
+	_ok("dopo la Merlatura: conta anche come Militare", "militare" in h.classes())
+	_ok("  e conserva la classe stampata", "civico" in h.classes())
+
+	# la carta condivisa non dev'essere stata modificata
+	var b := _scena()
+	var pulito := _put(b, civ, 1)
+	_ok("un altro edificio della stessa carta resta non Militare",
+		not "militare" in pulito.classes())
+
+	# 1. eventi che colpiscono una classe
+	var c := _scena()
+	_set_event(c, "ev_pax_imperiale")          # Ingegneria +1 · Militare -1
+	var h2 := _put(c, civ, 2)
+	_eq("1. prima della Merlatura l'evento sui Militari non lo tocca",
+		Effects.event_resistance_modifier(c, h2), 0)
+	_posa(c, "po_merlatura", h2)
+	_eq("   dopo, lo colpisce come un Militare",
+		Effects.event_resistance_modifier(c, h2), -1)
+
+	# 2. continuita' di luogo
+	var d := _scena()
+	var mil := _card_of_class("militare")
+	_put(d, mil, 3)
+	var h3 := _put(d, civ, 3)
+	Scoring.final_scoring(d)
+	var senza: int = int(d.players[0].vp_breakdown.get("continuita", 0))
+	var d2 := _scena()
+	_put(d2, mil, 3)
+	var h4 := _put(d2, civ, 3)
+	_posa(d2, "po_merlatura", h4)
+	Scoring.final_scoring(d2)
+	var con: int = int(d2.players[0].vp_breakdown.get("continuita", 0))
+	_ok("2. la Merlatura crea continuita' Militare in colonna", con > senza,
+		"senza %d, con %d" % [senza, con])
+
+	# 3. requisito del reclutamento
+	var e2 := _scena()
+	var cid := ""
+	for id in CardDB.characters:
+		var ch: Dictionary = CardDB.characters[id]
+		if ch["class"] == "militare" and not ch.get("is_dynasty", false): cid = id; break
+	_ok("trovato un personaggio Militare", cid != "")
+	var h5 := _put(e2, civ, 2)
+	_ok("3. senza Merlatura il personaggio Militare e' rifiutato",
+		not ActionRules.quote_recruit(e2, 0, cid, 2).legal)
+	e2.char_row = [cid]
+	_ok("   (con la carta nella fila, resta rifiutato per la classe)",
+		not ActionRules.quote_recruit(e2, 0, cid, 2).legal)
+	_posa(e2, "po_merlatura", h5)
+	_ok("   dopo la Merlatura e' accettato",
+		ActionRules.quote_recruit(e2, 0, cid, 2).legal)
+
+	# 4. continuita' di classe alla costruzione sopra un rudere
+	var f := _scena()
+	var rudere := _put(f, civ, 2, 0, Enums.BuildingState.RUDERE)
+	var carta_mil: Dictionary = CardDB.buildings[mil]
+	_ok("4. il rudere Civico non da' continuita' a una carta Militare",
+		not rudere.shares_class_with(carta_mil))
+	rudere.extra_classes.append("militare")
+	_ok("   con la classe acquisita, gliela da'", rudere.shares_class_with(carta_mil))

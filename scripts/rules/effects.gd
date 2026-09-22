@@ -47,7 +47,7 @@ const APPLIED: Array[String] = [
 	"potenziamento:on_final_scoring:scavo_delta",
 ]
 const APPLIED_OVERRIDES: Array[String] = ["first_terrapieno_free", "free_restore_of_class",
-	"ignore_terrain_requirement"]
+	"ignore_terrain_requirement", "counts_as_class"]
 
 # Override che NON richiedono codice: descrivono un comportamento che il modello
 # generico gia' fornisce. Tenerli distinti dagli APPLIED_OVERRIDES e' deliberato:
@@ -453,6 +453,12 @@ static func apply_on_acquire(gs: GameState, player: int, card: Dictionary,
 			"scavo_delta":
 				for b in _bersagli(gs, host, e):
 					b.bonus_scavo += int(e["value"])
+			"rule_override":
+				if str(e.get("name", "")) == "counts_as_class":
+					for b in _bersagli(gs, host, e):
+						for cl in e.get("adds_class", []):
+							if not cl in b.extra_classes: b.extra_classes.append(str(cl))
+						gs.log_line("%s: %s conta anche come %s" % [card["name"], b.data["name"], ", ".join(e.get("adds_class", []))])
 			"protection_delta":
 				# "la sua protezione vale +3 invece di +2", "l'edificio protetto
 				# da questo lavoratore ha +1 res": vanno all'edificio abitato.

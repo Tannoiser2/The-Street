@@ -57,7 +57,9 @@ func _snapshot(gs: GameState, seed_v: int, players: int, before: Dictionary) -> 
 			"state": ["intatto", "rudere", "rovina"][b.state],
 			"buried": b.is_buried,
 			"razed": b.was_razed,
-			"classes": b.data["classes"],
+			# classi EFFETTIVE: la continuita' che l'oracolo ricalcola deve
+			# vedere anche quelle acquisite (po_merlatura).
+			"classes": b.classes(),
 			"rendita": int(b.data["rendita"]),
 			"lampo": int(b.data["lampo"]),
 			# Scavo effettivo, bonus da Impronte e potenziamenti inclusi, ma

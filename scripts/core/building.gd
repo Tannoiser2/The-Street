@@ -19,6 +19,7 @@ var vetusta: int = 0          # cubetti bianchi: +1 per evento superato
 var protection: int = 0       # +2 per lavoratore piazzato; si azzera a fine era
 var protected_by: int = -1    # giocatore il cui lavoratore lo abita; -1 = nessuno
 var upgrades: Array = []      # id dei potenziamenti infilati sotto
+var extra_classes: Array[String] = []  # classi acquisite (po_merlatura: "conta anche come Militare")
 var imprint: String = ""      # Impronta infilata sotto: "un edificio puo' portarne una sola"
 var buried_character: String = ""   # personaggio sepolto qui (meccanica Scheletri)
 var buried_character_era: int = 0
@@ -36,11 +37,18 @@ func is_standing() -> bool:
 func is_alive() -> bool:
 	return not is_buried and state == Enums.BuildingState.INTATTO
 
+# Le classi effettive: quelle stampate piu' quelle acquisite. Restituisce una
+# copia quando ce ne sono di acquisite, per non esporre l'array della carta -
+# che e' condiviso da tutte le istanze di quell'edificio.
 func classes() -> Array:
-	return data["classes"]
+	if extra_classes.is_empty(): return data["classes"]
+	var out: Array = (data["classes"] as Array).duplicate()
+	for c in extra_classes:
+		if not c in out: out.append(c)
+	return out
 
 func shares_class_with(other_data: Dictionary) -> bool:
-	for c in data["classes"]:
+	for c in classes():
 		if c in other_data["classes"]: return true
 	return false
 

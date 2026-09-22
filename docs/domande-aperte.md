@@ -463,3 +463,27 @@ dato è stato importato da lì. Ma due confronti fra ciò che è stampato e
     Per non dire il falso, `colossal` non è fra gli override «applicati» ma in
     una terza categoria, `DESCRIPTIVE_OVERRIDES`: marcarlo applicato farebbe
     credere che una riga lo legga.
+
+37. **`counts_as_class`: la classe acquisita è un campo a sé, non un bersaglio.**
+    La Merlatura (`po_merlatura`) dice «Struttura: +1 res. L'edificio conta anche
+    come Militare». Modellare la classe aggiunta dentro `target` sarebbe stato un
+    abuso: `target` è un **selettore**, dice *quali* edifici l'effetto tocca, non
+    *cosa* acquisiscono. Ho quindi aggiunto al formato un campo distinto,
+    `adds_class`, e il bersaglio resta il selettore normale (`is_self`).
+
+    La classe acquisita conta in quattro posti, e li ho verificati tutti e
+    quattro: gli eventi che colpiscono una classe, la continuità, il
+    reclutamento di un personaggio che richiede una classe, e il bonus di
+    continuità in costruzione.
+
+    Un dettaglio che poteva diventare un bug silenzioso: `Building.data` è la
+    **carta condivisa** fra tutte le copie di quell'edificio, quindi
+    `classes()` restituisce una *copia* dell'array quando ci sono classi
+    acquisite. Se mutasse l'array della carta, un secondo edificio della stessa
+    carta erediterebbe la Merlatura di un altro giocatore. C'è un test apposta.
+
+    Conseguenza sull'esportazione: `export_states.gd` esporta ora `b.classes()`
+    e non più `b.data["classes"]`, perché l'oracolo ricalcola la continuità dalle
+    classi esportate e deve vedere la stessa realtà del motore. Il canale
+    continuità resta esatto (1920 contro 1920 su 180 partite) e nelle partite
+    reali l'effetto scatta davvero: 25 volte in 100 partite a 3 giocatori.

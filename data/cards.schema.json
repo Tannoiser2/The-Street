@@ -292,6 +292,14 @@
             "other_activates"
           ],
           "description": "Solo per hook=on_activate: chi deve attivare perche' l'effetto scatti. Default self_activates."
+        },
+        "adds_class": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/cls"
+          },
+          "description": "Solo per rule_override=counts_as_class: le classi che l'edificio bersaglio acquisisce."
         }
       }
     },

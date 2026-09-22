@@ -480,7 +480,7 @@ func _test_disperse() -> void:
 	_eq("era 5: le risorse restano intatte", p5.total_resources(), prima)
 
 	# e lo spareggio le usa davvero
-	var ctl6 := _game()
+	var ctl6 := _game(3)
 	var gs6 := ctl6.gs
 	for p in gs6.players:
 		p.vp = 10
