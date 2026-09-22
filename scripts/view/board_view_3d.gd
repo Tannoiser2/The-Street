@@ -22,6 +22,8 @@ var _cam: Camera3D = null
 # Cosa accendere: la carta scelta, i posti dove si puo' metterla, gli edifici
 # che possono riceverla. E' l'interfaccia che lo decide; qui si disegna.
 var evidenze: Dictionary = {}
+# Chi sta guardando: il suo obiettivo segreto si vede, quello degli altri no.
+var umano := -1
 
 func mostra(stato: GameState, colonna_evidenziata := -1, acceso := {}) -> void:
 	gs = stato
@@ -133,14 +135,12 @@ func _acceso_carta(c: Dictionary) -> bool:
 # dell'era in corso, e un alone attorno agli edifici che possono riceverla.
 func _posti_liberi() -> void:
 	for pz in evidenze.get("slot", []):
-		var c0 := int(pz["col_from"])
-		var w := int(pz["width"])
-		var box := BoardLayout3D.tile_box(c0, gs.era)
-		box.size.x = w * BoardLayout3D.TESSERA_W
-		box.position.z = BoardLayout3D.rail_z(gs.era)
-		box.size.z = BoardLayout3D.SLOT_D
+		var box: AABB = BoardLayout3D.box_piazzamento(int(pz["col_from"]),
+			int(pz["width"]), int(pz.get("level", 0)), gs.era)
+		# Verde a terra, ambra in alto: due quote e due colori, cosi' si
+		# capisce a colpo d'occhio che sono due cose diverse.
 		var col := Color(0.42, 1.0, 0.52)
-		if bool(pz.get("above", false)): col = Color(1.0, 0.76, 0.26)
+		if int(pz.get("level", 0)) > 0: col = Color(1.0, 0.76, 0.26)
 		_cornice(box, col)
 	for uid in evidenze.get("uid", []):
 		for b in gs.grid.buildings:
@@ -244,19 +244,35 @@ func _sagoma(b: Building) -> void:
 	# non e' versionata - si ripiega sul rettangolo colorato, cosi' i test e
 	# le partite headless non dipendono dalla grafica.
 	var tex: Texture2D = _illustrazione(b)
-	var m: MeshInstance3D
-	if tex != null:
-		m = _quad(dim, Color.WHITE)
+	var centro := base + Vector3(0.0, dim.y / 2.0 + BoardLayout3D.BASETTA_Y, 0.0)
+	if tex == null:
+		var m := _scatola(Vector3(dim.x, dim.y, BoardLayout3D.SAGOMA_SPESSORE_VISTA), col)
+		m.position = centro
+		add_child(m)
+		return
+	# Il cartone ha uno spessore, e un piano solo non ce l'ha: appena si gira
+	# il tabellone la sagoma spariva di taglio come un adesivo. Si impilano
+	# quindi alcune copie del disegno lungo lo spessore - le interne piu'
+	# scure, come il cuore del cartoncino - e da qualunque angolo si vede un
+	# pezzo pieno.
+	var strati := 4
+	var passo := BoardLayout3D.SAGOMA_SPESSORE_VISTA / float(strati - 1)
+	for i in strati:
+		var m := _quad(dim, Color.WHITE)
 		var mat := m.material_override as StandardMaterial3D
 		mat.albedo_texture = tex
 		mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA_SCISSOR
 		mat.alpha_scissor_threshold = 0.5
 		mat.texture_filter = BaseMaterial3D.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
-		if b.is_buried: mat.albedo_color = Color(0.62, 0.62, 0.66)
-	else:
-		m = _scatola(Vector3(dim.x, dim.y, BoardLayout3D.SAGOMA_SPESSORE), col)
-	m.position = base + Vector3(0.0, dim.y / 2.0 + BoardLayout3D.BASETTA_Y, 0.0)
-	add_child(m)
+		mat.cull_mode = BaseMaterial3D.CULL_DISABLED
+		# Solo la faccia davanti porta il colore pieno: le altre fanno da
+		# taglio e vanno in ombra, altrimenti lo spessore sembra vetro.
+		var buio := 1.0 if i == strati - 1 else 0.45
+		mat.albedo_color = Color(buio, buio, buio)
+		if b.is_buried: mat.albedo_color *= Color(0.62, 0.62, 0.66)
+		m.position = centro + Vector3(0.0, 0.0,
+			-BoardLayout3D.SAGOMA_SPESSORE_VISTA / 2.0 + i * passo)
+		add_child(m)
 	# Niente nome sopra la sagoma. Le scritte che galleggiano sul tavolo
 	# coprivano proprio quello che dovevano far vedere: adesso il nome esce
 	# quando ci passi sopra col mouse, e solo quello puntato.
@@ -317,7 +333,7 @@ const CARTA_SFONDO := Color("#3a3f4b")
 const PLANCIA_SFONDO := Color("#2d323c")
 
 func _file_laterali() -> void:
-	for c in BoardLayout3D.side_cards(gs):
+	for c in BoardLayout3D.side_cards(gs, umano):
 		var r: AABB = c["aabb"]
 		var percorso := BoardLayout3D.carta_path(str(c["kind"]), str(c["id"]))
 		var sfondo := CARTA_SFONDO

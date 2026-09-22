@@ -47,6 +47,7 @@ func _ready() -> void:
 	ctl = GameController.new()
 	ctl.new_game(3, 7)
 	vista = preload("res://scripts/view/board_view_3d.gd").new()
+	vista.umano = UMANO
 	add_child(vista)
 	vista.scale = Vector3.ONE * BoardLayout3D.U
 	var strato := CanvasLayer.new()
@@ -80,7 +81,7 @@ func _acceso() -> Dictionary:
 		if v.parametri.has("col_from"):
 			var d: Dictionary = CardDB.buildings[str(v.parametri["card_id"])]
 			slot.append({"col_from": int(v.parametri["col_from"]),
-				"width": int(d["width"]), "above": bool(v.parametri.get("above", false))})
+				"width": int(d["width"]), "level": int(v.parametri.get("level", 0))})
 		elif v.parametri.has("uid"):
 			uid.append(int(v.parametri["uid"]))
 	return {"carta": _scelta, "slot": slot, "uid": uid}
@@ -171,7 +172,7 @@ func _colonna_puntata(pixel: Vector2) -> int:
 
 func _carta_puntata(pixel: Vector2) -> Dictionary:
 	if get_viewport().get_camera_3d() == null: return {}
-	return BoardLayout3D.card_at_ray(ctl.gs, _origine(pixel), _direzione(pixel))
+	return BoardLayout3D.card_at_ray(ctl.gs, _origine(pixel), _direzione(pixel), UMANO)
 
 func _edificio_puntato(pixel: Vector2) -> Building:
 	if get_viewport().get_camera_3d() == null: return null
@@ -233,6 +234,14 @@ func _descrivi_sotto(pixel: Vector2) -> PackedStringArray:
 				out.append(str(mo.get("effect_text", "")))
 		"dinastia":
 			out.append("Dinastia")
+		"eredita":
+			if CardDB.legacies.has(id):
+				var er: Dictionary = CardDB.legacies[id]
+				out.append("%s (il tuo obiettivo segreto)" % er["name"])
+				out.append(str(er.get("effect_text", "")))
+		"eredita_coperta":
+			out.append("Obiettivo segreto")
+			out.append("coperto: lo vede solo il suo giocatore")
 	return out
 
 # ---- il clic ---------------------------------------------------------
@@ -261,36 +270,46 @@ func _clic(pixel: Vector2) -> void:
 				_esegui(b["voce"])
 			return
 
-	if gs.phase == Enums.Phase.PIAZZA:
-		_piazza_lavoratore(pixel)
-		return
-
-	# Col bersaglio gia' acceso, il clic sul posto acceso esegue.
+	# Col bersaglio gia' acceso, il clic sul posto acceso esegue - e se il
+	# lavoratore non e' ancora piazzato lo piazza lui, nella colonna giusta.
 	if not _scelta.is_empty() and _prova_bersaglio(pixel): return
 
-	# Altrimenti il clic sceglie una carta.
+	# Poi la scelta di una carta. Viene PRIMA del piazzamento: la carta si
+	# sceglie senza aver ancora messo il lavoratore, ed e' il punto di tutto
+	# il giro - prima si decide cosa, poi dove.
 	var c := _carta_puntata(pixel)
 	if not c.is_empty():
 		_seleziona(c)
 		return
+
+	# Senza carta scelta, il clic su una colonna mette il lavoratore e basta:
+	# si attiva la colonna per la produzione anche senza fare azioni.
+	if gs.phase == Enums.Phase.PIAZZA:
+		_piazza_lavoratore(pixel)
+		return
 	_deseleziona()
+
+# "Sopra un vostro edificio ancora in piedi": abitare da' +2 resistenza.
+func _da_abitare(col: int) -> Building:
+	for b in ctl.gs.grid.in_column(col):
+		if b.owner == UMANO and b.is_standing(): return b
+	return null
 
 func _piazza_lavoratore(pixel: Vector2) -> void:
 	var col := _colonna_puntata(pixel)
 	if col < 0: return
-	# "Sopra un vostro edificio ancora in piedi": abitare da' +2 resistenza.
-	var abita: Building = null
-	for b in ctl.gs.grid.in_column(col):
-		if b.owner == UMANO and b.is_standing():
-			abita = b
-			break
-	if ctl.place_worker(col, abita):
+	if ctl.place_worker(col, _da_abitare(col)):
 		_messaggio = "Colonna %d attivata." % col
 	else:
 		_messaggio = "Non puoi piazzare un lavoratore nella colonna %d." % col
 	_aggiorna()
 
 # Il clic e' caduto su un bersaglio acceso? Allora l'azione si fa.
+# I riquadri accesi SONO i riquadri cliccabili: si prova il raggio contro gli
+# stessi rettangoli che la vista disegna, invece di risalire alla colonna dal
+# piano del tavolo. Cosi' un posto in alto - costruire sopra una rovina,
+# spianare un proprio edificio - si clicca dove lo si vede, e non serve piu'
+# nessun tasto da tenere premuto.
 func _prova_bersaglio(pixel: Vector2) -> bool:
 	var b := _edificio_puntato(pixel)
 	if b != null:
@@ -298,25 +317,63 @@ func _prova_bersaglio(pixel: Vector2) -> bool:
 			if int(v.parametri.get("uid", -1)) == b.uid:
 				_esegui(v)
 				return true
-	var slot := BoardLayout3D.slot_at_ray(ctl.gs, _origine(pixel), _direzione(pixel))
-	if slot.is_empty(): return false
-	var col := int(slot["col"])
-	# Fra i piazzamenti che coprono questa colonna vince il piu' economico, e
-	# a parita' quello a terra: sopra si costruisce apposta, non per sbaglio,
-	# e per farlo si tiene premuto Maiusc.
-	var sopra := Input.is_key_pressed(KEY_SHIFT)
-	var migliore = null
+	var riquadri: Array = []
+	var voci: Array = []
 	for v in _bersagli:
 		if not v.parametri.has("col_from"): continue
-		var c0 := int(v.parametri["col_from"])
-		var w := int(CardDB.buildings[str(v.parametri["card_id"])]["width"])
-		if col < c0 or col >= c0 + w: continue
-		if bool(v.parametri.get("above", false)) != sopra: continue
-		if migliore == null or v.pietra + v.oro < migliore.pietra + migliore.oro:
-			migliore = v
-	if migliore == null: return false
-	_esegui(migliore)
+		var d: Dictionary = CardDB.buildings[str(v.parametri["card_id"])]
+		riquadri.append(BoardLayout3D.box_piazzamento(int(v.parametri["col_from"]),
+			int(d["width"]), int(v.parametri.get("level", 0)), ctl.gs.era))
+		voci.append(v)
+	var i := BoardLayout3D.riquadro_al_raggio(riquadri, _origine(pixel), _direzione(pixel))
+	if i < 0: return false
+	_esegui(voci[i])
 	return true
+
+# Le colonne dove il lavoratore puo' ancora andare. Sono quelle che aprono
+# un'azione: se la carta si sceglie PRIMA di piazzare, i posti da accendere
+# sono quelli raggiungibili da una qualsiasi di queste.
+func _colonne_possibili() -> Array[int]:
+	var out: Array[int] = []
+	var p: PlayerState = ctl.gs.players[UMANO]
+	if p.workers_used >= p.workers: return out
+	for c in ctl.gs.grid.n_cols:
+		if c in p.worker_cols: continue     # "un solo vostro lavoratore per colonna"
+		out.append(c)
+	return out
+
+func _voci_per(kind: String, id: String, col: int) -> Array:
+	match kind:
+		"mercato": return AvailableActions.piazzamenti(ctl.gs, UMANO, col, id)
+		"potenziamento": return AvailableActions.bersagli_potenziamento(ctl.gs, UMANO, col, id)
+		"personaggio": return AvailableActions.bersagli_reclutamento(ctl.gs, UMANO, col, id)
+	return []
+
+# I bersagli di una carta. Se il lavoratore e' gia' piazzato valgono solo
+# quelli della colonna attivata; se non lo e' ancora si guardano TUTTE le
+# colonne dove potrebbe andare, e ogni bersaglio si porta dietro la colonna
+# da attivare per raggiungerlo.
+#
+# Si puo' fare perche' AvailableActions e' pura e prende la colonna come
+# parametro: si interroga per una colonna ipotetica senza attivarla davvero.
+# E la legalita' non dipende dalle risorse - quelle contano nel `pagabile` -
+# quindi chiedere prima o dopo l'attivazione da' la stessa risposta.
+func _bersagli_di(kind: String, id: String) -> Array:
+	if ctl.gs.phase != Enums.Phase.PIAZZA:
+		return _voci_per(kind, id, ctl.colonna_attivata())
+	var out: Array = []
+	var visti := {}
+	for c in _colonne_possibili():
+		for v in _voci_per(kind, id, c):
+			# La stessa posizione si raggiunge da piu' colonne: si tiene la
+			# prima, e la colonna da attivare viaggia con lei.
+			var chiave: String = "%s|%s|%s" % [v.parametri.get("col_from", -1),
+				v.parametri.get("level", 0), v.parametri.get("uid", -1)]
+			if visti.has(chiave): continue
+			visti[chiave] = true
+			v.parametri["attiva"] = c
+			out.append(v)
+	return out
 
 func _seleziona(c: Dictionary) -> void:
 	var kind := str(c["kind"])
@@ -324,15 +381,10 @@ func _seleziona(c: Dictionary) -> void:
 	if str(_scelta.get("kind", "")) == kind and str(_scelta.get("id", "")) == id:
 		_deseleziona()
 		return
-	var col := ctl.colonna_attivata()
-	var voci: Array = []
-	match kind:
-		"mercato": voci = AvailableActions.piazzamenti(ctl.gs, UMANO, col, id)
-		"potenziamento": voci = AvailableActions.bersagli_potenziamento(ctl.gs, UMANO, col, id)
-		"personaggio": voci = AvailableActions.bersagli_reclutamento(ctl.gs, UMANO, col, id)
-		_:
-			_deseleziona()
-			return
+	if not (kind in ["mercato", "potenziamento", "personaggio"]):
+		_deseleziona()
+		return
+	var voci: Array = _bersagli_di(kind, id)
 	# Un personaggio senza bersaglio da scegliere non ha niente da accendere:
 	# si recluta e basta, e chiedere un secondo clic sarebbe finto.
 	if voci.size() == 1 and not voci[0].parametri.has("uid") \
@@ -378,6 +430,19 @@ func _nome_carta(kind: String, id: String) -> String:
 
 func _esegui(v) -> void:
 	var fatto := false
+	_messaggio = ""
+	# La carta si sceglie prima del lavoratore: il lavoratore lo piazza il
+	# clic sul bersaglio, nella colonna che quel bersaglio richiede. Cosi' il
+	# giocatore decide "questo edificio, li'" invece di dover indovinare
+	# prima quale colonna gli aprira' la carta che vuole.
+	if ctl.gs.phase == Enums.Phase.PIAZZA and v.parametri.has("attiva"):
+		var dove := int(v.parametri["attiva"])
+		if not ctl.place_worker(dove, _da_abitare(dove)):
+			_messaggio = "Non puoi piazzare un lavoratore nella colonna %d." % dove
+			_deseleziona(false)
+			_aggiorna()
+			return
+		_messaggio = "Colonna %d attivata. " % dove
 	match v.tipo:
 		"costruisci":
 			fatto = ctl.build(str(v.parametri["card_id"]), int(v.parametri["col_from"]),
@@ -393,7 +458,7 @@ func _esegui(v) -> void:
 		"passa":
 			ctl.pass_action()
 			fatto = true
-	_messaggio = v.etichetta if fatto else "Rifiutata: %s" % v.etichetta
+	_messaggio += v.etichetta if fatto else "Rifiutata: %s" % v.etichetta
 	_deseleziona(false)
 	_turni_dei_bot()
 	_aggiorna()
@@ -439,7 +504,8 @@ func _disegna_hud() -> void:
 	elif not gs.pending_choice.is_empty():
 		invito = str(gs.pending_choice["prompt"])
 	elif gs.phase == Enums.Phase.PIAZZA:
-		invito = "Clicca una colonna per piazzare un lavoratore e attivarla."
+		invito = "Scegli una carta e ti mostro dove puoi metterla, "
+		invito += "oppure clicca una colonna per attivarla e basta."
 	elif _scelta.is_empty():
 		invito = "Clicca una carta per vedere dove puoi metterla."
 	else:
@@ -454,8 +520,7 @@ func _disegna_hud() -> void:
 	var schermo := _hud.get_viewport_rect().size
 	_hud.draw_string(font, Vector2(20, schermo.y - 16),
 		"Trascina per girare il tabellone · rotella per avvicinare · "
-		+ "tasto destro per spostare · Maiusc mentre clicchi per costruire sopra · "
-		+ "R riporta l'inquadratura",
+		+ "tasto destro per spostare · R riporta l'inquadratura",
 		HORIZONTAL_ALIGNMENT_LEFT, -1, 12, Color("#6f7683"))
 
 	if not _nota.is_empty():

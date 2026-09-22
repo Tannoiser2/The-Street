@@ -153,9 +153,14 @@ static func piazzamenti(gs: GameState, player: int, col: int,
 			var q = BuildRules.quote_above(gs, player, d, c) if sopra \
 				else BuildRules.quote_rail(gs, player, d, c)
 			if not q.legal: continue
+			# Il livello viene dal preventivo: serve a disegnare il posto
+			# acceso ALLA SUA QUOTA, cosi' "costruire sopra" e' un riquadro
+			# che sta in alto invece di un tasto da tenere premuto.
 			var dove := "sopra" if sopra else "a terra"
+			if sopra and not q.razed.is_empty():
+				dove = "spianando " + str(q.razed[0].data["name"])
 			out.append(_voce("costruisci", "Costruisci %s %s" % [d["name"], dove], q,
-				{"card_id": card_id, "col_from": c, "above": sopra}))
+				{"card_id": card_id, "col_from": c, "above": sopra, "level": q.level}))
 	return out
 
 # Gli edifici che possono ricevere un potenziamento: uno per bersaglio.
