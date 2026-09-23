@@ -42,6 +42,7 @@ func mostra(stato: GameState, colonna_evidenziata := -1, acceso := {}) -> void:
 	_file_laterali()
 	_plance()
 	_edifici()
+	_pupazzetti()
 	_posti_liberi()
 	_luci()
 	_telecamera()
@@ -514,6 +515,50 @@ func _dettaglio_carta(c: Dictionary) -> String:
 			return "monumento"
 	return ""
 
+# IL PUPAZZETTO. Non un parallelepipedo: un corpo che si allarga verso il
+# basso e una testa tonda, cioe' la sagoma che al tavolo si riconosce a colpo
+# d'occhio anche piccola e di scorcio. E' fatto di tre pezzi perche' tre
+# bastano - un meeple vero ha le braccia, ma a 8 mm non si vedrebbero.
+func _meeple(dove: Vector3, colore: Color) -> Node3D:
+	var n := Node3D.new()
+	var w := BoardLayout3D.MEEPLE_W
+	var h := BoardLayout3D.MEEPLE_H
+	var d := BoardLayout3D.MEEPLE_D
+	var corpo := _scatola(Vector3(w, h * 0.45, d), colore)
+	corpo.position = Vector3(0, h * 0.225, 0)
+	n.add_child(corpo)
+	var busto := _scatola(Vector3(w * 0.62, h * 0.28, d), colore)
+	busto.position = Vector3(0, h * 0.45 + h * 0.14, 0)
+	n.add_child(busto)
+	var testa := MeshInstance3D.new()
+	var s := SphereMesh.new()
+	s.radius = w * 0.34
+	s.height = w * 0.68
+	s.radial_segments = 10
+	s.rings = 6
+	testa.mesh = s
+	var mat := StandardMaterial3D.new()
+	mat.albedo_color = colore
+	testa.material_override = mat
+	testa.position = Vector3(0, h * 0.73 + w * 0.3, 0)
+	n.add_child(testa)
+	n.position = dove
+	return n
+
+# I pupazzetti di tutti: quelli ancora in mano sulla bacchetta, quelli gia'
+# usati sulla strada, e quelli della Dinastia ancora sulla sua carta.
+func _pupazzetti() -> void:
+	for i in gs.n_players:
+		var col: Color = COLORI_GIOCATORE[i % COLORI_GIOCATORE.size()]
+		if i == gs.current_index: col = col.lightened(0.2)
+		for pos in BoardLayout3D.meeple_liberi(gs, i):
+			add_child(_meeple(pos, col))
+		for m in BoardLayout3D.meeple_in_campo(gs, i):
+			add_child(_meeple(m["pos"], col.lightened(0.3)))
+	for m in BoardLayout3D.meeple_dinastia(gs):
+		add_child(_meeple(m["pos"],
+			COLORI_GIOCATORE[int(m["player"]) % COLORI_GIOCATORE.size()]))
+
 func _plance() -> void:
 	# Del rettangolo colorato che fingeva di essere un tabellone resta una
 	# BACCHETTA del colore del giocatore: le carte che ha comprato si
@@ -557,12 +602,9 @@ func _linguette(b: Building) -> void:
 # che cambiano il punteggio e che altrimenti non si vedrebbero.
 func _segnalini(b: Building) -> void:
 	var base := BoardLayout3D.standee_base(gs, b)
-	if b.protected_by >= 0:
-		var col: Color = COLORI_GIOCATORE[b.protected_by % COLORI_GIOCATORE.size()]
-		var lav := _scatola(Vector3(7.0, 20.0, 7.0), col.lightened(0.35))
-		lav.position = base + Vector3(-BoardLayout3D.span_w(b.width()) / 2.0 + 5.0,
-			BoardLayout3D.BASETTA_Y + 10.0, BoardLayout3D.BASETTA_D / 2.0 - 3.0)
-		add_child(lav)
+	# Il lavoratore che abita l'edificio non si disegna piu' qui: e' un
+	# pupazzetto come gli altri, e lo mette in tavola `_pupazzetti` - uno solo
+	# per lavoratore, che sta o sulla bacchetta o sulla strada.
 	if b.buried_character != "":
 		var sep := _scatola(Vector3(8.0, 8.0, 8.0), Color("#8a6f3a"))
 		sep.position = base + Vector3(BoardLayout3D.span_w(b.width()) / 2.0 - 5.0,

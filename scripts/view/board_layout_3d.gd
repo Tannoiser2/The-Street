@@ -554,12 +554,20 @@ static func _fila_destra(gs: GameState) -> Array[Dictionary]:
 	var m_mon := misura_carta("monumento")
 	var righe: int = maxi(gs.char_row.size(), gs.upg_row.size())
 
+	# La Dinastia sta "sempre disponibile fuori dalle file": in cima, sopra i
+	# personaggi, e non si sposta mai. Chi la compra ne prende il pupazzetto.
+	var m_din := misura_carta("dinastia")
 	var alto_righe := righe * m_pers.y + maxf(0.0, righe - 1) * CARTA_GAP
 	var alto_mon := gs.monuments_open.size() * m_mon.y \
 		+ maxf(0.0, gs.monuments_open.size() - 1) * CARTA_GAP
-	var totale := alto_righe + (CARTA_GAP * 3.0 + alto_mon if alto_mon > 0.0 else 0.0)
+	var totale := m_din.y + CARTA_GAP * 3.0 + alto_righe \
+		+ (CARTA_GAP * 3.0 + alto_mon if alto_mon > 0.0 else 0.0)
 	var z := board_d() / 2.0 - totale / 2.0
 	var x := board_w(gs) + BORDO
+
+	out.append({"kind": "dinastia", "id": "dinastia_1",
+		"aabb": AABB(Vector3(x, 0.0, z), Vector3(m_din.x, TESSERA_Y, m_din.y))})
+	z += m_din.y + CARTA_GAP * 3.0
 
 	for i in righe:
 		if i < gs.char_row.size():
@@ -617,16 +625,24 @@ static func carte_giocatore(gs: GameState, player: int, umano := -1) -> Array[Di
 			out.append({"kind": "eredita", "id": p.legacy_id})
 		else:
 			out.append({"kind": "eredita_coperta", "id": "eredita_1"})
-	if p.has_dynasty: out.append({"kind": "dinastia", "id": "dinastia_1"})
-	for m in p.monuments_claimed: out.append({"kind": "monumento", "id": str(m)})
+	# La Dinastia non sta piu' qui: la carta resta fuori dalle file e quello
+	# che il giocatore ha preso e' il PUPAZZETTO, che si vede sulla bacchetta.
+	# I PERSONAGGI DI QUEST'ERA stanno subito sotto la bacchetta, perche' sono
+	# i lavoratori che ha in gioco adesso; quelli gia' sepolti non si ripetono
+	# qui, stanno sotto la carta del loro edificio.
+	var sepolti := {}
+	for b in gs.grid.buildings:
+		if b.owner == player and b.buried_character != "": sepolti[b.buried_character] = true
 	var visti := {}
 	for c in p.specialized_characters:
+		if sepolti.has(str(c)): continue
 		visti[str(c)] = true
 		out.append({"kind": "personaggio", "id": str(c)})
 	for c in p.final_characters:
-		if visti.has(str(c)): continue
+		if visti.has(str(c)) or sepolti.has(str(c)): continue
 		visti[str(c)] = true
 		out.append({"kind": "personaggio", "id": str(c)})
+	for m in p.monuments_claimed: out.append({"kind": "monumento", "id": str(m)})
 	# LE CARTE DEGLI EDIFICI COSTRUITI. "Costruire significa pagare il costo
 	# della carta e mettere la sagoma sul tabellone": la carta resta davanti
 	# a chi l'ha presa - il regolamento ci fa infilare sotto i personaggi a
@@ -640,19 +656,130 @@ static func carte_giocatore(gs: GameState, player: int, umano := -1) -> Array[Di
 		# sono il mazzetto dello Scavo.
 		out.append({"kind": "mercato", "id": str(b.data["id"]),
 			"ventaglio": true, "sepolta": b.is_buried,
-			"spenta": b.state != Enums.BuildingState.INTATTO})
+			"spenta": b.state != Enums.BuildingState.INTATTO,
+			# "Infilatelo sotto la carta di un vostro edificio": il
+			# personaggio sepolto viaggia con la carta che lo copre, e si
+			# disegna li' sotto con la linguetta di fuori. Prima si vedeva
+			# solo un cubetto sulla basetta e non si capiva CHI fosse sepolto
+			# ne' sotto cosa.
+			"sepolto": str(b.buried_character)})
 	return out
+
+# Quanto della carta del personaggio sepolto resta fuori da sotto la carta
+# dell'edificio: la linguetta, come per i potenziamenti sul tabellone.
+const LINGUETTA_CARTA := 24.0
+
+# La carta del personaggio sepolto sotto quella dell'edificio: sporge di
+# fianco, e sta un filo piu' in basso perche' e' SOTTO.
+# `verso` dice da che parte sporge: +1 a destra, -1 a sinistra. Le due colonne
+# del mazzetto lo fanno sporgere ognuna verso l'altra, cioe' nello stacco in
+# mezzo: sporgendo tutte e due a destra, la linguetta della colonna di sinistra
+# finiva sotto le carte di quella di destra e non si vedeva piu'.
+static func carta_sepolto(box: AABB, verso := 1.0) -> AABB:
+	var m := misura_carta("personaggio")
+	var scala := box.size.z / misura_carta("mercato").y
+	var d := m * scala
+	var x := box.end.x - d.x + LINGUETTA_CARTA * scala if verso >= 0.0 \
+		else box.position.x - LINGUETTA_CARTA * scala
+	return AABB(
+		Vector3(x, maxf(0.0, box.position.y - VENTAGLIO_Y / 2.0),
+			box.position.z + (box.size.z - d.y) / 2.0),
+		Vector3(d.x, TESSERA_Y, d.y))
+
+# ---- i pupazzetti ---------------------------------------------------
+# I LAVORATORI SI VEDONO. Prima esisteva solo il parallelepipedo sull'edificio
+# abitato: chi guardava non sapeva quanti lavoratori avesse ancora in mano un
+# giocatore, ne' che quelli sulla strada tornano indietro a fine era. Adesso
+# stanno sulla bacchetta del loro colore e da li' vanno sulla colonna che
+# attivano - e a fine era, quando `worker_cols` si svuota, tornano da soli.
+const MEEPLE_W := 8.0
+const MEEPLE_H := 15.0
+const MEEPLE_D := 6.0
+const MEEPLE_GAP := 3.0
+
+# Quelli ancora in mano: in fila sulla bacchetta, da sinistra.
+static func meeple_liberi(gs: GameState, player: int) -> Array[Vector3]:
+	var out: Array[Vector3] = []
+	var p: PlayerState = gs.players[player]
+	var quanti: int = maxi(0, p.workers - p.workers_used)
+	if quanti <= 0: return out
+	var r := bacchetta_box(gs, player)
+	var passo := MEEPLE_W + MEEPLE_GAP
+	# Se sono tanti e la bacchetta e' corta si stringono invece di sbordare.
+	if passo * float(quanti) > r.size.x:
+		passo = r.size.x / float(quanti)
+	for i in quanti:
+		out.append(Vector3(r.position.x + MEEPLE_W / 2.0 + i * passo,
+			r.position.y + r.size.y, r.position.z + r.size.z / 2.0))
+	return out
+
+# Quelli sulla strada: uno per colonna attivata. Se il lavoratore abita un
+# edificio sta sulla sua basetta - e' li' che il regolamento lo vuole, e da li'
+# gli da' +2 resistenza; se no sta sul davanti della colonna, dove si vede che
+# la colonna e' presa.
+static func meeple_in_campo(gs: GameState, player: int) -> Array[Dictionary]:
+	var out: Array[Dictionary] = []
+	var p: PlayerState = gs.players[player]
+	for c in p.worker_cols:
+		var col := int(c)
+		var ospite: Building = null
+		for b in gs.grid.buildings:
+			if b.protected_by == player and b.covers(col) and b.is_standing():
+				ospite = b
+				break
+		if ospite != null:
+			var base := standee_base(gs, ospite)
+			out.append({"col": col, "uid": ospite.uid, "pos": Vector3(
+				base.x - span_w(ospite.width()) / 2.0 + MEEPLE_W / 2.0 + 2.0,
+				base.y + BASETTA_Y,
+				base.z + BASETTA_D / 2.0 - MEEPLE_D / 2.0)})
+		else:
+			out.append({"col": col, "uid": -1, "pos": Vector3(
+				col_x(col) + TESSERA_W / 2.0, TESSERA_Y,
+				board_d() - MEEPLE_D)})
+	return out
+
+# ---- la Dinastia, fuori dalle file ----------------------------------
+# "Sempre disponibile fuori dalle file": la carta non si sposta mai. Sta in
+# cima alla fila dei personaggi e ci tiene sopra un pupazzetto per giocatore.
+# Chi la compra non prende la carta: prende il PUPAZZETTO e lo mette insieme
+# agli altri tre che ha gia'.
+static func meeple_dinastia(gs: GameState) -> Array[Dictionary]:
+	var out: Array[Dictionary] = []
+	var carta := carta_dinastia(gs)
+	if carta.is_empty(): return out
+	var r: AABB = carta["aabb"]
+	# Solo chi non l'ha ancora presa, e mai piu' copie di quante ne restano.
+	var chi: Array[int] = []
+	for i in gs.n_players:
+		if not gs.players[i].has_dynasty: chi.append(i)
+	while chi.size() > gs.dynasties_left: chi.pop_back()
+	if chi.is_empty(): return out
+	var passo := MEEPLE_W + MEEPLE_GAP
+	var largo := passo * float(chi.size()) - MEEPLE_GAP
+	var x0 := r.position.x + (r.size.x - largo) / 2.0 + MEEPLE_W / 2.0
+	for j in chi.size():
+		out.append({"player": chi[j], "pos": Vector3(x0 + j * passo,
+			r.position.y + r.size.y, r.position.z + r.size.z / 2.0)})
+	return out
+
+static func carta_dinastia(gs: GameState) -> Dictionary:
+	for c in _fila_destra(gs):
+		if str(c["kind"]) == "dinastia": return c
+	return {}
 
 # La bacchetta del colore: una per giocatore, davanti alla strada.
 static func player_boards(gs: GameState) -> Array[Dictionary]:
 	var out: Array[Dictionary] = []
+	for i in gs.n_players:
+		out.append({"player": i, "aabb": bacchetta_box(gs, i)})
+	return out
+
+static func bacchetta_box(gs: GameState, player: int) -> AABB:
 	var largo := board_w(gs) / float(gs.n_players)
 	var z := board_d() + BORDO      # davanti alla strada, dal lato di chi guarda
-	for i in gs.n_players:
-		out.append({"player": i, "aabb": AABB(
-			Vector3(i * largo + 4.0, 0.0, z),
-			Vector3(largo - 8.0, TESSERA_Y, BACCHETTA_D))})
-	return out
+	return AABB(Vector3(player * largo + 4.0, 0.0, z),
+		Vector3(largo - 8.0, TESSERA_Y, BACCHETTA_D))
 
 # Le carte comprate, stese sotto la bacchetta. NESSUNA COPRE L'ALTRA: si
 # riempie una riga finche' ci sta dentro il posto del giocatore, poi si va a
@@ -718,9 +845,16 @@ static func _ventaglio(carte: Array, player: int, x0: float, spazio: float,
 	var out: Array[Dictionary] = []
 	if carte.is_empty(): return out
 	var piena := misura_carta(str(carte[0]["kind"]))
+	# Lo stacco fra le due colonne si allarga quando c'e' un personaggio
+	# sepolto: la sua linguetta sporge li' in mezzo, e senza posto finirebbe
+	# sotto le carte dell'altra colonna.
+	var c_sepolti := false
+	for c0 in carte:
+		if str(c0.get("sepolto", "")) != "": c_sepolti = true
+	var stacco := CARTE_GIOCATORE_GAP + (LINGUETTA_CARTA * 2.0 if c_sepolti else 0.0)
 	# Quanto puo' essere larga una carta perche' le due colonne ci stiano.
 	# Non si ingrandisce mai: al massimo resta com'e'.
-	var posto := (spazio - CARTE_GIOCATORE_GAP * (MAZZETTO_COLONNE - 1)) \
+	var posto := (spazio - stacco * (MAZZETTO_COLONNE - 1)) \
 		/ float(MAZZETTO_COLONNE)
 	var scala: float = minf(1.0, posto / piena.x)
 	var m := piena * scala
@@ -731,13 +865,23 @@ static func _ventaglio(carte: Array, player: int, x0: float, spazio: float,
 		var c: int = 1 if sepolta else 0
 		var r: int = int(righe[c])
 		righe[c] = r + 1
+		var box := AABB(
+			Vector3(x0 + c * (m.x + stacco), r * VENTAGLIO_Y, z0 + r * passo),
+			Vector3(m.x, TESSERA_Y, m.y))
+		# Il personaggio sepolto va messo PRIMA: sta sotto la carta
+		# dell'edificio, e chi sta sotto si disegna per primo.
+		var chi := str(carte[j].get("sepolto", ""))
+		if chi != "":
+			# Spenta, non sepolta: il personaggio e' sotto terra ma la sua
+			# carta deve restare leggibile - il colore della sepoltura ce
+			# l'ha gia' la carta dell'edificio che lo copre.
+			out.append({"kind": "personaggio", "id": chi, "player": player,
+				"ordine": ordine0 + j, "spenta": true, "sotto": true,
+				"aabb": carta_sepolto(box, 1.0 if c == 0 else -1.0)})
 		out.append({"kind": str(carte[j]["kind"]), "id": str(carte[j]["id"]),
 			"player": player, "ordine": ordine0 + j,
 			"sepolta": sepolta, "spenta": bool(carte[j].get("spenta", false)),
-			"aabb": AABB(
-				Vector3(x0 + c * (m.x + CARTE_GIOCATORE_GAP), r * VENTAGLIO_Y,
-					z0 + r * passo),
-				Vector3(m.x, TESSERA_Y, m.y))})
+			"aabb": box})
 	return out
 
 # Tutto il tavolo: strada, file e plance. E' questo che l'inquadratura deve

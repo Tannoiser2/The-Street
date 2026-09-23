@@ -43,6 +43,9 @@ func _ready() -> void:
 	_run("chi siede al tavolo lo si sceglie", _test_scelte_inizio)
 	_run("  e a che velocita' si muovono i bot", _test_velocita_bot)
 	_run("il conto finale, diviso per fonte", _test_riepilogo)
+	_run("i pupazzetti dei lavoratori", _test_pupazzetti)
+	_run("la Dinastia resta fuori dalle file", _test_dinastia)
+	_run("il personaggio sepolto sta sotto la carta del suo edificio", _test_sepolto)
 	_run("il terrapieno si paga e si vede", _test_terrapieni)
 	_run("sotto un edificio a scalino non resta un buco", _test_scalino)
 	_run("le carte stanno in piedi alla stessa altezza", _test_misure_carte)
@@ -592,9 +595,11 @@ func _test_tavolo() -> void:
 	var carte := BoardLayout3D.side_cards(gs, 0)
 	var possedute := 0
 	for i in gs.n_players: possedute += BoardLayout3D.carte_giocatore(gs, i, 0).size()
+	# +1: la Dinastia, che sta "sempre disponibile fuori dalle file" e non e'
+	# in nessun mazzetto.
 	_eq("una carta per ogni carta sul tavolo", carte.size(),
 		gs.market.size() + gs.char_row.size() + gs.upg_row.size()
-		+ gs.monuments_open.size() + possedute)
+		+ gs.monuments_open.size() + possedute + 1)
 	_ok("e ogni giocatore ha davanti il suo obiettivo segreto", possedute >= gs.n_players)
 	var tipi := {}
 	for c in carte: tipi[str(c["kind"])] = true
@@ -1591,6 +1596,142 @@ func _test_riepilogo() -> void:
 # sospeso sopra il vuoto proprio nella colonna che aveva pagato per
 # riempirla. Il preventivo sapeva quante erano; adesso sa anche QUALI, e
 # l'edificio se le porta dietro.
+# I lavoratori sono pupazzetti e si contano: quelli in mano stanno sulla
+# bacchetta, quelli usati sulla strada, e non se ne perde nessuno per via.
+func _test_pupazzetti() -> void:
+	var ctl := _gioco()
+	var gs := ctl.gs
+	var p: PlayerState = gs.players[0]
+	_eq("a inizio partita sono tutti in mano",
+		BoardLayout3D.meeple_liberi(gs, 0).size(), p.workers)
+	_eq("  e sulla strada non ce n'e' nessuno",
+		BoardLayout3D.meeple_in_campo(gs, 0).size(), 0)
+
+	var bacchetta := BoardLayout3D.bacchetta_box(gs, 0)
+	for pos in BoardLayout3D.meeple_liberi(gs, 0):
+		_ok("  e stanno sulla bacchetta del loro colore",
+			pos.x >= bacchetta.position.x - 0.1 and pos.x <= bacchetta.end.x + 0.1
+			and pos.z >= bacchetta.position.z - 0.1 and pos.z <= bacchetta.end.z + 0.1)
+		break
+
+	# Piazzato uno, il conto si sposta ma non cambia.
+	ctl.place_worker(2)
+	_eq("piazzandone uno, in mano ne restano %d" % (p.workers - 1),
+		BoardLayout3D.meeple_liberi(gs, 0).size(), p.workers - 1)
+	_eq("  e uno e' sulla strada", BoardLayout3D.meeple_in_campo(gs, 0).size(), 1)
+	_eq("  nella colonna che ha attivato",
+		int(BoardLayout3D.meeple_in_campo(gs, 0)[0]["col"]), 2)
+	_eq("  e il conto torna sempre",
+		BoardLayout3D.meeple_liberi(gs, 0).size()
+		+ BoardLayout3D.meeple_in_campo(gs, 0).size(), p.workers)
+
+	# Chi abita un edificio ci sale sopra: il pupazzetto sta sulla basetta.
+	# Serve una partita nuova, perche' di lavoratori se ne piazza uno per
+	# turno e in questa e' gia' stato piazzato.
+	var ctl2 := _gioco()
+	var gs2 := ctl2.gs
+	var b := _metti(gs2, "ed_capanne", 4, 1, 0, 0)
+	_ok("si piazza il lavoratore sull'edificio", ctl2.place_worker(4, b))
+	var su_edificio := []
+	for m in BoardLayout3D.meeple_in_campo(gs2, 0):
+		if int(m["uid"]) == b.uid: su_edificio.append(m)
+	_eq("chi abita un edificio sta sulla sua basetta", su_edificio.size(), 1)
+	if not su_edificio.is_empty():
+		var piede := BoardLayout3D.basetta_box(gs2, b)
+		var pos: Vector3 = su_edificio[0]["pos"]
+		_approx("  alla quota della basetta", pos.y, piede.end.y)
+		_ok("  e dentro il suo ingombro",
+			pos.x >= piede.position.x - 0.1 and pos.x <= piede.end.x + 0.1)
+
+	# A fine era tornano tutti indietro da soli: e' `worker_cols` che si
+	# svuota, la vista non deve ricordarsi niente.
+	p.reset_for_era()
+	_eq("a fine era tornano tutti sulla bacchetta",
+		BoardLayout3D.meeple_liberi(gs, 0).size(), p.workers)
+	_eq("  e la strada resta sgombra",
+		BoardLayout3D.meeple_in_campo(gs, 0).size(), 0)
+
+# "Sempre disponibile fuori dalle file": la carta non si muove, si prende il
+# pupazzetto.
+func _test_dinastia() -> void:
+	var ctl := _gioco()
+	var gs := ctl.gs
+	var carta := BoardLayout3D.carta_dinastia(gs)
+	_ok("la carta Dinastia sta sul tavolo", not carta.is_empty())
+	if carta.is_empty(): return
+	var dove: AABB = carta["aabb"]
+	_ok("  fuori dalla strada, a fianco delle file",
+		dove.position.x >= BoardLayout3D.board_w(gs))
+	_eq("c'e' un pupazzetto per giocatore",
+		BoardLayout3D.meeple_dinastia(gs).size(), gs.n_players)
+	for m in BoardLayout3D.meeple_dinastia(gs):
+		var pos: Vector3 = m["pos"]
+		_ok("  e stanno sulla carta",
+			pos.x >= dove.position.x - 0.1 and pos.x <= dove.end.x + 0.1
+			and pos.z >= dove.position.z - 0.1 and pos.z <= dove.end.z + 0.1)
+		break
+
+	var p: PlayerState = gs.players[0]
+	var prima := p.workers
+	p.pietra = 99
+	p.oro = 99
+	ctl.place_worker(1)
+	_ok("il giocatore 0 compra la Dinastia", ctl.buy_dynasty())
+	_eq("  e adesso ha un lavoratore in piu'", p.workers, prima + 1)
+	var rimasti := BoardLayout3D.meeple_dinastia(gs)
+	_eq("  sulla carta resta un pupazzetto in meno", rimasti.size(), gs.n_players - 1)
+	var suoi := 0
+	for m in rimasti:
+		if int(m["player"]) == 0: suoi += 1
+	_eq("  e il suo non c'e' piu'", suoi, 0)
+	_eq("  ma la carta e' rimasta dov'era",
+		BoardLayout3D.carta_dinastia(gs)["aabb"], dove)
+	var carte := BoardLayout3D.carte_giocatore(gs, 0, 0)
+	var dinastie := 0
+	for c in carte:
+		if str(c["kind"]) == "dinastia": dinastie += 1
+	_eq("  e non se n'e' portata via una copia", dinastie, 0)
+
+# "Infilatelo sotto la carta di un vostro edificio": il personaggio sepolto
+# si vede li' sotto, con la linguetta di fuori, e non in mezzo agli altri.
+func _test_sepolto() -> void:
+	var ctl := _gioco()
+	var gs := ctl.gs
+	var p: PlayerState = gs.players[0]
+	var b := _metti(gs, "ed_capanne", 3, 1, 0, 0)
+	var cid := str(gs.char_row[0]) if not gs.char_row.is_empty() \
+		else str(CardDB.characters.keys()[0])
+	p.specialized_characters.append(cid)
+
+	var prima := 0
+	for c in BoardLayout3D.carte_giocatore(gs, 0, 0):
+		if str(c["kind"]) == "personaggio" and str(c["id"]) == cid: prima += 1
+	_eq("finche' e' vivo il personaggio sta davanti al giocatore", prima, 1)
+
+	b.buried_character = cid
+	b.buried_character_era = 1
+	var carte := BoardLayout3D.player_cards(gs, 0)
+	var sotto := []
+	var edificio := []
+	for c in carte:
+		if int(c.get("player", -1)) != 0: continue
+		if str(c["kind"]) == "personaggio" and str(c["id"]) == cid: sotto.append(c)
+		if str(c["kind"]) == "mercato" and str(c["id"]) == str(b.data["id"]): edificio.append(c)
+	_eq("una volta sepolto se ne disegna una sola", sotto.size(), 1)
+	_eq("  e la carta del suo edificio c'e'", edificio.size(), 1)
+	if sotto.is_empty() or edificio.is_empty(): return
+	var cs: AABB = sotto[0]["aabb"]
+	var ce: AABB = edificio[0]["aabb"]
+	_ok("  sta sotto la carta dell'edificio", cs.position.y <= ce.position.y)
+	_ok("  ma sporge di fianco",
+		cs.end.x > ce.end.x and cs.position.x < ce.end.x)
+	_ok("  e si tocca con lei, non sta per conto suo",
+		cs.position.z < ce.end.z and cs.end.z > ce.position.z)
+	var altrove := 0
+	for c in BoardLayout3D.carte_giocatore(gs, 0, 0):
+		if str(c["kind"]) == "personaggio" and str(c["id"]) == cid: altrove += 1
+	_eq("  e non resta anche in mezzo alle altre", altrove, 0)
+
 func _test_terrapieni() -> void:
 	var ctl := _gioco()
 	var gs := ctl.gs
