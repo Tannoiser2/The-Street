@@ -224,7 +224,9 @@ func build(card_id: String, col_from: int, above: bool, pay_option: int = 0, des
 	if above:
 		for c in range(b.col_from, b.col_to): gs.grid.risen_this_era[c] = true
 	p.buildings_built += 1
-	if int(data["lampo"]) > 0: p.add_vp("lampo", int(data["lampo"]))
+	if int(data["lampo"]) > 0:
+		p.add_vp("lampo", int(data["lampo"]))
+		b.rende("lampo", int(data["lampo"]))
 	gs.market.erase(card_id)
 	_refill(gs.market, gs.building_decks[gs.era], int(CardDB.constants["market_size"]))
 	building_placed.emit(b)

@@ -21,12 +21,51 @@ func _ready() -> void:
 	_run("ordine di turno e snake", _test_turn_order)
 	_run("un lavoratore per colonna", _test_worker_per_column)
 	_run("dispersione dei secoli", _test_disperse)
+	_run("il libro mastro degli edifici torna col tabellone", _test_libro_mastro)
 	print("\n%d superati, %d falliti" % [_passed, _failed])
 	get_tree().quit(0 if _failed == 0 else 1)
 
 func _run(name: String, f: Callable) -> void:
 	print("\n— %s" % name)
 	f.call()
+
+# Ogni edificio si segna quanto ha fruttato. Non e' un conto a parte: sono gli
+# stessi punti che finiscono sul tabellone, visti dalla carta invece che dal
+# giocatore. Quindi devono tornare, canale per canale, su partite vere.
+func _test_libro_mastro() -> void:
+	var canali := ["lampo", "rendita", "scavo", "scheletri", "verticalita"]
+	var storte := 0
+	var esempio := ""
+	for g in 8:
+		var ctl := _game(3, 500 + g)
+		var guard := 0
+		while ctl.gs.phase != Enums.Phase.FINE_PARTITA and guard < 10000:
+			RandomBot.play_turn(ctl)
+			guard += 1
+		# Si confrontano i totali del tavolo, non quelli di un giocatore: il
+		# libro mastro sta sulla CARTA, e una carta puo' cambiare padrone
+		# (un restauro se la prende). I punti che ha fruttato restano suoi
+		# anche quando a incassarli e' stato qualcun altro.
+		var dal_tabellone := {}
+		for p in ctl.gs.players:
+			for c in p.vp_breakdown:
+				dal_tabellone[c] = int(dal_tabellone.get(c, 0)) + int(p.vp_breakdown[c])
+		var dalle_carte := {}
+		for b in ctl.gs.grid.buildings:
+			for c in b.vp_reso:
+				dalle_carte[c] = int(dalle_carte.get(c, 0)) + int(b.vp_reso[c])
+		for c in canali:
+			var tabellone := int(dal_tabellone.get(c, 0))
+			var carte := int(dalle_carte.get(c, 0))
+			# La Verticalita' si arrotonda due volte - una per giocatore, una
+			# per carta - e lo scarto puo' arrivare a un punto per colonna.
+			var tolleranza: int = ctl.gs.grid.n_cols if c == "verticalita" else 0
+			if absi(tabellone - carte) > tolleranza:
+				storte += 1
+				if esempio == "":
+					esempio = "partita %d, %s: tabellone %d, carte %d" % [
+						500 + g, c, tabellone, carte]
+	_ok("su 8 partite intere ogni canale torna%s" % ("" if esempio == "" else " (%s)" % esempio), storte == 0)
 
 # ---- infrastruttura -------------------------------------------------
 func _game(n := 2, seed_v := 7) -> GameController:

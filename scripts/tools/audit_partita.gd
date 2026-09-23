@@ -29,6 +29,9 @@ func _ready() -> void:
 	if args.has("games"):
 		_lotto(seme, players, int(args["games"]))
 		return
+	if args.has("vita"):
+		_vita(seme, players, int(args["vita"]))
+		return
 
 	var ctl := GameController.new()
 	ctl.new_game(players, seme)
@@ -81,6 +84,96 @@ func _lotto(seme: int, players: int, quante: int) -> void:
 				campi.append("%d" % Riepilogo.punti(riga, str(v["id"])))
 			print(";".join(campi))
 	get_tree().quit(0)
+
+# LA VITA DEGLI EDIFICI. Tante partite, e per ogni CARTA quanto e' durata:
+# quante ere resta intatta, quante resta in piedi, quante volte finisce
+# sotterrata, quanta Vetusta' accumula e quanti punti ha fruttato al suo
+# proprietario. Una riga CSV per carta, da impaginare fuori.
+#
+# La vita si misura in ERE, perche' e' l'era il battito del gioco: gli eventi
+# colpiscono a fine era ed e' li' che un edificio diventa rudere o crolla.
+# L'era si prende PRIMA della mossa: la fine di un'era succede dentro il turno
+# di qualcuno, e quando il turno torna il contatore e' gia' avanzato.
+func _vita(seme: int, players: int, quante: int) -> void:
+	var acc := {}
+	for g in quante:
+		var ctl := GameController.new()
+		ctl.new_game(players, seme + g)
+		var gs := ctl.gs
+		var era_rudere := {}
+		var era_rovina := {}
+		var era_sepolto := {}
+		var visto := {}
+		var guard := 0
+		while gs.phase != Enums.Phase.FINE_PARTITA and guard < 10000:
+			var era: int = gs.era
+			RandomBot.play_turn(ctl)
+			for b in gs.grid.buildings:
+				if not visto.has(b.uid): visto[b.uid] = true
+				if b.state != Enums.BuildingState.INTATTO and not era_rudere.has(b.uid):
+					era_rudere[b.uid] = era
+				if b.state == Enums.BuildingState.ROVINA and not era_rovina.has(b.uid):
+					era_rovina[b.uid] = era
+				if b.is_buried and not era_sepolto.has(b.uid):
+					era_sepolto[b.uid] = era
+			guard += 1
+		var ultima: int = gs.era
+		for b in gs.grid.buildings:
+			var id := str(b.data["id"])
+			if not acc.has(id): acc[id] = _riga_vuota()
+			var r: Dictionary = acc[id]
+			r["n"] += 1
+			# ere da intatto e ere in piedi: se non e' mai caduto si conta
+			# fino all'ultima era giocata.
+			var fine_intatto: int = int(era_rudere.get(b.uid, ultima))
+			var giu: int = mini(int(era_rovina.get(b.uid, 99)), int(era_sepolto.get(b.uid, 99)))
+			var fine_piedi: int = ultima if giu == 99 else giu
+			r["ere_intatto"] += maxi(0, fine_intatto - b.era_built) + 1
+			r["ere_piedi"] += maxi(0, fine_piedi - b.era_built) + 1
+			if era_rudere.has(b.uid): r["n_rudere"] += 1
+			if era_rovina.has(b.uid): r["n_rovina"] += 1
+			if era_sepolto.has(b.uid): r["n_sepolto"] += 1
+			if giu != 99 and giu == b.era_built: r["n_subito"] += 1
+			if b.is_standing(): r["n_in_piedi_fine"] += 1
+			if b.is_alive(): r["n_intatto_fine"] += 1
+			r["vetusta"] += b.vetusta
+			r["potenziamenti"] += b.upgrades.size()
+			for c in b.vp_reso: r["vp_" + str(c)] = int(r.get("vp_" + str(c), 0)) + int(b.vp_reso[c])
+			r["vp"] += b.vp_totali()
+	_stampa_vita(acc, quante, players, seme)
+	get_tree().quit(0)
+
+const CANALI_CARTA: Array[String] = ["lampo", "rendita", "verticalita", "scavo", "scheletri"]
+
+func _riga_vuota() -> Dictionary:
+	var r := {"n": 0, "ere_intatto": 0, "ere_piedi": 0, "n_rudere": 0, "n_rovina": 0,
+		"n_sepolto": 0, "n_subito": 0, "n_in_piedi_fine": 0, "n_intatto_fine": 0,
+		"vetusta": 0, "potenziamenti": 0, "vp": 0}
+	for c in CANALI_CARTA: r["vp_" + c] = 0
+	return r
+
+func _stampa_vita(acc: Dictionary, quante: int, players: int, seme: int) -> void:
+	print("# partite=%d giocatori=%d seme_base=%d" % [quante, players, seme])
+	var intestazione: Array[String] = ["id", "nome", "era", "classi", "larghezza",
+		"costo_pietra", "costo_oro", "resistenza", "rendita", "scavo", "lampo_carta",
+		"copie", "n", "ere_intatto", "ere_piedi", "n_rudere", "n_rovina", "n_sepolto",
+		"n_subito", "n_in_piedi_fine", "n_intatto_fine", "vetusta", "potenziamenti", "vp"]
+	for c in CANALI_CARTA: intestazione.append("vp_" + c)
+	print(";".join(intestazione))
+	for id in CardDB.buildings:
+		var d: Dictionary = CardDB.buildings[id]
+		var r: Dictionary = acc.get(id, _riga_vuota())
+		var campi: Array[String] = [str(id), str(d["name"]), str(int(d["era"])),
+			"|".join(d["classes"]), str(int(d["width"])),
+			str(int(d["cost"]["pietra"])), str(int(d["cost"]["oro"])),
+			str(int(d["resistance"])), str(int(d["rendita"])), str(int(d["scavo"])),
+			str(int(d["lampo"])), str(int(d.get("copies", 1)))]
+		for k in ["n", "ere_intatto", "ere_piedi", "n_rudere", "n_rovina", "n_sepolto",
+				"n_subito", "n_in_piedi_fine", "n_intatto_fine", "vetusta",
+				"potenziamenti", "vp"]:
+			campi.append(str(r[k]))
+		for c in CANALI_CARTA: campi.append(str(r["vp_" + c]))
+		print(";".join(campi))
 
 # ---- il racconto di un turno ---------------------------------------
 
