@@ -1159,3 +1159,27 @@ dato è stato importato da lì. Ma due confronti fra ciò che è stampato e
     prende la riga del valore N con una divisione, e una striscia piu' alta
     delle altre non stira tutto il disegno. Un test controlla che nessuna
     carta abbia uno Scavo oltre le righe disponibili.
+
+80. **"Sepolto" con il vuoto sopra: gli strati successivi non sono tutta la
+    colonna.** Sul tabellone si vedevano basette marcate *sepolto* con sopra
+    niente. Il seme 726 ne dava cinque in una partita sola — Dolmen, Menhir,
+    Ponte, Mulino, Torre civica — tutte a quota zero, tutte all'aria aperta.
+
+    La regola dice: *"una rovina e' Sotterrata quando l'unione degli strati
+    successivi copre interamente la sua proiezione"*. Il codice leggeva
+    "strati successivi" come **tutto quello che nella colonna sta a un livello
+    piu' alto**. Ma a quota zero una colonna porta fino a **cinque** edifici,
+    uno per binario d'era, affiancati in PROFONDITA': chi costruisce sopra ne
+    sceglie uno solo come base — `top_of` — e gli altri quattro restano
+    scoperti, con niente addosso. Un edificio al livello 1 li seppelliva tutti
+    e cinque.
+
+    Correzione adottata: si risale la CATENA di chi poggia su chi (`basi`, che
+    l'edificio si fissa alla costruzione), e si e' sepolti solo se quella
+    catena copre tutte le proprie colonne. E' anche quello che fa il
+    simulatore di riferimento, che sotterra solo la base.
+
+    **Sposta il punteggio, e va rivisto al tavolo.** Su 40 partite a tre
+    giocatori con i bot che giocano: i sepolti passano da 743 a 548 su 1080
+    edifici (dal 69% al 51%), e **un sepolto su quattro era uno di quelli col
+    vuoto sopra**. Meno Scavo, piu' rovine che restano visibili sul tabellone.

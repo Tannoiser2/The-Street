@@ -196,13 +196,21 @@ static func terrapieni(gs: GameState, b: Building) -> Array[AABB]:
 # regge non cambia piu' - e solo quando l'edificio non le ha (i fissaggi dei
 # test) si ripiega sulla colonna di adesso.
 static func quota_sotto(gs: GameState, b: Building, col: int) -> int:
+	var mia := basetta_box(gs, b)
 	var q := -1
-	if not b.basi.is_empty():
-		for s in gs.grid.buildings:
-			if s.uid in b.basi and s.covers(col): q = maxi(q, s.level)
-		return q
 	for s in gs.grid.buildings:
 		if s == b or not s.covers(col) or s.level >= b.level: continue
+		# SOLO QUELLO CHE STA ALLA STESSA PROFONDITA'. Un edificio del binario
+		# accanto e' DI FIANCO, non sotto: riempire fino a lui lascerebbe il
+		# vuoto sotto la terra.
+		# E' il caso del Parco archeologico che poggia su due basi a quote e
+		# profondita' diverse - una al livello 2 sul binario dell'era 2, una
+		# al livello 1 su quello dell'era 3: alla profondita' in cui viene
+		# disegnato, sotto di lui c'e' il livello 0, e la terra deve partire
+		# da li'.
+		var r := basetta_box(gs, s)
+		if r.end.z <= mia.position.z + 0.01 or r.position.z >= mia.end.z - 0.01:
+			continue
 		q = maxi(q, s.level)
 	return q
 

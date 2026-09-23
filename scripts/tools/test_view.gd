@@ -1948,6 +1948,23 @@ func _test_scalino() -> void:
 
 	_eq("la colonna alta regge da sola", BoardLayout3D.quota_sotto(gs, su, 1), 1)
 	_eq("  quella bassa e' indietro di un livello", BoardLayout3D.quota_sotto(gs, su, 2), 0)
+	# Quello che sta a un'ALTRA profondita' non conta come sotto: e' di
+	# fianco. Un edificio alto sul binario accanto non riempie il vuoto sotto
+	# questa sagoma, e prendendolo per buono la terra partirebbe da mezz'aria.
+	# Una pila alta sul binario dell'era 5, nella stessa colonna: e' 78 mm
+	# piu' indietro, e da qui si vede di fianco.
+	var fondo := _metti(gs, "ed_capanne", 2, 5, 0, 0)
+	fondo.state = Enums.BuildingState.ROVINA
+	var vicino := _metti(gs, "ed_capanne", 2, 5, 1, 0)
+	vicino.state = Enums.BuildingState.ROVINA
+	vicino.basi = [fondo.uid]
+	_ok("  ed e' a un'altra profondita'", not is_equal_approx(
+		BoardLayout3D.basetta_box(gs, vicino).position.z,
+		BoardLayout3D.basetta_box(gs, su).position.z))
+	_eq("un vicino di un altro binario non conta come base",
+		BoardLayout3D.quota_sotto(gs, su, 2), 0)
+	gs.grid.buildings.erase(vicino)
+	gs.grid.buildings.erase(fondo)
 	var boxes := BoardLayout3D.terrapieni(gs, su)
 	_eq("si riempie solo la colonna indietro", boxes.size(), 1)
 	if boxes.is_empty(): return
