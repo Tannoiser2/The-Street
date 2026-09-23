@@ -43,6 +43,7 @@ func _ready() -> void:
 	_run("chi siede al tavolo lo si sceglie", _test_scelte_inizio)
 	_run("  e a che velocita' si muovono i bot", _test_velocita_bot)
 	_run("il conto finale, diviso per fonte", _test_riepilogo)
+	_run("il valore di Scavo sulla basetta", _test_banner_scavo)
 	_run("i pupazzetti dei lavoratori", _test_pupazzetti)
 	_run("la Dinastia resta fuori dalle file", _test_dinastia)
 	_run("il personaggio sepolto sta sotto la carta del suo edificio", _test_sepolto)
@@ -1596,6 +1597,57 @@ func _test_riepilogo() -> void:
 # sospeso sopra il vuoto proprio nella colonna che aveva pagato per
 # riempirla. Il preventivo sapeva quante erano; adesso sa anche QUALI, e
 # l'edificio se le porta dietro.
+# Il banner dello Scavo: la riga giusta dell'immagine, e il taglio da sinistra
+# per gli edifici corti - a destra c'e' il numero, e quello non si taglia mai.
+func _test_banner_scavo() -> void:
+	var ctl := _gioco()
+	var gs := ctl.gs
+	# Un edificio da tre slot mostra la striscia intera.
+	var largo := _metti(gs, _largo(3), 1, 1, 0, 0)
+	var u3: Dictionary = BoardLayout3D.scavo_uv(largo)
+	_approx("l'edificio da tre slot prende la striscia intera",
+		(u3["scala"] as Vector2).x, 1.0)
+	_approx("  senza tagliare niente a sinistra", (u3["offset"] as Vector2).x, 0.0)
+
+	# Uno da una casella ne prende un terzo, TAGLIATO A SINISTRA.
+	var stretto := _metti(gs, "ed_capanne", 4, 1, 0, 0)
+	var u1: Dictionary = BoardLayout3D.scavo_uv(stretto)
+	_approx("quello da una casella ne prende un terzo",
+		(u1["scala"] as Vector2).x, 1.0 / 3.0)
+	_approx("  e il taglio e' a sinistra", (u1["offset"] as Vector2).x, 2.0 / 3.0)
+	_ok("  cosi' il bordo destro - dove c'e' il numero - resta dentro",
+		is_equal_approx((u1["offset"] as Vector2).x + (u1["scala"] as Vector2).x, 1.0))
+
+	# La riga dipende dal valore di Scavo, e sono righe di uguale altezza.
+	var passo := 1.0 / float(BoardLayout3D.SCAVO_RIGHE)
+	_approx("ogni riga e' alta un quinto", (u1["scala"] as Vector2).y, passo)
+	_approx("  e si sceglie col valore",
+		(u1["offset"] as Vector2).y, passo * float(int(stretto.data["scavo"])))
+
+	# Spianare porta lo Scavo a 0: il banner deve dirlo.
+	stretto.was_razed = true
+	var u0: Dictionary = BoardLayout3D.scavo_uv(stretto)
+	_eq("uno spianato mostra lo zero", int(u0["valore"]), 0)
+	_approx("  cioe' la prima riga", (u0["offset"] as Vector2).y, 0.0)
+
+	# L'Impronta alza lo Scavo: anche quello si vede.
+	stretto.was_razed = false
+	stretto.bonus_scavo = 1
+	_eq("un'Impronta sposta la riga", int(BoardLayout3D.scavo_uv(stretto)["valore"]),
+		int(stretto.data["scavo"]) + 1)
+
+	# Le due facce: davanti e dietro, grandi quanto la basetta.
+	var facce := BoardLayout3D.facce_basetta(gs, largo)
+	_eq("il banner sta su due facce", facce.size(), 2)
+	var piede := BoardLayout3D.basetta_box(gs, largo)
+	for f in facce:
+		var d: Vector2 = f["dim"]
+		_ok("  grande quanto la basetta",
+			is_equal_approx(d.x, piede.size.x) and is_equal_approx(d.y, piede.size.y))
+		break
+	_approx("  una davanti", (facce[0]["pos"] as Vector3).z, piede.end.z)
+	_approx("  e una dietro", (facce[1]["pos"] as Vector3).z, piede.position.z)
+
 # I lavoratori sono pupazzetti e si contano: quelli in mano stanno sulla
 # bacchetta, quelli usati sulla strada, e non se ne perde nessuno per via.
 func _test_pupazzetti() -> void:

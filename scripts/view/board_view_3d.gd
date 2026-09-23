@@ -253,6 +253,31 @@ func _basetta(b: Building) -> void:
 	var m := _scatola(box.size, COLORI_GIOCATORE[b.owner % COLORI_GIOCATORE.size()].darkened(0.15))
 	m.position = box.position + box.size / 2.0
 	add_child(m)
+	_banner_scavo(b)
+
+# Il valore di Scavo scritto sulla basetta, davanti e dietro: la striscia di
+# terra e macerie che cresce col numero. Due piani appoggiati alle facce, non
+# la texture della scatola - una BoxMesh porterebbe lo stesso disegno anche
+# sui fianchi e sopra, dove ci sta in piedi la sagoma.
+func _banner_scavo(b: Building) -> void:
+	if not ResourceLoader.exists(BoardLayout3D.SCAVO_PATH): return
+	var tex := load(BoardLayout3D.SCAVO_PATH) as Texture2D
+	if tex == null: return
+	var uv: Dictionary = BoardLayout3D.scavo_uv(b)
+	for f in BoardLayout3D.facce_basetta(gs, b):
+		var p := _quad(f["dim"], Color.WHITE, true)
+		var mat := p.material_override as StandardMaterial3D
+		mat.albedo_texture = tex
+		mat.texture_filter = BaseMaterial3D.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
+		mat.uv1_scale = Vector3((uv["scala"] as Vector2).x, (uv["scala"] as Vector2).y, 1.0)
+		mat.uv1_offset = Vector3((uv["offset"] as Vector2).x, (uv["offset"] as Vector2).y, 0.0)
+		# Il quad guarda +Z: quello dietro si gira, se no si vedrebbe il
+		# disegno specchiato e il numero al contrario.
+		if not bool(f["davanti"]): p.rotate_y(PI)
+		# Un pelo fuori dalla faccia, se no i due piani complanari sfarfallano.
+		var fuori := 0.15 if bool(f["davanti"]) else -0.15
+		p.position = (f["pos"] as Vector3) + Vector3(0.0, 0.0, fuori)
+		add_child(p)
 
 func _sagoma(b: Building) -> void:
 	var dim := BoardLayout3D.standee_size(b)

@@ -465,19 +465,25 @@ def main(dest):
     if mancanti:
         print("NEI PDF NON CI SONO -> " + "; ".join(mancanti))
 
-    # Lo sfondo del cielo sta in materiali/ come gli altri originali, ma
-    # quella cartella ha un .gdignore: Godot non ci guarda dentro. Va quindi
-    # copiato fra gli asset, dove il resto della grafica gia' vive.
-    sfondo = os.path.join(ROOT, "materiali", "Sfondo.png")
-    if os.path.exists(sfondo):
-        os.makedirs(dest, exist_ok=True)
-        with open(sfondo, "rb") as a, open(os.path.join(dest, "sfondo.png"), "wb") as b:
-            b.write(a.read())
-        pix = pymupdf.Pixmap(sfondo)
-        print(f"sfondo del cielo: {pix.width}x{pix.height} px "
-              f"(rapporto {pix.width / pix.height:.3f})")
-    else:
-        print("sfondo del cielo: manca materiali/Sfondo.png")
+    # Lo sfondo del cielo e il banner dello Scavo stanno in materiali/ come
+    # gli altri originali, ma quella cartella ha un .gdignore: Godot non ci
+    # guarda dentro. Vanno quindi copiati fra gli asset, dove il resto della
+    # grafica gia' vive. Non si ritagliano qui: il banner e' una striscia
+    # sola con cinque righe, e a prendere la riga giusta ci pensa la vista
+    # con le coordinate della texture - cosi' aggiungerne una domani vuol dire
+    # cambiare l'immagine e basta.
+    for originale, copia, che in (("Sfondo.png", "sfondo.png", "sfondo del cielo"),
+                                  ("Scavo.png", "scavo.png", "banner dello Scavo")):
+        fonte = os.path.join(ROOT, "materiali", originale)
+        if os.path.exists(fonte):
+            os.makedirs(dest, exist_ok=True)
+            with open(fonte, "rb") as a, open(os.path.join(dest, copia), "wb") as b:
+                b.write(a.read())
+            pix = pymupdf.Pixmap(fonte)
+            print(f"{che}: {pix.width}x{pix.height} px "
+                  f"(rapporto {pix.width / pix.height:.3f})")
+        else:
+            print(f"{che}: manca materiali/{originale}")
 
     sag = estrai_sagome(doc, dest)
     with open(os.path.join(dest, "indice.json"), "w", encoding="utf-8") as f:

@@ -206,6 +206,46 @@ static func quota_sotto(gs: GameState, b: Building, col: int) -> int:
 		q = maxi(q, s.level)
 	return q
 
+# ---- il banner dello Scavo -------------------------------------------
+# IL VALORE DI SCAVO STA SCRITTO SULLA BASETTA, davanti e dietro. Prima lo
+# sapeva solo chi apriva il riquadro col mouse, eppure e' il numero che decide
+# se valga la pena sotterrare un edificio invece di restaurarlo.
+#
+# L'immagine e' UNA SOLA: cinque strisce sovrapposte, una per valore. La
+# striscia e' lunga quanto un edificio da tre slot; per quelli piu' corti si
+# taglia da SINISTRA, dove ci sono solo macerie, e resta la parte destra col
+# numero. Non si ritaglia in cinque file al momento di estrarre la grafica:
+# si sposta la finestra sulla texture, cosi' aggiungere un valore domani vuol
+# dire cambiare l'immagine e basta.
+const SCAVO_PATH := "res://assets/scavo.png"
+const SCAVO_RIGHE := 5           # le strisce dell'immagine: 0, 1, 2, 3, 4
+const SCAVO_SLOT_MAX := 3        # la striscia copre un edificio da tre slot
+
+# Che fetta di texture mostrare per questo edificio. Il valore e' quello
+# EFFETTIVO - `scavo_value` tiene conto delle Impronte e dello spianamento,
+# che porta lo Scavo a 0 - quindi il banner dice sempre la verita' di adesso.
+static func scavo_uv(b: Building) -> Dictionary:
+	var valore := clampi(b.scavo_value(), 0, SCAVO_RIGHE - 1)
+	var frazione := span_w(b.width()) / span_w(SCAVO_SLOT_MAX)
+	return {
+		"valore": valore,
+		"fuori_scala": b.scavo_value() > SCAVO_RIGHE - 1,
+		"scala": Vector2(frazione, 1.0 / float(SCAVO_RIGHE)),
+		"offset": Vector2(1.0 - frazione, float(valore) / float(SCAVO_RIGHE)),
+	}
+
+# Le due facce della basetta su cui va il banner: quella davanti, dal lato di
+# chi guarda, e quella dietro. Restituisce centro e dimensioni del rettangolo.
+static func facce_basetta(gs: GameState, b: Building) -> Array[Dictionary]:
+	var r := basetta_box(gs, b)
+	var centro := Vector2(r.position.x + r.size.x / 2.0, r.position.y + r.size.y / 2.0)
+	return [
+		{"davanti": true, "pos": Vector3(centro.x, centro.y, r.end.z),
+			"dim": Vector2(r.size.x, r.size.y)},
+		{"davanti": false, "pos": Vector3(centro.x, centro.y, r.position.z),
+			"dim": Vector2(r.size.x, r.size.y)},
+	]
+
 # La basetta: ogni sagoma ne ha una. 15 mm di profondita' per 4 mm di cartone.
 static func basetta_box(gs: GameState, b: Building) -> AABB:
 	var c := standee_base(gs, b)

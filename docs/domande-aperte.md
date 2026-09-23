@@ -1127,3 +1127,27 @@ dato è stato importato da lì. Ma due confronti fra ciò che è stampato e
     243, e le sagome in piedi a fine partita da 33 a 80. Meno Scavo, piu'
     rendita e piu' vetusta': e' il conto che il simulatore faceva gia', ma il
     porting no.
+
+79. **Il banner dello Scavo ha cinque righe, i valori stampati arrivano a 6.**
+    L'immagine `materiali/Scavo.png` porta cinque strisce, una per valore, dallo
+    **0 al 4**. I valori di Scavo in `data/cards.json` sono invece **0, 2, 3, 5,
+    6**: il 4 e l'1 non esistono su nessuna carta, e otto edifici stanno oltre la
+    scala —
+
+    | valore | carte |
+    |---|---|
+    | 5 | Circolo di pietre, Tumulo funerario, Teatro, Foro, Abbazia, Duomo |
+    | 6 | Grotte dipinte, Anfiteatro |
+
+    E non e' solo il valore stampato: l'Impronta dell'Incisore alza lo Scavo di
+    **+3 permanenti**, quindi anche una carta da 3 puo' arrivare a 6.
+
+    Per ora la vista **appiattisce sul 4** quello che va oltre, il che vuol dire
+    un numero SBAGLIATO sul tavolo per quelle otto carte. Il codice non ha
+    bisogno di altro che di un'immagine piu' alta: `SCAVO_RIGHE` dice quante
+    strisce ci sono e la vista prende la riga per valore, non per posizione.
+
+    **Serve una decisione del designer**: aggiungere le strisce 5 e 6
+    all'immagine (e allora il 4 e l'1 restano li' inutilizzati, che va bene -
+    l'Impronta puo' portarci), oppure rivedere i valori di Scavo delle carte
+    perche' stiano dentro lo 0-4.
