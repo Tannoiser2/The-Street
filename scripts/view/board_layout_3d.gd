@@ -579,9 +579,13 @@ static func cubetti(gs: GameState, b: Building) -> Array[Dictionary]:
 	var base := standee_base(gs, b)
 	var larghezza := (quanti * CUBETTO + (quanti - 1) * CUBETTO_GAP)
 	# Se sono troppi per la basetta si stringono: meglio affollati che fuori.
-	var disponibile := span_w(b.width()) - 4.0
+	# E il pezzo di basetta dove sta il gettone dello scheletro non e' loro:
+	# senza tenerglielo da parte, su un edificio con tanta vetusta i cubetti
+	# ci finivano sotto e si vedeva una fila di cubi mezzi dentro un gettone.
+	var riservato := (scheletro_size().x + 2.0) if b.buried_character != "" else 0.0
+	var disponibile := span_w(b.width()) - 4.0 - riservato
 	var scala: float = minf(1.0, disponibile / maxf(larghezza, 0.001))
-	var x0 := base.x - larghezza * scala / 2.0
+	var x0 := base.x - riservato / 2.0 - larghezza * scala / 2.0
 	var z := base.z + BASETTA_D / 2.0 - CUBETTO / 2.0 - 1.0
 	for i in quanti:
 		out.append({
@@ -590,6 +594,50 @@ static func cubetti(gs: GameState, b: Building) -> Array[Dictionary]:
 			"tipo": "vetusta" if i < b.vetusta else "resistenza",
 		})
 	return out
+
+# ---- il gettone dello scheletro --------------------------------------
+# "Nelle ere 1-4, a fine era il personaggio non si scarta: infilatelo sotto la
+# carta di un vostro edificio ancora in piedi." Quel personaggio sepolto vale
+# 6 meno l'era in cui e' stato sepolto - 5, 4, 3, 2 - ed e' l'unica cosa che
+# un edificio continua a rendere anche da rovina.
+#
+# Sul tavolo e' un gettone quadrato posato sulla basetta, uno per era, con
+# sopra lo scheletro dell'epoca e il suo valore. Prima era un cubetto color
+# ocra: si vedeva che li' sotto c'era qualcuno, non chi ne' quanto valeva.
+# I gettoni sono QUATTRO perche' quattro sono le ere che seppelliscono: "i
+# personaggi dell'era Moderna si scartano".
+#
+# L'immagine e' una sola, quattro caselle in fila: si sposta la finestra
+# sulla texture invece di ritagliare quattro file, come per il banner dello
+# Scavo. L'atlante lo prepara `tools/estrai_grafica.py`.
+const SCHELETRO_PATH := "res://assets/scheletri.png"
+const SCHELETRI_COLONNE := 4
+const SCHELETRO_LATO := 13.0                # quanto e' alto il gettone
+const SCHELETRO_RAPPORTO := 487.0 / 450.0   # il gettone e' quasi quadrato
+const SCHELETRO_SPESSORE := 1.6             # cartoncino spesso, non un cubo
+# Non disteso sulla basetta: APPOGGIATO ALL'INDIETRO contro la sagoma. La
+# telecamera guarda il tavolo quasi di taglio, e un gettone steso di piatto
+# si vede come una riga di due millimetri - cioe' meno del cubetto che
+# sostituisce. In piedi si legge, e sul tavolo vero e' come lo si appoggia
+# quando lo si vuole far vedere.
+const SCHELETRO_PENDENZA := 0.30            # rad, all'indietro
+
+static func scheletro_size() -> Vector2:
+	return Vector2(SCHELETRO_LATO * SCHELETRO_RAPPORTO, SCHELETRO_LATO)
+
+# Dove poggia: a destra sulla basetta, sul davanti, dove non copre la sagoma
+# ne' i cubetti della vetusta, che stanno a sinistra.
+static func scheletro_piede(gs: GameState, b: Building) -> Vector3:
+	var base := standee_base(gs, b)
+	var largo := scheletro_size().x
+	return Vector3(base.x + span_w(b.width()) / 2.0 - largo / 2.0 - 1.5,
+		base.y + BASETTA_Y, base.z + BASETTA_D / 2.0 - 1.5)
+
+# La casella dell'era: la prima e' l'era 1, che vale 5.
+static func scheletro_uv(era: int) -> Dictionary:
+	var i := clampi(era - 1, 0, SCHELETRI_COLONNE - 1)
+	return {"scala": Vector2(1.0 / float(SCHELETRI_COLONNE), 1.0),
+		"offset": Vector2(float(i) / float(SCHELETRI_COLONNE), 0.0)}
 
 # Le linguette dei potenziamenti, che sporgono da sotto la sagoma.
 static func linguette(gs: GameState, b: Building) -> Array[Vector3]:

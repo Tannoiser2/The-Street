@@ -775,10 +775,46 @@ func _segnalini(b: Building) -> void:
 	# pupazzetto come gli altri, e lo mette in tavola `_pupazzetti` - uno solo
 	# per lavoratore, che sta o sulla bacchetta o sulla strada.
 	if b.buried_character != "":
-		var sep := _scatola(Vector3(8.0, 8.0, 8.0), Color("#8a6f3a"))
-		sep.position = base + Vector3(BoardLayout3D.span_w(b.width()) / 2.0 - 5.0,
-			BoardLayout3D.BASETTA_Y + 4.0, BoardLayout3D.BASETTA_D / 2.0 - 3.0)
-		add_child(sep)
+		_gettone_scheletro(b)
+
+# Il gettone del personaggio sepolto, posato sulla basetta: lo scheletro
+# dell'era in cui e' stato sepolto, col suo valore stampato sopra. Senza
+# l'immagine - assets/ si rigenera e non e' versionata - resta il cubetto
+# color ocra di prima, cosi' le partite headless non dipendono dalla grafica.
+func _gettone_scheletro(b: Building) -> void:
+	var piede := BoardLayout3D.scheletro_piede(gs, b)
+	var dim := BoardLayout3D.scheletro_size()
+	var tex: Texture2D = null
+	if ResourceLoader.exists(BoardLayout3D.SCHELETRO_PATH):
+		tex = load(BoardLayout3D.SCHELETRO_PATH) as Texture2D
+	if tex == null:
+		var cubo := _scatola(Vector3(8.0, 8.0, 8.0), Color("#8a6f3a"))
+		cubo.position = piede + Vector3(0.0, 4.0, -4.0)
+		add_child(cubo)
+		return
+	# Il perno sta al PIEDE del gettone, sul davanti: e' li' che appoggia
+	# sulla basetta, e da li' si inclina all'indietro.
+	var perno := Node3D.new()
+	perno.position = piede
+	perno.rotation = Vector3(-BoardLayout3D.SCHELETRO_PENDENZA, 0.0, 0.0)
+	add_child(perno)
+	# Il cartoncino sotto la stampa: da' spessore al gettone, che di taglio
+	# altrimenti sparirebbe.
+	var spessore := _scatola(Vector3(dim.x, dim.y, BoardLayout3D.SCHELETRO_SPESSORE),
+		Color("#3a3128"))
+	spessore.position = Vector3(0.0, dim.y / 2.0, 0.0)
+	perno.add_child(spessore)
+	var uv: Dictionary = BoardLayout3D.scheletro_uv(b.buried_character_era)
+	var faccia := _quad(dim, Color.WHITE)
+	var mat := faccia.material_override as StandardMaterial3D
+	mat.albedo_texture = tex
+	mat.texture_filter = BaseMaterial3D.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
+	mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	mat.uv1_scale = Vector3((uv["scala"] as Vector2).x, (uv["scala"] as Vector2).y, 1.0)
+	mat.uv1_offset = Vector3((uv["offset"] as Vector2).x, (uv["offset"] as Vector2).y, 0.0)
+	faccia.position = Vector3(0.0, dim.y / 2.0,
+		BoardLayout3D.SCHELETRO_SPESSORE / 2.0 + 0.05)
+	perno.add_child(faccia)
 
 # Una scritta che guarda sempre la telecamera: le carte sono stese sul tavolo
 # e viste di scorcio, quindi il testo stampato sopra non si leggerebbe.

@@ -53,6 +53,7 @@ func _ready() -> void:
 	_run("la sagoma e' un pezzo solo, spesso", _test_sagoma_estrusa)
 	_run("la sagoma si sgretola quando crolla", _test_sgretolamento)
 	_run("  e la vista se ne accorge da sola", _test_sgretolamento_nella_vista)
+	_run("il gettone del personaggio sepolto", _test_gettone_scheletro)
 	print("\n%d superati, %d falliti" % [_passed, _failed])
 	get_tree().quit(0 if _failed == 0 else 1)
 
@@ -2260,3 +2261,80 @@ func _test_sgretolamento_nella_vista() -> void:
 	vista._process(BoardLayout3D.CROLLO_DURATA)
 	_ok("e alla fine non resta niente da animare", vista._crolli.is_empty())
 	vista.queue_free()
+
+# Il gettone del personaggio sepolto: uno per era, col suo valore stampato
+# sopra. Prima era un cubetto color ocra e non si sapeva ne' chi fosse ne'
+# quanto valesse.
+func _test_gettone_scheletro() -> void:
+	# Quattro caselle sull'atlante, una per era che seppellisce: "i personaggi
+	# dell'era Moderna si scartano", quindi le ere sono 1-4.
+	_eq("le caselle sono le ere che seppelliscono",
+		BoardLayout3D.SCHELETRI_COLONNE, 4)
+	var viste := {}
+	for era in [1, 2, 3, 4]:
+		var uv: Dictionary = BoardLayout3D.scheletro_uv(era)
+		var off: Vector2 = uv["offset"]
+		_approx("  l'era %d prende un quarto di atlante" % era,
+			(uv["scala"] as Vector2).x, 0.25)
+		viste[off.x] = era
+		_ok("  e la casella e' quella dell'era (offset %.2f)" % off.x,
+			is_equal_approx(off.x, (era - 1) * 0.25))
+	_eq("  quattro ere, quattro caselle diverse", viste.size(), 4)
+	# Un'era fuori gamma non deve prendere una casella che non c'e': il
+	# gettone sbagliato e' meglio di una texture vuota.
+	var fuori: Dictionary = BoardLayout3D.scheletro_uv(9)
+	_ok("un'era fuori gamma resta dentro l'atlante",
+		(fuori["offset"] as Vector2).x <= 0.75 + 0.0001)
+
+	# E sta sulla basetta, tutto: un gettone che sporge dal piede sembra
+	# appoggiato per aria.
+	var gs := _gioco().gs
+	var b := _metti(gs, _largo(3), 1, 2)
+	b.buried_character = "pe_mercante"
+	b.buried_character_era = 2
+	var piede := BoardLayout3D.scheletro_piede(gs, b)
+	var base := BoardLayout3D.standee_base(gs, b)
+	var dim := BoardLayout3D.scheletro_size()
+	var basetta := BoardLayout3D.basetta_box(gs, b)
+	_ok("il gettone poggia sulla basetta, non per aria",
+		is_equal_approx(piede.y, base.y + BoardLayout3D.BASETTA_Y))
+	_ok("  e sta dentro il piede in larghezza",
+		piede.x - dim.x / 2.0 >= basetta.position.x - 0.01
+		and piede.x + dim.x / 2.0 <= basetta.end.x + 0.01)
+	_ok("  e dentro il piede in profondita'",
+		piede.z <= basetta.end.z + 0.01 and piede.z >= basetta.position.z - 0.01)
+
+	# I cubetti della vetusta stanno a sinistra e gli lasciano il posto:
+	# senza, su un edificio pieno di vetusta la fila finiva sotto il gettone.
+	b.vetusta = 6
+	var invasi := 0
+	for c in BoardLayout3D.cubetti(gs, b):
+		var x: float = (c["pos"] as Vector3).x
+		if x + float(c["lato"]) / 2.0 > piede.x - dim.x / 2.0: invasi += 1
+	_eq("nessun cubetto finisce sotto il gettone", invasi, 0)
+	# Su una basetta stretta il posto non basta per tutti: i cubetti si
+	# stringono, e senza sepolto tornano a prendersi tutto il piede.
+	var stretto := _metti(gs, _largo(1), 4, 2)
+	stretto.vetusta = 6
+	var largo_senza: float = _larghezza_cubetti(BoardLayout3D.cubetti(gs, stretto))
+	stretto.buried_character = "pe_mercante"
+	stretto.buried_character_era = 1
+	var largo_con: float = _larghezza_cubetti(BoardLayout3D.cubetti(gs, stretto))
+	_ok("  e col gettone sopra si stringono (%.1f contro %.1f mm)"
+		% [largo_con, largo_senza], largo_con < largo_senza - 0.5)
+	var piede1 := BoardLayout3D.scheletro_piede(gs, stretto)
+	var sotto := 0
+	for c in BoardLayout3D.cubetti(gs, stretto):
+		if (c["pos"] as Vector3).x + float(c["lato"]) / 2.0 \
+			> piede1.x - BoardLayout3D.scheletro_size().x / 2.0: sotto += 1
+	_eq("  e nemmeno li' finiscono sotto il gettone", sotto, 0)
+
+func _larghezza_cubetti(lista: Array) -> float:
+	if lista.is_empty(): return 0.0
+	var minimo := 1e9
+	var massimo := -1e9
+	for c in lista:
+		var x: float = (c["pos"] as Vector3).x
+		minimo = minf(minimo, x - float(c["lato"]) / 2.0)
+		massimo = maxf(massimo, x + float(c["lato"]) / 2.0)
+	return massimo - minimo
