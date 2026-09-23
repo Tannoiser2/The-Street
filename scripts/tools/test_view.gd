@@ -248,15 +248,16 @@ func _test_partita() -> void:
 	_eq("nessuna sovrapposizione alla stessa quota", scontri, 0)
 
 # ---- geometria 3D ---------------------------------------------------
-# Il tavolo: X le colonne, Z i binari con l'ERA 1 DAVANTI, Y le quote.
+# Il tavolo: X le colonne, Z i binari con l'ERA 1 IN FONDO, Y le quote.
 func _test_3d_assi() -> void:
-	# "Davanti" e' dal lato della telecamera, che guarda verso le z calanti:
-	# l'era 1 ha percio' la z maggiore, non la minore.
+	# "Davanti" e' dal lato della telecamera, che guarda verso le z calanti.
+	# L'era 1 sta IN FONDO: e' sulle sue rovine che si costruisce in alto, e
+	# le pile alte davanti farebbero da muro alla citta' recente.
 	var cam := BoardLayout3D.camera_position(_gioco().gs)
-	_ok("l'era 1 sta davanti a tutte",
-		absf(cam.z - BoardLayout3D.rail_z(1)) < absf(cam.z - BoardLayout3D.rail_z(2)))
-	_ok("  e l'era 5 in fondo",
-		absf(cam.z - BoardLayout3D.rail_z(5)) > absf(cam.z - BoardLayout3D.rail_z(4)))
+	_ok("l'era 1 sta in fondo a tutte",
+		absf(cam.z - BoardLayout3D.rail_z(1)) > absf(cam.z - BoardLayout3D.rail_z(2)))
+	_ok("  e l'era 5 davanti",
+		absf(cam.z - BoardLayout3D.rail_z(5)) < absf(cam.z - BoardLayout3D.rail_z(4)))
 	# Misurato dal cartone: la tessera colonna e' un'unica striscia da 271 mm
 	# con cinque binari contigui. Non c'e' nessuno stacco fra i binari, e cio'
 	# che lascia vedere le file dietro e' la basetta, che degli 54 mm dello
@@ -275,7 +276,8 @@ func _test_3d_assi() -> void:
 		"fascia %.0f-%.0f su %.0f mm" % [BoardLayout3D.BANDA_SU,
 			BoardLayout3D.BANDA_GIU, BoardLayout3D.TESSERA_D])
 	_ok("nessuna sagoma finisce sul testo della tessera",
-		BoardLayout3D.rail_z(1) + BoardLayout3D.SLOT_D <= BoardLayout3D.BANDA_GIU + 0.001)
+		BoardLayout3D.rail_z(BoardLayout3D.RAILS) + BoardLayout3D.SLOT_D
+		<= BoardLayout3D.BANDA_GIU + 0.001)
 	_ok("la basetta sta dentro il suo binario",
 		BoardLayout3D.BASETTA_D < BoardLayout3D.SLOT_D,
 		"basetta %.0f su un binario di %.0f mm" % [BoardLayout3D.BASETTA_D,
@@ -370,8 +372,8 @@ func _test_3d_scena() -> void:
 	_approx("il cielo e' attaccato al bordo alto delle tessere", cielo.position.z, 0.0)
 	_approx("  ed e' largo quanto le tessere", cielo.size.x, BoardLayout3D.board_w(gs))
 	_approx("  e parte dal piano del tavolo", cielo.position.x, 0.0)
-	_ok("  e sta dietro l'ultimo binario",
-		cielo.position.z <= BoardLayout3D.rail_z(BoardLayout3D.RAILS))
+	_ok("  e sta dietro il binario piu' lontano, quello dell'era 1",
+		cielo.position.z <= BoardLayout3D.rail_z(1))
 	_ok("  e in piedi, non steso", cielo.size.y > 0.0 and cielo.size.z == 0.0)
 
 	# E NON E' PIU' UN MURO. A pannello intero saliva quasi quanto e'
@@ -386,8 +388,9 @@ func _test_3d_scena() -> void:
 	_approx("  restando largo quanto le tessere", cielo.size.x, intero.size.x)
 
 	var cam := BoardLayout3D.camera_position(gs)
-	_ok("la telecamera sta davanti alla prima fila", cam.z > BoardLayout3D.rail_z(1))
-	_ok("  e alzata, per vedere oltre l'era 1", cam.y > 1.0)
+	_ok("la telecamera sta davanti a tutti i binari",
+		cam.z > BoardLayout3D.rail_z(BoardLayout3D.RAILS) + BoardLayout3D.SLOT_D)
+	_ok("  e alzata, per vedere oltre la prima fila", cam.y > 1.0)
 	var mira := BoardLayout3D.camera_target(gs)
 	_ok("  e guarda verso il fondo della strada", mira.z < cam.z)
 
@@ -640,7 +643,8 @@ func _test_tavolo() -> void:
 	var davanti := 0
 	for p in plance:
 		var r: AABB = p["aabb"]
-		if absf(cam.z - r.position.z) < absf(cam.z - BoardLayout3D.rail_z(1)): davanti += 1
+		if absf(cam.z - r.position.z) \
+			< absf(cam.z - BoardLayout3D.rail_z(BoardLayout3D.RAILS)): davanti += 1
 	_eq("tutte davanti alla strada", davanti, gs.n_players)
 
 	# Il tavolo contiene tutto: strada, file e plance.
@@ -2404,18 +2408,34 @@ func _test_cartello_prosperita() -> void:
 		% BoardLayout3D.BANDA_GIU,
 		box.position.z > BoardLayout3D.BANDA_GIU)
 
-	# Il Centro Urbano e' "tre edifici intatti di almeno due proprietari": si
-	# fa e si disfa da solo, e il cartellino lo segue.
+	# Il Centro Urbano e' "N edifici intatti di almeno due proprietari": si fa
+	# e si disfa da solo, e il cartellino lo segue. La soglia si legge dai
+	# dati, non si scrive qui: e' una manopola di bilanciamento, e un test che
+	# la ricopia smette di provare qualcosa il giorno che la si gira.
+	var soglia := int(CardDB.constants["prosperity"]["min_buildings"])
+	var proprietari := int(CardDB.constants["prosperity"]["min_owners"])
 	_ok("una colonna vuota non e' un Centro", not gs.grid.is_prosperity_center(3))
-	var a := _metti(gs, "ed_capanne", 3, 1, 0, 0)
-	var b := _metti(gs, "ed_capanne", 3, 2, 0, 0)
-	_ok("  due edifici di un solo proprietario nemmeno",
+	# Tutti dello stesso proprietario: per quanti siano, non e' un Centro.
+	# Uno in piu' della soglia, cosi' se ne puo' buttare giu' uno e restare
+	# esattamente al limite.
+	var miei: Array[Building] = []
+	for i in soglia + 1:
+		miei.append(_metti(gs, "ed_capanne", 3, mini(i + 1, 5), 0, 0))
+	_ok("  %d edifici di un solo proprietario nemmeno" % (soglia + 1),
 		not gs.grid.is_prosperity_center(3))
-	var c := _metti(gs, "ed_capanne", 3, 3, 0, 1)
-	_ok("  tre edifici di due proprietari si", gs.grid.is_prosperity_center(3))
-	c.state = Enums.BuildingState.ROVINA
-	_ok("  e se uno crolla il Centro si spegne", not gs.grid.is_prosperity_center(3))
-	c.state = Enums.BuildingState.RUDERE
+	# L'ULTIMO passa all'avversario: adesso la colonna ha abbastanza edifici e
+	# abbastanza proprietari.
+	miei[miei.size() - 1].owner = 1
+	_ok("  con %d proprietari diversi si' (soglia %d edifici)"
+		% [proprietari, soglia], gs.grid.is_prosperity_center(3))
+	# Si butta giu' uno di quelli in piu' - non quello dell'avversario, se no
+	# a spegnere il Centro sarebbero i proprietari e non il conto degli
+	# edifici - e si resta esattamente al limite.
+	miei[0].state = Enums.BuildingState.ROVINA
+	_ok("  con esattamente %d edifici intatti resta acceso" % soglia,
+		gs.grid.is_prosperity_center(3))
+	miei[1].state = Enums.BuildingState.ROVINA
+	_ok("  e sotto la soglia si spegne", not gs.grid.is_prosperity_center(3))
+	miei[1].state = Enums.BuildingState.RUDERE
 	_ok("  un rudere non lo riaccende: e' in piedi ma spento",
 		not gs.grid.is_prosperity_center(3))
-	_ok("  a, b restano in piedi", a.is_standing() and b.is_standing())

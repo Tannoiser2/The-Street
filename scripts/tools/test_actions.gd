@@ -58,10 +58,12 @@ func _test_libro_mastro() -> void:
 		for c in canali:
 			var tabellone := int(dal_tabellone.get(c, 0))
 			var carte := int(dalle_carte.get(c, 0))
-			# La Verticalita' si arrotonda due volte - una per giocatore, una
-			# per carta - e lo scarto puo' arrivare a un punto per colonna.
-			var tolleranza: int = ctl.gs.grid.n_cols if c == "verticalita" else 0
-			if absi(tabellone - carte) > tolleranza:
+			# NESSUNA TOLLERANZA, nemmeno sulla Verticalita'. Prima ne aveva
+			# una di un punto per colonna, perche' la meta' divisa veniva
+			# arrotondata carta per carta e la somma non tornava; adesso la
+			# quota del giocatore si spezza fra le sue carte col resto piu'
+			# grande (Scoring._spezza) e i due conti sono lo stesso numero.
+			if tabellone != carte:
 				storte += 1
 				if esempio == "":
 					esempio = "partita %d, %s: tabellone %d, carte %d" % [

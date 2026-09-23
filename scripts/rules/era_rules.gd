@@ -83,7 +83,13 @@ static func resolve_event(gs: GameState) -> Array[int]:
 			b.vetusta = min(b.vetusta + 1, vmax)
 			continue
 		var gap := force - eff
-		if b.state == Enums.BuildingState.INTATTO and gap == 1:
+		# QUANTO SI PUO' FALLIRE RESTANDO IN PIEDI. "Fallire di 1 -> rudere,
+		# di 2+ -> rovina" e' la regola stampata, ed e' questa soglia: era
+		# scritta come `gap == 1` dentro il codice, e una regola di
+		# bilanciamento scritta nel codice non si puo' ne' leggere ne' provare
+		# senza ricompilare. Adesso sta nei dati come tutte le altre.
+		var soglia := int(CardDB.constants.get("rovina_gap", 2))
+		if b.state == Enums.BuildingState.INTATTO and gap < soglia:
 			b.state = Enums.BuildingState.RUDERE
 			gs.log_line("%s diventa rudere" % b.data["name"])
 		else:

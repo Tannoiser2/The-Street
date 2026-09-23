@@ -18,7 +18,7 @@ def leggi(pattern):
     # Prima che esistessero le strategie l'unico bot era quello a caso, e
     # prima che la tabella finisse nell'intestazione c'era quella ripida: un
     # CSV senza quei campi viene da li'.
-    carte, partite, giocatori, bot, vert = {}, 0, None, "caso", "2/6/12/20"
+    carte, partite, giocatori, bot, vert, prosp = {}, 0, None, "caso", "2/6/12/20", 3
     for f in sorted(glob.glob(pattern)):
         righe = [l.rstrip("\n") for l in open(f) if l.strip()]
         meta = [l for l in righe if l.startswith("# partite=")][0]
@@ -26,19 +26,31 @@ def leggi(pattern):
         giocatori = int(meta.split("giocatori=")[1].split()[0])
         if "bot=" in meta: bot = meta.split("bot=")[1].split()[0]
         if "verticalita=" in meta: vert = meta.split("verticalita=")[1].split()[0]
+        # La soglia del Centro Urbano e' arrivata dopo: un CSV che non la
+        # dichiara viene da quando erano tre edifici.
+        if "prosperita=" in meta: prosp = int(meta.split("prosperita=")[1].split()[0])
         i = righe.index([l for l in righe if l.startswith("id;")][0])
         hdr = righe[i].split(";")
         for l in righe[i+1:]:
             v = dict(zip(hdr, l.split(";")))
-            c = carte.setdefault(v["id"], {k: (int(v[k]) if k in NUM else v[k]) for k in v})
-            if c is not v:
+            c = carte.get(v["id"])
+            if c is None:
+                # Prima volta che si vede questa carta: si prende la riga.
+                # ATTENZIONE: qui c'era `setdefault` seguito da una somma, e la
+                # riga del PRIMO file finiva contata due volte - una nel
+                # costruire il totale e una nel sommarci sopra, perche' il dizionario
+                # appena creato non e' mai lo stesso oggetto della riga letta.
+                # Con quattro spezzoni tutte le medie "per partita" uscivano
+                # gonfiate del 25%.
+                carte[v["id"]] = {k: (int(v[k]) if k in NUM else v[k]) for k in v}
+            else:
                 for k in NUM: c[k] += int(v[k])
-    return carte, partite, giocatori, bot, vert
+    return carte, partite, giocatori, bot, vert, prosp
 
-carte, partite, giocatori, bot, vert = leggi(sys.argv[1])
+carte, partite, giocatori, bot, vert, prosp = leggi(sys.argv[1])
 altro = None
 if "--confronta" in sys.argv:
-    altro, partite_altro, _, bot_altro, vert_altro = leggi(
+    altro, partite_altro, _, bot_altro, vert_altro, prosp_altro = leggi(
         sys.argv[sys.argv.index("--confronta") + 1])
     # Le due colonne si chiamano come la cosa che le distingue: se a cambiare
     # e' chi gioca si parla di bot, se e' la tabella della Verticalita' si
@@ -50,6 +62,14 @@ if "--confronta" in sys.argv:
         TITOLO = "Cosa cambia quando i bot giocano davvero"
         SOTTO = (f"Le stesse misure su {partite_altro} partite **{COL_A}** e "
                  f"{partite} **{COL_B}**.")
+    elif prosp != prosp_altro:
+        COL_A = f"Centro a {prosp_altro} edifici"
+        COL_B = f"Centro a {prosp} edifici"
+        TITOLO = "Cosa cambia col Centro Urbano a due edifici"
+        SOTTO = (f"Le stesse misure su {partite_altro} partite con la Prosperità "
+                 f"Urbana che chiede **{prosp_altro} edifici intatti** nella colonna e "
+                 f"{partite} con **{prosp}**, a parità di tutto il resto: stessi semi, "
+                 "stessi bot, stesso numero di giocatori.")
     else:
         COL_A = f"Verticalità {vert_altro}"
         COL_B = f"Verticalità {vert}"
