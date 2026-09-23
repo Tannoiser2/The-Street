@@ -14,6 +14,9 @@ extends Node
 var _prima_edifici := {}
 var _prima_giocatori := []
 var _muto := false
+var _perche := false
+var _piano := false
+var _tutti := ""
 # Chi muove i bot: le cinque strategie vere o il tira-a-caso di RandomBot.
 # Il caso serve ancora come metro di paragone - "quanto pesa la testa di chi
 # gioca" e' la differenza fra le due colonne.
@@ -34,6 +37,14 @@ func _ready() -> void:
 	_tutto = args.has("tutto")
 	_strategie = not args.has("caso")
 	_candidate = args.has("candidate")
+	_perche = args.has("perche")
+	# IL TORNEO DEL PIANIFICATORE. `--piano` fa pianificare l'era a UN posto,
+	# che ruota di partita in partita cosi' nessuno siede sempre li';
+	# `--tutti rendita` fa giocare a tutti la stessa strategia. Insieme isolano
+	# l'effetto del PIANIFICARE da quello della strategia: stessi bot, stesse
+	# preferenze, uno solo guarda avanti.
+	_piano = args.has("piano")
+	_tutti = str(args.get("tutti", ""))
 	# Una tabella della Verticalita' diversa da quella stampata, per provare
 	# "e se pagasse meno salire?" senza toccare data/cards.json - che resta
 	# l'unica fonte. Il simulatore di riferimento fa lo stesso con VBONUS.
@@ -134,7 +145,7 @@ func _lotto(seme: int, players: int, quante: int) -> void:
 	# cambiando quanto paga la Verticalita', cambia anche come si gioca e non
 	# solo quanto si segna.
 	print("seme;posto;giocatore;pv;strategia;sopra;quota_max;costruiti;"
-		+ ";".join(Riepilogo.VOCI.map(func(v): return str(v["id"]))))
+		+ ";".join(Riepilogo.VOCI.map(func(v): return str(v["id"]))) + ";piano")
 	for g in quante:
 		var ctl := GameController.new()
 		ctl.new_game(players, seme + g)
@@ -158,6 +169,7 @@ func _lotto(seme: int, players: int, quante: int) -> void:
 				"%d" % sopra, "%d" % quota, "%d" % costruiti]
 			for v in Riepilogo.VOCI:
 				campi.append("%d" % Riepilogo.punti(riga, str(v["id"])))
+			campi.append("1" if pianifica_qui(chi, g, players) else "0")
 			print(";".join(campi))
 	get_tree().quit(0)
 
@@ -234,11 +246,12 @@ func _stampa_vita(acc: Dictionary, quante: int, players: int, seme: int) -> void
 	var vt = CardDB.constants["verticality_vp"]
 	var scala: Array[String] = []
 	for i in 4: scala.append("%d" % int(vt[str(i + 1)]))
-	print("# partite=%d giocatori=%d seme_base=%d bot=%s verticalita=%s prosperita=%d rovina=%d binari=%s" % [
+	print("# partite=%d giocatori=%d seme_base=%d bot=%s verticalita=%s prosperita=%d rovina=%d binari=%s versione_bot=%d" % [
 		quante, players, seme, "strategie" if _strategie else "caso",
 		"/".join(scala), int(CardDB.constants["prosperity"]["min_buildings"]),
 		int(CardDB.constants.get("rovina_gap", 2)),
-		"liberi" if bool(CardDB.constants.get("binari_liberi", false)) else "per_era"])
+		"liberi" if bool(CardDB.constants.get("binari_liberi", false)) else "per_era",
+		StrategyBot.VERSIONE])
 	var intestazione: Array[String] = ["id", "nome", "era", "classi", "larghezza",
 		"costo_pietra", "costo_oro", "resistenza", "rendita", "scavo", "lampo_carta",
 		"copie", "n", "ere_intatto", "ere_piedi", "n_rudere", "n_rovina", "n_sepolto",
@@ -263,12 +276,98 @@ func _stampa_vita(acc: Dictionary, quante: int, players: int, seme: int) -> void
 # La strategia del posto `i` nella partita `g`: si ruota, cosi' ogni strategia
 # gioca ogni posto lo stesso numero di volte e il posto non falsa il confronto.
 func strategia_di(i: int, g: int) -> String:
+	if _tutti != "": return _tutti
 	var lista := StrategyBot.tutte() if _candidate else StrategyBot.STRATEGIE
 	return lista[(i + g) % lista.size()]
 
+# Chi pianifica in questa partita: un posto solo, a rotazione.
+func pianifica_qui(i: int, g: int, players: int) -> bool:
+	return _piano and i == g % players
+
 func _muovi(ctl: GameController, g: int) -> void:
-	if _strategie: StrategyBot.play_turn(ctl, strategia_di(ctl.gs.current_index, g))
+	if _strategie:
+		var chi := ctl.gs.current_index
+		if pianifica_qui(chi, g, ctl.gs.n_players):
+			PlanningBot.play_turn(ctl, strategia_di(chi, g))
+			return
+		StrategyBot.racconta = _perche
+		StrategyBot.taccuino = {}
+		StrategyBot.play_turn(ctl, strategia_di(chi, g))
+		if _perche: _ragiona(ctl.gs)
 	else: RandomBot.play_turn(ctl)
+
+# ---- perche' ha fatto quella mossa ---------------------------------
+# Il bot sceglie prima la colonna e poi, fra le mosse che quella colonna gli
+# apre, quella che vale di piu'. Qui si guarda la stessa classifica che si fa
+# lui - le funzioni non tirano dadi, quindi chiederla non cambia la partita -
+# e si stampa: cosa ha scelto, quanto valeva, DA COSA era fatto quel valore, e
+# cosa ha scartato. "Perche' ha fatto questa mossa" non si risponde altrimenti:
+# una mossa si capisce solo accanto a quelle che non ha fatto.
+func _ragiona(gs: GameState) -> void:
+	var t: Dictionary = StrategyBot.taccuino
+	if t.is_empty() or not t.has("colonne"): return
+	var colonne: Array = (t["colonne"] as Array).duplicate()
+	colonne.sort_custom(func(a, b): return float(a["valore"]) > float(b["valore"]))
+	if colonne.is_empty(): return
+	var col := int(t.get("col", -1))
+	var scelta_col: Dictionary = colonne[0]
+	for e in colonne:
+		if int(e["col"]) == col: scelta_col = e
+	_dì("    · **colonna %d** (%.1f): %s" % [col, float(scelta_col["valore"]),
+		_perche_colonna(gs, scelta_col)])
+	if colonne.size() > 1:
+		var seconda: Dictionary = colonne[0] if int(colonne[0]["col"]) != col else colonne[1]
+		_dì("      (la seconda era la %d a %.1f)" % [int(seconda["col"]),
+			float(seconda["valore"])])
+	if not t.has("scelta") or (t["scelta"] as Dictionary).is_empty():
+		_dì("      nessuna mossa vale piu' di zero: passa")
+		return
+	var scelta: Dictionary = t["scelta"]
+	_dì("    · **%s** (%.1f) perche': %s" % [_descrivi(scelta["mossa"]),
+		float(scelta["valore"]), _voci(scelta["dettaglio"])])
+	var altre: Array = (t["mosse"] as Array).duplicate()
+	altre.sort_custom(func(a, b): return float(a["valore"]) > float(b["valore"]))
+	var scartate: Array[String] = []
+	for e in altre:
+		if e["mossa"] == scelta["mossa"] or scartate.size() >= 3: continue
+		scartate.append("%s %.1f" % [_descrivi(e["mossa"]), float(e["valore"])])
+	if not scartate.is_empty():
+		_dì("      scartate: %s" % " · ".join(scartate))
+
+func _perche_colonna(gs: GameState, e: Dictionary) -> String:
+	var pezzi: Array[String] = []
+	pezzi.append("terreno %s" % _nome_terreno(gs.grid.terrains[int(e["col"])]))
+	if float(e["produzione"]) != 0.0:
+		pezzi.append("produzione e roba mia %.1f" % float(e["produzione"]))
+	if float(e["protezione"]) > 0.0:
+		var b = e["salva"]
+		pezzi.append("il lavoratore salva %s dall'evento (%.1f)" % [
+			b.data["name"] if b != null else "un edificio", float(e["protezione"])])
+	if float(e["mossa"]) > 0.0:
+		pezzi.append("ci si puo' fare una mossa da %.1f" % float(e["mossa"]))
+	return ", ".join(pezzi)
+
+# Le voci del punteggio, dalla piu' grossa, col segno.
+func _voci(dett: Dictionary) -> String:
+	var chiavi := dett.keys()
+	chiavi.sort_custom(func(a, b): return absf(float(dett[a])) > absf(float(dett[b])))
+	var pezzi: Array[String] = []
+	for k in chiavi:
+		pezzi.append("%s %+.1f" % [str(k), float(dett[k])])
+	return " · ".join(pezzi) if not pezzi.is_empty() else "nessuna voce"
+
+# Ogni mossa si porta dietro l'etichetta con cui l'interfaccia la offre al
+# giocatore: e' gia' la sua descrizione, e riscriverla qui vorrebbe dire
+# tenerne due allineate - cosa che infatti non si e' riusciti a fare, perche'
+# i parametri non hanno tutti le stesse chiavi e il primo tentativo scoppiava
+# sul primo potenziamento.
+func _descrivi(v) -> String:
+	var dove := ""
+	if v.parametri.has("col_from"): dove = " in col %d" % int(v.parametri["col_from"])
+	return "%s%s" % [str(v.etichetta), dove]
+
+func _nome_terreno(t: int) -> String:
+	return ["pianura", "fiume", "collina", "bosco"][t]
 
 # ---- il racconto di un turno ---------------------------------------
 
@@ -279,6 +378,7 @@ func _racconta(gs: GameState, era: int, turno: int, chi: int) -> void:
 	var pezzi: Array[String] = []
 
 	var col := _colonna_nuova(p, vecchio)
+	var sepolti_ora: Array[String] = []
 	if col >= 0: pezzi.append("lavoratore in col %d" % col)
 
 	for uid in gs.grid.buildings.map(func(b): return b.uid):
@@ -300,9 +400,22 @@ func _racconta(gs: GameState, era: int, turno: int, chi: int) -> void:
 				pezzi.append("%s: %s" % [b.data["name"], verso])
 		if b.is_buried and not bool(pre["buried"]):
 			pezzi.append("%s sepolto" % b.data["name"])
+		# Il personaggio infilato sotto la carta a fine era: e' l'unica cosa
+		# che un edificio continua a rendere anche da rovina, e nel racconto
+		# non si vedeva.
+		if str(b.buried_character) != str(pre.get("pers", "")) and b.buried_character != "":
+			var nome := _nome_pers([b.buried_character])
+			sepolti_ora.append(nome)
+			pezzi.append("seppellisce %s sotto %s" % [nome, b.data["name"]])
 
 	if p.recruited_total > int(vecchio["recl"]):
-		pezzi.append("RECLUTA %s" % _nome_pers(p.specialized_characters))
+		# A fine era i personaggi si infilano sotto gli edifici e la mano si
+		# svuota: se il turno ha chiuso l'era, il nome va cercato fra quelli
+		# appena sepolti, se no il racconto diceva "RECLUTA ?".
+		var chi_nome := _nome_pers(p.specialized_characters)
+		if chi_nome == "?" and not sepolti_ora.is_empty():
+			chi_nome = sepolti_ora[sepolti_ora.size() - 1]
+		pezzi.append("RECLUTA %s" % chi_nome)
 	if p.has_dynasty and not bool(vecchio["din"]):
 		pezzi.append("compra la DINASTIA")
 	if pezzi.size() == (1 if col >= 0 else 0):
@@ -337,7 +450,7 @@ func _fotografa(gs: GameState) -> void:
 	for b in gs.grid.buildings:
 		_prima_edifici[b.uid] = {
 			"state": b.state, "buried": b.is_buried, "upg": b.upgrades.size(),
-			"owner": b.owner, "level": b.level}
+			"owner": b.owner, "level": b.level, "pers": b.buried_character}
 	_prima_giocatori = []
 	for p in gs.players:
 		_prima_giocatori.append({

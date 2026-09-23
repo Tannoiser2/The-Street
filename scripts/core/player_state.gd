@@ -40,6 +40,30 @@ var character_targets: Dictionary = {}
 # perche' non sono ricavabili dalla plancia finale.
 var counters: Dictionary = {}
 
+# Una copia su cui provare: vedi Building.duplica.
+func duplica() -> PlayerState:
+	var p := PlayerState.new(index)
+	p.name = name
+	p.pietra = pietra
+	p.oro = oro
+	p.workers = workers
+	p.workers_used = workers_used
+	p.has_dynasty = has_dynasty
+	p.buildings_built = buildings_built
+	p.vp = vp
+	p.vp_breakdown = vp_breakdown.duplicate(true)
+	p.legacy_id = legacy_id
+	p.monuments_claimed = monuments_claimed.duplicate()
+	p.specialized_characters = specialized_characters.duplicate()
+	p.worker_cols = worker_cols.duplicate()
+	p.terrapieno_free_used = terrapieno_free_used
+	p.recruited_total = recruited_total
+	p.final_characters = final_characters.duplicate()
+	p.effect_used = effect_used.duplicate(true)
+	p.character_targets = character_targets.duplicate(true)
+	p.counters = counters.duplicate(true)
+	return p
+
 func bump(nome: String, quanto: int = 1) -> void:
 	counters[nome] = int(counters.get(nome, 0)) + quanto
 

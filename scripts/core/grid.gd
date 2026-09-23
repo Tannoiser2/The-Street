@@ -14,6 +14,14 @@ func _init(cols: int, terrain_list: Array) -> void:
 	n_cols = cols
 	terrains = terrain_list
 
+# Una copia su cui provare: vedi Building.duplica.
+func duplica() -> Grid:
+	var g := Grid.new(n_cols, terrains.duplicate())
+	for b in buildings:
+		g.buildings.append(b.duplica())
+	g.risen_this_era = risen_this_era.duplicate(true)
+	return g
+
 # --- interrogazioni -------------------------------------------------
 
 func in_column(col: int) -> Array:

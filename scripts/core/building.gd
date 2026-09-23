@@ -61,6 +61,43 @@ func vp_totali() -> int:
 	for c in vp_reso: t += int(vp_reso[c])
 	return t
 
+# UNA COPIA SU CUI PROVARE. Serve a chi vuole simulare una mossa senza
+# giocarla: si copia lo stato, ci si gioca sopra e si guarda com'e' andata.
+# `data` NON si copia - e' la riga di cards.json, la stessa per tutte le
+# istanze di quella carta, e va condivisa: duplicarla vorrebbe dire avere
+# sessanta copie della stessa carta per ogni copia dello stato, e soprattutto
+# perdere l'identita' che il resto del codice confronta.
+func duplica() -> Building:
+	var b := Building.new()
+	b.uid = uid
+	b.data = data                  # condivisa di proposito
+	b.owner = owner
+	b.era_built = era_built
+	b.binario = binario
+	b.col_from = col_from
+	b.col_to = col_to
+	b.level = level
+	b.state = state
+	b.is_buried = is_buried
+	b.was_razed = was_razed
+	b.basi = basi.duplicate()
+	b.terrapieno_cols = terrapieno_cols.duplicate()
+	b.bonus_res = bonus_res
+	b.bonus_scavo = bonus_scavo
+	b.bonus_rendita = bonus_rendita
+	b.vetusta = vetusta
+	b.protection = protection
+	b.protected_by = protected_by
+	b.upgrades = upgrades.duplicate()
+	b.patrons = patrons.duplicate(true)
+	b.extra_classes = extra_classes.duplicate()
+	b.imprint = imprint
+	b.buried_character = buried_character
+	b.buried_character_era = buried_character_era
+	b.charges = charges
+	b.vp_reso = vp_reso.duplicate(true)
+	return b
+
 # Su che binario sta, a terra: quello scelto costruendo, o quello della sua
 # era per tutto il resto del gioco e per le partite salvate prima.
 func binario_effettivo() -> int:

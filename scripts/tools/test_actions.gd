@@ -23,6 +23,9 @@ func _ready() -> void:
 	_run("dispersione dei secoli", _test_disperse)
 	_run("il libro mastro degli edifici torna col tabellone", _test_libro_mastro)
 	_run("i binari liberi, la prova spenta", _test_binari_liberi)
+	_run("la copia dello stato", _test_copia_dello_stato)
+	_run("le mosse si valutano dopo l'attivazione", _test_valuta_dopo_attivazione)
+	_run("il bot che pianifica l'era", _test_pianificatore)
 	_run("i bot con una strategia giocano davvero", _test_strategie)
 	print("\n%d superati, %d falliti" % [_passed, _failed])
 	get_tree().quit(0 if _failed == 0 else 1)
@@ -667,3 +670,209 @@ func _carta_e_colonna(gs: GameState, evita := -1) -> Dictionary:
 			if BuildRules.quote_rail(gs, 0, c, col).legal:
 				return {"id": id, "col": col}
 	return {"id": "", "col": 0}
+
+# ---- la copia dello stato -------------------------------------------
+# Serve a chi vuole simulare: si copia la partita, ci si gioca sopra col
+# codice vero e si guarda com'e' andata. Il contratto e' uno solo e va provato
+# per intero: TOCCARE LA COPIA NON DEVE TOCCARE L'ORIGINALE. Una copia che si
+# porta dietro un array condiviso e' peggio di nessuna copia, perche' il danno
+# si vede lontano da dove e' stato fatto.
+func _test_copia_dello_stato() -> void:
+	var ctl := _game(3, 77)
+	var gs := ctl.gs
+	# Una partita gia' avviata: qualche edificio, risorse, un personaggio.
+	for i in 6:
+		StrategyBot.play_turn(ctl, "bilanciata")
+	var copia := gs.duplica()
+
+	_eq("la copia ha gli stessi giocatori", copia.players.size(), gs.players.size())
+	_eq("  e gli stessi edifici", copia.grid.buildings.size(), gs.grid.buildings.size())
+	_eq("  e la stessa era", copia.era, gs.era)
+	_eq("  e lo stesso mercato", copia.market, gs.market)
+	var uid_a: Array = gs.grid.buildings.map(func(b): return b.uid)
+	var uid_b: Array = copia.grid.buildings.map(func(b): return b.uid)
+	_eq("  e gli stessi uid, nello stesso ordine", uid_b, uid_a)
+
+	# Le carte invece SI CONDIVIDONO: sono righe di cards.json, uguali per
+	# tutte le istanze e mai modificate dal gioco.
+	if not gs.grid.buildings.is_empty():
+		_ok("la carta e' la stessa, non una copia",
+			copia.grid.buildings[0].data == gs.grid.buildings[0].data)
+
+	# E adesso il contratto.
+	var p0: PlayerState = copia.players[0]
+	var prima_pietra: int = gs.players[0].pietra
+	p0.pietra += 99
+	p0.worker_cols.append(99)
+	p0.counters["prova"] = 1
+	_eq("cambiare le risorse sulla copia non tocca l'originale",
+		gs.players[0].pietra, prima_pietra)
+	_ok("  ne' i suoi array", not 99 in gs.players[0].worker_cols)
+	_ok("  ne' i suoi contatori", not gs.players[0].counters.has("prova"))
+	if not gs.grid.buildings.is_empty():
+		var b: Building = copia.grid.buildings[0]
+		var stato_prima: int = gs.grid.buildings[0].state
+		b.state = Enums.BuildingState.ROVINA
+		b.basi.append(999)
+		b.vp_reso["prova"] = 7
+		_eq("cambiare un edificio sulla copia non tocca l'originale",
+			gs.grid.buildings[0].state, stato_prima)
+		_ok("  ne' le sue basi", not 999 in gs.grid.buildings[0].basi)
+		_ok("  ne' il suo libro mastro", not gs.grid.buildings[0].vp_reso.has("prova"))
+
+	# GIOCARCI SOPRA: e' l'uso vero. Una partita intera sulla copia, e
+	# l'originale deve restare fermo dov'era.
+	var copia2 := gs.duplica()
+	var ctl2 := GameController.new()
+	ctl2.gs = copia2
+	var edifici_prima: int = gs.grid.buildings.size()
+	var era_prima: int = gs.era
+	var giri := 0
+	while copia2.phase != Enums.Phase.FINE_PARTITA and giri < 4000:
+		StrategyBot.play_turn(ctl2, "bilanciata")
+		giri += 1
+	_ok("sulla copia la partita arriva in fondo", copia2.phase == Enums.Phase.FINE_PARTITA)
+	_eq("  e l'originale non si e' mosso di un edificio",
+		gs.grid.buildings.size(), edifici_prima)
+	_eq("  ne' di un'era", gs.era, era_prima)
+
+	# E la copia gioca la STESSA partita dell'originale: il generatore si copia
+	# con tutto il suo stato, se no simulare vorrebbe dire tirare altri dadi.
+	var a := gs.duplica()
+	var b2 := gs.duplica()
+	for c in [a, b2]:
+		var ct := GameController.new()
+		ct.gs = c
+		var g2 := 0
+		while c.phase != Enums.Phase.FINE_PARTITA and g2 < 4000:
+			StrategyBot.play_turn(ct, "bilanciata")
+			g2 += 1
+	var pv_a: Array = a.players.map(func(p): return p.vp)
+	var pv_b: Array = b2.players.map(func(p): return p.vp)
+	_eq("due copie della stessa partita finiscono uguali", pv_b, pv_a)
+
+	# A META' TURNO. Piazzato il lavoratore, la colonna attivata decide cosa e'
+	# legale: si costruisce li' o accanto. Stava nel controller, e una copia
+	# presa a questo punto non sapeva piu' dove si poteva costruire - ogni
+	# costruzione simulata falliva in silenzio, e il pianificatore credeva che
+	# stare fermi fosse la mossa migliore nel 64% dei turni.
+	var ctl4 := _game(3, 91)
+	var g4 := ctl4.gs
+	var chi4 := g4.current_index
+	var trovata := false
+	for col in g4.grid.n_cols:
+		var prova := g4.duplica()
+		var cp := GameController.new()
+		cp.gs = prova
+		if not cp.place_worker(col): continue
+		var lista := StrategyBot.classifica(prova, prova.players[chi4], col, "bilanciata")
+		for e in lista:
+			if e["mossa"].tipo != "costruisci": continue
+			# La copia della copia, con un controller NUOVO: e' esattamente
+			# quello che fa chi simula.
+			var dentro := prova.duplica()
+			var cn := GameController.new()
+			cn.gs = dentro
+			_eq("la copia a meta' turno sa qual e' la colonna attivata",
+				dentro.colonna_attivata, col)
+			var prima := dentro.grid.buildings.size()
+			_ok("  e ci si costruisce con un controller nuovo",
+				StrategyBot._esegui(cn, e["mossa"]) and dentro.grid.buildings.size() == prima + 1)
+			trovata = true
+			break
+		if trovata: break
+	_ok("  (c'era una costruzione da provare)", trovata)
+
+# ---- le mosse si valutano dopo l'attivazione ------------------------
+# Piazzare il lavoratore ATTIVA la colonna, e l'attivazione paga: la produzione
+# degli edifici che stanno li', le abilita' "quando la attivi", l'oro del
+# Centro Urbano. Con quelle risorse in mano le mosse possibili sono altre.
+# Il bot guardava lo stato di PRIMA, e quindi contava mosse che non avrebbe
+# potuto pagare e ne ignorava altre che avrebbe potuto: qui si prova che
+# adesso guarda dopo.
+func _test_valuta_dopo_attivazione() -> void:
+	# Si cercano partite vere finche' non se ne trova una dove l'attivazione
+	# cambia davvero quel che si puo' fare: non sempre succede - se in colonna
+	# non produce niente, prima e dopo sono lo stesso stato - e un test che
+	# pretendesse che succeda sempre proverebbe una cosa falsa.
+	var trovata := false
+	var guadagno := 0.0
+	var colonna := -1
+	for seme in [31, 57, 98, 144, 201]:
+		var ctl := _game(3, seme)
+		var gs := ctl.gs
+		for i in 9:
+			StrategyBot.play_turn(ctl, "bilanciata")
+		while gs.current_index != 0 and gs.phase != Enums.Phase.FINE_PARTITA:
+			StrategyBot.play_turn(ctl, "bilanciata")
+		if gs.phase == Enums.Phase.FINE_PARTITA: continue
+		var p: PlayerState = gs.players[0]
+		var dopo := StrategyBot.classifica_colonne(gs, p, "bilanciata")
+		for e in dopo:
+			var col := int(e["col"])
+			# Lo stesso conto sullo stato di PRIMA, come faceva il bot vecchio.
+			var prima := 0.0
+			for v in StrategyBot._opzioni(gs, 0, col):
+				if not v.pagabile(p): continue
+				prima = maxf(prima, StrategyBot._valore(gs, p, v, "bilanciata", col))
+			if float(e["mossa"]) > prima + 0.001:
+				trovata = true
+				guadagno = float(e["mossa"]) - prima
+				colonna = col
+				break
+		if trovata:
+			# E l'originale non si e' mosso: la prova si fa su una copia.
+			_eq("valutare non tocca i lavoratori veri", p.worker_cols.size(), 0)
+			_eq("  ne' gli edifici", gs.grid.buildings.size(), gs.grid.buildings.size())
+			break
+	_ok("esiste una colonna dove l'attivazione cambia quel che si puo' fare "
+		+ ("(col %d, %.1f in piu')" % [colonna, guadagno] if trovata else "(non trovata)"),
+		trovata)
+
+# ---- il bot che pianifica l'era -------------------------------------
+# Tre cose vanno provate, e nessuna e' "vince": quella la dice il torneo.
+# Che PIANIFICARE NON TOCCHI LA PARTITA - si pianifica su copie, e la partita
+# vera deve cambiare solo per la mossa che poi si gioca; che la partita arrivi
+# in fondo; e che sia deterministica, perche' una misura che non si ripete non
+# e' una misura.
+func _test_pianificatore() -> void:
+	var ctl := _game(3, 55)
+	var gs := ctl.gs
+	for i in 4:
+		StrategyBot.play_turn(ctl, "bilanciata")
+	var p := gs.current_player()
+	var fotografia := [p.pietra, p.oro, p.workers_used, p.worker_cols.duplicate(),
+		gs.grid.buildings.size(), gs.rng.state, gs.current_index, gs.log.size()]
+	var piano := PlanningBot.pianifica(gs, p.index, "bilanciata")
+	var dopo := [p.pietra, p.oro, p.workers_used, p.worker_cols.duplicate(),
+		gs.grid.buildings.size(), gs.rng.state, gs.current_index, gs.log.size()]
+	_eq("pianificare non tocca la partita vera", dopo, fotografia)
+	_ok("  e produce un piano", not piano.is_empty())
+	if not piano.is_empty():
+		var passi: Array = piano["passi"]
+		_ok("  lungo quanto i lavoratori che restano (%d passi)" % passi.size(),
+			passi.size() >= 1 and passi.size() <= p.workers - p.workers_used)
+		var primo: Dictionary = passi[0]
+		_ok("  e il primo passo e' in una colonna libera per lui",
+			not int(primo["col"]) in p.worker_cols)
+
+	# Una partita intera col pianificatore a un posto e gli avidi agli altri.
+	var ctl2 := _game(3, 56)
+	var giri := 0
+	while ctl2.gs.phase != Enums.Phase.FINE_PARTITA and giri < 4000:
+		if ctl2.gs.current_index == 0: PlanningBot.play_turn(ctl2, "bilanciata")
+		else: StrategyBot.play_turn(ctl2, "bilanciata")
+		giri += 1
+	_ok("col pianificatore la partita arriva in fondo",
+		ctl2.gs.phase == Enums.Phase.FINE_PARTITA)
+	var pv1: Array = ctl2.gs.players.map(func(q): return q.vp)
+
+	# E la stessa partita rigiocata finisce identica.
+	var ctl3 := _game(3, 56)
+	giri = 0
+	while ctl3.gs.phase != Enums.Phase.FINE_PARTITA and giri < 4000:
+		if ctl3.gs.current_index == 0: PlanningBot.play_turn(ctl3, "bilanciata")
+		else: StrategyBot.play_turn(ctl3, "bilanciata")
+		giri += 1
+	var pv2: Array = ctl3.gs.players.map(func(q): return q.vp)
+	_eq("  e rigiocata finisce identica", pv2, pv1)

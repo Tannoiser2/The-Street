@@ -18,6 +18,14 @@
 class_name StrategyBot
 extends RefCounted
 
+# LA VERSIONE DEL BOT, scritta nell'intestazione di ogni batteria di partite.
+# Due lotti giocati con le stesse regole ma con bot diversi non sono lo stesso
+# esperimento, e confrontarli senza saperlo vuol dire attribuire alle regole
+# quello che ha fatto il bot.
+#   1  sceglie la colonna guardando lo stato di prima dell'attivazione
+#   2  valuta le mosse sullo stato DOPO l'attivazione (copia della partita)
+const VERSIONE := 2
+
 const STRATEGIE: Array[String] = ["rendita", "lampo", "scavo", "verticale", "bilanciata"]
 
 # DUE CANDIDATE, non nel canone. Le cinque di sopra coprono quattro canali -
@@ -63,6 +71,18 @@ static func valore_risorse(gs: GameState, p: PlayerState) -> Vector2:
 		clampf(vo * scala, VALORE_MEDIO * 0.5, VALORE_MEDIO * 2.0))
 
 # ---- il turno -------------------------------------------------------
+# ---- il taccuino della decisione ------------------------------------
+# Acceso `racconta`, il bot lascia scritto COSA HA GUARDATO prima di muovere:
+# le colonne con quanto valevano, le mosse con quanto valevano e da cosa.
+# Serve a raccontare una partita, e deve venire da qui dentro: chiedendo la
+# classifica da fuori PRIMA della mossa si valuta uno stato che poi cambia -
+# il lavoratore non e' ancora piazzato, quindi la colonna non e' ancora stata
+# attivata e la produzione non e' ancora stata incassata -
+# e il racconto finisce per spiegare una mossa diversa da quella fatta. E'
+# successo, e si vedeva: il turno diceva "recluta" e il tabellone costruiva.
+static var racconta := false
+static var taccuino := {}
+
 static func play_turn(ctl: GameController, strategia := "bilanciata") -> void:
 	var gs := ctl.gs
 	while not gs.pending_choice.is_empty():
@@ -70,52 +90,111 @@ static func play_turn(ctl: GameController, strategia := "bilanciata") -> void:
 	if gs.phase == Enums.Phase.FINE_PARTITA: return
 	var p := gs.current_player()
 
-	var col := _colonna(gs, p, strategia)
+	if racconta: taccuino = {"strategia": strategia, "chi": p.index}
+	var colonne := classifica_colonne(gs, p, strategia)
+	if racconta: taccuino["colonne"] = colonne
+	var col := _colonna(gs, p, strategia, colonne)
 	if col < 0 or not ctl.place_worker(col, _da_proteggere(gs, p, col)):
 		ctl.pass_action()
 		return
+	if racconta: taccuino["col"] = col
 
 	# Il Mercante di ossidiana: si converte solo se manca l'oro per la mossa
 	# che si vuole fare, non per abitudine.
 	while p.oro < 2 and p.pietra >= 4 and ctl.exchange(true):
 		pass
 
-	var mosse := _opzioni(gs, p.index, col)
-	var meglio = null
-	var punteggio := 0.0
-	for v in mosse:
-		var q := _valore(gs, p, v, strategia, col)
-		if meglio == null or q > punteggio:
-			meglio = v
-			punteggio = q
-	if meglio == null or punteggio <= 0.0:
+	var lista := classifica(gs, p, col, strategia)
+	var scelta := migliore(lista)
+	if racconta:
+		taccuino["mosse"] = lista
+		taccuino["scelta"] = scelta
+	if scelta.is_empty():
 		ctl.pass_action()
 		return
-	if not _esegui(ctl, meglio):
+	if not _esegui(ctl, scelta["mossa"]):
 		ctl.pass_action()
+
+# ---- la classifica che il bot si fa in testa ------------------------
+# Tutte le mosse legali e pagabili con quanto valgono, NELL'ORDINE IN CUI LE
+# GUARDA. Non si ordina qui: `migliore` prende il primo massimo stretto, ed e'
+# la stessa regola di prima - ordinare cambierebbe le parita', cioe' le
+# partite gia' misurate.
+# Serve anche a RACCONTARE una partita: "perche' ha fatto questa mossa" si
+# risponde solo mostrando quali erano le altre e quanto valevano.
+static func classifica(gs: GameState, p: PlayerState, col: int,
+		strategia: String) -> Array[Dictionary]:
+	var out: Array[Dictionary] = []
+	for v in _opzioni(gs, p.index, col):
+		var dett := {}
+		out.append({"mossa": v, "valore": _valore(gs, p, v, strategia, col, dett),
+			"dettaglio": dett})
+	return out
+
+# La mossa scelta: il primo massimo stretto, e solo se vale piu' di zero -
+# passare e' meglio di una mossa che toglie.
+static func migliore(lista: Array[Dictionary]) -> Dictionary:
+	var scelta := {}
+	var punteggio := 0.0
+	for e in lista:
+		if scelta.is_empty() or float(e["valore"]) > punteggio:
+			if float(e["valore"]) <= 0.0 and scelta.is_empty(): continue
+			scelta = e
+			punteggio = float(e["valore"])
+	return scelta
 
 # ---- la colonna da attivare -----------------------------------------
 # Vale la produzione del terreno, quello che ci si puo' costruire e - se sta
 # per arrivare un evento che non regge - il proprio edificio da proteggere.
-static func _colonna(gs: GameState, p: PlayerState, strategia: String) -> int:
-	var libere: Array[int] = []
-	for c in gs.grid.n_cols:
-		if not c in p.worker_cols: libere.append(c)
-	if libere.is_empty(): return -1
+static func _colonna(gs: GameState, p: PlayerState, strategia: String,
+		gia_fatta: Array[Dictionary] = []) -> int:
+	var lista := gia_fatta if not gia_fatta.is_empty() else classifica_colonne(gs, p, strategia)
 	var meglio := -1
 	var punteggio := -INF
-	for c in libere:
-		var q := _produzione_colonna(gs, p, c)
-		q += _valore_protezione(gs, p, c)
-		var mosse := _opzioni(gs, p.index, c)
-		var migliore := 0.0
-		for v in mosse:
-			migliore = maxf(migliore, _valore(gs, p, v, strategia, c))
-		q += migliore
-		if q > punteggio:
-			punteggio = q
-			meglio = c
+	for e in lista:
+		if float(e["valore"]) > punteggio:
+			punteggio = float(e["valore"])
+			meglio = int(e["col"])
 	return meglio
+
+# Le colonne ancora libere per questo giocatore, con quanto valgono e da cosa:
+# quel che il terreno produce, l'edificio che il lavoratore salverebbe
+# dall'evento, e la migliore mossa che si potrebbe fare li'. Serve a
+# `_colonna` e a raccontare perche' il lavoratore e' andato proprio li'.
+# LE MOSSE SI VALUTANO SULLO STATO DOPO L'ATTIVAZIONE. Piazzare il lavoratore
+# non e' un gesto neutro: ATTIVA la colonna, e l'attivazione paga la produzione
+# a chi ha edifici li', fa scattare le abilita' "quando la attivi" e distribuisce
+# l'oro del Centro Urbano. Con quelle risorse in mano le mosse possibili sono
+# altre - una carta che prima non si poteva pagare adesso si puo'.
+# Guardando lo stato di PRIMA, il bot sceglieva la colonna contando mosse che
+# non avrebbe potuto fare e ignorandone altre che avrebbe potuto: e' la stessa
+# svista di chi, al tavolo, decide dove andare senza contare cosa incassa
+# andandoci.
+# La colonna si prova su una COPIA della partita, e si prova col codice vero -
+# `place_worker`, che protegge e attiva - invece di rifare i conti
+# dell'attivazione qui dentro: due versioni della stessa regola divergono, e la
+# seconda non la prova nessuno.
+static func classifica_colonne(gs: GameState, p: PlayerState,
+		strategia: String) -> Array[Dictionary]:
+	var out: Array[Dictionary] = []
+	for c in gs.grid.n_cols:
+		if c in p.worker_cols: continue
+		var prod := _produzione_colonna(gs, p, c)
+		var prot := _valore_protezione(gs, p, c)
+		var da_salvare := _da_proteggere(gs, p, c)
+		var migliore := 0.0
+		var copia := gs.duplica()
+		var ctl := GameController.new()
+		ctl.gs = copia
+		var protetto: Building = _per_uid(copia, da_salvare.uid) if da_salvare != null else null
+		if ctl.place_worker(c, protetto):
+			var pc: PlayerState = copia.players[p.index]
+			for v in _opzioni(copia, p.index, c):
+				migliore = maxf(migliore, _valore(copia, pc, v, strategia, c))
+		out.append({"col": c, "valore": prod + prot + migliore,
+			"produzione": prod, "protezione": prot, "mossa": migliore,
+			"salva": da_salvare})
+	return out
 
 static func _produzione_colonna(gs: GameState, p: PlayerState, col: int) -> float:
 	var t: int = gs.grid.terrains[col]
@@ -183,15 +262,21 @@ static func _per_uid(gs: GameState, uid: int) -> Building:
 	return null
 
 # ---- quanto vale una mossa ------------------------------------------
-static func _valore(gs: GameState, p: PlayerState, v, strategia: String, col: int) -> float:
+# `dett` e' un taccuino facoltativo: se lo si passa, il valutatore ci scrive
+# dentro voce per voce da dove viene il punteggio. Non cambia il conto - e'
+# la stessa aritmetica - ma permette di RACCONTARE la mossa invece di
+# limitarsi al totale.
+static func _valore(gs: GameState, p: PlayerState, v, strategia: String, col: int,
+		dett := {}) -> float:
 	var r := valore_risorse(gs, p)
 	var speso := float(v.pietra) * r.x + float(v.oro) * r.y
+	if speso != 0.0: dett["costo"] = -speso
 	match v.tipo:
-		"costruisci": return _valore_costruzione(gs, p, v, strategia, r) - speso
-		"potenzia": return _valore_potenziamento(gs, p, v) - speso
-		"restaura": return _valore_restauro(gs, p, v) - speso
-		"recluta": return _valore_reclutamento(gs, p, v, strategia, r) - speso
-		"dinastia": return _valore_dinastia(gs) - speso
+		"costruisci": return _valore_costruzione(gs, p, v, strategia, r, dett) - speso
+		"potenzia": return _valore_potenziamento(gs, p, v, dett) - speso
+		"restaura": return _valore_restauro(gs, p, v, dett) - speso
+		"recluta": return _valore_reclutamento(gs, p, v, strategia, r, dett) - speso
+		"dinastia": return _valore_dinastia(gs, dett) - speso
 	return 0.0
 
 static func _ere_rimaste(gs: GameState) -> int:
@@ -212,7 +297,7 @@ static func rendite_future(res: int, rendita: int, era: int) -> float:
 	return totale
 
 static func _valore_costruzione(gs: GameState, p: PlayerState, v, strategia: String,
-		r: Vector2) -> float:
+		r: Vector2, dett := {}) -> float:
 	var par: Dictionary = v.parametri
 	var d: Dictionary = CardDB.buildings[str(par["card_id"])]
 	var col_from := int(par["col_from"])
@@ -222,30 +307,43 @@ static func _valore_costruzione(gs: GameState, p: PlayerState, v, strategia: Str
 	var rimaste := _ere_rimaste(gs)
 
 	var q := float(d["lampo"])
-	q += rendite_future(res, int(d["rendita"]), gs.era)
+	if q != 0.0: dett["lampo subito"] = q
+	var rend := rendite_future(res, int(d["rendita"]), gs.era)
+	if rend != 0.0: dett["rendite future"] = rend
+	q += rend
 	var prod: Dictionary = d.get("production", {})
-	q += (float(prod.get("pietra", 0)) * r.x + float(prod.get("oro", 0)) * r.y
+	var pr := (float(prod.get("pietra", 0)) * r.x + float(prod.get("oro", 0)) * r.y
 		+ float(prod.get("cultura", 0))) * float(rimaste) * 0.5
+	if pr != 0.0: dett["produzione"] = pr
+	q += pr
 
 	var larghezza := int(d["width"])
 	if sopra:
 		# La Verticalita' paga il premio della colonna per OGNI colonna che
 		# l'edificio tocca, e chi sta in cima ne prende meta'.
 		var tab = CardDB.constants["verticality_vp"]
+		var vert := 0.0
 		for c in range(col_from, col_from + larghezza):
 			var h: int = gs.grid.height(c)
 			var prima := 0 if h < 1 else int(tab[str(mini(h, 4))])
 			var dopo := int(tab[str(mini(h + 1, 4))])
-			q += float(dopo - prima) * 0.35 + float(dopo) * 0.15
+			vert += float(dopo - prima) * 0.35 + float(dopo) * 0.15
 		# Cosa finisce sotto e cosa si spiana lo dice il preventivo, che sa
 		# gia' quali edifici faranno da base: lo Scavo di un proprio rudere si
 		# incassa, la rendita futura di un proprio intatto spianato si perde.
+		if vert != 0.0: dett["Verticalita' della colonna"] = vert
+		q += vert
 		var q2 := BuildRules.quote_above(gs, p.index, d, col_from)
+		var sotto := 0.0
+		var perso := 0.0
 		for b in q2.bases:
-			if b.owner == p.index: q += float(b.scavo_value()) * 0.5
+			if b.owner == p.index: sotto += float(b.scavo_value()) * 0.5
 		for b in q2.razed:
-			q -= rendite_future(b.effective_resistance(), b.rendita_value(), gs.era) * 0.6
-			q -= float(b.data["scavo"]) * 0.25      # spianato vale Scavo 0
+			perso -= rendite_future(b.effective_resistance(), b.rendita_value(), gs.era) * 0.6
+			perso -= float(b.data["scavo"]) * 0.25      # spianato vale Scavo 0
+		if sotto != 0.0: dett["Scavo dei miei che vanno sotto"] = sotto
+		if perso != 0.0: dett["quel che perdo spianando"] = perso
+		q += sotto + perso
 	# Continuita' di luogo: una seconda carta della stessa classe nella colonna.
 	var mie := {}
 	for b in gs.grid.in_column(col_from):
@@ -254,14 +352,17 @@ static func _valore_costruzione(gs: GameState, p: PlayerState, v, strategia: Str
 	for c in d["classes"]:
 		if int(mie.get(c, 0)) >= 1:
 			q += 1.5
+			dett["continuita' di classe in colonna"] = 1.5
 			break
 	# Lo Scavo si incassa solo da sotterrati: vale, ma meno della rendita.
+	if float(d["scavo"]) != 0.0: dett["Scavo suo"] = float(d["scavo"]) * 0.25
 	q += float(d["scavo"]) * 0.25
 
 	# LA PREFERENZA DELLA STRATEGIA. Tira in due sensi: premia la carta che fa
 	# al caso suo e scoraggia quella che non ne fa. Solo il premio non
 	# bastava - il valutatore comune vale molto di piu' della spinta, e le
 	# cinque finivano per giocare la stessa partita.
+	var prima_della_spinta := q
 	match strategia:
 		"rendita":
 			q += float(d["rendita"]) * float(rimaste) * 0.9
@@ -277,6 +378,8 @@ static func _valore_costruzione(gs: GameState, p: PlayerState, v, strategia: Str
 			else: q -= 1.5
 		"continuita": q += _premio_catena(mie, d)
 		"obiettivi": q += _premio_obiettivi(gs, p, d, col_from, par)
+	if q != prima_della_spinta:
+		dett["spinta della strategia %s" % strategia] = q - prima_della_spinta
 	return q
 
 # Quanto vale allungare una catena di classe in questa colonna: la differenza
@@ -329,21 +432,29 @@ static func _premio_obiettivi(gs: GameState, p: PlayerState, d: Dictionary,
 		if Conditions.met(gs, p.index, l2["condition"]): senza += float(l2["vp"]) * 0.7
 	return maxf(0.0, q - senza)
 
-static func _valore_potenziamento(gs: GameState, p: PlayerState, v) -> float:
+static func _valore_potenziamento(gs: GameState, p: PlayerState, v, dett := {}) -> float:
 	var par: Dictionary = v.parametri
 	var b := _per_uid(gs, int(par["uid"])) if par.has("uid") else null
 	if b == null: return 0.0
 	# Una carta infilata sotto dura quanto l'edificio che la ospita.
 	var vive := b.effective_resistance() >= gs.era + 1
+	dett["l'ospite regge l'evento" if vive else "l'ospite rischia di crollare"] = \
+		2.2 if vive else 0.8
+	if b.rendita_value() > 0:
+		dett["rendita dell'ospite"] = float(b.rendita_value()) * 0.3
 	return (2.2 if vive else 0.8) + float(b.rendita_value()) * 0.3
 
-static func _valore_restauro(gs: GameState, p: PlayerState, v) -> float:
+static func _valore_restauro(gs: GameState, p: PlayerState, v, dett := {}) -> float:
 	var b := _per_uid(gs, int(v.parametri["uid"]))
 	if b == null: return 0.0
 	# Torna intatto e la Vetusta' si azzera; se era altrui, cambia padrone.
 	var q := rendite_future(int(b.data["resistance"]) + b.bonus_res, b.rendita_value(), gs.era)
+	if q != 0.0: dett["rendite che torna a pagare"] = q
+	if float(b.data["scavo"]) != 0.0: dett["Scavo suo"] = float(b.data["scavo"]) * 0.25
 	q += float(b.data["scavo"]) * 0.25
-	if b.owner != p.index: q += 2.0
+	if b.owner != p.index:
+		q += 2.0
+		dett["ed e' altrui: cambia padrone"] = 2.0
 	return q
 
 # QUANTO VALE UN PERSONAGGIO. Anche qui il brief e' esplicito: va calcolato
@@ -353,16 +464,24 @@ static func _valore_restauro(gs: GameState, p: PlayerState, v) -> float:
 # da' +1 resistenza agli edifici Religione, e lo Sciamano vale qualcosa solo
 # se di edifici Religione ne ho.
 static func _valore_reclutamento(gs: GameState, p: PlayerState, v, strategia: String,
-		r: Vector2) -> float:
+		r: Vector2, dett := {}) -> float:
 	var d: Dictionary = CardDB.characters[str(v.parametri["char_id"])]
 	var q := 0.5                                   # il lavoratore specializzato in se'
+	dett["un lavoratore in piu'"] = 0.5
+	var abilita := 0.0
 	for e in d.get("effects", []):
-		q += _valore_effetto(gs, p, e, r)
+		abilita += _valore_effetto(gs, p, e, r)
+	if abilita != 0.0: dett["la sua abilita' (%s)" % str(d.get("class", "?"))] = abilita
+	q += abilita
 	# Se finisce sepolto vale 6 meno l'era: si conta per quel che e', una
 	# possibilita', non una certezza.
-	if gs.era <= 4: q += 0.3 * float(6 - gs.era)
+	if gs.era <= 4:
+		q += 0.3 * float(6 - gs.era)
+		dett["se lo seppellisco vale %d" % (6 - gs.era)] = 0.3 * float(6 - gs.era)
 	if strategia == "bilanciata": q += 0.6
 	if strategia == "scavo": q += 0.6
+	if strategia == "bilanciata" or strategia == "scavo":
+		dett["spinta della strategia %s" % strategia] = 0.6
 	return q
 
 # Il valore di una singola abilita'. Gli `op` sono uno schema chiuso: quelli
@@ -412,10 +531,12 @@ static func _valore_effetto(gs: GameState, p: PlayerState, e: Dictionary, r: Vec
 			return 0.8
 	return VALORE_IGNOTO
 
-static func _valore_dinastia(gs: GameState) -> float:
+static func _valore_dinastia(gs: GameState, dett := {}) -> float:
 	# Un quarto lavoratore per tutte le ere che restano: e' il moltiplicatore
 	# piu' grosso che si possa comprare, e prima lo si compra piu' rende.
-	return 1.2 * float(_ere_rimaste(gs) + 1)
+	var q := 1.2 * float(_ere_rimaste(gs) + 1)
+	dett["un quarto lavoratore per %d ere" % (_ere_rimaste(gs) + 1)] = q
+	return q
 
 # La scelta in sospeso (dove infilare il potenziamento dell'Eruzione): si
 # sceglie l'edificio che reggera' piu' a lungo, cosi' la carta non muore con
