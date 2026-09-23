@@ -1196,3 +1196,43 @@ dato è stato importato da lì. Ma due confronti fra ciò che è stampato e
 
     Resta da rivedere al tavolo se il 51% di sotterrati sia la quota giusta:
     e' la stessa domanda del punto 78, ma su un numero diverso.
+
+81. **I cubetti restano sulla rovina: quelli bianchi contano ancora, quelli
+    neri no.** Il Menhir a fine partita porta ancora tre cubetti bianchi di
+    Vetusta' e i suoi cubetti neri di resistenza, pur essendo una rovina.
+    Nessuna regola li toglie: il crollo azzera i potenziamenti
+    (`resolve_event` fa `upgrades.clear()`) e la Vetusta' si azzera **solo col
+    restauro** — che pero' vale sui *ruderi*, non sulle rovine. Una rovina non
+    si restaura piu', quindi quei cubetti restano li' per sempre.
+
+    **I neri sono inerti, e si puo' dimostrare.** Su una rovina la resistenza
+    non serve piu' a niente: gli eventi guardano solo chi e' in piedi
+    (`is_standing`), il restauro non la riguarda, le spolia di chi costruisce
+    sopra si pagano solo spianando un INTATTO (una rovina da' lo sconto
+    macerie, che non dipende dalla resistenza) e nessuna carta seleziona per
+    resistenza. In 300 partite a tre giocatori restano a fine partita 6167
+    rovine, 1851 delle quali con cubetti neri addosso che non fanno piu' nulla.
+
+    **I bianchi no: due carte li contano ancora.** Il **Colosseo**
+    (`{"owner": "self", "vetusta": {"min": 3}}`) e **Il Silvicoltore**
+    (`{"owner": "self", "terrain": ["bosco"], "vetusta": {"min": 3}}`) chiedono
+    "un tuo edificio con Vetusta' almeno 3" **senza dire in che stato**,
+    mentre le altre carte che vogliono edifici sani lo scrivono
+    (`"state": ["intatto"], "buried": false` — Monumenti 3 e 9, Lasciti 7 e 9,
+    personaggi 21 e 25). Cosi' come sono scritti i dati, una rovina — e
+    perfino una rovina sotterrata — soddisfa il Colosseo.
+
+    Misurato su 300 partite a tre giocatori (900 giocatori): a fine partita ci
+    sono 621 edifici con Vetusta' >= 3, di cui **517 intatti, 2 ruderi, 77
+    rovine e 25 sepolti**. Il Colosseo e' soddisfatto dal 55,4% dei giocatori,
+    e il **7,1%** lo soddisfa SOLO grazie a edifici non intatti: circa un
+    giocatore su quattordici prende quel punto per una rovina.
+
+    **Domanda al designer, due cose distinte:**
+    1. il Colosseo e Il Silvicoltore devono contare anche le rovine e i
+       sepolti, o gli manca il `"state": ["intatto"], "buried": false` che
+       hanno le carte sorelle? (regola: cambia il punteggio)
+    2. sul tabellone i cubetti di una rovina si continuano a mostrare, si
+       spengono o si tolgono? Finche' i bianchi contano per due carte,
+       toglierli nasconderebbe un'informazione che serve; i neri invece non
+       dicono piu' niente a nessuno. (solo grafica: non cambia il punteggio)
