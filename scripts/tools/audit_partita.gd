@@ -34,6 +34,15 @@ func _ready() -> void:
 	_tutto = args.has("tutto")
 	_strategie = not args.has("caso")
 	_candidate = args.has("candidate")
+	# Una tabella della Verticalita' diversa da quella stampata, per provare
+	# "e se pagasse meno salire?" senza toccare data/cards.json - che resta
+	# l'unica fonte. Il simulatore di riferimento fa lo stesso con VBONUS.
+	if args.has("verticalita"):
+		var pezzi := str(args["verticalita"]).split(",")
+		var tabella := {}
+		for i in pezzi.size(): tabella[str(i + 1)] = int(pezzi[i])
+		CardDB.constants["verticality_vp"] = tabella
+		print("# verticality_vp = %s" % str(tabella))
 
 	if args.has("games"):
 		_lotto(seme, players, int(args["games"]))
@@ -82,7 +91,12 @@ func _ready() -> void:
 # Tante partite di fila, una riga CSV per giocatore: serve a sapere se un
 # distacco visto in una partita sola e' la regola o il caso.
 func _lotto(seme: int, players: int, quante: int) -> void:
-	print("seme;posto;giocatore;pv;strategia;" + ";".join(Riepilogo.VOCI.map(func(v): return str(v["id"]))))
+	# Oltre ai punti, due misure di FORMA del tavolo: quanti edifici ha
+	# costruito sopra e quanto in alto e' arrivato. Servono a vedere se,
+	# cambiando quanto paga la Verticalita', cambia anche come si gioca e non
+	# solo quanto si segna.
+	print("seme;posto;giocatore;pv;strategia;sopra;quota_max;costruiti;"
+		+ ";".join(Riepilogo.VOCI.map(func(v): return str(v["id"]))))
 	for g in quante:
 		var ctl := GameController.new()
 		ctl.new_game(players, seme + g)
@@ -91,9 +105,19 @@ func _lotto(seme: int, players: int, quante: int) -> void:
 			_muovi(ctl, g)
 			guard += 1
 		for riga in Riepilogo.righe(ctl.gs):
+			var chi := int(riga["player"])
+			var sopra := 0
+			var quota := 0
+			var costruiti := 0
+			for b in ctl.gs.grid.buildings:
+				if b.owner != chi: continue
+				costruiti += 1
+				if b.level > 0: sopra += 1
+				quota = maxi(quota, b.level)
 			var campi: Array[String] = ["%d" % (seme + g), "%d" % riga["posto"],
-				"%d" % riga["player"], "%d" % riga["vp"],
-				strategia_di(int(riga["player"]), g) if _strategie else "caso"]
+				"%d" % chi, "%d" % riga["vp"],
+				strategia_di(chi, g) if _strategie else "caso",
+				"%d" % sopra, "%d" % quota, "%d" % costruiti]
 			for v in Riepilogo.VOCI:
 				campi.append("%d" % Riepilogo.punti(riga, str(v["id"])))
 			print(";".join(campi))
