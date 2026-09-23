@@ -1319,12 +1319,12 @@ func _test_carte_giocatore() -> void:
 		if scoperto < passo - 0.001: nascoste += 1
 	_eq("di ogni carta edificio resta fuori la fascia del titolo", nascoste, 0)
 
-	# E IL MAZZETTO STA IN DUE COLONNE, se le carte sono almeno due: una
-	# colonna sola lunga il doppio allungava il tavolo piu' della strada.
+	# LE DUE COLONNE VOGLIONO DIRE QUALCOSA: a sinistra quello che sta
+	# ancora sulla strada, a destra quello che e' finito sotto. Finche'
+	# non si sotterra niente, il mazzetto sta tutto a sinistra.
 	var colonne := {}
 	for c in mazzetto: colonne[snappedf((c["aabb"] as AABB).position.x, 0.1)] = true
-	_eq("il mazzetto sta in due colonne", colonne.size(),
-		mini(BoardLayout3D.MAZZETTO_COLONNE, mazzetto.size()))
+	_eq("senza sepolti il mazzetto sta tutto in una colonna", colonne.size(), 1)
 	var largo_pieno := BoardLayout3D.misura_carta("mercato")
 	var stretta: AABB = mazzetto[0]["aabb"]
 	_ok("  con le carte strette quel poco che serve (%.2f)"
@@ -1334,6 +1334,7 @@ func _test_carte_giocatore() -> void:
 	_ok("  e senza deformarsi",
 		is_equal_approx(stretta.size.x / stretta.size.z,
 			largo_pieno.x / largo_pieno.y))
+
 
 	# E nessuna finisce addosso al vicino: ognuno sta nella sua fetta.
 	var fetta := BoardLayout3D.board_w(gs) / float(gs.n_players)
@@ -1361,13 +1362,52 @@ func _test_carte_giocatore() -> void:
 	var sotto := 0
 	for i in mazzetto.size():
 		var b4: AABB = mazzetto[i]["aabb"]
-		var punto := b4.position + Vector3(b4.size.x / 2.0, 0.0,
-			BoardLayout3D.VENTAGLIO_Z / 2.0)
+		# Il passo si stringe con la carta: la fascia scoperta si misura da
+		# quella disegnata, se no si punta gia' dentro la carta sopra.
+		var passo2: float = BoardLayout3D.VENTAGLIO_Z \
+			* (b4.size.x / BoardLayout3D.misura_carta("mercato").x)
+		var punto := b4.position + Vector3(b4.size.x / 2.0, 0.0, passo2 / 2.0)
 		var presa := BoardLayout3D.card_at_ray(gs, punto + Vector3(0, 500, 0),
 			Vector3(0, -1, 0), 0)
 		if presa.is_empty() or int(presa.get("ordine", -1)) != int(mazzetto[i]["ordine"]):
 			sotto += 1
 	_eq("  e nel mazzetto risponde la carta sopra, non quella coperta", sotto, 0)
+
+	# Adesso se ne sotterrano due e se ne spegne una: le sepolte passano
+	# nella colonna di destra - che e' il mazzetto dello Scavo - le altre
+	# restano dove stavano, e quella spenta si segna come tale.
+	var sx := snappedf((mazzetto[0]["aabb"] as AABB).position.x, 0.1)
+	var miei: Array = []
+	for b in gs.grid.buildings:
+		if b.owner == 0: miei.append(b)
+	miei[0].state = Enums.BuildingState.ROVINA
+	miei[0].is_buried = true
+	miei[1].state = Enums.BuildingState.ROVINA
+	miei[1].is_buried = true
+	miei[2].state = Enums.BuildingState.RUDERE
+	var dopo: Array = []
+	for c in BoardLayout3D.player_cards(gs, 0):
+		if int(c["player"]) == 0 and str(c["kind"]) == "mercato": dopo.append(c)
+	var a_destra: Array = []
+	var a_sinistra: Array = []
+	for c in dopo:
+		if bool(c["sepolta"]): a_destra.append(c)
+		else: a_sinistra.append(c)
+	_eq("le sepolte diventano due", a_destra.size(), 2)
+	_eq("  e le altre restano tre", a_sinistra.size(), 3)
+	var fuori := 0
+	for c in a_sinistra:
+		if not is_equal_approx(snappedf((c["aabb"] as AABB).position.x, 0.1), sx):
+			fuori += 1
+	_eq("chi resta sulla strada non si sposta di colonna", fuori, 0)
+	var non_a_destra := 0
+	for c in a_destra:
+		if (c["aabb"] as AABB).position.x <= sx + 0.001: non_a_destra += 1
+	_eq("  e le sepolte passano nella colonna a destra", non_a_destra, 0)
+	var spente := 0
+	for c in a_sinistra:
+		if bool(c["spenta"]): spente += 1
+	_eq("  e la rovina non sepolta si segna spenta", spente, 1)
 
 # CHI SIEDE AL TAVOLO. Prima erano due numeri dentro gioca.gd - tre giocatori,
 # seme 7 - e in due o in quattro non ci si giocava affatto. ScelteInizio e'
