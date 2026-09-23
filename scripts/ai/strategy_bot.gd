@@ -153,6 +153,19 @@ static func _colonna(gs: GameState, p: PlayerState, strategia: String,
 # quel che il terreno produce, l'edificio che il lavoratore salverebbe
 # dall'evento, e la migliore mossa che si potrebbe fare li'. Serve a
 # `_colonna` e a raccontare perche' il lavoratore e' andato proprio li'.
+# LE MOSSE SI VALUTANO SULLO STATO DOPO L'ATTIVAZIONE. Piazzare il lavoratore
+# non e' un gesto neutro: ATTIVA la colonna, e l'attivazione paga la produzione
+# a chi ha edifici li', fa scattare le abilita' "quando la attivi" e distribuisce
+# l'oro del Centro Urbano. Con quelle risorse in mano le mosse possibili sono
+# altre - una carta che prima non si poteva pagare adesso si puo'.
+# Guardando lo stato di PRIMA, il bot sceglieva la colonna contando mosse che
+# non avrebbe potuto fare e ignorandone altre che avrebbe potuto: e' la stessa
+# svista di chi, al tavolo, decide dove andare senza contare cosa incassa
+# andandoci.
+# La colonna si prova su una COPIA della partita, e si prova col codice vero -
+# `place_worker`, che protegge e attiva - invece di rifare i conti
+# dell'attivazione qui dentro: due versioni della stessa regola divergono, e la
+# seconda non la prova nessuno.
 static func classifica_colonne(gs: GameState, p: PlayerState,
 		strategia: String) -> Array[Dictionary]:
 	var out: Array[Dictionary] = []
@@ -160,12 +173,19 @@ static func classifica_colonne(gs: GameState, p: PlayerState,
 		if c in p.worker_cols: continue
 		var prod := _produzione_colonna(gs, p, c)
 		var prot := _valore_protezione(gs, p, c)
+		var da_salvare := _da_proteggere(gs, p, c)
 		var migliore := 0.0
-		for v in _opzioni(gs, p.index, c):
-			migliore = maxf(migliore, _valore(gs, p, v, strategia, c))
+		var copia := gs.duplica()
+		var ctl := GameController.new()
+		ctl.gs = copia
+		var protetto: Building = _per_uid(copia, da_salvare.uid) if da_salvare != null else null
+		if ctl.place_worker(c, protetto):
+			var pc: PlayerState = copia.players[p.index]
+			for v in _opzioni(copia, p.index, c):
+				migliore = maxf(migliore, _valore(copia, pc, v, strategia, c))
 		out.append({"col": c, "valore": prod + prot + migliore,
 			"produzione": prod, "protezione": prot, "mossa": migliore,
-			"salva": _da_proteggere(gs, p, c)})
+			"salva": da_salvare})
 	return out
 
 static func _produzione_colonna(gs: GameState, p: PlayerState, col: int) -> float:

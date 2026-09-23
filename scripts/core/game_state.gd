@@ -33,6 +33,41 @@ var pending_choice: Dictionary = {}
 var next_uid: int = 1
 var log: Array = []                # traccia testuale degli eventi (utile per i test)
 
+# UNA COPIA DELLA PARTITA SU CUI PROVARE. Chi vuole sapere "cosa succede se"
+# copia, gioca sulla copia col codice vero e guarda com'e' andata: e' l'unico
+# modo di simulare senza riscrivere le regole una seconda volta - due ricette
+# della stessa regola divergono, e la seconda nessuno la prova.
+# Le CARTE non si copiano: `current_event` e il `data` degli edifici sono righe
+# di cards.json, condivise da tutti e mai modificate dal gioco.
+func duplica() -> GameState:
+	var g := GameState.new()
+	g.rng = RandomNumberGenerator.new()
+	g.rng.seed = rng.seed
+	g.rng.state = rng.state
+	g.n_players = n_players
+	for p in players:
+		g.players.append(p.duplica())
+	g.grid = grid.duplica()
+	g.era = era
+	g.phase = phase
+	g.turn_order = turn_order.duplicate()
+	g.turn_pos = turn_pos
+	g.current_index = current_index
+	g.current_event = current_event          # carta, condivisa
+	g.market = market.duplicate()
+	g.building_decks = building_decks.duplicate(true)
+	g.char_decks = char_decks.duplicate(true)
+	g.upg_decks = upg_decks.duplicate(true)
+	g.char_row = char_row.duplicate()
+	g.upg_row = upg_row.duplicate()
+	g.dynasties_left = dynasties_left
+	g.turn_sequence = turn_sequence.duplicate()
+	g.monuments_open = monuments_open.duplicate()
+	g.pending_choice = pending_choice.duplicate(true)
+	g.next_uid = next_uid
+	g.log = log.duplicate()
+	return g
+
 func current_player() -> PlayerState:
 	return players[current_index]
 
