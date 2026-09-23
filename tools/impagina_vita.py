@@ -12,21 +12,31 @@ NUM = ["n","ere_intatto","ere_piedi","n_rudere","n_rovina","n_sepolto","n_subito
        "n_in_piedi_fine","n_intatto_fine","vetusta","potenziamenti","vp",
        "vp_lampo","vp_rendita","vp_verticalita","vp_scavo","vp_scheletri"]
 
-carte = {}
-partite = 0
-giocatori = None
-for f in sorted(glob.glob(sys.argv[1])):
-    righe = [l.rstrip("\n") for l in open(f) if l.strip()]
-    meta = [l for l in righe if l.startswith("# partite=")][0]
-    partite += int(meta.split("partite=")[1].split()[0])
-    giocatori = int(meta.split("giocatori=")[1].split()[0])
-    i = righe.index([l for l in righe if l.startswith("id;")][0])
-    hdr = righe[i].split(";")
-    for l in righe[i+1:]:
-        v = dict(zip(hdr, l.split(";")))
-        c = carte.setdefault(v["id"], {k: (int(v[k]) if k in NUM else v[k]) for k in v})
-        if c is not v:
-            for k in NUM: c[k] += int(v[k])
+def leggi(pattern):
+    """Somma i CSV che corrispondono al pattern: le partite si possono
+    spezzare su piu' processi, e i file si sommano riga per riga."""
+    # Prima che esistessero le strategie l'unico bot era quello a caso: un
+    # CSV senza `bot=` viene da li'.
+    carte, partite, giocatori, bot = {}, 0, None, "caso"
+    for f in sorted(glob.glob(pattern)):
+        righe = [l.rstrip("\n") for l in open(f) if l.strip()]
+        meta = [l for l in righe if l.startswith("# partite=")][0]
+        partite += int(meta.split("partite=")[1].split()[0])
+        giocatori = int(meta.split("giocatori=")[1].split()[0])
+        if "bot=" in meta: bot = meta.split("bot=")[1].split()[0]
+        i = righe.index([l for l in righe if l.startswith("id;")][0])
+        hdr = righe[i].split(";")
+        for l in righe[i+1:]:
+            v = dict(zip(hdr, l.split(";")))
+            c = carte.setdefault(v["id"], {k: (int(v[k]) if k in NUM else v[k]) for k in v})
+            if c is not v:
+                for k in NUM: c[k] += int(v[k])
+    return carte, partite, giocatori, bot
+
+carte, partite, giocatori, bot = leggi(sys.argv[1])
+altro = None
+if "--confronta" in sys.argv:
+    altro, partite_altro, _, bot_altro = leggi(sys.argv[sys.argv.index("--confronta") + 1])
 
 def r(c, k, d=None):
     d = d or c["n"]
@@ -62,13 +72,19 @@ w(f"Misurata su **{partite:_} partite** a {giocatori} giocatori, rigiocate dal m
   + "(`scripts/tools/audit_partita.gd`, modalità `--vita`). "
   + f"In tutto {sum(c['n'] for c in vive):,} edifici costruiti.".replace(",", " "))
 w()
-w("> **Avvertenza, e non è piccola.** A giocare sono i bot casuali (`RandomBot`): scelgono")
-w("> una colonna a caso e provano le azioni in ordine casuale. Nessuno protegge quello che")
-w("> ha costruito, nessuno punta a una colonna, nessuno tiene da parte l'oro per il")
-w("> restauro. Quindi questi numeri dicono **cosa fa il gioco quando nessuno lo guida**:")
-w("> sono la linea di base della carta, non il suo rendimento in mano a un giocatore.")
-w("> Le stesse tabelle rifatte quando ci saranno le cinque strategie vere diranno quanto")
-w("> pesa la testa di chi gioca.")
+if bot == "caso":
+    w("> **Avvertenza, e non è piccola.** A giocare sono i bot casuali (`RandomBot`): scelgono")
+    w("> una colonna a caso e provano le azioni in ordine casuale. Nessuno protegge quello che")
+    w("> ha costruito, nessuno punta a una colonna, nessuno tiene da parte l'oro per il")
+    w("> restauro. Quindi questi numeri dicono **cosa fa il gioco quando nessuno lo guida**:")
+    w("> sono la linea di base della carta, non il suo rendimento in mano a un giocatore.")
+else:
+    w("> **Chi ha giocato.** I bot seguono le cinque strategie (`StrategyBot`): Rendita, Lampo,")
+    w("> Scavo, Verticale, Bilanciata. Valutano tutte le mosse legali e pagabili e scelgono la")
+    w("> migliore secondo la loro inclinazione; la strategia ruota di posto a ogni partita, così")
+    w("> nessuna gioca sempre dalla stessa sedia. Non sono campioni — non bluffano, non")
+    w("> guardano cosa stanno per fare gli altri — ma **giocano**: dove il bot casuale fa 66")
+    w("> punti, questi ne fanno 120.")
 w()
 w("## Come leggere le colonne")
 w()
@@ -254,6 +270,70 @@ w()
 w("Rifare il conto: `godot --headless res://scenes/audit_partita.tscn -- "
   f"--players {giocatori} --vita 2500 --seed 100000` (quattro processi, semi 100000 / 102500 / 105000 / 107500).")
 w()
+
+if altro is not None:
+    def somma(c, k): return sum(x[k] for x in c.values())
+    na, nb = somma(altro, "n"), somma(carte, "n")
+    w("## Cosa cambia quando i bot giocano davvero")
+    w()
+    w(f"Le stesse misure su {partite_altro} partite coi bot **a caso** e {partite} con le "
+      "**cinque strategie**. La colonna Δ è la seconda meno la prima.")
+    w()
+    w("| misura | bot a caso | con strategia | Δ |")
+    w("|---|--:|--:|--:|")
+    def riga(nome, va, vb, fmt="{:.2f}"):
+        d = vb - va
+        w(f"| {nome} | {fmt.format(va)} | {fmt.format(vb)} | {'+' if d >= 0 else '−'}{fmt.format(abs(d))} |")
+    riga("edifici costruiti per partita", na/partite_altro, nb/partite)
+    riga("ere intatto (media)", somma(altro,"ere_intatto")/na, somma(carte,"ere_intatto")/nb)
+    riga("ere in piedi (media)", somma(altro,"ere_piedi")/na, somma(carte,"ere_piedi")/nb)
+    riga("cade nella sua era", 100*somma(altro,"n_subito")/na, 100*somma(carte,"n_subito")/nb, "{:.0f}%")
+    riga("in piedi a fine partita", 100*somma(altro,"n_in_piedi_fine")/na, 100*somma(carte,"n_in_piedi_fine")/nb, "{:.0f}%")
+    riga("sepolto", 100*somma(altro,"n_sepolto")/na, 100*somma(carte,"n_sepolto")/nb, "{:.0f}%")
+    riga("vetustà media", somma(altro,"vetusta")/na, somma(carte,"vetusta")/nb)
+    riga("potenziamenti per edificio", somma(altro,"potenziamenti")/na, somma(carte,"potenziamenti")/nb)
+    riga("PV per edificio", somma(altro,"vp")/na, somma(carte,"vp")/nb, "{:.1f}")
+    riga("PV per partita (i tre giocatori insieme)", somma(altro,"vp")/partite_altro, somma(carte,"vp")/partite, "{:.0f}")
+    w()
+    w("| canale (PV per partita, tutti i giocatori) | bot a caso | con strategia | Δ |")
+    w("|---|--:|--:|--:|")
+    for k in ("vp_lampo","vp_rendita","vp_verticalita","vp_scavo","vp_scheletri"):
+        riga(k.replace("vp_","").capitalize(), somma(altro,k)/partite_altro, somma(carte,k)/partite, "{:.1f}")
+    w()
+    comuni = [i for i in altro if altro[i]["n"] >= 50 and i in carte]
+    def dfreq(i): return carte[i]["n"]/partite - altro[i]["n"]/partite_altro
+    def tabellina(titolo, lista, nota):
+        w(f"### {titolo}")
+        w()
+        w(nota)
+        w()
+        w("| carta | era | costo | a caso | con strategia | Δ | PV a caso | PV con strategia |")
+        w("|---|--:|--:|--:|--:|--:|--:|--:|")
+        for i in lista:
+            ca, cb = altro[i], carte[i]
+            costo = f"{ca['costo_pietra']}P" + (f"+{ca['costo_oro']}O" if int(ca['costo_oro']) else "")
+            d = dfreq(i)
+            w(f"| {ca['nome']} | {ca['era']} | {costo} | {ca['n']/partite_altro:.2f} | "
+              f"{cb['n']/partite:.2f} | {'+' if d>=0 else '−'}{abs(d):.2f} | "
+              f"{ca['vp']/ca['n']:.1f} | {cb['vp']/max(1,cb['n']):.1f} |")
+        w()
+    tabellina("Le carte che i bot con la testa cercano di più",
+              sorted(comuni, key=dfreq, reverse=True)[:10],
+              "Copie costruite per partita, prima e dopo.")
+    tabellina("E quelle che evitano", sorted(comuni, key=dfreq)[:10],
+              "Le stesse carte, dall'altro capo della classifica.")
+    scartate = [i for i in carte if carte[i]["n"] < partite * 0.02]
+    if scartate:
+        w("### Carte che un bot con la testa non compra quasi mai")
+        w()
+        for i in sorted(scartate, key=lambda i: carte[i]["n"]):
+            c = carte[i]
+            costo = f"{c['costo_pietra']}P" + (f"+{c['costo_oro']}O" if int(c['costo_oro']) else "")
+            quante = "mai" if c["n"] == 0 else f"una ogni {partite/c['n']:.0f} partite"
+            prima = f", contro una ogni {partite_altro/altro[i]['n']:.0f} coi bot a caso" \
+                if i in altro and altro[i]["n"] else ""
+            w(f"- **{c['nome']}** (era {c['era']}, {costo}) — {quante}{prima}")
+        w()
 
 open(sys.argv[2], "w").write("\n".join(O) + "\n")
 print("scritto", sys.argv[2], "-", len(vive), "carte vive,", len(mai), "mai costruite")
