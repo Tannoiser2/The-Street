@@ -214,6 +214,74 @@ static func quota_sotto(gs: GameState, b: Building, col: int) -> int:
 		q = maxi(q, s.level)
 	return q
 
+# ---- lo sgretolamento ------------------------------------------------
+# Quando un edificio crolla in rovina la sua sagoma sparisce dal tabellone, e
+# prima spariva e basta: un fotogramma prima c'era, quello dopo no. Chi stava
+# guardando altrove non si accorgeva di niente - ed e' la cosa piu' importante
+# che succede a fine era.
+#
+# Adesso si abbatte in avanti come farebbe il cartone: il piede resta dov'e' e
+# il resto cade verso chi guarda, accelerando; mentre cade si spegne, e un
+# pugno di macerie rotola giu' dalla basetta. Sono numeri puri, quindi si
+# provano headless come tutto il resto: la vista ci mette solo le mesh.
+const CROLLO_DURATA := 1.1
+const CROLLO_MACERIE := 7
+const CROLLO_MACERIA_LATO := 6.0
+const GRAVITA := 2600.0          # mm/s^2, scelta perche' le macerie cadano
+                                 # nel tempo del crollo e non dopo
+
+# A che punto e' la caduta. `t` va da 0 a 1.
+static func crollo(t: float) -> Dictionary:
+	var q := clampf(t, 0.0, 1.0)
+	# La caduta accelera come accelera una cosa che cade: al quadrato, non
+	# lineare, e arriva a terra prima della fine - l'ultimo pezzo di tempo
+	# serve a spegnersi da sdraiata.
+	var angolo := (PI / 2.0) * minf(1.0, q * q / 0.64)
+	# Si spegne sul finire: se cominciasse subito cadrebbe gia' invisibile.
+	var opacita := clampf((1.0 - q) / 0.3, 0.0, 1.0)
+	return {"angolo": angolo, "opacita": opacita, "finito": q >= 1.0}
+
+# Il mucchietto di macerie che si stacca. Tutto ricavato dall'uid: la stessa
+# rovina fa sempre lo stesso mucchio, e una partita rigiocata col suo seme si
+# vede uguale.
+static func macerie(uid: int, larghezza: float, quante := CROLLO_MACERIE) -> Array[Dictionary]:
+	var out: Array[Dictionary] = []
+	for i in quante:
+		var h := _rumore(uid * 31 + i * 7)
+		var h2 := _rumore(uid * 17 + i * 13 + 5)
+		var h3 := _rumore(uid * 11 + i * 29 + 3)
+		out.append({
+			# da dove parte, lungo il fronte della sagoma
+			"x": (h - 0.5) * larghezza * 0.8,
+			"y": 6.0 + h2 * larghezza * 0.25,
+			# come schizza via: un po' di lato e un po' verso chi guarda
+			"vx": (h2 - 0.5) * 70.0,
+			"vy": 60.0 + h3 * 120.0,
+			"vz": 20.0 + h * 60.0,
+			"lato": CROLLO_MACERIA_LATO * (0.6 + h3 * 0.8),
+		})
+	return out
+
+# Dove sta una maceria dopo `t` secondi: tiro parabolico, e quando tocca il
+# piano ci resta.
+static func maceria_pos(m: Dictionary, t: float) -> Vector3:
+	var y := float(m["y"]) + float(m["vy"]) * t - 0.5 * GRAVITA * t * t
+	var q := clampf(t, 0.0, CROLLO_DURATA)
+	if y < 0.0:
+		# atterrata: si ferma dov'e' caduta invece di sprofondare
+		var caduta := (float(m["vy"]) + sqrt(float(m["vy"]) * float(m["vy"])
+			+ 2.0 * GRAVITA * float(m["y"]))) / GRAVITA
+		q = minf(q, caduta)
+		y = 0.0
+	return Vector3(float(m["x"]) + float(m["vx"]) * q, y, float(m["vz"]) * q)
+
+# Un numero fra 0 e 1 ricavato da un intero. Non serve che sia un buon
+# generatore: serve che sia SEMPRE LO STESSO per lo stesso uid.
+static func _rumore(n: int) -> float:
+	var x := (n * 1103515245 + 12345) & 0x7fffffff
+	x = (x >> 7) ^ (x * 2654435761)
+	return float(absi(x) % 10000) / 10000.0
+
 # ---- il banner dello Scavo -------------------------------------------
 # IL VALORE DI SCAVO STA SCRITTO SULLA BASETTA, davanti e dietro. Prima lo
 # sapeva solo chi apriva il riquadro col mouse, eppure e' il numero che decide

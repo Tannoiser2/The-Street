@@ -51,6 +51,8 @@ func _ready() -> void:
 	_run("sotto un edificio a scalino non resta un buco", _test_scalino)
 	_run("le carte stanno in piedi alla stessa altezza", _test_misure_carte)
 	_run("la sagoma e' un pezzo solo, spesso", _test_sagoma_estrusa)
+	_run("la sagoma si sgretola quando crolla", _test_sgretolamento)
+	_run("  e la vista se ne accorge da sola", _test_sgretolamento_nella_vista)
 	print("\n%d superati, %d falliti" % [_passed, _failed])
 	get_tree().quit(0 if _failed == 0 else 1)
 
@@ -2163,3 +2165,98 @@ func _test_scena_giocabile() -> void:
 	n.torna_alla_scelta()
 	_ok("  e si torna alla scelta", n.ctl == null and n.vista == null)
 	n.queue_free()
+
+# Lo sgretolamento: quando un edificio va in rovina la sagoma si abbatte
+# invece di sparire fra due fotogrammi. Il movimento sta tutto in numeri puri
+# dentro BoardLayout3D, quindi si prova headless; qui sotto si prova anche che
+# la vista li accenda da sola, guardando come cambia lo stato.
+func _test_sgretolamento() -> void:
+	var prima := BoardLayout3D.crollo(0.0)
+	_approx("in piedi al primo istante", float(prima["angolo"]), 0.0)
+	_approx("  e tutta visibile", float(prima["opacita"]), 1.0)
+	_ok("  e non e' finita", not bool(prima["finito"]))
+
+	# L'angolo non torna mai indietro: una sagoma che si rialza a meta' caduta
+	# e' il difetto che questo test prende.
+	var scorso := -1.0
+	var sale := true
+	var t := 0.0
+	while t <= 1.0001:
+		var a := float(BoardLayout3D.crollo(t)["angolo"])
+		if a < scorso - 0.0001: sale = false
+		scorso = a
+		t += 0.02
+	_ok("l'angolo cresce sempre, non oscilla", sale)
+	_approx("  e arriva a terra, a squadra", float(BoardLayout3D.crollo(1.0)["angolo"]), PI / 2.0)
+	_ok("  e ci arriva prima della fine, che serve a spegnersi",
+		is_equal_approx(float(BoardLayout3D.crollo(0.8)["angolo"]), PI / 2.0))
+
+	# Si spegne SUL FINIRE. Se cominciasse subito cadrebbe gia' trasparente e
+	# la caduta non si vedrebbe.
+	_approx("a meta' caduta e' ancora piena", float(BoardLayout3D.crollo(0.5)["opacita"]), 1.0)
+	_ok("  a un soffio dalla fine e' quasi spenta",
+		float(BoardLayout3D.crollo(0.95)["opacita"]) < 0.2)
+	_approx("  e alla fine e' sparita", float(BoardLayout3D.crollo(1.0)["opacita"]), 0.0)
+	_ok("  e allora e' finita", bool(BoardLayout3D.crollo(1.0)["finito"]))
+
+	# Le macerie vengono dall'uid: la stessa rovina fa sempre lo stesso
+	# mucchio, e una partita rigiocata col suo seme si vede uguale.
+	var m1 := BoardLayout3D.macerie(7, 100.0)
+	var m2 := BoardLayout3D.macerie(7, 100.0)
+	var m3 := BoardLayout3D.macerie(8, 100.0)
+	_eq("le macerie sono quelle previste", m1.size(), BoardLayout3D.CROLLO_MACERIE)
+	_ok("  lo stesso edificio fa sempre lo stesso mucchio", m1 == m2)
+	_ok("  ma due edifici diversi non fanno il mucchio identico", m1 != m3)
+	var dentro := true
+	for m in m1:
+		if absf(float(m["x"])) > 50.0: dentro = false
+		if float(m["lato"]) <= 0.0: dentro = false
+	_ok("  e partono dal fronte della sagoma, non da fuori", dentro)
+
+	# Cadono e si fermano: nessuna maceria sprofonda sotto il piano, e una
+	# volta atterrata non scivola piu'.
+	var sotto := false
+	var tt := 0.0
+	while tt <= BoardLayout3D.CROLLO_DURATA + 0.5:
+		for m in m1:
+			if BoardLayout3D.maceria_pos(m, tt).y < -0.0001: sotto = true
+		tt += 0.01
+	_ok("nessuna maceria sprofonda sotto il tavolo", not sotto)
+	var ferme := true
+	for m in m1:
+		var a := BoardLayout3D.maceria_pos(m, BoardLayout3D.CROLLO_DURATA)
+		var b := BoardLayout3D.maceria_pos(m, BoardLayout3D.CROLLO_DURATA + 2.0)
+		if a.distance_to(b) > 0.0001: ferme = false
+	_ok("  e atterrate restano dove sono cadute", ferme)
+
+# E la vista se ne accorge da sola: non glielo dice il nucleo, che la vista
+# non la conosce, ma la differenza fra lo stato di prima e quello di adesso.
+func _test_sgretolamento_nella_vista() -> void:
+	var gs := _gioco().gs
+	var b := _metti(gs, "ed_capanne", 1, 2)
+	var vista: Node3D = preload("res://scripts/view/board_view_3d.gd").new()
+	add_child(vista)
+	vista.scale = Vector3.ONE * BoardLayout3D.U
+	vista.mostra(gs)
+	_ok("al primo sguardo non crolla niente: si prende nota e basta",
+		vista._crolli.is_empty())
+	vista.mostra(gs)
+	_ok("  e nemmeno ridisegnando lo stesso tavolo", vista._crolli.is_empty())
+
+	b.state = Enums.BuildingState.ROVINA
+	vista.mostra(gs)
+	_eq("chi passa a rovina si abbatte", vista._crolli.size(), 1)
+	_ok("  con le sue macerie",
+		(vista._crolli[0]["pezzi"] as Array).size() == BoardLayout3D.CROLLO_MACERIE)
+	# Un secondo giro di disegno non lo fa ricominciare: e' gia' rovina.
+	vista.mostra(gs)
+	_eq("  e non ricomincia a ogni ridisegno", vista._crolli.size(), 1)
+
+	# Il tempo passa: a meta' e' piegata, alla fine il livello degli effetti
+	# si e' svuotato da se'.
+	vista._process(BoardLayout3D.CROLLO_DURATA / 2.0)
+	var perno: Node3D = vista._crolli[0]["perno"]
+	_ok("a meta' caduta la sagoma e' piegata in avanti", perno.rotation.x > 0.1)
+	vista._process(BoardLayout3D.CROLLO_DURATA)
+	_ok("e alla fine non resta niente da animare", vista._crolli.is_empty())
+	vista.queue_free()

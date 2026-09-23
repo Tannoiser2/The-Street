@@ -35,6 +35,11 @@ func _ready() -> void:
 				BoardLayout3D.TESSERA_Y * 4.0, BoardLayout3D.board_d() / 2.0)
 		vista.orbita = o
 	vista.mostra(ctl.gs)
+	# --crollo 0.4   abbatte una sagoma e ferma lo sgretolamento a quel punto
+	#                della caduta (0 in piedi, 1 a terra), per guardarlo fermo
+	#                in un PNG invece che a occhio mentre scorre.
+	if args.has("crollo"):
+		_sgretola(vista, ctl.gs, float(args["crollo"]))
 	var quote := 0
 	for b in ctl.gs.grid.buildings:
 		if b.level > 0: quote += 1
@@ -44,6 +49,27 @@ func _ready() -> void:
 	print("terreni da colonna 0: ", ", ".join(terreni))
 	print("plancia 3D: era %d, %d edifici (%d sopraelevati), %d colonne" % [
 		ctl.gs.era, ctl.gs.grid.buildings.size(), quote, ctl.gs.grid.n_cols])
+
+# Sceglie la sagoma piu' in vista - la piu' alta, e fra quelle la piu' larga -
+# la manda in rovina e porta l'animazione all'istante chiesto, poi la blocca:
+# senza fermarla, i fotogrammi che Movie Maker scrive dopo la farebbero
+# proseguire e lo scatto uscirebbe sempre a caduta finita.
+func _sgretola(vista: Node3D, gs: GameState, quando: float) -> void:
+	var vittima: Building = null
+	for b in gs.grid.buildings:
+		if not BoardLayout3D.ha_sagoma(b): continue
+		if vittima == null or b.level > vittima.level \
+			or (b.level == vittima.level and b.width() > vittima.width()):
+			vittima = b
+	if vittima == null:
+		print("crollo: nessuna sagoma in piedi da abbattere")
+		return
+	vittima.state = Enums.BuildingState.ROVINA
+	vista.mostra(gs)
+	vista._process(clampf(quando, 0.0, 1.0) * BoardLayout3D.CROLLO_DURATA)
+	vista.set_process(false)
+	print("crollo: %s in colonna %d, fermato a %.2f" % [
+		vittima.data["name"], vittima.col_from, quando])
 
 func _args() -> Dictionary:
 	var out := {}
