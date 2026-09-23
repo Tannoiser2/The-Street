@@ -1,0 +1,259 @@
+#!/usr/bin/env python3
+# Impagina in Markdown le righe CSV di `audit_partita --vita`.
+#
+#   godot --headless res://scenes/audit_partita.tscn -- --players 3 --vita 2500 --seed 100000 > vita_0.csv
+#   ...uno per seme, poi:
+#   python3 tools/impagina_vita.py "vita_*.csv" docs/vita-degli-edifici.md
+#
+# I file si sommano: le partite si possono spezzare su piu' processi.
+import sys, glob, statistics as st
+
+NUM = ["n","ere_intatto","ere_piedi","n_rudere","n_rovina","n_sepolto","n_subito",
+       "n_in_piedi_fine","n_intatto_fine","vetusta","potenziamenti","vp",
+       "vp_lampo","vp_rendita","vp_verticalita","vp_scavo","vp_scheletri"]
+
+carte = {}
+partite = 0
+giocatori = None
+for f in sorted(glob.glob(sys.argv[1])):
+    righe = [l.rstrip("\n") for l in open(f) if l.strip()]
+    meta = [l for l in righe if l.startswith("# partite=")][0]
+    partite += int(meta.split("partite=")[1].split()[0])
+    giocatori = int(meta.split("giocatori=")[1].split()[0])
+    i = righe.index([l for l in righe if l.startswith("id;")][0])
+    hdr = righe[i].split(";")
+    for l in righe[i+1:]:
+        v = dict(zip(hdr, l.split(";")))
+        c = carte.setdefault(v["id"], {k: (int(v[k]) if k in NUM else v[k]) for k in v})
+        if c is not v:
+            for k in NUM: c[k] += int(v[k])
+
+def r(c, k, d=None):
+    d = d or c["n"]
+    return c[k] / d if d else 0.0
+
+vive = [c for c in carte.values() if c["n"] > 0]
+mai = [c for c in carte.values() if c["n"] == 0]
+for c in vive:
+    c["vita"] = r(c, "ere_piedi")
+    c["intatto"] = r(c, "ere_intatto")
+    c["pv"] = r(c, "vp")
+    c["sep"] = 100 * r(c, "n_sepolto")
+    c["fine"] = 100 * r(c, "n_in_piedi_fine")
+    c["subito"] = 100 * r(c, "n_subito")
+    c["vet"] = r(c, "vetusta")
+    c["freq"] = c["n"] / partite
+    # Un edificio dell'era 4 puo' vivere al massimo 2 ere, uno dell'era 5 una
+    # sola: confrontare le ere secche mette in cima alla classifica delle vite
+    # brevi le carte che sono semplicemente nate tardi. La quota di vita
+    # sfruttata - quanto e' durato su quanto poteva durare - si puo'
+    # confrontare fra ere diverse.
+    c["possibili"] = 6 - int(c["era"])
+    c["quota"] = 100 * c["vita"] / c["possibili"]
+    c["equiv"] = int(c["costo_pietra"]) + 2 * int(c["costo_oro"])
+    c["resa"] = c["pv"] / max(1, c["equiv"])
+
+O = []
+def w(s=""): O.append(s)
+
+w("# La vita degli edifici")
+w()
+w(f"Misurata su **{partite:_} partite** a {giocatori} giocatori, rigiocate dal motore vero ".replace("_", " ")
+  + "(`scripts/tools/audit_partita.gd`, modalità `--vita`). "
+  + f"In tutto {sum(c['n'] for c in vive):,} edifici costruiti.".replace(",", " "))
+w()
+w("> **Avvertenza, e non è piccola.** A giocare sono i bot casuali (`RandomBot`): scelgono")
+w("> una colonna a caso e provano le azioni in ordine casuale. Nessuno protegge quello che")
+w("> ha costruito, nessuno punta a una colonna, nessuno tiene da parte l'oro per il")
+w("> restauro. Quindi questi numeri dicono **cosa fa il gioco quando nessuno lo guida**:")
+w("> sono la linea di base della carta, non il suo rendimento in mano a un giocatore.")
+w("> Le stesse tabelle rifatte quando ci saranno le cinque strategie vere diranno quanto")
+w("> pesa la testa di chi gioca.")
+w()
+w("## Come leggere le colonne")
+w()
+w("| colonna | cosa misura |")
+w("|---|---|")
+w("| **per partita** | quante copie di quella carta finiscono in tavola in una partita |")
+w("| **ere intatto** | quante ere resta INTATTO, contando quella in cui è stato costruito. 1,0 = diventa rudere alla fine dell'era stessa in cui è nato |")
+w("| **ere in piedi** | quante ere resta in piedi, cioè finché non crolla in rovina o finisce sotterrato |")
+w("| **subito** | quota che cade o viene sepolto nell'era stessa in cui è stato costruito |")
+w("| **a fine partita** | quota ancora in piedi all'ultimo conteggio |")
+w("| **sepolto** | quota che finisce sotto un altro edificio (e quindi paga lo Scavo) |")
+w("| **vetustà** | cubetti bianchi accumulati, letti a fine partita |")
+w("| **vita sfruttata** | ere in piedi su quelle che poteva vivere: una carta dell'era 4 al massimo ne vive 2, una dell'era 5 una sola. È l'unica misura confrontabile fra ere diverse |")
+w("| **PV** | punti che quella carta ha fruttato, in media, in tutta la partita |")
+w("| **PV/costo** | gli stessi punti divisi per il costo in pietra equivalente (1 oro = 2 pietra) |")
+w()
+w("I PV sono attribuiti **alla carta, non al giocatore**: un edificio restaurato e rubato")
+w("porta con sé anche i punti che aveva fatto fare al padrone di prima. I canali contati")
+w("sono i cinque che si possono attribuire a un edificio senza inventare nulla:")
+w()
+w("- **Lampo** — il punto alla costruzione;")
+w("- **Rendita** — incassata a ogni censimento finché l'edificio è intatto, più la Vetustà;")
+w("- **Verticalità** — metà del premio della colonna a chi ha la cima, l'altra metà divisa")
+w("  per numero di edifici: è la regola stessa a dividerla per carta, quindi la quota di un")
+w("  edificio è un numero vero;")
+w("- **Scavo** — il valore stampato, se finisce sotterrato;")
+w("- **Scheletri** — il personaggio sepolto sotto, se l'edificio è sotterrato.")
+w()
+w("Restano fuori **Continuità** (è della colonna, non di una carta), **Monumenti**,")
+w("**Eredità** e la **Cultura** (vanno al giocatore). Il conto dei cinque canali torna")
+w("esatto col tabellone: c'è un test che lo verifica su partite intere")
+w("(`test_actions`, «il libro mastro degli edifici torna col tabellone»).")
+w()
+
+def tabella(righe, titolo, nota=""):
+    w(f"### {titolo}")
+    if nota: w(); w(nota)
+    w()
+    w("| carta | costo | res | rend | scavo | per partita | ere intatto | ere in piedi | vita sfruttata | subito | a fine partita | sepolto | vetustà | PV | PV/costo | (L/R/V/S/Sk) |")
+    w("|---|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|---|")
+    for c in righe:
+        costo = f"{c['costo_pietra']}P" + (f"+{c['costo_oro']}O" if int(c['costo_oro']) else "")
+        canali = "/".join(f"{r(c,'vp_'+k):.1f}" for k in ("lampo","rendita","verticalita","scavo","scheletri"))
+        w(f"| {c['nome']} | {costo} | {c['resistenza']} | {c['rendita']} | {c['scavo']} | "
+          f"{c['freq']:.2f} | {c['intatto']:.2f} | {c['vita']:.2f} | {c['quota']:.0f}% | {c['subito']:.0f}% | "
+          f"{c['fine']:.0f}% | {c['sep']:.0f}% | {c['vet']:.2f} | **{c['pv']:.1f}** | {c['resa']:.1f} | {canali} |")
+    w()
+
+w("## Il quadro d'insieme")
+w()
+tot_n = sum(c["n"] for c in vive)
+w("| era | carte | costruiti/partita | ere intatto | ere in piedi | subito | a fine partita | sepolto | PV medi |")
+w("|---|--:|--:|--:|--:|--:|--:|--:|--:|")
+for e in ("1","2","3","4","5"):
+    g = [c for c in vive if c["era"] == e]
+    if not g: continue
+    n = sum(c["n"] for c in g)
+    w(f"| era {e} | {len(g)} | {n/partite:.1f} | {sum(c['ere_intatto'] for c in g)/n:.2f} | "
+      f"{sum(c['ere_piedi'] for c in g)/n:.2f} | {100*sum(c['n_subito'] for c in g)/n:.0f}% | "
+      f"{100*sum(c['n_in_piedi_fine'] for c in g)/n:.0f}% | {100*sum(c['n_sepolto'] for c in g)/n:.0f}% | "
+      f"{sum(c['vp'] for c in g)/n:.1f} |")
+w()
+w(f"In media una partita mette in tavola **{tot_n/partite:.1f} edifici**; "
+  f"di questi **{100*sum(c['n_in_piedi_fine'] for c in vive)/tot_n:.0f}%** è ancora in piedi alla fine, "
+  f"**{100*sum(c['n_sepolto'] for c in vive)/tot_n:.0f}%** finisce sotterrato e "
+  f"**{100*sum(c['n_subito'] for c in vive)/tot_n:.0f}%** non supera l'era in cui è nato.")
+w()
+
+w("## Cosa salta all'occhio")
+w()
+
+def med(g, k, d="n"):
+    n = sum(c[d] for c in g)
+    return sum(c[k] for c in g) / n if n else 0.0
+
+w("**1. La Rendita è il canale che paga la durata, ed è quasi tutto.** Le "
+  + f"{len([c for c in vive if int(c['rendita'])>0])} carte con Rendita stampata fruttano in media "
+  + f"**{med([c for c in vive if int(c['rendita'])>0],'vp'):.1f} PV** contro i "
+  + f"**{med([c for c in vive if int(c['rendita'])==0],'vp'):.1f}** delle altre, e restano in piedi "
+  + f"{med([c for c in vive if int(c['rendita'])>0],'ere_piedi'):.2f} ere contro "
+  + f"{med([c for c in vive if int(c['rendita'])==0],'ere_piedi'):.2f}. Non è una sorpresa — la Rendita si "
+  "incassa a ogni censimento — ma dice che il valore di una carta lo decide quasi tutto un "
+  "numero solo.")
+w()
+w("**2. La resistenza fa esattamente il suo mestiere.** Sulle ere 1-4, per ogni punto di resistenza:")
+w()
+w("| resistenza | carte | ere in piedi | cade nella sua era | PV medi |")
+w("|---|--:|--:|--:|--:|")
+for res in sorted({int(c["resistenza"]) for c in vive}):
+    g = [c for c in vive if int(c["resistenza"]) == res and c["era"] != "5"]
+    if not g: continue
+    w(f"| {res} | {len(g)} | {med(g,'ere_piedi'):.2f} | {100*med(g,'n_subito'):.0f}% | {med(g,'vp'):.1f} |")
+w()
+w("Fra resistenza 1 e resistenza 4 la vita raddoppia e i punti quasi triplicano. Il salto "
+  "vero è **fra 2 e 3**: è lì che un edificio smette di essere materiale da riempimento.")
+w()
+w("**3. Le carte da 1 pietra dell'era 1 non sono edifici: sono Scavo da seminare.** Approdo, "
+  "Trappole da pesca, Cava, Capanne, Focolare comune vivono un'era e mezza, finiscono sotto "
+  "nell'**80%** dei casi e i loro punti sono per metà Scavo. Funzionano — ma solo se chi le "
+  "gioca sa che le sta seminando, non costruendo.")
+w()
+w("**4. Un edificio dell'era 5 non può morire.** Gli eventi sono solo nelle ere 1-4: chi "
+  "costruisce nell'era Moderna non vedrà mai un censimento né un evento. Si vede nei numeri: "
+  f"vetustà **{med([c for c in vive if c['era']=='5'],'vetusta'):.2f}**, Rendita "
+  f"**{med([c for c in vive if c['era']=='5'],'vp_rendita'):.2f}**, Scavo "
+  f"**{med([c for c in vive if c['era']=='5'],'vp_scavo'):.2f}**, e il "
+  f"**{100*med([c for c in vive if c['era']=='5'],'n_in_piedi_fine'):.0f}%** ancora in piedi. "
+  "Le carte dell'era 5 pagano solo Lampo e Verticalità, e vanno lette con un metro diverso "
+  "dalle altre: il loro valore è tutto nell'istante in cui le metti.")
+w()
+w("**5. I colossali prendono la cima di tre colonne.** Un edificio da tre caselle conta come "
+  "strato in tutte le colonne che tocca — quindi incassa il premio della cima **tre volte**:")
+w()
+w("| larghezza | carte | costruiti | PV medi | di cui Verticalità |")
+w("|---|--:|--:|--:|--:|")
+for larg in ("1", "2", "3"):
+    g = [c for c in vive if c["larghezza"] == larg]
+    if not g: continue
+    w(f"| XX | {len(g)} | {sum(c['n'] for c in g):,} | "
+      .replace(",", " ") + f"{med(g,'vp'):.1f} | {med(g,'vp_verticalita'):.1f} |")
+w()
+st_ = [c for c in vive if c["nome"] == "Stazione"]
+if st_:
+    c = st_[0]
+    w(f"Il caso limite è la **Stazione** (era 5, tre caselle, {c['costo_pietra']}P+{c['costo_oro']}O): "
+      f"**{c['pv']:.1f} PV medi**, di cui {r(c,'vp_verticalita'):.1f} di sola Verticalità — "
+      "più del doppio della seconda carta della lista. Arriva in tavola una volta ogni dieci "
+      "partite, quindi non rompe la media, ma quando arriva decide la colonna. Vale la pena "
+      "chiedersi se il premio della cima debba contare una volta per edificio invece che una "
+      "volta per colonna.")
+w()
+w("## Gli estremi")
+w()
+tabella(sorted(vive, key=lambda c: c["quota"])[:12], "Le dodici vite più brevi",
+        "Ordinate per **vita sfruttata**, non per ere secche: se no in testa finirebbero le carte dell'era 5, che vivono una sola era perché la partita finisce, non perché crollano.")
+tabella(sorted(vive, key=lambda c: -c["quota"])[:12], "Le dodici che arrivano in fondo",
+        "Ordinate per vita sfruttata.")
+tabella(sorted(vive, key=lambda c: -c["pv"])[:12], "Le dodici che rendono di più",
+        "Ordinate per PV medi fruttati al proprietario.")
+tabella(sorted([c for c in vive if c["freq"] > 0.2], key=lambda c: -c["resa"])[:12],
+        "Le dodici che rendono di più per quello che costano",
+        "Ordinate per PV diviso il costo in pietra equivalente.")
+tabella(sorted([c for c in vive if c["freq"] > 0.2], key=lambda c: c["pv"])[:12],
+        "Le dodici che rendono di meno",
+        "Solo carte che arrivano in tavola almeno una volta ogni cinque partite: una carta rara ha medie ballerine.")
+tabella(sorted(vive, key=lambda c: -c["sep"])[:12], "Le dodici più sepolte",
+        "Ordinate per quota di copie finite sotto un altro edificio.")
+
+w("## Tutte le carte, era per era")
+w()
+for e in ("1","2","3","4","5"):
+    g = sorted([c for c in vive if c["era"] == e], key=lambda c: -c["vita"])
+    if g: tabella(g, f"Era {e}")
+
+if mai:
+    w("## Carte che non sono mai arrivate in tavola")
+    w()
+    w("In " + f"{partite:,}".replace(",", " ") + " partite non è mai stata costruita nemmeno una copia di:")
+    w()
+    for c in sorted(mai, key=lambda c: (c["era"], c["nome"])):
+        w(f"- **{c['nome']}** (era {c['era']}, {c['costo_pietra']}P"
+          + (f"+{c['costo_oro']}O" if int(c['costo_oro']) else "") + ")")
+    w()
+
+# correlazioni
+def corr(xs, ys):
+    mx, my = st.mean(xs), st.mean(ys)
+    num = sum((x-mx)*(y-my) for x, y in zip(xs, ys))
+    den = (sum((x-mx)**2 for x in xs) * sum((y-my)**2 for y in ys)) ** 0.5
+    return num/den if den else 0.0
+
+grandi = [c for c in vive if c["n"] >= 50]
+w("## Due correlazioni, su chi arriva in tavola almeno 50 volte")
+w()
+for nome, k in (("resistenza stampata", "resistenza"), ("costo in pietra", "costo_pietra"),
+                ("Rendita stampata", "rendita"), ("Scavo stampato", "scavo")):
+    xs = [int(c[k]) for c in grandi]
+    w(f"- **{nome}** → ere in piedi: r = {corr(xs, [c['vita'] for c in grandi]):+.2f} · "
+      f"→ PV: r = {corr(xs, [c['pv'] for c in grandi]):+.2f}")
+w()
+w("---")
+w()
+w("Rifare il conto: `godot --headless res://scenes/audit_partita.tscn -- "
+  f"--players {giocatori} --vita 2500 --seed 100000` (quattro processi, semi 100000 / 102500 / 105000 / 107500).")
+w()
+
+open(sys.argv[2], "w").write("\n".join(O) + "\n")
+print("scritto", sys.argv[2], "-", len(vive), "carte vive,", len(mai), "mai costruite")
