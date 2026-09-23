@@ -214,6 +214,74 @@ static func quota_sotto(gs: GameState, b: Building, col: int) -> int:
 		q = maxi(q, s.level)
 	return q
 
+# ---- lo sgretolamento ------------------------------------------------
+# Quando un edificio crolla in rovina la sua sagoma sparisce dal tabellone, e
+# prima spariva e basta: un fotogramma prima c'era, quello dopo no. Chi stava
+# guardando altrove non si accorgeva di niente - ed e' la cosa piu' importante
+# che succede a fine era.
+#
+# Adesso si abbatte in avanti come farebbe il cartone: il piede resta dov'e' e
+# il resto cade verso chi guarda, accelerando; mentre cade si spegne, e un
+# pugno di macerie rotola giu' dalla basetta. Sono numeri puri, quindi si
+# provano headless come tutto il resto: la vista ci mette solo le mesh.
+const CROLLO_DURATA := 1.1
+const CROLLO_MACERIE := 7
+const CROLLO_MACERIA_LATO := 6.0
+const GRAVITA := 2600.0          # mm/s^2, scelta perche' le macerie cadano
+                                 # nel tempo del crollo e non dopo
+
+# A che punto e' la caduta. `t` va da 0 a 1.
+static func crollo(t: float) -> Dictionary:
+	var q := clampf(t, 0.0, 1.0)
+	# La caduta accelera come accelera una cosa che cade: al quadrato, non
+	# lineare, e arriva a terra prima della fine - l'ultimo pezzo di tempo
+	# serve a spegnersi da sdraiata.
+	var angolo := (PI / 2.0) * minf(1.0, q * q / 0.64)
+	# Si spegne sul finire: se cominciasse subito cadrebbe gia' invisibile.
+	var opacita := clampf((1.0 - q) / 0.3, 0.0, 1.0)
+	return {"angolo": angolo, "opacita": opacita, "finito": q >= 1.0}
+
+# Il mucchietto di macerie che si stacca. Tutto ricavato dall'uid: la stessa
+# rovina fa sempre lo stesso mucchio, e una partita rigiocata col suo seme si
+# vede uguale.
+static func macerie(uid: int, larghezza: float, quante := CROLLO_MACERIE) -> Array[Dictionary]:
+	var out: Array[Dictionary] = []
+	for i in quante:
+		var h := _rumore(uid * 31 + i * 7)
+		var h2 := _rumore(uid * 17 + i * 13 + 5)
+		var h3 := _rumore(uid * 11 + i * 29 + 3)
+		out.append({
+			# da dove parte, lungo il fronte della sagoma
+			"x": (h - 0.5) * larghezza * 0.8,
+			"y": 6.0 + h2 * larghezza * 0.25,
+			# come schizza via: un po' di lato e un po' verso chi guarda
+			"vx": (h2 - 0.5) * 70.0,
+			"vy": 60.0 + h3 * 120.0,
+			"vz": 20.0 + h * 60.0,
+			"lato": CROLLO_MACERIA_LATO * (0.6 + h3 * 0.8),
+		})
+	return out
+
+# Dove sta una maceria dopo `t` secondi: tiro parabolico, e quando tocca il
+# piano ci resta.
+static func maceria_pos(m: Dictionary, t: float) -> Vector3:
+	var y := float(m["y"]) + float(m["vy"]) * t - 0.5 * GRAVITA * t * t
+	var q := clampf(t, 0.0, CROLLO_DURATA)
+	if y < 0.0:
+		# atterrata: si ferma dov'e' caduta invece di sprofondare
+		var caduta := (float(m["vy"]) + sqrt(float(m["vy"]) * float(m["vy"])
+			+ 2.0 * GRAVITA * float(m["y"]))) / GRAVITA
+		q = minf(q, caduta)
+		y = 0.0
+	return Vector3(float(m["x"]) + float(m["vx"]) * q, y, float(m["vz"]) * q)
+
+# Un numero fra 0 e 1 ricavato da un intero. Non serve che sia un buon
+# generatore: serve che sia SEMPRE LO STESSO per lo stesso uid.
+static func _rumore(n: int) -> float:
+	var x := (n * 1103515245 + 12345) & 0x7fffffff
+	x = (x >> 7) ^ (x * 2654435761)
+	return float(absi(x) % 10000) / 10000.0
+
 # ---- il banner dello Scavo -------------------------------------------
 # IL VALORE DI SCAVO STA SCRITTO SULLA BASETTA, davanti e dietro. Prima lo
 # sapeva solo chi apriva il riquadro col mouse, eppure e' il numero che decide
@@ -503,17 +571,30 @@ const LINGUETTA_D := 9.0
 
 # I cubetti di un edificio, in fila sul davanti della basetta.
 # Ogni voce: {"pos": Vector3, "tipo": "vetusta"|"resistenza"}.
+# UNA ROVINA NON PORTA CUBETTI. Nessuna regola glieli toglie - il crollo
+# azzera i potenziamenti, e la Vetusta' si azzera solo col restauro, che vale
+# sui ruderi - ma su una rovina non contano piu' niente: gli eventi guardano
+# solo chi e' in piedi, il restauro non la riguarda, le spolia si pagano solo
+# spianando un intatto, e da quando il Colosseo e Il Silvicoltore chiedono un
+# edificio "sopravvissuto" (intatto o rudere) nemmeno la Vetusta' le serve
+# piu'. Sul tabellone restava una fila di cubetti che non diceva piu' niente
+# a nessuno: 1851 rovine su 6167 in 300 partite.
 static func cubetti(gs: GameState, b: Building) -> Array[Dictionary]:
 	var out: Array[Dictionary] = []
+	if b.state == Enums.BuildingState.ROVINA: return out
 	var quanti := b.vetusta + maxi(0, b.bonus_res)
 	if quanti <= 0: return out
 	var passo := CUBETTO + CUBETTO_GAP
 	var base := standee_base(gs, b)
 	var larghezza := (quanti * CUBETTO + (quanti - 1) * CUBETTO_GAP)
 	# Se sono troppi per la basetta si stringono: meglio affollati che fuori.
-	var disponibile := span_w(b.width()) - 4.0
+	# E il pezzo di basetta dove sta il gettone dello scheletro non e' loro:
+	# senza tenerglielo da parte, su un edificio con tanta vetusta i cubetti
+	# ci finivano sotto e si vedeva una fila di cubi mezzi dentro un gettone.
+	var riservato := (scheletro_size().x + 2.0) if b.buried_character != "" else 0.0
+	var disponibile := span_w(b.width()) - 4.0 - riservato
 	var scala: float = minf(1.0, disponibile / maxf(larghezza, 0.001))
-	var x0 := base.x - larghezza * scala / 2.0
+	var x0 := base.x - riservato / 2.0 - larghezza * scala / 2.0
 	var z := base.z + BASETTA_D / 2.0 - CUBETTO / 2.0 - 1.0
 	for i in quanti:
 		out.append({
@@ -522,6 +603,78 @@ static func cubetti(gs: GameState, b: Building) -> Array[Dictionary]:
 			"tipo": "vetusta" if i < b.vetusta else "resistenza",
 		})
 	return out
+
+# ---- il cartellino della Prosperita' Urbana --------------------------
+# Un Centro Urbano e' una colonna con almeno tre edifici intatti di almeno due
+# proprietari diversi: ogni volta che la si attiva, ognuno di quei proprietari
+# incassa un oro. La condizione si fa e si disfa da sola - basta che un
+# edificio crolli - e sul tabellone non si vedeva: la scritta "Prosperita'
+# Urbana" e' stampata sulla tessera di tutte le colonne, accesa o spenta che
+# sia, e per sapere se quella li' pagava bisognava contare gli edifici a mano.
+#
+# Il cartellino si posa proprio su quella fascia, in fondo alla tessera: la
+# scritta stampata c'e' sempre, il cartellino solo quando il Centro e' attivo.
+# La fascia e' misurata sull'immagine della tessera - e' l'ultimo riquadro
+# scuro prima della cornice - e sta fra il 90% e il 98,5% della sua lunghezza.
+const PROSPERITA_PATH := "res://assets/prosperita.png"
+const PROSPERITA_FASCIA_SU := 0.898     # in frazioni di TESSERA_D
+const PROSPERITA_FASCIA_GIU := 0.985
+const PROSPERITA_RAPPORTO := 1387.0 / 518.0
+const PROSPERITA_MARGINE := 2.5         # dentro la cornice della tessera
+
+# Il rettangolo dove si posa, sul piano della tessera.
+static func prosperita_box(col: int) -> AABB:
+	var t := tessera_box(col)
+	var largo := TESSERA_W - 2.0 * PROSPERITA_MARGINE
+	var alto := largo / PROSPERITA_RAPPORTO
+	var centro_z := TESSERA_D * (PROSPERITA_FASCIA_SU + PROSPERITA_FASCIA_GIU) / 2.0
+	return AABB(Vector3(t.position.x + PROSPERITA_MARGINE, t.end.y,
+			t.position.z + centro_z - alto / 2.0),
+		Vector3(largo, 0.0, alto))
+
+# ---- il gettone dello scheletro --------------------------------------
+# "Nelle ere 1-4, a fine era il personaggio non si scarta: infilatelo sotto la
+# carta di un vostro edificio ancora in piedi." Quel personaggio sepolto vale
+# 6 meno l'era in cui e' stato sepolto - 5, 4, 3, 2 - ed e' l'unica cosa che
+# un edificio continua a rendere anche da rovina.
+#
+# Sul tavolo e' un gettone quadrato posato sulla basetta, uno per era, con
+# sopra lo scheletro dell'epoca e il suo valore. Prima era un cubetto color
+# ocra: si vedeva che li' sotto c'era qualcuno, non chi ne' quanto valeva.
+# I gettoni sono QUATTRO perche' quattro sono le ere che seppelliscono: "i
+# personaggi dell'era Moderna si scartano".
+#
+# L'immagine e' una sola, quattro caselle in fila: si sposta la finestra
+# sulla texture invece di ritagliare quattro file, come per il banner dello
+# Scavo. L'atlante lo prepara `tools/estrai_grafica.py`.
+const SCHELETRO_PATH := "res://assets/scheletri.png"
+const SCHELETRI_COLONNE := 4
+const SCHELETRO_LATO := 13.0                # quanto e' alto il gettone
+const SCHELETRO_RAPPORTO := 487.0 / 450.0   # il gettone e' quasi quadrato
+const SCHELETRO_SPESSORE := 1.6             # cartoncino spesso, non un cubo
+# Non disteso sulla basetta: APPOGGIATO ALL'INDIETRO contro la sagoma. La
+# telecamera guarda il tavolo quasi di taglio, e un gettone steso di piatto
+# si vede come una riga di due millimetri - cioe' meno del cubetto che
+# sostituisce. In piedi si legge, e sul tavolo vero e' come lo si appoggia
+# quando lo si vuole far vedere.
+const SCHELETRO_PENDENZA := 0.30            # rad, all'indietro
+
+static func scheletro_size() -> Vector2:
+	return Vector2(SCHELETRO_LATO * SCHELETRO_RAPPORTO, SCHELETRO_LATO)
+
+# Dove poggia: a destra sulla basetta, sul davanti, dove non copre la sagoma
+# ne' i cubetti della vetusta, che stanno a sinistra.
+static func scheletro_piede(gs: GameState, b: Building) -> Vector3:
+	var base := standee_base(gs, b)
+	var largo := scheletro_size().x
+	return Vector3(base.x + span_w(b.width()) / 2.0 - largo / 2.0 - 1.5,
+		base.y + BASETTA_Y, base.z + BASETTA_D / 2.0 - 1.5)
+
+# La casella dell'era: la prima e' l'era 1, che vale 5.
+static func scheletro_uv(era: int) -> Dictionary:
+	var i := clampi(era - 1, 0, SCHELETRI_COLONNE - 1)
+	return {"scala": Vector2(1.0 / float(SCHELETRI_COLONNE), 1.0),
+		"offset": Vector2(float(i) / float(SCHELETRI_COLONNE), 0.0)}
 
 # Le linguette dei potenziamenti, che sporgono da sotto la sagoma.
 static func linguette(gs: GameState, b: Building) -> Array[Vector3]:

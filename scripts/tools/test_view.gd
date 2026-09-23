@@ -51,6 +51,11 @@ func _ready() -> void:
 	_run("sotto un edificio a scalino non resta un buco", _test_scalino)
 	_run("le carte stanno in piedi alla stessa altezza", _test_misure_carte)
 	_run("la sagoma e' un pezzo solo, spesso", _test_sagoma_estrusa)
+	_run("la sagoma si sgretola quando crolla", _test_sgretolamento)
+	_run("  e la vista se ne accorge da sola", _test_sgretolamento_nella_vista)
+	_run("il gettone del personaggio sepolto", _test_gettone_scheletro)
+	_run("  e la rovina non porta cubetti", _test_cubetti_sulle_rovine)
+	_run("il cartellino della Prosperita' Urbana", _test_cartello_prosperita)
 	print("\n%d superati, %d falliti" % [_passed, _failed])
 	get_tree().quit(0 if _failed == 0 else 1)
 
@@ -2163,3 +2168,254 @@ func _test_scena_giocabile() -> void:
 	n.torna_alla_scelta()
 	_ok("  e si torna alla scelta", n.ctl == null and n.vista == null)
 	n.queue_free()
+
+# Lo sgretolamento: quando un edificio va in rovina la sagoma si abbatte
+# invece di sparire fra due fotogrammi. Il movimento sta tutto in numeri puri
+# dentro BoardLayout3D, quindi si prova headless; qui sotto si prova anche che
+# la vista li accenda da sola, guardando come cambia lo stato.
+func _test_sgretolamento() -> void:
+	var prima := BoardLayout3D.crollo(0.0)
+	_approx("in piedi al primo istante", float(prima["angolo"]), 0.0)
+	_approx("  e tutta visibile", float(prima["opacita"]), 1.0)
+	_ok("  e non e' finita", not bool(prima["finito"]))
+
+	# L'angolo non torna mai indietro: una sagoma che si rialza a meta' caduta
+	# e' il difetto che questo test prende.
+	var scorso := -1.0
+	var sale := true
+	var t := 0.0
+	while t <= 1.0001:
+		var a := float(BoardLayout3D.crollo(t)["angolo"])
+		if a < scorso - 0.0001: sale = false
+		scorso = a
+		t += 0.02
+	_ok("l'angolo cresce sempre, non oscilla", sale)
+	_approx("  e arriva a terra, a squadra", float(BoardLayout3D.crollo(1.0)["angolo"]), PI / 2.0)
+	_ok("  e ci arriva prima della fine, che serve a spegnersi",
+		is_equal_approx(float(BoardLayout3D.crollo(0.8)["angolo"]), PI / 2.0))
+
+	# Si spegne SUL FINIRE. Se cominciasse subito cadrebbe gia' trasparente e
+	# la caduta non si vedrebbe.
+	_approx("a meta' caduta e' ancora piena", float(BoardLayout3D.crollo(0.5)["opacita"]), 1.0)
+	_ok("  a un soffio dalla fine e' quasi spenta",
+		float(BoardLayout3D.crollo(0.95)["opacita"]) < 0.2)
+	_approx("  e alla fine e' sparita", float(BoardLayout3D.crollo(1.0)["opacita"]), 0.0)
+	_ok("  e allora e' finita", bool(BoardLayout3D.crollo(1.0)["finito"]))
+
+	# Le macerie vengono dall'uid: la stessa rovina fa sempre lo stesso
+	# mucchio, e una partita rigiocata col suo seme si vede uguale.
+	var m1 := BoardLayout3D.macerie(7, 100.0)
+	var m2 := BoardLayout3D.macerie(7, 100.0)
+	var m3 := BoardLayout3D.macerie(8, 100.0)
+	_eq("le macerie sono quelle previste", m1.size(), BoardLayout3D.CROLLO_MACERIE)
+	_ok("  lo stesso edificio fa sempre lo stesso mucchio", m1 == m2)
+	_ok("  ma due edifici diversi non fanno il mucchio identico", m1 != m3)
+	var dentro := true
+	for m in m1:
+		if absf(float(m["x"])) > 50.0: dentro = false
+		if float(m["lato"]) <= 0.0: dentro = false
+	_ok("  e partono dal fronte della sagoma, non da fuori", dentro)
+
+	# Cadono e si fermano: nessuna maceria sprofonda sotto il piano, e una
+	# volta atterrata non scivola piu'.
+	var sotto := false
+	var tt := 0.0
+	while tt <= BoardLayout3D.CROLLO_DURATA + 0.5:
+		for m in m1:
+			if BoardLayout3D.maceria_pos(m, tt).y < -0.0001: sotto = true
+		tt += 0.01
+	_ok("nessuna maceria sprofonda sotto il tavolo", not sotto)
+	var ferme := true
+	for m in m1:
+		var a := BoardLayout3D.maceria_pos(m, BoardLayout3D.CROLLO_DURATA)
+		var b := BoardLayout3D.maceria_pos(m, BoardLayout3D.CROLLO_DURATA + 2.0)
+		if a.distance_to(b) > 0.0001: ferme = false
+	_ok("  e atterrate restano dove sono cadute", ferme)
+
+# E la vista se ne accorge da sola: non glielo dice il nucleo, che la vista
+# non la conosce, ma la differenza fra lo stato di prima e quello di adesso.
+func _test_sgretolamento_nella_vista() -> void:
+	var gs := _gioco().gs
+	var b := _metti(gs, "ed_capanne", 1, 2)
+	var vista: Node3D = preload("res://scripts/view/board_view_3d.gd").new()
+	add_child(vista)
+	vista.scale = Vector3.ONE * BoardLayout3D.U
+	vista.mostra(gs)
+	_ok("al primo sguardo non crolla niente: si prende nota e basta",
+		vista._crolli.is_empty())
+	vista.mostra(gs)
+	_ok("  e nemmeno ridisegnando lo stesso tavolo", vista._crolli.is_empty())
+
+	b.state = Enums.BuildingState.ROVINA
+	vista.mostra(gs)
+	_eq("chi passa a rovina si abbatte", vista._crolli.size(), 1)
+	_ok("  con le sue macerie",
+		(vista._crolli[0]["pezzi"] as Array).size() == BoardLayout3D.CROLLO_MACERIE)
+	# Un secondo giro di disegno non lo fa ricominciare: e' gia' rovina.
+	vista.mostra(gs)
+	_eq("  e non ricomincia a ogni ridisegno", vista._crolli.size(), 1)
+
+	# Il tempo passa: a meta' e' piegata, alla fine il livello degli effetti
+	# si e' svuotato da se'.
+	vista._process(BoardLayout3D.CROLLO_DURATA / 2.0)
+	var perno: Node3D = vista._crolli[0]["perno"]
+	_ok("a meta' caduta la sagoma e' piegata in avanti", perno.rotation.x > 0.1)
+	vista._process(BoardLayout3D.CROLLO_DURATA)
+	_ok("e alla fine non resta niente da animare", vista._crolli.is_empty())
+	vista.queue_free()
+
+# Il gettone del personaggio sepolto: uno per era, col suo valore stampato
+# sopra. Prima era un cubetto color ocra e non si sapeva ne' chi fosse ne'
+# quanto valesse.
+func _test_gettone_scheletro() -> void:
+	# Quattro caselle sull'atlante, una per era che seppellisce: "i personaggi
+	# dell'era Moderna si scartano", quindi le ere sono 1-4.
+	_eq("le caselle sono le ere che seppelliscono",
+		BoardLayout3D.SCHELETRI_COLONNE, 4)
+	var viste := {}
+	for era in [1, 2, 3, 4]:
+		var uv: Dictionary = BoardLayout3D.scheletro_uv(era)
+		var off: Vector2 = uv["offset"]
+		_approx("  l'era %d prende un quarto di atlante" % era,
+			(uv["scala"] as Vector2).x, 0.25)
+		viste[off.x] = era
+		_ok("  e la casella e' quella dell'era (offset %.2f)" % off.x,
+			is_equal_approx(off.x, (era - 1) * 0.25))
+	_eq("  quattro ere, quattro caselle diverse", viste.size(), 4)
+	# Un'era fuori gamma non deve prendere una casella che non c'e': il
+	# gettone sbagliato e' meglio di una texture vuota.
+	var fuori: Dictionary = BoardLayout3D.scheletro_uv(9)
+	_ok("un'era fuori gamma resta dentro l'atlante",
+		(fuori["offset"] as Vector2).x <= 0.75 + 0.0001)
+
+	# E sta sulla basetta, tutto: un gettone che sporge dal piede sembra
+	# appoggiato per aria.
+	var gs := _gioco().gs
+	var b := _metti(gs, _largo(3), 1, 2)
+	b.buried_character = "pe_mercante"
+	b.buried_character_era = 2
+	var piede := BoardLayout3D.scheletro_piede(gs, b)
+	var base := BoardLayout3D.standee_base(gs, b)
+	var dim := BoardLayout3D.scheletro_size()
+	var basetta := BoardLayout3D.basetta_box(gs, b)
+	_ok("il gettone poggia sulla basetta, non per aria",
+		is_equal_approx(piede.y, base.y + BoardLayout3D.BASETTA_Y))
+	_ok("  e sta dentro il piede in larghezza",
+		piede.x - dim.x / 2.0 >= basetta.position.x - 0.01
+		and piede.x + dim.x / 2.0 <= basetta.end.x + 0.01)
+	_ok("  e dentro il piede in profondita'",
+		piede.z <= basetta.end.z + 0.01 and piede.z >= basetta.position.z - 0.01)
+
+	# I cubetti della vetusta stanno a sinistra e gli lasciano il posto:
+	# senza, su un edificio pieno di vetusta la fila finiva sotto il gettone.
+	b.vetusta = 6
+	var invasi := 0
+	for c in BoardLayout3D.cubetti(gs, b):
+		var x: float = (c["pos"] as Vector3).x
+		if x + float(c["lato"]) / 2.0 > piede.x - dim.x / 2.0: invasi += 1
+	_eq("nessun cubetto finisce sotto il gettone", invasi, 0)
+	# Su una basetta stretta il posto non basta per tutti: i cubetti si
+	# stringono, e senza sepolto tornano a prendersi tutto il piede.
+	var stretto := _metti(gs, _largo(1), 4, 2)
+	stretto.vetusta = 6
+	var largo_senza: float = _larghezza_cubetti(BoardLayout3D.cubetti(gs, stretto))
+	stretto.buried_character = "pe_mercante"
+	stretto.buried_character_era = 1
+	var largo_con: float = _larghezza_cubetti(BoardLayout3D.cubetti(gs, stretto))
+	_ok("  e col gettone sopra si stringono (%.1f contro %.1f mm)"
+		% [largo_con, largo_senza], largo_con < largo_senza - 0.5)
+	var piede1 := BoardLayout3D.scheletro_piede(gs, stretto)
+	var sotto := 0
+	for c in BoardLayout3D.cubetti(gs, stretto):
+		if (c["pos"] as Vector3).x + float(c["lato"]) / 2.0 \
+			> piede1.x - BoardLayout3D.scheletro_size().x / 2.0: sotto += 1
+	_eq("  e nemmeno li' finiscono sotto il gettone", sotto, 0)
+
+func _larghezza_cubetti(lista: Array) -> float:
+	if lista.is_empty(): return 0.0
+	var minimo := 1e9
+	var massimo := -1e9
+	for c in lista:
+		var x: float = (c["pos"] as Vector3).x
+		minimo = minf(minimo, x - float(c["lato"]) / 2.0)
+		massimo = maxf(massimo, x + float(c["lato"]) / 2.0)
+	return massimo - minimo
+
+# Una rovina non porta cubetti: non contano piu' niente, e una fila di cubi
+# sopra un edificio crollato faceva sembrare che contassero.
+func _test_cubetti_sulle_rovine() -> void:
+	var gs := _gioco().gs
+	var b := _metti(gs, _largo(3), 1, 2)
+	b.vetusta = 3
+	b.bonus_res = 2
+	_eq("un intatto li porta tutti", BoardLayout3D.cubetti(gs, b).size(), 5)
+	b.state = Enums.BuildingState.RUDERE
+	_eq("  il rudere anche: e' in piedi, solo spento",
+		BoardLayout3D.cubetti(gs, b).size(), 5)
+	b.state = Enums.BuildingState.ROVINA
+	_eq("  la rovina nessuno", BoardLayout3D.cubetti(gs, b).size(), 0)
+	# E il gettone dello scheletro invece resta: e' l'unica cosa che una
+	# rovina continua a rendere.
+	b.buried_character = "pe_mercante"
+	b.buried_character_era = 3
+	var piede := BoardLayout3D.scheletro_piede(gs, b)
+	_ok("ma il gettone del sepolto resta anche sulla rovina",
+		piede.y > 0.0 and BoardLayout3D.cubetti(gs, b).is_empty())
+
+	# In partita non e' un caso di laboratorio: le rovine sono la meta' del
+	# tabellone, e prima meta' tabellone portava cubetti inerti.
+	var ctl := GameController.new()
+	ctl.new_game(3, 726)
+	var giri := 0
+	while ctl.gs.phase != Enums.Phase.FINE_PARTITA and giri < 4000:
+		RandomBot.play_turn(ctl)
+		giri += 1
+	var rovine_con_cubetti := 0
+	var rovine := 0
+	for e in ctl.gs.grid.buildings:
+		if e.state != Enums.BuildingState.ROVINA: continue
+		rovine += 1
+		if not BoardLayout3D.cubetti(ctl.gs, e).is_empty(): rovine_con_cubetti += 1
+	_ok("a fine partita nessuna delle %d rovine porta cubetti" % rovine,
+		rovine > 0 and rovine_con_cubetti == 0)
+
+# Il cartellino della Prosperita' Urbana: la scritta e' stampata su tutte le
+# tessere, il cartellino si posa solo dove il Centro Urbano e' attivo davvero.
+func _test_cartello_prosperita() -> void:
+	var gs := _gioco().gs
+	var box := BoardLayout3D.prosperita_box(2)
+	var tessera := BoardLayout3D.tessera_box(2)
+	_ok("il cartellino sta sulla tessera, non fuori",
+		box.position.x >= tessera.position.x - 0.01
+		and box.position.x + box.size.x <= tessera.end.x + 0.01
+		and box.position.z >= tessera.position.z - 0.01
+		and box.position.z + box.size.z <= tessera.end.z + 0.01)
+	# E sta proprio sulla fascia in fondo, quella dove la scritta e' stampata:
+	# se scivola in su finisce sul testo della regola, se scivola in giu'
+	# finisce sulla cornice.
+	var centro_z := box.position.z + box.size.z / 2.0 - tessera.position.z
+	_ok("  e cade sulla fascia della scritta (%.1f mm su %.0f)"
+		% [centro_z, BoardLayout3D.TESSERA_D],
+		centro_z / BoardLayout3D.TESSERA_D > BoardLayout3D.PROSPERITA_FASCIA_SU
+		and centro_z / BoardLayout3D.TESSERA_D < BoardLayout3D.PROSPERITA_FASCIA_GIU)
+	_ok("  e tiene le proporzioni del disegno",
+		is_equal_approx(box.size.x / box.size.z, BoardLayout3D.PROSPERITA_RAPPORTO))
+	_ok("  e resta sotto l'ultimo binario, che finisce a %.0f mm"
+		% BoardLayout3D.BANDA_GIU,
+		box.position.z > BoardLayout3D.BANDA_GIU)
+
+	# Il Centro Urbano e' "tre edifici intatti di almeno due proprietari": si
+	# fa e si disfa da solo, e il cartellino lo segue.
+	_ok("una colonna vuota non e' un Centro", not gs.grid.is_prosperity_center(3))
+	var a := _metti(gs, "ed_capanne", 3, 1, 0, 0)
+	var b := _metti(gs, "ed_capanne", 3, 2, 0, 0)
+	_ok("  due edifici di un solo proprietario nemmeno",
+		not gs.grid.is_prosperity_center(3))
+	var c := _metti(gs, "ed_capanne", 3, 3, 0, 1)
+	_ok("  tre edifici di due proprietari si", gs.grid.is_prosperity_center(3))
+	c.state = Enums.BuildingState.ROVINA
+	_ok("  e se uno crolla il Centro si spegne", not gs.grid.is_prosperity_center(3))
+	c.state = Enums.BuildingState.RUDERE
+	_ok("  un rudere non lo riaccende: e' in piedi ma spento",
+		not gs.grid.is_prosperity_center(3))
+	_ok("  a, b restano in piedi", a.is_standing() and b.is_standing())

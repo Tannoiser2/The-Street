@@ -30,12 +30,30 @@ var _cam: Camera3D = null
 var evidenze: Dictionary = {}
 # Chi sta guardando: il suo obiettivo segreto si vede, quello degli altri no.
 var umano := -1
+# Il livello degli effetti: quello che si muove nel tempo invece di essere
+# ridisegnato fermo a ogni giro.
+var _effetti: Node3D = null
+var _crolli: Array[Dictionary] = []
+# Lo stato di ogni edificio al giro prima: e' guardando come cambia che si
+# sa CHI e' appena crollato. Il nucleo non lo dice alla vista - non la
+# conosce - e non deve: la differenza si vede dallo stato, che c'e' gia'.
+var _stato_prima: Dictionary = {}
 
 func mostra(stato: GameState, colonna_evidenziata := -1, acceso := {}) -> void:
+	var prima := gs
 	gs = stato
 	_evidenziata = colonna_evidenziata
 	evidenze = acceso
-	for f in get_children(): f.queue_free()
+	# Gli EFFETTI non si buttano col resto: un crollo dura piu' di un
+	# fotogramma, e fra un turno e l'altro il tavolo si ridisegna piu' volte.
+	# Vivono in un nodo loro, che sopravvive al ridisegno e si svuota da se'.
+	for f in get_children():
+		if f == _effetti: continue
+		f.queue_free()
+	if _effetti == null:
+		_effetti = Node3D.new()
+		add_child(_effetti)
+	_nuovi_crolli(prima)
 	_tavolo()
 	_cielo()
 	_tessere()
@@ -46,6 +64,109 @@ func mostra(stato: GameState, colonna_evidenziata := -1, acceso := {}) -> void:
 	_posti_liberi()
 	_luci()
 	_telecamera()
+
+# ---- lo sgretolamento ------------------------------------------------
+# Chi e' passato a ROVINA da quando abbiamo guardato l'ultima volta si abbatte.
+# Alla prima chiamata non si anima niente: si prende nota e basta, se no
+# aprendo una partita a meta' crollerebbe tutto insieme.
+func _nuovi_crolli(prima: GameState) -> void:
+	var adesso := {}
+	for b in gs.grid.buildings: adesso[b.uid] = b.state
+	if prima != null and not _stato_prima.is_empty():
+		for b in gs.grid.buildings:
+			if b.state != Enums.BuildingState.ROVINA: continue
+			if not _stato_prima.has(b.uid): continue
+			if int(_stato_prima[b.uid]) == Enums.BuildingState.ROVINA: continue
+			_avvia_crollo(b)
+	_stato_prima = adesso
+
+func _avvia_crollo(b: Building) -> void:
+	if _effetti == null: return
+	var dim := BoardLayout3D.standee_size(b)
+	var base := BoardLayout3D.standee_base(gs, b)
+	# Il perno sta al PIEDE della sagoma, sul davanti: e' li' che il cartone
+	# fa leva quando si abbatte, non al centro.
+	var perno := Node3D.new()
+	perno.position = base + Vector3(0.0, BoardLayout3D.BASETTA_Y,
+		BoardLayout3D.SAGOMA_SPESSORE_VISTA / 2.0)
+	_effetti.add_child(perno)
+	var sagoma := _mesh_sagoma_di(b, dim)
+	if sagoma != null:
+		sagoma.position = Vector3(0.0, dim.y / 2.0, -BoardLayout3D.SAGOMA_SPESSORE_VISTA / 2.0)
+		perno.add_child(sagoma)
+	var pezzi: Array[Node3D] = []
+	var dati := BoardLayout3D.macerie(b.uid, dim.x)
+	for m in dati:
+		var lato := float(m["lato"])
+		var cubo := _scatola(Vector3(lato, lato, lato), TERRAPIENO.lightened(0.1))
+		_effetti.add_child(cubo)
+		pezzi.append(cubo)
+	_crolli.append({"perno": perno, "sagoma": sagoma, "t": 0.0,
+		"macerie": dati, "pezzi": pezzi,
+		"origine": base + Vector3(0.0, BoardLayout3D.BASETTA_Y, 0.0)})
+
+# La stessa sagoma che disegna `_sagoma`, ma staccata dal tabellone: serve a
+# farla cadere. Se non c'e' l'illustrazione si ripiega sul cartoncino colorato,
+# come fa il resto della vista.
+func _mesh_sagoma_di(b: Building, dim: Vector2) -> MeshInstance3D:
+	var col: Color = COLORI_GIOCATORE[b.owner % COLORI_GIOCATORE.size()].darkened(0.48)
+	var tex: Texture2D = _illustrazione(b)
+	if tex == null:
+		return _scatola(Vector3(dim.x, dim.y, BoardLayout3D.SAGOMA_SPESSORE_VISTA), col)
+	var mesh := mesh_sagoma(tex, dim, BoardLayout3D.SAGOMA_SPESSORE_VISTA)
+	if mesh == null: return _scatola(Vector3(dim.x, dim.y, BoardLayout3D.SAGOMA_SPESSORE_VISTA), col)
+	var m := MeshInstance3D.new()
+	m.mesh = mesh
+	var stampa := StandardMaterial3D.new()
+	_stampa(stampa, tex)
+	stampa.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	var taglio := StandardMaterial3D.new()
+	taglio.albedo_color = TAGLIO_CARTONE
+	taglio.cull_mode = BaseMaterial3D.CULL_DISABLED
+	taglio.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	m.set_surface_override_material(0, stampa)
+	if mesh.get_surface_count() > 1: m.set_surface_override_material(1, taglio)
+	return m
+
+func _process(delta: float) -> void:
+	if _crolli.is_empty(): return
+	var vivi: Array[Dictionary] = []
+	for c in _crolli:
+		c["t"] = float(c["t"]) + delta
+		var q := float(c["t"]) / BoardLayout3D.CROLLO_DURATA
+		var stato := BoardLayout3D.crollo(q)
+		var perno: Node3D = c["perno"]
+		if is_instance_valid(perno):
+			perno.rotation = Vector3(float(stato["angolo"]), 0.0, 0.0)
+			_opacita(c["sagoma"], float(stato["opacita"]))
+		var pezzi: Array = c["pezzi"]
+		var dati: Array = c["macerie"]
+		for i in pezzi.size():
+			var n: Node3D = pezzi[i]
+			if not is_instance_valid(n): continue
+			n.position = (c["origine"] as Vector3) \
+				+ BoardLayout3D.maceria_pos(dati[i], float(c["t"]))
+			_opacita(n, float(stato["opacita"]))
+		if bool(stato["finito"]):
+			if is_instance_valid(perno): perno.queue_free()
+			for n in pezzi:
+				if is_instance_valid(n): n.queue_free()
+			continue
+		vivi.append(c)
+	_crolli = vivi
+
+func _opacita(n, valore: float) -> void:
+	if n == null or not is_instance_valid(n): return
+	var m := n as MeshInstance3D
+	if m == null: return
+	if m.material_override is StandardMaterial3D:
+		var mat := m.material_override as StandardMaterial3D
+		mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+		mat.albedo_color.a = valore
+		return
+	for i in m.get_surface_override_material_count():
+		var mat2 := m.get_surface_override_material(i) as StandardMaterial3D
+		if mat2 != null: mat2.albedo_color.a = valore
 
 func _quad(dim: Vector2, col: Color, unshaded := false) -> MeshInstance3D:
 	var m := MeshInstance3D.new()
@@ -205,6 +326,10 @@ func _tessere() -> void:
 		# dove sta per cliccare, perche' in prospettiva le colonne non stanno
 		# dove sembra. Col disegno sopra non si puo' piu' schiarire il colore
 		# della scatola, quindi si posa una velatura chiara sopra la tessera.
+		# Il cartellino della Prosperita': si posa sulla fascia in fondo alla
+		# tessera quando la colonna e' un Centro Urbano attivo. La scritta
+		# stampata c'e' sempre, il cartellino no.
+		if gs.grid.is_prosperity_center(c): _cartello_prosperita(c)
 		if c == _evidenziata:
 			var velo := _quad(Vector2(box.size.x, box.size.z),
 				Color(1, 1, 1, 0.22), true)
@@ -214,6 +339,21 @@ func _tessere() -> void:
 			velo.position = Vector3(box.position.x + box.size.x / 2.0,
 				box.end.y + 0.8, box.position.z + box.size.z / 2.0)
 			add_child(velo)
+
+func _cartello_prosperita(col: int) -> void:
+	if not ResourceLoader.exists(BoardLayout3D.PROSPERITA_PATH): return
+	var tex := load(BoardLayout3D.PROSPERITA_PATH) as Texture2D
+	if tex == null: return
+	var box := BoardLayout3D.prosperita_box(col)
+	var q := _quad(Vector2(box.size.x, box.size.z), Color.WHITE, true)
+	var mat := q.material_override as StandardMaterial3D
+	mat.albedo_texture = tex
+	mat.texture_filter = BaseMaterial3D.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
+	mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	q.rotate_x(-PI / 2.0)
+	q.position = Vector3(box.position.x + box.size.x / 2.0, box.position.y + 0.4,
+		box.position.z + box.size.z / 2.0)
+	add_child(q)
 
 func _edifici() -> void:
 	for b in gs.grid.buildings:
@@ -654,10 +794,46 @@ func _segnalini(b: Building) -> void:
 	# pupazzetto come gli altri, e lo mette in tavola `_pupazzetti` - uno solo
 	# per lavoratore, che sta o sulla bacchetta o sulla strada.
 	if b.buried_character != "":
-		var sep := _scatola(Vector3(8.0, 8.0, 8.0), Color("#8a6f3a"))
-		sep.position = base + Vector3(BoardLayout3D.span_w(b.width()) / 2.0 - 5.0,
-			BoardLayout3D.BASETTA_Y + 4.0, BoardLayout3D.BASETTA_D / 2.0 - 3.0)
-		add_child(sep)
+		_gettone_scheletro(b)
+
+# Il gettone del personaggio sepolto, posato sulla basetta: lo scheletro
+# dell'era in cui e' stato sepolto, col suo valore stampato sopra. Senza
+# l'immagine - assets/ si rigenera e non e' versionata - resta il cubetto
+# color ocra di prima, cosi' le partite headless non dipendono dalla grafica.
+func _gettone_scheletro(b: Building) -> void:
+	var piede := BoardLayout3D.scheletro_piede(gs, b)
+	var dim := BoardLayout3D.scheletro_size()
+	var tex: Texture2D = null
+	if ResourceLoader.exists(BoardLayout3D.SCHELETRO_PATH):
+		tex = load(BoardLayout3D.SCHELETRO_PATH) as Texture2D
+	if tex == null:
+		var cubo := _scatola(Vector3(8.0, 8.0, 8.0), Color("#8a6f3a"))
+		cubo.position = piede + Vector3(0.0, 4.0, -4.0)
+		add_child(cubo)
+		return
+	# Il perno sta al PIEDE del gettone, sul davanti: e' li' che appoggia
+	# sulla basetta, e da li' si inclina all'indietro.
+	var perno := Node3D.new()
+	perno.position = piede
+	perno.rotation = Vector3(-BoardLayout3D.SCHELETRO_PENDENZA, 0.0, 0.0)
+	add_child(perno)
+	# Il cartoncino sotto la stampa: da' spessore al gettone, che di taglio
+	# altrimenti sparirebbe.
+	var spessore := _scatola(Vector3(dim.x, dim.y, BoardLayout3D.SCHELETRO_SPESSORE),
+		Color("#3a3128"))
+	spessore.position = Vector3(0.0, dim.y / 2.0, 0.0)
+	perno.add_child(spessore)
+	var uv: Dictionary = BoardLayout3D.scheletro_uv(b.buried_character_era)
+	var faccia := _quad(dim, Color.WHITE)
+	var mat := faccia.material_override as StandardMaterial3D
+	mat.albedo_texture = tex
+	mat.texture_filter = BaseMaterial3D.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
+	mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	mat.uv1_scale = Vector3((uv["scala"] as Vector2).x, (uv["scala"] as Vector2).y, 1.0)
+	mat.uv1_offset = Vector3((uv["offset"] as Vector2).x, (uv["offset"] as Vector2).y, 0.0)
+	faccia.position = Vector3(0.0, dim.y / 2.0,
+		BoardLayout3D.SCHELETRO_SPESSORE / 2.0 + 0.05)
+	perno.add_child(faccia)
 
 # Una scritta che guarda sempre la telecamera: le carte sono stese sul tavolo
 # e viste di scorcio, quindi il testo stampato sopra non si leggerebbe.

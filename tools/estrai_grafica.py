@@ -52,6 +52,14 @@ Produce tre cose, con gradi di affidabilità molto diversi.
    controllato voce per voce: qui, a differenza delle carte edificio, i numeri
    del PDF non sono obsoleti.
 
+4. GLI ORIGINALI DISEGNATI in materiali/*.png — sfondo del cielo, banner dello
+   Scavo, terra del terrapieno, gettoni dello scheletro. Non vengono dai PDF di
+   stampa: sono immagini che il designer manda una per una, disegnate e non
+   impaginate, quindi le strisce e le caselle non sono mai larghe uguali.
+   Qui si ritrovano una per una e si rimettono in atlanti regolari, così la
+   vista prende la riga o la casella che le serve con una divisione e non sa
+   niente di com'era fatta l'immagine di partenza.
+
 Uso:  python3 tools/estrai_grafica.py [cartella_destinazione]
       (default: assets/)
 """
@@ -258,6 +266,113 @@ def normalizza_scavo(fonte, uscita):
     if len(fasce) != SCAVO_RIGHE_ATTESE:
         print(f"  ATTENZIONE: la vista ne aspetta {SCAVO_RIGHE_ATTESE} "
               f"(BoardLayout3D.SCAVO_RIGHE): aggiorna la costante")
+
+
+# I GETTONI DELLO SCHELETRO: il personaggio sepolto sotto un edificio, uno
+# per era. Valgono 6 meno l'era in cui sono stati sepolti - 5, 4, 3, 2 - e
+# sono quattro perche' quattro sono le ere che seppelliscono: "i personaggi
+# dell'era Moderna si scartano" (EraRules.bury_characters).
+#
+# L'originale del designer e' una fila di quattro tessere su fondo bianco,
+# separate da colonne bianche e ognuna larga e alta a modo suo. Come per il
+# banner dello Scavo si ritrovano una per una e si rimettono in caselle tutte
+# uguali, cosi' la vista prende la casella dell'era N con una divisione. Il
+# bianco attorno agli angoli arrotondati se ne va con lo stesso riempimento
+# dai bordi che pulisce le sagome: il gettone sul tavolo e' fustellato, non
+# un quadrato bianco.
+SCHELETRI_ATTESI = 4
+
+def colonne_verticali(pix, soglia=235, quota=0.9, minimo=20):
+    """Le fasce di contenuto fra le colonne quasi bianche. Restituisce
+    [(x0, x1), ...] da sinistra a destra."""
+    larghezza, altezza, n = pix.width, pix.height, pix.n
+    dati = pix.samples
+    passo = max(1, altezza // 400)
+    def chiara(x, quanto=quota):
+        chiari = campioni = 0
+        for y in range(0, altezza, passo):
+            i = y * pix.stride + x * n
+            campioni += 1
+            if dati[i] > soglia and dati[i + 1] > soglia and dati[i + 2] > soglia:
+                chiari += 1
+        return chiari / campioni > quanto
+    bianca = [chiara(x) for x in range(larghezza)]
+    fasce, inizio = [], None
+    for x in range(larghezza):
+        if not bianca[x] and inizio is None:
+            inizio = x
+        elif bianca[x] and inizio is not None:
+            if x - inizio >= minimo:
+                fasce.append((inizio, x))
+            inizio = None
+    if inizio is not None and larghezza - inizio >= minimo:
+        fasce.append((inizio, larghezza))
+    return fasce
+
+
+def _altezza_utile(pix, x0, x1, soglia=235, quota=0.98, minimo=20):
+    """Dove comincia e dove finisce il disegno dentro una colonna."""
+    n, dati = pix.n, pix.samples
+    passo = max(1, (x1 - x0) // 200)
+    def chiara(y):
+        chiari = campioni = 0
+        base = y * pix.stride
+        for x in range(x0, x1, passo):
+            i = base + x * n
+            campioni += 1
+            if dati[i] > soglia and dati[i + 1] > soglia and dati[i + 2] > soglia:
+                chiari += 1
+        return chiari / campioni > quota
+    y0, y1 = 0, pix.height
+    while y0 < y1 - minimo and chiara(y0):
+        y0 += 1
+    while y1 - 1 > y0 + minimo and chiara(y1 - 1):
+        y1 -= 1
+    return y0, y1
+
+
+def normalizza_scheletri(fonte, uscita):
+    if not os.path.exists(fonte):
+        print("gettoni dello scheletro: manca materiali/Scheletri.png")
+        return
+    pix = pymupdf.Pixmap(fonte)
+    if pix.n > 3:
+        pix = pymupdf.Pixmap(pymupdf.csRGB, pix)
+    colonne = colonne_verticali(pix)
+    if not colonne:
+        print(f"gettoni dello scheletro: {pix.width}x{pix.height} px, nessun "
+              "gettone riconosciuto - copiato tale e quale")
+        with open(fonte, "rb") as a, open(uscita, "wb") as b:
+            b.write(a.read())
+        return
+    tessere = [(x0, x1) + _altezza_utile(pix, x0, x1) for x0, x1 in colonne]
+    # La casella e' la MEDIANA, come per il banner: un gettone un filo piu'
+    # largo degli altri non deve stirare tutta la fila.
+    larga = sorted(x1 - x0 for x0, x1, _, _ in tessere)[len(tessere) // 2]
+    alta = sorted(y1 - y0 for _, _, y0, y1 in tessere)[len(tessere) // 2]
+    doc = pymupdf.open()
+    pagina = doc.new_page(width=larga * len(tessere), height=alta)
+    for i, (x0, x1, y0, y1) in enumerate(tessere):
+        # Si ritaglia riga per riga: il costruttore che prende un rettangolo
+        # non c'e' in tutte le versioni di pymupdf.
+        righe = bytearray()
+        for y in range(y0, y1):
+            base = y * pix.stride
+            righe += pix.samples[base + x0 * pix.n:base + x1 * pix.n]
+        fetta = pymupdf.Pixmap(pix.colorspace, x1 - x0, y1 - y0, bytes(righe),
+                               pix.alpha)
+        pagina.insert_image(
+            pymupdf.Rect(i * larga, 0, (i + 1) * larga, alta), pixmap=fetta,
+            keep_proportion=False)
+    grezzo = uscita + ".tmp.png"
+    pagina.get_pixmap(matrix=pymupdf.Identity).save(grezzo)
+    senza_fondo(grezzo).save(uscita)
+    os.remove(grezzo)
+    print(f"gettoni dello scheletro: {len(tessere)} gettoni (valori "
+          f"{6 - 1}-{6 - len(tessere)}) da {larga}x{alta} px")
+    if len(tessere) != SCHELETRI_ATTESI:
+        print(f"  ATTENZIONE: la vista ne aspetta {SCHELETRI_ATTESI} "
+              f"(BoardLayout3D.SCHELETRI_COLONNE): aggiorna la costante")
 
 
 def estrai_sagome(doc, dest):
@@ -612,6 +727,23 @@ def main(dest):
               f"(rapporto {pix.width / pix.height:.2f})")
     else:
         print("terra del terrapieno: manca materiali/Terrapieno.png")
+
+    # Il cartellino della Prosperita' Urbana: si posa sulla fascia in fondo
+    # alla tessera, quella dove la scritta c'e' gia' stampata, e dice che quel
+    # Centro Urbano e' ATTIVO adesso. Un'immagine sola, quindi si copia e
+    # basta - ha gia' il fondo trasparente attorno alla cornice.
+    prosp = os.path.join(ROOT, "materiali", "ProsperitaUrbana.png")
+    if os.path.exists(prosp):
+        with open(prosp, "rb") as a, open(os.path.join(dest, "prosperita.png"), "wb") as b:
+            b.write(a.read())
+        pix = pymupdf.Pixmap(prosp)
+        print(f"cartellino della Prosperita': {pix.width}x{pix.height} px "
+              f"(rapporto {pix.width / pix.height:.2f})")
+    else:
+        print("cartellino della Prosperita': manca materiali/ProsperitaUrbana.png")
+
+    normalizza_scheletri(os.path.join(ROOT, "materiali", "Scheletri.png"),
+                         os.path.join(dest, "scheletri.png"))
 
     sag = estrai_sagome(doc, dest)
     with open(os.path.join(dest, "indice.json"), "w", encoding="utf-8") as f:

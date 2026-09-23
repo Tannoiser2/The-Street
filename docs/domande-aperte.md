@@ -1196,3 +1196,80 @@ dato è stato importato da lì. Ma due confronti fra ciò che è stampato e
 
     Resta da rivedere al tavolo se il 51% di sotterrati sia la quota giusta:
     e' la stessa domanda del punto 78, ma su un numero diverso.
+
+81. **I cubetti restano sulla rovina: quelli bianchi contano ancora, quelli
+    neri no.** Il Menhir a fine partita porta ancora tre cubetti bianchi di
+    Vetusta' e i suoi cubetti neri di resistenza, pur essendo una rovina.
+    Nessuna regola li toglie: il crollo azzera i potenziamenti
+    (`resolve_event` fa `upgrades.clear()`) e la Vetusta' si azzera **solo col
+    restauro** — che pero' vale sui *ruderi*, non sulle rovine. Una rovina non
+    si restaura piu', quindi quei cubetti restano li' per sempre.
+
+    **I neri sono inerti, e si puo' dimostrare.** Su una rovina la resistenza
+    non serve piu' a niente: gli eventi guardano solo chi e' in piedi
+    (`is_standing`), il restauro non la riguarda, le spolia di chi costruisce
+    sopra si pagano solo spianando un INTATTO (una rovina da' lo sconto
+    macerie, che non dipende dalla resistenza) e nessuna carta seleziona per
+    resistenza. In 300 partite a tre giocatori restano a fine partita 6167
+    rovine, 1851 delle quali con cubetti neri addosso che non fanno piu' nulla.
+
+    **I bianchi no: due carte li contano ancora.** Il **Colosseo**
+    (`{"owner": "self", "vetusta": {"min": 3}}`) e **Il Silvicoltore**
+    (`{"owner": "self", "terrain": ["bosco"], "vetusta": {"min": 3}}`) chiedono
+    "un tuo edificio con Vetusta' almeno 3" **senza dire in che stato**,
+    mentre le altre carte che vogliono edifici sani lo scrivono
+    (`"state": ["intatto"], "buried": false` — Monumenti 3 e 9, Lasciti 7 e 9,
+    personaggi 21 e 25). Cosi' come sono scritti i dati, una rovina — e
+    perfino una rovina sotterrata — soddisfa il Colosseo.
+
+    Misurato su 300 partite a tre giocatori (900 giocatori): a fine partita ci
+    sono 621 edifici con Vetusta' >= 3, di cui **517 intatti, 2 ruderi, 77
+    rovine e 25 sepolti**. Il Colosseo e' soddisfatto dal 55,4% dei giocatori,
+    e il **7,1%** lo soddisfa SOLO grazie a edifici non intatti: circa un
+    giocatore su quattordici prende quel punto per una rovina.
+
+    **Domanda al designer, due cose distinte:**
+    1. il Colosseo e Il Silvicoltore devono contare anche le rovine e i
+       sepolti, o gli manca il `"state": ["intatto"], "buried": false` che
+       hanno le carte sorelle? (regola: cambia il punteggio)
+    2. sul tabellone i cubetti di una rovina si continuano a mostrare, si
+       spengono o si tolgono? Finche' i bianchi contano per due carte,
+       toglierli nasconderebbe un'informazione che serve; i neri invece non
+       dicono piu' niente a nessuno. (solo grafica: non cambia il punteggio)
+
+82. **Il Centro Urbano paga 1,6 volte a partita.** La Prosperita' Urbana e' la
+    sola cosa sul tabellone che paga anche gli avversari: quando si attiva una
+    colonna con almeno tre edifici intatti di almeno due proprietari, ognuno di
+    quei proprietari incassa un oro. La scritta e' stampata su tutte le
+    tessere, quindi sembra una cosa che succede sempre.
+
+    Misurato su 300 partite a tre giocatori coi bot a strategie:
+
+    | | |
+    |---|--:|
+    | volte che paga, per partita | **1,61** |
+    | oro distribuito in tutto, per partita | 3,51 |
+    | partite in cui non paga MAI | **42%** |
+    | colonne diverse che pagano, per partita | 0,89 |
+    | colonne che sono Centro a fine partita | 8,5% |
+
+    E arriva tardi: nell'era 1 mai, nell'era 2 nel 3% delle partite, poi 24%,
+    35% e 13%. Prima dell'era 3 il tabellone non ha abbastanza edifici intatti
+    nella stessa colonna, e dall'era 4 in poi quelli che ci sono cominciano a
+    crollare.
+
+    Con dei bot, per giunta, che il Centro non lo cercano: nessuna delle cinque
+    strategie ha una riga che dica "costruisci dove c'e' gia' roba altrui per
+    accendere la Prosperita'", perche' il regolamento non dice che convenga.
+    Un tavolo di umani che ci puntasse lo farebbe scattare piu' spesso - ma
+    dovrebbe accorgersene, e finora sul tabellone non si vedeva.
+
+    **Domanda al designer:** un premio che paga 1,6 volte a partita e' quello
+    che volevi - una rarita' che quando capita fa piacere - o il Centro Urbano
+    dovrebbe pesare di piu' (soglia a 2 edifici invece di 3, oppure un oro a
+    testa a ogni fine era invece che a ogni attivazione)? Cambiarlo e' una
+    riga di `constants.prosperity`, ma e' una decisione di bilanciamento, non
+    di interfaccia.
+
+    Intanto il cartellino sulla fascia della tessera dice quali colonne sono
+    Centro **adesso**: prima bisognava contare gli edifici a mano.
