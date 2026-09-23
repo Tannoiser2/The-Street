@@ -1377,7 +1377,11 @@ func _test_colossal() -> void:
 	var big2 := _put(b2, col_id, 1)
 	big2.state = Enums.BuildingState.ROVINA
 	for c in range(big2.col_from, big2.col_to):
-		_put(b2, _card_of_class("civico"), c, 1)      # coprono l'intera proiezione
+		# Chi copre deve POGGIARCI SOPRA: "gli strati successivi" sono quelli
+		# che hanno questo edificio per base, non tutto quello che nella
+		# colonna sta piu' in alto. Il comando lo registra da se' quando si
+		# costruisce; qui, che si fissa lo stato a mano, va scritto a mano.
+		_put(b2, _card_of_class("civico"), c, 1).basi = [big2.uid]
 	b2.grid.refresh_buried()
 	Scoring.final_scoring(b2)
 	var atteso: int = big2.scavo_value()
@@ -1388,11 +1392,11 @@ func _test_colossal() -> void:
 	var c2 := _scena()
 	var big3 := _put(c2, col_id, 1)
 	big3.state = Enums.BuildingState.ROVINA
-	_put(c2, _card_of_class("civico"), big3.col_from, 1)   # copre una colonna sola
+	_put(c2, _card_of_class("civico"), big3.col_from, 1).basi = [big3.uid]
 	c2.grid.refresh_buried()
 	_ok("5. coperto in parte: NON e' sotterrato", not big3.is_buried)
 	for c in range(big3.col_from + 1, big3.col_to):
-		_put(c2, _card_of_class("civico"), c, 1)
+		_put(c2, _card_of_class("civico"), c, 1).basi = [big3.uid]
 	c2.grid.refresh_buried()
 	_ok("   coperto per intero: e' sotterrato", big3.is_buried)
 

@@ -1811,15 +1811,59 @@ func _test_sepolto() -> void:
 	if sotto.is_empty() or edificio.is_empty(): return
 	var cs: AABB = sotto[0]["aabb"]
 	var ce: AABB = edificio[0]["aabb"]
-	_ok("  sta sotto la carta dell'edificio", cs.position.y <= ce.position.y)
-	_ok("  ma sporge di fianco",
-		cs.end.x > ce.end.x and cs.position.x < ce.end.x)
-	_ok("  e si tocca con lei, non sta per conto suo",
-		cs.position.z < ce.end.z and cs.end.z > ce.position.z)
+	_ok("sta piu' in basso della carta dell'edificio", cs.position.y < ce.position.y)
+	_ok("  incolonnata con lei, non a fianco",
+		is_equal_approx(cs.position.x, ce.position.x)
+		and is_equal_approx(cs.size.x, ce.size.x))
+	_ok("  grande come lei: infilarla sotto non rimpicciolisce niente",
+		is_equal_approx(cs.size.z, ce.size.z))
+	# Sta PRIMA nel ventaglio - piu' verso il tabellone - cosi' quel che
+	# sporge e' la sua fascia del titolo, dritta; e la carta dell'edificio,
+	# che viene dopo, la copre per il resto.
+	_ok("  e la carta dell'edificio la copre in parte, lasciandole fuori il titolo",
+		ce.position.z > cs.position.z and ce.position.z < cs.end.z)
 	var altrove := 0
 	for c in BoardLayout3D.carte_giocatore(gs, 0, 0):
 		if str(c["kind"]) == "personaggio" and str(c["id"]) == cid: altrove += 1
 	_eq("  e non resta anche in mezzo alle altre", altrove, 0)
+
+	# "Infilate la carta sotto, lasciandone sporgere la linguetta": anche i
+	# potenziamenti stanno sotto la carta del loro edificio, e non spariscono
+	# in una linguetta gialla sul tabellone.
+	var upg := str(CardDB.upgrades.keys()[0])
+	b.upgrades.append(upg)
+	var con_pot := BoardLayout3D.player_cards(gs, 0)
+	var trovato := []
+	for c in con_pot:
+		if int(c.get("player", -1)) != 0: continue
+		if str(c["kind"]) == "potenziamento" and str(c["id"]) == upg: trovato.append(c)
+	_eq("il potenziamento sta davanti al giocatore", trovato.size(), 1)
+	if trovato.is_empty(): return
+	var edifici2 := []
+	for c in con_pot:
+		if str(c["kind"]) == "mercato" and str(c["id"]) == str(b.data["id"]): edifici2.append(c)
+	if edifici2.is_empty(): return
+	var cp: AABB = trovato[0]["aabb"]
+	var ce2: AABB = edifici2[0]["aabb"]
+	_ok("  sotto la carta del suo edificio", cp.position.y < ce2.position.y)
+	_ok("  e grande come lei", is_equal_approx(cp.size.x, ce2.size.x))
+
+	# E la carta dell'edificio NON si rimpicciolisce per far loro posto: le
+	# carte infilate prendono una riga del ventaglio, non spazio in larghezza.
+	var senza := BoardLayout3D.player_cards(gs, 0)
+	b.upgrades.clear()
+	b.buried_character = ""
+	var pulito := BoardLayout3D.player_cards(gs, 0)
+	var dim_con := Vector2.ZERO
+	var dim_senza := Vector2.ZERO
+	for c in senza:
+		if str(c["kind"]) == "mercato" and str(c["id"]) == str(b.data["id"]):
+			dim_con = Vector2((c["aabb"] as AABB).size.x, (c["aabb"] as AABB).size.z)
+	for c in pulito:
+		if str(c["kind"]) == "mercato" and str(c["id"]) == str(b.data["id"]):
+			dim_senza = Vector2((c["aabb"] as AABB).size.x, (c["aabb"] as AABB).size.z)
+	_ok("infilare carte sotto non rimpicciolisce le carte del mazzetto (%s contro %s)"
+		% [dim_con, dim_senza], dim_con.is_equal_approx(dim_senza))
 
 func _test_terrapieni() -> void:
 	var ctl := _gioco()
@@ -1904,6 +1948,23 @@ func _test_scalino() -> void:
 
 	_eq("la colonna alta regge da sola", BoardLayout3D.quota_sotto(gs, su, 1), 1)
 	_eq("  quella bassa e' indietro di un livello", BoardLayout3D.quota_sotto(gs, su, 2), 0)
+	# Quello che sta a un'ALTRA profondita' non conta come sotto: e' di
+	# fianco. Un edificio alto sul binario accanto non riempie il vuoto sotto
+	# questa sagoma, e prendendolo per buono la terra partirebbe da mezz'aria.
+	# Una pila alta sul binario dell'era 5, nella stessa colonna: e' 78 mm
+	# piu' indietro, e da qui si vede di fianco.
+	var fondo := _metti(gs, "ed_capanne", 2, 5, 0, 0)
+	fondo.state = Enums.BuildingState.ROVINA
+	var vicino := _metti(gs, "ed_capanne", 2, 5, 1, 0)
+	vicino.state = Enums.BuildingState.ROVINA
+	vicino.basi = [fondo.uid]
+	_ok("  ed e' a un'altra profondita'", not is_equal_approx(
+		BoardLayout3D.basetta_box(gs, vicino).position.z,
+		BoardLayout3D.basetta_box(gs, su).position.z))
+	_eq("un vicino di un altro binario non conta come base",
+		BoardLayout3D.quota_sotto(gs, su, 2), 0)
+	gs.grid.buildings.erase(vicino)
+	gs.grid.buildings.erase(fondo)
 	var boxes := BoardLayout3D.terrapieni(gs, su)
 	_eq("si riempie solo la colonna indietro", boxes.size(), 1)
 	if boxes.is_empty(): return

@@ -84,12 +84,40 @@ func refresh_buried() -> void:
 	for b in buildings:
 		b.is_buried = b.state == Enums.BuildingState.ROVINA and is_fully_covered(b)
 
+# "L'unione degli strati successivi copre interamente la sua proiezione."
+# GLI STRATI SUCCESSIVI SONO QUELLI CHE GLI POGGIANO SOPRA, non tutto quello
+# che nella colonna sta piu' in alto. A quota zero una colonna porta fino a
+# cinque edifici - uno per binario d'era, affiancati in profondita' - e chi
+# costruisce sopra ne sceglie UNO come base: gli altri quattro restano
+# scoperti, all'aria, con niente addosso. Guardando il solo livello, un
+# edificio al livello 1 li seppelliva tutti e cinque: sul tabellone si vedeva
+# una basetta marcata "sepolto" con sopra il vuoto.
+#
+# Si risale la catena: chi poggia su di lui, chi poggia su quelli, e cosi'
+# via. E' sepolto se quella catena gli copre tutte le colonne.
 func is_fully_covered(b: Building) -> bool:
+	var sopra := _catena_sopra(b)
+	if sopra.is_empty(): return false
 	for c in range(b.col_from, b.col_to):
 		var covered := false
-		for o in buildings:
-			if o != b and o.level > b.level and o.covers(c):
+		for o in sopra:
+			if o.covers(c):
 				covered = true
 				break
 		if not covered: return false
 	return true
+
+# Tutto quello che grava su `b`: chi lo ha per base, piu' chi ha per base
+# quelli, fino in cima.
+func _catena_sopra(b: Building) -> Array:
+	var visti := {}
+	var out: Array = []
+	var coda: Array[int] = [b.uid]
+	while not coda.is_empty():
+		var uid: int = coda.pop_back()
+		for o in buildings:
+			if visti.has(o.uid) or not uid in o.basi: continue
+			visti[o.uid] = true
+			out.append(o)
+			coda.append(o.uid)
+	return out

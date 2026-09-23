@@ -196,13 +196,21 @@ static func terrapieni(gs: GameState, b: Building) -> Array[AABB]:
 # regge non cambia piu' - e solo quando l'edificio non le ha (i fissaggi dei
 # test) si ripiega sulla colonna di adesso.
 static func quota_sotto(gs: GameState, b: Building, col: int) -> int:
+	var mia := basetta_box(gs, b)
 	var q := -1
-	if not b.basi.is_empty():
-		for s in gs.grid.buildings:
-			if s.uid in b.basi and s.covers(col): q = maxi(q, s.level)
-		return q
 	for s in gs.grid.buildings:
 		if s == b or not s.covers(col) or s.level >= b.level: continue
+		# SOLO QUELLO CHE STA ALLA STESSA PROFONDITA'. Un edificio del binario
+		# accanto e' DI FIANCO, non sotto: riempire fino a lui lascerebbe il
+		# vuoto sotto la terra.
+		# E' il caso del Parco archeologico che poggia su due basi a quote e
+		# profondita' diverse - una al livello 2 sul binario dell'era 2, una
+		# al livello 1 su quello dell'era 3: alla profondita' in cui viene
+		# disegnato, sotto di lui c'e' il livello 0, e la terra deve partire
+		# da li'.
+		var r := basetta_box(gs, s)
+		if r.end.z <= mia.position.z + 0.01 or r.position.z >= mia.end.z - 0.01:
+			continue
 		q = maxi(q, s.level)
 	return q
 
@@ -722,37 +730,24 @@ static func carte_giocatore(gs: GameState, player: int, umano := -1) -> Array[Di
 		# sinistra tiene quelle in gioco - accese se intatte, spente in
 		# grigio se rudere o rovina - e quella di destra le sotterrate, che
 		# sono il mazzetto dello Scavo.
+		# LE CARTE INFILATE SOTTO QUESTA. Sono due cose diverse che al tavolo
+		# si fanno allo stesso modo: i potenziamenti, che si infilano sotto
+		# l'edificio lasciando sporgere la linguetta, e il personaggio che a
+		# fine era finisce sepolto li' sotto. Viaggiano con la carta che le
+		# copre, se no dei potenziamenti restava solo una linguetta gialla sul
+		# tabellone e del personaggio non si capiva ne' chi fosse ne' sotto
+		# cosa fosse finito.
+		var sotto: Array[Dictionary] = []
+		for u in b.upgrades:
+			sotto.append({"kind": "potenziamento", "id": str(u)})
+		if b.buried_character != "":
+			sotto.append({"kind": "personaggio", "id": str(b.buried_character),
+				"spenta": true})
 		out.append({"kind": "mercato", "id": str(b.data["id"]),
 			"ventaglio": true, "sepolta": b.is_buried,
 			"spenta": b.state != Enums.BuildingState.INTATTO,
-			# "Infilatelo sotto la carta di un vostro edificio": il
-			# personaggio sepolto viaggia con la carta che lo copre, e si
-			# disegna li' sotto con la linguetta di fuori. Prima si vedeva
-			# solo un cubetto sulla basetta e non si capiva CHI fosse sepolto
-			# ne' sotto cosa.
-			"sepolto": str(b.buried_character)})
+			"sotto": sotto})
 	return out
-
-# Quanto della carta del personaggio sepolto resta fuori da sotto la carta
-# dell'edificio: la linguetta, come per i potenziamenti sul tabellone.
-const LINGUETTA_CARTA := 24.0
-
-# La carta del personaggio sepolto sotto quella dell'edificio: sporge di
-# fianco, e sta un filo piu' in basso perche' e' SOTTO.
-# `verso` dice da che parte sporge: +1 a destra, -1 a sinistra. Le due colonne
-# del mazzetto lo fanno sporgere ognuna verso l'altra, cioe' nello stacco in
-# mezzo: sporgendo tutte e due a destra, la linguetta della colonna di sinistra
-# finiva sotto le carte di quella di destra e non si vedeva piu'.
-static func carta_sepolto(box: AABB, verso := 1.0) -> AABB:
-	var m := misura_carta("personaggio")
-	var scala := box.size.z / misura_carta("mercato").y
-	var d := m * scala
-	var x := box.end.x - d.x + LINGUETTA_CARTA * scala if verso >= 0.0 \
-		else box.position.x - LINGUETTA_CARTA * scala
-	return AABB(
-		Vector3(x, maxf(0.0, box.position.y - VENTAGLIO_Y / 2.0),
-			box.position.z + (box.size.z - d.y) / 2.0),
-		Vector3(d.x, TESSERA_Y, d.y))
 
 # ---- i pupazzetti ---------------------------------------------------
 # I LAVORATORI SI VEDONO. Prima esisteva solo il parallelepipedo sull'edificio
@@ -913,16 +908,9 @@ static func _ventaglio(carte: Array, player: int, x0: float, spazio: float,
 	var out: Array[Dictionary] = []
 	if carte.is_empty(): return out
 	var piena := misura_carta(str(carte[0]["kind"]))
-	# Lo stacco fra le due colonne si allarga quando c'e' un personaggio
-	# sepolto: la sua linguetta sporge li' in mezzo, e senza posto finirebbe
-	# sotto le carte dell'altra colonna.
-	var c_sepolti := false
-	for c0 in carte:
-		if str(c0.get("sepolto", "")) != "": c_sepolti = true
-	var stacco := CARTE_GIOCATORE_GAP + (LINGUETTA_CARTA * 2.0 if c_sepolti else 0.0)
 	# Quanto puo' essere larga una carta perche' le due colonne ci stiano.
 	# Non si ingrandisce mai: al massimo resta com'e'.
-	var posto := (spazio - stacco * (MAZZETTO_COLONNE - 1)) \
+	var posto := (spazio - CARTE_GIOCATORE_GAP * (MAZZETTO_COLONNE - 1)) \
 		/ float(MAZZETTO_COLONNE)
 	var scala: float = minf(1.0, posto / piena.x)
 	var m := piena * scala
@@ -932,24 +920,35 @@ static func _ventaglio(carte: Array, player: int, x0: float, spazio: float,
 		var sepolta := bool(carte[j].get("sepolta", false))
 		var c: int = 1 if sepolta else 0
 		var r: int = int(righe[c])
-		righe[c] = r + 1
-		var box := AABB(
-			Vector3(x0 + c * (m.x + stacco), r * VENTAGLIO_Y, z0 + r * passo),
+		var x := x0 + c * (m.x + CARTE_GIOCATORE_GAP)
+		# LE CARTE INFILATE SOTTO QUESTA vengono PRIMA nel ventaglio - cosi'
+		# quello che sporge e' la loro fascia del titolo, dritta, e si legge
+		# che cosa c'e' infilato li' - ma stanno piu' in BASSO, perche' sono
+		# sotto. Prendono una riga per una, non spazio in larghezza: prima
+		# sporgevano di fianco e per far loro posto le carte dell'edificio si
+		# rimpicciolivano tutte.
+		var infilate: Array = carte[j].get("sotto", [])
+		var quota := float(r + infilate.size() + 1) * VENTAGLIO_Y
+		for k in infilate.size():
+			var sotto: Dictionary = infilate[k]
+			# Ognuna un filo piu' sotto della precedente: sono una pila, non
+			# un mazzo complanare.
+			var giu := quota - VENTAGLIO_Y * 0.5 * float(infilate.size() - k) \
+				/ float(infilate.size())
+			out.append({"kind": str(sotto["kind"]), "id": str(sotto["id"]),
+				"player": player, "ordine": ordine0 + j, "sotto": true,
+				"spenta": bool(sotto.get("spenta", false)),
+				"aabb": AABB(Vector3(x, giu, z0 + r * passo),
+					Vector3(m.x, TESSERA_Y, m.y))})
+			r += 1
+		var box := AABB(Vector3(x, quota, z0 + r * passo),
 			Vector3(m.x, TESSERA_Y, m.y))
-		# Il personaggio sepolto va messo PRIMA: sta sotto la carta
-		# dell'edificio, e chi sta sotto si disegna per primo.
-		var chi := str(carte[j].get("sepolto", ""))
-		if chi != "":
-			# Spenta, non sepolta: il personaggio e' sotto terra ma la sua
-			# carta deve restare leggibile - il colore della sepoltura ce
-			# l'ha gia' la carta dell'edificio che lo copre.
-			out.append({"kind": "personaggio", "id": chi, "player": player,
-				"ordine": ordine0 + j, "spenta": true, "sotto": true,
-				"aabb": carta_sepolto(box, 1.0 if c == 0 else -1.0)})
 		out.append({"kind": str(carte[j]["kind"]), "id": str(carte[j]["id"]),
 			"player": player, "ordine": ordine0 + j,
 			"sepolta": sepolta, "spenta": bool(carte[j].get("spenta", false)),
 			"aabb": box})
+		r += 1
+		righe[c] = r
 	return out
 
 # Tutto il tavolo: strada, file e plance. E' questo che l'inquadratura deve
