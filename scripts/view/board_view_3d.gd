@@ -166,14 +166,14 @@ func _posti_liberi() -> void:
 # Senza immagine resta il rettangolo colorato: assets/ si rigenera dai PDF e
 # non e' versionata, quindi la plancia deve reggere anche senza.
 func _carta_stesa(box: AABB, percorso: String, tinta: Color,
-		giu := false) -> void:
+		giu := false, stampa := Color.WHITE) -> void:
 	var m := _scatola(box.size, tinta)
 	m.position = box.position + box.size / 2.0
 	add_child(m)
 	if percorso == "" or not ResourceLoader.exists(percorso): return
 	var tex := load(percorso) as Texture2D
 	if tex == null: return
-	var piano := _quad(Vector2(box.size.x, box.size.z), Color.WHITE, true)
+	var piano := _quad(Vector2(box.size.x, box.size.z), stampa, true)
 	piano.rotate_x(-PI / 2.0)
 	# Il titolo della carta va dalla parte opposta a chi guarda, come una
 	# carta vera appoggiata sul tavolo davanti a se'.
@@ -464,13 +464,23 @@ func muovi_telecamera() -> void:
 const CARTA_SFONDO := Color("#3a3f4b")
 const PLANCIA_SFONDO := Color("#2d323c")
 
+# Le carte del mazzetto di un giocatore si spengono come le sagome: finche'
+# l'edificio e' intatto la carta e' accesa; quando diventa rudere o rovina
+# si gira sul grigio; quando finisce sotto passa nel mazzetto dello Scavo, a
+# destra, e li' si spegne del tutto.
+const CARTA_SPENTA := Color(0.45, 0.45, 0.47)
+const CARTA_SEPOLTA := Color(0.30, 0.28, 0.26)
+
 func _file_laterali() -> void:
 	for c in BoardLayout3D.side_cards(gs, umano):
 		var r: AABB = c["aabb"]
 		var percorso := BoardLayout3D.carta_path(str(c["kind"]), str(c["id"]))
 		var sfondo := CARTA_SFONDO
 		if percorso != "" and ResourceLoader.exists(percorso): sfondo = Color("#1d1b17")
-		_carta_stesa(r, percorso, sfondo)
+		var stampa := Color.WHITE
+		if bool(c.get("sepolta", false)): stampa = CARTA_SEPOLTA
+		elif bool(c.get("spenta", false)): stampa = CARTA_SPENTA
+		_carta_stesa(r, percorso, sfondo * stampa, false, stampa)
 		# Niente scritte sopra: il nome e i numeri escono nel riquadro che
 		# segue il mouse. I numeri li' vengono dai DATI e non dal disegno,
 		# perche' quelli stampati sono vecchi - su 44 edifici su 60 lo Scavo

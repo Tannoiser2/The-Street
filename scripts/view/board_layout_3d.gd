@@ -122,25 +122,45 @@ static func z_sagoma(gs: GameState, b: Building, giri := 0) -> float:
 	if b.level == 0:
 		# sul davanti dello slot, cioe' dal lato della telecamera
 		return rail_z(b.era_built) + SLOT_D - BASETTA_D / 2.0
+	# LE BASI SONO QUELLE DI QUANDO LO SI E' COSTRUITO, non quelle che si
+	# trovano adesso nelle sue colonne. A quota zero una colonna porta fino
+	# a cinque edifici, uno per binario d'era: chiedendolo alla colonna, un
+	# edificio costruito dopo in un altro binario entrava nella media e
+	# spostava la sagoma sopra, che a schermo scivolava verso il fondo.
+	# Una sagoma costruita non si muove piu'.
+	if not b.basi.is_empty(): return _z_di_uid(gs, b.basi, giri)
+	# Senza basi segnate - i fissaggi dei test, o una pila tutta terrapieno -
+	# si ripiega sulla colonna, che e' il conto di prima.
 	return z_basi(gs, b.col_from, b.col_to, b.level, giri)
 
+static func _z_di_uid(gs: GameState, uid: Array, giri: int) -> float:
+	var avanti := -INF
+	if giri < RAILS:
+		for s in gs.grid.buildings:
+			if not s.uid in uid: continue
+			avanti = maxf(avanti, z_sagoma(gs, s, giri + 1))
+	return avanti if avanti > -INF else (BANDA_SU + BANDA_GIU) / 2.0
+
 # La z di cio' che regge una pila alla quota `livello` fra due colonne: la
-# media delle basi trovate, perche' un edificio largo puo' poggiare su due
-# basi di ere diverse e allora sta in mezzo, come farebbe il cartone vero.
+# base PIU' AVANTI, dalla parte di chi guarda.
+#
+# Prima era la media delle basi trovate, per mettere in mezzo un edificio
+# largo che poggia su due basi di ere diverse. Ma i binari distano 26 mm e
+# una basetta ne e' profonda 15: a due ere di distanza la media non tocca
+# nessuno dei due piedi, e l'edificio resta sospeso fra loro. Appoggiandolo
+# a quello davanti sta sempre su un piede vero, che e' quello che farebbe
+# il cartone.
 # Se sotto non c'e' niente - tutto terrapieno - si torna al centro della
 # fascia: e' l'unico caso in cui non c'e' una base da seguire.
 static func z_basi(gs: GameState, col_from: int, col_to: int, livello: int,
 		giri := 0) -> float:
-	var somma := 0.0
-	var quante := 0
+	var avanti := -INF
 	if giri < RAILS:
 		for s in gs.grid.buildings:
 			if s.level != livello - 1: continue
 			if s.col_to <= col_from or s.col_from >= col_to: continue
-			somma += z_sagoma(gs, s, giri + 1)
-			quante += 1
-	if quante == 0: return (BANDA_SU + BANDA_GIU) / 2.0
-	return somma / float(quante)
+			avanti = maxf(avanti, z_sagoma(gs, s, giri + 1))
+	return avanti if avanti > -INF else (BANDA_SU + BANDA_GIU) / 2.0
 
 # IL TERRAPIENO: la terra riportata sotto una colonna che non aveva niente
 # da offrire come base. Il regolamento la fa pagare (1 pietra per colonna) e
@@ -589,7 +609,13 @@ static func carte_giocatore(gs: GameState, player: int, umano := -1) -> Array[Di
 	# nell'ordine in cui sono state costruite.
 	for b in gs.grid.buildings:
 		if b.owner != player: continue
-		out.append({"kind": "mercato", "id": str(b.data["id"]), "ventaglio": true})
+		# Ogni carta si porta dietro lo stato dell'edificio: la colonna di
+		# sinistra tiene quelle in gioco - accese se intatte, spente in
+		# grigio se rudere o rovina - e quella di destra le sotterrate, che
+		# sono il mazzetto dello Scavo.
+		out.append({"kind": "mercato", "id": str(b.data["id"]),
+			"ventaglio": true, "sepolta": b.is_buried,
+			"spenta": b.state != Enums.BuildingState.INTATTO})
 	return out
 
 # La bacchetta del colore: una per giocatore, davanti alla strada.
@@ -650,29 +676,39 @@ static func player_cards(gs: GameState, umano := -1) -> Array[Dictionary]:
 			out.append_array(_ventaglio(ventaglio, i, x0, spazio, z_v, carte.size()))
 	return out
 
-# Il mazzetto delle carte edificio, impilato a ventaglio: ognuna copre la
-# precedente lasciandone fuori la fascia del titolo. Si riempie una colonna
-# per volta, tante quante ne stanno nel posto del giocatore, e ogni carta
-# sta un filo piu' in alto della precedente - se no due carte complanari si
-# contendono lo stesso pixel e lo schermo sfarfalla.
+# Il mazzetto delle carte edificio, in DUE COLONNE CHE VOGLIONO DIRE
+# QUALCOSA: a sinistra quello che sta ancora sulla strada, a destra quello
+# che e' finito sotto - il mazzetto dello Scavo. Dentro ogni colonna le
+# carte si impilano a ventaglio, ognuna copre la precedente lasciandone
+# fuori la fascia del titolo.
+#
+# Ogni carta sta un filo piu' in alto della precedente: due carte complanari
+# si contenderebbero lo stesso pixel e lo schermo sfarfalla.
+#
+# Le colonne restano due anche quando una e' vuota, cosi' il posto di una
+# carta non balla appena la prima viene sotterrata. Su otto partite a tre il
+# massimo misurato e' 8 carte a sinistra e 10 a destra.
 static func _ventaglio(carte: Array, player: int, x0: float, spazio: float,
 		z0: float, ordine0: int) -> Array[Dictionary]:
 	var out: Array[Dictionary] = []
 	if carte.is_empty(): return out
 	var piena := misura_carta(str(carte[0]["kind"]))
-	var colonne: int = maxi(1, mini(MAZZETTO_COLONNE, carte.size()))
-	# Quanto puo' essere larga una carta perche' le colonne ci stiano tutte.
+	# Quanto puo' essere larga una carta perche' le due colonne ci stiano.
 	# Non si ingrandisce mai: al massimo resta com'e'.
-	var posto := (spazio - CARTE_GIOCATORE_GAP * (colonne - 1)) / float(colonne)
+	var posto := (spazio - CARTE_GIOCATORE_GAP * (MAZZETTO_COLONNE - 1)) \
+		/ float(MAZZETTO_COLONNE)
 	var scala: float = minf(1.0, posto / piena.x)
 	var m := piena * scala
 	var passo := VENTAGLIO_Z * scala
-	var per_colonna: int = int(ceil(carte.size() / float(colonne)))
+	var righe := [0, 0]
 	for j in carte.size():
-		var c: int = j / per_colonna
-		var r: int = j % per_colonna
+		var sepolta := bool(carte[j].get("sepolta", false))
+		var c: int = 1 if sepolta else 0
+		var r: int = int(righe[c])
+		righe[c] = r + 1
 		out.append({"kind": str(carte[j]["kind"]), "id": str(carte[j]["id"]),
 			"player": player, "ordine": ordine0 + j,
+			"sepolta": sepolta, "spenta": bool(carte[j].get("spenta", false)),
 			"aabb": AABB(
 				Vector3(x0 + c * (m.x + CARTE_GIOCATORE_GAP), r * VENTAGLIO_Y,
 					z0 + r * passo),

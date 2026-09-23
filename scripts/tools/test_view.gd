@@ -38,6 +38,7 @@ func _ready() -> void:
 	_run("  e il riquadro acceso e' quello che si clicca", _test_riquadri)
 	_run("  e la barra dice che mossa sarebbe, e quanto costa", _test_descrizione)
 	_run("chi sta sopra poggia su chi sta sotto", _test_pila)
+	_run("  e una volta costruita non si muove piu'", _test_sagome_ferme)
 	_run("le carte del giocatore non si coprono", _test_carte_giocatore)
 	_run("chi siede al tavolo lo si sceglie", _test_scelte_inizio)
 	_run("  e a che velocita' si muovono i bot", _test_velocita_bot)
@@ -1124,6 +1125,56 @@ func _test_descrizione() -> void:
 	_ok("e se il lavoratore non c'e' ancora, dice quale colonna attiva",
 		DescrizioneAzione.riga(gs, v2, 0).contains("attiva la colonna 4"))
 
+# UNA SAGOMA COSTRUITA NON SI MUOVE PIU'. Sembra ovvio e non lo era: la quota
+# di chi sta sopra si ricavava dalle basi che si trovavano IN QUEL MOMENTO
+# nelle sue colonne, e a quota zero una colonna porta fino a cinque edifici,
+# uno per binario d'era. Bastava che qualcuno costruisse in un altro binario
+# della stessa colonna perche' la media cambiasse e la sagoma sopra
+# scivolasse verso il fondo. Adesso le basi sono quelle di quando la si e'
+# costruita, segnate sull'edificio.
+#
+# Il test guarda una partita intera: dopo ogni turno confronta la posizione di
+# ogni sagoma gia' in tavola con quella che aveva, e non ne perdona una.
+func _test_sagome_ferme() -> void:
+	var ctl := _gioco()
+	var dove := {}          # uid -> posizione del piede
+	var mosse := 0
+	var esempio := ""
+	var giri := 0
+	while ctl.gs.phase != Enums.Phase.FINE_PARTITA and giri < 4000:
+		RandomBot.play_turn(ctl)
+		giri += 1
+		for b in ctl.gs.grid.buildings:
+			var p := BoardLayout3D.standee_base(ctl.gs, b)
+			if dove.has(b.uid):
+				var prima: Vector3 = dove[b.uid]
+				if not p.is_equal_approx(prima):
+					mosse += 1
+					if esempio == "":
+						esempio = "%s (liv %d) da %s a %s" % [b.data["name"], b.level,
+							str(prima), str(p)]
+			dove[b.uid] = p
+	_ok("la partita ha messo in tavola parecchie sagome (%d)" % dove.size(),
+		dove.size() > 10)
+	_eq("e nessuna si e' mossa dopo essere stata costruita%s"
+		% ("" if esempio == "" else ": " + esempio), mosse, 0)
+
+	# La prova diretta del difetto: si costruisce sopra, si segna la quota, e
+	# poi si aggiunge un edificio a quota zero in un ALTRO binario della
+	# stessa colonna. Era quello a spostare la sagoma di sopra.
+	var g := _gioco().gs
+	var sotto := _metti(g, "ed_capanne", 2, 1, 0, 0)
+	sotto.state = Enums.BuildingState.ROVINA
+	var sopra := _metti(g, "ed_capanne", 2, 1, 1, 0)
+	sopra.basi = [sotto.uid] as Array[int]
+	var prima2 := BoardLayout3D.standee_base(g, sopra)
+	_metti(g, "ed_capanne", 2, 4, 0, 1)      # un altro binario, stessa colonna
+	_ok("un edificio nuovo in un altro binario non sposta chi sta sopra",
+		BoardLayout3D.standee_base(g, sopra).is_equal_approx(prima2))
+	_approx("  che resta appoggiato alla sua base",
+		BoardLayout3D.standee_base(g, sopra).z,
+		BoardLayout3D.standee_base(g, sotto).z)
+
 # LE SAGOME SOPRAELEVATE GALLEGGIAVANO IN ARIA. Un edificio sopra finiva
 # sempre in mezzo alla fascia del disegno, mentre le sue fondamenta restavano
 # al binario della loro era - per l'era 1 sono 57 mm piu' avanti - e a
@@ -1268,12 +1319,12 @@ func _test_carte_giocatore() -> void:
 		if scoperto < passo - 0.001: nascoste += 1
 	_eq("di ogni carta edificio resta fuori la fascia del titolo", nascoste, 0)
 
-	# E IL MAZZETTO STA IN DUE COLONNE, se le carte sono almeno due: una
-	# colonna sola lunga il doppio allungava il tavolo piu' della strada.
+	# LE DUE COLONNE VOGLIONO DIRE QUALCOSA: a sinistra quello che sta
+	# ancora sulla strada, a destra quello che e' finito sotto. Finche'
+	# non si sotterra niente, il mazzetto sta tutto a sinistra.
 	var colonne := {}
 	for c in mazzetto: colonne[snappedf((c["aabb"] as AABB).position.x, 0.1)] = true
-	_eq("il mazzetto sta in due colonne", colonne.size(),
-		mini(BoardLayout3D.MAZZETTO_COLONNE, mazzetto.size()))
+	_eq("senza sepolti il mazzetto sta tutto in una colonna", colonne.size(), 1)
 	var largo_pieno := BoardLayout3D.misura_carta("mercato")
 	var stretta: AABB = mazzetto[0]["aabb"]
 	_ok("  con le carte strette quel poco che serve (%.2f)"
@@ -1283,6 +1334,7 @@ func _test_carte_giocatore() -> void:
 	_ok("  e senza deformarsi",
 		is_equal_approx(stretta.size.x / stretta.size.z,
 			largo_pieno.x / largo_pieno.y))
+
 
 	# E nessuna finisce addosso al vicino: ognuno sta nella sua fetta.
 	var fetta := BoardLayout3D.board_w(gs) / float(gs.n_players)
@@ -1310,13 +1362,52 @@ func _test_carte_giocatore() -> void:
 	var sotto := 0
 	for i in mazzetto.size():
 		var b4: AABB = mazzetto[i]["aabb"]
-		var punto := b4.position + Vector3(b4.size.x / 2.0, 0.0,
-			BoardLayout3D.VENTAGLIO_Z / 2.0)
+		# Il passo si stringe con la carta: la fascia scoperta si misura da
+		# quella disegnata, se no si punta gia' dentro la carta sopra.
+		var passo2: float = BoardLayout3D.VENTAGLIO_Z \
+			* (b4.size.x / BoardLayout3D.misura_carta("mercato").x)
+		var punto := b4.position + Vector3(b4.size.x / 2.0, 0.0, passo2 / 2.0)
 		var presa := BoardLayout3D.card_at_ray(gs, punto + Vector3(0, 500, 0),
 			Vector3(0, -1, 0), 0)
 		if presa.is_empty() or int(presa.get("ordine", -1)) != int(mazzetto[i]["ordine"]):
 			sotto += 1
 	_eq("  e nel mazzetto risponde la carta sopra, non quella coperta", sotto, 0)
+
+	# Adesso se ne sotterrano due e se ne spegne una: le sepolte passano
+	# nella colonna di destra - che e' il mazzetto dello Scavo - le altre
+	# restano dove stavano, e quella spenta si segna come tale.
+	var sx := snappedf((mazzetto[0]["aabb"] as AABB).position.x, 0.1)
+	var miei: Array = []
+	for b in gs.grid.buildings:
+		if b.owner == 0: miei.append(b)
+	miei[0].state = Enums.BuildingState.ROVINA
+	miei[0].is_buried = true
+	miei[1].state = Enums.BuildingState.ROVINA
+	miei[1].is_buried = true
+	miei[2].state = Enums.BuildingState.RUDERE
+	var dopo: Array = []
+	for c in BoardLayout3D.player_cards(gs, 0):
+		if int(c["player"]) == 0 and str(c["kind"]) == "mercato": dopo.append(c)
+	var a_destra: Array = []
+	var a_sinistra: Array = []
+	for c in dopo:
+		if bool(c["sepolta"]): a_destra.append(c)
+		else: a_sinistra.append(c)
+	_eq("le sepolte diventano due", a_destra.size(), 2)
+	_eq("  e le altre restano tre", a_sinistra.size(), 3)
+	var fuori := 0
+	for c in a_sinistra:
+		if not is_equal_approx(snappedf((c["aabb"] as AABB).position.x, 0.1), sx):
+			fuori += 1
+	_eq("chi resta sulla strada non si sposta di colonna", fuori, 0)
+	var non_a_destra := 0
+	for c in a_destra:
+		if (c["aabb"] as AABB).position.x <= sx + 0.001: non_a_destra += 1
+	_eq("  e le sepolte passano nella colonna a destra", non_a_destra, 0)
+	var spente := 0
+	for c in a_sinistra:
+		if bool(c["spenta"]): spente += 1
+	_eq("  e la rovina non sepolta si segna spenta", spente, 1)
 
 # CHI SIEDE AL TAVOLO. Prima erano due numeri dentro gioca.gd - tre giocatori,
 # seme 7 - e in due o in quattro non ci si giocava affatto. ScelteInizio e'
