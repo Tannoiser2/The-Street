@@ -244,6 +244,30 @@ func _terrapieni(b: Building) -> void:
 		var m := _scatola(box.size, TERRAPIENO)
 		m.position = box.position + box.size / 2.0
 		add_child(m)
+		# La terra riportata e' TERRA: prende lo stesso disegno del banner
+		# dello Scavo, la striscia dello zero, senza il riquadro del numero -
+		# li' non c'e' niente da contare. Prima era un parallelepipedo grigio
+		# e in mezzo a due basette disegnate sembrava un buco nella
+		# costruzione, non il pieno che invece e'.
+		_faccia_di_terra(box)
+
+func _faccia_di_terra(box: AABB) -> void:
+	if not ResourceLoader.exists(BoardLayout3D.SCAVO_PATH): return
+	var tex := load(BoardLayout3D.SCAVO_PATH) as Texture2D
+	if tex == null: return
+	var uv: Dictionary = BoardLayout3D.terra_uv(box)
+	for davanti in [true, false]:
+		var p := _quad(Vector2(box.size.x, box.size.y), Color.WHITE, true)
+		var mat := p.material_override as StandardMaterial3D
+		mat.albedo_texture = tex
+		mat.texture_filter = BaseMaterial3D.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
+		mat.uv1_scale = Vector3((uv["scala"] as Vector2).x, (uv["scala"] as Vector2).y, 1.0)
+		mat.uv1_offset = Vector3((uv["offset"] as Vector2).x, (uv["offset"] as Vector2).y, 0.0)
+		if not davanti: p.rotate_y(PI)
+		p.position = Vector3(box.position.x + box.size.x / 2.0,
+			box.position.y + box.size.y / 2.0,
+			(box.end.z + 0.15) if davanti else (box.position.z - 0.15))
+		add_child(p)
 
 func _basetta(b: Building) -> void:
 	var box := BoardLayout3D.basetta_box(gs, b)

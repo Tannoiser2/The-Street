@@ -238,6 +238,23 @@ static func scavo_uv(b: Building) -> Dictionary:
 		"offset": Vector2(1.0 - frazione, float(valore) / float(SCAVO_RIGHE)),
 	}
 
+# Il riquadro del numero occupa la coda destra della striscia: misurato
+# sull'immagine, comincia al 90% della larghezza. Il terrapieno prende la
+# terra e lascia fuori il numero, perche' li' non c'e' niente da contare.
+const SCAVO_NUMERO_DA := 0.9
+
+# La fetta di terra per un blocco di terrapieno: la striscia dello zero, senza
+# il numero, larga quanto serve. Se il blocco e' alto piu' di un livello la
+# terra si allunga invece di ripetersi: e' un taglio di terreno, non un
+# mattone, e un motivo che si ripete si vedrebbe.
+static func terra_uv(box: AABB) -> Dictionary:
+	var utile := SCAVO_NUMERO_DA
+	var frazione := minf(utile, box.size.x / span_w(SCAVO_SLOT_MAX) * utile)
+	return {
+		"scala": Vector2(frazione, 1.0 / float(SCAVO_RIGHE)),
+		"offset": Vector2(utile - frazione, 0.0),
+	}
+
 # Le due facce della basetta su cui va il banner: quella davanti, dal lato di
 # chi guarda, e quella dietro. Restituisce centro e dimensioni del rettangolo.
 static func facce_basetta(gs: GameState, b: Building) -> Array[Dictionary]:
