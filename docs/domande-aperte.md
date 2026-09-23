@@ -1310,7 +1310,19 @@ dato è stato importato da lì. Ma due confronti fra ciò che è stampato e
     sembrare piu' viva, la manopola grossa non e' la severita' dell'evento ma
     quanto paga salire (`docs/quanto-paga-salire.md`).
 
-    **Domanda al designer:** si tiene com'e', si mette `rovina_gap` a 3
-    (+1 edificio in piedi, +2 PV su 198, nessuna carta da ristampare), o si
-    sconta di 1 la forza degli eventi (+2 edifici, ma cambia il materiale
-    stampato)?
+    **RISOLTO: `rovina_gap` a 3.** Fallire l'evento di 1 o di 2 lascia un
+    rudere; si crolla in rovina solo fallendo di 3 o piu'. Gli edifici in piedi
+    a fine partita passano da 7,3 a 8,3 e la vita media da 1,79 a 1,96 ere, al
+    prezzo di 2 punti a partita su 198. Nessuna carta stampata cambia: la forza
+    degli eventi resta 2/3/4/5 e le resistenze restano quelle.
+
+    La manopola della forza (`--forza -1`, +2 edifici in piedi) resta li' per
+    quando si vorra' riprovare: quella pero' cambia il materiale stampato e va
+    decisa prima della stampa.
+
+    Alzando la soglia e' venuto fuori un difetto vecchio: il libro mastro delle
+    carte non tornava col tabellone sulla Verticalita', perche' la meta' divisa
+    del premio veniva arrotondata carta per carta invece di spezzare la quota
+    del giocatore. Adesso si spezza col resto piu' grande e i due conti sono lo
+    stesso numero - il test e' passato da "tolleranza un punto per colonna" a
+    nessuna tolleranza.

@@ -64,10 +64,33 @@ Detto altrimenti: **la città non è fatta di macerie, è fatta di fondamenta.**
 vedere più città in piedi alla fine, la manopola grossa non è la severità dell'evento ma
 quanto conviene costruire in alto — la tabella della Verticalità (`docs/quanto-paga-salire.md`).
 
-## Cosa consiglio
+## Cosa è stato deciso
 
-`rovina_gap` a **3** è il cambiamento che rende visibile il risultato senza spostare
-l'equilibrio: +1 edificio in piedi a fine partita, +2 punti a partita su 198 (l'1%),
-e nessuna carta da ristampare. Se si vuole la città davvero piena, la forza degli eventi
-scontata di 1 porta a 9,3 — ma quella è una modifica al materiale stampato, e va decisa
-prima della stampa, non dopo.
+**`rovina_gap` è passato a 3**: fallire l'evento di 1 o di 2 lascia un rudere, si crolla
+in rovina solo fallendo di 3 o più. È il cambiamento che rende visibile il risultato
+senza spostare l'equilibrio — +1 edificio in piedi a fine partita, +2 punti a partita su
+198 (l'1%) — e non tocca nessuna carta stampata: la forza degli eventi resta 2/3/4/5 e le
+resistenze sulle carte restano quelle.
+
+La forza degli eventi scontata di 1 porterebbe a 9,3 edifici in piedi, ma è una modifica
+al materiale stampato: va decisa prima della stampa, non dopo. La manopola resta lì,
+girabile con `--forza -1` quando la si vorrà riprovare.
+
+> **Nota sui numeri di questa pagina.** Sono misurati col vecchio `rovina_gap` a 2 come
+> controllo: la riga "rovina solo a −3" è quella che adesso è il gioco. Le tabelle di
+> `docs/vita-degli-edifici.md` vengono da partite giocate prima di questa decisione, e
+> vanno rifatte alla prossima tornata di 10 000.
+
+## Un difetto trovato alzando la soglia
+
+Il libro mastro degli edifici — i punti che ogni carta si segna — non tornava più col
+tabellone sulla Verticalità: 51 contro 43 in una partita su otto. La metà divisa del
+premio veniva arrotondata **carta per carta** invece di spezzare la quota del giocatore
+fra le sue carte: con un premio da 14 diviso fra due edifici ogni carta si segnava 4
+(3,5 per eccesso) e le carte dicevano 8 dove il tabellone diceva 7. L'errore c'era da
+sempre, ma cresce con le colonne alte, ed è saltato fuori proprio perché alzando la
+soglia sopravvivono più edifici e le colonne salgono.
+
+Adesso la quota si spezza col resto più grande (`Scoring._spezza`) e i due conti sono lo
+stesso numero: il test che li confronta è passato da "tolleranza un punto per colonna" a
+**nessuna tolleranza**.

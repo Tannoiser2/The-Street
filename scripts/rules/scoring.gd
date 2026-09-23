@@ -38,12 +38,30 @@ static func _verticality(gs: GameState) -> void:
 		for ow in owners:
 			var share := int(round((prize / 2.0) * owners[ow] / float(total)))
 			gs.players[ow].add_vp("verticalita", share)
-		# La meta' divisa la si segna carta per carta: e' la regola stessa a
-		# dividerla per numero di edifici, quindi la quota di un edificio e'
-		# un numero vero e non una stima. Si divide il premio, non i punti
-		# arrotondati del giocatore, se no la somma non torna.
-		for b in gs.grid.in_column(col):
-			b.rende("verticalita", int(round((prize / 2.0) / float(total))))
+			# La meta' divisa la si segna anche sulle carte, ma spezzando LA
+			# QUOTA DEL GIOCATORE fra le sue carte col resto piu' grande, non
+			# arrotondando ogni carta per conto suo. Arrotondando carta per
+			# carta la somma non fa i punti del giocatore: con un premio da 14
+			# diviso fra due edifici, ogni carta si segnava 4 (3,5 arrotondato
+			# per eccesso) e le carte dicevano 8 dove il tabellone diceva 7.
+			# L'errore cresceva con le colonne alte, ed e' saltato fuori
+			# alzando `rovina_gap`: piu' edifici sopravvivono, piu' le colonne
+			# salgono.
+			var suoi: Array = gs.grid.in_column(col).filter(
+				func(b): return b.owner == ow)
+			_spezza(share, suoi, "verticalita")
+
+# Spezza `punti` fra le carte, il piu' in parti uguali possibile: il resto va
+# alle prime, una unita' a testa. Serve perche' la somma di quel che si segna
+# sulle carte faccia ESATTAMENTE i punti che il giocatore ha incassato - un
+# libro mastro che non torna non e' un libro mastro.
+static func _spezza(punti: int, carte: Array, canale: String) -> void:
+	if carte.is_empty() or punti == 0: return
+	var base: int = punti / carte.size()
+	var resto: int = punti % carte.size()
+	for i in carte.size():
+		var quota: int = base + (1 if i < resto else 0)
+		if quota != 0: carte[i].rende(canale, quota)
 
 static func _continuity(gs: GameState) -> void:
 	var table = CardDB.constants["continuity_vp"]
