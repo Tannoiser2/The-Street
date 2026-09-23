@@ -31,6 +31,17 @@ var monuments_open: Array = []
 # {"player": int, "kind": String, "prompt": String, "options": Array[int]}
 var pending_choice: Dictionary = {}
 var next_uid: int = 1
+# LA COLONNA ATTIVATA IN QUESTO TURNO e l'edificio che il lavoratore abita.
+# Stavano nel controller, e sembravano dettagli del comando; invece decidono
+# cosa e' legale - si costruisce solo nella colonna attivata o accanto, si
+# potenzia e si restaura solo li' - quindi sono stato della partita. Una copia
+# presa a meta' turno che non li portava con se' non sapeva piu' dove si
+# poteva costruire, e ogni costruzione simulata falliva in silenzio.
+# L'edificio e' tenuto per uid, non per riferimento: un riferimento copiato
+# punterebbe all'edificio dell'ORIGINALE, e toccarlo dalla copia sporcherebbe
+# la partita vera.
+var colonna_attivata: int = -1
+var protetto_uid: int = -1
 var log: Array = []                # traccia testuale degli eventi (utile per i test)
 
 # UNA COPIA DELLA PARTITA SU CUI PROVARE. Chi vuole sapere "cosa succede se"
@@ -65,6 +76,8 @@ func duplica() -> GameState:
 	g.monuments_open = monuments_open.duplicate()
 	g.pending_choice = pending_choice.duplicate(true)
 	g.next_uid = next_uid
+	g.colonna_attivata = colonna_attivata
+	g.protetto_uid = protetto_uid
 	g.log = log.duplicate()
 	return g
 

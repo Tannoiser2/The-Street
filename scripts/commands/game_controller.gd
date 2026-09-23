@@ -13,8 +13,8 @@ signal choice_required(choice: Dictionary)
 signal game_ended(winner: int)
 
 var gs: GameState
-var _activated_col: int = -1      # colonna attivata nel turno corrente
-var _last_protected: Building = null  # edificio abitato dal lavoratore di questo turno
+# La colonna attivata e l'edificio abitato stanno nello STATO
+# (gs.colonna_attivata, gs.protetto_uid): vedi il commento in GameState.
 var _omaggi_da_piazzare: Array = []   # potenziamenti dell'Eruzione in attesa di bersaglio
 
 # ---- setup ---------------------------------------------------------
@@ -143,13 +143,13 @@ func place_worker(col: int, protect: Building = null) -> bool:
 	if col in p.worker_cols: return false
 	p.workers_used += 1
 	p.worker_cols.append(col)
-	_last_protected = null
+	gs.protetto_uid = -1
 	if protect != null and protect.owner == p.index and protect.covers(col) and protect.is_standing():
 		protect.protection += int(CardDB.constants["protection_bonus"])
 		protect.protected_by = p.index
-		_last_protected = protect
+		gs.protetto_uid = protect.uid
 	EraRules.activate(gs, p.index, col)
-	_activated_col = col
+	gs.colonna_attivata = col
 	gs.phase = Enums.Phase.AZIONE
 	state_changed.emit()
 	return true
@@ -160,7 +160,7 @@ func place_worker(col: int, protect: Building = null) -> bool:
 func build(card_id: String, col_from: int, above: bool, pay_option: int = 0, despoil: Building = null) -> bool:
 	if gs.phase != Enums.Phase.AZIONE: return false
 	if not gs.pending_choice.is_empty(): return false
-	if abs(col_from - _activated_col) > 1: return false
+	if abs(col_from - gs.colonna_attivata) > 1: return false
 	if not card_id in gs.market: return false
 	var p := gs.current_player()
 	var data: Dictionary = CardDB.buildings[card_id]
@@ -242,7 +242,7 @@ func build(card_id: String, col_from: int, above: bool, pay_option: int = 0, des
 func upgrade(upg_id: String, target: Building) -> bool:
 	if not gs.pending_choice.is_empty(): return false
 	if gs.phase != Enums.Phase.AZIONE: return false
-	if target == null or not target.covers(_activated_col): return false
+	if target == null or not target.covers(gs.colonna_attivata): return false
 	var p := gs.current_player()
 	var q := ActionRules.quote_upgrade(gs, p.index, upg_id, target)
 	if not q.legal:
@@ -288,7 +288,7 @@ func upgrade(upg_id: String, target: Building) -> bool:
 func restore(target: Building) -> bool:
 	if not gs.pending_choice.is_empty(): return false
 	if gs.phase != Enums.Phase.AZIONE: return false
-	if target == null or not target.covers(_activated_col): return false
+	if target == null or not target.covers(gs.colonna_attivata): return false
 	var p := gs.current_player()
 	var q := ActionRules.quote_restore(gs, p.index, target)
 	if not q.legal:
@@ -313,7 +313,7 @@ func recruit(char_id: String, imprint_target: Building = null) -> bool:
 	if not gs.pending_choice.is_empty(): return false
 	if gs.phase != Enums.Phase.AZIONE: return false
 	var p := gs.current_player()
-	var q := ActionRules.quote_recruit(gs, p.index, char_id, _activated_col, imprint_target)
+	var q := ActionRules.quote_recruit(gs, p.index, char_id, gs.colonna_attivata, imprint_target)
 	if not q.legal:
 		gs.log_line("Reclutamento rifiutato: %s" % q.reason)
 		return false
@@ -324,9 +324,10 @@ func recruit(char_id: String, imprint_target: Building = null) -> bool:
 	# Il lavoratore appena piazzato si specializza: l'edificio che abita e' il
 	# bersaglio degli effetti che parlano di "questo lavoratore".
 	var data: Dictionary = CardDB.characters[char_id]
-	var host: Building = imprint_target if data.get("imprint", false) else _last_protected
-	if _last_protected != null:
-		p.character_targets[char_id] = _last_protected.uid
+	var protetto := _protetto()
+	var host: Building = imprint_target if data.get("imprint", false) else protetto
+	if protetto != null:
+		p.character_targets[char_id] = protetto.uid
 	# "Uno a tua scelta": la designazione vince sull'edificio abitato, perche'
 	# e' una scelta del giocatore e non una conseguenza di dove ha messo il
 	# lavoratore.
@@ -367,7 +368,14 @@ func buy_dynasty() -> bool:
 # L'interfaccia deve sapere a quale colonna e' legata l'azione: il regolamento
 # dice "sempre legata alla colonna che avete appena attivato".
 func colonna_attivata() -> int:
-	return _activated_col
+	return gs.colonna_attivata
+
+# L'edificio abitato dal lavoratore di questo turno, cercato per uid nello stato.
+func _protetto() -> Building:
+	if gs.protetto_uid < 0: return null
+	for b in gs.grid.buildings:
+		if b.uid == gs.protetto_uid: return b
+	return null
 
 func pass_action() -> void:
 	if gs.phase == Enums.Phase.AZIONE: _end_turn()

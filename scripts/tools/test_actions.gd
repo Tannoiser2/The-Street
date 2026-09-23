@@ -751,6 +751,38 @@ func _test_copia_dello_stato() -> void:
 	var pv_b: Array = b2.players.map(func(p): return p.vp)
 	_eq("due copie della stessa partita finiscono uguali", pv_b, pv_a)
 
+	# A META' TURNO. Piazzato il lavoratore, la colonna attivata decide cosa e'
+	# legale: si costruisce li' o accanto. Stava nel controller, e una copia
+	# presa a questo punto non sapeva piu' dove si poteva costruire - ogni
+	# costruzione simulata falliva in silenzio, e il pianificatore credeva che
+	# stare fermi fosse la mossa migliore nel 64% dei turni.
+	var ctl4 := _game(3, 91)
+	var g4 := ctl4.gs
+	var chi4 := g4.current_index
+	var trovata := false
+	for col in g4.grid.n_cols:
+		var prova := g4.duplica()
+		var cp := GameController.new()
+		cp.gs = prova
+		if not cp.place_worker(col): continue
+		var lista := StrategyBot.classifica(prova, prova.players[chi4], col, "bilanciata")
+		for e in lista:
+			if e["mossa"].tipo != "costruisci": continue
+			# La copia della copia, con un controller NUOVO: e' esattamente
+			# quello che fa chi simula.
+			var dentro := prova.duplica()
+			var cn := GameController.new()
+			cn.gs = dentro
+			_eq("la copia a meta' turno sa qual e' la colonna attivata",
+				dentro.colonna_attivata, col)
+			var prima := dentro.grid.buildings.size()
+			_ok("  e ci si costruisce con un controller nuovo",
+				StrategyBot._esegui(cn, e["mossa"]) and dentro.grid.buildings.size() == prima + 1)
+			trovata = true
+			break
+		if trovata: break
+	_ok("  (c'era una costruzione da provare)", trovata)
+
 # ---- le mosse si valutano dopo l'attivazione ------------------------
 # Piazzare il lavoratore ATTIVA la colonna, e l'attivazione paga: la produzione
 # degli edifici che stanno li', le abilita' "quando la attivi", l'oro del

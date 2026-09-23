@@ -26,6 +26,11 @@ const LARGHEZZA := 4      # sequenze tenute a ogni passo
 const COLONNE := 2        # colonne esplorate da ogni stato
 const MOSSE := 3          # mosse provate in ogni colonna
 const PROFONDITA := 3     # lavoratori guardati avanti, al massimo
+# LO SCONTO DEL FUTURO. Una mossa promessa fra due turni vale meno della stessa
+# mossa adesso: nel frattempo gli avversari si muovono, prendono le carte del
+# mercato e occupano le caselle - e la simulazione, che li tiene fermi, questo
+# non lo vede. Senza sconto il piano si fidava ciecamente del mondo immobile.
+const SCONTO := 0.8
 
 # Il taccuino, come per StrategyBot: acceso `racconta`, resta scritto il piano.
 static var racconta := false
@@ -102,6 +107,7 @@ static func pianifica(gs: GameState, chi: int, strategia: String) -> Dictionary:
 				if not _piazza(c, col): continue
 				var lista := StrategyBot.classifica(dopo, dopo.players[chi], col, strategia)
 				lista.sort_custom(func(a, b): return float(a["valore"]) > float(b["valore"]))
+				var peso := pow(SCONTO, float((nodo["passi"] as Array).size()))
 				var provate := 0
 				for m in lista:
 					if provate >= MOSSE or float(m["valore"]) <= 0.0: break
@@ -115,16 +121,25 @@ static func pianifica(gs: GameState, chi: int, strategia: String) -> Dictionary:
 					passi.append({"col": col, "mossa": m["mossa"], "valore": float(m["valore"]),
 						"colonna": della_colonna})
 					figli.append({"gs": figlio,
-						"valore": float(nodo["valore"]) + della_colonna + float(m["valore"]),
+						"valore": float(nodo["valore"]) + peso * (della_colonna + float(m["valore"])),
 						"passi": passi})
-				# E il lavoratore piazzato senza fare niente: a volte conviene
-				# solo incassare, o tenere le risorse per il passo dopo.
-				c.pass_action()
-				_torna_a_me(dopo, chi, era)
-				var fermi: Array = (nodo["passi"] as Array).duplicate()
-				fermi.append({"col": col, "mossa": null, "valore": 0.0, "colonna": della_colonna})
-				figli.append({"gs": dopo, "valore": float(nodo["valore"]) + della_colonna,
-					"passi": fermi})
+				# STARE FERMI SOLO SE NON C'E' NIENTE DA FARE, come il bot avido.
+				# La prima versione teneva sempre anche il ramo "piazzo e non
+				# faccio niente", e il piano se ne innamorava: nel mondo immobile
+				# della simulazione stare fermi adesso incassa l'attivazione e
+				# rimanda la costruzione a un passo dopo sempre piu' ricco - e al
+				# turno dopo si ripianifica e si rimanda di nuovo. Procrastinava:
+				# il 64% dei suoi turni cominciava stando fermo, e costruiva la
+				# meta' degli avidi. Il torneo lo ha dato per ultimo in tutte e
+				# cinque le strategie, col 3% di vittorie.
+				if provate == 0:
+					c.pass_action()
+					_torna_a_me(dopo, chi, era)
+					var fermi: Array = (nodo["passi"] as Array).duplicate()
+					fermi.append({"col": col, "mossa": null, "valore": 0.0, "colonna": della_colonna})
+					figli.append({"gs": dopo,
+						"valore": float(nodo["valore"]) + peso * della_colonna,
+						"passi": fermi})
 		if figli.is_empty(): break
 		figli.sort_custom(func(a, b): return float(a["valore"]) > float(b["valore"]))
 		frontiera = figli.slice(0, LARGHEZZA)
