@@ -18,6 +18,14 @@
 class_name StrategyBot
 extends RefCounted
 
+# LA VERSIONE DEL BOT, scritta nell'intestazione di ogni batteria di partite.
+# Due lotti giocati con le stesse regole ma con bot diversi non sono lo stesso
+# esperimento, e confrontarli senza saperlo vuol dire attribuire alle regole
+# quello che ha fatto il bot.
+#   1  sceglie la colonna guardando lo stato di prima dell'attivazione
+#   2  valuta le mosse sullo stato DOPO l'attivazione (copia della partita)
+const VERSIONE := 2
+
 const STRATEGIE: Array[String] = ["rendita", "lampo", "scavo", "verticale", "bilanciata"]
 
 # DUE CANDIDATE, non nel canone. Le cinque di sopra coprono quattro canali -

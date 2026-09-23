@@ -15,6 +15,8 @@ var _prima_edifici := {}
 var _prima_giocatori := []
 var _muto := false
 var _perche := false
+var _piano := false
+var _tutti := ""
 # Chi muove i bot: le cinque strategie vere o il tira-a-caso di RandomBot.
 # Il caso serve ancora come metro di paragone - "quanto pesa la testa di chi
 # gioca" e' la differenza fra le due colonne.
@@ -36,6 +38,13 @@ func _ready() -> void:
 	_strategie = not args.has("caso")
 	_candidate = args.has("candidate")
 	_perche = args.has("perche")
+	# IL TORNEO DEL PIANIFICATORE. `--piano` fa pianificare l'era a UN posto,
+	# che ruota di partita in partita cosi' nessuno siede sempre li';
+	# `--tutti rendita` fa giocare a tutti la stessa strategia. Insieme isolano
+	# l'effetto del PIANIFICARE da quello della strategia: stessi bot, stesse
+	# preferenze, uno solo guarda avanti.
+	_piano = args.has("piano")
+	_tutti = str(args.get("tutti", ""))
 	# Una tabella della Verticalita' diversa da quella stampata, per provare
 	# "e se pagasse meno salire?" senza toccare data/cards.json - che resta
 	# l'unica fonte. Il simulatore di riferimento fa lo stesso con VBONUS.
@@ -136,7 +145,7 @@ func _lotto(seme: int, players: int, quante: int) -> void:
 	# cambiando quanto paga la Verticalita', cambia anche come si gioca e non
 	# solo quanto si segna.
 	print("seme;posto;giocatore;pv;strategia;sopra;quota_max;costruiti;"
-		+ ";".join(Riepilogo.VOCI.map(func(v): return str(v["id"]))))
+		+ ";".join(Riepilogo.VOCI.map(func(v): return str(v["id"]))) + ";piano")
 	for g in quante:
 		var ctl := GameController.new()
 		ctl.new_game(players, seme + g)
@@ -160,6 +169,7 @@ func _lotto(seme: int, players: int, quante: int) -> void:
 				"%d" % sopra, "%d" % quota, "%d" % costruiti]
 			for v in Riepilogo.VOCI:
 				campi.append("%d" % Riepilogo.punti(riga, str(v["id"])))
+			campi.append("1" if pianifica_qui(chi, g, players) else "0")
 			print(";".join(campi))
 	get_tree().quit(0)
 
@@ -236,11 +246,12 @@ func _stampa_vita(acc: Dictionary, quante: int, players: int, seme: int) -> void
 	var vt = CardDB.constants["verticality_vp"]
 	var scala: Array[String] = []
 	for i in 4: scala.append("%d" % int(vt[str(i + 1)]))
-	print("# partite=%d giocatori=%d seme_base=%d bot=%s verticalita=%s prosperita=%d rovina=%d binari=%s" % [
+	print("# partite=%d giocatori=%d seme_base=%d bot=%s verticalita=%s prosperita=%d rovina=%d binari=%s versione_bot=%d" % [
 		quante, players, seme, "strategie" if _strategie else "caso",
 		"/".join(scala), int(CardDB.constants["prosperity"]["min_buildings"]),
 		int(CardDB.constants.get("rovina_gap", 2)),
-		"liberi" if bool(CardDB.constants.get("binari_liberi", false)) else "per_era"])
+		"liberi" if bool(CardDB.constants.get("binari_liberi", false)) else "per_era",
+		StrategyBot.VERSIONE])
 	var intestazione: Array[String] = ["id", "nome", "era", "classi", "larghezza",
 		"costo_pietra", "costo_oro", "resistenza", "rendita", "scavo", "lampo_carta",
 		"copie", "n", "ere_intatto", "ere_piedi", "n_rudere", "n_rovina", "n_sepolto",
@@ -265,14 +276,23 @@ func _stampa_vita(acc: Dictionary, quante: int, players: int, seme: int) -> void
 # La strategia del posto `i` nella partita `g`: si ruota, cosi' ogni strategia
 # gioca ogni posto lo stesso numero di volte e il posto non falsa il confronto.
 func strategia_di(i: int, g: int) -> String:
+	if _tutti != "": return _tutti
 	var lista := StrategyBot.tutte() if _candidate else StrategyBot.STRATEGIE
 	return lista[(i + g) % lista.size()]
 
+# Chi pianifica in questa partita: un posto solo, a rotazione.
+func pianifica_qui(i: int, g: int, players: int) -> bool:
+	return _piano and i == g % players
+
 func _muovi(ctl: GameController, g: int) -> void:
 	if _strategie:
+		var chi := ctl.gs.current_index
+		if pianifica_qui(chi, g, ctl.gs.n_players):
+			PlanningBot.play_turn(ctl, strategia_di(chi, g))
+			return
 		StrategyBot.racconta = _perche
 		StrategyBot.taccuino = {}
-		StrategyBot.play_turn(ctl, strategia_di(ctl.gs.current_index, g))
+		StrategyBot.play_turn(ctl, strategia_di(chi, g))
 		if _perche: _ragiona(ctl.gs)
 	else: RandomBot.play_turn(ctl)
 

@@ -18,8 +18,8 @@ def leggi(pattern):
     # Prima che esistessero le strategie l'unico bot era quello a caso, e
     # prima che la tabella finisse nell'intestazione c'era quella ripida: un
     # CSV senza quei campi viene da li'.
-    carte, partite, giocatori, bot, vert, prosp, rov, bin = ({}, 0, None, "caso",
-                                                            "2/6/12/20", 3, 2, "per_era")
+    carte, partite, giocatori, bot, vert, prosp, rov, bin, ver = ({}, 0, None, "caso",
+                                                                 "2/6/12/20", 3, 2, "per_era", 1)
     for f in sorted(glob.glob(pattern)):
         righe = [l.rstrip("\n") for l in open(f) if l.strip()]
         meta = [l for l in righe if l.startswith("# partite=")][0]
@@ -36,6 +36,9 @@ def leggi(pattern):
         # E i binari: un CSV che non lo dice viene da quando ogni era aveva
         # il suo.
         if "binari=" in meta: bin = meta.split("binari=")[1].split()[0]
+        # La versione del bot: un CSV che non la dice viene dal bot che
+        # sceglieva la colonna prima dell'attivazione (versione 1).
+        if "versione_bot=" in meta: ver = int(meta.split("versione_bot=")[1].split()[0])
         i = righe.index([l for l in righe if l.startswith("id;")][0])
         hdr = righe[i].split(";")
         for l in righe[i+1:]:
@@ -52,12 +55,12 @@ def leggi(pattern):
                 carte[v["id"]] = {k: (int(v[k]) if k in NUM else v[k]) for k in v}
             else:
                 for k in NUM: c[k] += int(v[k])
-    return carte, partite, giocatori, bot, vert, prosp, rov, bin
+    return carte, partite, giocatori, bot, vert, prosp, rov, bin, ver
 
-carte, partite, giocatori, bot, vert, prosp, rov, bin = leggi(sys.argv[1])
+carte, partite, giocatori, bot, vert, prosp, rov, bin, ver = leggi(sys.argv[1])
 altro = None
 if "--confronta" in sys.argv:
-    altro, partite_altro, _, bot_altro, vert_altro, prosp_altro, rov_altro, bin_altro = leggi(
+    altro, partite_altro, _, bot_altro, vert_altro, prosp_altro, rov_altro, bin_altro, ver_altro = leggi(
         sys.argv[sys.argv.index("--confronta") + 1])
     # LE COLONNE SI CHIAMANO COME TUTTO CIO' CHE LE DISTINGUE, non come la
     # prima differenza trovata. Due lotti possono differire in piu' di una
@@ -69,6 +72,11 @@ if "--confronta" in sys.argv:
     DIFF = []          # (etichetta A, etichetta B, pezzo di titolo)
     if bot != bot_altro:
         DIFF.append((nomi_bot(bot_altro), nomi_bot(bot), "i bot che giocano davvero"))
+    if ver != ver_altro:
+        nomi_ver = {1: "il bot che sceglie prima di incassare",
+                    2: "il bot che valuta dopo l'attivazione"}
+        DIFF.append((f"bot v{ver_altro}", f"bot v{ver}",
+                     nomi_ver.get(ver, f"il bot versione {ver}")))
     if vert != vert_altro:
         DIFF.append((f"Verticalità {vert_altro}", f"Verticalità {vert}",
                      f"la Verticalità {vert}"))
@@ -93,9 +101,14 @@ if "--confronta" in sys.argv:
         pezzi = [d[2] for d in DIFF]
         titolo = pezzi[0] if len(pezzi) == 1 else ", ".join(pezzi[:-1]) + " e " + pezzi[-1]
         TITOLO = "Cosa cambia con " + titolo
+        # "Stessi bot" si scrive solo se e' vero: quando a cambiare e' proprio
+        # il bot, dirlo uguale sarebbe la frase sbagliata nel posto sbagliato.
+        uguali = ["stessi semi"]
+        if bot == bot_altro and ver == ver_altro: uguali.append("stessi bot")
+        uguali.append("stesso numero di giocatori")
         SOTTO = (f"Le stesse misure su {partite_altro} partite con **{COL_A}** e "
-                 f"{partite} con **{COL_B}**, a parità di tutto il resto: stessi semi, "
-                 "stessi bot, stesso numero di giocatori."
+                 f"{partite} con **{COL_B}**, a parità di tutto il resto: "
+                 + ", ".join(uguali) + "."
                  + ("" if len(DIFF) == 1 else
                     " **Le regole cambiate sono più di una**, quindi la colonna Δ è "
                     "l'effetto del pacchetto, non di una sola."))

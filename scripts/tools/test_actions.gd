@@ -25,6 +25,7 @@ func _ready() -> void:
 	_run("i binari liberi, la prova spenta", _test_binari_liberi)
 	_run("la copia dello stato", _test_copia_dello_stato)
 	_run("le mosse si valutano dopo l'attivazione", _test_valuta_dopo_attivazione)
+	_run("il bot che pianifica l'era", _test_pianificatore)
 	_run("i bot con una strategia giocano davvero", _test_strategie)
 	print("\n%d superati, %d falliti" % [_passed, _failed])
 	get_tree().quit(0 if _failed == 0 else 1)
@@ -795,3 +796,51 @@ func _test_valuta_dopo_attivazione() -> void:
 	_ok("esiste una colonna dove l'attivazione cambia quel che si puo' fare "
 		+ ("(col %d, %.1f in piu')" % [colonna, guadagno] if trovata else "(non trovata)"),
 		trovata)
+
+# ---- il bot che pianifica l'era -------------------------------------
+# Tre cose vanno provate, e nessuna e' "vince": quella la dice il torneo.
+# Che PIANIFICARE NON TOCCHI LA PARTITA - si pianifica su copie, e la partita
+# vera deve cambiare solo per la mossa che poi si gioca; che la partita arrivi
+# in fondo; e che sia deterministica, perche' una misura che non si ripete non
+# e' una misura.
+func _test_pianificatore() -> void:
+	var ctl := _game(3, 55)
+	var gs := ctl.gs
+	for i in 4:
+		StrategyBot.play_turn(ctl, "bilanciata")
+	var p := gs.current_player()
+	var fotografia := [p.pietra, p.oro, p.workers_used, p.worker_cols.duplicate(),
+		gs.grid.buildings.size(), gs.rng.state, gs.current_index, gs.log.size()]
+	var piano := PlanningBot.pianifica(gs, p.index, "bilanciata")
+	var dopo := [p.pietra, p.oro, p.workers_used, p.worker_cols.duplicate(),
+		gs.grid.buildings.size(), gs.rng.state, gs.current_index, gs.log.size()]
+	_eq("pianificare non tocca la partita vera", dopo, fotografia)
+	_ok("  e produce un piano", not piano.is_empty())
+	if not piano.is_empty():
+		var passi: Array = piano["passi"]
+		_ok("  lungo quanto i lavoratori che restano (%d passi)" % passi.size(),
+			passi.size() >= 1 and passi.size() <= p.workers - p.workers_used)
+		var primo: Dictionary = passi[0]
+		_ok("  e il primo passo e' in una colonna libera per lui",
+			not int(primo["col"]) in p.worker_cols)
+
+	# Una partita intera col pianificatore a un posto e gli avidi agli altri.
+	var ctl2 := _game(3, 56)
+	var giri := 0
+	while ctl2.gs.phase != Enums.Phase.FINE_PARTITA and giri < 4000:
+		if ctl2.gs.current_index == 0: PlanningBot.play_turn(ctl2, "bilanciata")
+		else: StrategyBot.play_turn(ctl2, "bilanciata")
+		giri += 1
+	_ok("col pianificatore la partita arriva in fondo",
+		ctl2.gs.phase == Enums.Phase.FINE_PARTITA)
+	var pv1: Array = ctl2.gs.players.map(func(q): return q.vp)
+
+	# E la stessa partita rigiocata finisce identica.
+	var ctl3 := _game(3, 56)
+	giri = 0
+	while ctl3.gs.phase != Enums.Phase.FINE_PARTITA and giri < 4000:
+		if ctl3.gs.current_index == 0: PlanningBot.play_turn(ctl3, "bilanciata")
+		else: StrategyBot.play_turn(ctl3, "bilanciata")
+		giri += 1
+	var pv2: Array = ctl3.gs.players.map(func(q): return q.vp)
+	_eq("  e rigiocata finisce identica", pv2, pv1)
