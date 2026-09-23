@@ -424,7 +424,12 @@ func _test_3d_partita() -> void:
 			var a: Building = gs.grid.buildings[i]
 			var b2: Building = gs.grid.buildings[j]
 			if a.level != b2.level: continue
-			if a.level == 0 and a.era_built != b2.era_built: continue
+			# A TERRA CONTA IL BINARIO, non l'era. Finche' ogni era aveva il
+			# suo i due erano la stessa cosa e qui c'era scritto `era_built`;
+			# coi binari liberi due edifici della stessa era possono stare su
+			# binari diversi senza toccarsi, e due di ere diverse sullo stesso
+			# binario non possono coesistere. L'invariante e' il binario.
+			if a.level == 0 and a.binario_effettivo() != b2.binario_effettivo(): continue
 			if a.col_from < b2.col_to and b2.col_from < a.col_to: scontri += 1
 	_eq("nessuna sagoma occupa il posto di un'altra", scontri, 0)
 

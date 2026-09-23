@@ -1376,6 +1376,30 @@ dato è stato importato da lì. Ma due confronti fra ciò che è stampato e
     gia' costruito di piu'. Se i binari liberi entrano, la soglia della
     Prosperita' va rivista - probabilmente rimessa a 3 - e rimisurata.
 
-    **Domanda al designer:** si adottano i binari liberi (e allora si ritara la
-    Prosperita'), oppure il terreno in piu' si da' in un altro modo - piu'
-    colonne, o un mercato che offra meno carte per era?
+    **ADOTTATI**, insieme alla Prosperita' rimessa a 3 edifici. Misurato dopo,
+    5 000 partite a parita' di semi, contro il mondo di stamattina:
+
+    | | per era, soglia 2 | liberi, soglia 3 |
+    |---|--:|--:|
+    | edifici costruiti per partita | 28,70 | **29,30** |
+    | in piedi a fine partita | 8,26 | **8,92** |
+    | intatti a fine partita | 7,61 | **8,23** |
+    | sepolti | 57% | **51%** |
+    | PV per partita | 200 | 201 |
+    | di cui Rendita | 54,0 | **65,2** |
+    | di cui Verticalita' | 79,7 | **73,7** |
+
+    Il punteggio totale non si muove (200 -> 201) ma cambia da dove viene: undici
+    punti in piu' dalla Rendita, sei in meno dalla Verticalita'. E' esattamente
+    quello che ci si aspetta quando salire smette di essere obbligatorio e piu'
+    edifici restano in piedi a pagare il censimento.
+
+    **La Prosperita' pero' resta frequente: 7,56 pagamenti a partita e 17,03
+    oro, nel 98% delle partite** (400 partite). La soglia a 3 taglia l'eccesso
+    dei binari liberi - erano 14,84 - ma non riporta il Centro Urbano alla
+    rarita' di partenza (1,61), perche' il motivo vero non e' la soglia: e' che
+    da quando si crolla solo fallendo di 3 sopravvivono piu' intatti, e piu'
+    colonne raggiungono comunque il minimo. Se la rarita' e' una cosa a cui
+    tieni, la manopola giusta adesso e' `gold_per_owner` o il richiedere
+    proprietari diversi in numero maggiore, non altri edifici. Va visto al
+    tavolo.

@@ -582,13 +582,17 @@ func _test_disperse() -> void:
 	p2.pietra = 7
 	_eq("a parita' di PV e di edifici vince chi ha piu' risorse", Scoring.winner(gs6), 2)
 
-# ---- i binari liberi (prova di bilanciamento, spenta) ---------------
-# Normalmente ogni era ha il suo binario: quando e' pieno, per continuare a
-# costruire si deve salire. Coi binari liberi un edificio puo' finire su
-# qualunque binario ancora libero in quelle colonne, riempiendo DAL FONDO.
-# La manopola sta fra le costanti e di serie e' spenta: questo test la
-# accende e la rispegne, e prova prima di tutto che spenta non cambi niente.
+# ---- i binari liberi ------------------------------------------------
+# Col vincolo per era ogni era ha il suo binario: quando e' pieno, per
+# continuare a costruire si deve salire. COI BINARI LIBERI - la regola adottata
+# - un edificio puo' finire su qualunque binario ancora libero in quelle
+# colonne, riempiendo DAL FONDO.
+# Il test prova tutt'e due i mondi accendendo e spegnendo la costante, e la
+# rimette com'e' nei dati quando ha finito: i test non lasciano il gioco
+# cambiato dietro di se'.
 func _test_binari_liberi() -> void:
+	var com_era := bool(CardDB.constants.get("binari_liberi", false))
+	CardDB.constants["binari_liberi"] = false
 	var ctl := _game(3, 21)
 	var gs := ctl.gs
 	# Una carta dell'era corrente e una colonna dove ci stia: quasi tutte
@@ -645,6 +649,10 @@ func _test_binari_liberi() -> void:
 	var q5 := BuildRules.quote_rail(gs, 0, CardDB.buildings[altrove["id"]], int(altrove["col"]))
 	_ok("spenta, si torna a costruire nel binario della propria era",
 		q5.legal and q5.binario == gs.era, q5.reason)
+	# E nei dati la regola c'e' davvero: se domani la si spegnesse, questo
+	# test lo direbbe invece di continuare a provare un mondo che non esiste.
+	_ok("nei dati i binari sono liberi", com_era)
+	CardDB.constants["binari_liberi"] = com_era
 
 # Una carta dell'era corrente e una colonna dove si possa davvero costruire:
 # quasi ogni carta chiede un terreno, e su una strada a caso la colonna giusta
