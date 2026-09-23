@@ -68,6 +68,12 @@ func _ready() -> void:
 	# La prima versione di questa manopola scriveva la costante e non cambiava
 	# niente - la variante "eventi piu' deboli" usciva identica al controllo, ed
 	# e' cosi' che ce ne siamo accorti. Qui si sconta ogni carta evento.
+	# I BINARI LIBERI: un edificio puo' finire su qualunque binario libero,
+	# riempiendo dal fondo, invece che solo su quello della sua era.
+	if args.has("binari"):
+		CardDB.constants["binari_liberi"] = int(args["binari"]) != 0
+		print("# binari_liberi = %s" % str(bool(CardDB.constants["binari_liberi"])))
+
 	if args.has("forza"):
 		var delta := int(args["forza"])
 		for id in CardDB.events:
@@ -228,10 +234,11 @@ func _stampa_vita(acc: Dictionary, quante: int, players: int, seme: int) -> void
 	var vt = CardDB.constants["verticality_vp"]
 	var scala: Array[String] = []
 	for i in 4: scala.append("%d" % int(vt[str(i + 1)]))
-	print("# partite=%d giocatori=%d seme_base=%d bot=%s verticalita=%s prosperita=%d rovina=%d" % [
+	print("# partite=%d giocatori=%d seme_base=%d bot=%s verticalita=%s prosperita=%d rovina=%d binari=%s" % [
 		quante, players, seme, "strategie" if _strategie else "caso",
 		"/".join(scala), int(CardDB.constants["prosperity"]["min_buildings"]),
-		int(CardDB.constants.get("rovina_gap", 2))])
+		int(CardDB.constants.get("rovina_gap", 2)),
+		"liberi" if bool(CardDB.constants.get("binari_liberi", false)) else "per_era"])
 	var intestazione: Array[String] = ["id", "nome", "era", "classi", "larghezza",
 		"costo_pietra", "costo_oro", "resistenza", "rendita", "scavo", "lampo_carta",
 		"copie", "n", "ere_intatto", "ere_piedi", "n_rudere", "n_rovina", "n_sepolto",

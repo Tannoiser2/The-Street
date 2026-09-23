@@ -130,7 +130,7 @@ static func standee_base(gs: GameState, b: Building) -> Vector3:
 static func z_sagoma(gs: GameState, b: Building, giri := 0) -> float:
 	if b.level == 0:
 		# sul davanti dello slot, cioe' dal lato della telecamera
-		return rail_z(b.era_built) + SLOT_D - BASETTA_D / 2.0
+		return rail_z(b.binario_effettivo()) + SLOT_D - BASETTA_D / 2.0
 	# LE BASI SONO QUELLE DI QUANDO LO SI E' COSTRUITO, non quelle che si
 	# trovano adesso nelle sue colonne. A quota zero una colonna porta fino
 	# a cinque edifici, uno per binario d'era: chiedendolo alla colonna, un

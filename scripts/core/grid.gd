@@ -25,9 +25,10 @@ func standing_in_column(col: int) -> Array:
 func alive_in_column(col: int) -> Array:
 	return in_column(col).filter(func(b): return b.is_alive())
 
-func rail_occupied(era: int, col_from: int, col_to: int) -> bool:
+func rail_occupied(binario: int, col_from: int, col_to: int) -> bool:
 	for b in buildings:
-		if b.level == 0 and b.era_built == era and b.col_from < col_to and b.col_to > col_from:
+		if b.level == 0 and b.binario_effettivo() == binario \
+			and b.col_from < col_to and b.col_to > col_from:
 			return true
 	return false
 

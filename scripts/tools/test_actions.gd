@@ -22,6 +22,7 @@ func _ready() -> void:
 	_run("un lavoratore per colonna", _test_worker_per_column)
 	_run("dispersione dei secoli", _test_disperse)
 	_run("il libro mastro degli edifici torna col tabellone", _test_libro_mastro)
+	_run("i binari liberi, la prova spenta", _test_binari_liberi)
 	_run("i bot con una strategia giocano davvero", _test_strategie)
 	print("\n%d superati, %d falliti" % [_passed, _failed])
 	get_tree().quit(0 if _failed == 0 else 1)
@@ -580,3 +581,89 @@ func _test_disperse() -> void:
 	var p2: PlayerState = gs6.players[2]
 	p2.pietra = 7
 	_eq("a parita' di PV e di edifici vince chi ha piu' risorse", Scoring.winner(gs6), 2)
+
+# ---- i binari liberi ------------------------------------------------
+# Col vincolo per era ogni era ha il suo binario: quando e' pieno, per
+# continuare a costruire si deve salire. COI BINARI LIBERI - la regola adottata
+# - un edificio puo' finire su qualunque binario ancora libero in quelle
+# colonne, riempiendo DAL FONDO.
+# Il test prova tutt'e due i mondi accendendo e spegnendo la costante, e la
+# rimette com'e' nei dati quando ha finito: i test non lasciano il gioco
+# cambiato dietro di se'.
+func _test_binari_liberi() -> void:
+	var com_era := bool(CardDB.constants.get("binari_liberi", false))
+	CardDB.constants["binari_liberi"] = false
+	var ctl := _game(3, 21)
+	var gs := ctl.gs
+	# Una carta dell'era corrente e una colonna dove ci stia: quasi tutte
+	# chiedono un terreno, quindi la colonna non si sceglie a caso.
+	var posto := _carta_e_colonna(gs)
+	_ok("c'e' una carta dell'era corrente da provare", posto["id"] != "")
+	if posto["id"] == "": return
+	var id: String = posto["id"]
+	var col: int = posto["col"]
+	var data: Dictionary = CardDB.buildings[id]
+
+	# Con ogni era nel suo binario: occupata la colonna nel binario dell'era,
+	# a terra non si puo' piu' costruire li'.
+	var occupante := _put(gs, 0, id, col)
+	_eq("  l'occupante sta sul binario della sua era",
+		occupante.binario_effettivo(), gs.era)
+	var q := BuildRules.quote_rail(gs, 0, data, col)
+	_ok("col binario per era, la casella occupata rifiuta", not q.legal)
+	_eq("  e lo dice", q.reason, "caselle occupate nel binario")
+
+	# Accendendo i binari liberi, lo stesso edificio trova posto su un altro
+	# binario: il piu' lontano fra quelli ancora liberi.
+	CardDB.constants["binari_liberi"] = true
+	var q2 := BuildRules.quote_rail(gs, 0, data, col)
+	_ok("coi binari liberi trova posto lo stesso", q2.legal, q2.reason)
+	_ok("  e non e' il binario dell'occupante", q2.binario != occupante.binario_effettivo())
+	_eq("  ed e' il piu' lontano libero", q2.binario, 1 if gs.era != 1 else 2)
+
+	# Si riempie dal fondo: occupando i binari uno a uno, il preventivo scala
+	# sempre al primo libero, e quando non ce n'e' piu' rifiuta.
+	var rails := int(CardDB.constants["rails"])
+	var presi: Array[int] = []
+	for _i in range(rails + 1):
+		var q3 := BuildRules.quote_rail(gs, 0, data, col)
+		if not q3.legal: break
+		presi.append(q3.binario)
+		var b := _put(gs, 0, id, col)
+		b.binario = q3.binario
+	# I binari attesi sono quelli liberi, dal fondo in avanti: tutti tranne
+	# quello dove sta gia' l'occupante.
+	var attesi: Array[int] = []
+	for r in range(1, rails + 1):
+		if r != occupante.binario_effettivo(): attesi.append(r)
+	_eq("si riempie dal fondo, un binario dopo l'altro", presi, attesi)
+	_eq("in colonna ci stanno tutti i binari meno quello gia' occupato",
+		presi.size(), rails - 1)
+	var q4 := BuildRules.quote_rail(gs, 0, data, col)
+	_ok("  e poi la colonna e' piena davvero", not q4.legal)
+
+	# Rispegnendola il gioco torna quello di prima: e' una prova, non una
+	# regola.
+	CardDB.constants["binari_liberi"] = false
+	var altrove := _carta_e_colonna(gs, col)
+	var q5 := BuildRules.quote_rail(gs, 0, CardDB.buildings[altrove["id"]], int(altrove["col"]))
+	_ok("spenta, si torna a costruire nel binario della propria era",
+		q5.legal and q5.binario == gs.era, q5.reason)
+	# E nei dati la regola c'e' davvero: se domani la si spegnesse, questo
+	# test lo direbbe invece di continuare a provare un mondo che non esiste.
+	_ok("nei dati i binari sono liberi", com_era)
+	CardDB.constants["binari_liberi"] = com_era
+
+# Una carta dell'era corrente e una colonna dove si possa davvero costruire:
+# quasi ogni carta chiede un terreno, e su una strada a caso la colonna giusta
+# non e' sempre la stessa. `evita` serve a chiederne una diversa.
+func _carta_e_colonna(gs: GameState, evita := -1) -> Dictionary:
+	for id in CardDB.buildings:
+		var c: Dictionary = CardDB.buildings[id]
+		if int(c["era"]) != gs.era or int(c["width"]) != 1: continue
+		if int(c["level_required"]) > 0: continue
+		for col in gs.grid.n_cols:
+			if col == evita: continue
+			if BuildRules.quote_rail(gs, 0, c, col).legal:
+				return {"id": id, "col": col}
+	return {"id": "", "col": 0}

@@ -6,7 +6,14 @@ extends RefCounted
 var uid: int
 var data: Dictionary          # riga di cards.json (buildings)
 var owner: int
-var era_built: int            # era in cui è stato costruito (= binario se livello 0)
+var era_built: int            # era in cui è stato costruito
+# IL BINARIO SU CUI POGGIA, quando sta a terra. Finche' ogni era ha il suo
+# binario i due numeri coincidono e questo resta 0: si deduce dall'era, com'e'
+# sempre stato. Serve per provare i "binari liberi", dove un edificio di
+# un'era puo' finire sul binario di un'altra e l'era non basta piu' a dire
+# dove sta. Un sopraelevato non ha binario: la sua profondita' viene dalle
+# basi su cui poggia.
+var binario: int = 0
 var col_from: int             # prima colonna occupata (inclusa)
 var col_to: int               # ultima colonna occupata (esclusa)
 var level: int = 0            # 0 = nel binario; >0 = sopraelevato
@@ -53,6 +60,11 @@ func vp_totali() -> int:
 	var t := 0
 	for c in vp_reso: t += int(vp_reso[c])
 	return t
+
+# Su che binario sta, a terra: quello scelto costruendo, o quello della sua
+# era per tutto il resto del gioco e per le partite salvate prima.
+func binario_effettivo() -> int:
+	return binario if binario > 0 else era_built
 
 func width() -> int:
 	return col_to - col_from
