@@ -43,7 +43,12 @@ func _ready() -> void:
 	_run("chi siede al tavolo lo si sceglie", _test_scelte_inizio)
 	_run("  e a che velocita' si muovono i bot", _test_velocita_bot)
 	_run("il conto finale, diviso per fonte", _test_riepilogo)
+	_run("il valore di Scavo sulla basetta", _test_banner_scavo)
+	_run("i pupazzetti dei lavoratori", _test_pupazzetti)
+	_run("la Dinastia resta fuori dalle file", _test_dinastia)
+	_run("il personaggio sepolto sta sotto la carta del suo edificio", _test_sepolto)
 	_run("il terrapieno si paga e si vede", _test_terrapieni)
+	_run("sotto un edificio a scalino non resta un buco", _test_scalino)
 	_run("le carte stanno in piedi alla stessa altezza", _test_misure_carte)
 	_run("la sagoma e' un pezzo solo, spesso", _test_sagoma_estrusa)
 	print("\n%d superati, %d falliti" % [_passed, _failed])
@@ -591,9 +596,11 @@ func _test_tavolo() -> void:
 	var carte := BoardLayout3D.side_cards(gs, 0)
 	var possedute := 0
 	for i in gs.n_players: possedute += BoardLayout3D.carte_giocatore(gs, i, 0).size()
+	# +1: la Dinastia, che sta "sempre disponibile fuori dalle file" e non e'
+	# in nessun mazzetto.
 	_eq("una carta per ogni carta sul tavolo", carte.size(),
 		gs.market.size() + gs.char_row.size() + gs.upg_row.size()
-		+ gs.monuments_open.size() + possedute)
+		+ gs.monuments_open.size() + possedute + 1)
 	_ok("e ogni giocatore ha davanti il suo obiettivo segreto", possedute >= gs.n_players)
 	var tipi := {}
 	for c in carte: tipi[str(c["kind"])] = true
@@ -1590,6 +1597,206 @@ func _test_riepilogo() -> void:
 # sospeso sopra il vuoto proprio nella colonna che aveva pagato per
 # riempirla. Il preventivo sapeva quante erano; adesso sa anche QUALI, e
 # l'edificio se le porta dietro.
+# Il banner dello Scavo: la riga giusta dell'immagine, e il taglio da sinistra
+# per gli edifici corti - a destra c'e' il numero, e quello non si taglia mai.
+func _test_banner_scavo() -> void:
+	var ctl := _gioco()
+	var gs := ctl.gs
+	# Un edificio da tre slot mostra la striscia intera.
+	var largo := _metti(gs, _largo(3), 1, 1, 0, 0)
+	var u3: Dictionary = BoardLayout3D.scavo_uv(largo)
+	_approx("l'edificio da tre slot prende la striscia intera",
+		(u3["scala"] as Vector2).x, 1.0)
+	_approx("  senza tagliare niente a sinistra", (u3["offset"] as Vector2).x, 0.0)
+
+	# Uno da una casella ne prende un terzo, TAGLIATO A SINISTRA.
+	var stretto := _metti(gs, "ed_capanne", 4, 1, 0, 0)
+	var u1: Dictionary = BoardLayout3D.scavo_uv(stretto)
+	_approx("quello da una casella ne prende un terzo",
+		(u1["scala"] as Vector2).x, 1.0 / 3.0)
+	_approx("  e il taglio e' a sinistra", (u1["offset"] as Vector2).x, 2.0 / 3.0)
+	_ok("  cosi' il bordo destro - dove c'e' il numero - resta dentro",
+		is_equal_approx((u1["offset"] as Vector2).x + (u1["scala"] as Vector2).x, 1.0))
+
+	# La riga dipende dal valore di Scavo, e sono righe di uguale altezza.
+	var passo := 1.0 / float(BoardLayout3D.SCAVO_RIGHE)
+	_approx("ogni riga e' alta un decimo", (u1["scala"] as Vector2).y, passo)
+	_approx("  e si sceglie col valore",
+		(u1["offset"] as Vector2).y, passo * float(int(stretto.data["scavo"])))
+
+	# Spianare porta lo Scavo a 0: il banner deve dirlo.
+	stretto.was_razed = true
+	var u0: Dictionary = BoardLayout3D.scavo_uv(stretto)
+	_eq("uno spianato mostra lo zero", int(u0["valore"]), 0)
+	_approx("  cioe' la prima riga", (u0["offset"] as Vector2).y, 0.0)
+
+	# L'Impronta alza lo Scavo: anche quello si vede.
+	stretto.was_razed = false
+	stretto.bonus_scavo = 3        # l'Incisore: +3 permanenti
+	_eq("un'Impronta sposta la riga", int(BoardLayout3D.scavo_uv(stretto)["valore"]),
+		int(stretto.data["scavo"]) + 3)
+	_ok("  e ci sono righe abbastanza per tutti i valori stampati",
+		not bool(BoardLayout3D.scavo_uv(stretto)["fuori_scala"]))
+	stretto.bonus_scavo = 0
+
+	# Nessuna carta deve restare fuori scala: se il banner ha meno righe dei
+	# valori in gioco, sul tavolo finisce un numero sbagliato.
+	var fuori: Array[String] = []
+	for id in CardDB.buildings:
+		var b2 := _metti(gs, str(id), 0, 1, 0, 0)
+		if bool(BoardLayout3D.scavo_uv(b2)["fuori_scala"]): fuori.append(str(id))
+		gs.grid.buildings.erase(b2)
+	_eq("nessuna carta ha uno Scavo oltre le righe del banner (%s)"
+		% ", ".join(fuori), fuori.size(), 0)
+
+	# Le due facce: davanti e dietro, grandi quanto la basetta.
+	var facce := BoardLayout3D.facce_basetta(gs, largo)
+	_eq("il banner sta su due facce", facce.size(), 2)
+	var piede := BoardLayout3D.basetta_box(gs, largo)
+	for f in facce:
+		var d: Vector2 = f["dim"]
+		_ok("  grande quanto la basetta",
+			is_equal_approx(d.x, piede.size.x) and is_equal_approx(d.y, piede.size.y))
+		break
+	_approx("  una davanti", (facce[0]["pos"] as Vector3).z, piede.end.z)
+	_approx("  e una dietro", (facce[1]["pos"] as Vector3).z, piede.position.z)
+
+# I lavoratori sono pupazzetti e si contano: quelli in mano stanno sulla
+# bacchetta, quelli usati sulla strada, e non se ne perde nessuno per via.
+func _test_pupazzetti() -> void:
+	var ctl := _gioco()
+	var gs := ctl.gs
+	var p: PlayerState = gs.players[0]
+	_eq("a inizio partita sono tutti in mano",
+		BoardLayout3D.meeple_liberi(gs, 0).size(), p.workers)
+	_eq("  e sulla strada non ce n'e' nessuno",
+		BoardLayout3D.meeple_in_campo(gs, 0).size(), 0)
+
+	var bacchetta := BoardLayout3D.bacchetta_box(gs, 0)
+	for pos in BoardLayout3D.meeple_liberi(gs, 0):
+		_ok("  e stanno sulla bacchetta del loro colore",
+			pos.x >= bacchetta.position.x - 0.1 and pos.x <= bacchetta.end.x + 0.1
+			and pos.z >= bacchetta.position.z - 0.1 and pos.z <= bacchetta.end.z + 0.1)
+		break
+
+	# Piazzato uno, il conto si sposta ma non cambia.
+	ctl.place_worker(2)
+	_eq("piazzandone uno, in mano ne restano %d" % (p.workers - 1),
+		BoardLayout3D.meeple_liberi(gs, 0).size(), p.workers - 1)
+	_eq("  e uno e' sulla strada", BoardLayout3D.meeple_in_campo(gs, 0).size(), 1)
+	_eq("  nella colonna che ha attivato",
+		int(BoardLayout3D.meeple_in_campo(gs, 0)[0]["col"]), 2)
+	_eq("  e il conto torna sempre",
+		BoardLayout3D.meeple_liberi(gs, 0).size()
+		+ BoardLayout3D.meeple_in_campo(gs, 0).size(), p.workers)
+
+	# Chi abita un edificio ci sale sopra: il pupazzetto sta sulla basetta.
+	# Serve una partita nuova, perche' di lavoratori se ne piazza uno per
+	# turno e in questa e' gia' stato piazzato.
+	var ctl2 := _gioco()
+	var gs2 := ctl2.gs
+	var b := _metti(gs2, "ed_capanne", 4, 1, 0, 0)
+	_ok("si piazza il lavoratore sull'edificio", ctl2.place_worker(4, b))
+	var su_edificio := []
+	for m in BoardLayout3D.meeple_in_campo(gs2, 0):
+		if int(m["uid"]) == b.uid: su_edificio.append(m)
+	_eq("chi abita un edificio sta sulla sua basetta", su_edificio.size(), 1)
+	if not su_edificio.is_empty():
+		var piede := BoardLayout3D.basetta_box(gs2, b)
+		var pos: Vector3 = su_edificio[0]["pos"]
+		_approx("  alla quota della basetta", pos.y, piede.end.y)
+		_ok("  e dentro il suo ingombro",
+			pos.x >= piede.position.x - 0.1 and pos.x <= piede.end.x + 0.1)
+
+	# A fine era tornano tutti indietro da soli: e' `worker_cols` che si
+	# svuota, la vista non deve ricordarsi niente.
+	p.reset_for_era()
+	_eq("a fine era tornano tutti sulla bacchetta",
+		BoardLayout3D.meeple_liberi(gs, 0).size(), p.workers)
+	_eq("  e la strada resta sgombra",
+		BoardLayout3D.meeple_in_campo(gs, 0).size(), 0)
+
+# "Sempre disponibile fuori dalle file": la carta non si muove, si prende il
+# pupazzetto.
+func _test_dinastia() -> void:
+	var ctl := _gioco()
+	var gs := ctl.gs
+	var carta := BoardLayout3D.carta_dinastia(gs)
+	_ok("la carta Dinastia sta sul tavolo", not carta.is_empty())
+	if carta.is_empty(): return
+	var dove: AABB = carta["aabb"]
+	_ok("  fuori dalla strada, a fianco delle file",
+		dove.position.x >= BoardLayout3D.board_w(gs))
+	_eq("c'e' un pupazzetto per giocatore",
+		BoardLayout3D.meeple_dinastia(gs).size(), gs.n_players)
+	for m in BoardLayout3D.meeple_dinastia(gs):
+		var pos: Vector3 = m["pos"]
+		_ok("  e stanno sulla carta",
+			pos.x >= dove.position.x - 0.1 and pos.x <= dove.end.x + 0.1
+			and pos.z >= dove.position.z - 0.1 and pos.z <= dove.end.z + 0.1)
+		break
+
+	var p: PlayerState = gs.players[0]
+	var prima := p.workers
+	p.pietra = 99
+	p.oro = 99
+	ctl.place_worker(1)
+	_ok("il giocatore 0 compra la Dinastia", ctl.buy_dynasty())
+	_eq("  e adesso ha un lavoratore in piu'", p.workers, prima + 1)
+	var rimasti := BoardLayout3D.meeple_dinastia(gs)
+	_eq("  sulla carta resta un pupazzetto in meno", rimasti.size(), gs.n_players - 1)
+	var suoi := 0
+	for m in rimasti:
+		if int(m["player"]) == 0: suoi += 1
+	_eq("  e il suo non c'e' piu'", suoi, 0)
+	_eq("  ma la carta e' rimasta dov'era",
+		BoardLayout3D.carta_dinastia(gs)["aabb"], dove)
+	var carte := BoardLayout3D.carte_giocatore(gs, 0, 0)
+	var dinastie := 0
+	for c in carte:
+		if str(c["kind"]) == "dinastia": dinastie += 1
+	_eq("  e non se n'e' portata via una copia", dinastie, 0)
+
+# "Infilatelo sotto la carta di un vostro edificio": il personaggio sepolto
+# si vede li' sotto, con la linguetta di fuori, e non in mezzo agli altri.
+func _test_sepolto() -> void:
+	var ctl := _gioco()
+	var gs := ctl.gs
+	var p: PlayerState = gs.players[0]
+	var b := _metti(gs, "ed_capanne", 3, 1, 0, 0)
+	var cid := str(gs.char_row[0]) if not gs.char_row.is_empty() \
+		else str(CardDB.characters.keys()[0])
+	p.specialized_characters.append(cid)
+
+	var prima := 0
+	for c in BoardLayout3D.carte_giocatore(gs, 0, 0):
+		if str(c["kind"]) == "personaggio" and str(c["id"]) == cid: prima += 1
+	_eq("finche' e' vivo il personaggio sta davanti al giocatore", prima, 1)
+
+	b.buried_character = cid
+	b.buried_character_era = 1
+	var carte := BoardLayout3D.player_cards(gs, 0)
+	var sotto := []
+	var edificio := []
+	for c in carte:
+		if int(c.get("player", -1)) != 0: continue
+		if str(c["kind"]) == "personaggio" and str(c["id"]) == cid: sotto.append(c)
+		if str(c["kind"]) == "mercato" and str(c["id"]) == str(b.data["id"]): edificio.append(c)
+	_eq("una volta sepolto se ne disegna una sola", sotto.size(), 1)
+	_eq("  e la carta del suo edificio c'e'", edificio.size(), 1)
+	if sotto.is_empty() or edificio.is_empty(): return
+	var cs: AABB = sotto[0]["aabb"]
+	var ce: AABB = edificio[0]["aabb"]
+	_ok("  sta sotto la carta dell'edificio", cs.position.y <= ce.position.y)
+	_ok("  ma sporge di fianco",
+		cs.end.x > ce.end.x and cs.position.x < ce.end.x)
+	_ok("  e si tocca con lei, non sta per conto suo",
+		cs.position.z < ce.end.z and cs.end.z > ce.position.z)
+	var altrove := 0
+	for c in BoardLayout3D.carte_giocatore(gs, 0, 0):
+		if str(c["kind"]) == "personaggio" and str(c["id"]) == cid: altrove += 1
+	_eq("  e non resta anche in mezzo alle altre", altrove, 0)
+
 func _test_terrapieni() -> void:
 	var ctl := _gioco()
 	var gs := ctl.gs
@@ -1639,6 +1846,50 @@ func _test_terrapieni() -> void:
 # enorme: le carte grandi schiacciavano le altre e il tavolo non sembrava
 # piu' un mazzo solo. E le sei del mercato, in una colonna sola, erano piu'
 # lunghe della strada: la prima finiva fuori dal tabellone, sospesa nel nulla.
+# Un edificio largo puo' poggiare su due colonne di quota diversa: prende il
+# livello della piu' alta piu' uno, e sull'altra resta uno scalino. Il
+# regolamento quello scalino non lo fa pagare - il terrapieno e' "per colonna
+# priva di base" - ma sul tavolo la terra ci va lo stesso, se no meta' sagoma
+# sta sul vuoto. E' il buco che si vedeva sotto la Fortezza bastionata.
+func _test_scalino() -> void:
+	var ctl := _gioco()
+	var gs := ctl.gs
+	# colonna 1: una pila che arriva a livello 1. colonna 2: solo una rovina
+	# a terra. Chi costruisce sopra entrambe parte da livello 2.
+	var a := _metti(gs, "ed_capanne", 1, 1, 0, 0)
+	a.state = Enums.BuildingState.ROVINA
+	var b := _metti(gs, "ed_capanne", 1, 1, 1, 0)
+	b.state = Enums.BuildingState.ROVINA
+	var c := _metti(gs, "ed_capanne", 2, 1, 0, 0)
+	c.state = Enums.BuildingState.ROVINA
+
+	var d: Dictionary = CardDB.buildings[_largo(2)]
+	var q := BuildRules.quote_above(gs, 0, d, 1)
+	_ok("il preventivo passa (%s)" % q.reason, q.legal)
+	_eq("  l'edificio va a livello 2", q.level, 2)
+	_eq("  e nessuna colonna paga terrapieno", q.terrapieno_cols, [] as Array[int])
+
+	var p: PlayerState = gs.players[0]
+	p.pietra = 99
+	p.oro = 99
+	ctl.place_worker(1)
+	var quanti := gs.grid.buildings.size()
+	_ok("si costruisce a scalino", ctl.build(str(d["id"]), 1, true))
+	if gs.grid.buildings.size() <= quanti: return
+	var su: Building = gs.grid.buildings[gs.grid.buildings.size() - 1]
+
+	_eq("la colonna alta regge da sola", BoardLayout3D.quota_sotto(gs, su, 1), 1)
+	_eq("  quella bassa e' indietro di un livello", BoardLayout3D.quota_sotto(gs, su, 2), 0)
+	var boxes := BoardLayout3D.terrapieni(gs, su)
+	_eq("si riempie solo la colonna indietro", boxes.size(), 1)
+	if boxes.is_empty(): return
+	var box: AABB = boxes[0]
+	var piede := BoardLayout3D.basetta_box(gs, su)
+	_approx("  la terra parte dalla cima di cio' che c'e'", box.position.y,
+		BoardLayout3D.level_y(1))
+	_approx("  e arriva esatto sotto il piede", box.end.y, piede.position.y)
+	_ok("  e sta nella colonna 2", box.position.x >= BoardLayout3D.col_x(2) - 0.1)
+
 func _test_misure_carte() -> void:
 	# Stessa altezza, proporzioni salve: il disegno non si deforma.
 	var storte := 0

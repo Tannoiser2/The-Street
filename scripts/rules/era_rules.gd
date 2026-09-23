@@ -166,7 +166,9 @@ static func _on_terrain(gs: GameState, b: Building, t: int) -> bool:
 static func census(gs: GameState) -> void:
 	for b in gs.grid.buildings:
 		if b.is_alive() and b.rendita_value() > 0:
-			gs.players[b.owner].add_vp("rendita", b.rendita_value() + b.vetusta)
+			var quanto: int = b.rendita_value() + b.vetusta
+			gs.players[b.owner].add_vp("rendita", quanto)
+			b.rende("rendita", quanto)
 
 # ---- dispersione dei secoli ---------------------------------------
 # Si scarta a scelta del giocatore; il default scarta prima la pietra.

@@ -34,9 +34,16 @@ static func _verticality(gs: GameState) -> void:
 		var top := gs.grid.top_of(col)
 		if top != null:
 			gs.players[top.owner].add_vp("verticalita", prize / 2)
+			top.rende("verticalita", prize / 2)
 		for ow in owners:
 			var share := int(round((prize / 2.0) * owners[ow] / float(total)))
 			gs.players[ow].add_vp("verticalita", share)
+		# La meta' divisa la si segna carta per carta: e' la regola stessa a
+		# dividerla per numero di edifici, quindi la quota di un edificio e'
+		# un numero vero e non una stima. Si divide il premio, non i punti
+		# arrotondati del giocatore, se no la somma non torna.
+		for b in gs.grid.in_column(col):
+			b.rende("verticalita", int(round((prize / 2.0) / float(total))))
 
 static func _continuity(gs: GameState) -> void:
 	var table = CardDB.constants["continuity_vp"]
@@ -57,12 +64,14 @@ static func _scavo(gs: GameState) -> void:
 	for b in gs.grid.buildings:
 		if b.is_buried:
 			gs.players[b.owner].add_vp("scavo", b.scavo_value())
+			b.rende("scavo", b.scavo_value())
 
 # Personaggi sepolti (ere 1-4): valgono 6 - era se il loro edificio è sotterrato.
 static func _skeletons(gs: GameState) -> void:
 	for b in gs.grid.buildings:
 		if b.buried_character != "" and b.is_buried:
 			gs.players[b.owner].add_vp("scheletri", 6 - b.buried_character_era)
+			b.rende("scheletri", 6 - b.buried_character_era)
 
 # L'ordine di arrivo, dal primo all'ultimo. Prima si contava solo il
 # vincitore, ma il riepilogo finale li vuole tutti in fila, e due modi di

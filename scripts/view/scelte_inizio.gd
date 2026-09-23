@@ -45,6 +45,15 @@ func sistema() -> void:
 	bot = clampi(bot, 0, giocatori)
 	velocita = clampi(velocita, 0, VELOCITA.size() - 1)
 
+# LA STRATEGIA DEL BOT che siede al posto `i`, ricavata dal seme: la stessa
+# partita rigiocata ha gli stessi avversari, con le stesse teste. Prima i bot
+# tiravano a caso, e "guardare i bot giocare" voleva dire guardare rumore.
+func strategia(i: int) -> String:
+	return StrategyBot.STRATEGIE[(i + seme) % StrategyBot.STRATEGIE.size()]
+
+func nome_strategia(i: int) -> String:
+	return strategia(i).capitalize()
+
 func con_giocatori(n: int) -> void:
 	giocatori = n
 	sistema()

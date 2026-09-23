@@ -177,7 +177,7 @@ func bot_da_muovere() -> bool:
 # fatto cosa.
 func muovi_un_bot() -> void:
 	if not bot_da_muovere(): return
-	RandomBot.play_turn(ctl)
+	StrategyBot.play_turn(ctl, inizio.strategia(ctl.gs.current_index))
 	_attesa = maxf(inizio.pausa_bot(), 0.0)
 	_aggiorna()
 
@@ -196,7 +196,7 @@ func _turni_dei_bot() -> void:
 	if not inizio.bot_subito(): return
 	var giri := 0
 	while bot_da_muovere() and giri < 500:
-		RandomBot.play_turn(ctl)
+		StrategyBot.play_turn(ctl, inizio.strategia(ctl.gs.current_index))
 		giri += 1
 
 # ---- input -----------------------------------------------------------
@@ -830,7 +830,9 @@ func _disegna_riepilogo(font: Font, gs: GameState) -> void:
 		false, {"che": "tavolo"}, 160.0)
 
 func _nome_giocatore(i: int) -> String:
-	if not inizio.e_umano(i): return "giocatore %d (bot)" % i
+	# Il bot dice anche che testa ha: guardarlo giocare senza sapere cosa
+	# insegue e' come guardare qualcuno muovere pezzi a caso.
+	if not inizio.e_umano(i): return "giocatore %d (bot · %s)" % [i, inizio.nome_strategia(i)]
 	return "tu" if inizio.umani() <= 1 else "giocatore %d" % i
 
 # ---- la schermata d'inizio -------------------------------------------

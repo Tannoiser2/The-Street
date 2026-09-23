@@ -1127,3 +1127,35 @@ dato è stato importato da lì. Ma due confronti fra ciò che è stampato e
     243, e le sagome in piedi a fine partita da 33 a 80. Meno Scavo, piu'
     rendita e piu' vetusta': e' il conto che il simulatore faceva gia', ma il
     porting no.
+
+79. **Il banner dello Scavo ha cinque righe, i valori stampati arrivano a 6.**
+    L'immagine `materiali/Scavo.png` porta cinque strisce, una per valore, dallo
+    **0 al 4**. I valori di Scavo in `data/cards.json` sono invece **0, 2, 3, 5,
+    6**: il 4 e l'1 non esistono su nessuna carta, e otto edifici stanno oltre la
+    scala —
+
+    | valore | carte |
+    |---|---|
+    | 5 | Circolo di pietre, Tumulo funerario, Teatro, Foro, Abbazia, Duomo |
+    | 6 | Grotte dipinte, Anfiteatro |
+
+    E non e' solo il valore stampato: l'Impronta dell'Incisore alza lo Scavo di
+    **+3 permanenti**, quindi anche una carta da 3 puo' arrivare a 6.
+
+    Per ora la vista **appiattisce sul 4** quello che va oltre, il che vuol dire
+    un numero SBAGLIATO sul tavolo per quelle otto carte. Il codice non ha
+    bisogno di altro che di un'immagine piu' alta: `SCAVO_RIGHE` dice quante
+    strisce ci sono e la vista prende la riga per valore, non per posizione.
+
+    **RISOLTA dal designer**: l'immagine adesso porta **dieci strisce, dallo 0
+    al 9**. Lo 0-9 copre i valori stampati (0, 2, 3, 5, 6) e anche il caso
+    peggiore con l'Impronta (6 + 3 = 9). L'1 e il 4 restano li' senza una
+    carta che li usi, e va bene: ci arriva l'Incisore.
+
+    L'immagine del designer e' pero' DISEGNATA, non impaginata: le strisce
+    sono separate da righe bianche e alte una diversa dall'altra (fra 79 e
+    117 pixel). `tools/estrai_grafica.py` le ritrova una per una e le
+    ricompone in righe tutte uguali, alte quanto la MEDIANA: cosi' la vista
+    prende la riga del valore N con una divisione, e una striscia piu' alta
+    delle altre non stira tutto il disegno. Un test controlla che nessuna
+    carta abbia uno Scavo oltre le righe disponibili.

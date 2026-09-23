@@ -38,6 +38,21 @@ var imprint: String = ""      # Impronta infilata sotto: "un edificio puo' porta
 var buried_character: String = ""   # personaggio sepolto qui (meccanica Scheletri)
 var buried_character_era: int = 0
 var charges: int = 0          # cubetti carica per edifici Esauribili
+# Quanto ha reso, canale per canale. Il nucleo i punti li divide gia' per
+# canale quando li segna al giocatore (PlayerState.vp_breakdown); qui li
+# divide anche per CARTA, perche' "quanto vale questo edificio in una
+# partita vera" e' una domanda da designer a cui lo stato sapeva rispondere
+# solo a meta'. Non cambia niente di quello che succede: e' un libro mastro.
+var vp_reso: Dictionary = {}      # canale -> punti fruttati al proprietario
+
+func rende(canale: String, quanti: int) -> void:
+	if quanti == 0: return
+	vp_reso[canale] = int(vp_reso.get(canale, 0)) + quanti
+
+func vp_totali() -> int:
+	var t := 0
+	for c in vp_reso: t += int(vp_reso[c])
+	return t
 
 func width() -> int:
 	return col_to - col_from
