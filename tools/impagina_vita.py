@@ -15,9 +15,10 @@ NUM = ["n","ere_intatto","ere_piedi","n_rudere","n_rovina","n_sepolto","n_subito
 def leggi(pattern):
     """Somma i CSV che corrispondono al pattern: le partite si possono
     spezzare su piu' processi, e i file si sommano riga per riga."""
-    # Prima che esistessero le strategie l'unico bot era quello a caso: un
-    # CSV senza `bot=` viene da li'.
-    carte, partite, giocatori, bot, vert = {}, 0, None, "caso", "?"
+    # Prima che esistessero le strategie l'unico bot era quello a caso, e
+    # prima che la tabella finisse nell'intestazione c'era quella ripida: un
+    # CSV senza quei campi viene da li'.
+    carte, partite, giocatori, bot, vert = {}, 0, None, "caso", "2/6/12/20"
     for f in sorted(glob.glob(pattern)):
         righe = [l.rstrip("\n") for l in open(f) if l.strip()]
         meta = [l for l in righe if l.startswith("# partite=")][0]
