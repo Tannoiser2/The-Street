@@ -32,10 +32,35 @@ static func tutte() -> Array[String]:
 	out.append_array(STRATEGIE_CANDIDATE)
 	return out
 
-# Quanto vale una risorsa quando la si spende: l'oro e' piu' raro della pietra
-# (quasi ogni terreno produce pietra) e vale di piu'.
-const VALORE_PIETRA := 0.55
-const VALORE_ORO := 1.1
+# QUANTO VALE UNA RISORSA. Il brief e' esplicito: "nessun peso fisso
+# rappresenta bene un giocatore umano" - nel simulatore di riferimento due
+# numeri fissi (oro 1,2 contro pietra 0,8) avevano falsato per round interi la
+# misura della dominanza del fiume. Quindi qui non c'e' un peso: c'e' un
+# conto. Una risorsa vale quanto la CHIEDE il mercato di adesso, diviso
+# quanta se ne ha gia' in mano. Se le carte in tavola vogliono oro e io non ne
+# ho, il prossimo oro vale molto; se ho cinque pietre e nessuno ne chiede,
+# la sesta non vale niente.
+const VALORE_MEDIO := 0.8
+
+static func valore_risorse(gs: GameState, p: PlayerState) -> Vector2:
+	var chiede_p := 0.0
+	var chiede_o := 0.0
+	for id in gs.market:
+		var c: Dictionary = CardDB.buildings[id]["cost"]
+		chiede_p += float(c["pietra"])
+		chiede_o += float(c["oro"])
+	if chiede_p + chiede_o <= 0.0: return Vector2(VALORE_MEDIO, VALORE_MEDIO)
+	var vp := chiede_p / float(p.pietra + 1)
+	var vo := chiede_o / float(p.oro + 1)
+	if vp + vo <= 0.0: return Vector2(VALORE_MEDIO, VALORE_MEDIO)
+	# Si normalizza sulla media, cosi' a cambiare e' il RAPPORTO fra le due e
+	# non la scala: se no un mercato caro farebbe sembrare tutto impagabile.
+	var scala := 2.0 * VALORE_MEDIO / (vp + vo)
+	# Il rapporto si tiene entro il doppio e la meta': un mercato che per caso
+	# non chiede oro non deve far credere che l'oro non serva - serve a
+	# reclutare, a comprare la Dinastia e a pagare le ere dopo.
+	return Vector2(clampf(vp * scala, VALORE_MEDIO * 0.5, VALORE_MEDIO * 2.0),
+		clampf(vo * scala, VALORE_MEDIO * 0.5, VALORE_MEDIO * 2.0))
 
 # ---- il turno -------------------------------------------------------
 static func play_turn(ctl: GameController, strategia := "bilanciata") -> void:
@@ -159,12 +184,13 @@ static func _per_uid(gs: GameState, uid: int) -> Building:
 
 # ---- quanto vale una mossa ------------------------------------------
 static func _valore(gs: GameState, p: PlayerState, v, strategia: String, col: int) -> float:
-	var speso := float(v.pietra) * VALORE_PIETRA + float(v.oro) * VALORE_ORO
+	var r := valore_risorse(gs, p)
+	var speso := float(v.pietra) * r.x + float(v.oro) * r.y
 	match v.tipo:
-		"costruisci": return _valore_costruzione(gs, p, v, strategia) - speso
+		"costruisci": return _valore_costruzione(gs, p, v, strategia, r) - speso
 		"potenzia": return _valore_potenziamento(gs, p, v) - speso
 		"restaura": return _valore_restauro(gs, p, v) - speso
-		"recluta": return _valore_reclutamento(gs, strategia) - speso
+		"recluta": return _valore_reclutamento(gs, p, v, strategia, r) - speso
 		"dinastia": return _valore_dinastia(gs) - speso
 	return 0.0
 
@@ -185,7 +211,8 @@ static func rendite_future(res: int, rendita: int, era: int) -> float:
 		totale += float(rendita + vet)
 	return totale
 
-static func _valore_costruzione(gs: GameState, p: PlayerState, v, strategia: String) -> float:
+static func _valore_costruzione(gs: GameState, p: PlayerState, v, strategia: String,
+		r: Vector2) -> float:
 	var par: Dictionary = v.parametri
 	var d: Dictionary = CardDB.buildings[str(par["card_id"])]
 	var col_from := int(par["col_from"])
@@ -197,7 +224,7 @@ static func _valore_costruzione(gs: GameState, p: PlayerState, v, strategia: Str
 	var q := float(d["lampo"])
 	q += rendite_future(res, int(d["rendita"]), gs.era)
 	var prod: Dictionary = d.get("production", {})
-	q += (float(prod.get("pietra", 0)) * VALORE_PIETRA + float(prod.get("oro", 0)) * VALORE_ORO
+	q += (float(prod.get("pietra", 0)) * r.x + float(prod.get("oro", 0)) * r.y
 		+ float(prod.get("cultura", 0))) * float(rimaste) * 0.5
 
 	var larghezza := int(d["width"])
@@ -319,13 +346,71 @@ static func _valore_restauro(gs: GameState, p: PlayerState, v) -> float:
 	if b.owner != p.index: q += 2.0
 	return q
 
-static func _valore_reclutamento(gs: GameState, strategia: String) -> float:
-	# Un personaggio dura un'era, ma se finisce sepolto vale 6 meno l'era.
-	var q := 1.6 + 0.25 * float(gs.era)
-	if gs.era <= 4: q += 0.5 * float(6 - gs.era) * 0.3
+# QUANTO VALE UN PERSONAGGIO. Anche qui il brief e' esplicito: va calcolato
+# "dalla sua abilita' reale, non stimato". Le abilita' sono dati strutturati
+# (`effects`), quindi si leggono una per una invece di dare a tutti lo stesso
+# numero: il Capotribu' che da' 2 pietra subito non vale come lo Sciamano che
+# da' +1 resistenza agli edifici Religione, e lo Sciamano vale qualcosa solo
+# se di edifici Religione ne ho.
+static func _valore_reclutamento(gs: GameState, p: PlayerState, v, strategia: String,
+		r: Vector2) -> float:
+	var d: Dictionary = CardDB.characters[str(v.parametri["char_id"])]
+	var q := 0.5                                   # il lavoratore specializzato in se'
+	for e in d.get("effects", []):
+		q += _valore_effetto(gs, p, e, r)
+	# Se finisce sepolto vale 6 meno l'era: si conta per quel che e', una
+	# possibilita', non una certezza.
+	if gs.era <= 4: q += 0.3 * float(6 - gs.era)
 	if strategia == "bilanciata": q += 0.6
-	if strategia == "scavo": q += 0.4
+	if strategia == "scavo": q += 0.6
 	return q
+
+# Il valore di una singola abilita'. Gli `op` sono uno schema chiuso: quelli
+# che si sanno contare si contano, gli altri valgono un numero piccolo e
+# dichiarato invece di zero - un'abilita' che non so leggere non e' un'abilita'
+# che non serve.
+const VALORE_IGNOTO := 1.0
+
+static func _valore_effetto(gs: GameState, p: PlayerState, e: Dictionary, r: Vector2) -> float:
+	var rimaste := float(_ere_rimaste(gs))
+	match str(e.get("op", "")):
+		"resource":
+			return float(e.get("pietra", 0)) * r.x + float(e.get("oro", 0)) * r.y
+		"vp":
+			return float(e.get("value", 0))
+		"vp_per":
+			# vale quanti bersagli ho davvero adesso
+			var n := 0
+			for b in gs.grid.buildings:
+				if Effects.matches(gs, b, e.get("target", {}), null, p.index): n += 1
+			return float(e.get("value", 1)) * float(n)
+		"resistance", "protection_delta":
+			# vale gli edifici che salva: quelli che senza questo punto in piu'
+			# non passerebbero l'evento di quest'era
+			var forza := gs.era + 1
+			var salvati := 0.0
+			for b in gs.grid.buildings:
+				if not b.is_standing() or b.owner != p.index: continue
+				if not Effects.matches(gs, b, e.get("target", {}), null, p.index): continue
+				var res: int = b.effective_resistance()
+				if res >= forza or res + int(e.get("value", 1)) < forza: continue
+				# Quanto vale salvarlo: le rendite che incassera' in piu'
+				# perche' non e' crollato, piu' il suo Scavo che resta buono.
+				salvati += 1.0 + rendite_future(res + int(e.get("value", 1)),
+					b.rendita_value(), gs.era)
+			return salvati
+		"scavo_delta":
+			return float(e.get("value", 0)) * 0.5
+		"cost_delta":
+			# uno sconto vale una volta per ogni era che resta, se ci costruisco
+			return absf(float(e.get("pietra", 0))) * r.x * maxf(1.0, rimaste * 0.5) \
+				+ absf(float(e.get("oro", 0))) * r.y * maxf(1.0, rimaste * 0.5)
+		"production_delta":
+			return (float(e.get("pietra", 0)) * r.x + float(e.get("oro", 0)) * r.y
+				+ float(e.get("cultura", 0))) * maxf(1.0, rimaste)
+		"upgrade_slots_delta":
+			return 0.8
+	return VALORE_IGNOTO
 
 static func _valore_dinastia(gs: GameState) -> float:
 	# Un quarto lavoratore per tutte le ere che restano: e' il moltiplicatore
