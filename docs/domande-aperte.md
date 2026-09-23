@@ -1275,6 +1275,15 @@ dato è stato importato da lì. Ma due confronti fra ciò che è stampato e
     | in piedi a fine partita | 25% | 25% |
     | sepolti | 54% | 57% |
 
+    **E ATTENZIONE AL NUMERO DI PARTENZA: non vale piu'.** Il Centro Urbano
+    pagava 1,61 volte a partita quando chiedeva tre edifici e si crollava
+    fallendo di 2. Con la soglia a 2 E la rovina a -3 - piu' edifici intatti
+    sopravvivono, quindi piu' colonne raggiungono la soglia - adesso paga
+    **8,73 volte a partita e distribuisce 17,75 oro, in tutte le partite**,
+    misurato su 400. Da rarita' che quando capita fa piacere e' diventata una
+    rendita costante: e' un effetto combinato delle due decisioni, non di una
+    sola, e va guardato al tavolo prima di considerarlo a posto.
+
     Due edifici e mezzo in piu' per partita e ventuno punti: l'oro in piu' non
     resta in tasca, diventa mattoni. A guadagnarci sono le carte care delle
     ultime ere - Palazzo signorile, Villa, Duomo, Ponte in acciaio, che si
@@ -1326,3 +1335,47 @@ dato è stato importato da lì. Ma due confronti fra ciò che è stampato e
     del giocatore. Adesso si spezza col resto piu' grande e i due conti sono lo
     stesso numero - il test e' passato da "tolleranza un punto per colonna" a
     nessuna tolleranza.
+
+
+84. **I binari liberi: piu' terreno, e salire torna una scelta.** Proposta del
+    designer: i binari non sono piu' vincolati all'era, si riempie DAL FONDO e
+    un edificio di un'era puo' finire sul binario di un'altra se il suo e'
+    pieno. Il motivo, misurato: sulle 10 000 partite ogni era tranne la quinta
+    chiede piu' caselle di quante il suo binario ne abbia - l'era 2 ne chiede
+    9,6 su 7 - quindi oggi salire non e' una strategia, e' uno sfratto. Coi
+    binari liberi il terreno passa da 7 caselle per era a 35 per partita,
+    contro le 39,7 che servono.
+
+    Provato dietro la manopola `binari_liberi` (spenta nei dati), 5 000 partite
+    per parte a parita' di semi:
+
+    | | per era | liberi |
+    |---|--:|--:|
+    | edifici costruiti per partita | 28,70 | **30,50** |
+    | in piedi a fine partita | 8,26 | **9,29** |
+    | sepolti | 57% | 52% |
+    | sopraelevati (per giocatore) | 5,51 | 5,33 |
+    | quota massima raggiunta | 4,02 | 3,95 |
+    | PV per partita | 200 | **212** |
+    | di cui Rendita | 54,0 | **64,0** |
+    | di cui Verticalita' | 79,7 | 79,6 |
+    | di cui Scavo | 21,0 | 21,4 |
+
+    **La citta' NON si appiattisce**, ed e' il risultato che non mi aspettavo:
+    i sopraelevati restano 5,3 per giocatore contro 5,5, la quota massima non
+    si muove e i punti della Verticalita' sono identici. Salire continua a
+    convenire - lo pagano la tabella, le spolia e la continuita' - e i binari
+    liberi aggiungono terreno senza togliere la stratificazione. Quello che
+    cresce e' la Rendita (+10 PV): piu' edifici restano in piedi e pagano il
+    censimento.
+
+    **Il prezzo sta altrove, ed e' la Prosperita'.** Con i binari liberi una
+    colonna porta fino a cinque edifici a terra di proprietari diversi: il
+    Centro Urbano passa da 8,73 a **14,84 pagamenti a partita** e da 17,75 a
+    **31,51 oro**. Trentuno monete distribuite sono tante, e vanno a chi ha
+    gia' costruito di piu'. Se i binari liberi entrano, la soglia della
+    Prosperita' va rivista - probabilmente rimessa a 3 - e rimisurata.
+
+    **Domanda al designer:** si adottano i binari liberi (e allora si ritara la
+    Prosperita'), oppure il terreno in piu' si da' in un altro modo - piu'
+    colonne, o un mercato che offra meno carte per era?

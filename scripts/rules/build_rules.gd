@@ -22,6 +22,7 @@ class BuildQuote:
 	var despoiled: Building = null   # rudere depredato, diventa rovina prima di costruire
 	var terrapieno_free_applied: bool = false
 	var terrapieno_pietra: int = 0   # pietra effettivamente spesa in terrapieni
+	var binario: int = 0             # il binario scelto, quando si costruisce a terra
 
 # ---- requisiti di terreno -----------------------------------------
 # Morbidi per pianura/collina/bosco (colonna o adiacente), stretti per fiume.
@@ -76,6 +77,29 @@ static func pianura_discount(gs: GameState, data: Dictionary, col_from: int) -> 
 		return 1
 	return 0
 
+# ---- quale binario -------------------------------------------------
+# NORMALMENTE OGNI ERA HA IL SUO: si costruisce a terra solo nel binario
+# dell'era corrente, e quando e' pieno l'unico modo di continuare e' salire.
+# Sulle 10 000 partite misurate ogni era tranne la quinta chiede piu' caselle
+# di quante il suo binario ne abbia - l'era 2 ne chiede 9,6 su 7 - quindi
+# salire non e' una strategia, e' uno sfratto.
+#
+# CON I BINARI LIBERI (la prova: `binari_liberi` fra le costanti, spento) un
+# edificio puo' finire su qualunque binario ancora libero in quelle colonne, e
+# SI RIEMPIE DAL FONDO: il piu' lontano che ha posto. Nessuna scelta in piu'
+# per chi gioca - la regola sceglie da sola - solo piu' terreno: 35 caselle
+# per tutta la partita invece di 7 per era, contro le 39,7 che servono. Salire
+# torna a essere una scelta con un costo.
+# Il fondo si riempie per primo anche per come scorre il tempo: chi gioca
+# l'era 1 trova i binari in fondo vuoti, l'era 2 prende quel che resta e si
+# sposta avanti. La citta' si stratifica in profondita' da sola.
+static func binario_per(gs: GameState, col_from: int, col_to: int) -> int:
+	if not bool(CardDB.constants.get("binari_liberi", false)):
+		return 0 if gs.grid.rail_occupied(gs.era, col_from, col_to) else gs.era
+	for r in range(1, int(CardDB.constants["rails"]) + 1):
+		if not gs.grid.rail_occupied(r, col_from, col_to): return r
+	return 0
+
 # ---- costruzione nel proprio binario ------------------------------
 static func quote_rail(gs: GameState, player: int, data: Dictionary, col_from: int, despoil: Building = null) -> BuildQuote:
 	var q := BuildQuote.new()
@@ -85,8 +109,10 @@ static func quote_rail(gs: GameState, player: int, data: Dictionary, col_from: i
 		q.reason = "fuori dalla strada"; return q
 	if int(data["era"]) != gs.era:
 		q.reason = "non è un edificio dell'era corrente"; return q
-	if gs.grid.rail_occupied(gs.era, col_from, col_to):
+	var binario := binario_per(gs, col_from, col_to)
+	if binario == 0:
 		q.reason = "caselle occupate nel binario"; return q
+	q.binario = binario
 	if int(data["level_required"]) > 0:
 		q.reason = "richiede livello %d: va costruito sopra" % data["level_required"]; return q
 	if not terrain_ok(gs, data, col_from, col_to, player):

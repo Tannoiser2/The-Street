@@ -203,6 +203,11 @@ func build(card_id: String, col_from: int, above: bool, pay_option: int = 0, des
 	b.data = data
 	b.owner = p.index
 	b.era_built = gs.era
+	# Il binario e' quello che il preventivo ha scelto: con ogni era nel suo
+	# binario e' l'era stessa, coi binari liberi puo' essere un altro, e da
+	# qui in poi lo deve sapere l'edificio - se no la vista lo disegna sul
+	# binario sbagliato e il posto risulta libero a chi costruisce dopo.
+	b.binario = q.binario
 	b.col_from = col_from
 	b.col_to = col_from + int(data["width"])
 	b.level = q.level
