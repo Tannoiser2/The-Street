@@ -244,18 +244,17 @@ func _terrapieni(b: Building) -> void:
 		var m := _scatola(box.size, TERRAPIENO)
 		m.position = box.position + box.size / 2.0
 		add_child(m)
-		# La terra riportata e' TERRA: prende lo stesso disegno del banner
-		# dello Scavo, la striscia dello zero, senza il riquadro del numero -
-		# li' non c'e' niente da contare. Prima era un parallelepipedo grigio
-		# e in mezzo a due basette disegnate sembrava un buco nella
-		# costruzione, non il pieno che invece e'.
-		_faccia_di_terra(box)
+		# La terra riportata e' TERRA, e ha un disegno suo: una sezione di
+		# terreno. Prima era un parallelepipedo grigio e in mezzo a due
+		# basette disegnate sembrava un buco nella costruzione, non il pieno
+		# che invece e'.
+		_faccia_di_terra(box, b.col_from)
 
-func _faccia_di_terra(box: AABB) -> void:
-	if not ResourceLoader.exists(BoardLayout3D.SCAVO_PATH): return
-	var tex := load(BoardLayout3D.SCAVO_PATH) as Texture2D
+func _faccia_di_terra(box: AABB, variante: int) -> void:
+	if not ResourceLoader.exists(BoardLayout3D.TERRAPIENO_PATH): return
+	var tex := load(BoardLayout3D.TERRAPIENO_PATH) as Texture2D
 	if tex == null: return
-	var uv: Dictionary = BoardLayout3D.terra_uv(box)
+	var uv: Dictionary = BoardLayout3D.terra_uv(box, variante)
 	for davanti in [true, false]:
 		var p := _quad(Vector2(box.size.x, box.size.y), Color.WHITE, true)
 		var mat := p.material_override as StandardMaterial3D

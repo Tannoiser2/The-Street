@@ -600,6 +600,19 @@ def main(dest):
     normalizza_scavo(os.path.join(ROOT, "materiali", "Scavo.png"),
                      os.path.join(dest, "scavo.png"))
 
+    # Il terrapieno ha un disegno suo: una sezione di terra senza macerie e
+    # senza numero, perche' li' non c'e' niente da contare. Una striscia sola,
+    # quindi si copia e basta.
+    terra = os.path.join(ROOT, "materiali", "Terrapieno.png")
+    if os.path.exists(terra):
+        with open(terra, "rb") as a, open(os.path.join(dest, "terrapieno.png"), "wb") as b:
+            b.write(a.read())
+        pix = pymupdf.Pixmap(terra)
+        print(f"terra del terrapieno: {pix.width}x{pix.height} px "
+              f"(rapporto {pix.width / pix.height:.2f})")
+    else:
+        print("terra del terrapieno: manca materiali/Terrapieno.png")
+
     sag = estrai_sagome(doc, dest)
     with open(os.path.join(dest, "indice.json"), "w", encoding="utf-8") as f:
         json.dump({"carte_edifici": indice,

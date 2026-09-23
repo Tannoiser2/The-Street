@@ -1649,18 +1649,29 @@ func _test_banner_scavo() -> void:
 	_eq("nessuna carta ha uno Scavo oltre le righe del banner (%s)"
 		% ", ".join(fuori), fuori.size(), 0)
 
-	# Il terrapieno prende la stessa terra, ma senza il numero: li' non c'e'
-	# niente da contare, e il numero di un altro edificio sarebbe una bugia.
+	# Il terrapieno ha una terra sua, e la finestra che ne ritaglia tiene le
+	# PROPORZIONI del blocco: i sassi devono restare tondi.
+	var alto := BoardLayout3D.LEVEL_H
 	var t := BoardLayout3D.terra_uv(AABB(Vector3.ZERO,
-		Vector3(BoardLayout3D.span_w(1), 10.0, BoardLayout3D.BASETTA_D)))
-	var fine: float = (t["offset"] as Vector2).x + (t["scala"] as Vector2).x
-	_ok("la terra del terrapieno si ferma prima del numero (%.2f)" % fine,
-		fine <= BoardLayout3D.SCAVO_NUMERO_DA + 0.001)
-	_approx("  e prende la riga dello zero", (t["offset"] as Vector2).y, 0.0)
-	var t3 := BoardLayout3D.terra_uv(AABB(Vector3.ZERO,
-		Vector3(BoardLayout3D.span_w(3), 10.0, BoardLayout3D.BASETTA_D)))
-	_ok("  un blocco largo il triplo prende il triplo di terra",
-		(t3["scala"] as Vector2).x > (t["scala"] as Vector2).x * 2.9)
+		Vector3(BoardLayout3D.span_w(1), alto, BoardLayout3D.BASETTA_D)))
+	var largo_tex: float = (t["scala"] as Vector2).x * BoardLayout3D.TERRAPIENO_RAPPORTO
+	_approx("la finestra della terra ha le proporzioni del blocco",
+		largo_tex, BoardLayout3D.span_w(1) / alto)
+	_ok("  e sta dentro l'immagine",
+		(t["offset"] as Vector2).x >= -0.001
+		and (t["offset"] as Vector2).x + (t["scala"] as Vector2).x <= 1.001)
+	# Un blocco alto il doppio ne prende una piu' stretta, non una stirata.
+	var t2 := BoardLayout3D.terra_uv(AABB(Vector3.ZERO,
+		Vector3(BoardLayout3D.span_w(1), alto * 2.0, BoardLayout3D.BASETTA_D)))
+	_ok("un blocco alto il doppio prende una finestra piu' stretta",
+		(t2["scala"] as Vector2).x < (t["scala"] as Vector2).x)
+	# Colonne diverse, sassi diversi.
+	var a := BoardLayout3D.terra_uv(AABB(Vector3.ZERO,
+		Vector3(BoardLayout3D.span_w(1), alto, BoardLayout3D.BASETTA_D)), 2)
+	var b2 := BoardLayout3D.terra_uv(AABB(Vector3.ZERO,
+		Vector3(BoardLayout3D.span_w(1), alto, BoardLayout3D.BASETTA_D)), 3)
+	_ok("due colonne vicine non mostrano lo stesso sasso",
+		not is_equal_approx((a["offset"] as Vector2).x, (b2["offset"] as Vector2).x))
 
 	# Le due facce: davanti e dietro, grandi quanto la basetta.
 	var facce := BoardLayout3D.facce_basetta(gs, largo)
