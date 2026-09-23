@@ -68,7 +68,8 @@ static func valore_risorse(gs: GameState, p: PlayerState) -> Vector2:
 # le colonne con quanto valevano, le mosse con quanto valevano e da cosa.
 # Serve a raccontare una partita, e deve venire da qui dentro: chiedendo la
 # classifica da fuori PRIMA della mossa si valuta uno stato che poi cambia -
-# il lavoratore non e' ancora piazzato e la pietra non e' ancora convertita -
+# il lavoratore non e' ancora piazzato, quindi la colonna non e' ancora stata
+# attivata e la produzione non e' ancora stata incassata -
 # e il racconto finisce per spiegare una mossa diversa da quella fatta. E'
 # successo, e si vedeva: il turno diceva "recluta" e il tabellone costruiva.
 static var racconta := false

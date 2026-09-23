@@ -9,7 +9,7 @@ Due bot, 2 giocatori, rigiocata dal motore vero (`scripts/tools/audit_partita.gd
 
 **La strada**: pia fiu fiu pia col (colonne da 0 a 4). **Monumenti aperti**: Catacombe (5 PV)
 
-> **Come si legge il ragionamento.** Il bot sceglie prima *dove* mandare il lavoratore — la colonna vale per quel che il terreno produce, per gli edifici suoi che ci sono già, per l'edificio che il lavoratore salverebbe dall'evento e per la migliore mossa che quella colonna gli aprirebbe — e poi, fra le mosse che quella colonna gli apre davvero, prende quella che vale di più. I due numeri possono non combaciare: la colonna si sceglie con le risorse che si hanno, e *dopo* il bot converte la pietra in oro se gli serve, quindi la mossa può valere più di quanto la colonna prometteva.
+> **Come si legge il ragionamento.** Il bot sceglie prima *dove* mandare il lavoratore — la colonna vale per quel che il terreno produce, per gli edifici suoi che ci sono già, per l'edificio che il lavoratore salverebbe dall'evento e per la migliore mossa che quella colonna gli aprirebbe — e poi, fra le mosse che quella colonna gli apre davvero, prende quella che vale di più. I due numeri possono non combaciare, e il motivo è una regola del gioco: **piazzare il lavoratore attiva la colonna**, cioè paga la produzione a tutti quelli che hanno un edificio lì. Il bot sceglie la colonna con le risorse che ha in mano, poi incassa, e solo allora guarda cosa può permettersi: la mossa che fa può valere più — o meno — di quanto la colonna prometteva. (Se ha il Mercante di ossidiana può anche scambiare pietra e oro alla pari, fino a due volte per era, e questo sposta ancora un po' il conto.)
 
 
 ## Era 1 — evento: *Età degli spiriti*
@@ -343,10 +343,10 @@ proteggere.
 
 **Dove questi bot sono più deboli di un giocatore vero.** Si vede nell'ordine in
 cui decidono: prima scelgono la colonna - contando anche quanto varrebbe la
-migliore mossa che ci si potrebbe fare - e solo *dopo*, piazzato il lavoratore,
-convertono la pietra in oro. La colonna promette e la mossa mantiene qualcosa di
-diverso: al turno 29 la colonna 3 valeva 4,2 contando una mossa da 0,5, e la
-mossa che ne è uscita vale 0,4. È uno scarto piccolo qui, ma è strutturale, e
+migliore mossa che ci si potrebbe fare - e solo *dopo* piazzano il lavoratore,
+il che **attiva la colonna e paga la produzione**. La colonna promette e la
+mossa mantiene qualcosa di diverso: al turno 29 la colonna 3 valeva 4,2
+contando una mossa da 0,5, e la mossa che ne è uscita vale 0,4. È uno scarto piccolo qui, ma è strutturale, e
 si somma al limite più grosso: **non pianificano**. Scelgono la mossa che vale
 di più adesso, non quella che prepara il turno dopo - nessuno di loro tiene da
 parte una colonna per salirci in era 5. Quando si legge una tabella di
@@ -355,8 +355,9 @@ la loro *strategia di lungo respiro* non esiste, e un tavolo di umani che
 pianifica sposterebbe soprattutto la Verticalità e i Monumenti.
 
 > Questa nota nasce da un difetto trovato scrivendo il documento: il racconto
-> chiedeva la classifica al bot **prima** che piazzasse il lavoratore e
-> convertisse la pietra, e finiva per spiegare una mossa diversa da quella
+> chiedeva la classifica al bot **prima** che piazzasse il lavoratore - cioè
+> prima che la colonna fosse attivata e la produzione incassata - e finiva per
+> spiegare una mossa diversa da quella
 > fatta - il turno diceva "recluta" e il tabellone costruiva. Adesso è il bot a
 > lasciare scritto cosa ha guardato nel momento in cui decide
 > (`StrategyBot.taccuino`), e le due cose combaciano per costruzione.
