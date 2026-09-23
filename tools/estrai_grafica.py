@@ -187,7 +187,35 @@ def strisce_orizzontali(pix, soglia=235, quota=0.9, minimo=20):
             inizio = None
     if inizio is not None and altezza - inizio >= minimo:
         fasce.append((inizio, altezza))
-    return fasce
+
+    # Si stringe ancora un po' da sopra e da sotto: fra una striscia e l'altra
+    # c'e' una sfumatura di due o tre pixel che non e' bianca abbastanza da
+    # contare come separatore ma sul tavolo si vede eccome - una riga chiara
+    # fra una basetta e quella sopra, che sembra un buco nella costruzione.
+    def chiara(y, quanto=0.22):
+        chiari = campioni = 0
+        base = y * pix.stride
+        for x in range(0, larghezza, passo):
+            i = base + x * n
+            campioni += 1
+            if dati[i] > soglia and dati[i + 1] > soglia and dati[i + 2] > soglia:
+                chiari += 1
+        return chiari / campioni > quanto
+
+    strette = []
+    for y0, y1 in fasce:
+        while y0 < y1 - minimo and chiara(y0):
+            y0 += 1
+        while y1 - 1 > y0 + minimo and chiara(y1 - 1):
+            y1 -= 1
+        # E comunque due pixel per parte: il confine fra la terra e il bianco
+        # non e' netto, e quel che resta della sfumatura da ingrandito torna a
+        # sembrare una riga di luce fra una basetta e l'altra.
+        orlo = 2
+        if y1 - y0 > 2 * orlo + minimo:
+            y0, y1 = y0 + orlo, y1 - orlo
+        strette.append((y0, y1))
+    return strette
 
 
 def normalizza_scavo(fonte, uscita):
@@ -571,6 +599,19 @@ def main(dest):
 
     normalizza_scavo(os.path.join(ROOT, "materiali", "Scavo.png"),
                      os.path.join(dest, "scavo.png"))
+
+    # Il terrapieno ha un disegno suo: una sezione di terra senza macerie e
+    # senza numero, perche' li' non c'e' niente da contare. Una striscia sola,
+    # quindi si copia e basta.
+    terra = os.path.join(ROOT, "materiali", "Terrapieno.png")
+    if os.path.exists(terra):
+        with open(terra, "rb") as a, open(os.path.join(dest, "terrapieno.png"), "wb") as b:
+            b.write(a.read())
+        pix = pymupdf.Pixmap(terra)
+        print(f"terra del terrapieno: {pix.width}x{pix.height} px "
+              f"(rapporto {pix.width / pix.height:.2f})")
+    else:
+        print("terra del terrapieno: manca materiali/Terrapieno.png")
 
     sag = estrai_sagome(doc, dest)
     with open(os.path.join(dest, "indice.json"), "w", encoding="utf-8") as f:

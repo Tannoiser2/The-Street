@@ -238,6 +238,30 @@ static func scavo_uv(b: Building) -> Dictionary:
 		"offset": Vector2(1.0 - frazione, float(valore) / float(SCAVO_RIGHE)),
 	}
 
+# LA TERRA DEL TERRAPIENO ha un disegno suo: una sezione di terreno, senza
+# macerie e senza numero, perche' li' non c'e' niente da contare.
+const TERRAPIENO_PATH := "res://assets/terrapieno.png"
+const TERRAPIENO_RAPPORTO := 2000.0 / 173.0
+
+# La finestra da ritagliare per un blocco. Non si prende tutta l'immagine per
+# poi schiacciarla nel riquadro: si prende una finestra che ha LE STESSE
+# PROPORZIONI del blocco, cosi' i sassi restano tondi invece di diventare
+# ellissi. Un blocco piu' lungo di quanto sia lunga l'immagine non lascia
+# scelta: li' si prende tutto.
+#
+# `variante` sposta la finestra di lato - basta la colonna - cosi' due
+# terrapieni vicini non mostrano lo stesso identico sasso.
+static func terra_uv(box: AABB, variante := 0) -> Dictionary:
+	if box.size.y <= 0.0: return {"scala": Vector2.ONE, "offset": Vector2.ZERO}
+	var voluto := box.size.x / box.size.y
+	var frazione := clampf(voluto / TERRAPIENO_RAPPORTO, 0.05, 1.0)
+	var resto := 1.0 - frazione
+	var dove := fposmod(0.37 * float(variante) + 0.5, 1.0)
+	return {
+		"scala": Vector2(frazione, 1.0),
+		"offset": Vector2(resto * dove, 0.0),
+	}
+
 # Le due facce della basetta su cui va il banner: quella davanti, dal lato di
 # chi guarda, e quella dietro. Restituisce centro e dimensioni del rettangolo.
 static func facce_basetta(gs: GameState, b: Building) -> Array[Dictionary]:
