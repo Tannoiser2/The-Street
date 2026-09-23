@@ -2,8 +2,8 @@
 # Bot minimale per i test di fumo: sceglie mosse legali a caso, provando tutte
 # le azioni in ordine casuale. Non gioca bene, ma tocca ogni comando: serve a
 # far emergere crash e stati illegali nelle partite headless.
-# Le cinque strategie vere (Rendita, Lampo, Scavo, Verticale, Bilanciata) sono
-# descritte in reference/ e vanno portate dopo che il nucleo e' stabile (M6).
+# Le strategie vere - Rendita, Lampo, Scavo, Verticale, Bilanciata, Obiettivi -
+# stanno in StrategyBot; questo resta come metro di paragone (`--caso`).
 class_name RandomBot
 extends RefCounted
 

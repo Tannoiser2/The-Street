@@ -1403,3 +1403,16 @@ dato è stato importato da lì. Ma due confronti fra ciò che è stampato e
     tieni, la manopola giusta adesso e' `gold_per_owner` o il richiedere
     proprietari diversi in numero maggiore, non altri edifici. Va visto al
     tavolo.
+
+85. **Il canone delle strategie: sei, con Obiettivi.** Deciso dal designer: il
+    torneo rifatto col bot della versione 2 mette Obiettivi sopra la media con
+    tutti e due i bot (34,8% col bot v1, 39,5% col v2, attesa 33,3%), e resta
+    l'unica candidata a farlo. **Entra come sesta**, Scavo resta: e' misurando
+    chi lo insegue che si vede che lo Scavo non si puo' raccogliere.
+
+    Misurato l'effetto sulle batterie, 10 000 partite per parte a parita' di
+    semi e di regole: **edifici costruiti 30,12 -> 29,83, PV per partita
+    211 -> 209**, in piedi e sepolti identici. Le misure fatte con cinque
+    strategie restano confrontabili entro un punto percentuale. Da qui in poi
+    l'intestazione di ogni batteria dice `strategie=6`.
+

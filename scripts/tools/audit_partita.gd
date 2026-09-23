@@ -17,12 +17,12 @@ var _muto := false
 var _perche := false
 var _piano := false
 var _tutti := ""
-# Chi muove i bot: le cinque strategie vere o il tira-a-caso di RandomBot.
+# Chi muove i bot: le sei strategie vere o il tira-a-caso di RandomBot.
 # Il caso serve ancora come metro di paragone - "quanto pesa la testa di chi
 # gioca" e' la differenza fra le due colonne.
 var _strategie := true
-# Con --candidate entrano in gioco anche le due strategie fuori canone
-# (Continuita', Obiettivi): serve a misurare se cinque bastano.
+# Con --candidate entra in gioco anche la strategia fuori canone
+# (Continuita'): serve a misurare se sei bastano.
 var _candidate := false
 # Il bot prova ogni mossa legale in ordine casuale, quindi il log si riempie di
 # "Costruzione rifiutata": e' il suo modo di cercare, non un fatto della
@@ -251,12 +251,12 @@ func _stampa_vita(acc: Dictionary, quante: int, players: int, seme: int) -> void
 	var vt = CardDB.constants["verticality_vp"]
 	var scala: Array[String] = []
 	for i in 4: scala.append("%d" % int(vt[str(i + 1)]))
-	print("# partite=%d giocatori=%d seme_base=%d bot=%s verticalita=%s prosperita=%d rovina=%d binari=%s versione_bot=%d" % [
+	print("# partite=%d giocatori=%d seme_base=%d bot=%s verticalita=%s prosperita=%d rovina=%d binari=%s versione_bot=%d strategie=%d" % [
 		quante, players, seme, "strategie" if _strategie else "caso",
 		"/".join(scala), int(CardDB.constants["prosperity"]["min_buildings"]),
 		int(CardDB.constants.get("rovina_gap", 2)),
 		"liberi" if bool(CardDB.constants.get("binari_liberi", false)) else "per_era",
-		StrategyBot.versione_in_uso])
+		StrategyBot.versione_in_uso, _quante_strategie()])
 	var intestazione: Array[String] = ["id", "nome", "era", "classi", "larghezza",
 		"costo_pietra", "costo_oro", "resistenza", "rendita", "scavo", "lampo_carta",
 		"copie", "n", "ere_intatto", "ere_piedi", "n_rudere", "n_rovina", "n_sepolto",
@@ -284,6 +284,13 @@ func strategia_di(i: int, g: int) -> String:
 	if _tutti != "": return _tutti
 	var lista := StrategyBot.tutte() if _candidate else StrategyBot.STRATEGIE
 	return lista[(i + g) % lista.size()]
+
+# Quante strategie si alternano al tavolo: finisce nell'intestazione, perche'
+# un lotto giocato con cinque e uno con sei non sono lo stesso esperimento.
+func _quante_strategie() -> int:
+	if not _strategie: return 0
+	if _tutti != "": return 1
+	return (StrategyBot.tutte() if _candidate else StrategyBot.STRATEGIE).size()
 
 # Chi pianifica in questa partita: un posto solo, a rotazione.
 func pianifica_qui(i: int, g: int, players: int) -> bool:

@@ -64,15 +64,40 @@ resta un sottoprodotto del costruire, non un piano.
 Lampo (9,4), che non lo cerca**. Lo Scavo lo incassa chi viene sotterrato, e a sotterrare è
 l'avversario: non si può inseguire.
 
-**La domanda che ne viene:** il canone delle cinque ha ancora senso con Scavo dentro e Obiettivi
-fuori? Obiettivi sta sopra la media con tutti e due i bot. Scavo invece non riesce a prendere il
-proprio canale — ma è proprio questo a renderlo utile come strategia di misura: un giocatore che
-insegue lo Scavo esiste, ed è misurando lui che si vede che lo Scavo, così com'è, non ripaga.
-Togliendolo, il difetto sparirebbe dalle misure senza sparire dal gioco.
+## Il canone adesso è di sei
 
-C'è anche un vincolo storico: le cinque sono quelle del simulatore di riferimento, e tenerle
-uguali permette di confrontarsi con lui. Cambiare il canone vuol dire cambiare i bot di tutte le
-batterie future, quindi è una decisione da prendere, non da fare.
+**Obiettivi è entrata come sesta, senza togliere Scavo.** Obiettivi sta sopra la media con tutti
+e due i bot, ed è la sola delle candidate che lo fa; Scavo resta perché è proprio misurando chi lo
+insegue che si vede che lo Scavo, così com'è, non ripaga — togliendolo il difetto sparirebbe dalle
+misure senza sparire dal gioco. Le prime cinque restano quelle del simulatore di riferimento, in
+quell'ordine, così il confronto con lui resta possibile; la Continuità resta candidata
+(`--candidate`).
+
+Cambiare il canone cambia i bot di tutte le batterie future, quindi l'ho misurato: **10 000
+partite con sei strategie contro le 10 000 con cinque**, stessi semi, stesse regole, stesso bot
+(il confronto completo è in [`vita-degli-edifici.md`](vita-degli-edifici.md)).
+
+| | 5 strategie | 6 strategie | Δ |
+|---|--:|--:|--:|
+| edifici costruiti per partita | 30,12 | 29,83 | −0,28 |
+| in piedi a fine partita | 31% | 31% | = |
+| sepolti | 52% | 52% | = |
+| PV per partita (tre giocatori) | 211 | 209 | −2 |
+| di cui Rendita | 65,8 | 66,2 | +0,4 |
+| di cui Verticalità | 77,9 | 76,4 | −1,5 |
+
+**Il tavolo non cambia faccia.** Un sesto dei posti passa a una strategia che costruisce per
+soddisfare condizioni invece che per un canale di carta, e si vede solo come un filo di
+Verticalità in meno (−1,5 punti a partita). Le misure pubblicate prima, fatte con cinque
+strategie, restano confrontabili con quelle nuove entro un punto percentuale; l'intestazione di
+ogni batteria ora dice quante strategie c'erano (`strategie=6`), e `impagina_vita.py` lo nomina
+quando due lotti differiscono.
+
+Il segno di Obiettivi non si vede in poche partite contro il bot a caso — un Monumento lo
+prendono tutti prima o poi — ma fra bot sì: è prima per Monumenti (3,1 punti a partita) ed
+Eredità (2,7). Il test fissa la preferenza stessa: su un Monumento che scatta con un edificio
+largo, la carta larga vale i punti del Monumento, la stretta niente, e a Monumento già
+soddisfatto non vale più niente.
 
 ---
 
@@ -125,6 +150,9 @@ volte; l'attesa è 33,3%):
 | **Obiettivi** | 31,6% ±5,7 | 82,8 | monumenti 2,5 |
 | **Continuità** | 29,2% ±5,6 | 82,3 | continuità 8,8 |
 | Verticale | 28,7% ±5,5 | 82,9 | verticalità 36,8 |
+
+> *Era la conclusione di allora, e col bot della versione 2 non regge più: Obiettivi vince
+> sopra la media con tutti e due i bot ed è entrata nel canone come sesta (vedi in cima).*
 
 **Cinque bastano.** Le due candidate stanno in piedi — nessuna delle due è un disastro — ma
 non aprono una linea nuova: finiscono in fondo, con la Verticale. I canali che lasciavano
@@ -189,5 +217,7 @@ godot --headless res://scenes/audit_partita.tscn -- --players 3 --games 600 --ca
 python3 tools/confronta_strategie.py strat.csv
 ```
 
-Senza `--candidate` giocano solo le cinque del canone; con `--caso` torna in campo il bot
-casuale, che resta il metro di paragone.
+Senza `--candidate` giocano solo le sei del canone; con `--candidate` entra anche la
+Continuità, e con `--caso` torna in campo il bot casuale, che resta il metro di paragone.
+L'intestazione di ogni batteria dice quante strategie c'erano al tavolo (`strategie=6`): un
+lotto giocato con cinque e uno con sei non sono lo stesso esperimento.
