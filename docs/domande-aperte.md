@@ -1179,7 +1179,20 @@ dato è stato importato da lì. Ma due confronti fra ciò che è stampato e
     catena copre tutte le proprie colonne. E' anche quello che fa il
     simulatore di riferimento, che sotterra solo la base.
 
-    **Sposta il punteggio, e va rivisto al tavolo.** Su 40 partite a tre
-    giocatori con i bot che giocano: i sepolti passano da 743 a 548 su 1080
-    edifici (dal 69% al 51%), e **un sepolto su quattro era uno di quelli col
-    vuoto sopra**. Meno Scavo, piu' rovine che restano visibili sul tabellone.
+    **Quanto sposta, misurato a parita' di tutto il resto.** Sessanta partite
+    a tre giocatori, stessi semi e stessi bot, cambiando SOLO questa regola:
+
+    | | prima | dopo |
+    |---|--:|--:|
+    | edifici costruiti per partita | 26,9 | 26,9 |
+    | turni per partita | 45,3 | 45,3 |
+    | **sotterrati** | **68%** | **51%** |
+    | PV per giocatore | 73,8 | **69,2** |
+
+    Il tavolo si costruisce **identico** - stessi edifici, stessi turni: la
+    sepoltura non cambia quello che si puo' fare, cambia quello che vale.
+    Costa **4,6 PV a testa, il 6%**, e quasi tutti dallo Scavo. Un sepolto su
+    quattro, prima, era uno di quelli col vuoto sopra.
+
+    Resta da rivedere al tavolo se il 51% di sotterrati sia la quota giusta:
+    e' la stessa domanda del punto 78, ma su un numero diverso.
