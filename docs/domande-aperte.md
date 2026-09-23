@@ -1264,12 +1264,53 @@ dato è stato importato da lì. Ma due confronti fra ciò che è stampato e
     Un tavolo di umani che ci puntasse lo farebbe scattare piu' spesso - ma
     dovrebbe accorgersene, e finora sul tabellone non si vedeva.
 
-    **Domanda al designer:** un premio che paga 1,6 volte a partita e' quello
-    che volevi - una rarita' che quando capita fa piacere - o il Centro Urbano
-    dovrebbe pesare di piu' (soglia a 2 edifici invece di 3, oppure un oro a
-    testa a ogni fine era invece che a ogni attivazione)? Cambiarlo e' una
-    riga di `constants.prosperity`, ma e' una decisione di bilanciamento, non
-    di interfaccia.
+    **RISOLTO: il designer ha messo la soglia a 2 edifici.** Rimisurato su
+    10 000 partite per parte, stessi semi e stessi bot, cambiando solo quella
+    riga di `constants.prosperity`:
+
+    | | Centro a 3 | Centro a 2 |
+    |---|--:|--:|
+    | edifici costruiti per partita | 26,3 | **28,7** |
+    | PV per partita (i tre insieme) | 177 | **198** |
+    | in piedi a fine partita | 25% | 25% |
+    | sepolti | 54% | 57% |
+
+    Due edifici e mezzo in piu' per partita e ventuno punti: l'oro in piu' non
+    resta in tasca, diventa mattoni. A guadagnarci sono le carte care delle
+    ultime ere - Palazzo signorile, Villa, Duomo, Ponte in acciaio, che si
+    costruiscono una volta e mezzo piu' spesso - e i canali che premiano chi
+    costruisce: Verticalita' +11 PV, Lampo +6,5. La Rendita cala di un punto,
+    perche' gli edifici nuovi coprono i vecchi. Il dettaglio carta per carta
+    sta in `docs/vita-degli-edifici.md`.
 
     Intanto il cartellino sulla fascia della tessera dice quali colonne sono
     Centro **adesso**: prima bisognava contare gli edifici a mano.
+
+
+83. **La citta' a fine partita e' fatta di rovine: 7,3 edifici in piedi su
+    28,7 costruiti.** Il designer l'ha vista giocando e ha chiesto se le
+    soglie che mandano in rovina non siano troppo severe. Misurato: le tre
+    manopole (la penalita' del rudere, la soglia della rovina, la forza degli
+    eventi) valgono rispettivamente +0,07, +1,0 e +2,0 edifici in piedi a fine
+    partita; tutte e tre insieme portano da 7,3 a 10,3, cioe' da un quarto a
+    un terzo della citta'. Il conto completo, variante per variante, sta in
+    `docs/quanto-punisce-il-gioco.md`.
+
+    Le manopole si girano da riga di comando (`--rudere`, `--gap`, `--forza`)
+    e i dati non cambiano: nel commit c'e' solo `rovina_gap`, la soglia che
+    prima stava scritta nel codice come `gap == 1` e adesso sta nei dati col
+    suo valore di oggi, 2. Non e' un cambio di regola: e' la stessa regola,
+    scritta dove si puo' leggere e provare.
+
+    **Quel che la misura dice, e che non ci si aspettava:** in tutte le
+    varianti la quota di SEPOLTI resta ferma al 57%. Gli eventi decidono chi
+    crolla, non chi sparisce sotto la citta': quello lo decidono i giocatori
+    costruendo sopra. Anche rendendo il gioco molto piu' mite, piu' di meta'
+    degli edifici finirebbe comunque sotto uno strato. Se la citta' deve
+    sembrare piu' viva, la manopola grossa non e' la severita' dell'evento ma
+    quanto paga salire (`docs/quanto-paga-salire.md`).
+
+    **Domanda al designer:** si tiene com'e', si mette `rovina_gap` a 3
+    (+1 edificio in piedi, +2 PV su 198, nessuna carta da ristampare), o si
+    sconta di 1 la forza degli eventi (+2 edifici, ma cambia il materiale
+    stampato)?

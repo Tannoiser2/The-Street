@@ -44,6 +44,38 @@ func _ready() -> void:
 		CardDB.constants["verticality_vp"] = tabella
 		print("# verticality_vp = %s" % str(tabella))
 
+	# Stessa idea per la soglia del Centro Urbano: "e se bastassero due
+	# edifici invece di tre?" si prova qui, senza toccare i dati.
+	if args.has("prosperita"):
+		var pr: Dictionary = (CardDB.constants["prosperity"] as Dictionary).duplicate()
+		pr["min_buildings"] = int(args["prosperita"])
+		CardDB.constants["prosperity"] = pr
+		print("# prosperity.min_buildings = %d" % int(pr["min_buildings"]))
+
+	# Le manopole della punizione, per provare "e se il gioco perdonasse di
+	# piu'?" senza toccare i dati:
+	#   --rudere 1      quanto costa essere un rudere (rudere_penalty)
+	#   --gap 3         di quanto si puo' fallire restando in piedi
+	#   --forza 2,3,3,4 la forza dell'evento, era per era
+	if args.has("rudere"):
+		CardDB.constants["rudere_penalty"] = int(args["rudere"])
+		print("# rudere_penalty = %d" % int(args["rudere"]))
+	if args.has("gap"):
+		CardDB.constants["rovina_gap"] = int(args["gap"])
+		print("# rovina_gap = %d" % int(args["gap"]))
+	# LA FORZA STA SULLA CARTA EVENTO, non nella costante: `event_force_by_era`
+	# e' la tabella di riferimento, ma chi decide e' `gs.current_event["force"]`.
+	# La prima versione di questa manopola scriveva la costante e non cambiava
+	# niente - la variante "eventi piu' deboli" usciva identica al controllo, ed
+	# e' cosi' che ce ne siamo accorti. Qui si sconta ogni carta evento.
+	if args.has("forza"):
+		var delta := int(args["forza"])
+		for id in CardDB.events:
+			var ev: Dictionary = CardDB.events[id]
+			if not ev.has("force"): continue
+			ev["force"] = maxi(1, int(ev["force"]) + delta)
+		print("# forza degli eventi scontata di %d" % delta)
+
 	if args.has("games"):
 		_lotto(seme, players, int(args["games"]))
 		return
@@ -196,9 +228,9 @@ func _stampa_vita(acc: Dictionary, quante: int, players: int, seme: int) -> void
 	var vt = CardDB.constants["verticality_vp"]
 	var scala: Array[String] = []
 	for i in 4: scala.append("%d" % int(vt[str(i + 1)]))
-	print("# partite=%d giocatori=%d seme_base=%d bot=%s verticalita=%s" % [
+	print("# partite=%d giocatori=%d seme_base=%d bot=%s verticalita=%s prosperita=%d" % [
 		quante, players, seme, "strategie" if _strategie else "caso",
-		"/".join(scala)])
+		"/".join(scala), int(CardDB.constants["prosperity"]["min_buildings"])])
 	var intestazione: Array[String] = ["id", "nome", "era", "classi", "larghezza",
 		"costo_pietra", "costo_oro", "resistenza", "rendita", "scavo", "lampo_carta",
 		"copie", "n", "ere_intatto", "ere_piedi", "n_rudere", "n_rovina", "n_sepolto",

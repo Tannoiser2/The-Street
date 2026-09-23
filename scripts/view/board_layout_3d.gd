@@ -78,12 +78,21 @@ const SFONDO_PATH := "res://assets/sfondo.png"
 static func col_x(col: int) -> float:
 	return col * TESSERA_W
 
-# L'era 1 sta DAVANTI, cioe' dalla parte della telecamera, che guarda verso
-# le z calanti. Con la telecamera dall'altro lato lo schermo specchierebbe la
-# X e la colonna 0 finirebbe a destra: chi legge "colonna 2" guarderebbe dalla
-# parte sbagliata.
+# L'ERA 1 STA IN FONDO, le ere recenti davanti, dalla parte della telecamera.
+# La telecamera guarda verso le z calanti, quindi l'era 1 ha la z minore.
+#
+# Prima era il contrario, ed era una scelta che si ritorceva contro il
+# disegno: SI COSTRUISCE IN ALTO SULLE ROVINE DELLE PRIME ERE, perche' sono
+# quelle che hanno avuto il tempo di crollare. Le pile alte crescevano quindi
+# sul binario piu' vicino a chi guarda e facevano da muro a tutto quello che
+# veniva costruito dopo, che stava dietro ed era anche piu' basso: della
+# citta' recente si vedevano i tetti.
+# Cosi' invece la citta' sale verso il fondo - le torri stanno dietro - e le
+# costruzioni nuove, basse, restano in prima fila dove si vedono.
+# La X non si tocca: la telecamera resta da questo lato, e la colonna 0 resta
+# a sinistra come la legge chi gioca.
 static func rail_z(era: int) -> float:
-	return BANDA_SU + (RAILS - era) * SLOT_D
+	return BANDA_SU + (era - 1) * SLOT_D
 
 # La tessera intera, che e' piu' lunga della fascia dei binari.
 static func tessera_box(col: int) -> AABB:
@@ -133,12 +142,24 @@ static func z_sagoma(gs: GameState, b: Building, giri := 0) -> float:
 	# si ripiega sulla colonna, che e' il conto di prima.
 	return z_basi(gs, b.col_from, b.col_to, b.level, giri)
 
+# LA BASE PIU' ALTA, e fra quelle alla stessa quota la piu' avanti.
+# Le basi di un edificio non stanno per forza tutte alla stessa quota: uno
+# largo puo' poggiare su una pila da una parte e su una rovina a terra
+# dall'altra, e il dislivello lo riempie il terrapieno. Il piede vero e'
+# quello ALTO - e' li' che il cartone appoggia - mentre quello basso e' sotto
+# la terra riportata. Seguendo il piu' avanti e basta, un edificio che avesse
+# davanti la base bassa se ne andava a stare sopra di lei e perdeva il
+# contatto con la base alta, che restava un binario piu' in la'.
 static func _z_di_uid(gs: GameState, uid: Array, giri: int) -> float:
 	var avanti := -INF
+	var alto := -1
 	if giri < RAILS:
 		for s in gs.grid.buildings:
 			if not s.uid in uid: continue
-			avanti = maxf(avanti, z_sagoma(gs, s, giri + 1))
+			var z := z_sagoma(gs, s, giri + 1)
+			if s.level > alto or (s.level == alto and z > avanti):
+				alto = s.level
+				avanti = z
 	return avanti if avanti > -INF else (BANDA_SU + BANDA_GIU) / 2.0
 
 # La z di cio' che regge una pila alla quota `livello` fra due colonne: la
@@ -1127,7 +1148,7 @@ static func slot_at_ray(gs: GameState, origine: Vector3, direzione: Vector3) -> 
 	# I binari occupano solo la fascia del disegno, ma si clicca tutta la
 	# tessera: fuori dalla fascia vale il binario piu' vicino, altrimenti
 	# meta' tessera sarebbe morta al clic senza che si capisca perche'.
-	var era := RAILS - int(floor((p.z - BANDA_SU) / SLOT_D))
+	var era := 1 + int(floor((p.z - BANDA_SU) / SLOT_D))
 	return {"col": col, "era": clampi(era, 1, RAILS), "punto": p}
 
 # L'ingombro che il raggio incontra: SI CLICCA QUELLO CHE SI VEDE. Chi non ha
