@@ -211,14 +211,18 @@ static func quota_sotto(gs: GameState, b: Building, col: int) -> int:
 # sapeva solo chi apriva il riquadro col mouse, eppure e' il numero che decide
 # se valga la pena sotterrare un edificio invece di restaurarlo.
 #
-# L'immagine e' UNA SOLA: cinque strisce sovrapposte, una per valore. La
-# striscia e' lunga quanto un edificio da tre slot; per quelli piu' corti si
-# taglia da SINISTRA, dove ci sono solo macerie, e resta la parte destra col
-# numero. Non si ritaglia in cinque file al momento di estrarre la grafica:
-# si sposta la finestra sulla texture, cosi' aggiungere un valore domani vuol
-# dire cambiare l'immagine e basta.
+# L'immagine e' UNA SOLA: dieci strisce sovrapposte, una per valore, dallo 0
+# al 9. La striscia e' lunga quanto un edificio da tre slot; per quelli piu'
+# corti si taglia da SINISTRA, dove ci sono solo macerie, e resta la parte
+# destra col numero. Non si ritaglia in dieci file: si sposta la finestra
+# sulla texture, cosi' aggiungere un valore domani vuol dire cambiare
+# l'immagine e basta.
+#
+# L'atlante lo prepara `tools/estrai_grafica.py`, che dall'originale del
+# designer ritrova le strisce una per una e le rimette in righe tutte uguali:
+# l'immagine e' disegnata, non impaginata, e le strisce non sono alte uguali.
 const SCAVO_PATH := "res://assets/scavo.png"
-const SCAVO_RIGHE := 5           # le strisce dell'immagine: 0, 1, 2, 3, 4
+const SCAVO_RIGHE := 10          # le strisce dell'atlante: da 0 a 9
 const SCAVO_SLOT_MAX := 3        # la striscia copre un edificio da tre slot
 
 # Che fetta di texture mostrare per questo edificio. Il valore e' quello

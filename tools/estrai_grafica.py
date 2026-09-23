@@ -146,6 +146,92 @@ def senza_fondo(percorso, soglia=232):
     return pymupdf.Pixmap(pymupdf.csRGB, w, h, bytes(rgba), True)
 
 
+# IL BANNER DELLO SCAVO: una striscia di terra e macerie per valore, dallo 0
+# in su, con il numero in fondo a destra.
+#
+# L'immagine del designer e' DISEGNATA, non impaginata: le strisce sono
+# separate da righe bianche e sono alte una diversa dall'altra (fra 80 e 117
+# pixel nell'originale a dieci valori). Prendendola a fette uguali il numero
+# finirebbe mezzo tagliato, e a valori diversi in modo diverso.
+#
+# Qui si trovano i separatori, si ritaglia striscia per striscia e si
+# ricompone un atlante con righe TUTTE UGUALI. Cosi' la vista prende la riga
+# del valore N con una divisione e non sa niente di come era fatta l'immagine
+# di partenza; e se il designer ne manda una nuova, le strisce si ritrovano
+# da sole.
+SCAVO_RIGHE_ATTESE = 10
+
+def strisce_orizzontali(pix, soglia=235, quota=0.9, minimo=20):
+    """Le fasce di contenuto fra le righe quasi bianche. Restituisce
+    [(y0, y1), ...] dall'alto in basso."""
+    larghezza, altezza, n = pix.width, pix.height, pix.n
+    dati = pix.samples
+    passo = max(1, larghezza // 400)          # non serve guardarli tutti
+    bianca = []
+    for y in range(altezza):
+        chiari = campioni = 0
+        base = y * pix.stride
+        for x in range(0, larghezza, passo):
+            i = base + x * n
+            campioni += 1
+            if dati[i] > soglia and dati[i + 1] > soglia and dati[i + 2] > soglia:
+                chiari += 1
+        bianca.append(chiari / campioni > quota)
+    fasce, inizio = [], None
+    for y in range(altezza):
+        if not bianca[y] and inizio is None:
+            inizio = y
+        elif bianca[y] and inizio is not None:
+            if y - inizio >= minimo:
+                fasce.append((inizio, y))
+            inizio = None
+    if inizio is not None and altezza - inizio >= minimo:
+        fasce.append((inizio, altezza))
+    return fasce
+
+
+def normalizza_scavo(fonte, uscita):
+    if not os.path.exists(fonte):
+        print("banner dello Scavo: manca materiali/Scavo.png")
+        return
+    pix = pymupdf.Pixmap(fonte)
+    fasce = strisce_orizzontali(pix)
+    if not fasce:
+        print(f"banner dello Scavo: {pix.width}x{pix.height} px, nessuna "
+              "striscia riconosciuta - copiato tale e quale")
+        with open(fonte, "rb") as a, open(uscita, "wb") as b:
+            b.write(a.read())
+        return
+    # L'altezza della riga e' la MEDIANA delle strisce, non la massima: una
+    # sola striscia un po' piu' alta delle altre - l'ultima, che si porta
+    # dietro il margine del foglio - allargherebbe tutte le righe del 40% e
+    # il disegno uscirebbe stirato in verticale. Con la mediana le strisce
+    # tengono le proporzioni che hanno sul foglio, che sono poi quelle della
+    # basetta da tre slot.
+    altezze = sorted(y1 - y0 for y0, y1 in fasce)
+    alta = altezze[len(altezze) // 2]
+    doc = pymupdf.open()
+    pagina = doc.new_page(width=pix.width, height=alta * len(fasce))
+    for i, (y0, y1) in enumerate(fasce):
+        # La fetta si ritaglia copiando le righe di pixel: il costruttore
+        # che prende un rettangolo non c'e' in tutte le versioni di pymupdf.
+        fetta = pymupdf.Pixmap(pix.colorspace, pix.width, y1 - y0,
+                               pix.samples[y0 * pix.stride:y1 * pix.stride],
+                               pix.alpha)
+        # keep_proportion=False: la fetta deve RIEMPIRE la riga. Lasciandolo
+        # vero, una striscia piu' alta delle altre veniva rimpicciolita e
+        # centrata, e sul tavolo si vedeva un banner piu' corto degli altri.
+        pagina.insert_image(
+            pymupdf.Rect(0, i * alta, pix.width, (i + 1) * alta), pixmap=fetta,
+            keep_proportion=False)
+    pagina.get_pixmap(matrix=pymupdf.Identity).save(uscita)
+    print(f"banner dello Scavo: {len(fasce)} strisce (valori 0-{len(fasce) - 1}) "
+          f"da {pix.width}x{alta} px")
+    if len(fasce) != SCAVO_RIGHE_ATTESE:
+        print(f"  ATTENZIONE: la vista ne aspetta {SCAVO_RIGHE_ATTESE} "
+              f"(BoardLayout3D.SCAVO_RIGHE): aggiorna la costante")
+
+
 def estrai_sagome(doc, dest):
     """Sagome nei due stati, numerate in ordine di lettura. La corrispondenza
     col nome della carta non è derivabile: vedi il commento in testa."""
@@ -472,18 +558,19 @@ def main(dest):
     # sola con cinque righe, e a prendere la riga giusta ci pensa la vista
     # con le coordinate della texture - cosi' aggiungerne una domani vuol dire
     # cambiare l'immagine e basta.
-    for originale, copia, che in (("Sfondo.png", "sfondo.png", "sfondo del cielo"),
-                                  ("Scavo.png", "scavo.png", "banner dello Scavo")):
-        fonte = os.path.join(ROOT, "materiali", originale)
-        if os.path.exists(fonte):
-            os.makedirs(dest, exist_ok=True)
-            with open(fonte, "rb") as a, open(os.path.join(dest, copia), "wb") as b:
-                b.write(a.read())
-            pix = pymupdf.Pixmap(fonte)
-            print(f"{che}: {pix.width}x{pix.height} px "
-                  f"(rapporto {pix.width / pix.height:.3f})")
-        else:
-            print(f"{che}: manca materiali/{originale}")
+    sfondo = os.path.join(ROOT, "materiali", "Sfondo.png")
+    if os.path.exists(sfondo):
+        os.makedirs(dest, exist_ok=True)
+        with open(sfondo, "rb") as a, open(os.path.join(dest, "sfondo.png"), "wb") as b:
+            b.write(a.read())
+        pix = pymupdf.Pixmap(sfondo)
+        print(f"sfondo del cielo: {pix.width}x{pix.height} px "
+              f"(rapporto {pix.width / pix.height:.3f})")
+    else:
+        print("sfondo del cielo: manca materiali/Sfondo.png")
+
+    normalizza_scavo(os.path.join(ROOT, "materiali", "Scavo.png"),
+                     os.path.join(dest, "scavo.png"))
 
     sag = estrai_sagome(doc, dest)
     with open(os.path.join(dest, "indice.json"), "w", encoding="utf-8") as f:

@@ -1147,7 +1147,15 @@ dato è stato importato da lì. Ma due confronti fra ciò che è stampato e
     bisogno di altro che di un'immagine piu' alta: `SCAVO_RIGHE` dice quante
     strisce ci sono e la vista prende la riga per valore, non per posizione.
 
-    **Serve una decisione del designer**: aggiungere le strisce 5 e 6
-    all'immagine (e allora il 4 e l'1 restano li' inutilizzati, che va bene -
-    l'Impronta puo' portarci), oppure rivedere i valori di Scavo delle carte
-    perche' stiano dentro lo 0-4.
+    **RISOLTA dal designer**: l'immagine adesso porta **dieci strisce, dallo 0
+    al 9**. Lo 0-9 copre i valori stampati (0, 2, 3, 5, 6) e anche il caso
+    peggiore con l'Impronta (6 + 3 = 9). L'1 e il 4 restano li' senza una
+    carta che li usi, e va bene: ci arriva l'Incisore.
+
+    L'immagine del designer e' pero' DISEGNATA, non impaginata: le strisce
+    sono separate da righe bianche e alte una diversa dall'altra (fra 79 e
+    117 pixel). `tools/estrai_grafica.py` le ritrova una per una e le
+    ricompone in righe tutte uguali, alte quanto la MEDIANA: cosi' la vista
+    prende la riga del valore N con una divisione, e una striscia piu' alta
+    delle altre non stira tutto il disegno. Un test controlla che nessuna
+    carta abbia uno Scavo oltre le righe disponibili.

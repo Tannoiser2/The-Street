@@ -1620,7 +1620,7 @@ func _test_banner_scavo() -> void:
 
 	# La riga dipende dal valore di Scavo, e sono righe di uguale altezza.
 	var passo := 1.0 / float(BoardLayout3D.SCAVO_RIGHE)
-	_approx("ogni riga e' alta un quinto", (u1["scala"] as Vector2).y, passo)
+	_approx("ogni riga e' alta un decimo", (u1["scala"] as Vector2).y, passo)
 	_approx("  e si sceglie col valore",
 		(u1["offset"] as Vector2).y, passo * float(int(stretto.data["scavo"])))
 
@@ -1632,9 +1632,22 @@ func _test_banner_scavo() -> void:
 
 	# L'Impronta alza lo Scavo: anche quello si vede.
 	stretto.was_razed = false
-	stretto.bonus_scavo = 1
+	stretto.bonus_scavo = 3        # l'Incisore: +3 permanenti
 	_eq("un'Impronta sposta la riga", int(BoardLayout3D.scavo_uv(stretto)["valore"]),
-		int(stretto.data["scavo"]) + 1)
+		int(stretto.data["scavo"]) + 3)
+	_ok("  e ci sono righe abbastanza per tutti i valori stampati",
+		not bool(BoardLayout3D.scavo_uv(stretto)["fuori_scala"]))
+	stretto.bonus_scavo = 0
+
+	# Nessuna carta deve restare fuori scala: se il banner ha meno righe dei
+	# valori in gioco, sul tavolo finisce un numero sbagliato.
+	var fuori: Array[String] = []
+	for id in CardDB.buildings:
+		var b2 := _metti(gs, str(id), 0, 1, 0, 0)
+		if bool(BoardLayout3D.scavo_uv(b2)["fuori_scala"]): fuori.append(str(id))
+		gs.grid.buildings.erase(b2)
+	_eq("nessuna carta ha uno Scavo oltre le righe del banner (%s)"
+		% ", ".join(fuori), fuori.size(), 0)
 
 	# Le due facce: davanti e dietro, grandi quanto la basetta.
 	var facce := BoardLayout3D.facce_basetta(gs, largo)
