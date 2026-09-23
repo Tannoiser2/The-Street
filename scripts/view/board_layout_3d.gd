@@ -162,24 +162,49 @@ static func z_basi(gs: GameState, col_from: int, col_to: int, livello: int,
 			avanti = maxf(avanti, z_sagoma(gs, s, giri + 1))
 	return avanti if avanti > -INF else (BANDA_SU + BANDA_GIU) / 2.0
 
-# IL TERRAPIENO: la terra riportata sotto una colonna che non aveva niente
-# da offrire come base. Il regolamento la fa pagare (1 pietra per colonna) e
-# il preventivo la contava gia', ma sul tavolo non si vedeva: l'edificio
-# restava sospeso sopra il vuoto proprio nella colonna che aveva pagato per
-# riempire. E' un blocco che va dal piano del tavolo fino al piede
-# dell'edificio, largo la fetta di basetta di quella colonna.
+# IL TERRAPIENO: la terra riportata sotto una colonna dell'impronta che non
+# arriva da sola alla quota del piede. E' un blocco che parte da cio' che c'e'
+# sotto in quella colonna - il piano del tavolo se non c'e' niente - e arriva
+# esatto sotto il piede, largo la fetta di basetta di quella colonna.
+#
+# I casi sono due e sul tavolo si riempiono allo stesso modo:
+#  - la colonna NUDA, il terrapieno che il regolamento fa pagare 1 pietra;
+#  - la colonna la cui base sta PIU' IN BASSO del piede. Questa non si paga
+#    - "per colonna priva di base, una volta sola, qualunque sia la quota da
+#    raggiungere" - perche' l'edificio prende il livello della base piu' alta
+#    piu' uno, e le altre restano indietro. Ma la terra ci va lo stesso: e'
+#    il caso dell'edificio largo appoggiato a una pila alta da un lato e a una
+#    rovina a terra dall'altro, che restava con mezza sagoma sul vuoto.
 static func terrapieno_box(gs: GameState, b: Building, col: int) -> AABB:
 	var base := basetta_box(gs, b)
 	var fetta := base.size.x / float(b.width())
+	var da := level_y(quota_sotto(gs, b, col) + 1)
 	return AABB(
-		Vector3(base.position.x + (col - b.col_from) * fetta, TESSERA_Y,
-			base.position.z),
-		Vector3(fetta, maxf(base.position.y - TESSERA_Y, 0.0), base.size.z))
+		Vector3(base.position.x + (col - b.col_from) * fetta, da, base.position.z),
+		Vector3(fetta, maxf(base.position.y - da, 0.0), base.size.z))
 
 static func terrapieni(gs: GameState, b: Building) -> Array[AABB]:
 	var out: Array[AABB] = []
-	for col in b.terrapieno_cols: out.append(terrapieno_box(gs, b, int(col)))
+	if b.level == 0: return out
+	for col in range(b.col_from, b.col_to):
+		var box := terrapieno_box(gs, b, col)
+		if box.size.y > 0.0: out.append(box)
 	return out
+
+# Il livello di cio' che regge questa colonna, -1 se sotto non c'e' niente.
+# Si guardano le basi fissate alla costruzione - come per la z, quello che
+# regge non cambia piu' - e solo quando l'edificio non le ha (i fissaggi dei
+# test) si ripiega sulla colonna di adesso.
+static func quota_sotto(gs: GameState, b: Building, col: int) -> int:
+	var q := -1
+	if not b.basi.is_empty():
+		for s in gs.grid.buildings:
+			if s.uid in b.basi and s.covers(col): q = maxi(q, s.level)
+		return q
+	for s in gs.grid.buildings:
+		if s == b or not s.covers(col) or s.level >= b.level: continue
+		q = maxi(q, s.level)
+	return q
 
 # La basetta: ogni sagoma ne ha una. 15 mm di profondita' per 4 mm di cartone.
 static func basetta_box(gs: GameState, b: Building) -> AABB:

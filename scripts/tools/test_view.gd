@@ -44,6 +44,7 @@ func _ready() -> void:
 	_run("  e a che velocita' si muovono i bot", _test_velocita_bot)
 	_run("il conto finale, diviso per fonte", _test_riepilogo)
 	_run("il terrapieno si paga e si vede", _test_terrapieni)
+	_run("sotto un edificio a scalino non resta un buco", _test_scalino)
 	_run("le carte stanno in piedi alla stessa altezza", _test_misure_carte)
 	_run("la sagoma e' un pezzo solo, spesso", _test_sagoma_estrusa)
 	print("\n%d superati, %d falliti" % [_passed, _failed])
@@ -1639,6 +1640,50 @@ func _test_terrapieni() -> void:
 # enorme: le carte grandi schiacciavano le altre e il tavolo non sembrava
 # piu' un mazzo solo. E le sei del mercato, in una colonna sola, erano piu'
 # lunghe della strada: la prima finiva fuori dal tabellone, sospesa nel nulla.
+# Un edificio largo puo' poggiare su due colonne di quota diversa: prende il
+# livello della piu' alta piu' uno, e sull'altra resta uno scalino. Il
+# regolamento quello scalino non lo fa pagare - il terrapieno e' "per colonna
+# priva di base" - ma sul tavolo la terra ci va lo stesso, se no meta' sagoma
+# sta sul vuoto. E' il buco che si vedeva sotto la Fortezza bastionata.
+func _test_scalino() -> void:
+	var ctl := _gioco()
+	var gs := ctl.gs
+	# colonna 1: una pila che arriva a livello 1. colonna 2: solo una rovina
+	# a terra. Chi costruisce sopra entrambe parte da livello 2.
+	var a := _metti(gs, "ed_capanne", 1, 1, 0, 0)
+	a.state = Enums.BuildingState.ROVINA
+	var b := _metti(gs, "ed_capanne", 1, 1, 1, 0)
+	b.state = Enums.BuildingState.ROVINA
+	var c := _metti(gs, "ed_capanne", 2, 1, 0, 0)
+	c.state = Enums.BuildingState.ROVINA
+
+	var d: Dictionary = CardDB.buildings[_largo(2)]
+	var q := BuildRules.quote_above(gs, 0, d, 1)
+	_ok("il preventivo passa (%s)" % q.reason, q.legal)
+	_eq("  l'edificio va a livello 2", q.level, 2)
+	_eq("  e nessuna colonna paga terrapieno", q.terrapieno_cols, [] as Array[int])
+
+	var p: PlayerState = gs.players[0]
+	p.pietra = 99
+	p.oro = 99
+	ctl.place_worker(1)
+	var quanti := gs.grid.buildings.size()
+	_ok("si costruisce a scalino", ctl.build(str(d["id"]), 1, true))
+	if gs.grid.buildings.size() <= quanti: return
+	var su: Building = gs.grid.buildings[gs.grid.buildings.size() - 1]
+
+	_eq("la colonna alta regge da sola", BoardLayout3D.quota_sotto(gs, su, 1), 1)
+	_eq("  quella bassa e' indietro di un livello", BoardLayout3D.quota_sotto(gs, su, 2), 0)
+	var boxes := BoardLayout3D.terrapieni(gs, su)
+	_eq("si riempie solo la colonna indietro", boxes.size(), 1)
+	if boxes.is_empty(): return
+	var box: AABB = boxes[0]
+	var piede := BoardLayout3D.basetta_box(gs, su)
+	_approx("  la terra parte dalla cima di cio' che c'e'", box.position.y,
+		BoardLayout3D.level_y(1))
+	_approx("  e arriva esatto sotto il piede", box.end.y, piede.position.y)
+	_ok("  e sta nella colonna 2", box.position.x >= BoardLayout3D.col_x(2) - 0.1)
+
 func _test_misure_carte() -> void:
 	# Stessa altezza, proporzioni salve: il disegno non si deforma.
 	var storte := 0
