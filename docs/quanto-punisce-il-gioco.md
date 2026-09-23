@@ -77,9 +77,32 @@ al materiale stampato: va decisa prima della stampa, non dopo. La manopola resta
 girabile con `--forza -1` quando la si vorrà riprovare.
 
 > **Nota sui numeri di questa pagina.** Sono misurati col vecchio `rovina_gap` a 2 come
-> controllo: la riga "rovina solo a −3" è quella che adesso è il gioco. Le tabelle di
-> `docs/vita-degli-edifici.md` vengono da partite giocate prima di questa decisione, e
-> vanno rifatte alla prossima tornata di 10 000.
+> controllo: la riga "rovina solo a −3" è quella che adesso è il gioco.
+
+### Confermato su 10 000 partite
+
+Le 2 000 partite della tabella qui sopra dicevano +1 edificio in piedi. Rigiocate
+**10 000 partite per parte**, stessi semi, cambiando solo quella riga:
+
+| misura | rovina fallendo di 2 | rovina fallendo di 3 | Δ |
+|---|--:|--:|--:|
+| edifici costruiti per partita | 28,68 | 28,70 | +0,02 |
+| **in piedi a fine partita** | **7,23** | **8,28** | **+1,05** |
+| intatti a fine partita | 7,04 | 7,63 | +0,59 |
+| **cade nell'era in cui è nato** | **34%** | **18%** | **−16%** |
+| ere in piedi (media) | 1,78 | 1,96 | +0,18 |
+| quota di rovine | 75% | 71% | −4% |
+| sepolti | 57% | 57% | −0% |
+| PV per partita (i tre insieme) | 198 | 200 | +2 |
+
+Il numero che si vede al tavolo è il terzo: **un edificio su tre cadeva nell'era stessa
+in cui era stato costruito, adesso è uno su cinque e mezzo.** Era questo a far sembrare
+la città un cantiere di macerie — si costruiva e crollava prima di aver fruttato una
+rendita. Gli edifici costruiti sono gli stessi (28,7): non si gioca diversamente, si
+perde meno.
+
+E i sepolti restano 57% anche qui, su diecimila partite: la conferma che il tetto della
+città in piedi non lo mette l'evento.
 
 ## Un difetto trovato alzando la soglia
 
