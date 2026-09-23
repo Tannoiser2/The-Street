@@ -25,6 +25,12 @@ extends RefCounted
 #   1  sceglie la colonna guardando lo stato di prima dell'attivazione
 #   2  valuta le mosse sullo stato DOPO l'attivazione (copia della partita)
 const VERSIONE := 2
+# Quale versione gioca adesso. Di serie l'ultima; la si rimette indietro per
+# rispondere a "questo e' merito del bot o delle regole?" - rigiocando le regole
+# nuove col bot vecchio. Deve riprodurre il bot di allora ESATTAMENTE, e c'e'
+# un test che lo verifica: una versione vecchia approssimata non separerebbe
+# niente.
+static var versione_in_uso := VERSIONE
 
 const STRATEGIE: Array[String] = ["rendita", "lampo", "scavo", "verticale", "bilanciata"]
 
@@ -183,14 +189,19 @@ static func classifica_colonne(gs: GameState, p: PlayerState,
 		var prot := _valore_protezione(gs, p, c)
 		var da_salvare := _da_proteggere(gs, p, c)
 		var migliore := 0.0
-		var copia := gs.duplica()
-		var ctl := GameController.new()
-		ctl.gs = copia
-		var protetto: Building = _per_uid(copia, da_salvare.uid) if da_salvare != null else null
-		if ctl.place_worker(c, protetto):
-			var pc: PlayerState = copia.players[p.index]
-			for v in _opzioni(copia, p.index, c):
-				migliore = maxf(migliore, _valore(copia, pc, v, strategia, c))
+		if versione_in_uso <= 1:
+			# Versione 1: le mosse sullo stato di PRIMA, senza attivare.
+			for v in _opzioni(gs, p.index, c):
+				migliore = maxf(migliore, _valore(gs, p, v, strategia, c))
+		else:
+			var copia := gs.duplica()
+			var ctl := GameController.new()
+			ctl.gs = copia
+			var protetto: Building = _per_uid(copia, da_salvare.uid) if da_salvare != null else null
+			if ctl.place_worker(c, protetto):
+				var pc: PlayerState = copia.players[p.index]
+				for v in _opzioni(copia, p.index, c):
+					migliore = maxf(migliore, _valore(copia, pc, v, strategia, c))
 		out.append({"col": c, "valore": prod + prot + migliore,
 			"produzione": prod, "protezione": prot, "mossa": migliore,
 			"salva": da_salvare})

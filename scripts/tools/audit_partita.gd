@@ -44,6 +44,11 @@ func _ready() -> void:
 	# l'effetto del PIANIFICARE da quello della strategia: stessi bot, stesse
 	# preferenze, uno solo guarda avanti.
 	_piano = args.has("piano")
+	# `--bot 1` rigioca col bot della versione 1, per separare l'effetto del
+	# bot da quello delle regole.
+	if args.has("bot"):
+		StrategyBot.versione_in_uso = int(args["bot"])
+		print("# versione del bot = %d" % StrategyBot.versione_in_uso)
 	_tutti = str(args.get("tutti", ""))
 	# Una tabella della Verticalita' diversa da quella stampata, per provare
 	# "e se pagasse meno salire?" senza toccare data/cards.json - che resta
@@ -251,7 +256,7 @@ func _stampa_vita(acc: Dictionary, quante: int, players: int, seme: int) -> void
 		"/".join(scala), int(CardDB.constants["prosperity"]["min_buildings"]),
 		int(CardDB.constants.get("rovina_gap", 2)),
 		"liberi" if bool(CardDB.constants.get("binari_liberi", false)) else "per_era",
-		StrategyBot.VERSIONE])
+		StrategyBot.versione_in_uso])
 	var intestazione: Array[String] = ["id", "nome", "era", "classi", "larghezza",
 		"costo_pietra", "costo_oro", "resistenza", "rendita", "scavo", "lampo_carta",
 		"copie", "n", "ere_intatto", "ere_piedi", "n_rudere", "n_rovina", "n_sepolto",
