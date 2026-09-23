@@ -1,5 +1,52 @@
 # Le strategie dei bot
 
+## Rimisurato col bot versione 2 e le regole di oggi
+
+> Il resto del documento racconta il torneo su cui sono state scelte le cinque strategie, col
+> bot e le regole di allora. Da allora sono cambiate tre regole — binari liberi, rovina solo
+> fallendo di 3, Centro Urbano a 3 edifici — e il bot valuta le mosse dopo l'attivazione. Stesso
+> torneo, **600 partite a tre giocatori, tutte e sette le strategie a rotazione**, rigiocato
+> oggi:
+
+| strategia | vittorie | PV medi | il canale che insegue | allora |
+|---|--:|--:|---|--:|
+| **Rendita** | **41,0%** ±6,0 | 93,0 | rendita 30,2 | 38,3% |
+| **Obiettivi** | **39,5%** ±6,0 | 90,8 | monumenti 3,1 | 31,6% |
+| Bilanciata | 35,7% ±5,8 | 87,7 | *nessuno: è il controllo* | 39,1% |
+| Verticale | 32,2% ±5,7 | 85,3 | verticalità 29,9 | 28,7% |
+| Continuità | 30,4% ±5,6 | 85,3 | continuità 12,6 | 29,2% |
+| Lampo | 28,4% ±5,5 | 85,4 | lampo 21,6 | 33,9% |
+| Scavo | 26,4% ±5,4 | 85,1 | scavo 7,5 | 32,6% |
+
+**La prima conclusione non regge più.** "Chi non insegue niente vince di più" era vero allora:
+la Bilanciata era prima. Oggi **specializzarsi nella Rendita paga**, e la Bilanciata è terza.
+Il motivo è nelle regole cambiate: con la rovina a −3 e i binari liberi più edifici restano in
+piedi a fine era, e ogni edificio in piedi paga il censimento — la Rendita è diventata il
+canale che si accumula. Non è un difetto in sé, ma è un cambiamento di carattere del gioco: da
+"non specializzarti" a "costruisci cose che durano".
+
+**La seconda regge**, anche se la Verticale non è più ultima: la Rendita prende **29,1 punti di
+Verticalità senza cercarla**, contro i 29,9 di chi la insegue. La Verticalità resta un
+sottoprodotto del costruire, non un piano.
+
+**La terza regge ancora di più.** La strategia Scavo prende **7,5 punti di Scavo — meno della
+Lampo (9,4), che non lo cerca** — ed è ultima. Lo Scavo lo incassa chi viene sotterrato, e a
+sotterrare è l'avversario: non si può inseguire.
+
+**E c'è una novità: "Obiettivi" è seconda**, dal quinto posto di allora. Insegue Monumenti ed
+Eredità chiedendo alle regole se la condizione è soddisfatta, e adesso la trova soddisfatta più
+spesso (3,1 punti di Monumenti contro 1,4–2,4 delle altre). **Non so ancora dire quanto sia
+merito del bot e quanto delle regole nuove** — il bot versione 2 valuta dopo l'attivazione anche
+le condizioni, e le regole nuove lasciano in piedi più edifici da contare. Separare le due cose
+richiede un torneo col bot vecchio sulle regole nuove.
+
+**La domanda che ne viene:** il canone delle cinque ha ancora senso con Scavo dentro e Obiettivi
+fuori? Scavo è ultima e non riesce a prendere il proprio canale; Obiettivi batte quattro delle
+cinque. Cambiare il canone vorrebbe dire cambiare i bot di tutte le batterie future, quindi è una
+decisione da prendere, non da fare.
+
+---
+
 ## Perché cinque
 
 Le cinque strategie del simulatore di riferimento — **Rendita, Lampo, Scavo, Verticale,

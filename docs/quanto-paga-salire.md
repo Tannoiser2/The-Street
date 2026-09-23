@@ -1,5 +1,39 @@
 # Quanto paga salire
 
+## Rimisurato col bot versione 2 e le regole di oggi
+
+> Le tabelle più sotto sono quelle su cui è stata scelta la **2/5/9/14**, misurate col bot di
+> allora e con le regole di allora. Da allora sono cambiate tre regole — binari liberi, rovina
+> solo fallendo di 3, Centro Urbano a 3 edifici — e il bot valuta le mosse dopo l'attivazione.
+> Qui le stesse quattro tabelle, **1000 partite ciascuna con gli stessi semi**, rigiocate oggi.
+
+| tabella | primo | ultimo | distacco | distacco / punti del primo | Verticalità | quota sul punteggio | edifici sopra | quota max |
+|---|--:|--:|--:|--:|--:|--:|--:|--:|
+| 2 / 6 / 12 / 20 | 118,4 | 77,8 | 40,7 | 34% | 36,7 | 38% | 5,21 | 3,96 |
+| **2 / 5 / 9 / 14** (quella adottata) | 104,8 | 70,3 | **34,6** | **33%** | 25,9 | 30% | 5,20 | 3,92 |
+| 2 / 5 / 8 / 11 | 98,0 | 66,4 | 31,6 | 32% | 20,5 | 25% | 5,20 | 3,91 |
+| 2 / 4 / 6 / 8 (lineare) | 92,1 | 62,7 | 29,4 | 32% | 15,6 | 20% | 5,13 | 3,84 |
+
+| tabella | Verticalità del primo | dell'ultimo | quanta parte del distacco è solo Verticalità |
+|---|--:|--:|--:|
+| 2/6/12/20 | 48,1 | 26,7 | 53% |
+| **2/5/9/14** | 32,7 | 19,8 | **37%** |
+| 2/5/8/11 | 25,2 | 16,3 | 28% |
+| 2/4/6/8 | 18,7 | 12,6 | 21% |
+
+**Cosa regge.** La scelta della 2/5/9/14 regge, e per le stesse ragioni: la quota della
+Verticalità sul punteggio è identica (30%), e l'altezza raggiunta **non dipende dalla
+tabella** — 5,13 edifici sopra con la lineare, 5,21 con la più ripida. Si sale per necessità
+e per le spolia, non per il premio: la tabella decide quanto vale salire, non quanto si sale.
+
+**Cosa è cambiato.** Il gioco è più **equilibrato** di quando la tabella fu scelta: il distacco
+fra primo e ultimo è sceso da 39,7 a **34,6** punti, e soprattutto da 41% a **33%** dei punti del
+primo. È l'effetto sommato dei binari liberi e della rovina a −3: più edifici restano in piedi e
+più punti arrivano dalla Rendita, che si distribuisce meglio della Verticalità. La parte del
+distacco spiegata dalla sola Verticalità scende da 41% a **37%**.
+
+---
+
 > **Esito: la tabella adottata è 2 / 5 / 9 / 14**, quella intermedia. `data/cards.json`
 > porta questa; le misure qui sotto sono il confronto che ha portato alla scelta, e la
 > colonna "2/6/12/20" è la tabella di prima.

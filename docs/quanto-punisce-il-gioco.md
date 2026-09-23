@@ -1,5 +1,30 @@
 # Quanto punisce il gioco
 
+## Rimisurato col bot versione 2 e le regole di oggi
+
+> Il resto della pagina è la misura su cui è stata presa la decisione — `rovina_gap` a 3 — col
+> bot e le regole di allora. Qui le stesse manopole attorno al gioco **di oggi** (binari liberi,
+> Centro Urbano a 3, rovina a −3), col bot che valuta dopo l'attivazione: 2000 partite per
+> variante, stessi semi.
+
+| variante | costruiti | **in piedi a fine** | intatti a fine | cade nella sua era | ere in piedi | rovine | sepolti | PV/partita |
+|---|--:|--:|--:|--:|--:|--:|--:|--:|
+| **oggi** (rovina a −3) | 30,17 | **9,36** | 8,60 | 17% | 2,06 | 69% | 52% | 211 |
+| rovina a −2, com'era | 30,21 | 8,30 | 8,09 | 31% | 1,89 | 73% | 52% | 211 |
+| rudere −1 | 30,08 | 9,44 | 8,66 | 17% | 2,07 | 69% | 52% | 211 |
+| eventi −1 | 30,65 | 11,60 | 10,36 | 7% | 2,24 | 62% | 51% | 219 |
+
+**La decisione regge, con gli stessi numeri.** Rimettere la rovina a −2 costerebbe un edificio in
+piedi a fine partita (9,36 → 8,30) e riporterebbe dal 17% al **31%** gli edifici che cadono
+nell'era in cui sono nati, a punteggio identico. Il `rudere_penalty` continua a non contare niente
+(+0,08), e la forza degli eventi resta la manopola grossa: +2,2 edifici in piedi e +8 punti, al
+prezzo di cambiare le carte stampate.
+
+**E i sepolti restano al 52%** in tutte e quattro le varianti: gli eventi decidono chi crolla, non
+chi sparisce sotto la città. Era vero col bot vecchio, e il bot nuovo lo conferma.
+
+---
+
 > Misure fatte col motore vero (`scripts/tools/audit_partita.gd --vita`), 2 000 partite
 > a tre giocatori per variante, **stessi semi** (base 200 000) e stessi bot a strategie.
 > Le manopole si girano da riga di comando e **non toccano `data/cards.json`**, che resta
