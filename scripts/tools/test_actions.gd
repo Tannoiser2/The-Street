@@ -26,6 +26,7 @@ func _ready() -> void:
 	_run("la copia dello stato", _test_copia_dello_stato)
 	_run("le mosse si valutano dopo l'attivazione", _test_valuta_dopo_attivazione)
 	_run("il bot che pianifica l'era", _test_pianificatore)
+	_run("la versione vecchia del bot", _test_versione_del_bot)
 	_run("i bot con una strategia giocano davvero", _test_strategie)
 	print("\n%d superati, %d falliti" % [_passed, _failed])
 	get_tree().quit(0 if _failed == 0 else 1)
@@ -876,3 +877,30 @@ func _test_pianificatore() -> void:
 		giri += 1
 	var pv2: Array = ctl3.gs.players.map(func(q): return q.vp)
 	_eq("  e rigiocata finisce identica", pv2, pv1)
+
+# ---- la versione vecchia del bot, per separare le cause ---------------
+# `--bot 1` rimette in campo il bot che sceglieva la colonna guardando lo stato
+# di prima dell'attivazione. Serve a rispondere a "e' merito del bot o delle
+# regole?", e risponde solo se il bot vecchio e' davvero quello vecchio: qui si
+# fissa che, in versione 1, il valore della colonna e' quello calcolato SENZA
+# attivare. (Che riproduca le partite di allora riga per riga e' stato
+# verificato su 250 partite quando la manopola e' nata.)
+func _test_versione_del_bot() -> void:
+	var ctl := _game(3, 31)
+	var gs := ctl.gs
+	for i in 9:
+		StrategyBot.play_turn(ctl, "bilanciata")
+	var p := gs.current_player()
+	StrategyBot.versione_in_uso = 1
+	var v1 := StrategyBot.classifica_colonne(gs, p, "bilanciata")
+	StrategyBot.versione_in_uso = StrategyBot.VERSIONE
+	var uguali := true
+	for e in v1:
+		var col := int(e["col"])
+		var prima := 0.0
+		for v in StrategyBot._opzioni(gs, p.index, col):
+			prima = maxf(prima, StrategyBot._valore(gs, p, v, "bilanciata", col))
+		if not is_equal_approx(float(e["mossa"]), prima): uguali = false
+	_ok("in versione 1 la colonna vale le mosse di PRIMA dell'attivazione", uguali)
+	_eq("  e dopo la prova si torna alla versione di serie",
+		StrategyBot.versione_in_uso, StrategyBot.VERSIONE)
