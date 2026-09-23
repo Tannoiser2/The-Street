@@ -122,25 +122,45 @@ static func z_sagoma(gs: GameState, b: Building, giri := 0) -> float:
 	if b.level == 0:
 		# sul davanti dello slot, cioe' dal lato della telecamera
 		return rail_z(b.era_built) + SLOT_D - BASETTA_D / 2.0
+	# LE BASI SONO QUELLE DI QUANDO LO SI E' COSTRUITO, non quelle che si
+	# trovano adesso nelle sue colonne. A quota zero una colonna porta fino
+	# a cinque edifici, uno per binario d'era: chiedendolo alla colonna, un
+	# edificio costruito dopo in un altro binario entrava nella media e
+	# spostava la sagoma sopra, che a schermo scivolava verso il fondo.
+	# Una sagoma costruita non si muove piu'.
+	if not b.basi.is_empty(): return _z_di_uid(gs, b.basi, giri)
+	# Senza basi segnate - i fissaggi dei test, o una pila tutta terrapieno -
+	# si ripiega sulla colonna, che e' il conto di prima.
 	return z_basi(gs, b.col_from, b.col_to, b.level, giri)
 
+static func _z_di_uid(gs: GameState, uid: Array, giri: int) -> float:
+	var avanti := -INF
+	if giri < RAILS:
+		for s in gs.grid.buildings:
+			if not s.uid in uid: continue
+			avanti = maxf(avanti, z_sagoma(gs, s, giri + 1))
+	return avanti if avanti > -INF else (BANDA_SU + BANDA_GIU) / 2.0
+
 # La z di cio' che regge una pila alla quota `livello` fra due colonne: la
-# media delle basi trovate, perche' un edificio largo puo' poggiare su due
-# basi di ere diverse e allora sta in mezzo, come farebbe il cartone vero.
+# base PIU' AVANTI, dalla parte di chi guarda.
+#
+# Prima era la media delle basi trovate, per mettere in mezzo un edificio
+# largo che poggia su due basi di ere diverse. Ma i binari distano 26 mm e
+# una basetta ne e' profonda 15: a due ere di distanza la media non tocca
+# nessuno dei due piedi, e l'edificio resta sospeso fra loro. Appoggiandolo
+# a quello davanti sta sempre su un piede vero, che e' quello che farebbe
+# il cartone.
 # Se sotto non c'e' niente - tutto terrapieno - si torna al centro della
 # fascia: e' l'unico caso in cui non c'e' una base da seguire.
 static func z_basi(gs: GameState, col_from: int, col_to: int, livello: int,
 		giri := 0) -> float:
-	var somma := 0.0
-	var quante := 0
+	var avanti := -INF
 	if giri < RAILS:
 		for s in gs.grid.buildings:
 			if s.level != livello - 1: continue
 			if s.col_to <= col_from or s.col_from >= col_to: continue
-			somma += z_sagoma(gs, s, giri + 1)
-			quante += 1
-	if quante == 0: return (BANDA_SU + BANDA_GIU) / 2.0
-	return somma / float(quante)
+			avanti = maxf(avanti, z_sagoma(gs, s, giri + 1))
+	return avanti if avanti > -INF else (BANDA_SU + BANDA_GIU) / 2.0
 
 # IL TERRAPIENO: la terra riportata sotto una colonna che non aveva niente
 # da offrire come base. Il regolamento la fa pagare (1 pietra per colonna) e

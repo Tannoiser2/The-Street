@@ -13,6 +13,10 @@ var level: int = 0            # 0 = nel binario; >0 = sopraelevato
 var state: int = Enums.BuildingState.INTATTO
 var is_buried: bool = false   # condizione di posizione: qualcosa è stato costruito sopra
 var was_razed: bool = false   # spianato dal proprietario da intatto -> Scavo 0
+# Su chi poggia: gli uid degli edifici che gli fanno da base. Si fissano
+# quando lo si costruisce e non cambiano piu', perche' la sagoma non deve
+# muoversi quando qualcun altro costruisce li' vicino.
+var basi: Array[int] = []
 # Le colonne in cui, per poggiare qui, e' stata riportata terra: sotto non
 # c'era niente e si e' pagato un terrapieno. Serve alla vista per riempire
 # il vuoto sotto l'edificio, che altrimenti resta sospeso.

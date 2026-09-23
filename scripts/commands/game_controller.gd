@@ -210,6 +210,11 @@ func build(card_id: String, col_from: int, above: bool, pay_option: int = 0, des
 	# qui in poi deve saperlo l'edificio, se no la vista lo disegna
 	# sospeso sopra il vuoto.
 	b.terrapieno_cols = q.terrapieno_cols.duplicate()
+	# E su chi poggia. Anche questo lo sa il preventivo, e da qui in poi lo
+	# deve sapere l'edificio: la sua quota si legge da loro, e se la si
+	# ricavasse ogni volta da quel che c'e' in colonna, un edificio nuovo a
+	# quota zero in un altro binario gliela sposterebbe sotto i piedi.
+	for base in q.bases: b.basi.append(base.uid)
 	b.bonus_res = q.continuity_bonus
 	if gs.grid.terrains[col_from] == Enums.Terrain.COLLINA: b.bonus_res += 1
 	b.charges = int(data.get("exhaustible", 0))

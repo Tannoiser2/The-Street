@@ -38,6 +38,7 @@ func _ready() -> void:
 	_run("  e il riquadro acceso e' quello che si clicca", _test_riquadri)
 	_run("  e la barra dice che mossa sarebbe, e quanto costa", _test_descrizione)
 	_run("chi sta sopra poggia su chi sta sotto", _test_pila)
+	_run("  e una volta costruita non si muove piu'", _test_sagome_ferme)
 	_run("le carte del giocatore non si coprono", _test_carte_giocatore)
 	_run("chi siede al tavolo lo si sceglie", _test_scelte_inizio)
 	_run("  e a che velocita' si muovono i bot", _test_velocita_bot)
@@ -1123,6 +1124,56 @@ func _test_descrizione() -> void:
 		"level": 0, "spiana": PackedStringArray(), "terrapieni": 0, "attiva": 4}
 	_ok("e se il lavoratore non c'e' ancora, dice quale colonna attiva",
 		DescrizioneAzione.riga(gs, v2, 0).contains("attiva la colonna 4"))
+
+# UNA SAGOMA COSTRUITA NON SI MUOVE PIU'. Sembra ovvio e non lo era: la quota
+# di chi sta sopra si ricavava dalle basi che si trovavano IN QUEL MOMENTO
+# nelle sue colonne, e a quota zero una colonna porta fino a cinque edifici,
+# uno per binario d'era. Bastava che qualcuno costruisse in un altro binario
+# della stessa colonna perche' la media cambiasse e la sagoma sopra
+# scivolasse verso il fondo. Adesso le basi sono quelle di quando la si e'
+# costruita, segnate sull'edificio.
+#
+# Il test guarda una partita intera: dopo ogni turno confronta la posizione di
+# ogni sagoma gia' in tavola con quella che aveva, e non ne perdona una.
+func _test_sagome_ferme() -> void:
+	var ctl := _gioco()
+	var dove := {}          # uid -> posizione del piede
+	var mosse := 0
+	var esempio := ""
+	var giri := 0
+	while ctl.gs.phase != Enums.Phase.FINE_PARTITA and giri < 4000:
+		RandomBot.play_turn(ctl)
+		giri += 1
+		for b in ctl.gs.grid.buildings:
+			var p := BoardLayout3D.standee_base(ctl.gs, b)
+			if dove.has(b.uid):
+				var prima: Vector3 = dove[b.uid]
+				if not p.is_equal_approx(prima):
+					mosse += 1
+					if esempio == "":
+						esempio = "%s (liv %d) da %s a %s" % [b.data["name"], b.level,
+							str(prima), str(p)]
+			dove[b.uid] = p
+	_ok("la partita ha messo in tavola parecchie sagome (%d)" % dove.size(),
+		dove.size() > 10)
+	_eq("e nessuna si e' mossa dopo essere stata costruita%s"
+		% ("" if esempio == "" else ": " + esempio), mosse, 0)
+
+	# La prova diretta del difetto: si costruisce sopra, si segna la quota, e
+	# poi si aggiunge un edificio a quota zero in un ALTRO binario della
+	# stessa colonna. Era quello a spostare la sagoma di sopra.
+	var g := _gioco().gs
+	var sotto := _metti(g, "ed_capanne", 2, 1, 0, 0)
+	sotto.state = Enums.BuildingState.ROVINA
+	var sopra := _metti(g, "ed_capanne", 2, 1, 1, 0)
+	sopra.basi = [sotto.uid] as Array[int]
+	var prima2 := BoardLayout3D.standee_base(g, sopra)
+	_metti(g, "ed_capanne", 2, 4, 0, 1)      # un altro binario, stessa colonna
+	_ok("un edificio nuovo in un altro binario non sposta chi sta sopra",
+		BoardLayout3D.standee_base(g, sopra).is_equal_approx(prima2))
+	_approx("  che resta appoggiato alla sua base",
+		BoardLayout3D.standee_base(g, sopra).z,
+		BoardLayout3D.standee_base(g, sotto).z)
 
 # LE SAGOME SOPRAELEVATE GALLEGGIAVANO IN ARIA. Un edificio sopra finiva
 # sempre in mezzo alla fascia del disegno, mentre le sue fondamenta restavano
