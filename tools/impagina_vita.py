@@ -17,13 +17,14 @@ def leggi(pattern):
     spezzare su piu' processi, e i file si sommano riga per riga."""
     # Prima che esistessero le strategie l'unico bot era quello a caso: un
     # CSV senza `bot=` viene da li'.
-    carte, partite, giocatori, bot = {}, 0, None, "caso"
+    carte, partite, giocatori, bot, vert = {}, 0, None, "caso", "?"
     for f in sorted(glob.glob(pattern)):
         righe = [l.rstrip("\n") for l in open(f) if l.strip()]
         meta = [l for l in righe if l.startswith("# partite=")][0]
         partite += int(meta.split("partite=")[1].split()[0])
         giocatori = int(meta.split("giocatori=")[1].split()[0])
         if "bot=" in meta: bot = meta.split("bot=")[1].split()[0]
+        if "verticalita=" in meta: vert = meta.split("verticalita=")[1].split()[0]
         i = righe.index([l for l in righe if l.startswith("id;")][0])
         hdr = righe[i].split(";")
         for l in righe[i+1:]:
@@ -31,12 +32,30 @@ def leggi(pattern):
             c = carte.setdefault(v["id"], {k: (int(v[k]) if k in NUM else v[k]) for k in v})
             if c is not v:
                 for k in NUM: c[k] += int(v[k])
-    return carte, partite, giocatori, bot
+    return carte, partite, giocatori, bot, vert
 
-carte, partite, giocatori, bot = leggi(sys.argv[1])
+carte, partite, giocatori, bot, vert = leggi(sys.argv[1])
 altro = None
 if "--confronta" in sys.argv:
-    altro, partite_altro, _, bot_altro = leggi(sys.argv[sys.argv.index("--confronta") + 1])
+    altro, partite_altro, _, bot_altro, vert_altro = leggi(
+        sys.argv[sys.argv.index("--confronta") + 1])
+    # Le due colonne si chiamano come la cosa che le distingue: se a cambiare
+    # e' chi gioca si parla di bot, se e' la tabella della Verticalita' si
+    # parla di quella. Confrontare due lotti senza dire cosa li separa e' il
+    # modo piu' rapido di prendere un effetto per un altro.
+    if bot != bot_altro:
+        COL_A = "bot a caso" if bot_altro == "caso" else "con strategia"
+        COL_B = "bot a caso" if bot == "caso" else "con strategia"
+        TITOLO = "Cosa cambia quando i bot giocano davvero"
+        SOTTO = (f"Le stesse misure su {partite_altro} partite **{COL_A}** e "
+                 f"{partite} **{COL_B}**.")
+    else:
+        COL_A = f"Verticalità {vert_altro}"
+        COL_B = f"Verticalità {vert}"
+        TITOLO = "Cosa cambia con la Verticalità più piatta"
+        SOTTO = (f"Le stesse misure su {partite_altro} partite con la tabella "
+                 f"**{vert_altro}** e {partite} con la **{vert}**, a parità di tutto "
+                 "il resto: stessi bot, stesso numero di giocatori.")
 
 def r(c, k, d=None):
     d = d or c["n"]
@@ -282,12 +301,11 @@ w()
 if altro is not None:
     def somma(c, k): return sum(x[k] for x in c.values())
     na, nb = somma(altro, "n"), somma(carte, "n")
-    w("## Cosa cambia quando i bot giocano davvero")
+    w(f"## {TITOLO}")
     w()
-    w(f"Le stesse misure su {partite_altro} partite coi bot **a caso** e {partite} con le "
-      "**cinque strategie**. La colonna Δ è la seconda meno la prima.")
+    w(SOTTO + " La colonna Δ è la seconda meno la prima.")
     w()
-    w("| misura | bot a caso | con strategia | Δ |")
+    w(f"| misura | {COL_A} | {COL_B} | Δ |")
     w("|---|--:|--:|--:|")
     def riga(nome, va, vb, fmt="{:.2f}"):
         d = vb - va
@@ -303,7 +321,7 @@ if altro is not None:
     riga("PV per edificio", somma(altro,"vp")/na, somma(carte,"vp")/nb, "{:.1f}")
     riga("PV per partita (i tre giocatori insieme)", somma(altro,"vp")/partite_altro, somma(carte,"vp")/partite, "{:.0f}")
     w()
-    w("| canale (PV per partita, tutti i giocatori) | bot a caso | con strategia | Δ |")
+    w(f"| canale (PV per partita, tutti i giocatori) | {COL_A} | {COL_B} | Δ |")
     w("|---|--:|--:|--:|")
     for k in ("vp_lampo","vp_rendita","vp_verticalita","vp_scavo","vp_scheletri"):
         riga(k.replace("vp_","").capitalize(), somma(altro,k)/partite_altro, somma(carte,k)/partite, "{:.1f}")
@@ -315,7 +333,7 @@ if altro is not None:
         w()
         w(nota)
         w()
-        w("| carta | era | costo | a caso | con strategia | Δ | PV a caso | PV con strategia |")
+        w(f"| carta | era | costo | {COL_A} | {COL_B} | Δ | PV {COL_A} | PV {COL_B} |")
         w("|---|--:|--:|--:|--:|--:|--:|--:|")
         for i in lista:
             ca, cb = altro[i], carte[i]
@@ -325,20 +343,19 @@ if altro is not None:
               f"{cb['n']/partite:.2f} | {'+' if d>=0 else '−'}{abs(d):.2f} | "
               f"{ca['vp']/ca['n']:.1f} | {cb['vp']/max(1,cb['n']):.1f} |")
         w()
-    tabellina("Le carte che i bot con la testa cercano di più",
-              sorted(comuni, key=dfreq, reverse=True)[:10],
+    tabellina("Le carte che si cercano di più", sorted(comuni, key=dfreq, reverse=True)[:10],
               "Copie costruite per partita, prima e dopo.")
-    tabellina("E quelle che evitano", sorted(comuni, key=dfreq)[:10],
+    tabellina("E quelle che si cercano di meno", sorted(comuni, key=dfreq)[:10],
               "Le stesse carte, dall'altro capo della classifica.")
     scartate = [i for i in carte if carte[i]["n"] < partite * 0.02]
     if scartate:
-        w("### Carte che un bot con la testa non compra quasi mai")
+        w("### Carte che non arrivano quasi mai in tavola")
         w()
         for i in sorted(scartate, key=lambda i: carte[i]["n"]):
             c = carte[i]
             costo = f"{c['costo_pietra']}P" + (f"+{c['costo_oro']}O" if int(c['costo_oro']) else "")
             quante = "mai" if c["n"] == 0 else f"una ogni {partite/c['n']:.0f} partite"
-            prima = f", contro una ogni {partite_altro/altro[i]['n']:.0f} coi bot a caso" \
+            prima = f", contro una ogni {partite_altro/altro[i]['n']:.0f} prima" \
                 if i in altro and altro[i]["n"] else ""
             w(f"- **{c['nome']}** (era {c['era']}, {costo}) — {quante}{prima}")
         w()

@@ -191,8 +191,14 @@ func _riga_vuota() -> Dictionary:
 	return r
 
 func _stampa_vita(acc: Dictionary, quante: int, players: int, seme: int) -> void:
-	print("# partite=%d giocatori=%d seme_base=%d bot=%s" % [quante, players, seme,
-		"strategie" if _strategie else "caso"])
+	# La tabella della Verticalita' finisce nell'intestazione: due lotti si
+	# confrontano solo se si sa con che regole sono stati giocati.
+	var vt = CardDB.constants["verticality_vp"]
+	var scala: Array[String] = []
+	for i in 4: scala.append("%d" % int(vt[str(i + 1)]))
+	print("# partite=%d giocatori=%d seme_base=%d bot=%s verticalita=%s" % [
+		quante, players, seme, "strategie" if _strategie else "caso",
+		"/".join(scala)])
 	var intestazione: Array[String] = ["id", "nome", "era", "classi", "larghezza",
 		"costo_pietra", "costo_oro", "resistenza", "rendita", "scavo", "lampo_carta",
 		"copie", "n", "ere_intatto", "ere_piedi", "n_rudere", "n_rovina", "n_sepolto",

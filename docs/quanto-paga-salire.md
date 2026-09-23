@@ -1,5 +1,9 @@
 # Quanto paga salire
 
+> **Esito: la tabella adottata è 2 / 5 / 9 / 14**, quella intermedia. `data/cards.json`
+> porta questa; le misure qui sotto sono il confronto che ha portato alla scelta, e la
+> colonna "2/6/12/20" è la tabella di prima.
+
 La Verticalità si prende un terzo abbondante dei punti e **metà del distacco fra il primo
 e l'ultimo**. La domanda che viene da sé è se la tabella sia troppo ripida: il premio della
 colonna passa da 2 a 20 fra l'altezza 1 e la 4, e la metà se la prende chi sta in cima.
@@ -66,16 +70,16 @@ il che è ovvio; la Rendita migliora (38,5% → 41,5%). Ma nessuna tabella ribal
 classifica: la Bilanciata resta in testa o quasi in tutte e quattro. Appiattire la
 Verticalità non crea né distrugge una linea di gioco.
 
-## Cosa ne farei
+## La scelta
 
-Se l'obiettivo è **che il tavolo abbia più voci in gioco**, la tabella intermedia
+L'obiettivo era **che il tavolo avesse più voci in gioco**, e la tabella intermedia
 **2 / 5 / 9 / 14** fa quasi tutto il lavoro: il canale scende dal 38% al 30% del punteggio,
 la parte di distacco che dipende da lui crolla dal 54% al 41%, e il punteggio del vincitore
 resta sopra i 95 punti — cioè il gioco «pesa» ancora come adesso. La lineare 2/4/6/8 va
 oltre: toglie 25 punti al vincitore e rende la salita quasi indifferente, e a quel punto
 la cima della colonna smette di essere una cosa per cui valga la pena litigare.
 
-Se invece l'obiettivo era **fare in modo che la gente costruisca meno in alto**, nessuna di
+Quello che questa scelta **non** fa è far costruire meno in alto: per quello nessuna di
 queste tabelle serve: bisogna agire sul *costo* di salire (terrapieni, spoliazione, il tetto
 di un livello per era), non sul premio.
 
