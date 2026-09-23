@@ -181,10 +181,15 @@ w()
 w("Fra resistenza 1 e resistenza 4 la vita raddoppia e i punti quasi triplicano. Il salto "
   "vero è **fra 2 e 3**: è lì che un edificio smette di essere materiale da riempimento.")
 w()
-w("**3. Le carte da 1 pietra dell'era 1 non sono edifici: sono Scavo da seminare.** Approdo, "
-  "Trappole da pesca, Cava, Capanne, Focolare comune vivono un'era e mezza, finiscono sotto "
-  "nell'**80%** dei casi e i loro punti sono per metà Scavo. Funzionano — ma solo se chi le "
-  "gioca sa che le sta seminando, non costruendo.")
+magre = [c for c in vive if c["era"] == "1" and int(c["costo_pietra"]) <= 1 and int(c["costo_oro"]) == 0]
+if magre:
+    w("**3. Le carte da una pietra dell'era 1 non sono edifici: sono Scavo da seminare.** "
+      + ", ".join(sorted(c["nome"] for c in magre))
+      + f" vivono {med(magre,'ere_piedi'):.1f} ere, finiscono sotto nel "
+      + f"**{100*med(magre,'n_sepolto'):.0f}%** dei casi e "
+      + f"{100*med(magre,'vp_scavo')/max(0.01, med(magre,'vp')):.0f} punti su cento di quello che "
+      "fruttano sono Scavo. Funzionano — ma solo se chi le gioca sa che le sta seminando, "
+      "non costruendo.")
 w()
 w("**4. Un edificio dell'era 5 non può morire.** Gli eventi sono solo nelle ere 1-4: chi "
   "costruisce nell'era Moderna non vedrà mai un censimento né un evento. Si vede nei numeri: "
@@ -203,16 +208,19 @@ w("|---|--:|--:|--:|--:|")
 for larg in ("1", "2", "3"):
     g = [c for c in vive if c["larghezza"] == larg]
     if not g: continue
-    w(f"| XX | {len(g)} | {sum(c['n'] for c in g):,} | "
+    nome = "1 casella" if larg == "1" else f"{larg} caselle"
+    w(f"| {nome} | {len(g)} | {sum(c['n'] for c in g):,} | "
       .replace(",", " ") + f"{med(g,'vp'):.1f} | {med(g,'vp_verticalita'):.1f} |")
 w()
 st_ = [c for c in vive if c["nome"] == "Stazione"]
 if st_:
     c = st_[0]
+    secondo = sorted((x for x in vive if x is not c), key=lambda x: -x["pv"])[0]
+    quanto = "una volta ogni %.0f partite" % (1 / c["freq"]) if c["freq"] < 1 else "%.1f volte a partita" % c["freq"]
     w(f"Il caso limite è la **Stazione** (era 5, tre caselle, {c['costo_pietra']}P+{c['costo_oro']}O): "
       f"**{c['pv']:.1f} PV medi**, di cui {r(c,'vp_verticalita'):.1f} di sola Verticalità — "
-      "più del doppio della seconda carta della lista. Arriva in tavola una volta ogni dieci "
-      "partite, quindi non rompe la media, ma quando arriva decide la colonna. Vale la pena "
+      f"contro i {secondo['pv']:.1f} della seconda della lista, {secondo['nome']}. Arriva in tavola "
+      f"{quanto}, quindi non rompe la media, ma quando arriva decide la colonna. Vale la pena "
       "chiedersi se il premio della cima debba contare una volta per edificio invece che una "
       "volta per colonna.")
 w()
