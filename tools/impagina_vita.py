@@ -18,7 +18,8 @@ def leggi(pattern):
     # Prima che esistessero le strategie l'unico bot era quello a caso, e
     # prima che la tabella finisse nell'intestazione c'era quella ripida: un
     # CSV senza quei campi viene da li'.
-    carte, partite, giocatori, bot, vert, prosp, rov = {}, 0, None, "caso", "2/6/12/20", 3, 2
+    carte, partite, giocatori, bot, vert, prosp, rov, bin = ({}, 0, None, "caso",
+                                                            "2/6/12/20", 3, 2, "per_era")
     for f in sorted(glob.glob(pattern)):
         righe = [l.rstrip("\n") for l in open(f) if l.strip()]
         meta = [l for l in righe if l.startswith("# partite=")][0]
@@ -32,6 +33,9 @@ def leggi(pattern):
         # Anche la soglia della rovina e' arrivata dopo: un CSV che non la
         # dichiara viene da quando si crollava fallendo di 2.
         if "rovina=" in meta: rov = int(meta.split("rovina=")[1].split()[0])
+        # E i binari: un CSV che non lo dice viene da quando ogni era aveva
+        # il suo.
+        if "binari=" in meta: bin = meta.split("binari=")[1].split()[0]
         i = righe.index([l for l in righe if l.startswith("id;")][0])
         hdr = righe[i].split(";")
         for l in righe[i+1:]:
@@ -48,46 +52,53 @@ def leggi(pattern):
                 carte[v["id"]] = {k: (int(v[k]) if k in NUM else v[k]) for k in v}
             else:
                 for k in NUM: c[k] += int(v[k])
-    return carte, partite, giocatori, bot, vert, prosp, rov
+    return carte, partite, giocatori, bot, vert, prosp, rov, bin
 
-carte, partite, giocatori, bot, vert, prosp, rov = leggi(sys.argv[1])
+carte, partite, giocatori, bot, vert, prosp, rov, bin = leggi(sys.argv[1])
 altro = None
 if "--confronta" in sys.argv:
-    altro, partite_altro, _, bot_altro, vert_altro, prosp_altro, rov_altro = leggi(
+    altro, partite_altro, _, bot_altro, vert_altro, prosp_altro, rov_altro, bin_altro = leggi(
         sys.argv[sys.argv.index("--confronta") + 1])
-    # Le due colonne si chiamano come la cosa che le distingue: se a cambiare
-    # e' chi gioca si parla di bot, se e' la tabella della Verticalita' si
-    # parla di quella. Confrontare due lotti senza dire cosa li separa e' il
-    # modo piu' rapido di prendere un effetto per un altro.
+    # LE COLONNE SI CHIAMANO COME TUTTO CIO' CHE LE DISTINGUE, non come la
+    # prima differenza trovata. Due lotti possono differire in piu' di una
+    # regola per volta - e' successo coi binari liberi insieme alla soglia
+    # della Prosperita' - e allora il titolo ne nominava una sola: un
+    # confronto che dichiara male cosa lo separa fa attribuire un effetto
+    # alla causa sbagliata, che e' il difetto peggiore di tutti.
+    def nomi_bot(b): return "bot a caso" if b == "caso" else "bot con strategia"
+    DIFF = []          # (etichetta A, etichetta B, pezzo di titolo)
     if bot != bot_altro:
-        COL_A = "bot a caso" if bot_altro == "caso" else "con strategia"
-        COL_B = "bot a caso" if bot == "caso" else "con strategia"
-        TITOLO = "Cosa cambia quando i bot giocano davvero"
-        SOTTO = (f"Le stesse misure su {partite_altro} partite **{COL_A}** e "
-                 f"{partite} **{COL_B}**.")
-    elif rov != rov_altro:
-        COL_A = f"rovina fallendo di {rov_altro}"
-        COL_B = f"rovina fallendo di {rov}"
-        TITOLO = f"Cosa cambia crollando solo fallendo di {rov}"
-        SOTTO = (f"Le stesse misure su {partite_altro} partite in cui si crollava in "
-                 f"rovina fallendo l'evento di **{rov_altro}** e {partite} in cui ci "
-                 f"vogliono **{rov}**, a parità di tutto il resto: stessi semi, stessi "
-                 "bot, stesso numero di giocatori.")
-    elif prosp != prosp_altro:
-        COL_A = f"Centro a {prosp_altro} edifici"
-        COL_B = f"Centro a {prosp} edifici"
-        TITOLO = "Cosa cambia col Centro Urbano a due edifici"
-        SOTTO = (f"Le stesse misure su {partite_altro} partite con la Prosperità "
-                 f"Urbana che chiede **{prosp_altro} edifici intatti** nella colonna e "
-                 f"{partite} con **{prosp}**, a parità di tutto il resto: stessi semi, "
-                 "stessi bot, stesso numero di giocatori.")
+        DIFF.append((nomi_bot(bot_altro), nomi_bot(bot), "i bot che giocano davvero"))
+    if vert != vert_altro:
+        DIFF.append((f"Verticalità {vert_altro}", f"Verticalità {vert}",
+                     f"la Verticalità {vert}"))
+    if rov != rov_altro:
+        DIFF.append((f"rovina a −{rov_altro}", f"rovina a −{rov}",
+                     f"la rovina solo fallendo di {rov}"))
+    if prosp != prosp_altro:
+        DIFF.append((f"Centro a {prosp_altro}", f"Centro a {prosp}",
+                     f"il Centro Urbano a {prosp} edifici"))
+    if bin != bin_altro:
+        DIFF.append(("binari per era" if bin_altro == "per_era" else "binari liberi",
+                     "binari per era" if bin == "per_era" else "binari liberi",
+                     "i binari liberi" if bin == "liberi" else "i binari legati all'era"))
+    if not DIFF:
+        COL_A, COL_B = "prima", "dopo"
+        TITOLO = "Due lotti a parità di regole"
+        SOTTO = (f"Le stesse misure su {partite_altro} partite e {partite} altre, "
+                 "con le stesse regole: quello che si vede è solo rumore.")
     else:
-        COL_A = f"Verticalità {vert_altro}"
-        COL_B = f"Verticalità {vert}"
-        TITOLO = "Cosa cambia con la Verticalità più piatta"
-        SOTTO = (f"Le stesse misure su {partite_altro} partite con la tabella "
-                 f"**{vert_altro}** e {partite} con la **{vert}**, a parità di tutto "
-                 "il resto: stessi bot, stesso numero di giocatori.")
+        COL_A = " · ".join(d[0] for d in DIFF)
+        COL_B = " · ".join(d[1] for d in DIFF)
+        pezzi = [d[2] for d in DIFF]
+        titolo = pezzi[0] if len(pezzi) == 1 else ", ".join(pezzi[:-1]) + " e " + pezzi[-1]
+        TITOLO = "Cosa cambia con " + titolo
+        SOTTO = (f"Le stesse misure su {partite_altro} partite con **{COL_A}** e "
+                 f"{partite} con **{COL_B}**, a parità di tutto il resto: stessi semi, "
+                 "stessi bot, stesso numero di giocatori."
+                 + ("" if len(DIFF) == 1 else
+                    " **Le regole cambiate sono più di una**, quindi la colonna Δ è "
+                    "l'effetto del pacchetto, non di una sola."))
 
 def r(c, k, d=None):
     d = d or c["n"]
