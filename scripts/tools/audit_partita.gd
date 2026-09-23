@@ -14,6 +14,13 @@ extends Node
 var _prima_edifici := {}
 var _prima_giocatori := []
 var _muto := false
+# Chi muove i bot: le cinque strategie vere o il tira-a-caso di RandomBot.
+# Il caso serve ancora come metro di paragone - "quanto pesa la testa di chi
+# gioca" e' la differenza fra le due colonne.
+var _strategie := true
+# Con --candidate entrano in gioco anche le due strategie fuori canone
+# (Continuita', Obiettivi): serve a misurare se cinque bastano.
+var _candidate := false
 # Il bot prova ogni mossa legale in ordine casuale, quindi il log si riempie di
 # "Costruzione rifiutata": e' il suo modo di cercare, non un fatto della
 # partita. Fuori per difetto, --tutto le rimette.
@@ -25,6 +32,8 @@ func _ready() -> void:
 	var players := int(args.get("players", "3"))
 	_muto = args.has("muto")
 	_tutto = args.has("tutto")
+	_strategie = not args.has("caso")
+	_candidate = args.has("candidate")
 
 	if args.has("games"):
 		_lotto(seme, players, int(args["games"]))
@@ -36,7 +45,11 @@ func _ready() -> void:
 	var ctl := GameController.new()
 	ctl.new_game(players, seme)
 	var gs := ctl.gs
-	_dì("=== Seme %d · %d giocatori · tutti bot ===" % [seme, players])
+	_dì("=== Seme %d · %d giocatori · bot %s ===" % [seme, players,
+		"con strategia" if _strategie else "a caso"])
+	if _strategie:
+		for i in players:
+			_dì("  giocatore %d gioca %s" % [i, strategia_di(i, 0)])
 	_dì("Terreni: %s" % _terreni(gs))
 	for p in gs.players:
 		_dì("  giocatore %d · eredita' segreta: %s" % [p.index, _nome_eredita(p.legacy_id)])
@@ -54,7 +67,7 @@ func _ready() -> void:
 				era, gs.current_event.get("name", "nessuno"), str(gs.turn_order)])
 			_dì("    " + _borsa(gs))
 		var chi := gs.current_index
-		RandomBot.play_turn(ctl)
+		_muovi(ctl, 0)
 		turno += 1
 		_racconta(gs, era, turno, chi)
 		log_letto = _log_nuovo(gs, log_letto)
@@ -69,17 +82,18 @@ func _ready() -> void:
 # Tante partite di fila, una riga CSV per giocatore: serve a sapere se un
 # distacco visto in una partita sola e' la regola o il caso.
 func _lotto(seme: int, players: int, quante: int) -> void:
-	print("seme;posto;giocatore;pv;" + ";".join(Riepilogo.VOCI.map(func(v): return str(v["id"]))))
+	print("seme;posto;giocatore;pv;strategia;" + ";".join(Riepilogo.VOCI.map(func(v): return str(v["id"]))))
 	for g in quante:
 		var ctl := GameController.new()
 		ctl.new_game(players, seme + g)
 		var guard := 0
 		while ctl.gs.phase != Enums.Phase.FINE_PARTITA and guard < 10000:
-			RandomBot.play_turn(ctl)
+			_muovi(ctl, g)
 			guard += 1
 		for riga in Riepilogo.righe(ctl.gs):
 			var campi: Array[String] = ["%d" % (seme + g), "%d" % riga["posto"],
-				"%d" % riga["player"], "%d" % riga["vp"]]
+				"%d" % riga["player"], "%d" % riga["vp"],
+				strategia_di(int(riga["player"]), g) if _strategie else "caso"]
 			for v in Riepilogo.VOCI:
 				campi.append("%d" % Riepilogo.punti(riga, str(v["id"])))
 			print(";".join(campi))
@@ -107,7 +121,7 @@ func _vita(seme: int, players: int, quante: int) -> void:
 		var guard := 0
 		while gs.phase != Enums.Phase.FINE_PARTITA and guard < 10000:
 			var era: int = gs.era
-			RandomBot.play_turn(ctl)
+			_muovi(ctl, g)
 			for b in gs.grid.buildings:
 				if not visto.has(b.uid): visto[b.uid] = true
 				if b.state != Enums.BuildingState.INTATTO and not era_rudere.has(b.uid):
@@ -153,7 +167,8 @@ func _riga_vuota() -> Dictionary:
 	return r
 
 func _stampa_vita(acc: Dictionary, quante: int, players: int, seme: int) -> void:
-	print("# partite=%d giocatori=%d seme_base=%d" % [quante, players, seme])
+	print("# partite=%d giocatori=%d seme_base=%d bot=%s" % [quante, players, seme,
+		"strategie" if _strategie else "caso"])
 	var intestazione: Array[String] = ["id", "nome", "era", "classi", "larghezza",
 		"costo_pietra", "costo_oro", "resistenza", "rendita", "scavo", "lampo_carta",
 		"copie", "n", "ere_intatto", "ere_piedi", "n_rudere", "n_rovina", "n_sepolto",
@@ -174,6 +189,16 @@ func _stampa_vita(acc: Dictionary, quante: int, players: int, seme: int) -> void
 			campi.append(str(r[k]))
 		for c in CANALI_CARTA: campi.append(str(r["vp_" + c]))
 		print(";".join(campi))
+
+# La strategia del posto `i` nella partita `g`: si ruota, cosi' ogni strategia
+# gioca ogni posto lo stesso numero di volte e il posto non falsa il confronto.
+func strategia_di(i: int, g: int) -> String:
+	var lista := StrategyBot.tutte() if _candidate else StrategyBot.STRATEGIE
+	return lista[(i + g) % lista.size()]
+
+func _muovi(ctl: GameController, g: int) -> void:
+	if _strategie: StrategyBot.play_turn(ctl, strategia_di(ctl.gs.current_index, g))
+	else: RandomBot.play_turn(ctl)
 
 # ---- il racconto di un turno ---------------------------------------
 
