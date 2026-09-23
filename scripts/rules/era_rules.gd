@@ -54,8 +54,14 @@ static func activate(gs: GameState, player: int, col: int) -> void:
 
 	if g.is_prosperity_center(col):
 		var gold := int(CardDB.constants["prosperity"]["gold_per_owner"])
-		for ow in g.owners_alive_in(col):
+		var chi := g.owners_alive_in(col)
+		for ow in chi:
 			gs.players[ow].gain(0, gold)
+		# A registro come gli altri incassi: il Centro Urbano paga tutti quelli
+		# che hanno un edificio intatto li', non solo chi ha attivato, ed e'
+		# l'unico premio del tabellone che paga anche gli avversari.
+		gs.log_line("Centro Urbano in colonna %d: %d proprietari incassano %d oro"
+			% [col, chi.size(), gold])
 
 # ---- evento --------------------------------------------------------
 # Confronta la resistenza effettiva con la forza dell'era.

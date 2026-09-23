@@ -1236,3 +1236,40 @@ dato è stato importato da lì. Ma due confronti fra ciò che è stampato e
        spengono o si tolgono? Finche' i bianchi contano per due carte,
        toglierli nasconderebbe un'informazione che serve; i neri invece non
        dicono piu' niente a nessuno. (solo grafica: non cambia il punteggio)
+
+82. **Il Centro Urbano paga 1,6 volte a partita.** La Prosperita' Urbana e' la
+    sola cosa sul tabellone che paga anche gli avversari: quando si attiva una
+    colonna con almeno tre edifici intatti di almeno due proprietari, ognuno di
+    quei proprietari incassa un oro. La scritta e' stampata su tutte le
+    tessere, quindi sembra una cosa che succede sempre.
+
+    Misurato su 300 partite a tre giocatori coi bot a strategie:
+
+    | | |
+    |---|--:|
+    | volte che paga, per partita | **1,61** |
+    | oro distribuito in tutto, per partita | 3,51 |
+    | partite in cui non paga MAI | **42%** |
+    | colonne diverse che pagano, per partita | 0,89 |
+    | colonne che sono Centro a fine partita | 8,5% |
+
+    E arriva tardi: nell'era 1 mai, nell'era 2 nel 3% delle partite, poi 24%,
+    35% e 13%. Prima dell'era 3 il tabellone non ha abbastanza edifici intatti
+    nella stessa colonna, e dall'era 4 in poi quelli che ci sono cominciano a
+    crollare.
+
+    Con dei bot, per giunta, che il Centro non lo cercano: nessuna delle cinque
+    strategie ha una riga che dica "costruisci dove c'e' gia' roba altrui per
+    accendere la Prosperita'", perche' il regolamento non dice che convenga.
+    Un tavolo di umani che ci puntasse lo farebbe scattare piu' spesso - ma
+    dovrebbe accorgersene, e finora sul tabellone non si vedeva.
+
+    **Domanda al designer:** un premio che paga 1,6 volte a partita e' quello
+    che volevi - una rarita' che quando capita fa piacere - o il Centro Urbano
+    dovrebbe pesare di piu' (soglia a 2 edifici invece di 3, oppure un oro a
+    testa a ogni fine era invece che a ogni attivazione)? Cambiarlo e' una
+    riga di `constants.prosperity`, ma e' una decisione di bilanciamento, non
+    di interfaccia.
+
+    Intanto il cartellino sulla fascia della tessera dice quali colonne sono
+    Centro **adesso**: prima bisognava contare gli edifici a mano.

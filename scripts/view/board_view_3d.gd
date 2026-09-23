@@ -326,6 +326,10 @@ func _tessere() -> void:
 		# dove sta per cliccare, perche' in prospettiva le colonne non stanno
 		# dove sembra. Col disegno sopra non si puo' piu' schiarire il colore
 		# della scatola, quindi si posa una velatura chiara sopra la tessera.
+		# Il cartellino della Prosperita': si posa sulla fascia in fondo alla
+		# tessera quando la colonna e' un Centro Urbano attivo. La scritta
+		# stampata c'e' sempre, il cartellino no.
+		if gs.grid.is_prosperity_center(c): _cartello_prosperita(c)
 		if c == _evidenziata:
 			var velo := _quad(Vector2(box.size.x, box.size.z),
 				Color(1, 1, 1, 0.22), true)
@@ -335,6 +339,21 @@ func _tessere() -> void:
 			velo.position = Vector3(box.position.x + box.size.x / 2.0,
 				box.end.y + 0.8, box.position.z + box.size.z / 2.0)
 			add_child(velo)
+
+func _cartello_prosperita(col: int) -> void:
+	if not ResourceLoader.exists(BoardLayout3D.PROSPERITA_PATH): return
+	var tex := load(BoardLayout3D.PROSPERITA_PATH) as Texture2D
+	if tex == null: return
+	var box := BoardLayout3D.prosperita_box(col)
+	var q := _quad(Vector2(box.size.x, box.size.z), Color.WHITE, true)
+	var mat := q.material_override as StandardMaterial3D
+	mat.albedo_texture = tex
+	mat.texture_filter = BaseMaterial3D.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
+	mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	q.rotate_x(-PI / 2.0)
+	q.position = Vector3(box.position.x + box.size.x / 2.0, box.position.y + 0.4,
+		box.position.z + box.size.z / 2.0)
+	add_child(q)
 
 func _edifici() -> void:
 	for b in gs.grid.buildings:

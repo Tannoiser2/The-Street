@@ -54,6 +54,8 @@ func _ready() -> void:
 	_run("la sagoma si sgretola quando crolla", _test_sgretolamento)
 	_run("  e la vista se ne accorge da sola", _test_sgretolamento_nella_vista)
 	_run("il gettone del personaggio sepolto", _test_gettone_scheletro)
+	_run("  e la rovina non porta cubetti", _test_cubetti_sulle_rovine)
+	_run("il cartellino della Prosperita' Urbana", _test_cartello_prosperita)
 	print("\n%d superati, %d falliti" % [_passed, _failed])
 	get_tree().quit(0 if _failed == 0 else 1)
 
@@ -2338,3 +2340,82 @@ func _larghezza_cubetti(lista: Array) -> float:
 		minimo = minf(minimo, x - float(c["lato"]) / 2.0)
 		massimo = maxf(massimo, x + float(c["lato"]) / 2.0)
 	return massimo - minimo
+
+# Una rovina non porta cubetti: non contano piu' niente, e una fila di cubi
+# sopra un edificio crollato faceva sembrare che contassero.
+func _test_cubetti_sulle_rovine() -> void:
+	var gs := _gioco().gs
+	var b := _metti(gs, _largo(3), 1, 2)
+	b.vetusta = 3
+	b.bonus_res = 2
+	_eq("un intatto li porta tutti", BoardLayout3D.cubetti(gs, b).size(), 5)
+	b.state = Enums.BuildingState.RUDERE
+	_eq("  il rudere anche: e' in piedi, solo spento",
+		BoardLayout3D.cubetti(gs, b).size(), 5)
+	b.state = Enums.BuildingState.ROVINA
+	_eq("  la rovina nessuno", BoardLayout3D.cubetti(gs, b).size(), 0)
+	# E il gettone dello scheletro invece resta: e' l'unica cosa che una
+	# rovina continua a rendere.
+	b.buried_character = "pe_mercante"
+	b.buried_character_era = 3
+	var piede := BoardLayout3D.scheletro_piede(gs, b)
+	_ok("ma il gettone del sepolto resta anche sulla rovina",
+		piede.y > 0.0 and BoardLayout3D.cubetti(gs, b).is_empty())
+
+	# In partita non e' un caso di laboratorio: le rovine sono la meta' del
+	# tabellone, e prima meta' tabellone portava cubetti inerti.
+	var ctl := GameController.new()
+	ctl.new_game(3, 726)
+	var giri := 0
+	while ctl.gs.phase != Enums.Phase.FINE_PARTITA and giri < 4000:
+		RandomBot.play_turn(ctl)
+		giri += 1
+	var rovine_con_cubetti := 0
+	var rovine := 0
+	for e in ctl.gs.grid.buildings:
+		if e.state != Enums.BuildingState.ROVINA: continue
+		rovine += 1
+		if not BoardLayout3D.cubetti(ctl.gs, e).is_empty(): rovine_con_cubetti += 1
+	_ok("a fine partita nessuna delle %d rovine porta cubetti" % rovine,
+		rovine > 0 and rovine_con_cubetti == 0)
+
+# Il cartellino della Prosperita' Urbana: la scritta e' stampata su tutte le
+# tessere, il cartellino si posa solo dove il Centro Urbano e' attivo davvero.
+func _test_cartello_prosperita() -> void:
+	var gs := _gioco().gs
+	var box := BoardLayout3D.prosperita_box(2)
+	var tessera := BoardLayout3D.tessera_box(2)
+	_ok("il cartellino sta sulla tessera, non fuori",
+		box.position.x >= tessera.position.x - 0.01
+		and box.position.x + box.size.x <= tessera.end.x + 0.01
+		and box.position.z >= tessera.position.z - 0.01
+		and box.position.z + box.size.z <= tessera.end.z + 0.01)
+	# E sta proprio sulla fascia in fondo, quella dove la scritta e' stampata:
+	# se scivola in su finisce sul testo della regola, se scivola in giu'
+	# finisce sulla cornice.
+	var centro_z := box.position.z + box.size.z / 2.0 - tessera.position.z
+	_ok("  e cade sulla fascia della scritta (%.1f mm su %.0f)"
+		% [centro_z, BoardLayout3D.TESSERA_D],
+		centro_z / BoardLayout3D.TESSERA_D > BoardLayout3D.PROSPERITA_FASCIA_SU
+		and centro_z / BoardLayout3D.TESSERA_D < BoardLayout3D.PROSPERITA_FASCIA_GIU)
+	_ok("  e tiene le proporzioni del disegno",
+		is_equal_approx(box.size.x / box.size.z, BoardLayout3D.PROSPERITA_RAPPORTO))
+	_ok("  e resta sotto l'ultimo binario, che finisce a %.0f mm"
+		% BoardLayout3D.BANDA_GIU,
+		box.position.z > BoardLayout3D.BANDA_GIU)
+
+	# Il Centro Urbano e' "tre edifici intatti di almeno due proprietari": si
+	# fa e si disfa da solo, e il cartellino lo segue.
+	_ok("una colonna vuota non e' un Centro", not gs.grid.is_prosperity_center(3))
+	var a := _metti(gs, "ed_capanne", 3, 1, 0, 0)
+	var b := _metti(gs, "ed_capanne", 3, 2, 0, 0)
+	_ok("  due edifici di un solo proprietario nemmeno",
+		not gs.grid.is_prosperity_center(3))
+	var c := _metti(gs, "ed_capanne", 3, 3, 0, 1)
+	_ok("  tre edifici di due proprietari si", gs.grid.is_prosperity_center(3))
+	c.state = Enums.BuildingState.ROVINA
+	_ok("  e se uno crolla il Centro si spegne", not gs.grid.is_prosperity_center(3))
+	c.state = Enums.BuildingState.RUDERE
+	_ok("  un rudere non lo riaccende: e' in piedi ma spento",
+		not gs.grid.is_prosperity_center(3))
+	_ok("  a, b restano in piedi", a.is_standing() and b.is_standing())

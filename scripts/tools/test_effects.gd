@@ -1146,6 +1146,27 @@ func _test_objectives() -> void:
 	_put(a, civ, 3, 4)
 	_ok("  livello 4 la soddisfa", Conditions.met(a, 0, _cond("mo_acropoli")))
 
+	# count_matching con lo stato — Colosseo: "primo il cui edificio
+	# SOPRAVVIVE esposto a 3 eventi". La Vetusta' resta addosso anche a un
+	# edificio crollato, perche' si azzera solo col restauro e una rovina non
+	# si restaura piu': senza chiedere lo stato, il Colosseo lo prendeva un
+	# giocatore su quattordici per un edificio che non era sopravvissuto per
+	# niente (docs/domande-aperte.md punto 81).
+	var col := _scena()
+	var v := _put(col, civ, 1)
+	v.vetusta = 3
+	_ok("Colosseo: un intatto con Vetusta' 3 la soddisfa",
+		Conditions.met(col, 0, _cond("mo_colosseo")))
+	v.state = Enums.BuildingState.RUDERE
+	_ok("  e anche un rudere: e' in piedi, e ha superato i suoi eventi",
+		Conditions.met(col, 0, _cond("mo_colosseo")))
+	v.state = Enums.BuildingState.ROVINA
+	_ok("  ma una rovina no: non e' sopravvissuta",
+		not Conditions.met(col, 0, _cond("mo_colosseo")))
+	v.state = Enums.BuildingState.INTATTO
+	v.is_buried = true
+	_ok("  e nemmeno un sepolto", not Conditions.met(col, 0, _cond("mo_colosseo")))
+
 	# same_column_count — San Clemente: 3 Religione nella STESSA colonna
 	var b := _scena()
 	for c2 in [1, 1, 5]: _put(b, rel, c2)

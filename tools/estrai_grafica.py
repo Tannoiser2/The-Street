@@ -728,6 +728,20 @@ def main(dest):
     else:
         print("terra del terrapieno: manca materiali/Terrapieno.png")
 
+    # Il cartellino della Prosperita' Urbana: si posa sulla fascia in fondo
+    # alla tessera, quella dove la scritta c'e' gia' stampata, e dice che quel
+    # Centro Urbano e' ATTIVO adesso. Un'immagine sola, quindi si copia e
+    # basta - ha gia' il fondo trasparente attorno alla cornice.
+    prosp = os.path.join(ROOT, "materiali", "ProsperitaUrbana.png")
+    if os.path.exists(prosp):
+        with open(prosp, "rb") as a, open(os.path.join(dest, "prosperita.png"), "wb") as b:
+            b.write(a.read())
+        pix = pymupdf.Pixmap(prosp)
+        print(f"cartellino della Prosperita': {pix.width}x{pix.height} px "
+              f"(rapporto {pix.width / pix.height:.2f})")
+    else:
+        print("cartellino della Prosperita': manca materiali/ProsperitaUrbana.png")
+
     normalizza_scheletri(os.path.join(ROOT, "materiali", "Scheletri.png"),
                          os.path.join(dest, "scheletri.png"))
 

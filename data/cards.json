@@ -3977,6 +3977,11 @@
         "op": "count_matching",
         "target": {
           "owner": "self",
+          "state": [
+            "intatto",
+            "rudere"
+          ],
+          "buried": false,
           "vetusta": {
             "min": 3
           }
@@ -4385,6 +4390,11 @@
           "terrain": [
             "bosco"
           ],
+          "state": [
+            "intatto",
+            "rudere"
+          ],
+          "buried": false,
           "vetusta": {
             "min": 3
           }

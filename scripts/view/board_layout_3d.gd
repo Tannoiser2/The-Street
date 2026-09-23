@@ -571,8 +571,17 @@ const LINGUETTA_D := 9.0
 
 # I cubetti di un edificio, in fila sul davanti della basetta.
 # Ogni voce: {"pos": Vector3, "tipo": "vetusta"|"resistenza"}.
+# UNA ROVINA NON PORTA CUBETTI. Nessuna regola glieli toglie - il crollo
+# azzera i potenziamenti, e la Vetusta' si azzera solo col restauro, che vale
+# sui ruderi - ma su una rovina non contano piu' niente: gli eventi guardano
+# solo chi e' in piedi, il restauro non la riguarda, le spolia si pagano solo
+# spianando un intatto, e da quando il Colosseo e Il Silvicoltore chiedono un
+# edificio "sopravvissuto" (intatto o rudere) nemmeno la Vetusta' le serve
+# piu'. Sul tabellone restava una fila di cubetti che non diceva piu' niente
+# a nessuno: 1851 rovine su 6167 in 300 partite.
 static func cubetti(gs: GameState, b: Building) -> Array[Dictionary]:
 	var out: Array[Dictionary] = []
+	if b.state == Enums.BuildingState.ROVINA: return out
 	var quanti := b.vetusta + maxi(0, b.bonus_res)
 	if quanti <= 0: return out
 	var passo := CUBETTO + CUBETTO_GAP
@@ -594,6 +603,34 @@ static func cubetti(gs: GameState, b: Building) -> Array[Dictionary]:
 			"tipo": "vetusta" if i < b.vetusta else "resistenza",
 		})
 	return out
+
+# ---- il cartellino della Prosperita' Urbana --------------------------
+# Un Centro Urbano e' una colonna con almeno tre edifici intatti di almeno due
+# proprietari diversi: ogni volta che la si attiva, ognuno di quei proprietari
+# incassa un oro. La condizione si fa e si disfa da sola - basta che un
+# edificio crolli - e sul tabellone non si vedeva: la scritta "Prosperita'
+# Urbana" e' stampata sulla tessera di tutte le colonne, accesa o spenta che
+# sia, e per sapere se quella li' pagava bisognava contare gli edifici a mano.
+#
+# Il cartellino si posa proprio su quella fascia, in fondo alla tessera: la
+# scritta stampata c'e' sempre, il cartellino solo quando il Centro e' attivo.
+# La fascia e' misurata sull'immagine della tessera - e' l'ultimo riquadro
+# scuro prima della cornice - e sta fra il 90% e il 98,5% della sua lunghezza.
+const PROSPERITA_PATH := "res://assets/prosperita.png"
+const PROSPERITA_FASCIA_SU := 0.898     # in frazioni di TESSERA_D
+const PROSPERITA_FASCIA_GIU := 0.985
+const PROSPERITA_RAPPORTO := 1387.0 / 518.0
+const PROSPERITA_MARGINE := 2.5         # dentro la cornice della tessera
+
+# Il rettangolo dove si posa, sul piano della tessera.
+static func prosperita_box(col: int) -> AABB:
+	var t := tessera_box(col)
+	var largo := TESSERA_W - 2.0 * PROSPERITA_MARGINE
+	var alto := largo / PROSPERITA_RAPPORTO
+	var centro_z := TESSERA_D * (PROSPERITA_FASCIA_SU + PROSPERITA_FASCIA_GIU) / 2.0
+	return AABB(Vector3(t.position.x + PROSPERITA_MARGINE, t.end.y,
+			t.position.z + centro_z - alto / 2.0),
+		Vector3(largo, 0.0, alto))
 
 # ---- il gettone dello scheletro --------------------------------------
 # "Nelle ere 1-4, a fine era il personaggio non si scarta: infilatelo sotto la
