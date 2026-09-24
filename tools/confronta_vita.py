@@ -75,6 +75,8 @@ def etichetta(regole):
     if regole.get("draft") == "si": pezzi.append("draft dei Personaggi")
     if regole.get("sepolti") == "si" and regole.get("draft") == "si": pezzi.append("Personaggi sepolti")
     if regole.get("vetusta", "3") == "0": pezzi.append("senza Vetustà")
+    if regole.get("protezione", "2") != "2": pezzi.append(f"protezione +{regole['protezione']}")
+    if regole.get("scheletro", "sotterrato") != "sotterrato": pezzi.append(f"scheletro conta {regole['scheletro']}")
     if regole.get("dati", "").startswith("v2"): pezzi.insert(0, "v2 tre risorse")
     return ", ".join(pezzi)
 

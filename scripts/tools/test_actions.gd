@@ -1329,6 +1329,16 @@ func _test_senza_vetusta_v2() -> void:
 	_ok("il proprietario potenzia l'edificio", potenziato)
 	if potenziato:
 		_eq("  e il lavoratore resta sotto come scheletro", costruito.buried_character, "lavoratore")
+		# Registro 96: `scheletro_conta` "sempre" paga lo scheletro anche se
+		# l'edificio sta in piedi; "sotterrato" (la regola di sempre) no.
+		var chi_p: PlayerState = gs.players[chi]
+		var prima := chi_p.vp
+		CardDB.constants["scheletro_conta"] = "sotterrato"
+		Scoring._skeletons(gs)
+		_eq("in piedi, lo scheletro non paga (sotterrato)", chi_p.vp, prima)
+		CardDB.constants["scheletro_conta"] = "sempre"
+		Scoring._skeletons(gs)
+		_eq("  ma con \"sempre\" paga 6 meno l'era", chi_p.vp, prima + 6 - costruito.buried_character_era)
 	CardDB.load_db(CardDB.DB_PATH)
 	# Con la v1.5 la sepoltura c'e' ancora.
 	var c1 := _game(2, 7)

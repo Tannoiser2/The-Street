@@ -154,6 +154,17 @@ func _ready() -> void:
 		CardDB.constants["vetusta_max"] = vm
 		CardDB.constants["vetusta_max_bosco"] = vm + 1 if vm > 0 else 0
 		print("# vetusta_max = %d" % vm)
+	# LA PROTEZIONE DEL LAVORATORE (`--protezione 1`, `protection_bonus`, 2 nei
+	# dati): con quattro lavoratori e' quattro edifici protetti per era, e la
+	# Rendita vince il 56% (registro 95). Registro 96: si prova a +1.
+	if args.has("protezione"):
+		CardDB.constants["protection_bonus"] = int(args["protezione"])
+		print("# protection_bonus = %d" % int(args["protezione"]))
+	# GLI SCHELETRI (`--scheletro sotterrato|sempre`, `scheletro_conta`): con
+	# "sempre" lo scheletro del potenziamento paga comunque finisca l'edificio.
+	if args.has("scheletro"):
+		CardDB.constants["scheletro_conta"] = str(args["scheletro"])
+		print("# scheletro_conta = %s" % str(args["scheletro"]))
 	# I LAVORATORI PER ERA (`--lavoratori 5`, `workers_base`, 3 nei dati). Nel
 	# turno v2 ogni lavoratore e' UN'azione, non piu' un'attivazione piu'
 	# un'azione: con 3 il ritmo si dimezza (registro 93), e la manopola misura
@@ -348,7 +359,7 @@ func _stampa_vita(acc: Dictionary, quante: int, players: int, seme: int) -> void
 	var vt = CardDB.constants["verticality_vp"]
 	var scala: Array[String] = []
 	for i in 4: scala.append("%d" % int(vt[str(i + 1)]))
-	print("# partite=%d giocatori=%d seme_base=%d bot=%s verticalita=%s prosperita=%d rovina=%d binari=%s versione_bot=%d strategie=%d centro=%s rudere=%s spianato=%s scavo=%s sconto=%s disturbo=%d premio=%s dati=%s era5=%s tetto=%d turno=%s lavoratori=%d draft=%s sepolti=%s vetusta=%d" % [
+	print("# partite=%d giocatori=%d seme_base=%d bot=%s verticalita=%s prosperita=%d rovina=%d binari=%s versione_bot=%d strategie=%d centro=%s rudere=%s spianato=%s scavo=%s sconto=%s disturbo=%d premio=%s dati=%s era5=%s tetto=%d turno=%s lavoratori=%d draft=%s sepolti=%s vetusta=%d protezione=%d scheletro=%s" % [
 		quante, players, seme, "strategie" if _strategie else "caso",
 		"/".join(scala), int(CardDB.constants["prosperity"]["min_buildings"]),
 		int(CardDB.constants.get("rovina_gap", 2)),
@@ -369,7 +380,9 @@ func _stampa_vita(acc: Dictionary, quante: int, players: int, seme: int) -> void
 		int(CardDB.constants["workers_base"]),
 		"si" if bool(CardDB.constants.get("draft_personaggi", false)) else "no",
 		"si" if bool(CardDB.constants.get("personaggi_sepolti", true)) else "no",
-		int(CardDB.constants["vetusta_max"])])
+		int(CardDB.constants["vetusta_max"]),
+		int(CardDB.constants["protection_bonus"]),
+		str(CardDB.constants.get("scheletro_conta", "sotterrato"))])
 	var intestazione: Array[String] = ["id", "nome", "era", "classi", "larghezza",
 		"costo_pietra", "costo_oro", "resistenza", "rendita", "scavo", "lampo_carta",
 		"copie", "n", "ere_intatto", "ere_piedi", "n_rudere", "n_rovina", "n_sepolto",

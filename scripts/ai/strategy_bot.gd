@@ -618,8 +618,11 @@ static func _valore_potenziamento(gs: GameState, p: PlayerState, v, dett := {}) 
 	# finira' sotterrato, contato come una possibilita', come per i Personaggi.
 	if (bool(CardDB.constants.get("scheletro_potenziamento", false)) or bool(CardDB.constants.get("turno_v2", false))) \
 			and gs.era <= 4 and b.buried_character == "":
-		q += 0.3 * float(6 - gs.era)
-		dett["lo scheletro vale %d se sepolto" % (6 - gs.era)] = 0.3 * float(6 - gs.era)
+		# Se conta comunque ("sempre") sono punti quasi sicuri; se conta
+		# solo da sotterrato, una possibilita'.
+		var peso := 0.8 if str(CardDB.constants.get("scheletro_conta", "sotterrato")) == "sempre" else 0.3
+		q += peso * float(6 - gs.era)
+		dett["lo scheletro vale %d" % (6 - gs.era)] = peso * float(6 - gs.era)
 	return q
 
 static func _valore_restauro(gs: GameState, p: PlayerState, v, dett := {}) -> float:

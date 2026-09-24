@@ -76,6 +76,8 @@ def etichetta(regole):
     if regole.get("draft_personaggi") == "true": pezzi.append("draft dei Personaggi")
     if regole.get("personaggi_sepolti") == "true": pezzi.append("Personaggi sepolti")
     if regole.get("vetusta_max", "0") != "0": pezzi.append(f"Vetustà {regole['vetusta_max']}")
+    if regole.get("protection_bonus", "2") != "2": pezzi.append(f"protezione +{regole['protection_bonus']}")
+    if regole.get("scheletro_conta", "sotterrato") != "sotterrato": pezzi.append(f"scheletro conta {regole['scheletro_conta']}")
     # Il file dati: la riga "# dati = ..." c'e' solo quando non e' cards.json.
     if "dati" in regole: pezzi.insert(0, "v2 tre risorse" if "v2" in regole["dati"] else regole["dati"])
     return ", ".join(pezzi) if pezzi else "oggi"
