@@ -24,13 +24,22 @@ static func _census_final(gs: GameState) -> void:
 # al posto della Verticalita'. Tre moltiplicatori da misurare: "per_livello"
 # S x L, "piu_livello" S + L, "per_livello_meno_uno" S x (L - 1). Uno
 # spianato (S = 0) non paga mai: seppellire il proprio vivo resta a zero.
-static func premio_scavo(scavo: int, livello: int) -> int:
+# La correzione all'ultima era (registro 91, manopola `premio_era5`): "intero"
+# come nelle altre ere, "dimezzato" per difetto, "niente". Serve perche' con
+# S x L meta' del premio arrivava nell'era 5 e una partita su cinque si
+# decideva li'.
+static func premio_scavo(scavo: int, livello: int, era: int = 1) -> int:
 	if scavo <= 0: return 0
+	var premio := 0
 	match str(CardDB.constants.get("premio_scavo", "nessuno")):
-		"per_livello": return scavo * livello
-		"piu_livello": return scavo + livello
-		"per_livello_meno_uno": return scavo * (livello - 1)
-	return 0
+		"per_livello": premio = scavo * livello
+		"piu_livello": premio = scavo + livello
+		"per_livello_meno_uno": premio = scavo * (livello - 1)
+	if premio > 0 and era >= int(CardDB.constants["eras"]):
+		match str(CardDB.constants.get("premio_era5", "intero")):
+			"dimezzato": premio = premio / 2
+			"niente": premio = 0
+	return premio
 
 # Metà del premio a chi ha la cima; metà divisa in proporzione agli edifici.
 static func _verticality(gs: GameState) -> void:

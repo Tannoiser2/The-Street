@@ -90,7 +90,8 @@
     },
     "level_cap_per_era_per_column": 1,
     "market_size": 6,
-    "side_rows": 3
+    "side_rows": 3,
+    "resource_cap_per_resource": 3
   },
   "terrains": [
     {
@@ -2945,24 +2946,28 @@
       "is_dynasty": true,
       "timing": "permanente",
       "imprint": false,
-      "effect_text": "Sempre disponibile fuori dalle file, nessuna classe richiesta. Costo a scalare secondo l'era: era 1 = 4 pietra · era 2 = 2 pietra + 1 oro · era 3 = 1 pietra + 2 oro · era 4 = 3 oro. Nessuna abilità: aggiunge un quarto lavoratore, permanente e attivo da subito. Massimo una a testa.",
+      "effect_text": "Sempre disponibile fuori dalle file, nessuna classe richiesta. Costo a scalare in Idee: era 1 = 4 · era 2 = 3 · era 3 = 3 · era 4 = 3. Nessuna abilita': aggiunge un quarto lavoratore, permanente e attivo da subito. Massimo una a testa.",
       "copies": 4,
       "cost_by_era": {
         "1": {
-          "pietra": 4,
-          "oro": 0
+          "pietra": 0,
+          "oro": 0,
+          "idee": 4
         },
         "2": {
-          "pietra": 2,
-          "oro": 1
+          "pietra": 0,
+          "oro": 0,
+          "idee": 3
         },
         "3": {
-          "pietra": 1,
-          "oro": 2
+          "pietra": 0,
+          "oro": 0,
+          "idee": 3
         },
         "4": {
           "pietra": 0,
-          "oro": 3
+          "oro": 0,
+          "idee": 3
         }
       }
     }
@@ -2974,7 +2979,9 @@
       "era": 1,
       "class": "cultura",
       "cost": {
-        "oro": 1
+        "pietra": 0,
+        "oro": 0,
+        "idee": 1
       },
       "family": "arte",
       "effect_text": "Arte: +1 PV. Scavo dell'edificio +2.",
@@ -3001,7 +3008,9 @@
       "era": 1,
       "class": "militare",
       "cost": {
-        "oro": 1
+        "pietra": 1,
+        "oro": 0,
+        "idee": 0
       },
       "family": "struttura",
       "effect_text": "Struttura: +1 res.",
@@ -3023,7 +3032,9 @@
       "era": 1,
       "class": "religione",
       "cost": {
-        "oro": 1
+        "pietra": 0,
+        "oro": 0,
+        "idee": 1
       },
       "family": "arte",
       "effect_text": "Arte: +1 PV (+1 extra su edificio Religione).",
@@ -3056,7 +3067,9 @@
       "era": 1,
       "class": "civico",
       "cost": {
-        "oro": 1
+        "pietra": 0,
+        "oro": 1,
+        "idee": 0
       },
       "family": "altro",
       "effect_text": "Quando abiti questo edificio, +1 pietra.",
@@ -3077,7 +3090,9 @@
       "era": 1,
       "class": "ingegneria",
       "cost": {
-        "oro": 1
+        "pietra": 1,
+        "oro": 0,
+        "idee": 0
       },
       "family": "struttura",
       "effect_text": "Struttura: +1 res.",
@@ -3099,7 +3114,9 @@
       "era": 2,
       "class": "cultura",
       "cost": {
-        "oro": 1
+        "pietra": 0,
+        "oro": 0,
+        "idee": 1
       },
       "family": "arte",
       "effect_text": "Arte: +2 PV.",
@@ -3117,7 +3134,9 @@
       "era": 2,
       "class": "religione",
       "cost": {
-        "oro": 1
+        "pietra": 0,
+        "oro": 0,
+        "idee": 1
       },
       "family": "arte",
       "effect_text": "Arte: +1 PV. Scavo +2.",
@@ -3144,7 +3163,9 @@
       "era": 2,
       "class": "militare",
       "cost": {
-        "oro": 1
+        "pietra": 1,
+        "oro": 0,
+        "idee": 0
       },
       "family": "struttura",
       "effect_text": "Struttura: +1 res.",
@@ -3166,7 +3187,9 @@
       "era": 2,
       "class": "commercio",
       "cost": {
-        "oro": 1
+        "pietra": 0,
+        "oro": 1,
+        "idee": 0
       },
       "family": "altro",
       "effect_text": "Solo su slot fiume: quando abiti qui, +1 oro.",
@@ -3197,7 +3220,9 @@
       "era": 2,
       "class": "cultura",
       "cost": {
-        "oro": 1
+        "pietra": 0,
+        "oro": 1,
+        "idee": 0
       },
       "family": "altro",
       "effect_text": "Scavo dell'edificio +2.",
@@ -3219,7 +3244,9 @@
       "era": 3,
       "class": "ingegneria",
       "cost": {
-        "oro": 1
+        "pietra": 1,
+        "oro": 0,
+        "idee": 0
       },
       "family": "struttura",
       "effect_text": "Struttura: +1 res.",
@@ -3241,7 +3268,9 @@
       "era": 3,
       "class": "religione",
       "cost": {
-        "oro": 1
+        "pietra": 0,
+        "oro": 1,
+        "idee": 0
       },
       "family": "altro",
       "effect_text": "Ibrido: +1 PV e +1 res.",
@@ -3268,7 +3297,9 @@
       "era": 3,
       "class": "militare",
       "cost": {
-        "oro": 1
+        "pietra": 1,
+        "oro": 0,
+        "idee": 0
       },
       "family": "struttura",
       "effect_text": "Struttura: +1 res. L'edificio conta anche come Militare.",
@@ -3301,7 +3332,9 @@
       "era": 3,
       "class": "commercio",
       "cost": {
-        "oro": 1
+        "pietra": 0,
+        "oro": 1,
+        "idee": 0
       },
       "family": "altro",
       "effect_text": "L'affitto incassato da questo edificio è +1.",
@@ -3323,7 +3356,9 @@
       "era": 3,
       "class": "religione",
       "cost": {
-        "oro": 1
+        "pietra": 0,
+        "oro": 0,
+        "idee": 1
       },
       "family": "arte",
       "effect_text": "Arte: +2 PV su edificio Religione, altrimenti +1.",
@@ -3356,7 +3391,9 @@
       "era": 4,
       "class": "cultura",
       "cost": {
-        "oro": 2
+        "pietra": 0,
+        "oro": 0,
+        "idee": 2
       },
       "family": "arte",
       "effect_text": "Arte: +3 PV.",
@@ -3374,7 +3411,9 @@
       "era": 4,
       "class": "cultura",
       "cost": {
-        "oro": 2
+        "pietra": 0,
+        "oro": 0,
+        "idee": 2
       },
       "family": "arte",
       "effect_text": "Arte: +2 PV.",
@@ -3392,7 +3431,9 @@
       "era": 4,
       "class": "ingegneria",
       "cost": {
-        "oro": 2
+        "pietra": 0,
+        "oro": 2,
+        "idee": 0
       },
       "family": "altro",
       "effect_text": "Ibrido: +2 PV e +1 res.",
@@ -3419,7 +3460,9 @@
       "era": 4,
       "class": "civico",
       "cost": {
-        "oro": 2
+        "pietra": 0,
+        "oro": 0,
+        "idee": 2
       },
       "family": "arte",
       "effect_text": "Arte: +2 PV.",
@@ -3437,7 +3480,9 @@
       "era": 4,
       "class": "militare",
       "cost": {
-        "oro": 2
+        "pietra": 2,
+        "oro": 0,
+        "idee": 0
       },
       "family": "struttura",
       "effect_text": "Struttura: +1 res (+2 su edificio Militare).",
@@ -3478,7 +3523,9 @@
       "era": 5,
       "class": "cultura",
       "cost": {
-        "oro": 2
+        "pietra": 0,
+        "oro": 0,
+        "idee": 2
       },
       "family": "arte",
       "effect_text": "Arte: +3 PV.",
@@ -3496,7 +3543,9 @@
       "era": 5,
       "class": "civico",
       "cost": {
-        "oro": 2
+        "pietra": 0,
+        "oro": 2,
+        "idee": 0
       },
       "family": "altro",
       "effect_text": "Finale: +2 Scavo a ogni edificio Sotterrato sotto questo edificio.",
@@ -3518,7 +3567,9 @@
       "era": 5,
       "class": "ingegneria",
       "cost": {
-        "oro": 2
+        "pietra": 0,
+        "oro": 2,
+        "idee": 0
       },
       "family": "altro",
       "effect_text": "+2 PV.",
@@ -3536,7 +3587,9 @@
       "era": 5,
       "class": "commercio",
       "cost": {
-        "oro": 2
+        "pietra": 0,
+        "oro": 2,
+        "idee": 0
       },
       "family": "altro",
       "effect_text": "Quando abiti questo edificio, +2 oro.",
@@ -3557,7 +3610,9 @@
       "era": 5,
       "class": "religione",
       "cost": {
-        "oro": 2
+        "pietra": 0,
+        "oro": 2,
+        "idee": 0
       },
       "family": "altro",
       "effect_text": "+2 PV.",

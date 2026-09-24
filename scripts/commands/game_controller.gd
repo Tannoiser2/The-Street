@@ -241,7 +241,7 @@ func build(card_id: String, col_from: int, above: bool, pay_option: int = 0, des
 			altro.buried_era = gs.era
 			# Il premio di scavo si paga qui, sul momento, come il Lampo: il
 			# livello e' quello dell'edificio appena costruito.
-			var premio := Scoring.premio_scavo(altro.scavo_value(), b.level)
+			var premio := Scoring.premio_scavo(altro.scavo_value(), b.level, gs.era)
 			if premio > 0:
 				p.add_vp("scavo", premio)
 				altro.rende("scavo", premio)

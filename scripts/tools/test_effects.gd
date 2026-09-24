@@ -2377,5 +2377,17 @@ func _test_premio_scavo() -> void:
 	CardDB.constants["premio_scavo"] = "per_livello_meno_uno"
 	_eq("S x (L-1): al livello 1 paga 0", Scoring.premio_scavo(3, 1), 0)
 	_eq("  al livello 3 paga 6", Scoring.premio_scavo(3, 3), 6)
+	# La correzione all'ultima era (registro 91).
+	var era5_com_era: String = str(CardDB.constants.get("premio_era5", "intero"))
+	var ultima := int(CardDB.constants["eras"])
+	CardDB.constants["premio_scavo"] = "per_livello"
+	CardDB.constants["premio_era5"] = "intero"
+	_eq("era 5 intera: 3 al livello 3 paga 9", Scoring.premio_scavo(3, 3, ultima), 9)
+	CardDB.constants["premio_era5"] = "dimezzato"
+	_eq("  dimezzata: paga 4", Scoring.premio_scavo(3, 3, ultima), 4)
+	_eq("  ma nell'era 4 paga 9", Scoring.premio_scavo(3, 3, ultima - 1), 9)
+	CardDB.constants["premio_era5"] = "niente"
+	_eq("  niente: paga 0", Scoring.premio_scavo(3, 3, ultima), 0)
+	CardDB.constants["premio_era5"] = era5_com_era
 	CardDB.constants["premio_scavo"] = com_era
 

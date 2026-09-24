@@ -221,7 +221,14 @@ static func census(gs: GameState) -> void:
 # Si scarta a scelta del giocatore; il default scarta prima la pietra.
 static func disperse(gs: GameState) -> void:
 	var cap := int(CardDB.constants["resource_cap"])
+	# V2 (registro 91): un tetto PER RISORSA, "tetto a tre"; 0 nei dati v1.5,
+	# cioe' spento. Si applica prima del tetto totale, che resta com'e'.
+	var per_risorsa := int(CardDB.constants.get("resource_cap_per_resource", 0))
 	for p in gs.players:
+		if per_risorsa > 0:
+			p.pietra = mini(p.pietra, per_risorsa)
+			p.oro = mini(p.oro, per_risorsa)
+			p.idee = mini(p.idee, per_risorsa)
 		var excess: int = p.total_resources() - cap
 		if excess <= 0: continue
 		var from_p: int = min(excess, p.pietra)

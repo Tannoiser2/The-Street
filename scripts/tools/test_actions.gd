@@ -33,6 +33,7 @@ func _ready() -> void:
 	_run("chi ha sepolto chi, e lo sconto solo sulle rovine altrui", _test_sepolto_da)
 	_run("il premio di scavo si paga e torna col libro mastro", _test_premio_in_partita)
 	_run("la v2 a tre risorse gira sullo stesso motore", _test_tre_risorse)
+	_run("il tetto per risorsa alla dispersione", _test_tetto_per_risorsa)
 	print("\n%d superati, %d falliti" % [_passed, _failed])
 	get_tree().quit(0 if _failed == 0 else 1)
 
@@ -1101,4 +1102,24 @@ func _test_tre_risorse() -> void:
 	_eq("  nessuno va sotto zero", sotto_zero, 0)
 	CardDB.load_db(CardDB.DB_PATH)
 	_eq("ricaricata la v1.5, il Dolmen non chiede Idee", int(CardDB.buildings["ed_dolmen"]["cost"].get("idee", 0)), 0)
+
+# "Tetto a tre" (registro 91): alla dispersione ogni risorsa scende a 3, poi
+# vale il tetto totale di sempre. Spento (0, i dati v1.5) non cambia niente.
+func _test_tetto_per_risorsa() -> void:
+	var com_era := int(CardDB.constants.get("resource_cap_per_resource", 0))
+	var gs := _game(3, 41).gs
+	var p: PlayerState = gs.players[0]
+	p.pietra = 4
+	p.oro = 4
+	p.idee = 4
+	CardDB.constants["resource_cap_per_resource"] = 0
+	EraRules.disperse(gs)
+	_eq("spento: resta il tetto totale (5), si scarta prima la pietra", [p.pietra, p.oro, p.idee], [0, 1, 4])
+	p.pietra = 4
+	p.oro = 4
+	p.idee = 4
+	CardDB.constants["resource_cap_per_resource"] = 3
+	EraRules.disperse(gs)
+	_eq("a 3: ogni risorsa scende a 3, poi il totale a 5", [p.pietra, p.oro, p.idee], [0, 2, 3])
+	CardDB.constants["resource_cap_per_resource"] = com_era
 

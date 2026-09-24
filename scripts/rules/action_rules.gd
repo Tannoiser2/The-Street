@@ -101,12 +101,14 @@ static func quote_restore(gs: GameState, player: int, target: Building) -> Actio
 	if not free.is_empty() and Effects.matches(gs, target, free.get("target", {})):
 		return ActionQuote.yes(0, 0, target)
 	var c: Dictionary = target.data["cost"]
+	# "La ristrutturazione si paga in Costruzione e Denaro" (registro 91): la
+	# parte in Idee del costo originale si paga in Denaro. Con i dati v1.5 le
+	# Idee sono 0 e il conto e' quello di sempre.
 	var p := int(ceil(float(int(c["pietra"])) / 2.0))
-	var o := int(ceil(float(int(c["oro"])) / 2.0))
-	var i := int(ceil(float(int(c.get("idee", 0))) / 2.0))
+	var o := int(ceil(float(int(c["oro"]) + int(c.get("idee", 0))) / 2.0))
 	if _touches_terrain(gs, target, Enums.Terrain.BOSCO):
 		p = max(0, p - 1)
-	return ActionQuote.yes(p, o, target, i)
+	return ActionQuote.yes(p, o, target)
 
 # ---- reclutare -----------------------------------------------------
 # "Reclutare costa 1 oro e richiede che la classe del personaggio sia presente

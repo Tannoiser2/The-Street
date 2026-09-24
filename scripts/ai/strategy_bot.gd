@@ -372,7 +372,7 @@ static func _valore_costruzione(gs: GameState, p: PlayerState, v, strategia: Str
 		# finire coperta del tutto da questa costruzione.
 		if str(CardDB.constants.get("premio_scavo", "nessuno")) != "nessuno":
 			var premio := 0.0
-			for b in q2.bases: premio += float(Scoring.premio_scavo(b.scavo_value(), q2.level))
+			for b in q2.bases: premio += float(Scoring.premio_scavo(b.scavo_value(), q2.level, gs.era))
 			if premio != 0.0:
 				dett["premio di scavo"] = premio * 0.8
 				q += premio * 0.8

@@ -126,6 +126,14 @@ func _ready() -> void:
 	if args.has("premio"):
 		CardDB.constants["premio_scavo"] = str(args["premio"])
 		print("# premio_scavo = %s" % str(args["premio"]))
+	#   --premio_era5 intero | dimezzato | niente   (la correzione all'ultima era)
+	if args.has("premio_era5"):
+		CardDB.constants["premio_era5"] = str(args["premio_era5"])
+		print("# premio_era5 = %s" % str(args["premio_era5"]))
+	#   --tetto N   il tetto per risorsa alla dispersione (0 = solo il totale)
+	if args.has("tetto"):
+		CardDB.constants["resource_cap_per_resource"] = int(args["tetto"])
+		print("# resource_cap_per_resource = %d" % int(args["tetto"]))
 	# LA FORZA STA SULLA CARTA EVENTO, non nella costante: `event_force_by_era`
 	# e' la tabella di riferimento, ma chi decide e' `gs.current_event["force"]`.
 	# La prima versione di questa manopola scriveva la costante e non cambiava
@@ -311,7 +319,7 @@ func _stampa_vita(acc: Dictionary, quante: int, players: int, seme: int) -> void
 	var vt = CardDB.constants["verticality_vp"]
 	var scala: Array[String] = []
 	for i in 4: scala.append("%d" % int(vt[str(i + 1)]))
-	print("# partite=%d giocatori=%d seme_base=%d bot=%s verticalita=%s prosperita=%d rovina=%d binari=%s versione_bot=%d strategie=%d centro=%s rudere=%s spianato=%s scavo=%s sconto=%s disturbo=%d premio=%s dati=%s" % [
+	print("# partite=%d giocatori=%d seme_base=%d bot=%s verticalita=%s prosperita=%d rovina=%d binari=%s versione_bot=%d strategie=%d centro=%s rudere=%s spianato=%s scavo=%s sconto=%s disturbo=%d premio=%s dati=%s era5=%s tetto=%d" % [
 		quante, players, seme, "strategie" if _strategie else "caso",
 		"/".join(scala), int(CardDB.constants["prosperity"]["min_buildings"]),
 		int(CardDB.constants.get("rovina_gap", 2)),
@@ -325,7 +333,9 @@ func _stampa_vita(acc: Dictionary, quante: int, players: int, seme: int) -> void
 		"altrui" if bool(CardDB.constants.get("sconto_macerie_solo_altrui", false)) else "tutti",
 		int(CardDB.constants.get("disturbo_vp", 0)),
 		str(CardDB.constants.get("premio_scavo", "nessuno")),
-		str(CardDB.ruleset)])
+		str(CardDB.ruleset),
+		str(CardDB.constants.get("premio_era5", "intero")),
+		int(CardDB.constants.get("resource_cap_per_resource", 0))])
 	var intestazione: Array[String] = ["id", "nome", "era", "classi", "larghezza",
 		"costo_pietra", "costo_oro", "resistenza", "rendita", "scavo", "lampo_carta",
 		"copie", "n", "ere_intatto", "ere_piedi", "n_rudere", "n_rovina", "n_sepolto",

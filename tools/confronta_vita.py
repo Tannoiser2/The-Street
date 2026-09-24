@@ -68,6 +68,8 @@ def etichetta(regole):
     if regole.get("disturbo", "0") != "0": pezzi.append(f"disturbo {regole['disturbo']}")
     if regole.get("verticalita") == "0/0/0/0": pezzi.append("senza Verticalità")
     if regole.get("premio", "nessuno") != "nessuno": pezzi.append(NOMI_PREMIO.get(regole["premio"], regole["premio"]))
+    if regole.get("era5", "intero") != "intero": pezzi.append(f"era 5 {regole['era5']}")
+    if regole.get("tetto", "0") != "0": pezzi.append(f"tetto {regole['tetto']} per risorsa")
     if regole.get("dati", "").startswith("v2"): pezzi.insert(0, "v2 tre risorse")
     return ", ".join(pezzi)
 

@@ -52,6 +52,23 @@ for t in v2["terrains"]:
     t["rule"] = REGOLE[t["id"]]
 v2["constants"]["terrain_mix_by_players"] = MIX
 v2["constants"]["start_resources"] = {"pietra": 2, "oro": 0, "idee": 0}
+# Registro 91, decisioni del designer:
+# - "tetto a tre": ogni risorsa al massimo 3 alla dispersione (il totale resta 5);
+v2["constants"]["resource_cap_per_resource"] = 3
+# - i potenziamenti "dipende da cosa sono": Arte in Idee, Struttura in
+#   Costruzione, il resto in Denaro; l'importo e' quello di oggi (1, 2 nelle ere 4-5);
+RISORSA_FAMIGLIA = {"arte": "idee", "struttura": "pietra", "altro": "oro"}
+for u in v2["upgrades"]:
+    quanto = sum(int(v) for v in u["cost"].values())
+    u["cost"] = {"pietra": 0, "oro": 0, "idee": 0}
+    u["cost"][RISORSA_FAMIGLIA[u["family"]]] = quanto
+# - la Dinastia si paga in Idee, stesse unita' di oggi (4 / 3 / 3 / 3);
+for c in v2["characters"]:
+    if c.get("is_dynasty"):
+        c["cost_by_era"] = {e: {"pietra": 0, "oro": 0, "idee": int(v["pietra"]) + int(v["oro"])}
+                            for e, v in c["cost_by_era"].items()}
+        c["effect_text"] = c["effect_text"].split("Costo a scalare")[0] + "Costo a scalare in Idee: era 1 = 4 · era 2 = 3 · era 3 = 3 · era 4 = 3. Nessuna abilita': aggiunge un quarto lavoratore, permanente e attivo da subito. Massimo una a testa."
+# - la ristrutturazione in Costruzione e Denaro: e' nel motore (ActionRules.quote_restore).
 out = os.path.join(RADICE, "data/cards-v2.json")
 json.dump(v2, open(out, "w", encoding="utf-8"), indent=2, ensure_ascii=False)
 open(out, "a").write("\n")
