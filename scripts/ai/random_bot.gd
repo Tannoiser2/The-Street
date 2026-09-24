@@ -18,7 +18,11 @@ static func play_turn(ctl: GameController) -> void:
 		if opzioni.is_empty(): break
 		if not ctl.choose(int(opzioni[gs.rng.randi_range(0, opzioni.size() - 1)])): break
 	if gs.phase == Enums.Phase.FINE_PARTITA: return
+	if not gs.pending_choice.is_empty(): return
 	var p := gs.current_player()
+	if bool(CardDB.constants.get("turno_v2", false)):
+		_play_turn_v2(ctl, p)
+		return
 	var col := _free_column(gs, p)
 	# "Mettetelo su una colonna, sopra un vostro edificio ancora in piedi
 	# oppure sulla colonna nuda": abitare da' +2 resistenza, quindi conviene
@@ -117,3 +121,41 @@ static func _shuffle(gs: GameState, a: Array) -> void:
 	for i in range(a.size() - 1, 0, -1):
 		var j := gs.rng.randi_range(0, i)
 		var tmp = a[i]; a[i] = a[j]; a[j] = tmp
+
+# ---- il turno v2 -----------------------------------------------------
+# Una delle sette cose, a caso, finche' una passa: attivare una colonna,
+# costruire ovunque, potenziare, ristrutturare, reclutare, la Dinastia; se
+# niente passa, passare e incassare.
+static func _play_turn_v2(ctl: GameController, p: PlayerState) -> void:
+	var gs := ctl.gs
+	var order := [0, 1, 2, 3, 4, 5]
+	_shuffle(gs, order)
+	for a in order:
+		match a:
+			0:
+				var col := _free_column(gs, p)
+				if col >= 0 and ctl.place_worker(col): return
+			1:
+				for card_id in gs.market.duplicate():
+					for c in gs.grid.n_cols:
+						for above in [false, true]:
+							if ctl.build(card_id, c, above): return
+			2:
+				for upg_id in gs.upg_row.duplicate():
+					for b in gs.grid.buildings.duplicate():
+						if b.owner == p.index and ctl.upgrade(upg_id, b): return
+			3:
+				for b in gs.grid.buildings.duplicate():
+					if b.owner == p.index and b.state == Enums.BuildingState.ROVINA \
+							and not b.is_buried and ctl.restore(b): return
+			4:
+				# Con il draft (v2) reclutare non e' un'azione: si salta.
+				if bool(CardDB.constants.get("draft_personaggi", false)): continue
+				for cid in gs.char_row.duplicate():
+					if ctl.recruit(cid, null): return
+					for b in gs.grid.buildings.duplicate():
+						if b.owner == p.index and b.is_standing() and ctl.recruit(cid, b): return
+			5:
+				if ctl.buy_dynasty(): return
+	ctl.passa(["pietra", "oro", "idee"][gs.rng.randi_range(0, 2)])
+

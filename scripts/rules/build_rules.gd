@@ -10,6 +10,7 @@ class BuildQuote:
 	var reason: String = ""
 	var pietra: int = 0
 	var oro: int = 0
+	var idee: int = 0              # la terza risorsa: nessuno sconto la tocca
 	var level: int = 0
 	var bases: Array = []          # Building che finiranno sotterrati
 	var razed: Array = []          # tuoi intatti che verrebbero spianati
@@ -72,6 +73,11 @@ static func despoil_reason(gs: GameState, target: Building, col_from: int, col_t
 static func base_cost(data: Dictionary) -> Vector2i:
 	return Vector2i(int(data["cost"]["pietra"]), int(data["cost"]["oro"]))
 
+# Le Idee (v2) stanno accanto a pietra e oro nel costo; nei dati v1.5 mancano
+# e valgono 0. Nessun effetto le sconta: i `cost_delta` parlano di pietra e oro.
+static func base_idee(data: Dictionary) -> int:
+	return int(data["cost"].get("idee", 0))
+
 static func pianura_discount(gs: GameState, data: Dictionary, col_from: int) -> int:
 	if int(data["width"]) >= 2 and gs.grid.terrains[col_from] == Enums.Terrain.PIANURA:
 		return 1
@@ -127,6 +133,7 @@ static func quote_rail(gs: GameState, player: int, data: Dictionary, col_from: i
 	p = _apply_despoil(q, despoil, p)
 	q.pietra = max(0, p)
 	q.oro = max(0, c.y + sconto.y)
+	q.idee = base_idee(data)
 	q.level = 0
 	q.legal = true
 	return q
@@ -181,7 +188,11 @@ static func quote_above(gs: GameState, player: int, data: Dictionary, col_from: 
 				# non offre continuita' di classe.
 				if top != despoil and top.shares_class_with(data): q.continuity_bonus = 1
 			Enums.BuildingState.ROVINA:
-				rubble_discount = true
+				# Manopola `sconto_macerie_solo_altrui` (registro 87): lo
+				# sconto vale solo costruendo sopra le rovine degli altri,
+				# per dare un motivo di non seppellire sempre i propri.
+				if top.owner != player or not bool(CardDB.constants.get("sconto_macerie_solo_altrui", false)):
+					rubble_discount = true
 		if not top in q.bases: q.bases.append(top)
 		real_bases += 1
 		top_level = max(top_level, top.level + 1)
@@ -211,6 +222,7 @@ static func quote_above(gs: GameState, player: int, data: Dictionary, col_from: 
 		Effects.sonda(data, player, col_from, q.level))
 	q.pietra = max(0, p + sconto.x)
 	q.oro = max(0, c.y + sconto.y)
+	q.idee = base_idee(data)
 	q.legal = true
 	return q
 
