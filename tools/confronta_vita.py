@@ -52,9 +52,9 @@ def leggi(f):
     }
 
 def etichetta(regole):
-    pezzi = []
-    if regole.get("rudere", "si") == "no": pezzi.append("senza rudere")
-    else: pezzi.append("con il rudere")
+    # A soglia 1 il rudere non esiste di fatto: fallire di 1 e' gia' rovina.
+    if regole.get("rovina") == "1": return "ogni fallimento fa rovina"
+    pezzi = ["senza rudere" if regole.get("rudere", "si") == "no" else "con il rudere"]
     if "rovina" in regole: pezzi.append(f"rovina a −{regole['rovina']}")
     return ", ".join(pezzi)
 

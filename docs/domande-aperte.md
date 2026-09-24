@@ -1475,3 +1475,24 @@ dato è stato importato da lì. Ma due confronti fra ciò che è stampato e
     cartellino della Prosperita' dopo il pagamento, e rigirarli tutti a fine
     era - e il regolamento va aggiornato di conseguenza. Il cartellino a
     schermo oggi non lo mostra.
+
+87. **Senza rudere: la prima misura della nuova meccanica.** Il punto 11 della
+    proposta (`proposte/nuova-meccanica.md`) toglie lo stato di rudere. Misurato
+    da solo sul motore di oggi, manopola `senza_rudere` spenta nei dati
+    (`--senza_rudere 1`), 2 000 partite `--vita` e 750 di torneo per variante a
+    parita' di semi: `docs/senza-rudere.md`.
+
+    Le due letture vanno in direzioni opposte. **Rovina solo a -3** (chi fallisce
+    di 1-2 resta intatto): +2 edifici in piedi a fine partita, Rendita +15 per
+    partita, ma lo Scavo cade da 20,5 a 6,5 con i sepolti fermi al 50%: senza
+    ruderi si sale solo spianando i propri edifici vivi, che valgono Scavo 0
+    (`was_razed`). Il rudere e' la porta dell'archeologia. **Ogni fallimento fa
+    rovina** (`--gap 1`, la lettura letterale del punto 9): canali e vittorie
+    fermi, ma gli edifici che cadono nell'era in cui nascono passano dal 17% al
+    48%.
+
+    **Da decidere insieme (D15 e D16 dell'audit):** la soglia con un passo solo
+    (1, 2 o 3) e se spianare un proprio edificio attivo conserva lo Scavo. Con
+    la seconda a "si'" l'archeologia rientra da un'altra porta: e' la misura
+    successiva, una manopola da una riga.
+
