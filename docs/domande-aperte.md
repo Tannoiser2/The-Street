@@ -1673,3 +1673,19 @@ dato è stato importato da lì. Ma due confronti fra ciò che è stampato e
     `protection_bonus` o il censimento. Il torneo ora conta le azioni per
     giocatore anche a quattro lavoratori.
 
+96. **La protezione a +1, e quanto valgono gli scheletri.** Due domande
+    del designer dopo il punto 95. Misurato sulla base W, stessi semi
+    (`docs/la-terza-risorsa.md`, settima misura): la protezione a +1
+    (`--protezione 1`) non cambia niente, stessi punti, stessa citta', la
+    Rendita vince ancora il 54%: la strategia Rendita costruisce meno
+    edifici ma cari e duraturi con la Rendita stampata alta, e con quattro
+    lavoratori le risorse per comprarli ci sono sempre. Prossima manopola:
+    il valore di Rendita delle carte care, o il censimento. Gli scheletri
+    del potenziamento oggi valgono 2,8 punti a giocatore (3%), e pagano
+    solo se l'edificio finisce sotterrato: non sono un motivo per
+    potenziare. Con lo scheletro che **conta sempre** (`--scheletro sempre`,
+    costante `scheletro_conta`, 6 meno l'era comunque finisca l'edificio)
+    valgono 9,6 punti (11%), i potenziamenti salgono da 2,8 a 3,4 a
+    giocatore, la citta' non cambia e il kingmaker scende al 13%.
+    Raccomandato: conta sempre. In attesa della decisione del designer.
+

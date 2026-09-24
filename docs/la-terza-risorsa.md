@@ -345,6 +345,51 @@ per ogni lavoratore) o il censimento; la Vetustà non c'entrava.
 **4. Lo scheletro del potenziamento vale 2,8 punti a giocatore** (8,5 a partita), poco più
 della metà di quello che valevano i Personaggi sepolti, e non cambia la forma della città.
 
+## Settima misura: la protezione a +1, e quanto valgono gli scheletri
+
+Due domande del designer sulla base W (la v2 di oggi: quattro lavoratori, draft, niente
+sepolture, niente Vetustà, scheletro del potenziamento): la protezione del lavoratore a +1
+invece di +2 (`--protezione 1`), contro la Rendita che vince il 56 %; e se gli scheletri
+sono un valore aggiunto o vanno valorizzati di più. Per la seconda una prova: lo scheletro
+**conta sempre** (`--scheletro sempre`, costante `scheletro_conta`), cioè paga 6 meno l'era
+comunque finisca l'edificio, non solo se viene sotterrato. Stessi semi:
+
+| per giocatore | W | X1 protezione +1 | X2 protezione +1, scheletro conta sempre |
+|---|--:|--:|--:|
+| PV medi | 81,3 | 81,0 | **86,5** |
+| Rendita | 10,3 | 10,0 | 9,7 |
+| Lampo | 20,7 | 20,7 | 20,4 |
+| Scavo | 17,4 | 17,8 | 17,2 |
+| Scheletri | 2,8 | 2,8 | **9,6** |
+| costruiti | 14,0 | 14,0 | 13,7 |
+| potenziamenti per giocatore | n.d. | 2,8 | 3,4 |
+| altezza massima | 4,64 | 4,64 | 4,58 |
+| basi proprie / altrui | 6,3 / 2,3 | 6,2 / 2,4 | 6,1 / 2,4 |
+| senza l'era 5 cambierebbe il vincitore | 15 % | 16 % | 13 % |
+| vince Rendita / Lampo / Continuità | 56 / 26 / 32 % | 54 / 21 / 32 % | 53 / 22 / 37 % |
+
+Per partita (2 000 `--vita`, W → X1): costruiti 41,9 → 42,0; in piedi a fine 13,7 → 13,3; cade
+nell'era in cui nasce 35 → 35 %; sepolti 49 → 49 %; Scheletri 8,5 → 8,4.
+
+**1. La protezione non c'entra.** X1 contro W: stessi punti, stessa città, stessa vita delle
+carte, la Rendita vince ancora il 54 %. La strategia Rendita costruisce meno edifici (12
+contro 14-17) ma cari e duraturi, con la Rendita stampata alta (22 punti contro 8-11 delle
+altre), e con quattro lavoratori le risorse per comprarli ci sono sempre (Idee spese 14 su
+16). È un fatto delle carte, non del lavoratore: la prossima manopola è il valore di Rendita
+delle carte care, o il censimento.
+
+**2. Gli scheletri oggi contano poco.** 2,8 punti a giocatore, il 3 % del totale: circa tre
+potenziamenti a partita a testa, e lo scheletro paga solo se l'edificio finisce sotterrato
+(la metà dei casi). Non sono un motivo per potenziare: il potenziamento si sceglie per il
+suo effetto, lo scheletro è un resto.
+
+**3. Se lo scheletro conta sempre, diventa una scelta.** X2: 9,6 punti a giocatore, l'11 %
+del totale; i potenziamenti passano da 2,8 a 3,4 a giocatore (la strategia Rendita ne fa
+4,5), la città non cambia (altezza 4,58, basi altrui 2,4), nessuna strategia si deforma, e
+il kingmaker dell'ultima era scende dal 16 al 13 % perché il premio pesa su un totale più
+alto. Un lavoratore che diventa 6 meno l'era di punti sicuri è una decisione vera, e
+premia chi potenzia presto. Raccomandato: **conta sempre**.
+
 ## Come rifare il conto
 
 ```bash
@@ -373,4 +418,7 @@ python3 tools/confronta_torneo.py S.csv U4.csv
 # `--sepolti 1` riseppellisce i Personaggi, `--vetusta 3` rimette la Vetusta'
 godot --headless res://scenes/audit_partita.tscn -- --players 3 --games 750 --seed 700000 --dati data/cards-v2.json > W.csv
 python3 tools/confronta_torneo.py U4.csv W.csv
+# settima misura: la protezione a +1 e lo scheletro che conta sempre, manopole sulla base W
+godot --headless res://scenes/audit_partita.tscn -- --players 3 --games 750 --seed 700000 --dati data/cards-v2.json --protezione 1 --scheletro sempre > X2.csv
+python3 tools/confronta_torneo.py W.csv X2.csv
 ```
