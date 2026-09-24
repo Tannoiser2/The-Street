@@ -1574,3 +1574,18 @@ dato è stato importato da lì. Ma due confronti fra ciò che è stampato e
     tetto delle risorse (D5) e in che risorsa pagare potenziamenti, Dinastia e
     ristrutturazione (D2).
 
+91. **L'ultima era, il tetto a tre, e in che risorsa si pagano le azioni.**
+    Decisioni del designer: correggere il premio di scavo nell'ultima era
+    (manopola `premio_era5`: intero, dimezzato, niente); "tetto a tre", letto
+    come 3 per risorsa alla dispersione con il totale di 5 che resta
+    (`resource_cap_per_resource`, 3 nella v2, 0 nella v1.5); i potenziamenti
+    pagano secondo cosa sono (Arte in Idee, Struttura in Costruzione, il resto
+    in Denaro, importi di oggi); la Dinastia in Idee (4/3/3/3); la
+    ristrutturazione in Costruzione e Denaro (la parte in Idee va in Denaro).
+    Misurato a parita' di semi (`docs/la-terza-risorsa.md`): le decisioni sui
+    dati sono neutre (un punto di differenza, stessa forma della citta'); il
+    **premio dimezzato nell'era 5** porta le partite decise dall'ultima era dal
+    21% al 12% senza cambiare la citta' (altezza 4,2, basi altrui 2,4), al
+    costo di 4,5 punti di Scavo a giocatore; senza premio nell'era 5 la citta'
+    smette di salire (altezza 4,0, basi altrui 2,0). Raccomandato: dimezzato.
+

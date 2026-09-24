@@ -94,6 +94,47 @@ un bilanciamento: le strategie vanno riscritte per la v2 prima di leggere le vit
 - **Potenziamenti, Dinastia, ristrutturazione** (D2): ancora in oro. Se passano alle Idee, la
   domanda di Idee cresce e l'82 % speso può diventare scarsità.
 
+## Seconda misura: le decisioni del registro 91
+
+Il designer: correggere l'ultima era; "tetto a tre"; i potenziamenti pagano secondo cosa sono
+(Arte in Idee, Struttura in Costruzione, il resto in Denaro); la Dinastia in Idee; la
+ristrutturazione in Costruzione e Denaro. Le prime quattro sono nel file dati v2 rigenerato
+(tetto 3 per risorsa alla dispersione, con il totale di 5 che resta; importi come oggi), la
+quinta e la correzione nel motore (`premio_era5`: intero, dimezzato, niente). Tre lotti sulla
+base D (v2 + pacchetto), stessi semi:
+
+| per giocatore | D (v2 di prima) | E1 nuovi dati, era 5 intera | E2 era 5 dimezzata | E3 era 5 senza premio |
+|---|--:|--:|--:|--:|
+| PV medi | 77,8 | 78,9 | 74,4 | 70,4 |
+| Scavo | 22,5 | 22,5 | 18,0 | 13,6 |
+| Rendita | 18,4 | 18,7 | 18,7 | 19,6 |
+| premio incassato scavando | 16,8 | 16,7 | 12,2 | 7,9 |
+| di cui nell'era 5 | 9,0 (53 %) | 8,9 (53 %) | 4,3 (36 %) | 0 |
+| altezza massima | 4,18 | 4,18 | 4,17 | **3,99** |
+| basi proprie | 5,1 | 5,2 | 5,2 | 5,2 |
+| basi altrui | 2,5 | 2,4 | 2,4 | **2,0** |
+| Idee prodotte / spese | 10,7 / 8,7 | 11,4 / 9,6 | 11,4 / 9,6 | 11,4 / 9,5 |
+| bottino dell'era 5 del vincitore ≥ distacco | 44 % | 41 % | **20 %** | 0 % |
+| senza l'era 5 cambierebbe il vincitore | 22 % | 21 % | **12 %** | 0 % |
+| vince Rendita / Lampo / Bilanciata | 45 / 25 / 46 % | 40 / 27 / 44 % | 39 / 28 / 40 % | 32 / 34 / 38 % |
+
+Per partita: sepolti 55 / 55 / 55 / 53 %, sepolti da un altro 22 / 22 / 21 / 18 %, edifici in
+piedi a fine partita 9,1 / 9,2 / 9,2 / 9,4.
+
+**1. Le decisioni sui dati sono neutre.** E1 contro D: un punto di differenza, stessa forma,
+stesse basi. Il tetto a 3 per risorsa non morde (le Idee spese passano dall'81 all'85 %), i
+potenziamenti per famiglia e la Dinastia in Idee non spostano le vittorie oltre l'errore.
+
+**2. Il premio dimezzato nell'era 5 è la correzione giusta.** E2: il kingmaker scende dal 21 al
+12 % (era l'11 % di S+L, senza rinunciare alla scala di S×L), il bottino dell'ultima era del
+vincitore supera il distacco in una partita su cinque invece di due su cinque, e la città non
+cambia: altezza 4,17, basi altrui 2,4, sepolti 55 %. Costa 4,5 punti di Scavo a giocatore.
+
+**3. Senza premio nell'ultima era la città smette di salire.** E3: altezza da 4,2 a 4,0, basi
+altrui da 2,4 a 2,0, sepolti da un altro dal 22 al 18 %: nell'era 5 non c'è più motivo di
+costruire sopra, e vince chi costruisce e basta (Lampo 34 %). Il kingmaker sparisce per
+costruzione, ma con lui l'ultima era.
+
 ## Come rifare il conto
 
 ```bash
@@ -103,4 +144,7 @@ godot --headless res://scenes/audit_partita.tscn -- $A --dati data/cards-v2.json
 godot --headless res://scenes/audit_partita.tscn -- $A --dati data/cards-v2.json \
   --senza_rudere 1 --gap 2 --verticalita 0,0,0,0 --premio per_livello > D.csv
 python3 tools/confronta_vita.py A.csv B.csv C.csv D.csv
+# seconda misura, con i dati rigenerati (tetto 3, potenziamenti per famiglia, Dinastia in Idee):
+godot --headless res://scenes/audit_partita.tscn -- $A --dati data/cards-v2.json \
+  --senza_rudere 1 --gap 2 --verticalita 0,0,0,0 --premio per_livello --premio_era5 dimezzato > E2.csv
 ```
