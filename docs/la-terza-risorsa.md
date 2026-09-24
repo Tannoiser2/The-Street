@@ -135,6 +135,14 @@ altrui da 2,4 a 2,0, sepolti da un altro dal 22 al 18 %: nell'era 5 non c'è pi�
 costruire sopra, e vince chi costruisce e basta (Lampo 34 %). Il kingmaker sparisce per
 costruzione, ma con lui l'ultima era.
 
+## Le regole della v2 stanno nel file v2
+
+Dopo la decisione del designer ("dimezzato"), `data/cards-v2.json` porta come costanti tutte le
+regole scelte finora: senza rudere, rovina a −2, spianato a 0, Verticalità a zero, premio S×L
+dimezzato nell'era 5, tetto 3 per risorsa. `--dati data/cards-v2.json` gioca la v2 senza
+manopole, e le 120 partite di prova escono identiche a quelle con le manopole. Le manopole
+restano per le prove sulla v1.5.
+
 ## Come rifare il conto
 
 ```bash

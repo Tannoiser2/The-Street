@@ -69,6 +69,15 @@ for c in v2["characters"]:
                             for e, v in c["cost_by_era"].items()}
         c["effect_text"] = c["effect_text"].split("Costo a scalare")[0] + "Costo a scalare in Idee: era 1 = 4 · era 2 = 3 · era 3 = 3 · era 4 = 3. Nessuna abilita': aggiunge un quarto lavoratore, permanente e attivo da subito. Massimo una a testa."
 # - la ristrutturazione in Costruzione e Denaro: e' nel motore (ActionRules.quote_restore).
+# LE REGOLE DELLA V2, decise e misurate (registro 87-91), stanno nel file v2
+# come costanti: cosi' `--dati data/cards-v2.json` gioca la v2 senza manopole,
+# e le manopole restano per le prove sulla v1.5.
+v2["constants"]["senza_rudere"] = True                 # stati: attivo, rovina, sotterrato
+v2["constants"]["rovina_gap"] = 2                      # si crolla fallendo di 2
+v2["constants"]["spianare_conserva_scavo"] = False     # lo spianato vale 0 (terrapieno)
+v2["constants"]["verticality_vp"] = {"1": 0, "2": 0, "3": 0, "4": 0}   # via la Verticalita'
+v2["constants"]["premio_scavo"] = "per_livello"        # S x L a chi costruisce sopra
+v2["constants"]["premio_era5"] = "dimezzato"           # la correzione all'ultima era
 out = os.path.join(RADICE, "data/cards-v2.json")
 json.dump(v2, open(out, "w", encoding="utf-8"), indent=2, ensure_ascii=False)
 open(out, "a").write("\n")

@@ -54,19 +54,19 @@
     "vetusta_max": 3,
     "vetusta_max_bosco": 4,
     "rudere_penalty": 2,
-    "rovina_gap": 3,
-    "senza_rudere": false,
+    "rovina_gap": 2,
+    "senza_rudere": true,
     "spianare_conserva_scavo": false,
     "scavo_a_chi_scava": false,
     "sconto_macerie_solo_altrui": false,
     "disturbo_vp": 0,
-    "premio_scavo": "nessuno",
+    "premio_scavo": "per_livello",
     "binari_liberi": true,
     "verticality_vp": {
-      "1": 2,
-      "2": 5,
-      "3": 9,
-      "4": 14
+      "1": 0,
+      "2": 0,
+      "3": 0,
+      "4": 0
     },
     "continuity_vp": {
       "2": 2,
@@ -91,7 +91,8 @@
     "level_cap_per_era_per_column": 1,
     "market_size": 6,
     "side_rows": 3,
-    "resource_cap_per_resource": 3
+    "resource_cap_per_resource": 3,
+    "premio_era5": "dimezzato"
   },
   "terrains": [
     {
