@@ -367,7 +367,7 @@ func _stampa_vita(acc: Dictionary, quante: int, players: int, seme: int) -> void
 # gioca ogni posto lo stesso numero di volte e il posto non falsa il confronto.
 func strategia_di(i: int, g: int) -> String:
 	if _tutti != "": return _tutti
-	var lista := StrategyBot.tutte() if _candidate else StrategyBot.STRATEGIE
+	var lista := StrategyBot.tutte() if _candidate else StrategyBot.canone()
 	return lista[(i + g) % lista.size()]
 
 # Quante strategie si alternano al tavolo: finisce nell'intestazione, perche'
@@ -375,7 +375,7 @@ func strategia_di(i: int, g: int) -> String:
 func _quante_strategie() -> int:
 	if not _strategie: return 0
 	if _tutti != "": return 1
-	return (StrategyBot.tutte() if _candidate else StrategyBot.STRATEGIE).size()
+	return (StrategyBot.tutte() if _candidate else StrategyBot.canone()).size()
 
 # Chi pianifica in questa partita: un posto solo, a rotazione.
 func pianifica_qui(i: int, g: int, players: int) -> bool:

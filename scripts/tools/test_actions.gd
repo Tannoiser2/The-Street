@@ -34,6 +34,7 @@ func _ready() -> void:
 	_run("il premio di scavo si paga e torna col libro mastro", _test_premio_in_partita)
 	_run("la v2 a tre risorse gira sullo stesso motore", _test_tre_risorse)
 	_run("il tetto per risorsa alla dispersione", _test_tetto_per_risorsa)
+	_run("il canone delle strategie segue il file dati", _test_canone_v2)
 	print("\n%d superati, %d falliti" % [_passed, _failed])
 	get_tree().quit(0 if _failed == 0 else 1)
 
@@ -1122,4 +1123,24 @@ func _test_tetto_per_risorsa() -> void:
 	EraRules.disperse(gs)
 	_eq("a 3: ogni risorsa scende a 3, poi il totale a 5", [p.pietra, p.oro, p.idee], [0, 2, 3])
 	CardDB.constants["resource_cap_per_resource"] = com_era
+
+# Registro 92: con la v2 caricata il canone e' quello della v2 (niente
+# Verticale, la Continuita' dentro), e le sei strategie giocano partite intere.
+func _test_canone_v2() -> void:
+	_eq("con la v1.5 il canone e' quello di sempre", StrategyBot.canone(), StrategyBot.STRATEGIE)
+	if not FileAccess.file_exists("res://data/cards-v2.json"): return
+	CardDB.load_db("res://data/cards-v2.json")
+	_ok("con la v2 il canone e' quello della v2", StrategyBot.canone() == StrategyBot.STRATEGIE_V2)
+	_ok("  senza la Verticale", not StrategyBot.canone().has("verticale"))
+	_ok("  con la Continuita'", StrategyBot.canone().has("continuita"))
+	var finite := 0
+	for strat in StrategyBot.canone():
+		var ctl := _game(3, 980)
+		var guard := 0
+		while ctl.gs.phase != Enums.Phase.FINE_PARTITA and guard < 10000:
+			StrategyBot.play_turn(ctl, strat)
+			guard += 1
+		if ctl.gs.phase == Enums.Phase.FINE_PARTITA: finite += 1
+	_eq("  e ogni strategia porta in fondo una partita v2", finite, StrategyBot.canone().size())
+	CardDB.load_db(CardDB.DB_PATH)
 

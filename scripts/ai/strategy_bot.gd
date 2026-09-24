@@ -45,9 +45,24 @@ const STRATEGIE: Array[String] = ["rendita", "lampo", "scavo", "verticale", "bil
 # numeri alla domanda "sei bastano?".
 const STRATEGIE_CANDIDATE: Array[String] = ["continuita"]
 
+# IL CANONE DELLA V2 (registro 92). Senza Verticalita' la strategia Verticale
+# non insegue niente, e lo Scavo lo fa chi scava (il premio S x L), non chi
+# viene sepolto: la Verticale esce, la Continuita' entra (senza il premio
+# della colonna e' il quarto canale del gioco), e la Scavo cambia testa.
+# Quale canone vale lo dice il file dati caricato, non una manopola: due lotti
+# con lo stesso file giocano le stesse strategie.
+const STRATEGIE_V2: Array[String] = ["rendita", "lampo", "scavo", "continuita", "bilanciata",
+	"obiettivi"]
+
+static func e_v2() -> bool:
+	return str(CardDB.ruleset).begins_with("v2")
+
+static func canone() -> Array[String]:
+	return STRATEGIE_V2 if e_v2() else STRATEGIE
+
 static func tutte() -> Array[String]:
-	var out: Array[String] = STRATEGIE.duplicate()
-	out.append_array(STRATEGIE_CANDIDATE)
+	var out: Array[String] = canone().duplicate()
+	if not e_v2(): out.append_array(STRATEGIE_CANDIDATE)
 	return out
 
 # QUANTO VALE UNA RISORSA. Il brief e' esplicito: "nessun peso fisso
@@ -334,6 +349,7 @@ static func _valore_costruzione(gs: GameState, p: PlayerState, v, strategia: Str
 	q += pr
 
 	var larghezza := int(d["width"])
+	var premio_stimato := 0.0     # il premio di scavo di questa costruzione, per la strategia Scavo v2
 	if sopra:
 		# La Verticalita' paga il premio della colonna per OGNI colonna che
 		# l'edificio tocca, e chi sta in cima ne prende meta'.
@@ -376,6 +392,7 @@ static func _valore_costruzione(gs: GameState, p: PlayerState, v, strategia: Str
 			if premio != 0.0:
 				dett["premio di scavo"] = premio * 0.8
 				q += premio * 0.8
+				premio_stimato = premio
 	# Continuita' di luogo: una seconda carta della stessa classe nella colonna.
 	var mie := {}
 	for b in gs.grid.in_column(col_from):
@@ -403,8 +420,14 @@ static func _valore_costruzione(gs: GameState, p: PlayerState, v, strategia: Str
 			q += float(d["lampo"]) * 1.6
 			if int(d["lampo"]) == 0: q -= 1.0
 		"scavo":
-			q += float(d["scavo"]) * 0.9 + (2.0 if sopra else 0.0)
-			if int(d["scavo"]) == 0: q -= 1.0
+			if e_v2():
+				# V2: lo Scavo lo incassa chi scava, sul momento. La strategia
+				# cerca le pile ricche e alte, e non vuole restare a terra.
+				q += premio_stimato * 0.8
+				if not sopra: q -= 1.5
+			else:
+				q += float(d["scavo"]) * 0.9 + (2.0 if sopra else 0.0)
+				if int(d["scavo"]) == 0: q -= 1.0
 		"verticale":
 			if sopra: q += 3.0 + 1.2 * float(par.get("level", 1))
 			else: q -= 1.5
