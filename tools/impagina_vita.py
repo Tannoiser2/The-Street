@@ -22,6 +22,7 @@ def leggi(pattern):
                                                                  "2/6/12/20", 3, 2, "per_era", 1)
     strat = None
     centro = "ogni_attivazione"
+    rudere = "si"
     for f in sorted(glob.glob(pattern)):
         righe = [l.rstrip("\n") for l in open(f) if l.strip()]
         meta = [l for l in righe if l.startswith("# partite=")][0]
@@ -47,6 +48,9 @@ def leggi(pattern):
         # E quante volte paga il Centro Urbano: un CSV che non lo dice viene
         # da quando pagava a ogni attivazione.
         if "centro=" in meta: centro = meta.split("centro=")[1].split()[0]
+        # E se il rudere esiste: un CSV che non lo dice viene da quando
+        # esisteva sempre (la manopola `senza_rudere` e' arrivata dopo).
+        if "rudere=" in meta: rudere = meta.split("rudere=")[1].split()[0]
         i = righe.index([l for l in righe if l.startswith("id;")][0])
         hdr = righe[i].split(";")
         for l in righe[i+1:]:
@@ -64,12 +68,12 @@ def leggi(pattern):
             else:
                 for k in NUM: c[k] += int(v[k])
     if strat is None: strat = 5 if bot == "strategie" else 0
-    return carte, partite, giocatori, bot, vert, prosp, rov, bin, ver, strat, centro
+    return carte, partite, giocatori, bot, vert, prosp, rov, bin, ver, strat, centro, rudere
 
-carte, partite, giocatori, bot, vert, prosp, rov, bin, ver, strat, centro = leggi(sys.argv[1])
+carte, partite, giocatori, bot, vert, prosp, rov, bin, ver, strat, centro, rudere = leggi(sys.argv[1])
 altro = None
 if "--confronta" in sys.argv:
-    altro, partite_altro, _, bot_altro, vert_altro, prosp_altro, rov_altro, bin_altro, ver_altro, strat_altro, centro_altro = leggi(
+    altro, partite_altro, _, bot_altro, vert_altro, prosp_altro, rov_altro, bin_altro, ver_altro, strat_altro, centro_altro, rudere_altro = leggi(
         sys.argv[sys.argv.index("--confronta") + 1])
     # LE COLONNE SI CHIAMANO COME TUTTO CIO' CHE LE DISTINGUE, non come la
     # prima differenza trovata. Due lotti possono differire in piu' di una
@@ -104,6 +108,10 @@ if "--confronta" in sys.argv:
         DIFF.append((nomi_c.get(centro_altro, centro_altro), nomi_c.get(centro, centro),
                      "il Centro Urbano che paga una volta per era" if centro == "una_per_era"
                      else "il Centro Urbano che paga a ogni attivazione"))
+    if rudere != rudere_altro:
+        DIFF.append(("con il rudere" if rudere_altro == "si" else "senza rudere",
+                     "con il rudere" if rudere == "si" else "senza rudere",
+                     "il rudere che non esiste più" if rudere == "no" else "il rudere che torna"))
     if bin != bin_altro:
         DIFF.append(("binari per era" if bin_altro == "per_era" else "binari liberi",
                      "binari per era" if bin == "per_era" else "binari liberi",

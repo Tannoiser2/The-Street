@@ -34,6 +34,7 @@ func _ready() -> void:
 	_run("Industriale", _test_industriale)
 	_run("Anni della fame", _test_anni_della_fame)
 	_run("Eruzione: il potenziamento in cambio della perdita", _test_eruzione)
+	_run("senza rudere: chi fallisce di poco resta intatto", _test_senza_rudere)
 	_run("Mercante di ossidiana", _test_mercante_scambi)
 	_run("Ingegnere militare: uno a tua scelta", _test_designazione)
 	_run("  e la designazione al reclutamento", _test_designazione_reclutamento)
@@ -2247,3 +2248,39 @@ func _test_omaggio_sospende() -> void:
 	_eq("  e la carta e' finita dove ho detto", y.upgrades.size(), 1)
 	_ok("  il gioco riparte", gs.pending_choice.is_empty())
 	_ok("  e l'era e' avanzata", gs.era == 2 or gs.phase == Enums.Phase.FINE_PARTITA)
+
+# ---- senza rudere ----------------------------------------------------
+# Manopola `senza_rudere`, spenta nei dati: la prima misura dell'audit della
+# nuova meccanica (D15), che toglie lo stato intermedio. Fallire di meno della
+# soglia lascia l'edificio intatto e senza Vetusta' - non ha superato l'evento,
+# l'ha scampato - e fallire di piu' crolla come oggi. Si prova col Diluvio
+# (forza 2) sulla pianura, dove non ha modificatori: le Capanne (resistenza 1)
+# falliscono di 1.
+func _test_senza_rudere() -> void:
+	var com_era: bool = bool(CardDB.constants.get("senza_rudere", false))
+	var soglia := int(CardDB.constants.get("rovina_gap", 2))
+
+	# Spenta: fallire di 1 fa rudere, come sempre.
+	var a := _scena()
+	_flat(a, Enums.Terrain.PIANURA)
+	_set_event(a, "ev_diluvio")
+	var r := _put(a, "ed_capanne", 1)
+	CardDB.constants["senza_rudere"] = false
+	EraRules.resolve_event(a)
+	_eq("spenta: fallire di 1 fa rudere", r.state, Enums.BuildingState.RUDERE)
+
+	# Accesa: lo stesso edificio resta intatto, senza Vetusta'; chi fallisce
+	# di piu' della soglia crolla lo stesso.
+	var b := _scena()
+	_flat(b, Enums.Terrain.PIANURA)
+	_set_event(b, "ev_diluvio")
+	var salvo := _put(b, "ed_capanne", 1)
+	var crolla := _put(b, "ed_capanne", 3)
+	crolla.bonus_res = -soglia
+	CardDB.constants["senza_rudere"] = true
+	EraRules.resolve_event(b)
+	CardDB.constants["senza_rudere"] = com_era
+	_eq("accesa: fallire di 1 lascia intatto", salvo.state, Enums.BuildingState.INTATTO)
+	_eq("  ma senza Vetusta'", salvo.vetusta, 0)
+	_eq("  e fallire oltre la soglia crolla lo stesso", crolla.state, Enums.BuildingState.ROVINA)
+

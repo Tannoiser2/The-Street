@@ -47,8 +47,17 @@ static func activate(gs: GameState, player: int, col: int) -> void:
 		if int(b.data.get("exhaustible", 0)) > 0:
 			b.charges -= 1
 			if b.charges <= 0:
-				b.state = Enums.BuildingState.RUDERE
-				gs.log_line("%s si esaurisce e diventa rudere" % b.data["name"])
+				# Senza rudere (manopola) la Cava vuota crolla in rovina: e'
+				# l'unico altro modo di diventare rudere, e la manopola deve
+				# togliere lo stato del tutto, se no `n_rudere` non e' zero e
+				# la misura mente.
+				if bool(CardDB.constants.get("senza_rudere", false)):
+					b.state = Enums.BuildingState.ROVINA
+					b.upgrades.clear()
+					gs.log_line("%s si esaurisce e crolla in rovina" % b.data["name"])
+				else:
+					b.state = Enums.BuildingState.RUDERE
+					gs.log_line("%s si esaurisce e diventa rudere" % b.data["name"])
 
 	Effects.apply_on_activate(gs, player, col)
 
@@ -101,6 +110,15 @@ static func resolve_event(gs: GameState) -> Array[int]:
 		# senza ricompilare. Adesso sta nei dati come tutte le altre.
 		var soglia := int(CardDB.constants.get("rovina_gap", 2))
 		if b.state == Enums.BuildingState.INTATTO and gap < soglia:
+			# SENZA RUDERE (manopola `senza_rudere`, spenta nei dati): la
+			# proposta della nuova meccanica toglie lo stato intermedio. Chi
+			# fallisce di meno della soglia resta intatto, ma senza Vetusta':
+			# non ha superato l'evento, l'ha solo scampato. Chi fallisce di
+			# piu' crolla come oggi. E' la prima misura dell'audit (D15):
+			# quanto vale il rudere da solo, prima di toccare il resto.
+			if bool(CardDB.constants.get("senza_rudere", false)):
+				gs.log_line("%s regge per un soffio: senza rudere resta intatto" % b.data["name"])
+				continue
 			b.state = Enums.BuildingState.RUDERE
 			gs.log_line("%s diventa rudere" % b.data["name"])
 		else:

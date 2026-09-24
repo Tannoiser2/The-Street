@@ -91,6 +91,12 @@ func _ready() -> void:
 	if args.has("gap"):
 		CardDB.constants["rovina_gap"] = int(args["gap"])
 		print("# rovina_gap = %d" % int(args["gap"]))
+	# SENZA RUDERE (`--senza_rudere 1`, spenta nei dati): fallire di meno della
+	# soglia lascia intatto invece di fare rudere. Prima misura dell'audit
+	# della nuova meccanica (D15), a parita' di tutto il resto.
+	if args.has("senza_rudere"):
+		CardDB.constants["senza_rudere"] = str(args["senza_rudere"]) != "0"
+		print("# senza_rudere = %s" % str(bool(CardDB.constants["senza_rudere"])))
 	# LA FORZA STA SULLA CARTA EVENTO, non nella costante: `event_force_by_era`
 	# e' la tabella di riferimento, ma chi decide e' `gs.current_event["force"]`.
 	# La prima versione di questa manopola scriveva la costante e non cambiava
@@ -266,14 +272,15 @@ func _stampa_vita(acc: Dictionary, quante: int, players: int, seme: int) -> void
 	var vt = CardDB.constants["verticality_vp"]
 	var scala: Array[String] = []
 	for i in 4: scala.append("%d" % int(vt[str(i + 1)]))
-	print("# partite=%d giocatori=%d seme_base=%d bot=%s verticalita=%s prosperita=%d rovina=%d binari=%s versione_bot=%d strategie=%d centro=%s" % [
+	print("# partite=%d giocatori=%d seme_base=%d bot=%s verticalita=%s prosperita=%d rovina=%d binari=%s versione_bot=%d strategie=%d centro=%s rudere=%s" % [
 		quante, players, seme, "strategie" if _strategie else "caso",
 		"/".join(scala), int(CardDB.constants["prosperity"]["min_buildings"]),
 		int(CardDB.constants.get("rovina_gap", 2)),
 		"liberi" if bool(CardDB.constants.get("binari_liberi", false)) else "per_era",
 		StrategyBot.versione_in_uso, _quante_strategie(),
 		"una_per_era" if bool(CardDB.constants["prosperity"].get("once_per_era", false))
-			else "ogni_attivazione"])
+			else "ogni_attivazione",
+		"no" if bool(CardDB.constants.get("senza_rudere", false)) else "si"])
 	var intestazione: Array[String] = ["id", "nome", "era", "classi", "larghezza",
 		"costo_pietra", "costo_oro", "resistenza", "rendita", "scavo", "lampo_carta",
 		"copie", "n", "ere_intatto", "ere_piedi", "n_rudere", "n_rovina", "n_sepolto",
