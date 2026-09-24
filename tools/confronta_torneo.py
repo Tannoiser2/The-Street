@@ -59,6 +59,8 @@ def etichetta(regole):
     if regole.get("disturbo_vp", "0") != "0": pezzi.append(f"disturbo {regole['disturbo_vp']}")
     if regole.get("verticality_vp", "").count(": 0") == 4: pezzi.append("senza Verticalità")
     if regole.get("premio_scavo", "nessuno") != "nessuno": pezzi.append(NOMI_PREMIO.get(regole["premio_scavo"], regole["premio_scavo"]))
+    # Il file dati: la riga "# dati = ..." c'e' solo quando non e' cards.json.
+    if "dati" in regole: pezzi.insert(0, "v2 tre risorse" if "v2" in regole["dati"] else regole["dati"])
     return ", ".join(pezzi) if pezzi else "oggi"
 
 lotti = [leggi(f) for f in sys.argv[1:]]

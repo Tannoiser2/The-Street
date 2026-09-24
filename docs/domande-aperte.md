@@ -1556,3 +1556,21 @@ dato è stato importato da lì. Ma due confronti fra ciò che è stampato e
     insegue la regola vecchia: le strategie vanno riscritte per la v2.
     Tutto in `docs/senza-rudere.md`.
 
+90. **I 60 edifici in tre risorse, le tessere e la prima misura della v2.**
+    Decisioni del designer: le Idee sono la Cultura resa risorsa e
+    **sostituiscono** (il costo totale di ogni carta resta quello di oggi);
+    Cultura, Religione e Ingegneria pagano Idee, il Medioevo ne chiede meno
+    ("un periodo oscuro"), nelle ere 4-5 ogni carta ne paga almeno una
+    ("esplodono"): domanda 5 / 6 / 4 / 15 / 18 per era. Le tessere producono
+    per tipo con la curva dell'audit (fiume e collina Costruzione 2/2/1/1/1,
+    pianura Denaro 0/1/1/2/2 piu' 1 Costruzione nelle ere 1-2, bosco Idee
+    1/2/2/3/3) e il mix garantisce il bosco. Tabella e regole in
+    `proposte/costi-tre-risorse.md` (generate da `tools/proponi_costi_v2.py`),
+    file dati `data/cards-v2.json` (da `tools/genera_cards_v2.py`), misura in
+    `docs/la-terza-risorsa.md`. Da sola la terza risorsa sposta poco (+2 punti,
+    basi altrui da 2,0 a 2,5); con il pacchetto di regole si comporta come con
+    le carte vecchie, ma il kingmaker dell'ultima era sale al 22%: la
+    correzione all'era 5 del premio di scavo diventa necessaria. Restano il
+    tetto delle risorse (D5) e in che risorsa pagare potenziamenti, Dinastia e
+    ristrutturazione (D2).
+
