@@ -1650,3 +1650,26 @@ dato è stato importato da lì. Ma due confronti fra ciò che è stampato e
     (generato da `tools/carte_v2.py`), al posto di `carte-da-rifare.md` e
     `proposte/costi-tre-risorse.md`.
 
+95. **Niente Personaggi sepolti, niente Vetusta', lo scheletro e' il
+    lavoratore del potenziamento.** Tre decisioni del designer dopo il
+    punto 94: il Personaggio del draft non si seppellisce
+    (`personaggi_sepolti` falso nel file v2, vero dove manca); la Vetusta'
+    non esiste piu' ("non mi e' mai piaciuta, semplifichiamo": tetto
+    `vetusta_max` 0 nel file v2, il motore non cambia; Colosseo, Il
+    Silvicoltore e Speculazione edilizia la contavano e non scattano piu',
+    proposte in `docs/carte-v2.md`; il bosco perde il +4); gli scheletri ci
+    sono e li lascia il lavoratore che piazza un potenziamento
+    (`scheletro_potenziamento`, vero nel file v2: resta sotto l'edificio,
+    uno per edificio, non nell'era Moderna, 6 meno l'era se l'edificio
+    finisce sotterrato; nel turno a un'azione era gia' cosi', D12).
+    Manopole `--sepolti` e `--vetusta` per rigiocare con una decisione
+    sola. Misurato (`docs/la-terza-risorsa.md`, sesta misura): le
+    sepolture del draft erano solo 4,6 punti regalati; la Vetusta' era due
+    terzi della Rendita (27,9 -> 10,6) e senza si costruisce piu' sopra
+    (altezza 4,66, premio 12,2, kingmaker 15%); lo scheletro del
+    potenziamento vale 2,8 punti. La **Rendita vince il 56%** delle
+    partite anche senza Vetusta': il motivo e' la protezione, quattro
+    lavoratori proteggono quattro edifici per era. Prossima manopola:
+    `protection_bonus` o il censimento. Il torneo ora conta le azioni per
+    giocatore anche a quattro lavoratori.
+

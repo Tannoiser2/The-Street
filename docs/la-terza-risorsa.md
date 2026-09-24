@@ -299,6 +299,52 @@ partita contro 17) è la prima manopola da provare, perché è quella che gonfia
 **4. Le Idee bastano ancora.** Prodotte 16,4, spese 14,2 (87 %): con quattro attivazioni le
 Idee crescono, e si spendono. Il tetto a 3 non morde.
 
+## Sesta misura: niente Personaggi sepolti, niente Vetustà, lo scheletro del potenziamento
+
+Tre decisioni del designer (registro 95): il Personaggio del draft **non si seppellisce**; la
+**Vetustà non esiste più** ("non mi è mai piaciuta, semplifichiamo": tetto a 0, il motore non
+cambia); gli scheletri ci sono e li lascia **il lavoratore che piazza un potenziamento**, che
+resta sotto l'edificio, uno per edificio, non nell'era Moderna, e vale 6 meno l'era se
+l'edificio finisce sotterrato. Sulla base U4 (quattro lavoratori e draft), stessi semi, una
+decisione alla volta:
+
+| per giocatore | U4 | Va senza sepolture | Vb + senza Vetustà | **W + scheletro del potenziamento** |
+|---|--:|--:|--:|--:|
+| PV medi | 97,1 | 92,5 | 79,0 | **81,3** |
+| Rendita | 27,9 | 27,9 | 10,6 | 10,3 |
+| Lampo | 19,2 | 19,2 | 20,8 | 20,7 |
+| Scavo | 15,6 | 15,6 | 17,4 | 17,4 |
+| Scheletri | 4,6 | 0 | 0 | **2,8** |
+| costruiti | 13,6 | 13,6 | 14,2 | 14,0 |
+| altezza massima | 4,24 | 4,24 | 4,66 | 4,64 |
+| basi proprie / altrui | 5,5 / 2,2 | 5,5 / 2,2 | 6,4 / 2,3 | 6,3 / 2,3 |
+| premio incassato scavando | 10,4 | 10,4 | 12,2 | 12,2 |
+| senza l'era 5 cambierebbe il vincitore | 11 % | 9 % | 16 % | 15 % |
+| vince Rendita / Lampo / Bilanciata | 47 / 23 / 38 % | 48 / 24 / 36 % | 54 / 22 / 30 % | **56** / 26 / 33 % |
+
+Per partita (2 000 `--vita`, U4 → W): costruiti 40,9 → 41,9; in piedi a fine partita 14,6 →
+13,7; sepolti 44 → 49 %; spianati dal proprietario 27 → 32 %; cubetti Vetustà 24,1 → 0;
+Rendita 83 → 31; Scheletri 14,1 → 8,5.
+
+**1. Le sepolture del draft erano solo punti regalati.** Va contro U4: identico in tutto, meno
+4,6 punti di Scheletri. I bot non giocavano intorno ai Personaggi da seppellire, quindi la
+regola non cambiava la partita: la toglie e basta.
+
+**2. La Vetustà era due terzi della Rendita.** Vb contro Va: la Rendita scende da 27,9 a 10,6,
+la partita da 92 a 79 punti. Senza cubetti si tiene meno agli edifici vecchi: si costruisce di
+più sopra (altezza 4,66, sepolti 49 %), il premio di scavo sale a 12,2 e il kingmaker
+dell'ultima era torna al 15-16 %, perché il premio pesa di più su un totale più basso.
+
+**3. La Rendita domina ancora di più, e non è la Vetustà.** La strategia Rendita vince il 54-56
+% delle partite (atteso 33, errore 5) con 8 punti di vantaggio: senza cubetti la sua Rendita
+è 23,6 contro 8-11 delle altre. Il motivo è la protezione: quattro lavoratori proteggono
+quattro edifici per era (+2), e chi costruisce edifici a Rendita alta e li tiene in piedi
+incassa quattro censimenti. La prossima manopola è la protezione (`protection_bonus` 2, oggi
+per ogni lavoratore) o il censimento; la Vetustà non c'entrava.
+
+**4. Lo scheletro del potenziamento vale 2,8 punti a giocatore** (8,5 a partita), poco più
+della metà di quello che valevano i Personaggi sepolti, e non cambia la forma della città.
+
 ## Come rifare il conto
 
 ```bash
@@ -323,4 +369,8 @@ python3 tools/confronta_torneo.py S.csv T.csv
 # `--lavoratori 3` e' il controllo U3, `--turno_v2 1` rigioca il turno a un'azione
 godot --headless res://scenes/audit_partita.tscn -- --players 3 --games 750 --seed 700000 --dati data/cards-v2.json > U4.csv
 python3 tools/confronta_torneo.py S.csv U4.csv
+# sesta misura: le tre decisioni stanno nel file v2 (oggi il comando di U4 produce W);
+# `--sepolti 1` riseppellisce i Personaggi, `--vetusta 3` rimette la Vetusta'
+godot --headless res://scenes/audit_partita.tscn -- --players 3 --games 750 --seed 700000 --dati data/cards-v2.json > W.csv
+python3 tools/confronta_torneo.py U4.csv W.csv
 ```
