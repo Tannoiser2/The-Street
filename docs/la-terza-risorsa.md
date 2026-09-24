@@ -248,6 +248,57 @@ di meno (cade nell'era in cui nasce 12 % contro 33 %: si costruisce meno, e gli 
 sono protetti), la città ha la stessa altezza. Tutto il resto della v2 (tre risorse, niente
 rudere, premio S×L) non cambia lettura.
 
+## Quinta misura: quattro lavoratori che attivano e poi agiscono
+
+Decisione del designer dopo la quarta misura (registro 94): il turno resta quello della v1.5, il
+lavoratore attiva la colonna e poi si costruisce, potenzia o ristruttura lì o accanto; i
+lavoratori diventano **quattro**; il Personaggio resta quello del draft. Il file v2 spegne
+`turno_v2` (che resta come manopola) e porta `workers_base` a 4. Tre lotti sugli stessi semi:
+S (il lotto v2 di riferimento: tre lavoratori, Reclutare come azione), U3 (tre lavoratori e il
+draft, il controllo che isola il draft) e U4 (quattro lavoratori e il draft, la v2 di oggi):
+
+| per giocatore | S v2 di riferimento | U3 3 lavoratori + draft | **U4 4 lavoratori + draft** |
+|---|--:|--:|--:|
+| PV medi | 74,3 | 87,0 | **97,1** |
+| Rendita | 18,7 | 23,5 | 27,9 |
+| Lampo | 15,3 | 16,8 | 19,2 |
+| Scavo | 17,0 | 15,1 | 15,6 |
+| Continuità | 10,3 | 11,2 | 12,9 |
+| Scheletri | 1,8 | 5,8 | 4,6 |
+| costruiti | 10,8 | 11,7 | 13,6 |
+| costruiti sopra un altro | 5,8 | 5,7 | 6,1 |
+| altezza massima | 4,09 | 4,11 | 4,24 |
+| basi proprie / altrui | 5,0 / 2,3 | 5,2 / 2,1 | 5,5 / 2,2 |
+| premio incassato scavando | 11,5 | 9,9 | 10,4 |
+| Idee prodotte / spese | 11,6 / 9,7 | 12,9 / 11,6 | 16,4 / 14,2 |
+| senza l'era 5 cambierebbe il vincitore | 11 % | 11 % | 11 % |
+| vince Rendita / Lampo / Bilanciata | 35 / 28 / 37 % | 44 / 23 / 38 % | **47** / 23 / 38 % |
+
+Per partita (2 000 `--vita`, S contro U4): costruiti 32,4 → 40,9; in piedi a fine partita 9,5 →
+14,6; cade nell'era in cui nasce 33 → 33 %; sepolti 54 → 44 %; sepolti da un altro 21 → 15 %;
+spianati dal proprietario 33 → 27 %; Scavo per sepolto 2,96 → 2,66; Scheletri 5,7 → 14,1.
+
+**1. La v2 torna una partita intera.** 13,6 edifici e 97 punti a giocatore, la città alta 4,2 con
+le basi altrui a 2,2 come nella v2 di riferimento: il quarto lavoratore rimette in piedi tutto
+quello che il turno a un'azione aveva spento, e l'archeologia riparte (premio scavato 10,4,
+kingmaker fermo all'11 %). Si costruisce di più e si seppellisce di meno (44 % contro 54 %):
+con quattro turni per era conviene più allargare che coprire.
+
+**2. Il draft da solo vale 13 punti.** U3 contro S: +4 Scheletri (il Personaggio gratis
+seppellito vale 6 meno l'era), +5 Rendita, +2,4 Cultura (i "+1 cultura" dei Personaggi presi
+ogni era). Non è il quarto lavoratore, è il regalo: un Personaggio a testa per era senza pagare
+nulla. Da decidere se il Personaggio del draft si seppellisce ancora a fine era.
+
+**3. La Rendita domina.** Vince il 47 % delle partite (atteso 33, errore 5), il Lampo scende al
+23 %. Quattro attivazioni per era pagano più censimenti a chi tiene in piedi gli edifici (Rendita
+27,9 contro 18,7), e la Rendita è già il canale più grosso. Il Lampo, che vince costruendo,
+paga di più il ritmo: il mercato scorre più in fretta e le carte a Lampo alto finiscono a tutti.
+È il primo squilibrio da correggere nella v2 a quattro lavoratori: la Vetustà (24 cubetti a
+partita contro 17) è la prima manopola da provare, perché è quella che gonfia la Rendita.
+
+**4. Le Idee bastano ancora.** Prodotte 16,4, spese 14,2 (87 %): con quattro attivazioni le
+Idee crescono, e si spendono. Il tetto a 3 non morde.
+
 ## Come rifare il conto
 
 ```bash
@@ -268,4 +319,8 @@ godot --headless res://scenes/audit_partita.tscn -- $A --dati data/cards-v2.json
 # `--lavoratori 5` prova un altro numero di lavoratori per era
 godot --headless res://scenes/audit_partita.tscn -- --players 3 --games 750 --seed 700000 --dati data/cards-v2.json > T.csv
 python3 tools/confronta_torneo.py S.csv T.csv
+# quinta misura: quattro lavoratori e il draft stanno nel file v2 (oggi il comando di S produce U4);
+# `--lavoratori 3` e' il controllo U3, `--turno_v2 1` rigioca il turno a un'azione
+godot --headless res://scenes/audit_partita.tscn -- --players 3 --games 750 --seed 700000 --dati data/cards-v2.json > U4.csv
+python3 tools/confronta_torneo.py S.csv U4.csv
 ```

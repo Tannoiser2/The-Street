@@ -1628,3 +1628,25 @@ dato è stato importato da lì. Ma due confronti fra ciò che è stampato e
     Il bot v2 sconta l'incasso oltre quello che il mercato assorbe: senza,
     passava l'era a incassare (15 punti a giocatore).
 
+94. **Quattro lavoratori che attivano e poi agiscono.** Decisione del
+    designer dopo il punto 93: "voglio tre lavoratori come prima che fanno
+    una delle cinque azioni" era la lettura giusta della proposta, ma la
+    misura ha mostrato che nella v1.5 ogni lavoratore faceva DUE cose
+    (attivava e poi agiva) e con una sola la partita si dimezza. Quindi: i
+    lavoratori diventano **quattro**, e ogni lavoratore attiva la colonna e
+    poi fa un'azione (costruire, potenziare, ristrutturare) li' o accanto,
+    come nella v1.5; il Personaggio resta quello del draft (punto 93). Il
+    file v2 spegne `turno_v2`, che resta come manopola (`--turno_v2 1`), e
+    porta `workers_base` a 4; la ristrutturazione della propria rovina
+    dipende da `senza_rudere` e non dal turno; i protettori del draft si
+    legano al primo edificio costruito nell'era con tutti e due i turni.
+    Misurato (`docs/la-terza-risorsa.md`, quinta misura): la v2 torna una
+    partita intera, 13,6 edifici e 97 punti a giocatore, basi altrui 2,2,
+    kingmaker 11%; il draft da solo vale 13 punti (Scheletri e Rendita);
+    la **Rendita vince il 47%** delle partite e il Lampo il 23%: quattro
+    attivazioni pagano piu' censimenti. Aperto: la regola degli scheletri
+    per il Personaggio del draft, e la Vetusta' come prima manopola contro
+    la Rendita. Un documento solo per le carte: `docs/carte-v2.md`
+    (generato da `tools/carte_v2.py`), al posto di `carte-da-rifare.md` e
+    `proposte/costi-tre-risorse.md`.
+
