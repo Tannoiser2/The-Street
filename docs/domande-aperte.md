@@ -1601,3 +1601,30 @@ dato è stato importato da lì. Ma due confronti fra ciò che è stampato e
     atteso), la Scavo torna nella media, il kingmaker al 10%. E' il lotto di
     partenza per le prossime domande dell'audit.
 
+93. **Il turno a un'azione, il draft dei Personaggi, e quanti lavoratori.**
+    Il punto 8 della proposta letto alla lettera (`turno_v2` nel file v2):
+    ogni turno UNA cosa, e il lavoratore va dove agisce. Letture adottate
+    dove la proposta tace: si costruisce in qualsiasi colonna e il lavoratore
+    sta sull'edificio nuovo, con +2 per l'era, e attiva solo quello (D9-D11);
+    il lavoratore sul potenziamento resta sotto come scheletro e torna a fine
+    era (D12); la ristrutturazione vale solo sulle proprie rovine e costa meta'
+    del costo, Costruzione e Denaro (D13); passare consuma il lavoratore e
+    incassa 1 Costruzione piu' 1 risorsa a scelta, l'era finisce quando
+    finiscono i lavoratori (D14); la Dinastia resta un acquisto al posto del
+    turno (D8). Decisione del designer: **i lavoratori restano tre** e il
+    Personaggio si prende **in automatico a inizio era, senza lavoratore**
+    (`draft_personaggi`: uno a testa in ordine di turno fra i cinque
+    dell'era, gratis; Reclutare sparisce; i protettori si legano al primo
+    edificio costruito nell'era; le Impronte chiedono l'edificio dopo la
+    carta). Misurato (`docs/la-terza-risorsa.md`, quarta misura): con
+    un'azione per lavoratore la partita si dimezza (7 edifici e 44 punti a
+    giocatore contro 11 e 74), le basi altrui cadono da 2,3 a 0,6 e lo Scavo
+    da 17 a 3: l'archeologia si spegne. Con 5 o 6 lavoratori il ritmo torna,
+    ma i lavoratori restano tre. Il draft regala scheletri (da 1,8 a 9,4
+    punti): la regola degli scheletri va decisa. **Aperto:** il designer ha
+    detto che "una cosa sola per lavoratore" non e' la lettura giusta del
+    punto 8; la lettura vera (il lavoratore sulla colonna attiva E poi si
+    agisce, come oggi? le azioni senza lavoratore?) va scritta e misurata.
+    Il bot v2 sconta l'incasso oltre quello che il mercato assorbe: senza,
+    passava l'era a incassare (15 punti a giocatore).
+

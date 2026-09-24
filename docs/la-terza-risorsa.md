@@ -185,6 +185,69 @@ per la forma del gioco; quelle sulle vittorie per strategia si leggono da qui in
 prossime domande dell'audit (le cinque azioni, il draft dei Personaggi, la ristrutturazione
 delle rovine): ogni cambiamento si misura contro questo lotto.
 
+## Quarta misura: il turno a un'azione e il draft dei Personaggi
+
+Il punto 8 della proposta, letto alla lettera: "ogni turno un giocatore può fare **una** delle
+seguenti cose", con il lavoratore che va dove agisce (`turno_v2` nel file v2: attiva una colonna;
+costruisce ovunque e il lavoratore sta sull'edificio nuovo con +2 e attiva solo quello; potenzia e
+il lavoratore resta sotto come scheletro; ristruttura una propria rovina; compra la Dinastia;
+passa e incassa 1 Costruzione più 1 risorsa a scelta). Tre lavoratori, tre turni per era. Poi la
+decisione del designer sul draft: il Personaggio si prende a inizio era, gratis e senza lavoratore
+(`draft_personaggi`), e Reclutare sparisce dalle azioni. Stesso lotto v2 di prima, stessi semi:
+
+| per giocatore | S canone v2 | T turno a un'azione | T + draft |
+|---|--:|--:|--:|
+| PV medi | 74,3 | 32,1 | 44,3 |
+| Rendita | 18,7 | 5,3 | 6,4 |
+| Lampo | 15,3 | 10,0 | 10,9 |
+| Scavo | 17,0 | 3,1 | 2,6 |
+| Scheletri | 1,8 | 2,6 | **9,4** |
+| costruiti | 10,8 | 6,8 | 7,5 |
+| costruiti sopra un altro | 5,8 | 4,1 | 4,5 |
+| altezza massima | 4,09 | 3,76 | 4,03 |
+| basi proprie | 5,0 | 3,9 | 4,4 |
+| **basi altrui** | 2,3 | **0,6** | **0,6** |
+| premio incassato scavando | 11,5 | 2,1 | 1,7 |
+| Idee prodotte / spese | 11,6 / 9,7 | 6,1 / 3,9 | 6,2 / 4,2 |
+| azioni: colonna / costruisci / potenzia / ristruttura / recluta / passa | — | 5,4 / 6,8 / 0,5 / 0,2 / 1,4 / 0,8 | 5,0 / 7,5 / 1,1 / 0,3 / — / 1,2 |
+| senza l'era 5 cambierebbe il vincitore | 11 % | 12 % | 10 % |
+| vince Rendita / Lampo / Bilanciata | 35 / 28 / 37 % | 29 / 38 / 33 % | 39 / 33 / 36 % |
+
+Per partita (2 000 `--vita`): costruiti 32,4 / 20,5 / 22,4; cade nell'era in cui nasce 33 / 13 /
+12 %; spianati dal proprietario 33 / 49 / 51 %; **sepolti da un altro 21 / 8 / 7 %**; Scavo per
+sepolto 2,96 / 0,85 / 0,59; Scheletri 5,7 / 7,8 / 28,4.
+
+**0. Prima il bot, poi la regola.** La prima corsa di T dava 15,6 punti a giocatore: il bot
+pagava le risorse a prezzo fisso anche con tredici pietre in mano che la dispersione avrebbe
+tagliato a tre, e passava l'era a incassare. Nel turno v2 incassare costa il turno, quindi ora le
+unità oltre quello che il mercato chiede (o oltre il tetto, con l'ultimo lavoratore) valgono
+quasi niente. Con questo sconto il bot costruisce 6,8 edifici invece di 3,5, e la misura è
+quella qui sopra.
+
+**1. Con un'azione per lavoratore la partita si dimezza.** Tre azioni per era invece di tre
+attivazioni più tre azioni: 7 edifici a giocatore invece di 11, 32-44 punti invece di 74. Non è
+un difetto del bot: con 5 lavoratori (`--lavoratori 5`, prova a parte) si torna a 10 edifici e
+54 punti, con 6 a 11 e 65. Il designer ha detto che i lavoratori restano tre: quindi il turno
+non può essere "una cosa sola per lavoratore", e la sua lettura del punto 8 va scritta (vedi
+registro 93).
+
+**2. L'archeologia si spegne.** Le basi altrui passano da 2,3 a 0,6 a giocatore, i sepolti da un
+altro dal 21 al 7 %, lo Scavo da 17 a 3 punti: con tre azioni per era si costruisce sul proprio,
+al livello che c'è, e il premio S×L non si incassa quasi più (1,7 a giocatore). Le pile alte
+(altezza 4,0) sono spianature dei propri edifici (51 %), non sepolture altrui. Il kingmaker resta
+al 10-12 % solo perché il premio è piccolo.
+
+**3. Il draft regala scheletri.** Un Personaggio gratis a era, cinque a partita, seppellito a fine
+era sotto un edificio in piedi vale 6 meno l'era: gli Scheletri salgono da 1,8 a 9,4 punti a
+giocatore (28 a partita), il canale più grosso dopo il Lampo. Con il draft la regola degli
+scheletri (D12) va decisa: o il Personaggio non si seppellisce più (lo scheletro è il lavoratore
+sul potenziamento, come dice la proposta), o il draft costa qualcosa.
+
+**4. Il resto tiene.** Le sei strategie restano entro l'errore (28-39 %), gli eventi abbattono
+di meno (cade nell'era in cui nasce 12 % contro 33 %: si costruisce meno, e gli edifici nuovi
+sono protetti), la città ha la stessa altezza. Tutto il resto della v2 (tre risorse, niente
+rudere, premio S×L) non cambia lettura.
+
 ## Come rifare il conto
 
 ```bash
@@ -200,4 +263,9 @@ python3 tools/confronta_strategie.py S.csv
 # seconda misura, con i dati rigenerati (tetto 3, potenziamenti per famiglia, Dinastia in Idee):
 godot --headless res://scenes/audit_partita.tscn -- $A --dati data/cards-v2.json \
   --senza_rudere 1 --gap 2 --verticalita 0,0,0,0 --premio per_livello --premio_era5 dimezzato > E2.csv
+# quarta misura: il turno v2 e il draft stanno ORA nel file v2, quindi il comando di S
+# oggi produce T (S e' stato giocato prima che il turno entrasse nel file);
+# `--lavoratori 5` prova un altro numero di lavoratori per era
+godot --headless res://scenes/audit_partita.tscn -- --players 3 --games 750 --seed 700000 --dati data/cards-v2.json > T.csv
+python3 tools/confronta_torneo.py S.csv T.csv
 ```
