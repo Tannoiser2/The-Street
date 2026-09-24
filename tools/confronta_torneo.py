@@ -10,7 +10,9 @@ import sys, collections
 
 FUORI = ("seme", "posto", "giocatore", "pv", "strategia", "sopra", "quota_max",
          "costruiti", "piano", "centro_attivato", "oro_centro",
-         "sopra_propri", "sopra_altrui", "spianati", "scavo_scavato", "scavo_e5")
+         "sopra_propri", "sopra_altrui", "spianati", "scavo_scavato", "scavo_e5",
+         "idee_prodotte", "idee_spese", "az_colonna", "az_costruisci", "az_potenzia",
+         "az_ristruttura", "az_recluta", "az_dinastia", "az_passa")
 
 def leggi(f):
     regole = {}
@@ -43,6 +45,14 @@ def leggi(f):
     if "scavo_scavato" in hdr:
         m["Scavo incassato scavando"] = media("scavo_scavato")
         m["  di cui nell'era 5"] = media("scavo_e5")
+    if "idee_prodotte" in hdr:
+        m["Idee prodotte"] = media("idee_prodotte")
+        m["Idee spese"] = media("idee_spese")
+    if "az_colonna" in hdr and sum(int(d["az_colonna"]) for d in dati) > 0:
+        for k, nome in [("az_colonna", "azioni: colonna"), ("az_costruisci", "  costruisci"),
+                        ("az_potenzia", "  potenzia"), ("az_ristruttura", "  ristruttura"),
+                        ("az_recluta", "  recluta"), ("az_dinastia", "  Dinastia"), ("az_passa", "  passa")]:
+            m[nome] = media(k)
     for s in sorted(giocate): m["vince " + s] = vinte[s] / giocate[s]
     return regole, partite, m
 

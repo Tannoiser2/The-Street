@@ -29,41 +29,7 @@ static func activate(gs: GameState, player: int, col: int) -> void:
 		gs.log_line("Anni della fame: giocatore %d non incassa la produzione base" % player)
 
 	for b in g.alive_in_column(col):
-		var pr = b.data["production"]
-		var ow: PlayerState = gs.players[b.owner]
-		# Il Ponte alza cio' che l'edificio gia' produce, prima che si conti
-		# se la produzione e' "di oro" per l'Industriale.
-		var aura := Effects.aura_production_bonus(gs, b)
-		var pp := int(pr.get("pietra", 0)) + int(aura["pietra"])
-		var po := int(pr.get("oro", 0)) + int(aura["oro"])
-		var pc := int(pr.get("cultura", 0)) + int(aura["cultura"])
-		var pi := int(pr.get("idee", 0))      # v2: le Idee prodotte dagli edifici
-		var ex := Effects.production_bonus(gs, b.owner, pp, po)
-		ow.gain(pp + ex.x, po + ex.y, pi)
-		if pc > 0:
-			ow.add_vp("cultura", pc)
-		# Artista di corte: chi ha firmato l'edificio altrui incassa la sua
-		# quota. Non e' una produzione dell'edificio ma un taglio dell'artista,
-		# quindi non conta per l'Industriale, come l'oro della Prosperita'.
-		for chi in b.patrons:
-			var quota := int(b.patrons[chi])
-			if quota <= 0: continue
-			gs.players[int(chi)].gain(0, quota)
-			gs.log_line("%s: giocatore %d incassa %d oro come firmatario" % [b.data["name"], int(chi), quota])
-		if int(b.data.get("exhaustible", 0)) > 0:
-			b.charges -= 1
-			if b.charges <= 0:
-				# Senza rudere (manopola) la Cava vuota crolla in rovina: e'
-				# l'unico altro modo di diventare rudere, e la manopola deve
-				# togliere lo stato del tutto, se no `n_rudere` non e' zero e
-				# la misura mente.
-				if bool(CardDB.constants.get("senza_rudere", false)):
-					b.state = Enums.BuildingState.ROVINA
-					b.upgrades.clear()
-					gs.log_line("%s si esaurisce e crolla in rovina" % b.data["name"])
-				else:
-					b.state = Enums.BuildingState.RUDERE
-					gs.log_line("%s si esaurisce e diventa rudere" % b.data["name"])
+		paga_edificio(gs, b)
 
 	Effects.apply_on_activate(gs, player, col)
 
@@ -88,6 +54,47 @@ static func activate(gs: GameState, player: int, col: int) -> void:
 		# l'unico premio del tabellone che paga anche gli avversari.
 		gs.log_line("Centro Urbano in colonna %d: %d proprietari incassano %d oro"
 			% [col, chi.size(), gold])
+
+# La paga di UN edificio vivo: la sua produzione al proprietario, la quota dei
+# firmatari, la carica della Cava. E' un pezzo dell'attivazione di colonna,
+# estratto pari pari perche' nel turno v2 (registro 93) chi costruisce mette il
+# lavoratore sull'edificio nuovo e attiva solo quello.
+static func paga_edificio(gs: GameState, b: Building) -> void:
+	var pr = b.data["production"]
+	var ow: PlayerState = gs.players[b.owner]
+	# Il Ponte alza cio' che l'edificio gia' produce, prima che si conti
+	# se la produzione e' "di oro" per l'Industriale.
+	var aura := Effects.aura_production_bonus(gs, b)
+	var pp := int(pr.get("pietra", 0)) + int(aura["pietra"])
+	var po := int(pr.get("oro", 0)) + int(aura["oro"])
+	var pc := int(pr.get("cultura", 0)) + int(aura["cultura"])
+	var pi := int(pr.get("idee", 0))      # v2: le Idee prodotte dagli edifici
+	var ex := Effects.production_bonus(gs, b.owner, pp, po)
+	ow.gain(pp + ex.x, po + ex.y, pi)
+	if pc > 0:
+		ow.add_vp("cultura", pc)
+	# Artista di corte: chi ha firmato l'edificio altrui incassa la sua
+	# quota. Non e' una produzione dell'edificio ma un taglio dell'artista,
+	# quindi non conta per l'Industriale, come l'oro della Prosperita'.
+	for chi in b.patrons:
+		var quota := int(b.patrons[chi])
+		if quota <= 0: continue
+		gs.players[int(chi)].gain(0, quota)
+		gs.log_line("%s: giocatore %d incassa %d oro come firmatario" % [b.data["name"], int(chi), quota])
+	if int(b.data.get("exhaustible", 0)) > 0:
+		b.charges -= 1
+		if b.charges <= 0:
+			# Senza rudere (manopola) la Cava vuota crolla in rovina: e'
+			# l'unico altro modo di diventare rudere, e la manopola deve
+			# togliere lo stato del tutto, se no `n_rudere` non e' zero e
+			# la misura mente.
+			if bool(CardDB.constants.get("senza_rudere", false)):
+				b.state = Enums.BuildingState.ROVINA
+				b.upgrades.clear()
+				gs.log_line("%s si esaurisce e crolla in rovina" % b.data["name"])
+			else:
+				b.state = Enums.BuildingState.RUDERE
+				gs.log_line("%s si esaurisce e diventa rudere" % b.data["name"])
 
 # ---- evento --------------------------------------------------------
 # Confronta la resistenza effettiva con la forza dell'era.

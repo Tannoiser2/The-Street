@@ -35,6 +35,7 @@ func _ready() -> void:
 	_run("la v2 a tre risorse gira sullo stesso motore", _test_tre_risorse)
 	_run("il tetto per risorsa alla dispersione", _test_tetto_per_risorsa)
 	_run("il canone delle strategie segue il file dati", _test_canone_v2)
+	_run("il turno v2: un'azione per turno, il lavoratore dove agisce", _test_turno_v2)
 	print("\n%d superati, %d falliti" % [_passed, _failed])
 	get_tree().quit(0 if _failed == 0 else 1)
 
@@ -1142,5 +1143,58 @@ func _test_canone_v2() -> void:
 			guard += 1
 		if ctl.gs.phase == Enums.Phase.FINE_PARTITA: finite += 1
 	_eq("  e ogni strategia porta in fondo una partita v2", finite, StrategyBot.canone().size())
+	CardDB.load_db(CardDB.DB_PATH)
+
+# Registro 93: nel turno v2 ogni azione consuma un lavoratore e non c'e' la
+# fase AZIONE. Si prova sul file v2: costruire all'inizio del turno passa,
+# mette il lavoratore sull'edificio (+2) e lo attiva; passare incassa; su
+# partite vere del bot casuale si fanno tutte le azioni e le partite finiscono.
+func _test_turno_v2() -> void:
+	if not FileAccess.file_exists("res://data/cards-v2.json"): return
+	CardDB.load_db("res://data/cards-v2.json")
+	_ok("il file v2 accende il turno v2", bool(CardDB.constants.get("turno_v2", false)))
+	var ctl := _game(3, 990)
+	var gs := ctl.gs
+	var p := gs.current_player()
+	var usati := p.workers_used
+	# Costruire senza aver attivato: nel turno v2 e' il turno stesso.
+	var fatto := false
+	var nuovo: Building = null
+	for card_id in gs.market.duplicate():
+		for c in gs.grid.n_cols:
+			if ctl.build(card_id, c, false):
+				fatto = true
+				for b in gs.grid.buildings:
+					if b.owner == p.index: nuovo = b
+				break
+		if fatto: break
+	_ok("si costruisce all'inizio del turno", fatto)
+	if fatto:
+		_eq("  e costa il lavoratore", p.workers_used, usati + 1)
+		_eq("  che resta sull'edificio a proteggerlo", nuovo.protection, int(CardDB.constants["protection_bonus"]))
+		_eq("  ed e' ancora fase PIAZZA per il prossimo", gs.phase, Enums.Phase.PIAZZA)
+	var p2 := gs.current_player()
+	var oro_prima := p2.oro
+	var usati2 := p2.workers_used
+	_ok("passare e incassare", ctl.passa("oro"))
+	_eq("  porta 1 oro", p2.oro, oro_prima + 1)
+	_eq("  e costa il lavoratore", p2.workers_used, usati2 + 1)
+	var azioni := {}
+	var finite := 0
+	for g in 4:
+		var c2 := _game(3, 995 + g)
+		var guard := 0
+		while c2.gs.phase != Enums.Phase.FINE_PARTITA and guard < 10000:
+			RandomBot.play_turn(c2)
+			guard += 1
+		if c2.gs.phase == Enums.Phase.FINE_PARTITA: finite += 1
+		for pl in c2.gs.players:
+			for k in pl.counters:
+				if str(k).begins_with("az_"): azioni[k] = int(azioni.get(k, 0)) + int(pl.counters[k])
+	_eq("4 partite del bot casuale arrivano in fondo", finite, 4)
+	# Il bot casuale non passa mai: una colonna libera c'e' sempre. Passare e'
+	# provato sopra, direttamente.
+	for k in ["az_colonna", "az_costruisci", "az_potenzia"]:
+		_ok("  si fa l'azione %s (%d)" % [k, int(azioni.get(k, 0))], int(azioni.get(k, 0)) > 0)
 	CardDB.load_db(CardDB.DB_PATH)
 

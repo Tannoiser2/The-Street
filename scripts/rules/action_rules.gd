@@ -93,7 +93,14 @@ static func quote_restore(gs: GameState, player: int, target: Building) -> Actio
 		return ActionQuote.no("nessun rudere bersaglio")
 	if target.is_buried:
 		return ActionQuote.no("l'edificio e' sotterrato")
-	if target.state != Enums.BuildingState.RUDERE:
+	if bool(CardDB.constants.get("turno_v2", false)):
+		# V2 (D13): si ristruttura una PROPRIA rovina esposta. Niente furto:
+		# senza rudere ogni edificio caduto sarebbe rubabile.
+		if target.state != Enums.BuildingState.ROVINA:
+			return ActionQuote.no("non e' una rovina")
+		if target.owner != player:
+			return ActionQuote.no("la rovina non e' tua")
+	elif target.state != Enums.BuildingState.RUDERE:
 		return ActionQuote.no("non e' un rudere")
 	# ev_secolarizzazioni: "durante l'era, restaurare un rudere Religione non
 	# costa risorse (richiede comunque l'azione) e vale sui ruderi gia' presenti."
@@ -131,12 +138,17 @@ static func quote_recruit(gs: GameState, player: int, char_id: String, col: int,
 		if why2 != "": return ActionQuote.no(why2)
 	var cls: String = data["class"]
 	var found := false
-	for b in gs.grid.alive_in_column(col):
+	# V2 (col -1): nessuna colonna attivata, la classe si cerca fra i PROPRI
+	# edifici vivi, ovunque siano.
+	var dove: Array = gs.grid.alive_in_column(col) if col >= 0 \
+		else gs.grid.buildings.filter(func(b): return b.owner == player and b.is_alive())
+	for b in dove:
 		if cls in b.classes():
 			found = true
 			break
 	if not found:
-		return ActionQuote.no("nessun edificio intatto di classe %s nella colonna" % cls)
+		return ActionQuote.no("nessun edificio intatto di classe %s %s" % [cls,
+			"nella colonna" if col >= 0 else "fra i tuoi"])
 	return ActionQuote.yes(0, int(CardDB.constants["recruit_cost_oro"]))
 
 # ---- Dinastia ------------------------------------------------------

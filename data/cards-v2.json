@@ -92,7 +92,10 @@
     "market_size": 6,
     "side_rows": 3,
     "resource_cap_per_resource": 3,
-    "premio_era5": "dimezzato"
+    "premio_era5": "dimezzato",
+    "turno_v2": true,
+    "passa_incasso_pietra": 1,
+    "passa_incasso_scelta": 1
   },
   "terrains": [
     {

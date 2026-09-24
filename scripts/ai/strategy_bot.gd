@@ -114,6 +114,9 @@ static func play_turn(ctl: GameController, strategia := "bilanciata") -> void:
 		if not ctl.choose(_scelta(gs)): break
 	if gs.phase == Enums.Phase.FINE_PARTITA: return
 	var p := gs.current_player()
+	if bool(CardDB.constants.get("turno_v2", false)):
+		_play_turn_v2(ctl, p, strategia)
+		return
 
 	if racconta: taccuino = {"strategia": strategia, "chi": p.index}
 	var colonne := classifica_colonne(gs, p, strategia)
@@ -254,6 +257,61 @@ static func _da_proteggere(gs: GameState, p: PlayerState, col: int) -> Building:
 	return meglio
 
 # ---- le mosse possibili ---------------------------------------------
+# ---- il turno v2 -----------------------------------------------------
+# Una lista sola con tutto quello che si puo' fare: attivare una colonna
+# (vale quello che rende, provato su una copia), costruire ovunque, potenziare,
+# ristrutturare, reclutare, la Dinastia, passare. La stessa testa di sempre
+# (`_valore`) e la stessa spinta della strategia; a cambiare e' solo che non
+# c'e' piu' una colonna da scegliere prima.
+static func _play_turn_v2(ctl: GameController, p: PlayerState, strategia: String) -> void:
+	var gs := ctl.gs
+	var r := valore_risorse(gs, p)
+	var lista: Array[Dictionary] = []
+	for c in gs.grid.n_cols:
+		if c in p.worker_cols: continue
+		var copia := gs.duplica()
+		var pc: PlayerState = copia.players[p.index]
+		var prima := Vector3(pc.pietra, pc.oro, pc.idee)
+		EraRules.activate(copia, p.index, c)
+		var guadagno := float(pc.pietra - prima.x) * r.x + float(pc.oro - prima.y) * r.y \
+			+ float(pc.idee - prima.z) * r.y
+		var v := AvailableActions.Voce.new()
+		v.tipo = "colonna"
+		v.legale = true
+		v.etichetta = "Attiva la colonna %d" % c
+		v.parametri = {"col": c}
+		# Anche i punti (Cultura, effetti all'attivazione) contano.
+		guadagno += float(pc.vp - p.vp) * 0.9
+		lista.append({"mossa": v, "valore": guadagno + 0.3})
+	for v in _opzioni_v2(gs, p.index, r):
+		lista.append({"mossa": v, "valore": _valore(gs, p, v, strategia, int(v.parametri.get("col_from", -1)))})
+	var scelta := migliore(lista)
+	if scelta.is_empty() or not _esegui(ctl, scelta["mossa"]):
+		ctl.passa(_risorsa_da_passare(p, r))
+
+static func _opzioni_v2(gs: GameState, player: int, r: Vector2) -> Array:
+	var p: PlayerState = gs.players[player]
+	var out := []
+	for card_id in gs.market:
+		for v in AvailableActions.piazzamenti_ovunque(gs, player, card_id):
+			if v.pagabile(p): out.append(v)
+	for v in AvailableActions.potenziamenti_ovunque(gs, player):
+		if v.pagabile(p): out.append(v)
+	for v in AvailableActions.ristrutturazioni(gs, player):
+		if v.pagabile(p): out.append(v)
+	for v in AvailableActions.reclutamenti(gs, player, -1):
+		if v.legale and v.pagabile(p): out.append(v)
+	var d := AvailableActions.dinastia(gs, player)
+	if d.legale and d.pagabile(p): out.append(d)
+	out.append(AvailableActions.passa(_risorsa_da_passare(p, r)))
+	return out
+
+# La risorsa da chiedere passando: quella che vale di piu', e fra oro e Idee
+# quella che manca di piu'.
+static func _risorsa_da_passare(p: PlayerState, r: Vector2) -> String:
+	if r.y < r.x: return "pietra"
+	return "idee" if p.idee < p.oro else "oro"
+
 static func _opzioni(gs: GameState, player: int, col: int) -> Array:
 	var p: PlayerState = gs.players[player]
 	var out := []
@@ -273,6 +331,10 @@ static func _opzioni(gs: GameState, player: int, col: int) -> Array:
 static func _esegui(ctl: GameController, v) -> bool:
 	var par: Dictionary = v.parametri
 	match v.tipo:
+		"colonna":
+			return ctl.place_worker(int(par["col"]))
+		"passa":
+			return ctl.passa(str(par.get("scelta", "oro")))
 		"costruisci":
 			return ctl.build(str(par["card_id"]), int(par["col_from"]), bool(par["above"]))
 		"potenzia":
@@ -303,6 +365,11 @@ static func _valore(gs: GameState, p: PlayerState, v, strategia: String, col: in
 	var speso := float(v.pietra) * r.x + float(v.oro) * r.y + float(v.idee) * r.y
 	if speso != 0.0: dett["costo"] = -speso
 	match v.tipo:
+		"passa":
+			# Passare vale le due risorse che porta, meno il turno che costa.
+			var q := r.x + maxf(r.x, r.y) - 0.5
+			dett["passare e incassare"] = q
+			return q
 		"costruisci": return _valore_costruzione(gs, p, v, strategia, r, dett) - speso
 		"potenzia": return _valore_potenziamento(gs, p, v, dett) - speso
 		"restaura": return _valore_restauro(gs, p, v, dett) - speso

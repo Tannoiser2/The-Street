@@ -78,6 +78,11 @@ v2["constants"]["spianare_conserva_scavo"] = False     # lo spianato vale 0 (ter
 v2["constants"]["verticality_vp"] = {"1": 0, "2": 0, "3": 0, "4": 0}   # via la Verticalita'
 v2["constants"]["premio_scavo"] = "per_livello"        # S x L a chi costruisce sopra
 v2["constants"]["premio_era5"] = "dimezzato"           # la correzione all'ultima era
+# IL TURNO V2 (registro 93): un'azione per turno, il lavoratore va dove agisce;
+# passare incassa 1 Costruzione piu' 1 risorsa a scelta (D14).
+v2["constants"]["turno_v2"] = True
+v2["constants"]["passa_incasso_pietra"] = 1
+v2["constants"]["passa_incasso_scelta"] = 1
 out = os.path.join(RADICE, "data/cards-v2.json")
 json.dump(v2, open(out, "w", encoding="utf-8"), indent=2, ensure_ascii=False)
 open(out, "a").write("\n")

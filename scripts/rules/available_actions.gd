@@ -211,6 +211,48 @@ static func bersagli_reclutamento(gs: GameState, player: int, col: int,
 			q, {"char_id": char_id, "uid": b.uid}))
 	return out
 
+# ---- il turno v2: le voci senza colonna attivata --------------------
+# Nel turno v2 (registro 93) non c'e' una colonna attivata: si costruisce
+# ovunque, si potenzia e si ristruttura qualunque proprio edificio.
+static func piazzamenti_ovunque(gs: GameState, player: int, card_id: String) -> Array[Voce]:
+	var out: Array[Voce] = []
+	if not CardDB.buildings.has(card_id): return out
+	var d: Dictionary = CardDB.buildings[card_id]
+	var w := int(d["width"])
+	for c in range(0, gs.grid.n_cols - w + 1):
+		for sopra in [false, true]:
+			var q = BuildRules.quote_above(gs, player, d, c) if sopra \
+				else BuildRules.quote_rail(gs, player, d, c)
+			if not q.legal: continue
+			out.append(_voce("costruisci", "Costruisci %s in colonna %d%s" % [d["name"], c, " sopra" if sopra else ""],
+				q, {"card_id": card_id, "col_from": c, "above": sopra, "level": q.level}))
+	return out
+
+static func potenziamenti_ovunque(gs: GameState, player: int) -> Array[Voce]:
+	var out: Array[Voce] = []
+	for upg_id in gs.upg_row:
+		var d: Dictionary = CardDB.upgrades[upg_id]
+		for b in gs.grid.buildings:
+			if b.owner != player or not b.is_alive(): continue
+			var q := ActionRules.quote_upgrade(gs, player, upg_id, b)
+			if q.legal:
+				out.append(_voce("potenzia", "Potenzia %s con %s" % [b.data["name"], d["name"]], q,
+					{"upg_id": upg_id, "uid": b.uid}))
+	return out
+
+static func ristrutturazioni(gs: GameState, player: int) -> Array[Voce]:
+	var out: Array[Voce] = []
+	for b in gs.grid.buildings:
+		if b.owner != player or b.state != Enums.BuildingState.ROVINA or b.is_buried: continue
+		var q := ActionRules.quote_restore(gs, player, b)
+		if q.legal:
+			out.append(_voce("restaura", "Ristruttura %s" % b.data["name"], q, {"uid": b.uid}))
+	return out
+
+static func passa(scelta: String) -> Voce:
+	return _voce("passa", "Passa e incassa 1 pietra e 1 %s" % scelta,
+		ActionRules.ActionQuote.yes(0, 0), {"scelta": scelta})
+
 static func dinastia(gs: GameState, player: int) -> Voce:
 	return _voce("dinastia", "Acquista la Dinastia",
 		ActionRules.quote_dynasty(gs, player), {})

@@ -206,7 +206,8 @@ func _lotto(seme: int, players: int, quante: int) -> void:
 	# solo quanto si segna.
 	print("seme;posto;giocatore;pv;strategia;sopra;quota_max;costruiti;"
 		+ ";".join(Riepilogo.VOCI.map(func(v): return str(v["id"]))) + ";piano;centro_attivato;oro_centro"
-		+ ";sopra_propri;sopra_altrui;spianati;scavo_scavato;scavo_e5;idee_prodotte;idee_spese")
+		+ ";sopra_propri;sopra_altrui;spianati;scavo_scavato;scavo_e5;idee_prodotte;idee_spese"
+		+ ";az_colonna;az_costruisci;az_potenzia;az_ristruttura;az_recluta;az_dinastia;az_passa")
 	for g in quante:
 		var ctl := GameController.new()
 		ctl.new_game(players, seme + g)
@@ -237,7 +238,8 @@ func _lotto(seme: int, players: int, quante: int) -> void:
 			# Sopra chi ha costruito (registro 87): quante basi erano sue,
 			# quante altrui, e quanti suoi intatti ha spianato.
 			for k in ["sopra_propri", "sopra_altrui", "spianati", "scavo_scavato", "scavo_e5",
-					"idee_prodotte", "idee_spese"]:
+					"idee_prodotte", "idee_spese", "az_colonna", "az_costruisci", "az_potenzia",
+					"az_ristruttura", "az_recluta", "az_dinastia", "az_passa"]:
 				campi.append("%d" % int(cnt.get(k, 0)))
 			print(";".join(campi))
 	get_tree().quit(0)
@@ -319,7 +321,7 @@ func _stampa_vita(acc: Dictionary, quante: int, players: int, seme: int) -> void
 	var vt = CardDB.constants["verticality_vp"]
 	var scala: Array[String] = []
 	for i in 4: scala.append("%d" % int(vt[str(i + 1)]))
-	print("# partite=%d giocatori=%d seme_base=%d bot=%s verticalita=%s prosperita=%d rovina=%d binari=%s versione_bot=%d strategie=%d centro=%s rudere=%s spianato=%s scavo=%s sconto=%s disturbo=%d premio=%s dati=%s era5=%s tetto=%d" % [
+	print("# partite=%d giocatori=%d seme_base=%d bot=%s verticalita=%s prosperita=%d rovina=%d binari=%s versione_bot=%d strategie=%d centro=%s rudere=%s spianato=%s scavo=%s sconto=%s disturbo=%d premio=%s dati=%s era5=%s tetto=%d turno=%s" % [
 		quante, players, seme, "strategie" if _strategie else "caso",
 		"/".join(scala), int(CardDB.constants["prosperity"]["min_buildings"]),
 		int(CardDB.constants.get("rovina_gap", 2)),
@@ -335,7 +337,8 @@ func _stampa_vita(acc: Dictionary, quante: int, players: int, seme: int) -> void
 		str(CardDB.constants.get("premio_scavo", "nessuno")),
 		str(CardDB.ruleset),
 		str(CardDB.constants.get("premio_era5", "intero")),
-		int(CardDB.constants.get("resource_cap_per_resource", 0))])
+		int(CardDB.constants.get("resource_cap_per_resource", 0)),
+		"v2" if bool(CardDB.constants.get("turno_v2", false)) else "v1"])
 	var intestazione: Array[String] = ["id", "nome", "era", "classi", "larghezza",
 		"costo_pietra", "costo_oro", "resistenza", "rendita", "scavo", "lampo_carta",
 		"copie", "n", "ere_intatto", "ere_piedi", "n_rudere", "n_rovina", "n_sepolto",
@@ -384,7 +387,8 @@ func pianifica_qui(i: int, g: int, players: int) -> bool:
 func _muovi(ctl: GameController, g: int) -> void:
 	if _strategie:
 		var chi := ctl.gs.current_index
-		if pianifica_qui(chi, g, ctl.gs.n_players):
+		# Il pianificatore conosce solo il turno v1.5: nella v2 gioca lo StrategyBot.
+		if pianifica_qui(chi, g, ctl.gs.n_players) and not bool(CardDB.constants.get("turno_v2", false)):
 			PlanningBot.play_turn(ctl, strategia_di(chi, g))
 			return
 		StrategyBot.racconta = _perche
