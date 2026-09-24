@@ -1589,3 +1589,15 @@ dato è stato importato da lì. Ma due confronti fra ciò che è stampato e
     costo di 4,5 punti di Scavo a giocatore; senza premio nell'era 5 la citta'
     smette di salire (altezza 4,0, basi altrui 2,0). Raccomandato: dimezzato.
 
+92. **Il canone delle strategie per la v2.** Con il file v2 caricato il bot
+    gioca Rendita, Lampo, Scavo, Continuita', Bilanciata, Obiettivi: la
+    Verticale esce (senza Verticalita' non insegue niente), la Continuita'
+    entra (senza il premio della colonna e' il quarto canale), la Scavo
+    insegue il premio S x L di chi costruisce sopra invece dello Scavo di chi
+    viene sepolto. Quale canone vale lo dice `CardDB.ruleset`, non una
+    manopola. Misurato sullo stesso lotto v2 con i due canoni
+    (`docs/la-terza-risorsa.md`): la citta' non cambia, e con il canone v2
+    le sei strategie stanno tutte entro l'errore (27,5-36,8% contro 33,3
+    atteso), la Scavo torna nella media, il kingmaker al 10%. E' il lotto di
+    partenza per le prossime domande dell'audit.
+

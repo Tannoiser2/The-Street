@@ -143,6 +143,48 @@ dimezzato nell'era 5, tetto 3 per risorsa. `--dati data/cards-v2.json` gioca la 
 manopole, e le 120 partite di prova escono identiche a quelle con le manopole. Le manopole
 restano per le prove sulla v1.5.
 
+## Terza misura: le strategie della v2
+
+Le sei strategie erano tarate sulla v1.5: la Verticale inseguiva un canale che nella v2 non
+esiste e la Scavo inseguiva lo Scavo di chi viene sepolto, non il premio di chi scava. Registro
+92: con il file v2 caricato il canone è **Rendita, Lampo, Scavo, Continuità, Bilanciata,
+Obiettivi**; la Scavo insegue il premio S×L (le pile ricche e alte), la Continuità entra al posto
+della Verticale. Quale canone vale lo dice il file dati. Stesso lotto v2 (tutte le regole nel
+file), stessi semi, due canoni:
+
+| per giocatore | canone v1.5 | canone v2 |
+|---|--:|--:|
+| PV medi | 74,4 | 74,3 |
+| Scavo | 18,0 | 17,0 |
+| Continuità | 9,6 | 10,3 |
+| altezza massima | 4,17 | 4,09 |
+| basi proprie / altrui | 5,2 / 2,4 | 5,0 / 2,3 |
+| senza l'era 5 cambierebbe il vincitore | 12 % | 10 % |
+
+| strategia | vittorie (canone v2) | PV medi | il canale che insegue |
+|---|--:|--:|--:|
+| Bilanciata | 36,8 % | 73,7 | (il controllo) |
+| Continuità | 36,0 % | 75,8 | Continuità 13,8 |
+| Obiettivi | 35,7 % | 74,4 | Monumenti 2,8 |
+| Rendita | 34,7 % | 74,8 | Rendita 28,5 |
+| Scavo | 29,3 % | 72,1 | Scavo 23,2 |
+| Lampo | 27,5 % | 75,3 | Lampo 25,9 |
+
+Attesa per strategia 33,3 %, errore ±5.
+
+**1. La v2, così com'è, è equilibrata fra le strategie.** Sei su sei entro l'errore, con il
+Lampo sul bordo. Nella v1.5 la Rendita stava a 41 % e la Lampo a 27 %: la v2 stringe la
+forbice. La Scavo, che con il canone vecchio inseguiva la regola sbagliata (23,7 %), inseguendo
+il premio torna nella media (29,3 %).
+
+**2. Il canone non cambia la città.** Stesso punteggio, stessa forma (altezza 4,1, sepolti 54 %,
+basi altrui 2,3), il kingmaker al 10 %. Le misure fatte con il canone vecchio restano valide
+per la forma del gioco; quelle sulle vittorie per strategia si leggono da qui in poi.
+
+**3. Nessuna strategia domina, e nessuna è morta.** È il punto di partenza che serviva per le
+prossime domande dell'audit (le cinque azioni, il draft dei Personaggi, la ristrutturazione
+delle rovine): ogni cambiamento si misura contro questo lotto.
+
 ## Come rifare il conto
 
 ```bash
@@ -152,6 +194,9 @@ godot --headless res://scenes/audit_partita.tscn -- $A --dati data/cards-v2.json
 godot --headless res://scenes/audit_partita.tscn -- $A --dati data/cards-v2.json \
   --senza_rudere 1 --gap 2 --verticalita 0,0,0,0 --premio per_livello > D.csv
 python3 tools/confronta_vita.py A.csv B.csv C.csv D.csv
+# terza misura: le regole stanno nel file v2, il canone segue il file
+godot --headless res://scenes/audit_partita.tscn -- --players 3 --games 750 --seed 700000 --dati data/cards-v2.json > S.csv
+python3 tools/confronta_strategie.py S.csv
 # seconda misura, con i dati rigenerati (tetto 3, potenziamenti per famiglia, Dinastia in Idee):
 godot --headless res://scenes/audit_partita.tscn -- $A --dati data/cards-v2.json \
   --senza_rudere 1 --gap 2 --verticalita 0,0,0,0 --premio per_livello --premio_era5 dimezzato > E2.csv
