@@ -52,11 +52,22 @@ static func activate(gs: GameState, player: int, col: int) -> void:
 
 	Effects.apply_on_activate(gs, player, col)
 
-	if g.is_prosperity_center(col):
-		var gold := int(CardDB.constants["prosperity"]["gold_per_owner"])
+	# UNA VOLTA PER ERA (manopola `once_per_era`, spenta nei dati): la prima
+	# attivazione di un Centro Urbano in un'era paga, le altre nella stessa
+	# colonna no. Si prova per rendere la Prosperita' piu' rara senza toccarne
+	# la soglia: la colonna resta un Centro, smette di essere un bancomat.
+	var pr: Dictionary = CardDB.constants["prosperity"]
+	var una_volta := bool(pr.get("once_per_era", false))
+	if g.is_prosperity_center(col) and not (una_volta and g.prosperity_paid.has(col)):
+		if una_volta: g.prosperity_paid[col] = true
+		var gold := int(pr["gold_per_owner"])
 		var chi := g.owners_alive_in(col)
+		# Contatori per le misure: quante volte il Centro paga (a chi lo
+		# attiva) e quanto oro porta a ciascuno.
+		gs.players[player].bump("centro_attivato")
 		for ow in chi:
 			gs.players[ow].gain(0, gold)
+			gs.players[ow].bump("oro_centro", gold)
 		# A registro come gli altri incassi: il Centro Urbano paga tutti quelli
 		# che hanno un edificio intatto li', non solo chi ha attivato, ed e'
 		# l'unico premio del tabellone che paga anche gli avversari.

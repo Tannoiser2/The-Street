@@ -1416,3 +1416,49 @@ dato è stato importato da lì. Ma due confronti fra ciò che è stampato e
     strategie restano confrontabili entro un punto percentuale. Da qui in poi
     l'intestazione di ogni batteria dice `strategie=6`.
 
+
+86. **Il Centro Urbano piu' raro: tre proprietari, o una volta per era.**
+    Seguito del punto 84. `gold_per_owner` vale gia' 1 e l'oro e' intero:
+    abbassarlo vuol dire 0, cioe' togliere la Prosperita'. Le due vie
+    provate, dietro manopole che non cambiano nulla finche' sono spente
+    (verificato: 120 partite identiche a main):
+
+    - **tre proprietari diversi** (`min_owners` 2 -> 3, solo dato:
+      `--proprietari 3`);
+    - **una volta per era** (`once_per_era`, nuova e spenta nei dati:
+      `--una_per_era`): la prima attivazione di un Centro in un'era paga, le
+      altre nella stessa colonna no fino all'era dopo.
+
+    3 000 partite a 3 giocatori per configurazione, stessi semi, sei
+    strategie (800 a 4 giocatori fra parentesi):
+
+    | | oggi | 3 proprietari | una per era |
+    |---|--:|--:|--:|
+    | pagamenti a partita | 7,30 (8,63) | **2,25** (3,37) | 5,09 (5,87) |
+    | oro distribuito a partita | 16,7 (20,6) | **6,8** (10,2) | 11,4 (13,7) |
+    | partite in cui scatta | 95% (96%) | **57%** (71%) | 95% (96%) |
+    | oro al vincitore | 6,4 | 2,3 | 4,4 |
+    | edifici costruiti a partita | 29,9 | 28,9 | 29,6 |
+    | PV a partita (tutti i canali) | 261 | 248 | 257 |
+    | di cui Verticalita' | 76,7 | 71,0 | 75,1 |
+    | distacco fra primo e secondo | 18,3 | 19,4 | 19,2 |
+
+    **Tre proprietari riporta la Prosperita' vicino alla rarita' di
+    partenza** (1,61 pagamenti a partita): 2,25, e in quattro partite su
+    dieci non scatta mai. Costa 14 PV a partita al tavolo, quasi tutti dal
+    costruire meno (un edificio in meno a partita, Verticalita' -5,7): l'oro
+    del Centro finiva in muri. **Ma a due giocatori la Prosperita'
+    sparisce**: tre proprietari diversi non ci sono. Se si sceglie questa
+    via, la regola va scritta come "tutti i giocatori, massimo tre" o
+    simile, e a due resta a 2.
+
+    **Una per era taglia un terzo** (7,30 -> 5,09) e lascia la Prosperita'
+    in quasi tutte le partite: toglie la colonna-bancomat attivata tre
+    volte di fila, non il Centro. Costa 4 PV a partita.
+
+    **Nessuna delle due sposta chi vince.** Le vittorie per strategia
+    restano dentro l'errore standard (1,2 punti a 3 giocatori): la Rendita
+    fa 37,6 / 39,0 / 38,9%, Obiettivi 37,1 / 36,5 / 35,7%. Il distacco fra
+    primo e secondo cresce di un punto con meno Prosperita': e' l'unico
+    premio che paga anche gli avversari, e un po' livellava. Decisione del
+    designer; nessuna delle due e' accesa nei dati.

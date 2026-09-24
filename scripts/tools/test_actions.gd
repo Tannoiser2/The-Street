@@ -29,6 +29,7 @@ func _ready() -> void:
 	_run("la versione vecchia del bot", _test_versione_del_bot)
 	_run("i bot con una strategia giocano davvero", _test_strategie)
 	_run("la strategia Obiettivi", _test_obiettivi)
+	_run("il Centro Urbano una volta per era, la prova spenta", _test_centro_una_volta)
 	print("\n%d superati, %d falliti" % [_passed, _failed])
 	get_tree().quit(0 if _failed == 0 else 1)
 
@@ -945,3 +946,32 @@ func _test_obiettivi() -> void:
 	_put(gs, 0, larga, 0)
 	_eq("  a Monumento gia' soddisfatto la carta larga non vale piu' niente",
 		StrategyBot._premio_obiettivi(gs, p, CardDB.buildings[larga], 4, {}), 0.0)
+
+# LA PROSPERITA' UNA VOLTA PER ERA. Manopola spenta nei dati: quando e' spenta
+# il Centro paga a ogni attivazione, come sempre; accesa, paga la prima volta
+# in un'era e poi tace in quella colonna fino all'era dopo. I contatori sono
+# quelli che leggono le misure: se sbagliano loro, sbaglia il documento.
+func _test_centro_una_volta() -> void:
+	var ctl := _game(3, 11)
+	var gs := ctl.gs
+	var soglia := int(CardDB.constants["prosperity"]["min_buildings"])
+	for i in soglia:
+		_put(gs, i % 2, "ed_capanne", 3, i)
+	_ok("la colonna e' un Centro Urbano", gs.grid.is_prosperity_center(3))
+	var oro := func() -> int: return int(gs.players[1].counters.get("oro_centro", 0))
+	EraRules.activate(gs, 0, 3)
+	EraRules.activate(gs, 0, 3)
+	_eq("spenta: paga a ogni attivazione", oro.call(), 2)
+	_eq("  e conta le volte a chi attiva", int(gs.players[0].counters.get("centro_attivato", 0)), 2)
+	var salvate: Dictionary = CardDB.constants["prosperity"]
+	var accesa := salvate.duplicate()
+	accesa["once_per_era"] = true
+	CardDB.constants["prosperity"] = accesa
+	EraRules.activate(gs, 0, 3)
+	EraRules.activate(gs, 0, 3)
+	_eq("accesa: nella stessa era paga una volta sola", oro.call(), 3)
+	gs.grid.reset_era_flags()
+	EraRules.activate(gs, 0, 3)
+	_eq("  e all'era dopo paga di nuovo", oro.call(), 4)
+	_ok("  e la copia dello stato se lo ricorda", gs.duplica().grid.prosperity_paid.has(3))
+	CardDB.constants["prosperity"] = salvate

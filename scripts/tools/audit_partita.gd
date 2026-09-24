@@ -67,6 +67,16 @@ func _ready() -> void:
 		pr["min_buildings"] = int(args["prosperita"])
 		CardDB.constants["prosperity"] = pr
 		print("# prosperity.min_buildings = %d" % int(pr["min_buildings"]))
+	# E le due vie per renderla piu' rara senza cambiarne la soglia: piu'
+	# proprietari diversi (`--proprietari 3`) o un pagamento solo per colonna
+	# e per era (`--una_per_era`).
+	if args.has("proprietari") or args.has("una_per_era"):
+		var pr2: Dictionary = (CardDB.constants["prosperity"] as Dictionary).duplicate()
+		if args.has("proprietari"): pr2["min_owners"] = int(args["proprietari"])
+		if args.has("una_per_era"): pr2["once_per_era"] = true
+		CardDB.constants["prosperity"] = pr2
+		print("# prosperity.min_owners = %d once_per_era = %s" % [int(pr2["min_owners"]),
+			str(bool(pr2.get("once_per_era", false)))])
 
 	# Le manopole della punizione, per provare "e se il gioco perdonasse di
 	# piu'?" senza toccare i dati:
@@ -150,7 +160,7 @@ func _lotto(seme: int, players: int, quante: int) -> void:
 	# cambiando quanto paga la Verticalita', cambia anche come si gioca e non
 	# solo quanto si segna.
 	print("seme;posto;giocatore;pv;strategia;sopra;quota_max;costruiti;"
-		+ ";".join(Riepilogo.VOCI.map(func(v): return str(v["id"]))) + ";piano")
+		+ ";".join(Riepilogo.VOCI.map(func(v): return str(v["id"]))) + ";piano;centro_attivato;oro_centro")
 	for g in quante:
 		var ctl := GameController.new()
 		ctl.new_game(players, seme + g)
@@ -175,6 +185,9 @@ func _lotto(seme: int, players: int, quante: int) -> void:
 			for v in Riepilogo.VOCI:
 				campi.append("%d" % Riepilogo.punti(riga, str(v["id"])))
 			campi.append("1" if pianifica_qui(chi, g, players) else "0")
+			var cnt: Dictionary = ctl.gs.players[chi].counters
+			campi.append("%d" % int(cnt.get("centro_attivato", 0)))
+			campi.append("%d" % int(cnt.get("oro_centro", 0)))
 			print(";".join(campi))
 	get_tree().quit(0)
 

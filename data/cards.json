@@ -77,7 +77,8 @@
     "prosperity": {
       "min_buildings": 3,
       "min_owners": 2,
-      "gold_per_owner": 1
+      "gold_per_owner": 1,
+      "once_per_era": false
     },
     "level_cap_per_era_per_column": 1,
     "market_size": 6,
