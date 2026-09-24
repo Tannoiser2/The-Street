@@ -2,7 +2,7 @@
 
 > Prima misura con i **dati nuovi**: `data/cards-v2.json`, generato da `tools/genera_cards_v2.py`
 > dalla v1.5 e dalla tabella dei costi in tre risorse approvata dal designer
-> (`proposte/costi-tre-risorse.md`: le Idee sostituiscono, esplodono nelle ere 4-5). Le tessere
+> (`carte-v2.md`, le regole dei costi: le Idee sostituiscono, esplodono nelle ere 4-5). Le tessere
 > producono per tipo con la curva dell'audit, fiume e collina Costruzione 2/2/1/1/1, pianura
 > Denaro 0/1/1/2/2 (più 1 Costruzione nelle ere 1-2), bosco Idee 1/2/2/3/3; il mix di terreni
 > garantisce il bosco, due a tre giocatori. Tutto il resto è la v1.5: con `cards.json` il motore

@@ -1565,7 +1565,7 @@ dato è stato importato da lì. Ma due confronti fra ciò che è stampato e
     per tipo con la curva dell'audit (fiume e collina Costruzione 2/2/1/1/1,
     pianura Denaro 0/1/1/2/2 piu' 1 Costruzione nelle ere 1-2, bosco Idee
     1/2/2/3/3) e il mix garantisce il bosco. Tabella e regole in
-    `proposte/costi-tre-risorse.md` (generate da `tools/proponi_costi_v2.py`),
+    `carte-v2.md` (le regole dei costi, da `tools/proponi_costi_v2.py`),
     file dati `data/cards-v2.json` (da `tools/genera_cards_v2.py`), misura in
     `docs/la-terza-risorsa.md`. Da sola la terza risorsa sposta poco (+2 punti,
     basi altrui da 2,0 a 2,5); con il pacchetto di regole si comporta come con
