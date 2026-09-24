@@ -4,10 +4,11 @@
 # e pagabili con una funzione comune, poi ci somma la preferenza della sua
 # strategia.
 #
-# LE CINQUE STRATEGIE sono quelle del simulatore di riferimento: Rendita,
-# Lampo, Scavo, Verticale, Bilanciata. Non sono cinque modi di giocare
-# diversi, sono cinque PESI sulla stessa testa: dove il gioco paga in piu'
-# modi, ognuna tira verso il suo canale.
+# LE SEI STRATEGIE: le cinque del simulatore di riferimento - Rendita, Lampo,
+# Scavo, Verticale, Bilanciata - piu' Obiettivi, entrata nel canone quando il
+# torneo ha mostrato che vince sopra la media con tutti e due i bot. Non sono
+# sei modi di giocare diversi, sono sei PESI sulla stessa testa: dove il gioco
+# paga in piu' modi, ognuna tira verso il suo canale.
 #
 # IL CONTO DELLA SOPRAVVIVENZA NON E' UNA SCOMMESSA. La forza dell'evento e'
 # fissa per era - 2, 3, 4, 5, e nell'era 5 non c'e' evento - quindi "quante
@@ -32,14 +33,17 @@ const VERSIONE := 2
 # niente.
 static var versione_in_uso := VERSIONE
 
-const STRATEGIE: Array[String] = ["rendita", "lampo", "scavo", "verticale", "bilanciata"]
+# L'ORDINE CONTA: le partite assegnano le strategie a rotazione su questa
+# lista, e Obiettivi sta in fondo perche' e' arrivata dopo. Le prime cinque
+# coprono quattro canali - Lampo, Rendita, Scavo, Verticalita' - e uno che non
+# ne insegue nessuno; Obiettivi insegue Monumenti ed Eredita'.
+const STRATEGIE: Array[String] = ["rendita", "lampo", "scavo", "verticale", "bilanciata",
+	"obiettivi"]
 
-# DUE CANDIDATE, non nel canone. Le cinque di sopra coprono quattro canali -
-# Lampo, Rendita, Scavo, Verticalita' - e uno che non ne insegue nessuno.
-# Restano fuori la Continuita' (che pesa quanto lo Scavo) e gli Obiettivi
-# (Monumenti + Eredita'). Queste due li inseguono, e servono a rispondere con
-# i numeri alla domanda "cinque bastano?".
-const STRATEGIE_CANDIDATE: Array[String] = ["continuita", "obiettivi"]
+# UNA CANDIDATA, fuori dal canone: la Continuita', che pesa quanto lo Scavo e
+# nel torneo non ha mai vinto sopra la media. Resta per rispondere con i
+# numeri alla domanda "sei bastano?".
+const STRATEGIE_CANDIDATE: Array[String] = ["continuita"]
 
 static func tutte() -> Array[String]:
 	var out: Array[String] = STRATEGIE.duplicate()

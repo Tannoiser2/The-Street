@@ -20,6 +20,7 @@ def leggi(pattern):
     # CSV senza quei campi viene da li'.
     carte, partite, giocatori, bot, vert, prosp, rov, bin, ver = ({}, 0, None, "caso",
                                                                  "2/6/12/20", 3, 2, "per_era", 1)
+    strat = None
     for f in sorted(glob.glob(pattern)):
         righe = [l.rstrip("\n") for l in open(f) if l.strip()]
         meta = [l for l in righe if l.startswith("# partite=")][0]
@@ -39,6 +40,9 @@ def leggi(pattern):
         # La versione del bot: un CSV che non la dice viene dal bot che
         # sceglieva la colonna prima dell'attivazione (versione 1).
         if "versione_bot=" in meta: ver = int(meta.split("versione_bot=")[1].split()[0])
+        # Quante strategie al tavolo: un CSV che non lo dice viene da quando
+        # il canone ne aveva cinque (o dal bot a caso, che non ne ha).
+        if "strategie=" in meta: strat = int(meta.split("strategie=")[1].split()[0])
         i = righe.index([l for l in righe if l.startswith("id;")][0])
         hdr = righe[i].split(";")
         for l in righe[i+1:]:
@@ -55,12 +59,13 @@ def leggi(pattern):
                 carte[v["id"]] = {k: (int(v[k]) if k in NUM else v[k]) for k in v}
             else:
                 for k in NUM: c[k] += int(v[k])
-    return carte, partite, giocatori, bot, vert, prosp, rov, bin, ver
+    if strat is None: strat = 5 if bot == "strategie" else 0
+    return carte, partite, giocatori, bot, vert, prosp, rov, bin, ver, strat
 
-carte, partite, giocatori, bot, vert, prosp, rov, bin, ver = leggi(sys.argv[1])
+carte, partite, giocatori, bot, vert, prosp, rov, bin, ver, strat = leggi(sys.argv[1])
 altro = None
 if "--confronta" in sys.argv:
-    altro, partite_altro, _, bot_altro, vert_altro, prosp_altro, rov_altro, bin_altro, ver_altro = leggi(
+    altro, partite_altro, _, bot_altro, vert_altro, prosp_altro, rov_altro, bin_altro, ver_altro, strat_altro = leggi(
         sys.argv[sys.argv.index("--confronta") + 1])
     # LE COLONNE SI CHIAMANO COME TUTTO CIO' CHE LE DISTINGUE, non come la
     # prima differenza trovata. Due lotti possono differire in piu' di una
@@ -77,6 +82,9 @@ if "--confronta" in sys.argv:
                     2: "il bot che valuta dopo l'attivazione"}
         DIFF.append((f"bot v{ver_altro}", f"bot v{ver}",
                      nomi_ver.get(ver, f"il bot versione {ver}")))
+    if strat != strat_altro and bot == bot_altro == "strategie":
+        DIFF.append((f"{strat_altro} strategie", f"{strat} strategie",
+                     f"{strat} strategie al tavolo"))
     if vert != vert_altro:
         DIFF.append((f"Verticalità {vert_altro}", f"Verticalità {vert}",
                      f"la Verticalità {vert}"))
@@ -104,7 +112,8 @@ if "--confronta" in sys.argv:
         # "Stessi bot" si scrive solo se e' vero: quando a cambiare e' proprio
         # il bot, dirlo uguale sarebbe la frase sbagliata nel posto sbagliato.
         uguali = ["stessi semi"]
-        if bot == bot_altro and ver == ver_altro: uguali.append("stessi bot")
+        if bot == bot_altro and ver == ver_altro and strat == strat_altro:
+            uguali.append("stessi bot")
         uguali.append("stesso numero di giocatori")
         SOTTO = (f"Le stesse misure su {partite_altro} partite con **{COL_A}** e "
                  f"{partite} con **{COL_B}**, a parità di tutto il resto: "
@@ -154,8 +163,10 @@ if bot == "caso":
     w("> restauro. Quindi questi numeri dicono **cosa fa il gioco quando nessuno lo guida**:")
     w("> sono la linea di base della carta, non il suo rendimento in mano a un giocatore.")
 else:
-    w("> **Chi ha giocato.** I bot seguono le cinque strategie (`StrategyBot`): Rendita, Lampo,")
-    w("> Scavo, Verticale, Bilanciata. Valutano tutte le mosse legali e pagabili e scelgono la")
+    elenco = "Rendita, Lampo, Scavo, Verticale, Bilanciata" + (", Obiettivi" if strat >= 6 else "")
+    numeri = {5: "cinque", 6: "sei", 7: "sette"}
+    w(f"> **Chi ha giocato.** I bot seguono le {numeri.get(strat, strat)} strategie (`StrategyBot`): {elenco}.")
+    w("> Valutano tutte le mosse legali e pagabili e scelgono la")
     w("> migliore secondo la loro inclinazione; la strategia ruota di posto a ogni partita, così")
     w("> nessuna gioca sempre dalla stessa sedia. Non sono campioni — non bluffano, non")
     w("> guardano cosa stanno per fare gli altri — ma **giocano**: dove il bot casuale fa 66")

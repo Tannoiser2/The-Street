@@ -10,10 +10,10 @@ func _ready() -> void:
 	# Gioca StrategyBot, come in partita: un tavolo costruito a caso non e' il
 	# tavolo che si vede giocando, e gli scatti servono a guardare quello.
 	while ctl.gs.era < fino and ctl.gs.phase != Enums.Phase.FINE_PARTITA:
-		StrategyBot.play_turn(ctl, StrategyBot.STRATEGIE[ctl.gs.current_index % 5])
+		StrategyBot.play_turn(ctl, StrategyBot.STRATEGIE[ctl.gs.current_index % StrategyBot.STRATEGIE.size()])
 	for i in int(args.get("turns", "6")):
 		if ctl.gs.phase == Enums.Phase.FINE_PARTITA: break
-		StrategyBot.play_turn(ctl, StrategyBot.STRATEGIE[ctl.gs.current_index % 5])
+		StrategyBot.play_turn(ctl, StrategyBot.STRATEGIE[ctl.gs.current_index % StrategyBot.STRATEGIE.size()])
 	var vista := preload("res://scripts/view/board_view_3d.gd").new()
 	add_child(vista)
 	vista.scale = Vector3.ONE * BoardLayout3D.U   # dai millimetri alle unita'

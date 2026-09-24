@@ -28,6 +28,7 @@ func _ready() -> void:
 	_run("il bot che pianifica l'era", _test_pianificatore)
 	_run("la versione vecchia del bot", _test_versione_del_bot)
 	_run("i bot con una strategia giocano davvero", _test_strategie)
+	_run("la strategia Obiettivi", _test_obiettivi)
 	print("\n%d superati, %d falliti" % [_passed, _failed])
 	get_tree().quit(0 if _failed == 0 else 1)
 
@@ -904,3 +905,43 @@ func _test_versione_del_bot() -> void:
 	_ok("in versione 1 la colonna vale le mosse di PRIMA dell'attivazione", uguali)
 	_eq("  e dopo la prova si torna alla versione di serie",
 		StrategyBot.versione_in_uso, StrategyBot.VERSIONE)
+
+# OBIETTIVI NEL CANONE. Il suo segno non si vede in sei partite contro il bot a
+# caso - un Monumento vale 4 o 5 punti, e in sei partite lo prendono tutti
+# prima o poi - quindi qui si fissa la preferenza stessa, su un Monumento che
+# si soddisfa con un edificio solo: una carta larga 3 lo fa scattare e vale
+# i suoi punti, una stretta no, e se il Monumento e' gia' soddisfatto la carta
+# larga non e' piu' merito suo.
+func _test_obiettivi() -> void:
+	_ok("Obiettivi sta nel canone", StrategyBot.STRATEGIE.has("obiettivi"))
+	_ok("  e non e' piu' fra le candidate", not StrategyBot.STRATEGIE_CANDIDATE.has("obiettivi"))
+	var mon := ""
+	for id in CardDB.monuments:
+		var c: Dictionary = CardDB.monuments[id]["condition"]
+		if str(c["op"]) == "count_matching" and int(c["min"]) == 1 \
+				and c["target"].has("width") and c["target"].size() == 2:
+			mon = id
+	_ok("c'e' un Monumento che scatta con un edificio largo", mon != "")
+	if mon == "": return
+	var minimo := int(CardDB.monuments[mon]["condition"]["target"]["width"]["min"])
+	var larga := ""
+	var stretta := ""
+	for id in CardDB.buildings:
+		var w := int(CardDB.buildings[id]["width"])
+		if w >= minimo and larga == "": larga = id
+		if w < minimo and stretta == "": stretta = id
+	var ctl := _game(3, 5)
+	var gs := ctl.gs
+	gs.monuments_open = [mon]
+	var p: PlayerState = gs.players[0]
+	# L'Eredita' segreta pescata a caso conterebbe anche lei: fuori.
+	p.legacy_id = ""
+	var vp := float(CardDB.monuments[mon]["vp"])
+	_eq("la carta larga vale i punti del Monumento", StrategyBot._premio_obiettivi(
+		gs, p, CardDB.buildings[larga], 0, {}), vp)
+	_eq("  la stretta niente", StrategyBot._premio_obiettivi(
+		gs, p, CardDB.buildings[stretta], 0, {}), 0.0)
+	_eq("  e la prova non lascia l'edificio finto in tavola", gs.grid.buildings.size(), 0)
+	_put(gs, 0, larga, 0)
+	_eq("  a Monumento gia' soddisfatto la carta larga non vale piu' niente",
+		StrategyBot._premio_obiettivi(gs, p, CardDB.buildings[larga], 4, {}), 0.0)
