@@ -443,6 +443,23 @@ static func rendite_future(res: int, rendita: int, era: int) -> float:
 		totale += float(rendita + vet)
 	return totale
 
+# LE SPINTE DELLE STRATEGIE, in tabella (registro 98): nella v1.5 sono
+# quelle tarate a suo tempo; nella v2 le sei strategie vanno ritarate sul
+# lotto di riferimento, e la taratura si fa misurando, con la manopola
+# `--spinta chiave=valore,...` dell'audit, poi si scrive qui.
+const SPINTE_V1 := {"rendita_per_era": 0.9, "rendita_zero": -1.5, "lampo": 1.6, "lampo_zero": -1.0,
+	"scavo_premio": 0.8, "scavo_terra": -1.5, "scavo_terra_scavo": 0.0}
+const SPINTE_V2 := {"rendita_per_era": 0.9, "rendita_zero": -1.5, "lampo": 1.6, "lampo_zero": -1.0,
+	"scavo_premio": 0.8, "scavo_terra": -1.5, "scavo_terra_scavo": 0.0}
+static var spinte_override := {}
+
+static func spinte() -> Dictionary:
+	var base := SPINTE_V2 if e_v2() else SPINTE_V1
+	if spinte_override.is_empty(): return base
+	var out := base.duplicate()
+	for k in spinte_override: out[k] = spinte_override[k]
+	return out
+
 static func _valore_costruzione(gs: GameState, p: PlayerState, v, strategia: String,
 		r: Vector2, dett := {}) -> float:
 	var par: Dictionary = v.parametri
@@ -528,19 +545,21 @@ static func _valore_costruzione(gs: GameState, p: PlayerState, v, strategia: Str
 	# bastava - il valutatore comune vale molto di piu' della spinta, e le
 	# cinque finivano per giocare la stessa partita.
 	var prima_della_spinta := q
+	var sp := spinte()
 	match strategia:
 		"rendita":
-			q += float(d["rendita"]) * float(rimaste) * 0.9
-			if int(d["rendita"]) == 0: q -= 1.5
+			q += float(d["rendita"]) * float(rimaste) * float(sp["rendita_per_era"])
+			if int(d["rendita"]) == 0: q += float(sp["rendita_zero"])
 		"lampo":
-			q += float(d["lampo"]) * 1.6
-			if int(d["lampo"]) == 0: q -= 1.0
+			q += float(d["lampo"]) * float(sp["lampo"])
+			if int(d["lampo"]) == 0: q += float(sp["lampo_zero"])
 		"scavo":
 			if e_v2():
 				# V2: lo Scavo lo incassa chi scava, sul momento. La strategia
-				# cerca le pile ricche e alte, e non vuole restare a terra.
-				q += premio_stimato * 0.8
-				if not sopra: q -= 1.5
+				# cerca le pile ricche e alte; a terra costruisce le carte con
+				# lo Scavo alto, che sepolte pagano.
+				q += premio_stimato * float(sp["scavo_premio"])
+				if not sopra: q += float(sp["scavo_terra"]) + float(d["scavo"]) * float(sp["scavo_terra_scavo"])
 			else:
 				q += float(d["scavo"]) * 0.9 + (2.0 if sopra else 0.0)
 				if int(d["scavo"]) == 0: q -= 1.0

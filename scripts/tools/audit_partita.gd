@@ -177,6 +177,13 @@ func _ready() -> void:
 				bd["rendita"] = rt
 				tagliati += 1
 		print("# rendita_tetto = %d (%d edifici tagliati)" % [rt, tagliati])
+	# LE SPINTE DELLE STRATEGIE (`--spinta rendita_per_era=0.6,scavo_terra=-0.5`,
+	# registro 98): sovrascrive la tabella del bot per tarare la v2 misurando.
+	if args.has("spinta"):
+		for pezzo in str(args["spinta"]).split(","):
+			var kv := pezzo.split("=")
+			if kv.size() == 2: StrategyBot.spinte_override[kv[0].strip_edges()] = float(kv[1])
+		print("# spinte = %s" % str(StrategyBot.spinte_override))
 	# I LAVORATORI PER ERA (`--lavoratori 5`, `workers_base`, 3 nei dati). Nel
 	# turno v2 ogni lavoratore e' UN'azione, non piu' un'attivazione piu'
 	# un'azione: con 3 il ritmo si dimezza (registro 93), e la manopola misura

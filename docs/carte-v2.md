@@ -86,11 +86,11 @@ Domanda per era (C / D / I): era 1: 13 / 0 / 5 · era 2: 25 / 0 / 6 · era 3: 22
 
 | edificio | classi | terreno | slot | costo C/D/I | res | Rendita | Lampo | Scavo | produce | liv. | esaur. | testo | motivo | nota |
 |---|---|---|--:|--:|--:|--:|--:|--:|---|--:|--:|---|---|---|
-| Abbazia | religione, commercio | Bosco | 2 | 2/1/1 | 3 | 3 | 0 | 5 | — | 0 | — | — |  |  |
+| Abbazia | religione, commercio | Bosco | 2 | 2/1/1 | 3 | 2 | 0 | 5 | — | 0 | — | — |  | Rendita 3 → 2 (registro 97: le carte care) |
 | Arsenale | militare | Fiume | 2 | 3/1/0 | 3 | 0 | 2 | 2 | — | 0 | — | Quartiere: i tuoi edifici Militari adiacenti +1 res. |  |  |
 | Borgo | civico | Pianura | 1 | 2/0/0 | 2 | 0 | 2 | 2 | 1 D | 0 | — | — |  |  |
 | Cappella | religione | qualsiasi | 1 | 1/0/1 | 2 | 0 | 2 | 3 | — | 0 | — | — |  |  |
-| Castello | militare | Collina | 2 | 2/1/0 | 4 | 3 | 0 | 3 | — | 1 | — | — |  |  |
+| Castello | militare | Collina | 2 | 2/1/0 | 4 | 2 | 0 | 3 | — | 1 | — | — |  | Rendita 3 → 2 (registro 97) |
 | Chiesa | religione, cultura | qualsiasi | 1 | 2/0/1 | 3 | 2 | 0 | 3 | — | 0 | — | — |  |  |
 | Conceria | commercio | Fiume | 1 | 1/0/0 | 1 | 0 | 1 | 0 | 1 D | 0 | — | — |  |  |
 | Mercato | commercio | Fiume | 1 | 2/0/0 | 2 | 0 | 1 | 2 | 1 C + 1 D | 0 | — | — |  |  |
@@ -106,14 +106,14 @@ Domanda per era (C / D / I): era 1: 13 / 0 / 5 · era 2: 25 / 0 / 6 · era 3: 22
 | Accademia | cultura | qualsiasi | 1 | 1/0/2 | 2 | 0 | 2 | 3 | — | 0 | — | — |  |  |
 | Banco | commercio | qualsiasi | 1 | 1/0/1 | 2 | 0 | 2 | 0 | 1 D | 0 | — | — |  |  |
 | Bottega d'artista | cultura | qualsiasi | 1 | 1/0/1 | 2 | 0 | 2 | 2 | — | 0 | — | **I tuoi potenziamenti costano 1 in meno, nella loro risorsa.** | 3R | oggi: "I tuoi potenziamenti costano 1 oro in meno" — i potenziamenti pagano per famiglia: Arte in Idee, Struttura in Costruzione, il resto in Denaro |
-| Duomo | religione, cultura | qualsiasi | 2 | 3/1/2 | 4 | 4 | 0 | 5 | — | 2 | — | — |  |  |
-| Fortezza bastionata | militare, ingegneria | Collina | 2 | 3/1/1 | 5 | 3 | 0 | 2 | — | 1 | — | — |  |  |
+| Duomo | religione, cultura | qualsiasi | 2 | 3/1/2 | 4 | 2 | 0 | 5 | — | 2 | — | — |  | Rendita 4 → 2 (registro 97) |
+| Fortezza bastionata | militare, ingegneria | Collina | 2 | 3/1/1 | 5 | 2 | 0 | 2 | — | 1 | — | — |  | Rendita 3 → 2 (registro 97) |
 | Giardino all'italiana | cultura | Collina | 1 | 0/0/2 | 1 | 0 | 3 | 0 | — | 0 | — | Effimero per eccellenza: PV subito, difficilmente sopravvivrà. |  |  |
 | Loggia | civico | qualsiasi | 1 | 1/0/1 | 2 | 0 | 2 | 2 | — | 0 | — | — |  |  |
 | Osservatorio | ingegneria | Collina | 1 | 1/1/1 | 2 | 0 | 2 | 2 | — | 0 | — | Eco: +2 PV (lampo) se ancora in piedi a fine partita. |  |  |
 | Palazzo signorile | civico | Pianura | 1 | 2/1/1 | 3 | 0 | 3 | 3 | 1 I | 0 | — | — | 3R | produce 1 Idea al posto di 1 cultura (già nel file v2) |
 | Piazza monumentale | civico | Pianura | 2 | 2/1/1 | 3 | 2 | 0 | 3 | — | 1 | — | A fine partita: +1 PV per tuo edificio in cima adiacente. Richiede livello 1+. |  |  |
-| Ponte monumentale | ingegneria | Fiume | 2 | 2/1/1 | 4 | 3 | 0 | 3 | — | 0 | — | — |  |  |
+| Ponte monumentale | ingegneria | Fiume | 2 | 2/1/1 | 4 | 2 | 0 | 3 | — | 0 | — | — |  | Rendita 3 → 2 (registro 97) |
 | Villa | civico | Collina | 1 | 2/1/1 | 3 | 0 | 4 | 3 | — | 0 | — | — |  |  |
 
 ### Era 5

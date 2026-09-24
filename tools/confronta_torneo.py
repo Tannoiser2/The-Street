@@ -78,6 +78,7 @@ def etichetta(regole):
     if regole.get("vetusta_max", "0") != "0": pezzi.append(f"Vetustà {regole['vetusta_max']}")
     if regole.get("protection_bonus", "2") != "2": pezzi.append(f"protezione +{regole['protection_bonus']}")
     if regole.get("scheletro_conta", "sotterrato") != "sotterrato": pezzi.append(f"scheletro conta {regole['scheletro_conta']}")
+    if "spinte" in regole: pezzi.append("spinte " + regole["spinte"].replace('"', "").replace("{", "").replace("}", "").replace(":", "="))
     if "rendita_tetto" in regole: pezzi.append(f"Rendita al massimo {regole['rendita_tetto'].split(' ')[0]}")
     # Il file dati: la riga "# dati = ..." c'e' solo quando non e' cards.json.
     if "dati" in regole: pezzi.insert(0, "v2 tre risorse" if "v2" in regole["dati"] else regole["dati"])

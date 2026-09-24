@@ -39,6 +39,8 @@ MIX = {"2": {"pianura": 2, "fiume": 1, "collina": 1, "bosco": 1},
        "3": {"pianura": 2, "fiume": 2, "collina": 1, "bosco": 2},
        "4": {"pianura": 3, "fiume": 2, "collina": 2, "bosco": 2}}
 
+RENDITA_TETTO = 2
+
 v2 = json.loads(json.dumps(base))
 v2["meta"]["ruleset"] = "v2-tre-risorse"
 v2["meta"]["origine"] = "generato da tools/genera_cards_v2.py: non modificare a mano"
@@ -47,6 +49,10 @@ for b in v2["buildings"]:
     b["cost"] = {"pietra": c["costruzione"], "oro": c["denaro"], "idee": c["idee"]}
     p = per_id[b["id"]]["production"]
     b["production"] = {"pietra": p["costruzione"], "oro": p["denaro"], "cultura": 0, "idee": p["idee"]}
+    # LA RENDITA DELLE CARTE CARE (registro 97): tetto a 2. Abbazia, Castello,
+    # Fortezza bastionata, Ponte monumentale (3) e Duomo (4) scendono a 2: la
+    # strategia Rendita vinceva il 57% delle partite, con il tetto il 49%.
+    b["rendita"] = min(int(b["rendita"]), RENDITA_TETTO)
 for t in v2["terrains"]:
     t["base_production_by_era"] = CURVA[t["id"]]
     t["rule"] = REGOLE[t["id"]]

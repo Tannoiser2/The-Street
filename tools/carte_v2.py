@@ -43,6 +43,11 @@ TESTI = {
     "ed_palazzo_signorile": (None, "3R", "produce 1 Idea al posto di 1 cultura (già nel file v2)"),
     "ed_universita": ("+1 PV per ogni tuo Personaggio preso nel draft. Richiede livello 1+.", "DRA", ""),
     "ed_condominio": (None, "", "resta: si costruisce sopra le rovine con lo sconto di metà resistenza (punto 10)"),
+    "ed_abbazia": (None, "", "Rendita 3 → 2 (registro 97: le carte care)"),
+    "ed_castello": (None, "", "Rendita 3 → 2 (registro 97)"),
+    "ed_fortezza_bastionata": (None, "", "Rendita 3 → 2 (registro 97)"),
+    "ed_ponte_monumentale": (None, "", "Rendita 3 → 2 (registro 97)"),
+    "ed_duomo": (None, "", "Rendita 4 → 2 (registro 97)"),
     # personaggi
     "pe_capotribu": ("Subito: +2 Costruzione. Per l'era: il primo edificio che costruisci ha +1 res.", "LAV 3R",
         "è così nel motore: senza lavoratore che abita, il protettore si lega al primo edificio costruito nell'era"),
