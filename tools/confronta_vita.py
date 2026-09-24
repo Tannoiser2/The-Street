@@ -15,7 +15,8 @@ import sys, collections
 
 CHIAVI = ["n", "ere_intatto", "ere_piedi", "n_rudere", "n_rovina", "n_sepolto",
           "n_subito", "n_in_piedi_fine", "n_intatto_fine", "vetusta", "vp",
-          "vp_rendita", "vp_lampo", "vp_verticalita", "vp_scavo", "vp_scheletri"]
+          "vp_rendita", "vp_lampo", "vp_verticalita", "vp_scavo", "vp_scheletri",
+          "n_spianato"]     # assente nei CSV vecchi: vale 0
 
 def leggi(f):
     righe = [l.rstrip("\n") for l in open(f) if l.strip()]
@@ -41,6 +42,7 @@ def leggi(f):
         "caduti (non piu' intatti)": (tot["n_rudere"] / n, "{:.0%}"),
         "finiti in rovina": (tot["n_rovina"] / n, "{:.0%}"),
         "sepolti": (tot["n_sepolto"] / n, "{:.0%}"),
+        "spianati dal proprietario": (tot["n_spianato"] / n, "{:.0%}"),
         "Scavo per sepolto": (tot["vp_scavo"] / max(1, tot["n_sepolto"]), "{:.2f}"),
         "cubetti Vetusta'/partita": (tot["vetusta"] / partite, "{:.1f}"),
         "PV delle carte/partita": (tot["vp"] / partite, "{:.1f}"),
@@ -53,9 +55,11 @@ def leggi(f):
 
 def etichetta(regole):
     # A soglia 1 il rudere non esiste di fatto: fallire di 1 e' gia' rovina.
-    if regole.get("rovina") == "1": return "ogni fallimento fa rovina"
-    pezzi = ["senza rudere" if regole.get("rudere", "si") == "no" else "con il rudere"]
-    if "rovina" in regole: pezzi.append(f"rovina a −{regole['rovina']}")
+    if regole.get("rovina") == "1": pezzi = ["ogni fallimento fa rovina"]
+    else:
+        pezzi = ["senza rudere" if regole.get("rudere", "si") == "no" else "con il rudere"]
+        if "rovina" in regole: pezzi.append(f"rovina a −{regole['rovina']}")
+    if regole.get("spianato") == "vale": pezzi.append("Scavo mai azzerato")
     return ", ".join(pezzi)
 
 lotti = [leggi(f) for f in sys.argv[1:]]
