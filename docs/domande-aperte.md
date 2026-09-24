@@ -1689,3 +1689,18 @@ dato è stato importato da lì. Ma due confronti fra ciò che è stampato e
     giocatore, la citta' non cambia e il kingmaker scende al 13%.
     Raccomandato: conta sempre. In attesa della decisione del designer.
 
+97. **La Rendita delle carte care.** Prova chiesta dal designer contro la
+    strategia Rendita che vince il 57%: `--rendita_tetto N` taglia la
+    Rendita stampata di ogni carta a N (a 2 cinque carte: Abbazia,
+    Castello, Fortezza bastionata, Ponte monumentale, Duomo; a 1 otto).
+    Misurato sulla base Z, la v2 di oggi con lo scheletro che conta sempre
+    (`docs/la-terza-risorsa.md`, ottava misura): a 2 la Rendita vince il
+    49%, a 1 il 44%, con il canale Rendita quasi cancellato (5 punti su
+    84). Il resto del vantaggio e' lo stile di quella strategia, meno
+    edifici e piu' potenziamenti (4,9 contro 2,7-3,8), che con lo scheletro
+    che conta sempre valgono 12 punti: con quattro lavoratori costruire
+    poco e bene batte costruire tanto. La Scavo e' la strategia debole
+    (17-22%): da ritarare il bot, non la regola. Da decidere: la Rendita
+    delle cinque carte care a 2 (cinque righe in `carte-v2.md`, forbice
+    piu' stretta di 8 punti senza toccare la citta').
+

@@ -390,6 +390,53 @@ il kingmaker dell'ultima era scende dal 16 al 13 % perché il premio pesa su un 
 alto. Un lavoratore che diventa 6 meno l'era di punti sicuri è una decisione vera, e
 premia chi potenzia presto. Raccomandato: **conta sempre**.
 
+## Ottava misura: la Rendita delle carte care
+
+Decisione del designer (registro 96): lo scheletro **conta sempre**, nel file v2. Poi la prova
+chiesta: la Rendita stampata delle carte care, contro la strategia Rendita che vince il 57 %.
+Manopola `--rendita_tetto N`: la Rendita di ogni carta si taglia a N. A 2 si toccano cinque
+carte (Abbazia, Castello, Fortezza bastionata, Ponte monumentale da 3, Duomo da 4); a 1 otto
+(anche Anfiteatro, Chiesa e Piazza monumentale da 2).
+Stessi semi, base Z (la v2 di oggi):
+
+| per giocatore | W (scheletro da sotterrato) | **Z scheletro conta sempre** | Y2 Rendita al massimo 2 | Y1 Rendita al massimo 1 |
+|---|--:|--:|--:|--:|
+| PV medi | 81,3 | 87,0 | 85,6 | 84,1 |
+| Rendita | 10,3 | 9,9 | 7,8 | 4,9 |
+| Lampo | 20,7 | 20,4 | 20,7 | 21,4 |
+| Scavo | 17,4 | 16,7 | 17,5 | 18,0 |
+| Scheletri | 2,8 | **10,0** | 9,8 | 9,9 |
+| costruiti | 14,0 | 13,6 | 13,7 | 13,8 |
+| potenziamenti per giocatore | n.d. | 3,6 | 3,5 | 3,5 |
+| altezza massima | 4,64 | 4,57 | 4,59 | 4,60 |
+| basi proprie / altrui | 6,3 / 2,3 | 6,1 / 2,3 | 6,1 / 2,4 | 6,2 / 2,4 |
+| senza l'era 5 cambierebbe il vincitore | 15 % | 12 % | 13 % | 17 % |
+| vince Rendita | 56 % | **57 %** | 49 % | 44 % |
+| vince Obiettivi / Bilanciata / Continuità | 29 / 33 / 32 % | 32 / 33 / 36 % | 35 / 36 / 33 % | 37 / 33 / 34 % |
+| vince Lampo / Scavo | 26 / 24 % | 25 / 17 % | 25 / 22 % | 30 / 21 % |
+
+Per strategia in Z: la Rendita fa 94,6 punti con 21,3 di Rendita, 12,0 di Scheletri (4,9
+potenziamenti) e 11,5 edifici; le altre 80-87 con 3-11 di Rendita e 14-16 edifici. Per partita
+(2 000 `--vita`, W → Z): Scheletri 8,5 → 29,8, tutto il resto uguale (costruiti 41, sepolti 49 %).
+
+**1. Lo scheletro che conta sempre fa quello che prometteva.** Z contro W: +7 punti di
+Scheletri a giocatore, 3,6 potenziamenti a testa, città identica, kingmaker al 12 %.
+
+**2. La Rendita delle carte care conta, ma non è tutto.** Tagliando a 2 la strategia Rendita
+scende dal 57 al 49 %, tagliando a 1 al 44 %: ancora 11 sopra l'atteso, con il canale Rendita
+ridotto a 5 punti su 84, cioè quasi cancellato. Il resto del vantaggio non è la Rendita: è lo
+**stile** di quella strategia, meno edifici (11,5 contro 14-16) e più potenziamenti (4,9 contro
+2,7-3,8), che con lo scheletro che conta sempre valgono 12 punti. Con quattro lavoratori e le
+risorse che bastano, costruire poco e bene batte costruire tanto.
+
+**3. La Scavo è la strategia debole**, 17-22 % e 80 punti: passa il doppio delle altre (6,8 turni
+di solo incasso) e costruisce poco. Non è una regola da cambiare, è il bot da ritarare quando
+il canone della v2 si chiude.
+
+**4. Da decidere.** Se la Rendita delle cinque carte care scende a 2 (Y2: un cambio piccolo,
+cinque righe in `carte-v2.md`), la forbice si stringe di 8 punti senza toccare la città; il
+resto è taratura dei bot, non regola.
+
 ## Come rifare il conto
 
 ```bash
@@ -421,4 +468,7 @@ python3 tools/confronta_torneo.py U4.csv W.csv
 # settima misura: la protezione a +1 e lo scheletro che conta sempre, manopole sulla base W
 godot --headless res://scenes/audit_partita.tscn -- --players 3 --games 750 --seed 700000 --dati data/cards-v2.json --protezione 1 --scheletro sempre > X2.csv
 python3 tools/confronta_torneo.py W.csv X2.csv
+# ottava misura: lo scheletro che conta sempre sta nel file v2; `--rendita_tetto 2` taglia le carte care
+godot --headless res://scenes/audit_partita.tscn -- --players 3 --games 750 --seed 700000 --dati data/cards-v2.json --rendita_tetto 2 > Y2.csv
+python3 tools/confronta_torneo.py Z.csv Y2.csv
 ```
