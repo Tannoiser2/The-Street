@@ -9,8 +9,8 @@
 #
 # Del torneo si confrontano i primi CAMPI campi (19: fino a `piano`), perche'
 # le colonne nuove si aggiungono in fondo e non devono far fallire il confronto.
-# Della vita delle carte si confronta tutto, intestazione compresa: se una regola
-# nuova aggiunge una voce all'intestazione, il riferimento va rigenerato apposta.
+# Della vita delle carte si confrontano tutte le righe; l'intestazione delle
+# regole puo' crescere di una voce (una manopola nuova, spenta) senza fallire.
 set -u
 GODOT="${GODOT:-godot}"
 CAMPI="${CAMPI:-19}"
@@ -39,10 +39,30 @@ else
 fi
 
 gioca vita 120 100000 "$TMP/vita.csv"
-if ! diff "$RIF/vita.csv" "$TMP/vita.csv" > "$TMP/vita.diff"; then
+# L'intestazione delle regole puo' solo CRESCERE: ogni manopola nuova aggiunge
+# la sua voce in fondo (e' il metodo: una regola che non sta li' rende uguali
+# due lotti diversi) e finche' e' spenta le partite non cambiano. Quindi ogni
+# voce del riferimento deve esserci con lo stesso valore, e una voce in piu'
+# si segnala soltanto. Le righe delle carte, invece, devono coincidere tutte.
+rif_meta=$(grep -m1 '^# partite=' "$RIF/vita.csv")
+new_meta=$(grep -m1 '^# partite=' "$TMP/vita.csv")
+for kv in $rif_meta; do
+	[ "$kv" = "#" ] && continue
+	k=${kv%%=*}
+	nv=$(tr ' ' '\n' <<< "$new_meta" | grep -m1 "^$k=" || true)
+	if [ "$nv" != "$kv" ]; then
+		echo "VITA: la regola '$kv' del riferimento e' diventata '${nv:-assente}'"; esito=1
+	fi
+done
+for kv in $new_meta; do
+	[ "$kv" = "#" ] && continue
+	k=${kv%%=*}
+	grep -q " $k=" <<< "$rif_meta " || echo "VITA: voce nuova nell'intestazione, assente nel riferimento: $kv"
+done
+if ! diff <(grep -v '^# partite=' "$RIF/vita.csv") <(grep -v '^# partite=' "$TMP/vita.csv") > "$TMP/vita.diff"; then
 	echo "VITA: DIVERSA dal riferimento ($(grep -c '^<' "$TMP/vita.diff") righe cambiate)"
 	head -20 "$TMP/vita.diff"; esito=1
-else
+elif [ "$esito" = 0 ]; then
 	echo "VITA: identica al riferimento (120 partite, seme 100000)"
 fi
 exit $esito

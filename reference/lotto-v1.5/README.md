@@ -23,9 +23,10 @@ GODOT=/percorso/godot tools/verifica_riferimento.sh
 
 Rigioca le due batterie (circa 100 secondi) e dice se sono identiche. Del torneo confronta i
 primi 19 campi (fino a `piano`), perché le colonne nuove si aggiungono in fondo; della vita
-confronta tutto, intestazione compresa. Se una regola nuova aggiunge una voce all'intestazione
-il confronto fallisce apposta: si guarda che sia l'unica differenza, e si rigenera il
-riferimento dichiarandolo nel commit.
+confronta tutte le righe delle carte. L'intestazione delle regole può solo crescere: una
+manopola nuova aggiunge la sua voce (per esempio `rudere=si`) e, finché è spenta, le partite
+non cambiano; lo script lo segnala senza fallire. Fallisce invece se una voce del riferimento
+cambia valore o sparisce.
 
 È lo stesso metodo usato finora per le manopole ("spenta, le partite sono identiche a main"),
 reso eseguibile e ancorato a un lotto salvato, così non serve più tenere a mano i CSV di main.
