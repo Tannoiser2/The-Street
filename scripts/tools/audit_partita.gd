@@ -38,6 +38,9 @@ func _ready() -> void:
 	if args.has("dati"):
 		CardDB.load_db("res://" + str(args["dati"]).trim_prefix("res://"))
 		print("# dati = %s" % str(args["dati"]))
+		# Il turno lo decide il file dati: lo si dichiara, cosi' due lotti v2
+		# con turni diversi non si confondono.
+		print("# turno_v2 = %s" % str(bool(CardDB.constants.get("turno_v2", false))))
 	_muto = args.has("muto")
 	_tutto = args.has("tutto")
 	_strategie = not args.has("caso")
@@ -134,6 +137,13 @@ func _ready() -> void:
 	if args.has("tetto"):
 		CardDB.constants["resource_cap_per_resource"] = int(args["tetto"])
 		print("# resource_cap_per_resource = %d" % int(args["tetto"]))
+	# I LAVORATORI PER ERA (`--lavoratori 5`, `workers_base`, 3 nei dati). Nel
+	# turno v2 ogni lavoratore e' UN'azione, non piu' un'attivazione piu'
+	# un'azione: con 3 il ritmo si dimezza (registro 93), e la manopola misura
+	# quanti ne servono per tornare al ritmo della v1.5.
+	if args.has("lavoratori"):
+		CardDB.constants["workers_base"] = int(args["lavoratori"])
+		print("# workers_base = %d" % int(args["lavoratori"]))
 	# LA FORZA STA SULLA CARTA EVENTO, non nella costante: `event_force_by_era`
 	# e' la tabella di riferimento, ma chi decide e' `gs.current_event["force"]`.
 	# La prima versione di questa manopola scriveva la costante e non cambiava
@@ -321,7 +331,7 @@ func _stampa_vita(acc: Dictionary, quante: int, players: int, seme: int) -> void
 	var vt = CardDB.constants["verticality_vp"]
 	var scala: Array[String] = []
 	for i in 4: scala.append("%d" % int(vt[str(i + 1)]))
-	print("# partite=%d giocatori=%d seme_base=%d bot=%s verticalita=%s prosperita=%d rovina=%d binari=%s versione_bot=%d strategie=%d centro=%s rudere=%s spianato=%s scavo=%s sconto=%s disturbo=%d premio=%s dati=%s era5=%s tetto=%d turno=%s" % [
+	print("# partite=%d giocatori=%d seme_base=%d bot=%s verticalita=%s prosperita=%d rovina=%d binari=%s versione_bot=%d strategie=%d centro=%s rudere=%s spianato=%s scavo=%s sconto=%s disturbo=%d premio=%s dati=%s era5=%s tetto=%d turno=%s lavoratori=%d" % [
 		quante, players, seme, "strategie" if _strategie else "caso",
 		"/".join(scala), int(CardDB.constants["prosperity"]["min_buildings"]),
 		int(CardDB.constants.get("rovina_gap", 2)),
@@ -338,7 +348,8 @@ func _stampa_vita(acc: Dictionary, quante: int, players: int, seme: int) -> void
 		str(CardDB.ruleset),
 		str(CardDB.constants.get("premio_era5", "intero")),
 		int(CardDB.constants.get("resource_cap_per_resource", 0)),
-		"v2" if bool(CardDB.constants.get("turno_v2", false)) else "v1"])
+		"v2" if bool(CardDB.constants.get("turno_v2", false)) else "v1",
+		int(CardDB.constants["workers_base"])])
 	var intestazione: Array[String] = ["id", "nome", "era", "classi", "larghezza",
 		"costo_pietra", "costo_oro", "resistenza", "rendita", "scavo", "lampo_carta",
 		"copie", "n", "ere_intatto", "ere_piedi", "n_rudere", "n_rovina", "n_sepolto",

@@ -263,6 +263,42 @@ static func _da_proteggere(gs: GameState, p: PlayerState, col: int) -> Building:
 # ristrutturare, reclutare, la Dinastia, passare. La stessa testa di sempre
 # (`_valore`) e la stessa spinta della strategia; a cambiare e' solo che non
 # c'e' piu' una colonna da scegliere prima.
+# NEL TURNO V2 L'INCASSO COSTA UN TURNO. Nella v1.5 attivare era gratis (il
+# lavoratore attivava E agiva), quindi una risorsa valeva sempre il suo prezzo
+# di mercato. Qui attivare o passare e' l'azione intera, in concorrenza con il
+# costruire, e a fine era la dispersione taglia a `resource_cap_per_resource`
+# per risorsa e a `resource_cap` in tutto: le risorse oltre quello che il
+# mercato puo' assorbire in quest'era, o oltre il tetto con l'ultimo
+# lavoratore, non valgono quasi niente. Senza questo sconto il bot passava
+# l'era a incassare con tredici pietre in mano e le perdeva tutte (registro
+# 93): la prima misura del turno v2 usciva a 15 punti a giocatore.
+const VALORE_OLTRE_SOGLIA := 0.15
+
+static func _valore_incasso(gs: GameState, p: PlayerState, dp: int, do: int, di: int, r: Vector2) -> float:
+	var ultimo := p.workers_used + 1 >= p.workers
+	var tetto := int(CardDB.constants.get("resource_cap_per_resource", 0))
+	if tetto <= 0: tetto = int(CardDB.constants["resource_cap"])
+	# Quanto chiede al massimo il mercato, risorsa per risorsa: oltre, si
+	# accumula per niente (o per il tetto, che e' gia' compreso nel massimo).
+	var max_p := tetto
+	var max_o := tetto
+	var max_i := tetto
+	if not ultimo:
+		for id in gs.market:
+			var c: Dictionary = CardDB.buildings[id]["cost"]
+			max_p = maxi(max_p, int(c["pietra"]))
+			max_o = maxi(max_o, int(c["oro"]))
+			max_i = maxi(max_i, int(c.get("idee", 0)))
+	return _utili(p.pietra, dp, max_p) * r.x + _utili(p.oro, do, max_o) * r.y \
+		+ _utili(p.idee, di, max_i) * r.y
+
+# Le unita' guadagnate che stanno sotto la soglia valgono intere, le altre
+# `VALORE_OLTRE_SOGLIA` (qualcosa valgono: uno sconto, uno scambio).
+static func _utili(stock: int, guadagno: int, soglia: int) -> float:
+	if guadagno <= 0: return float(guadagno)
+	var sotto := clampi(soglia - stock, 0, guadagno)
+	return float(sotto) + float(guadagno - sotto) * VALORE_OLTRE_SOGLIA
+
 static func _play_turn_v2(ctl: GameController, p: PlayerState, strategia: String) -> void:
 	var gs := ctl.gs
 	var r := valore_risorse(gs, p)
@@ -273,8 +309,8 @@ static func _play_turn_v2(ctl: GameController, p: PlayerState, strategia: String
 		var pc: PlayerState = copia.players[p.index]
 		var prima := Vector3(pc.pietra, pc.oro, pc.idee)
 		EraRules.activate(copia, p.index, c)
-		var guadagno := float(pc.pietra - prima.x) * r.x + float(pc.oro - prima.y) * r.y \
-			+ float(pc.idee - prima.z) * r.y
+		var guadagno := _valore_incasso(gs, p, pc.pietra - int(prima.x), pc.oro - int(prima.y),
+			pc.idee - int(prima.z), r)
 		var v := AvailableActions.Voce.new()
 		v.tipo = "colonna"
 		v.legale = true
@@ -366,8 +402,13 @@ static func _valore(gs: GameState, p: PlayerState, v, strategia: String, col: in
 	if speso != 0.0: dett["costo"] = -speso
 	match v.tipo:
 		"passa":
-			# Passare vale le due risorse che porta, meno il turno che costa.
-			var q := r.x + maxf(r.x, r.y) - 0.5
+			# Passare vale le due risorse che porta, meno il turno che costa;
+			# nel turno v2 con lo sconto sull'incasso oltre soglia.
+			var scelta := str(v.parametri.get("scelta", "oro"))
+			var base := int(CardDB.constants.get("passa_incasso_pietra", 1))
+			var extra := int(CardDB.constants.get("passa_incasso_scelta", 1))
+			var q := _valore_incasso(gs, p, base + (extra if scelta == "pietra" else 0),
+				extra if scelta == "oro" else 0, extra if scelta == "idee" else 0, r) - 0.5
 			dett["passare e incassare"] = q
 			return q
 		"costruisci": return _valore_costruzione(gs, p, v, strategia, r, dett) - speso
