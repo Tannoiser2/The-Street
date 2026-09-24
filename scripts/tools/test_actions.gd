@@ -32,6 +32,7 @@ func _ready() -> void:
 	_run("il Centro Urbano una volta per era", _test_centro_una_volta)
 	_run("chi ha sepolto chi, e lo sconto solo sulle rovine altrui", _test_sepolto_da)
 	_run("il premio di scavo si paga e torna col libro mastro", _test_premio_in_partita)
+	_run("la v2 a tre risorse gira sullo stesso motore", _test_tre_risorse)
 	print("\n%d superati, %d falliti" % [_passed, _failed])
 	get_tree().quit(0 if _failed == 0 else 1)
 
@@ -1073,4 +1074,31 @@ func _test_premio_in_partita() -> void:
 	CardDB.constants["premio_scavo"] = com_era
 	_ok("su 4 partite qualcuno incassa il premio (%d punti)" % incassato, incassato > 0)
 	_eq("  e il canale Scavo torna col libro mastro", storte, 0)
+
+# `data/cards-v2.json` (generato da tools/genera_cards_v2.py) carica le Idee
+# nei costi e nella produzione: su partite vere qualcuno le produce e le
+# spende, nessuno va sotto zero, e ricaricando la v1.5 le Idee spariscono.
+func _test_tre_risorse() -> void:
+	_ok("il file v2 esiste", FileAccess.file_exists("res://data/cards-v2.json"))
+	if not FileAccess.file_exists("res://data/cards-v2.json"): return
+	CardDB.load_db("res://data/cards-v2.json")
+	_eq("il Dolmen costa un'Idea", int(CardDB.buildings["ed_dolmen"]["cost"].get("idee", 0)), 1)
+	var prodotte := 0
+	var spese := 0
+	var sotto_zero := 0
+	for g in 3:
+		var ctl := _game(3, 970 + g)
+		var guard := 0
+		while ctl.gs.phase != Enums.Phase.FINE_PARTITA and guard < 10000:
+			RandomBot.play_turn(ctl)
+			guard += 1
+		for p in ctl.gs.players:
+			prodotte += int(p.counters.get("idee_prodotte", 0))
+			spese += int(p.counters.get("idee_spese", 0))
+			if p.pietra < 0 or p.oro < 0 or p.idee < 0: sotto_zero += 1
+	_ok("su 3 partite si producono Idee (%d)" % prodotte, prodotte > 0)
+	_ok("  e si spendono (%d)" % spese, spese > 0)
+	_eq("  nessuno va sotto zero", sotto_zero, 0)
+	CardDB.load_db(CardDB.DB_PATH)
+	_eq("ricaricata la v1.5, il Dolmen non chiede Idee", int(CardDB.buildings["ed_dolmen"]["cost"].get("idee", 0)), 0)
 

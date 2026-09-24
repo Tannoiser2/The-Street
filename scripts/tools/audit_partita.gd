@@ -33,6 +33,11 @@ func _ready() -> void:
 	var args := _parse_args(OS.get_cmdline_user_args())
 	var seme := int(args.get("seed", "1"))
 	var players := int(args.get("players", "3"))
+	# UN ALTRO FILE DATI (`--dati data/cards-v2.json`): la v2 con tre risorse
+	# gioca sullo stesso motore, e `cards.json` resta la fonte della v1.5.
+	if args.has("dati"):
+		CardDB.load_db("res://" + str(args["dati"]).trim_prefix("res://"))
+		print("# dati = %s" % str(args["dati"]))
 	_muto = args.has("muto")
 	_tutto = args.has("tutto")
 	_strategie = not args.has("caso")
@@ -193,7 +198,7 @@ func _lotto(seme: int, players: int, quante: int) -> void:
 	# solo quanto si segna.
 	print("seme;posto;giocatore;pv;strategia;sopra;quota_max;costruiti;"
 		+ ";".join(Riepilogo.VOCI.map(func(v): return str(v["id"]))) + ";piano;centro_attivato;oro_centro"
-		+ ";sopra_propri;sopra_altrui;spianati;scavo_scavato;scavo_e5")
+		+ ";sopra_propri;sopra_altrui;spianati;scavo_scavato;scavo_e5;idee_prodotte;idee_spese")
 	for g in quante:
 		var ctl := GameController.new()
 		ctl.new_game(players, seme + g)
@@ -223,7 +228,8 @@ func _lotto(seme: int, players: int, quante: int) -> void:
 			campi.append("%d" % int(cnt.get("oro_centro", 0)))
 			# Sopra chi ha costruito (registro 87): quante basi erano sue,
 			# quante altrui, e quanti suoi intatti ha spianato.
-			for k in ["sopra_propri", "sopra_altrui", "spianati", "scavo_scavato", "scavo_e5"]:
+			for k in ["sopra_propri", "sopra_altrui", "spianati", "scavo_scavato", "scavo_e5",
+					"idee_prodotte", "idee_spese"]:
 				campi.append("%d" % int(cnt.get(k, 0)))
 			print(";".join(campi))
 	get_tree().quit(0)
@@ -305,7 +311,7 @@ func _stampa_vita(acc: Dictionary, quante: int, players: int, seme: int) -> void
 	var vt = CardDB.constants["verticality_vp"]
 	var scala: Array[String] = []
 	for i in 4: scala.append("%d" % int(vt[str(i + 1)]))
-	print("# partite=%d giocatori=%d seme_base=%d bot=%s verticalita=%s prosperita=%d rovina=%d binari=%s versione_bot=%d strategie=%d centro=%s rudere=%s spianato=%s scavo=%s sconto=%s disturbo=%d premio=%s" % [
+	print("# partite=%d giocatori=%d seme_base=%d bot=%s verticalita=%s prosperita=%d rovina=%d binari=%s versione_bot=%d strategie=%d centro=%s rudere=%s spianato=%s scavo=%s sconto=%s disturbo=%d premio=%s dati=%s" % [
 		quante, players, seme, "strategie" if _strategie else "caso",
 		"/".join(scala), int(CardDB.constants["prosperity"]["min_buildings"]),
 		int(CardDB.constants.get("rovina_gap", 2)),
@@ -318,7 +324,8 @@ func _stampa_vita(acc: Dictionary, quante: int, players: int, seme: int) -> void
 		"scavatore" if bool(CardDB.constants.get("scavo_a_chi_scava", false)) else "proprietario",
 		"altrui" if bool(CardDB.constants.get("sconto_macerie_solo_altrui", false)) else "tutti",
 		int(CardDB.constants.get("disturbo_vp", 0)),
-		str(CardDB.constants.get("premio_scavo", "nessuno"))])
+		str(CardDB.constants.get("premio_scavo", "nessuno")),
+		str(CardDB.ruleset)])
 	var intestazione: Array[String] = ["id", "nome", "era", "classi", "larghezza",
 		"costo_pietra", "costo_oro", "resistenza", "rendita", "scavo", "lampo_carta",
 		"copie", "n", "ere_intatto", "ere_piedi", "n_rudere", "n_rovina", "n_sepolto",
@@ -326,6 +333,7 @@ func _stampa_vita(acc: Dictionary, quante: int, players: int, seme: int) -> void
 	for c in CANALI_CARTA: intestazione.append("vp_" + c)
 	intestazione.append("n_spianato")
 	intestazione.append("n_sepolto_altrui")
+	intestazione.append("costo_idee")
 	print(";".join(intestazione))
 	for id in CardDB.buildings:
 		var d: Dictionary = CardDB.buildings[id]
@@ -342,6 +350,7 @@ func _stampa_vita(acc: Dictionary, quante: int, players: int, seme: int) -> void
 		for c in CANALI_CARTA: campi.append(str(r["vp_" + c]))
 		campi.append(str(r["n_spianato"]))
 		campi.append(str(r["n_sepolto_altrui"]))
+		campi.append(str(int(d["cost"].get("idee", 0))))
 		print(";".join(campi))
 
 # La strategia del posto `i` nella partita `g`: si ruota, cosi' ogni strategia

@@ -10,16 +10,21 @@ static func activate(gs: GameState, player: int, col: int) -> void:
 	var g := gs.grid
 	var t_id: String = ["pianura", "fiume", "collina", "bosco"][g.terrains[col]]
 	var base = CardDB.terrains[t_id]["base_production"]
+	# V2: la tessera produce secondo una curva per era (`base_production_by_era`,
+	# punto 7 della proposta). Nei dati v1.5 la chiave non c'e' e vale la base fissa.
+	var per_era = CardDB.terrains[t_id].get("base_production_by_era", null)
+	if per_era != null and per_era.has(str(gs.era)): base = per_era[str(gs.era)]
 	# "Anni della fame: nessuna produzione durante l'ultimo round dell'era."
 	# Decisione del designer: salta la sola produzione BASE, e solo sull'ultimo
 	# lavoratore che ciascuno piazza. Gli edifici pagano comunque. "Ultimo" si
 	# calcola sul momento: chi compra la Dinastia guadagna un lavoratore e
 	# sposta in avanti il proprio ultimo giro.
 	if not (Effects.has_override(gs, "no_production_last_round") and _is_last_worker(gs, player)):
-		var bp := int(base["pietra"])
-		var bo := int(base["oro"])
+		var bp := int(base.get("pietra", 0))
+		var bo := int(base.get("oro", 0))
+		var bi := int(base.get("idee", 0))
 		var be := Effects.production_bonus(gs, player, bp, bo)
-		gs.players[player].gain(bp + be.x, bo + be.y)
+		gs.players[player].gain(bp + be.x, bo + be.y, bi)
 	else:
 		gs.log_line("Anni della fame: giocatore %d non incassa la produzione base" % player)
 
@@ -32,8 +37,9 @@ static func activate(gs: GameState, player: int, col: int) -> void:
 		var pp := int(pr.get("pietra", 0)) + int(aura["pietra"])
 		var po := int(pr.get("oro", 0)) + int(aura["oro"])
 		var pc := int(pr.get("cultura", 0)) + int(aura["cultura"])
+		var pi := int(pr.get("idee", 0))      # v2: le Idee prodotte dagli edifici
 		var ex := Effects.production_bonus(gs, b.owner, pp, po)
-		ow.gain(pp + ex.x, po + ex.y)
+		ow.gain(pp + ex.x, po + ex.y, pi)
 		if pc > 0:
 			ow.add_vp("cultura", pc)
 		# Artista di corte: chi ha firmato l'edificio altrui incassa la sua
@@ -220,7 +226,11 @@ static func disperse(gs: GameState) -> void:
 		if excess <= 0: continue
 		var from_p: int = min(excess, p.pietra)
 		p.pietra -= from_p
-		p.oro -= excess - from_p
+		# Poi l'oro, e per ultime le Idee (v2): con i dati v1.5 le Idee sono 0
+		# e il conto e' quello di sempre.
+		var from_o: int = min(excess - from_p, p.oro)
+		p.oro -= from_o
+		p.idee -= excess - from_p - from_o
 
 # ---- scheletri: sepoltura dei personaggi ---------------------------
 # "Nelle ere 1-4, a fine era il personaggio non si scarta: infilatelo sotto la

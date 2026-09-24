@@ -15,6 +15,7 @@ class ActionQuote:
 	var reason: String = ""
 	var pietra: int = 0
 	var oro: int = 0
+	var idee: int = 0                # la terza risorsa (v2); 0 nei dati v1.5
 	var target: Building = null      # edificio bersaglio, dove previsto
 
 	static func no(r: String) -> ActionQuote:
@@ -22,11 +23,12 @@ class ActionQuote:
 		q.reason = r
 		return q
 
-	static func yes(p: int, o: int, t: Building = null) -> ActionQuote:
+	static func yes(p: int, o: int, t: Building = null, i: int = 0) -> ActionQuote:
 		var q := ActionQuote.new()
 		q.legal = true
 		q.pietra = p
 		q.oro = o
+		q.idee = i
 		q.target = t
 		return q
 
@@ -79,7 +81,8 @@ static func quote_upgrade(gs: GameState, player: int, upg_id: String, target: Bu
 	# Sconti sui potenziamenti: Bottega d'artista, e il Cardinale sui Religione.
 	var sconto := Effects.cost_delta(gs, player, "upgrade", target)
 	return ActionQuote.yes(max(0, int(cost.get("pietra", 0)) + sconto.x),
-						   max(0, int(cost.get("oro", 0)) + sconto.y), target)
+						   max(0, int(cost.get("oro", 0)) + sconto.y), target,
+						   int(cost.get("idee", 0)))
 
 # ---- restaurare ----------------------------------------------------
 # "pagate meta' del costo originale, arrotondato per eccesso, e torna intatto
@@ -100,9 +103,10 @@ static func quote_restore(gs: GameState, player: int, target: Building) -> Actio
 	var c: Dictionary = target.data["cost"]
 	var p := int(ceil(float(int(c["pietra"])) / 2.0))
 	var o := int(ceil(float(int(c["oro"])) / 2.0))
+	var i := int(ceil(float(int(c.get("idee", 0))) / 2.0))
 	if _touches_terrain(gs, target, Enums.Terrain.BOSCO):
 		p = max(0, p - 1)
-	return ActionQuote.yes(p, o, target)
+	return ActionQuote.yes(p, o, target, i)
 
 # ---- reclutare -----------------------------------------------------
 # "Reclutare costa 1 oro e richiede che la classe del personaggio sia presente
@@ -147,7 +151,7 @@ static func quote_dynasty(gs: GameState, player: int) -> ActionQuote:
 	if gs.dynasties_left <= 0:
 		return ActionQuote.no("nessuna Dinastia disponibile")
 	var c: Dictionary = by_era[str(gs.era)]
-	return ActionQuote.yes(int(c.get("pietra", 0)), int(c.get("oro", 0)))
+	return ActionQuote.yes(int(c.get("pietra", 0)), int(c.get("oro", 0)), null, int(c.get("idee", 0)))
 
 # "Impronta: infila questa carta sotto un tuo edificio" — il bersaglio e' una
 # SCELTA del giocatore, non l'edificio abitato: va passato al comando.

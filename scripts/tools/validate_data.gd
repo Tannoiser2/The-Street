@@ -5,11 +5,15 @@
 extends Node
 
 const DATA := "res://data/cards.json"
+const DATA_V2 := "res://data/cards-v2.json"   # la v2 a tre risorse, generata
 const SCHEMA := "res://data/cards.schema.json"
 
 func _ready() -> void:
 	var failures := 0
-	failures += _validate_schema()
+	failures += _validate_schema(DATA)
+	# La v2 rispetta lo stesso schema (allargato alle Idee): un file generato
+	# che non lo rispetta e' un errore del generatore, e si vede qui.
+	if FileAccess.file_exists(DATA_V2): failures += _validate_schema(DATA_V2)
 	failures += _check_no_duplicate_data()
 	if failures == 0:
 		print("\nOK: i dati rispettano lo schema e la fonte e' unica.")
@@ -24,14 +28,15 @@ func _read_json(path: String):
 		return null
 	return JSON.parse_string(f.get_as_text())
 
-func _validate_schema() -> int:
-	var data = _read_json(DATA)
+func _validate_schema(path: String) -> int:
+	var data = _read_json(path)
 	var schema = _read_json(SCHEMA)
 	if data == null or schema == null:
 		return 1
 	var v := SchemaValidator.new()
 	if v.validate(data, schema):
-		print("schema ....... OK (%d edifici, %d personaggi, %d potenziamenti, %d eventi, %d monumenti, %d eredita)" % [
+		print("schema %s OK (%d edifici, %d personaggi, %d potenziamenti, %d eventi, %d monumenti, %d eredita)" % [
+			path.get_file(),
 			data["buildings"].size(), data["characters"].size(), data["upgrades"].size(),
 			data["events"].size(), data["monuments"].size(), data["legacies"].size()])
 		return 0

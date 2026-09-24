@@ -25,6 +25,7 @@ func new_game(n_players: int, seed_value: int) -> void:
 	for i in n_players:
 		var p := PlayerState.new(i)
 		p.pietra = int(CardDB.constants["start_resources"]["pietra"])
+		p.idee = int(CardDB.constants["start_resources"].get("idee", 0))
 		p.workers = int(CardDB.constants["workers_base"])
 		gs.players.append(p)
 	if n_players == 2:
@@ -171,8 +172,8 @@ func build(card_id: String, col_from: int, above: bool, pay_option: int = 0, des
 		return false
 	var opts := BuildRules.flexible_options(data, q.pietra, q.oro)
 	var cost: Vector2i = opts[clamp(pay_option, 0, opts.size() - 1)]
-	if not p.can_pay(cost.x, cost.y): return false
-	p.pay(cost.x, cost.y)
+	if not p.can_pay(cost.x, cost.y, q.idee): return false
+	p.pay(cost.x, cost.y, q.idee)
 	if q.terrapieno_free_applied:
 		p.terrapieno_free_used = true
 	if q.terrapieno_pietra > 0:
@@ -271,7 +272,7 @@ func upgrade(upg_id: String, target: Building) -> bool:
 	if not q.legal:
 		gs.log_line("Potenziamento rifiutato: %s" % q.reason)
 		return false
-	if not p.can_pay(q.pietra, q.oro): return false
+	if not p.can_pay(q.pietra, q.oro, q.idee): return false
 	# Il Vescovo si consuma qui, non nel preventivo: il preventivo viene
 	# chiesto anche solo per sapere se l'azione e' legale.
 	var vescovo := Effects.player_override(gs, p.index, "free_upgrade_of_class", target)
@@ -292,7 +293,7 @@ func upgrade(upg_id: String, target: Building) -> bool:
 				target.patrons[p.index] = int(target.patrons.get(p.index, 0)) + rendita
 			gs.log_line("%s: giocatore %d firma %s e ne incassa %d oro a ogni attivazione" % [
 				artista[1]["name"], p.index, target.data["name"], rendita])
-	p.pay(q.pietra, q.oro)
+	p.pay(q.pietra, q.oro, q.idee)
 	target.upgrades.append(upg_id)
 	# Gli effetti vengono dai dati della carta, con l'edificio ospite come
 	# sorgente dei selettori. Prima il cubetto nero dei Struttura era un caso
@@ -317,8 +318,8 @@ func restore(target: Building) -> bool:
 	if not q.legal:
 		gs.log_line("Restauro rifiutato: %s" % q.reason)
 		return false
-	if not p.can_pay(q.pietra, q.oro): return false
-	p.pay(q.pietra, q.oro)
+	if not p.can_pay(q.pietra, q.oro, q.idee): return false
+	p.pay(q.pietra, q.oro, q.idee)
 	target.state = Enums.BuildingState.INTATTO
 	target.vetusta = 0
 	p.bump("restauri")
@@ -340,8 +341,8 @@ func recruit(char_id: String, imprint_target: Building = null) -> bool:
 	if not q.legal:
 		gs.log_line("Reclutamento rifiutato: %s" % q.reason)
 		return false
-	if not p.can_pay(q.pietra, q.oro): return false
-	p.pay(q.pietra, q.oro)
+	if not p.can_pay(q.pietra, q.oro, q.idee): return false
+	p.pay(q.pietra, q.oro, q.idee)
 	p.specialized_characters.append(char_id)
 	p.recruited_total += 1
 	# Il lavoratore appena piazzato si specializza: l'edificio che abita e' il
@@ -379,8 +380,8 @@ func buy_dynasty() -> bool:
 	if not q.legal:
 		gs.log_line("Dinastia rifiutata: %s" % q.reason)
 		return false
-	if not p.can_pay(q.pietra, q.oro): return false
-	p.pay(q.pietra, q.oro)
+	if not p.can_pay(q.pietra, q.oro, q.idee): return false
+	p.pay(q.pietra, q.oro, q.idee)
 	p.has_dynasty = true
 	p.workers += 1          # "attivo da subito e per tutte le ere che restano"
 	gs.dynasties_left -= 1

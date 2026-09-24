@@ -18,12 +18,13 @@ class Voce:
 	var motivo: String = ""
 	var pietra: int = 0
 	var oro: int = 0
+	var idee: int = 0
 	var parametri: Dictionary = {}
 
 	# Pagabile e' diverso da legale: l'azione puo' essere permessa e le
 	# risorse mancare. Il giocatore deve vedere due cose diverse.
 	func pagabile(p: PlayerState) -> bool:
-		return p.pietra >= pietra and p.oro >= oro
+		return p.pietra >= pietra and p.oro >= oro and p.idee >= idee
 
 static func _voce(tipo: String, etichetta: String, q, parametri := {}) -> Voce:
 	var v := Voce.new()
@@ -33,6 +34,7 @@ static func _voce(tipo: String, etichetta: String, q, parametri := {}) -> Voce:
 	v.motivo = q.reason
 	v.pietra = q.pietra
 	v.oro = q.oro
+	v.idee = q.idee
 	v.parametri = parametri
 	return v
 
@@ -60,7 +62,7 @@ static func costruzioni(gs: GameState, player: int, col: int) -> Array[Voce]:
 				var q = BuildRules.quote_above(gs, player, d, c) if sopra \
 					else BuildRules.quote_rail(gs, player, d, c)
 				if q.legal:
-					if migliore == null or q.pietra + q.oro < migliore.pietra + migliore.oro:
+					if migliore == null or q.pietra + q.oro + q.idee < migliore.pietra + migliore.oro + migliore.idee:
 						migliore = q
 						migliori_par = {"card_id": card_id, "col_from": c, "above": sopra}
 				elif ripiego == null:
@@ -82,7 +84,7 @@ static func potenziamenti(gs: GameState, player: int, col: int) -> Array[Voce]:
 		for b in gs.grid.in_column(col):
 			var q := ActionRules.quote_upgrade(gs, player, upg_id, b)
 			if q.legal:
-				if migliore == null or q.pietra + q.oro < migliore.pietra + migliore.oro:
+				if migliore == null or q.pietra + q.oro + q.idee < migliore.pietra + migliore.oro + migliore.idee:
 					migliore = q
 					par = {"upg_id": upg_id, "uid": b.uid}
 			elif ripiego == null:

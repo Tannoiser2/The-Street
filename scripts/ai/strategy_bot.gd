@@ -284,7 +284,8 @@ static func _per_uid(gs: GameState, uid: int) -> Building:
 static func _valore(gs: GameState, p: PlayerState, v, strategia: String, col: int,
 		dett := {}) -> float:
 	var r := valore_risorse(gs, p)
-	var speso := float(v.pietra) * r.x + float(v.oro) * r.y
+	# Le Idee (v2) si contano come l'oro: una risorsa che non si scava.
+	var speso := float(v.pietra) * r.x + float(v.oro) * r.y + float(v.idee) * r.y
 	if speso != 0.0: dett["costo"] = -speso
 	match v.tipo:
 		"costruisci": return _valore_costruzione(gs, p, v, strategia, r, dett) - speso
@@ -328,7 +329,7 @@ static func _valore_costruzione(gs: GameState, p: PlayerState, v, strategia: Str
 	q += rend
 	var prod: Dictionary = d.get("production", {})
 	var pr := (float(prod.get("pietra", 0)) * r.x + float(prod.get("oro", 0)) * r.y
-		+ float(prod.get("cultura", 0))) * float(rimaste) * 0.5
+		+ float(prod.get("idee", 0)) * r.y + float(prod.get("cultura", 0))) * float(rimaste) * 0.5
 	if pr != 0.0: dett["produzione"] = pr
 	q += pr
 
