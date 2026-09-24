@@ -9,8 +9,9 @@
 #
 # Del torneo si confrontano i primi CAMPI campi (19: fino a `piano`), perche'
 # le colonne nuove si aggiungono in fondo e non devono far fallire il confronto.
-# Della vita delle carte si confrontano tutte le righe; l'intestazione delle
-# regole puo' crescere di una voce (una manopola nuova, spenta) senza fallire.
+# Della vita delle carte si confrontano tutte le righe sulle colonne che il
+# riferimento ha; l'intestazione delle regole puo' crescere di una voce (una
+# manopola nuova, spenta) senza fallire.
 set -u
 GODOT="${GODOT:-godot}"
 CAMPI="${CAMPI:-19}"
@@ -59,7 +60,10 @@ for kv in $new_meta; do
 	k=${kv%%=*}
 	grep -q " $k=" <<< "$rif_meta " || echo "VITA: voce nuova nell'intestazione, assente nel riferimento: $kv"
 done
-if ! diff <(grep -v '^# partite=' "$RIF/vita.csv") <(grep -v '^# partite=' "$TMP/vita.csv") > "$TMP/vita.diff"; then
+# Le colonne nuove si aggiungono in coda anche qui: si confrontano solo
+# quelle che il riferimento ha.
+campi_vita=$(grep -m1 '^id;' "$RIF/vita.csv" | tr ';' '\n' | wc -l)
+if ! diff <(grep -v '^# partite=' "$RIF/vita.csv" | cut -d';' -f1-"$campi_vita") <(grep -v '^# partite=' "$TMP/vita.csv" | cut -d';' -f1-"$campi_vita") > "$TMP/vita.diff"; then
 	echo "VITA: DIVERSA dal riferimento ($(grep -c '^<' "$TMP/vita.diff") righe cambiate)"
 	head -20 "$TMP/vita.diff"; esito=1
 elif [ "$esito" = 0 ]; then

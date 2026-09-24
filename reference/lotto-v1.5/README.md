@@ -23,7 +23,8 @@ GODOT=/percorso/godot tools/verifica_riferimento.sh
 
 Rigioca le due batterie (circa 100 secondi) e dice se sono identiche. Del torneo confronta i
 primi 19 campi (fino a `piano`), perché le colonne nuove si aggiungono in fondo; della vita
-confronta tutte le righe delle carte. L'intestazione delle regole può solo crescere: una
+confronta tutte le righe delle carte sulle colonne che il riferimento ha (anche qui le colonne
+nuove vanno in coda). L'intestazione delle regole può solo crescere: una
 manopola nuova aggiunge la sua voce (per esempio `rudere=si`) e, finché è spenta, le partite
 non cambiano; lo script lo segnala senza fallire. Fallisce invece se una voce del riferimento
 cambia valore o sparisce.
