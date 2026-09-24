@@ -54,6 +54,8 @@ def leggi(f):
         "  Scheletri": (tot["vp_scheletri"] / partite, "{:.1f}"),
     }
 
+NOMI_PREMIO = {"per_livello": "premio S×L", "piu_livello": "premio S+L", "per_livello_meno_uno": "premio S×(L−1)"}
+
 def etichetta(regole):
     # A soglia 1 il rudere non esiste di fatto: fallire di 1 e' gia' rovina.
     if regole.get("rovina") == "1": pezzi = ["ogni fallimento fa rovina"]
@@ -64,6 +66,8 @@ def etichetta(regole):
     if regole.get("scavo") == "scavatore": pezzi.append("Scavo a chi scava")
     if regole.get("sconto") == "altrui": pezzi.append("sconto solo sulle altrui")
     if regole.get("disturbo", "0") != "0": pezzi.append(f"disturbo {regole['disturbo']}")
+    if regole.get("verticalita") == "0/0/0/0": pezzi.append("senza Verticalità")
+    if regole.get("premio", "nessuno") != "nessuno": pezzi.append(NOMI_PREMIO.get(regole["premio"], regole["premio"]))
     return ", ".join(pezzi)
 
 lotti = [leggi(f) for f in sys.argv[1:]]

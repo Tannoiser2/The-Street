@@ -19,6 +19,19 @@ static func final_scoring(gs: GameState) -> void:
 static func _census_final(gs: GameState) -> void:
 	EraRules.census(gs)
 
+# PREMIO DI SCAVO (registro 89, manopola `premio_scavo`, "nessuno" nei dati):
+# chi costruisce al livello L sopra un edificio con Scavo S lo incassa subito,
+# al posto della Verticalita'. Tre moltiplicatori da misurare: "per_livello"
+# S x L, "piu_livello" S + L, "per_livello_meno_uno" S x (L - 1). Uno
+# spianato (S = 0) non paga mai: seppellire il proprio vivo resta a zero.
+static func premio_scavo(scavo: int, livello: int) -> int:
+	if scavo <= 0: return 0
+	match str(CardDB.constants.get("premio_scavo", "nessuno")):
+		"per_livello": return scavo * livello
+		"piu_livello": return scavo + livello
+		"per_livello_meno_uno": return scavo * (livello - 1)
+	return 0
+
 # Metà del premio a chi ha la cima; metà divisa in proporzione agli edifici.
 static func _verticality(gs: GameState) -> void:
 	var vp_table = CardDB.constants["verticality_vp"]

@@ -116,6 +116,11 @@ func _ready() -> void:
 	if args.has("disturbo"):
 		CardDB.constants["disturbo_vp"] = int(args["disturbo"])
 		print("# disturbo_vp = %d" % int(args["disturbo"]))
+	# IL PREMIO DI SCAVO al posto della Verticalita' (registro 89):
+	#   --premio per_livello | piu_livello | per_livello_meno_uno
+	if args.has("premio"):
+		CardDB.constants["premio_scavo"] = str(args["premio"])
+		print("# premio_scavo = %s" % str(args["premio"]))
 	# LA FORZA STA SULLA CARTA EVENTO, non nella costante: `event_force_by_era`
 	# e' la tabella di riferimento, ma chi decide e' `gs.current_event["force"]`.
 	# La prima versione di questa manopola scriveva la costante e non cambiava
@@ -300,7 +305,7 @@ func _stampa_vita(acc: Dictionary, quante: int, players: int, seme: int) -> void
 	var vt = CardDB.constants["verticality_vp"]
 	var scala: Array[String] = []
 	for i in 4: scala.append("%d" % int(vt[str(i + 1)]))
-	print("# partite=%d giocatori=%d seme_base=%d bot=%s verticalita=%s prosperita=%d rovina=%d binari=%s versione_bot=%d strategie=%d centro=%s rudere=%s spianato=%s scavo=%s sconto=%s disturbo=%d" % [
+	print("# partite=%d giocatori=%d seme_base=%d bot=%s verticalita=%s prosperita=%d rovina=%d binari=%s versione_bot=%d strategie=%d centro=%s rudere=%s spianato=%s scavo=%s sconto=%s disturbo=%d premio=%s" % [
 		quante, players, seme, "strategie" if _strategie else "caso",
 		"/".join(scala), int(CardDB.constants["prosperity"]["min_buildings"]),
 		int(CardDB.constants.get("rovina_gap", 2)),
@@ -312,7 +317,8 @@ func _stampa_vita(acc: Dictionary, quante: int, players: int, seme: int) -> void
 		"vale" if bool(CardDB.constants.get("spianare_conserva_scavo", false)) else "zero",
 		"scavatore" if bool(CardDB.constants.get("scavo_a_chi_scava", false)) else "proprietario",
 		"altrui" if bool(CardDB.constants.get("sconto_macerie_solo_altrui", false)) else "tutti",
-		int(CardDB.constants.get("disturbo_vp", 0))])
+		int(CardDB.constants.get("disturbo_vp", 0)),
+		str(CardDB.constants.get("premio_scavo", "nessuno"))])
 	var intestazione: Array[String] = ["id", "nome", "era", "classi", "larghezza",
 		"costo_pietra", "costo_oro", "resistenza", "rendita", "scavo", "lampo_carta",
 		"copie", "n", "ere_intatto", "ere_piedi", "n_rudere", "n_rovina", "n_sepolto",

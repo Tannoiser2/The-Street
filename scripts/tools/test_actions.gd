@@ -31,6 +31,7 @@ func _ready() -> void:
 	_run("la strategia Obiettivi", _test_obiettivi)
 	_run("il Centro Urbano una volta per era", _test_centro_una_volta)
 	_run("chi ha sepolto chi, e lo sconto solo sulle rovine altrui", _test_sepolto_da)
+	_run("il premio di scavo si paga e torna col libro mastro", _test_premio_in_partita)
 	print("\n%d superati, %d falliti" % [_passed, _failed])
 	get_tree().quit(0 if _failed == 0 else 1)
 
@@ -1047,3 +1048,29 @@ func _test_sepolto_da() -> void:
 	_eq("  accesa, costa %d in piu'" % int(CardDB.constants["rubble_discount_pietra"]),
 		q_mia_senza.pietra, q_mia.pietra + int(CardDB.constants["rubble_discount_pietra"]))
 	CardDB.constants["sconto_macerie_solo_altrui"] = com_era
+
+# Con il premio di scavo acceso, su partite vere qualcuno lo incassa e i punti
+# del canale Scavo tornano ancora, carta per carta, con quelli del tabellone:
+# il premio si segna sull'edificio sepolto, non si inventa un canale nuovo.
+func _test_premio_in_partita() -> void:
+	var com_era: String = str(CardDB.constants.get("premio_scavo", "nessuno"))
+	CardDB.constants["premio_scavo"] = "per_livello"
+	var incassato := 0
+	var storte := 0
+	for g in 4:
+		var ctl := _game(3, 950 + g)
+		var guard := 0
+		while ctl.gs.phase != Enums.Phase.FINE_PARTITA and guard < 10000:
+			RandomBot.play_turn(ctl)
+			guard += 1
+		var tabellone := 0
+		var carte := 0
+		for p in ctl.gs.players:
+			incassato += int(p.counters.get("scavo_scavato", 0))
+			tabellone += int(p.vp_breakdown.get("scavo", 0))
+		for b in ctl.gs.grid.buildings: carte += int(b.vp_reso.get("scavo", 0))
+		if tabellone != carte: storte += 1
+	CardDB.constants["premio_scavo"] = com_era
+	_ok("su 4 partite qualcuno incassa il premio (%d punti)" % incassato, incassato > 0)
+	_eq("  e il canale Scavo torna col libro mastro", storte, 0)
+

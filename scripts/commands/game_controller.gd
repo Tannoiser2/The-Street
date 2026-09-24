@@ -238,6 +238,16 @@ func build(card_id: String, col_from: int, above: bool, pay_option: int = 0, des
 		if altro.is_buried and not bool(sepolti_prima.get(altro.uid, false)):
 			altro.buried_by = p.index
 			altro.buried_era = gs.era
+			# Il premio di scavo si paga qui, sul momento, come il Lampo: il
+			# livello e' quello dell'edificio appena costruito.
+			var premio := Scoring.premio_scavo(altro.scavo_value(), b.level)
+			if premio > 0:
+				p.add_vp("scavo", premio)
+				altro.rende("scavo", premio)
+				p.bump("scavo_scavato", premio)
+				if gs.era >= int(CardDB.constants["eras"]): p.bump("scavo_e5", premio)
+				gs.log_line("%s seppellisce %s al livello %d: premio di scavo %d" % [
+					p.name, altro.data["name"], b.level, premio])
 	Effects.apply_on_build(gs, p.index, b)
 	if above:
 		for c in range(b.col_from, b.col_to): gs.grid.risen_this_era[c] = true

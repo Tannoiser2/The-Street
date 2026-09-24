@@ -26,6 +26,7 @@ def leggi(pattern):
     spianato = "zero"
     scavo_a = "proprietario"
     sconto = "tutti"
+    premio = "nessuno"
     for f in sorted(glob.glob(pattern)):
         righe = [l.rstrip("\n") for l in open(f) if l.strip()]
         meta = [l for l in righe if l.startswith("# partite=")][0]
@@ -60,6 +61,7 @@ def leggi(pattern):
         # A chi va lo Scavo e a chi lo sconto macerie (registro 87).
         if " scavo=" in meta: scavo_a = meta.split(" scavo=")[1].split()[0]
         if "sconto=" in meta: sconto = meta.split("sconto=")[1].split()[0]
+        if "premio=" in meta: premio = meta.split("premio=")[1].split()[0]
         i = righe.index([l for l in righe if l.startswith("id;")][0])
         hdr = righe[i].split(";")
         for l in righe[i+1:]:
@@ -77,12 +79,12 @@ def leggi(pattern):
             else:
                 for k in NUM: c[k] += int(v[k])
     if strat is None: strat = 5 if bot == "strategie" else 0
-    return carte, partite, giocatori, bot, vert, prosp, rov, bin, ver, strat, centro, rudere, spianato, scavo_a, sconto
+    return carte, partite, giocatori, bot, vert, prosp, rov, bin, ver, strat, centro, rudere, spianato, scavo_a, sconto, premio
 
-carte, partite, giocatori, bot, vert, prosp, rov, bin, ver, strat, centro, rudere, spianato, scavo_a, sconto = leggi(sys.argv[1])
+carte, partite, giocatori, bot, vert, prosp, rov, bin, ver, strat, centro, rudere, spianato, scavo_a, sconto, premio = leggi(sys.argv[1])
 altro = None
 if "--confronta" in sys.argv:
-    altro, partite_altro, _, bot_altro, vert_altro, prosp_altro, rov_altro, bin_altro, ver_altro, strat_altro, centro_altro, rudere_altro, spianato_altro, scavo_a_altro, sconto_altro = leggi(
+    altro, partite_altro, _, bot_altro, vert_altro, prosp_altro, rov_altro, bin_altro, ver_altro, strat_altro, centro_altro, rudere_altro, spianato_altro, scavo_a_altro, sconto_altro, premio_altro = leggi(
         sys.argv[sys.argv.index("--confronta") + 1])
     # LE COLONNE SI CHIAMANO COME TUTTO CIO' CHE LE DISTINGUE, non come la
     # prima differenza trovata. Due lotti possono differire in piu' di una
@@ -131,6 +133,12 @@ if "--confronta" in sys.argv:
     if sconto != sconto_altro:
         DIFF.append((f"sconto macerie: {sconto_altro}", f"sconto macerie: {sconto}",
                      "lo sconto macerie solo sulle rovine altrui" if sconto == "altrui" else "lo sconto macerie su tutte le rovine"))
+    if premio != premio_altro:
+        nomi_p = {"nessuno": "senza premio di scavo", "per_livello": "premio S×L",
+                  "piu_livello": "premio S+L", "per_livello_meno_uno": "premio S×(L−1)"}
+        DIFF.append((nomi_p.get(premio_altro, premio_altro), nomi_p.get(premio, premio),
+                     "il premio di scavo " + nomi_p.get(premio, premio).replace("premio ", "")
+                     if premio != "nessuno" else "il premio di scavo tolto"))
     if bin != bin_altro:
         DIFF.append(("binari per era" if bin_altro == "per_era" else "binari liberi",
                      "binari per era" if bin == "per_era" else "binari liberi",

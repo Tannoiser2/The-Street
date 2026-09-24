@@ -37,6 +37,7 @@ func _ready() -> void:
 	_run("senza rudere: chi fallisce di poco resta intatto", _test_senza_rudere)
 	_run("spianare conserva lo Scavo: la manopola", _test_scavo_spianato)
 	_run("lo Scavo a chi scava, e il punto per il disturbo", _test_scavo_a_chi_scava)
+	_run("il premio di scavo: i tre moltiplicatori", _test_premio_scavo)
 	_run("Mercante di ossidiana", _test_mercante_scambi)
 	_run("Ingegnere militare: uno a tua scelta", _test_designazione)
 	_run("  e la designazione al reclutamento", _test_designazione_reclutamento)
@@ -2357,3 +2358,24 @@ func _test_scavo_a_chi_scava() -> void:
 
 	CardDB.constants["scavo_a_chi_scava"] = scava_era
 	CardDB.constants["disturbo_vp"] = disturbo_era
+
+# ---- il premio di scavo ----------------------------------------------
+# Manopola `premio_scavo` (registro 89), "nessuno" nei dati: chi costruisce al
+# livello L sopra un edificio con Scavo S lo incassa subito, con uno dei tre
+# moltiplicatori. Lo spianato (S = 0) non paga in nessun modo.
+func _test_premio_scavo() -> void:
+	var com_era: String = str(CardDB.constants.get("premio_scavo", "nessuno"))
+	CardDB.constants["premio_scavo"] = "nessuno"
+	_eq("spenta: niente premio", Scoring.premio_scavo(3, 2), 0)
+	CardDB.constants["premio_scavo"] = "per_livello"
+	_eq("S x L: 3 al livello 2 paga 6", Scoring.premio_scavo(3, 2), 6)
+	_eq("  al livello 1 paga 3", Scoring.premio_scavo(3, 1), 3)
+	_eq("  lo spianato non paga", Scoring.premio_scavo(0, 3), 0)
+	CardDB.constants["premio_scavo"] = "piu_livello"
+	_eq("S + L: 3 al livello 2 paga 5", Scoring.premio_scavo(3, 2), 5)
+	_eq("  lo spianato non paga nemmeno il livello", Scoring.premio_scavo(0, 3), 0)
+	CardDB.constants["premio_scavo"] = "per_livello_meno_uno"
+	_eq("S x (L-1): al livello 1 paga 0", Scoring.premio_scavo(3, 1), 0)
+	_eq("  al livello 3 paga 6", Scoring.premio_scavo(3, 3), 6)
+	CardDB.constants["premio_scavo"] = com_era
+

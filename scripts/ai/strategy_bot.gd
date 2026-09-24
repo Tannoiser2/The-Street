@@ -366,6 +366,15 @@ static func _valore_costruzione(gs: GameState, p: PlayerState, v, strategia: Str
 		if sotto != 0.0: dett["Scavo dei miei che vanno sotto"] = sotto
 		if perso != 0.0: dett["quel che perdo spianando"] = perso
 		q += sotto + perso
+		# Il premio di scavo (manopola `premio_scavo`) si incassa subito: vale
+		# quasi per intero, scontato solo perche' una base larga puo' non
+		# finire coperta del tutto da questa costruzione.
+		if str(CardDB.constants.get("premio_scavo", "nessuno")) != "nessuno":
+			var premio := 0.0
+			for b in q2.bases: premio += float(Scoring.premio_scavo(b.scavo_value(), q2.level))
+			if premio != 0.0:
+				dett["premio di scavo"] = premio * 0.8
+				q += premio * 0.8
 	# Continuita' di luogo: una seconda carta della stessa classe nella colonna.
 	var mie := {}
 	for b in gs.grid.in_column(col_from):

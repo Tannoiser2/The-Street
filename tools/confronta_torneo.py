@@ -46,6 +46,8 @@ def leggi(f):
     for s in sorted(giocate): m["vince " + s] = vinte[s] / giocate[s]
     return regole, partite, m
 
+NOMI_PREMIO = {"per_livello": "premio S×L", "piu_livello": "premio S+L", "per_livello_meno_uno": "premio S×(L−1)"}
+
 def etichetta(regole):
     pezzi = []
     if regole.get("rovina_gap") == "1": pezzi.append("ogni fallimento fa rovina")
@@ -55,6 +57,8 @@ def etichetta(regole):
     if regole.get("scavo_a_chi_scava") == "true": pezzi.append("Scavo a chi scava")
     if regole.get("sconto_macerie_solo_altrui") == "true": pezzi.append("sconto solo sulle altrui")
     if regole.get("disturbo_vp", "0") != "0": pezzi.append(f"disturbo {regole['disturbo_vp']}")
+    if regole.get("verticality_vp", "").count(": 0") == 4: pezzi.append("senza Verticalità")
+    if regole.get("premio_scavo", "nessuno") != "nessuno": pezzi.append(NOMI_PREMIO.get(regole["premio_scavo"], regole["premio_scavo"]))
     return ", ".join(pezzi) if pezzi else "oggi"
 
 lotti = [leggi(f) for f in sys.argv[1:]]
