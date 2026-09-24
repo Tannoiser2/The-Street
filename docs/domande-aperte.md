@@ -1511,7 +1511,29 @@ dato è stato importato da lì. Ma due confronti fra ciò che è stampato e
     Demolitore, Soprintendente, la meta' della Verticalita' fra i
     proprietari): decisione da regolamento.
 
-    **Resta da scegliere** fra spianato a zero (soglia 2 il compromesso) e una
-    via di mezzo non ancora misurata: Scavo pieno ma senza lo sconto della
-    Spolia, o Scavo dimezzato. Tutto in `docs/senza-rudere.md`.
+    **Terza misura, "perche' costruire sopra gli altri".** Due leve provate
+    sulla base senza rudere a soglia 2: lo Scavo a chi scava
+    (`scavo_a_chi_scava`; il motore ora registra chi ha sepolto chi) e lo
+    sconto macerie solo sulle rovine altrui (`sconto_macerie_solo_altrui`).
+    Nessuna delle due porta a costruire sugli altri: basi altrui 1,6-1,8 per
+    giocatore contro le 2,0 di oggi. Lo Scavo a chi scava smette di far
+    seppellire se stessi (basi proprie 4,6 -> 3,5) ma si costruisce meno
+    sopra: colonne mezzo livello piu' basse, Verticalita' -4 per giocatore,
+    Rendita che vince il 53%. Lo sconto di una pietra non muove nulla. Il
+    kingmaker e' piccolo: togliendo a tutti lo Scavo dell'era 5 il vincitore
+    cambia nel 2% delle partite. **Il motivo e' strutturale:** costruire
+    nella colonna altrui divide la Verticalita' (meta' alla cima, meta' a
+    tutti gli strati), nella propria e' tutta propria. Da provare: il premio
+    della colonna che non si divide con chi sta sotto. Tutto in
+    `docs/senza-rudere.md`.
+
+88. **Il punto per il disturbo non e' mai esistito nel motore.** Il regolamento
+    dice "+1 per ogni edificio altrui che avete sotterrato" (voce Scavo del
+    conteggio finale). Ne' il motore (`Scoring._scavo` aveva un TODO) ne'
+    l'oracolo Python lo contavano: le 80 000 partite del bilanciamento e tutte
+    le misure di questo registro sono senza. Ora il motore sa chi ha sepolto
+    chi e la costante `disturbo_vp` lo paga; sta a **0** perche' il gioco
+    congelato e' senza, e il lotto di riferimento lo prova. Decisione del
+    designer: accenderlo a 1 come da regolamento (e rigenerare il
+    riferimento, dichiarandolo) o togliere la frase dal regolamento.
 

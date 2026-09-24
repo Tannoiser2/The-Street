@@ -218,6 +218,71 @@ non da misurare.
   della rovina) rende le rovine altrui più appetibili e potrebbe spostare le basi dai propri
   agli altrui. Si misura quando i costi della v2 esistono.
 
+## Terza misura: perché costruire sopra gli altri
+
+Il designer: "dobbiamo evitare che un giocatore costruisca sempre sui suoi edifici in rovina;
+quale motivo lo spingerebbe a costruire sugli altrui?", con il timore che "l'ultimo che
+costruisce sopra prende tutto il bottino, la mossa finale è un kingmaker". Due leve, misurate
+sulla base scelta (senza rudere, soglia 2, spianato a Scavo 0):
+
+- **lo Scavo a chi scava** (`scavo_a_chi_scava`, `--scavo_scava 1`): chi completa la sepoltura
+  di un edificio altrui ne incassa lo Scavo; il proprio sepolto da sé vale 0. Il motore ora
+  registra chi ha sepolto chi e in che era (`Building.buried_by`, `buried_era`);
+- **lo sconto macerie solo sulle rovine altrui** (`sconto_macerie_solo_altrui`,
+  `--sconto_altrui 1`): la pietra di sconto di oggi non vale sulle proprie.
+
+Il torneo conta per giocatore le basi proprie, le altrui, gli spianati, e quanto Scavo si
+incassa scavando e quanto di quello nell'era 5.
+
+| per giocatore | oggi | E: base | E + Scavo a chi scava | E + sconto solo altrui | tutte e due |
+|---|--:|--:|--:|--:|--:|
+| basi proprie | 4,2 | 4,6 | **3,5** | 4,4 | 3,4 |
+| **basi altrui** | **2,0** | 1,6 | **1,7** | 1,7 | 1,8 |
+| propri intatti spianati | 2,5 | 3,4 | 2,7 | 3,3 | 2,7 |
+| costruiti sopra un altro | 5,1 | 5,2 | **4,4** | 5,2 | 4,4 |
+| altezza massima | 3,9 | 3,9 | **3,5** | 3,9 | 3,5 |
+| PV medi | 85,7 | 89,1 | 86,6 | 88,8 | 86,7 |
+| Verticalità | 25,1 | 25,2 | **21,3** | 25,2 | 21,2 |
+| Rendita | 22,1 | 25,6 | 28,7 | 25,6 | 28,8 |
+| Scavo | 6,8 | 4,7 | 3,1 | 4,6 | 3,3 |
+| vince Rendita | 41 % | 44 % | **53 %** | 42 % | 54 % |
+| vince Lampo | 27 % | 25 % | **16 %** | 26 % | 16 % |
+
+Per partita (vita delle carte): sepolti da un altro 15 % → 17 % con lo Scavo a chi scava, in
+piedi a fine partita 9,1 → 10,1, Verticalità 75 → 63, Scavo 13,9 → 9,5, Rendita 77 → 86.
+
+### Cosa salta all'occhio
+
+**1. Nessuna delle due leve porta a costruire sugli altri.** Le basi altrui restano fra 1,6 e
+1,8 per giocatore, sotto le 2,0 di oggi. Lo Scavo a chi scava ottiene l'altra metà del
+desiderio, smettere di seppellire se stessi (basi proprie 4,6 → 3,5, spianati 3,4 → 2,7), ma
+non lo trasforma in sepolture altrui: si costruisce **meno sopra**, le colonne si fermano
+mezzo livello più in basso e la Verticalità perde 4 punti a giocatore. Il gioco scivola verso la
+Rendita (vince il 53 %) e il Lampo crolla. Lo sconto di una pietra non muove nulla: è una leva
+troppo piccola.
+
+**2. Il motivo è strutturale, e non è lo Scavo.** Costruire nella colonna di un altro divide la
+Verticalità: metà del premio va a chi ha la cima, l'altra metà si spartisce fra **tutti** i
+proprietari degli strati, sotterrati compresi. Nella propria colonna il premio è tutto proprio.
+Con la Verticalità al 34 % dei punti, il primo canale del gioco dice "sali sul tuo". A questo si
+aggiungono la Continuità di classe (nella propria colonna) e la geometria: un livello per era
+per colonna. Finché il premio della colonna si divide con chi sta sotto, nessuno Scavo basta.
+
+**3. Il kingmaker, con i numeri.** Con lo Scavo a chi scava il 40 % dello Scavo scavato arriva
+nell'era 5, ma sono 1,3 punti a giocatore; il vincitore ha scavato nell'era 5 nel 54 % delle
+partite, e il suo bottino dell'ultima era supera il suo distacco dal secondo nel **6 %**;
+togliendo a tutti lo Scavo dell'era 5 il vincitore cambierebbe nel **2 %** delle partite, con
+un distacco mediano di 18 punti. Il rischio esiste ma è piccolo, perché il canale è piccolo:
+tornerebbe grande se lo Scavo tornasse grande.
+
+### Cosa proporre
+
+La leva da provare è **il premio della colonna**: la Verticalità non si divide con gli strati
+sotto (tutto a chi ha la cima), o si divide solo fra chi ha costruito **sopra** qualcun altro.
+Così salire sulla colonna altrui non regala punti a chi sta sotto, e lo Scavo a chi scava
+diventa un motivo in più invece che l'unico. È una manopola sul conteggio, da misurare a
+parità di semi; il costo è che il timore del kingmaker si sposta lì, e va rimisurato.
+
 ## Come rifare il conto
 
 I lotti sono stati giocati il 24 settembre 2026 sul ramo `claude/niente-rudere` (main a
@@ -233,4 +298,7 @@ godot --headless res://scenes/audit_partita.tscn -- $A --senza_rudere 1 --gap 2 
 godot --headless res://scenes/audit_partita.tscn -- $A --gap 1 --scavo_spianato 1 > F.csv
 python3 tools/confronta_vita.py A.csv B.csv C.csv D.csv E.csv F.csv      # lotti --vita
 python3 tools/confronta_torneo.py A.csv B.csv C.csv D.csv E.csv F.csv    # lotti --games
+# terza misura, sulla base E:
+godot --headless res://scenes/audit_partita.tscn -- $A --senza_rudere 1 --gap 2 --scavo_scava 1 > E1.csv
+godot --headless res://scenes/audit_partita.tscn -- $A --senza_rudere 1 --gap 2 --sconto_altrui 1 > E4.csv
 ```
