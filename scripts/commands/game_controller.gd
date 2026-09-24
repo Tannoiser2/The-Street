@@ -268,12 +268,13 @@ func _puo_agire() -> bool:
 	if turno_v2(): return gs.phase == Enums.Phase.PIAZZA and _has_worker(gs.current_index)
 	return gs.phase == Enums.Phase.AZIONE
 
-# Nel turno v2 l'azione E' il piazzamento del lavoratore.
+# Nel turno v2 l'azione E' il piazzamento del lavoratore. Il contatore
+# `az_<azione>` si tiene con tutti e due i turni: il torneo conta le azioni
+# fatte per giocatore anche a quattro lavoratori.
 func _spendi_lavoratore(azione: String) -> void:
-	if not turno_v2(): return
 	var p := gs.current_player()
-	p.workers_used += 1
 	p.bump("az_" + azione)
+	if turno_v2(): p.workers_used += 1
 
 # Il lavoratore va sull'edificio (costruito o ristrutturato) e lo protegge
 # per l'era, come oggi il lavoratore piazzato sopra un proprio edificio.
@@ -302,9 +303,9 @@ func place_worker(col: int, protect: Building = null) -> bool:
 		gs.protetto_uid = protect.uid
 	EraRules.activate(gs, p.index, col)
 	gs.colonna_attivata = col
+	p.bump("az_colonna")
 	if turno_v2():
 		# Attivare la colonna e' l'azione intera del turno.
-		p.bump("az_colonna")
 		_end_turn()
 		return true
 	gs.phase = Enums.Phase.AZIONE
@@ -415,10 +416,10 @@ func build(card_id: String, col_from: int, above: bool, pay_option: int = 0, des
 		b.rende("lampo", int(data["lampo"]))
 	gs.market.erase(card_id)
 	_refill(gs.market, gs.building_decks[gs.era], int(CardDB.constants["market_size"]))
+	_spendi_lavoratore("costruisci")
 	if turno_v2():
 		# Il lavoratore va sull'edificio nuovo: +2 per l'era, e attiva solo
 		# quello (D10: niente base del terreno, niente Centro Urbano).
-		_spendi_lavoratore("costruisci")
 		_lavoratore_su(b, p)
 		EraRules.paga_edificio(gs, b)
 	# Con il draft i protettori aspettano il primo edificio costruito nell'era.
@@ -469,7 +470,7 @@ func upgrade(upg_id: String, target: Building) -> bool:
 	gs.upg_row.erase(upg_id)
 	_refill(gs.upg_row, gs.upg_decks[gs.era], int(CardDB.constants["side_rows"]))
 	gs.log_line("%s potenziato con %s" % [target.data["name"], CardDB.upgrades[upg_id]["name"]])
-	if turno_v2(): _spendi_lavoratore("potenzia")
+	_spendi_lavoratore("potenzia")
 	# LO SCHELETRO DEL POTENZIAMENTO (punto 8 della proposta, registro 95): il
 	# lavoratore che piazza il potenziamento resta sotto l'edificio come
 	# scheletro, e vale come un Personaggio sepolto, 6 meno l'era, se
@@ -508,9 +509,9 @@ func restore(target: Building) -> bool:
 	# Ristrutturare (D13): la rovina torna attiva, e' di nuovo un edificio
 	# intero (anche se era stato spianato).
 	if bool(CardDB.constants.get("senza_rudere", false)): target.was_razed = false
+	_spendi_lavoratore("ristruttura")
 	if turno_v2():
 		# Nel turno a un'azione il lavoratore ci resta sopra a proteggerla.
-		_spendi_lavoratore("ristruttura")
 		_lavoratore_su(target, p)
 	building_changed.emit(target)
 	_end_turn()
@@ -596,7 +597,9 @@ func pass_action() -> void:
 	if turno_v2():
 		passa("pietra")
 		return
-	if gs.phase == Enums.Phase.AZIONE: _end_turn()
+	if gs.phase == Enums.Phase.AZIONE:
+		gs.current_player().bump("az_passa")
+		_end_turn()
 
 # V2, "passare e incassare" (D14): il lavoratore va sulla plancia e si incassa
 # 1 Costruzione piu' 1 risorsa a scelta (`passa_incasso_pietra`,
