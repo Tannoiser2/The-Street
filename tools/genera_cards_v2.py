@@ -99,6 +99,9 @@ v2["constants"]["personaggi_sepolti"] = False
 # Gli scheletri restano: "se scelgo il potenziamento il lavoratore genera uno
 # scheletro" (punto 8, registro 95): 6 meno l'era se l'edificio finisce sotterrato.
 v2["constants"]["scheletro_potenziamento"] = True
+# Registro 96: lo scheletro conta SEMPRE, comunque finisca l'edificio (6 meno
+# l'era): cosi' potenziare e' una scelta, non un resto.
+v2["constants"]["scheletro_conta"] = "sempre"
 v2["constants"]["vetusta_max"] = 0
 v2["constants"]["vetusta_max_bosco"] = 0
 out = os.path.join(RADICE, "data/cards-v2.json")

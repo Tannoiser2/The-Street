@@ -98,7 +98,8 @@
     "passa_incasso_scelta": 1,
     "draft_personaggi": true,
     "personaggi_sepolti": false,
-    "scheletro_potenziamento": true
+    "scheletro_potenziamento": true,
+    "scheletro_conta": "sempre"
   },
   "terrains": [
     {

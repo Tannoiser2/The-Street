@@ -165,6 +165,18 @@ func _ready() -> void:
 	if args.has("scheletro"):
 		CardDB.constants["scheletro_conta"] = str(args["scheletro"])
 		print("# scheletro_conta = %s" % str(args["scheletro"]))
+	# LA RENDITA DELLE CARTE CARE (`--rendita_tetto N`, registro 97): la Rendita
+	# stampata si taglia a N su ogni edificio. Come `--forza`, si scontano le
+	# carte, non una costante: la Rendita sta sulla carta.
+	if args.has("rendita_tetto"):
+		var rt := int(args["rendita_tetto"])
+		var tagliati := 0
+		for id in CardDB.buildings:
+			var bd: Dictionary = CardDB.buildings[id]
+			if int(bd.get("rendita", 0)) > rt:
+				bd["rendita"] = rt
+				tagliati += 1
+		print("# rendita_tetto = %d (%d edifici tagliati)" % [rt, tagliati])
 	# I LAVORATORI PER ERA (`--lavoratori 5`, `workers_base`, 3 nei dati). Nel
 	# turno v2 ogni lavoratore e' UN'azione, non piu' un'attivazione piu'
 	# un'azione: con 3 il ritmo si dimezza (registro 93), e la manopola misura
