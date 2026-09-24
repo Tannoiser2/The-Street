@@ -54,6 +54,7 @@
     "rudere_penalty": 2,
     "rovina_gap": 3,
     "senza_rudere": false,
+    "spianare_conserva_scavo": false,
     "binari_liberi": true,
     "verticality_vp": {
       "1": 2,

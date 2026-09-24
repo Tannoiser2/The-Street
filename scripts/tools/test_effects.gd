@@ -35,6 +35,7 @@ func _ready() -> void:
 	_run("Anni della fame", _test_anni_della_fame)
 	_run("Eruzione: il potenziamento in cambio della perdita", _test_eruzione)
 	_run("senza rudere: chi fallisce di poco resta intatto", _test_senza_rudere)
+	_run("spianare conserva lo Scavo: la manopola", _test_scavo_spianato)
 	_run("Mercante di ossidiana", _test_mercante_scambi)
 	_run("Ingegnere militare: uno a tua scelta", _test_designazione)
 	_run("  e la designazione al reclutamento", _test_designazione_reclutamento)
@@ -2283,4 +2284,22 @@ func _test_senza_rudere() -> void:
 	_eq("accesa: fallire di 1 lascia intatto", salvo.state, Enums.BuildingState.INTATTO)
 	_eq("  ma senza Vetusta'", salvo.vetusta, 0)
 	_eq("  e fallire oltre la soglia crolla lo stesso", crolla.state, Enums.BuildingState.ROVINA)
+
+# ---- spianare conserva lo Scavo ---------------------------------------
+# Manopola `spianare_conserva_scavo`, spenta nei dati (registro 87): un proprio
+# intatto spianato vale Scavo 0 oggi, il suo Scavo stampato piu' i bonus con
+# la manopola accesa. Il conteggio finale passa da scavo_value(), quindi basta
+# provare quello.
+func _test_scavo_spianato() -> void:
+	var com_era: bool = bool(CardDB.constants.get("spianare_conserva_scavo", false))
+	var gs := _scena()
+	var sp := _put(gs, "ed_capanne", 1)
+	sp.was_razed = true
+	sp.bonus_scavo = 1
+	CardDB.constants["spianare_conserva_scavo"] = false
+	_eq("spenta: lo spianato vale 0", sp.scavo_value(), 0)
+	CardDB.constants["spianare_conserva_scavo"] = true
+	_eq("accesa: vale lo Scavo stampato piu' i bonus", sp.scavo_value(),
+		int(CardDB.buildings["ed_capanne"]["scavo"]) + 1)
+	CardDB.constants["spianare_conserva_scavo"] = com_era
 

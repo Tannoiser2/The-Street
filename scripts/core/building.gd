@@ -137,7 +137,11 @@ func effective_resistance() -> int:
 	return r
 
 func scavo_value() -> int:
-	if was_razed: return 0
+	# "Spianare azzera lo Scavo" e' la regola v1.5. La nuova meccanica dice che
+	# lo Scavo non si azzera mai (registro 87): manopola `spianare_conserva_scavo`,
+	# spenta nei dati, per misurare quanto spinge a seppellire i propri.
+	if was_razed and not bool(CardDB.constants.get("spianare_conserva_scavo", false)):
+		return 0
 	return int(data["scavo"]) + bonus_scavo
 
 # La Rendita effettiva: quella stampata piu' i potenziamenti che la alzano.

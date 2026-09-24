@@ -355,7 +355,11 @@ static func _valore_costruzione(gs: GameState, p: PlayerState, v, strategia: Str
 			if b.owner == p.index: sotto += float(b.scavo_value()) * 0.5
 		for b in q2.razed:
 			perso -= rendite_future(b.effective_resistance(), b.rendita_value(), gs.era) * 0.6
-			perso -= float(b.data["scavo"]) * 0.25      # spianato vale Scavo 0
+			# Spianato vale Scavo 0, salvo la manopola `spianare_conserva_scavo`:
+			# allora il suo Scavo e' gia' contato sopra fra "i miei che vanno
+			# sotto", e togliergli un quarto sarebbe giocare una regola vecchia.
+			if not bool(CardDB.constants.get("spianare_conserva_scavo", false)):
+				perso -= float(b.data["scavo"]) * 0.25
 		if sotto != 0.0: dett["Scavo dei miei che vanno sotto"] = sotto
 		if perso != 0.0: dett["quel che perdo spianando"] = perso
 		q += sotto + perso

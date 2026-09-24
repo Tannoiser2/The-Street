@@ -191,7 +191,11 @@ func build(card_id: String, col_from: int, above: bool, pay_option: int = 0, des
 	# e' una condizione di posizione e si ricalcola sotto, quando il nuovo
 	# edificio e' gia' sulla griglia (Grid.refresh_buried).
 	for base in q.bases:
+		# Sopra chi si costruisce: contatori per l'audit (registro 87, "non si
+		# spinge troppo a sotterrare i propri?"). Non toccano il gioco.
+		p.bump("sopra_propri" if base.owner == p.index else "sopra_altrui")
 		if base in q.razed:
+			p.bump("spianati")
 			base.was_razed = true
 			base.state = Enums.BuildingState.ROVINA
 		elif base.state == Enums.BuildingState.RUDERE:
