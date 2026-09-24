@@ -18,6 +18,7 @@ static func play_turn(ctl: GameController) -> void:
 		if opzioni.is_empty(): break
 		if not ctl.choose(int(opzioni[gs.rng.randi_range(0, opzioni.size() - 1)])): break
 	if gs.phase == Enums.Phase.FINE_PARTITA: return
+	if not gs.pending_choice.is_empty(): return
 	var p := gs.current_player()
 	if bool(CardDB.constants.get("turno_v2", false)):
 		_play_turn_v2(ctl, p)
@@ -148,6 +149,8 @@ static func _play_turn_v2(ctl: GameController, p: PlayerState) -> void:
 					if b.owner == p.index and b.state == Enums.BuildingState.ROVINA \
 							and not b.is_buried and ctl.restore(b): return
 			4:
+				# Con il draft (v2) reclutare non e' un'azione: si salta.
+				if bool(CardDB.constants.get("draft_personaggi", false)): continue
 				for cid in gs.char_row.duplicate():
 					if ctl.recruit(cid, null): return
 					for b in gs.grid.buildings.duplicate():

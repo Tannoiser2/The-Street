@@ -36,6 +36,7 @@ func _ready() -> void:
 	_run("il tetto per risorsa alla dispersione", _test_tetto_per_risorsa)
 	_run("il canone delle strategie segue il file dati", _test_canone_v2)
 	_run("il turno v2: un'azione per turno, il lavoratore dove agisce", _test_turno_v2)
+	_run("il draft dei Personaggi a inizio era (v2)", _test_draft_v2)
 	print("\n%d superati, %d falliti" % [_passed, _failed])
 	get_tree().quit(0 if _failed == 0 else 1)
 
@@ -1155,6 +1156,9 @@ func _test_turno_v2() -> void:
 	_ok("il file v2 accende il turno v2", bool(CardDB.constants.get("turno_v2", false)))
 	var ctl := _game(3, 990)
 	var gs := ctl.gs
+	# Prima il draft dei Personaggi (v2): qui si prende il primo che c'e'.
+	while not gs.pending_choice.is_empty():
+		ctl.choose(int((gs.pending_choice["options"] as Array)[0]))
 	var p := gs.current_player()
 	var usati := p.workers_used
 	# Costruire senza aver attivato: nel turno v2 e' il turno stesso.
@@ -1198,3 +1202,63 @@ func _test_turno_v2() -> void:
 		_ok("  si fa l'azione %s (%d)" % [k, int(azioni.get(k, 0))], int(azioni.get(k, 0)) > 0)
 	CardDB.load_db(CardDB.DB_PATH)
 
+# IL DRAFT (registro 93): a inizio era, in ordine di turno, ogni giocatore
+# prende un Personaggio fra tutti quelli dell'era, gratis e senza lavoratore.
+# I protettori si legano al primo edificio costruito nell'era.
+func _test_draft_v2() -> void:
+	if not FileAccess.file_exists("res://data/cards-v2.json"): return
+	CardDB.load_db("res://data/cards-v2.json")
+	_ok("il file v2 accende il draft", bool(CardDB.constants.get("draft_personaggi", false)))
+	var ctl := _game(3, 990)
+	var gs := ctl.gs
+	_eq("all'inizio dell'era il gioco chiede il draft", str(gs.pending_choice.get("kind", "")), "draft")
+	_eq("  in fila ci sono tutti i Personaggi dell'era 1", gs.char_row.size(), 5)
+	_eq("  e sceglie per primo il primo dell'ordine", int(gs.pending_choice["player"]), int(gs.turn_order[0]))
+	var opzioni: Array = gs.pending_choice["options"]
+	var con_impronta := false
+	for i in opzioni:
+		if bool(CardDB.characters[gs.char_row[int(i)]].get("imprint", false)): con_impronta = true
+	_ok("  senza edifici l'Impronta non si offre", not con_impronta)
+	var primo: PlayerState = gs.players[int(gs.pending_choice["player"])]
+	var pietra := primo.pietra
+	var oro := primo.oro
+	var usati := primo.workers_used
+	var capotribu := gs.char_row.find("pe_capotribu")
+	_ok("  il Capotribu' e' fra le opzioni", capotribu in opzioni)
+	_ok("  si sceglie", ctl.choose(capotribu))
+	_eq("  il Personaggio e' del giocatore", primo.recruited_total, 1)
+	_eq("  senza lavoratore", primo.workers_used, usati)
+	_ok("  senza pagare (il Capotribu' porta +2 pietra)", primo.pietra == pietra + 2 and primo.oro == oro)
+	_eq("  poi tocca al secondo", int(gs.pending_choice["player"]), int(gs.turn_order[1]))
+	while not gs.pending_choice.is_empty():
+		ctl.choose(int((gs.pending_choice["options"] as Array)[0]))
+	_eq("finito il draft si gioca", gs.phase, Enums.Phase.PIAZZA)
+	_eq("  e parte il primo dell'ordine", gs.current_index, int(gs.turn_order[0]))
+	_eq("  con la fila scesa a 2", gs.char_row.size(), 2)
+	_ok("  reclutare non e' piu' un'azione", not ctl.recruit(gs.char_row[0], null))
+	var costruito: Building = null
+	for card_id in gs.market.duplicate():
+		for c in gs.grid.n_cols:
+			if ctl.build(card_id, c, false):
+				for b in gs.grid.buildings:
+					if b.owner == primo.index: costruito = b
+				break
+		if costruito != null: break
+	_ok("il primo drafter costruisce", costruito != null)
+	if costruito != null:
+		_eq("  e il Capotribu' protegge l'edificio nuovo (+2 +1)", costruito.protection,
+			int(CardDB.constants["protection_bonus"]) + 1)
+		_eq("  legato a quell'edificio", int(primo.character_targets.get("pe_capotribu", -1)), costruito.uid)
+	var finite := 0
+	var draftati := 0
+	for g in 3:
+		var c2 := _game(3, 995 + g)
+		var guard := 0
+		while c2.gs.phase != Enums.Phase.FINE_PARTITA and guard < 10000:
+			RandomBot.play_turn(c2)
+			guard += 1
+		if c2.gs.phase == Enums.Phase.FINE_PARTITA: finite += 1
+		for pl in c2.gs.players: draftati += int(pl.counters.get("draftati", 0))
+	_eq("3 partite del bot casuale arrivano in fondo", finite, 3)
+	_ok("  con Personaggi draftati (%d)" % draftati, draftati >= 30)
+	CardDB.load_db(CardDB.DB_PATH)

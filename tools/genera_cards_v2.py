@@ -83,6 +83,10 @@ v2["constants"]["premio_era5"] = "dimezzato"           # la correzione all'ultim
 v2["constants"]["turno_v2"] = True
 v2["constants"]["passa_incasso_pietra"] = 1
 v2["constants"]["passa_incasso_scelta"] = 1
+# IL DRAFT DEI PERSONAGGI (punto 8, registro 93): a inizio era, in ordine di
+# turno, uno a testa fra tutti quelli dell'era, gratis e senza lavoratore.
+# Reclutare come azione sparisce.
+v2["constants"]["draft_personaggi"] = True
 out = os.path.join(RADICE, "data/cards-v2.json")
 json.dump(v2, open(out, "w", encoding="utf-8"), indent=2, ensure_ascii=False)
 open(out, "a").write("\n")

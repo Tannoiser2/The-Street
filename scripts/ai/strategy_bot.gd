@@ -110,9 +110,15 @@ static var taccuino := {}
 
 static func play_turn(ctl: GameController, strategia := "bilanciata") -> void:
 	var gs := ctl.gs
+	var chi := gs.current_index
 	while not gs.pending_choice.is_empty():
-		if not ctl.choose(_scelta(gs)): break
+		# Il draft e' una scelta PER GIOCATORE: risolta la propria, la
+		# prossima e' di un altro, con la sua strategia (il chiamante lo sa).
+		if str(gs.pending_choice.get("kind", "")).begins_with("draft") \
+				and int(gs.pending_choice["player"]) != chi: return
+		if not ctl.choose(_scelta(gs, strategia)): break
 	if gs.phase == Enums.Phase.FINE_PARTITA: return
+	if not gs.pending_choice.is_empty(): return
 	var p := gs.current_player()
 	if bool(CardDB.constants.get("turno_v2", false)):
 		_play_turn_v2(ctl, p, strategia)
@@ -335,8 +341,9 @@ static func _opzioni_v2(gs: GameState, player: int, r: Vector2) -> Array:
 		if v.pagabile(p): out.append(v)
 	for v in AvailableActions.ristrutturazioni(gs, player):
 		if v.pagabile(p): out.append(v)
-	for v in AvailableActions.reclutamenti(gs, player, -1):
-		if v.legale and v.pagabile(p): out.append(v)
+	if not ctl_draft():
+		for v in AvailableActions.reclutamenti(gs, player, -1):
+			if v.legale and v.pagabile(p): out.append(v)
 	var d := AvailableActions.dinastia(gs, player)
 	if d.legale and d.pagabile(p): out.append(d)
 	out.append(AvailableActions.passa(_risorsa_da_passare(p, r)))
@@ -704,9 +711,30 @@ static func _valore_dinastia(gs: GameState, dett := {}) -> float:
 # La scelta in sospeso (dove infilare il potenziamento dell'Eruzione): si
 # sceglie l'edificio che reggera' piu' a lungo, cosi' la carta non muore con
 # lui nella stessa era.
-static func _scelta(gs: GameState) -> int:
+static func ctl_draft() -> bool:
+	return bool(CardDB.constants.get("draft_personaggi", false))
+
+# Il draft: la carta che vale di piu' per la strategia, con lo stesso conto
+# del reclutamento (senza costo: e' gratis).
+static func _scelta_draft(gs: GameState, strategia: String) -> int:
+	var opzioni: Array = gs.pending_choice["options"]
+	var p: PlayerState = gs.players[int(gs.pending_choice["player"])]
+	var r := valore_risorse(gs, p)
+	var meglio := int(opzioni[0])
+	var punteggio := -INF
+	for i in opzioni:
+		var v := AvailableActions.Voce.new()
+		v.parametri = {"char_id": gs.char_row[int(i)]}
+		var q := _valore_reclutamento(gs, p, v, strategia, r)
+		if q > punteggio:
+			punteggio = q
+			meglio = int(i)
+	return meglio
+
+static func _scelta(gs: GameState, strategia := "bilanciata") -> int:
 	var opzioni: Array = gs.pending_choice.get("options", [])
 	if opzioni.is_empty(): return 0
+	if str(gs.pending_choice.get("kind", "")) == "draft": return _scelta_draft(gs, strategia)
 	var meglio := int(opzioni[0])
 	var punteggio := -INF
 	for uid in opzioni:
