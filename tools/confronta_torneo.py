@@ -10,7 +10,7 @@ import sys, collections
 
 FUORI = ("seme", "posto", "giocatore", "pv", "strategia", "sopra", "quota_max",
          "costruiti", "piano", "centro_attivato", "oro_centro",
-         "sopra_propri", "sopra_altrui", "spianati")
+         "sopra_propri", "sopra_altrui", "spianati", "scavo_scavato", "scavo_e5")
 
 def leggi(f):
     regole = {}
@@ -40,6 +40,9 @@ def leggi(f):
         m["basi proprie"] = media("sopra_propri")
         m["basi altrui"] = media("sopra_altrui")
         m["propri intatti spianati"] = media("spianati")
+    if "scavo_scavato" in hdr:
+        m["Scavo incassato scavando"] = media("scavo_scavato")
+        m["  di cui nell'era 5"] = media("scavo_e5")
     for s in sorted(giocate): m["vince " + s] = vinte[s] / giocate[s]
     return regole, partite, m
 
@@ -49,6 +52,9 @@ def etichetta(regole):
     elif regole.get("senza_rudere") == "true": pezzi.append("senza rudere")
     if regole.get("rovina_gap") not in (None, "1"): pezzi.append(f"rovina a −{regole['rovina_gap']}")
     if regole.get("spianare_conserva_scavo") == "true": pezzi.append("Scavo mai azzerato")
+    if regole.get("scavo_a_chi_scava") == "true": pezzi.append("Scavo a chi scava")
+    if regole.get("sconto_macerie_solo_altrui") == "true": pezzi.append("sconto solo sulle altrui")
+    if regole.get("disturbo_vp", "0") != "0": pezzi.append(f"disturbo {regole['disturbo_vp']}")
     return ", ".join(pezzi) if pezzi else "oggi"
 
 lotti = [leggi(f) for f in sys.argv[1:]]

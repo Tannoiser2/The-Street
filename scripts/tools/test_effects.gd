@@ -36,6 +36,7 @@ func _ready() -> void:
 	_run("Eruzione: il potenziamento in cambio della perdita", _test_eruzione)
 	_run("senza rudere: chi fallisce di poco resta intatto", _test_senza_rudere)
 	_run("spianare conserva lo Scavo: la manopola", _test_scavo_spianato)
+	_run("lo Scavo a chi scava, e il punto per il disturbo", _test_scavo_a_chi_scava)
 	_run("Mercante di ossidiana", _test_mercante_scambi)
 	_run("Ingegnere militare: uno a tua scelta", _test_designazione)
 	_run("  e la designazione al reclutamento", _test_designazione_reclutamento)
@@ -2303,3 +2304,56 @@ func _test_scavo_spianato() -> void:
 		int(CardDB.buildings["ed_capanne"]["scavo"]) + 1)
 	CardDB.constants["spianare_conserva_scavo"] = com_era
 
+# ---- lo Scavo a chi scava, e il disturbo -------------------------------
+# Manopole `scavo_a_chi_scava` e `disturbo_vp` (registro 87 e 88), spente nei
+# dati. Due sepolti: uno del giocatore 1 sepolto dal giocatore 0 nell'era 3, e
+# uno del giocatore 0 sepolto da lui stesso nell'era 5. Oggi lo Scavo va ai
+# proprietari e il disturbo non si conta; con `disturbo_vp` 1 chi ha sepolto
+# l'altrui prende 1 in piu'; con `scavo_a_chi_scava` lo Scavo dell'altrui va
+# a chi ha scavato e il proprio sepolto da se' vale 0.
+func _scena_sepolti() -> GameState:
+	var gs := _scena()
+	var altrui := _put(gs, "ed_capanne", 1, 0, Enums.BuildingState.ROVINA)
+	altrui.owner = 1
+	altrui.is_buried = true
+	altrui.buried_by = 0
+	altrui.buried_era = 3
+	var proprio := _put(gs, "ed_capanne", 3, 0, Enums.BuildingState.ROVINA)
+	proprio.is_buried = true
+	proprio.buried_by = 0
+	proprio.buried_era = 5
+	return gs
+
+func _scavo_di(gs: GameState, chi: int) -> int:
+	return int(gs.players[chi].vp_breakdown.get("scavo", 0))
+
+func _test_scavo_a_chi_scava() -> void:
+	var scava_era: bool = bool(CardDB.constants.get("scavo_a_chi_scava", false))
+	var disturbo_era: int = int(CardDB.constants.get("disturbo_vp", 0))
+	var v := int(CardDB.buildings["ed_capanne"]["scavo"])
+
+	CardDB.constants["scavo_a_chi_scava"] = false
+	CardDB.constants["disturbo_vp"] = 0
+	var a := _scena_sepolti()
+	Scoring._scavo(a)
+	_eq("oggi: lo Scavo dell'altrui va al suo proprietario", _scavo_di(a, 1), v)
+	_eq("  e chi l'ha sepolto prende solo il proprio", _scavo_di(a, 0), v)
+
+	CardDB.constants["disturbo_vp"] = 1
+	var b := _scena_sepolti()
+	Scoring._scavo(b)
+	_eq("disturbo 1: chi ha sepolto l'altrui prende 1 in piu'", _scavo_di(b, 0), v + 1)
+	_eq("  il proprietario non perde nulla", _scavo_di(b, 1), v)
+	_eq("  e il proprio sepolto da se' non da' disturbo", int(b.players[0].counters.get("scavo_scavato", 0)), 1)
+
+	CardDB.constants["disturbo_vp"] = 0
+	CardDB.constants["scavo_a_chi_scava"] = true
+	var c := _scena_sepolti()
+	Scoring._scavo(c)
+	_eq("a chi scava: lo Scavo dell'altrui va a chi ha scavato", _scavo_di(c, 0), v)
+	_eq("  il proprietario sepolto non prende nulla", _scavo_di(c, 1), 0)
+	_eq("  il proprio sepolto da se' vale 0 (non e' contato due volte)", int(c.players[0].counters.get("scavo_scavato", 0)), v)
+	_eq("  e l'era 5 conta solo lo scavato altrui", int(c.players[0].counters.get("scavo_e5", 0)), 0)
+
+	CardDB.constants["scavo_a_chi_scava"] = scava_era
+	CardDB.constants["disturbo_vp"] = disturbo_era

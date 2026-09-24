@@ -24,6 +24,8 @@ def leggi(pattern):
     centro = "ogni_attivazione"
     rudere = "si"
     spianato = "zero"
+    scavo_a = "proprietario"
+    sconto = "tutti"
     for f in sorted(glob.glob(pattern)):
         righe = [l.rstrip("\n") for l in open(f) if l.strip()]
         meta = [l for l in righe if l.startswith("# partite=")][0]
@@ -55,6 +57,9 @@ def leggi(pattern):
         # E se lo Scavo di uno spianato vale: un CSV che non lo dice viene da
         # quando spianare lo azzerava sempre.
         if "spianato=" in meta: spianato = meta.split("spianato=")[1].split()[0]
+        # A chi va lo Scavo e a chi lo sconto macerie (registro 87).
+        if " scavo=" in meta: scavo_a = meta.split(" scavo=")[1].split()[0]
+        if "sconto=" in meta: sconto = meta.split("sconto=")[1].split()[0]
         i = righe.index([l for l in righe if l.startswith("id;")][0])
         hdr = righe[i].split(";")
         for l in righe[i+1:]:
@@ -72,12 +77,12 @@ def leggi(pattern):
             else:
                 for k in NUM: c[k] += int(v[k])
     if strat is None: strat = 5 if bot == "strategie" else 0
-    return carte, partite, giocatori, bot, vert, prosp, rov, bin, ver, strat, centro, rudere, spianato
+    return carte, partite, giocatori, bot, vert, prosp, rov, bin, ver, strat, centro, rudere, spianato, scavo_a, sconto
 
-carte, partite, giocatori, bot, vert, prosp, rov, bin, ver, strat, centro, rudere, spianato = leggi(sys.argv[1])
+carte, partite, giocatori, bot, vert, prosp, rov, bin, ver, strat, centro, rudere, spianato, scavo_a, sconto = leggi(sys.argv[1])
 altro = None
 if "--confronta" in sys.argv:
-    altro, partite_altro, _, bot_altro, vert_altro, prosp_altro, rov_altro, bin_altro, ver_altro, strat_altro, centro_altro, rudere_altro, spianato_altro = leggi(
+    altro, partite_altro, _, bot_altro, vert_altro, prosp_altro, rov_altro, bin_altro, ver_altro, strat_altro, centro_altro, rudere_altro, spianato_altro, scavo_a_altro, sconto_altro = leggi(
         sys.argv[sys.argv.index("--confronta") + 1])
     # LE COLONNE SI CHIAMANO COME TUTTO CIO' CHE LE DISTINGUE, non come la
     # prima differenza trovata. Due lotti possono differire in piu' di una
@@ -120,6 +125,12 @@ if "--confronta" in sys.argv:
         nomi_s = {"zero": "spianato vale 0", "vale": "spianato vale il suo Scavo"}
         DIFF.append((nomi_s.get(spianato_altro, spianato_altro), nomi_s.get(spianato, spianato),
                      "lo Scavo che non si azzera mai" if spianato == "vale" else "lo spianato che torna a valere 0"))
+    if scavo_a != scavo_a_altro:
+        DIFF.append((f"Scavo al {scavo_a_altro}", f"Scavo allo {scavo_a}" if scavo_a == "scavatore" else f"Scavo al {scavo_a}",
+                     "lo Scavo a chi scava" if scavo_a == "scavatore" else "lo Scavo che torna al proprietario"))
+    if sconto != sconto_altro:
+        DIFF.append((f"sconto macerie: {sconto_altro}", f"sconto macerie: {sconto}",
+                     "lo sconto macerie solo sulle rovine altrui" if sconto == "altrui" else "lo sconto macerie su tutte le rovine"))
     if bin != bin_altro:
         DIFF.append(("binari per era" if bin_altro == "per_era" else "binari liberi",
                      "binari per era" if bin == "per_era" else "binari liberi",

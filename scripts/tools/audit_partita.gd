@@ -103,6 +103,19 @@ func _ready() -> void:
 	if args.has("scavo_spianato"):
 		CardDB.constants["spianare_conserva_scavo"] = str(args["scavo_spianato"]) != "0"
 		print("# spianare_conserva_scavo = %s" % str(bool(CardDB.constants["spianare_conserva_scavo"])))
+	# PERCHE' COSTRUIRE SOPRA GLI ALTRI (registro 87), tre manopole spente nei dati:
+	#   --scavo_scava 1    lo Scavo lo incassa chi seppellisce (il proprio vale 0)
+	#   --sconto_altrui 1  lo sconto macerie solo sulle rovine altrui
+	#   --disturbo N       i punti a chi sotterra un edificio altrui (regolamento: 1)
+	if args.has("scavo_scava"):
+		CardDB.constants["scavo_a_chi_scava"] = str(args["scavo_scava"]) != "0"
+		print("# scavo_a_chi_scava = %s" % str(bool(CardDB.constants["scavo_a_chi_scava"])))
+	if args.has("sconto_altrui"):
+		CardDB.constants["sconto_macerie_solo_altrui"] = str(args["sconto_altrui"]) != "0"
+		print("# sconto_macerie_solo_altrui = %s" % str(bool(CardDB.constants["sconto_macerie_solo_altrui"])))
+	if args.has("disturbo"):
+		CardDB.constants["disturbo_vp"] = int(args["disturbo"])
+		print("# disturbo_vp = %d" % int(args["disturbo"]))
 	# LA FORZA STA SULLA CARTA EVENTO, non nella costante: `event_force_by_era`
 	# e' la tabella di riferimento, ma chi decide e' `gs.current_event["force"]`.
 	# La prima versione di questa manopola scriveva la costante e non cambiava
@@ -175,7 +188,7 @@ func _lotto(seme: int, players: int, quante: int) -> void:
 	# solo quanto si segna.
 	print("seme;posto;giocatore;pv;strategia;sopra;quota_max;costruiti;"
 		+ ";".join(Riepilogo.VOCI.map(func(v): return str(v["id"]))) + ";piano;centro_attivato;oro_centro"
-		+ ";sopra_propri;sopra_altrui;spianati")
+		+ ";sopra_propri;sopra_altrui;spianati;scavo_scavato;scavo_e5")
 	for g in quante:
 		var ctl := GameController.new()
 		ctl.new_game(players, seme + g)
@@ -205,7 +218,7 @@ func _lotto(seme: int, players: int, quante: int) -> void:
 			campi.append("%d" % int(cnt.get("oro_centro", 0)))
 			# Sopra chi ha costruito (registro 87): quante basi erano sue,
 			# quante altrui, e quanti suoi intatti ha spianato.
-			for k in ["sopra_propri", "sopra_altrui", "spianati"]:
+			for k in ["sopra_propri", "sopra_altrui", "spianati", "scavo_scavato", "scavo_e5"]:
 				campi.append("%d" % int(cnt.get(k, 0)))
 			print(";".join(campi))
 	get_tree().quit(0)
@@ -262,6 +275,7 @@ func _vita(seme: int, players: int, quante: int) -> void:
 			if b.is_standing(): r["n_in_piedi_fine"] += 1
 			if b.is_alive(): r["n_intatto_fine"] += 1
 			if b.was_razed: r["n_spianato"] += 1
+			if b.is_buried and b.buried_by >= 0 and b.buried_by != b.owner: r["n_sepolto_altrui"] += 1
 			r["vetusta"] += b.vetusta
 			r["potenziamenti"] += b.upgrades.size()
 			for c in b.vp_reso: r["vp_" + str(c)] = int(r.get("vp_" + str(c), 0)) + int(b.vp_reso[c])
@@ -277,6 +291,7 @@ func _riga_vuota() -> Dictionary:
 		"vetusta": 0, "potenziamenti": 0, "vp": 0}
 	for c in CANALI_CARTA: r["vp_" + c] = 0
 	r["n_spianato"] = 0     # in fondo: le colonne nuove si aggiungono in coda
+	r["n_sepolto_altrui"] = 0
 	return r
 
 func _stampa_vita(acc: Dictionary, quante: int, players: int, seme: int) -> void:
@@ -285,7 +300,7 @@ func _stampa_vita(acc: Dictionary, quante: int, players: int, seme: int) -> void
 	var vt = CardDB.constants["verticality_vp"]
 	var scala: Array[String] = []
 	for i in 4: scala.append("%d" % int(vt[str(i + 1)]))
-	print("# partite=%d giocatori=%d seme_base=%d bot=%s verticalita=%s prosperita=%d rovina=%d binari=%s versione_bot=%d strategie=%d centro=%s rudere=%s spianato=%s" % [
+	print("# partite=%d giocatori=%d seme_base=%d bot=%s verticalita=%s prosperita=%d rovina=%d binari=%s versione_bot=%d strategie=%d centro=%s rudere=%s spianato=%s scavo=%s sconto=%s disturbo=%d" % [
 		quante, players, seme, "strategie" if _strategie else "caso",
 		"/".join(scala), int(CardDB.constants["prosperity"]["min_buildings"]),
 		int(CardDB.constants.get("rovina_gap", 2)),
@@ -294,13 +309,17 @@ func _stampa_vita(acc: Dictionary, quante: int, players: int, seme: int) -> void
 		"una_per_era" if bool(CardDB.constants["prosperity"].get("once_per_era", false))
 			else "ogni_attivazione",
 		"no" if bool(CardDB.constants.get("senza_rudere", false)) else "si",
-		"vale" if bool(CardDB.constants.get("spianare_conserva_scavo", false)) else "zero"])
+		"vale" if bool(CardDB.constants.get("spianare_conserva_scavo", false)) else "zero",
+		"scavatore" if bool(CardDB.constants.get("scavo_a_chi_scava", false)) else "proprietario",
+		"altrui" if bool(CardDB.constants.get("sconto_macerie_solo_altrui", false)) else "tutti",
+		int(CardDB.constants.get("disturbo_vp", 0))])
 	var intestazione: Array[String] = ["id", "nome", "era", "classi", "larghezza",
 		"costo_pietra", "costo_oro", "resistenza", "rendita", "scavo", "lampo_carta",
 		"copie", "n", "ere_intatto", "ere_piedi", "n_rudere", "n_rovina", "n_sepolto",
 		"n_subito", "n_in_piedi_fine", "n_intatto_fine", "vetusta", "potenziamenti", "vp"]
 	for c in CANALI_CARTA: intestazione.append("vp_" + c)
 	intestazione.append("n_spianato")
+	intestazione.append("n_sepolto_altrui")
 	print(";".join(intestazione))
 	for id in CardDB.buildings:
 		var d: Dictionary = CardDB.buildings[id]
@@ -316,6 +335,7 @@ func _stampa_vita(acc: Dictionary, quante: int, players: int, seme: int) -> void
 			campi.append(str(r[k]))
 		for c in CANALI_CARTA: campi.append(str(r["vp_" + c]))
 		campi.append(str(r["n_spianato"]))
+		campi.append(str(r["n_sepolto_altrui"]))
 		print(";".join(campi))
 
 # La strategia del posto `i` nella partita `g`: si ruota, cosi' ogni strategia

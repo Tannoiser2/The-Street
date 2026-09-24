@@ -228,7 +228,16 @@ func build(card_id: String, col_from: int, above: bool, pay_option: int = 0, des
 	if gs.grid.terrains[col_from] == Enums.Terrain.COLLINA: b.bonus_res += 1
 	b.charges = int(data.get("exhaustible", 0))
 	gs.grid.buildings.append(b)
+	# Chi finisce sepolto ADESSO lo ha sepolto questo giocatore: si guarda
+	# prima e dopo il ricalcolo, perche' una costruzione puo' completare la
+	# copertura anche di un edificio piu' in basso della sua base.
+	var sepolti_prima := {}
+	for altro in gs.grid.buildings: sepolti_prima[altro.uid] = altro.is_buried
 	gs.grid.refresh_buried()
+	for altro in gs.grid.buildings:
+		if altro.is_buried and not bool(sepolti_prima.get(altro.uid, false)):
+			altro.buried_by = p.index
+			altro.buried_era = gs.era
 	Effects.apply_on_build(gs, p.index, b)
 	if above:
 		for c in range(b.col_from, b.col_to): gs.grid.risen_this_era[c] = true

@@ -55,6 +55,9 @@
     "rovina_gap": 3,
     "senza_rudere": false,
     "spianare_conserva_scavo": false,
+    "scavo_a_chi_scava": false,
+    "sconto_macerie_solo_altrui": false,
+    "disturbo_vp": 0,
     "binari_liberi": true,
     "verticality_vp": {
       "1": 2,

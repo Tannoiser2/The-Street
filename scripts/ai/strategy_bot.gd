@@ -351,8 +351,11 @@ static func _valore_costruzione(gs: GameState, p: PlayerState, v, strategia: Str
 		var q2 := BuildRules.quote_above(gs, p.index, d, col_from)
 		var sotto := 0.0
 		var perso := 0.0
+		# Con `scavo_a_chi_scava` lo Scavo dei sepolti ALTRUI e' mio e il mio
+		# sepolto da me vale 0: la stessa riga, letta dalla parte giusta.
+		var a_chi_scava := bool(CardDB.constants.get("scavo_a_chi_scava", false))
 		for b in q2.bases:
-			if b.owner == p.index: sotto += float(b.scavo_value()) * 0.5
+			if (b.owner != p.index) == a_chi_scava: sotto += float(b.scavo_value()) * 0.5
 		for b in q2.razed:
 			perso -= rendite_future(b.effective_resistance(), b.rendita_value(), gs.era) * 0.6
 			# Spianato vale Scavo 0, salvo la manopola `spianare_conserva_scavo`:

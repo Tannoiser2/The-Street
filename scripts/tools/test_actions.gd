@@ -30,6 +30,7 @@ func _ready() -> void:
 	_run("i bot con una strategia giocano davvero", _test_strategie)
 	_run("la strategia Obiettivi", _test_obiettivi)
 	_run("il Centro Urbano una volta per era", _test_centro_una_volta)
+	_run("chi ha sepolto chi, e lo sconto solo sulle rovine altrui", _test_sepolto_da)
 	print("\n%d superati, %d falliti" % [_passed, _failed])
 	get_tree().quit(0 if _failed == 0 else 1)
 
@@ -981,3 +982,68 @@ func _test_centro_una_volta() -> void:
 	_eq("  e all'era dopo paga di nuovo", oro.call(), 4)
 	_ok("  e la copia dello stato se lo ricorda", gs.duplica().grid.prosperity_paid.has(3))
 	CardDB.constants["prosperity"] = salvate
+
+# Chi seppellisce chi lo registra il controller (Building.buried_by, in che
+# era): su partite vere ogni sepolto deve avere uno scavatore e un'era, e
+# qualcuno deve essere stato sepolto da un avversario. Poi la manopola
+# `sconto_macerie_solo_altrui` (registro 87): sopra una rovina altrui lo
+# sconto c'e' sempre, sopra la propria solo con la manopola spenta.
+func _test_sepolto_da() -> void:
+	var sepolti := 0
+	var senza_scavatore := 0
+	var da_altri := 0
+	for g in 6:
+		var ctl := _game(3, 900 + g)
+		var guard := 0
+		while ctl.gs.phase != Enums.Phase.FINE_PARTITA and guard < 10000:
+			RandomBot.play_turn(ctl)
+			guard += 1
+		for b in ctl.gs.grid.buildings:
+			if not b.is_buried: continue
+			sepolti += 1
+			if b.buried_by < 0 or b.buried_era < 1 or b.buried_era > int(CardDB.constants["eras"]):
+				senza_scavatore += 1
+			elif b.buried_by != b.owner:
+				da_altri += 1
+	_ok("su 6 partite ci sono sepolti (%d)" % sepolti, sepolti > 0)
+	_eq("  ognuno con il suo scavatore e la sua era", senza_scavatore, 0)
+	_ok("  e qualcuno sepolto da un avversario (%d)" % da_altri, da_altri > 0)
+
+	var com_era := bool(CardDB.constants.get("sconto_macerie_solo_altrui", false))
+	var ctl2 := _game(3, 31)
+	var gs := ctl2.gs
+	# Una carta dell'era, larga 1, con pietra da scontare, e una colonna dal
+	# terreno giusto: nell'era 1 quasi tutte chiedono un terreno.
+	var id := ""
+	var col := -1
+	for cid in CardDB.buildings:
+		var d: Dictionary = CardDB.buildings[cid]
+		if int(d["era"]) != gs.era or int(d["width"]) != 1 \
+				or int(d["cost"]["pietra"]) < 2 or int(d["level_required"]) > 1:
+			continue
+		for c in gs.grid.n_cols:
+			if BuildRules.terrain_ok(gs, d, c, c + 1, 0):
+				id = cid
+				col = c
+				break
+		if id != "": break
+	_ok("c'e' una carta da provare", id != "")
+	if id == "": return
+	var data: Dictionary = CardDB.buildings[id]
+	var rovina := _put(gs, 1, id, col)
+	rovina.state = Enums.BuildingState.ROVINA
+	CardDB.constants["sconto_macerie_solo_altrui"] = false
+	var q_tutti := BuildRules.quote_above(gs, 0, data, col)
+	CardDB.constants["sconto_macerie_solo_altrui"] = true
+	var q_altrui := BuildRules.quote_above(gs, 0, data, col)
+	_ok("sopra una rovina altrui il preventivo e' legale", q_tutti.legal and q_altrui.legal, q_tutti.reason)
+	_eq("  e lo sconto c'e' con e senza manopola", q_altrui.pietra, q_tutti.pietra)
+	rovina.owner = 0
+	CardDB.constants["sconto_macerie_solo_altrui"] = false
+	var q_mia := BuildRules.quote_above(gs, 0, data, col)
+	CardDB.constants["sconto_macerie_solo_altrui"] = true
+	var q_mia_senza := BuildRules.quote_above(gs, 0, data, col)
+	_eq("sopra la propria rovina, spenta, lo sconto c'e'", q_mia.pietra, q_tutti.pietra)
+	_eq("  accesa, costa %d in piu'" % int(CardDB.constants["rubble_discount_pietra"]),
+		q_mia_senza.pietra, q_mia.pietra + int(CardDB.constants["rubble_discount_pietra"]))
+	CardDB.constants["sconto_macerie_solo_altrui"] = com_era

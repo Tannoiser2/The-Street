@@ -181,7 +181,11 @@ static func quote_above(gs: GameState, player: int, data: Dictionary, col_from: 
 				# non offre continuita' di classe.
 				if top != despoil and top.shares_class_with(data): q.continuity_bonus = 1
 			Enums.BuildingState.ROVINA:
-				rubble_discount = true
+				# Manopola `sconto_macerie_solo_altrui` (registro 87): lo
+				# sconto vale solo costruendo sopra le rovine degli altri,
+				# per dare un motivo di non seppellire sempre i propri.
+				if top.owner != player or not bool(CardDB.constants.get("sconto_macerie_solo_altrui", false)):
+					rubble_discount = true
 		if not top in q.bases: q.bases.append(top)
 		real_bases += 1
 		top_level = max(top_level, top.level + 1)

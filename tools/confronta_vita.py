@@ -16,7 +16,7 @@ import sys, collections
 CHIAVI = ["n", "ere_intatto", "ere_piedi", "n_rudere", "n_rovina", "n_sepolto",
           "n_subito", "n_in_piedi_fine", "n_intatto_fine", "vetusta", "vp",
           "vp_rendita", "vp_lampo", "vp_verticalita", "vp_scavo", "vp_scheletri",
-          "n_spianato"]     # assente nei CSV vecchi: vale 0
+          "n_spianato", "n_sepolto_altrui"]     # assenti nei CSV vecchi: valgono 0
 
 def leggi(f):
     righe = [l.rstrip("\n") for l in open(f) if l.strip()]
@@ -43,6 +43,7 @@ def leggi(f):
         "finiti in rovina": (tot["n_rovina"] / n, "{:.0%}"),
         "sepolti": (tot["n_sepolto"] / n, "{:.0%}"),
         "spianati dal proprietario": (tot["n_spianato"] / n, "{:.0%}"),
+        "sepolti da un altro": (tot["n_sepolto_altrui"] / n, "{:.0%}"),
         "Scavo per sepolto": (tot["vp_scavo"] / max(1, tot["n_sepolto"]), "{:.2f}"),
         "cubetti Vetusta'/partita": (tot["vetusta"] / partite, "{:.1f}"),
         "PV delle carte/partita": (tot["vp"] / partite, "{:.1f}"),
@@ -60,6 +61,9 @@ def etichetta(regole):
         pezzi = ["senza rudere" if regole.get("rudere", "si") == "no" else "con il rudere"]
         if "rovina" in regole: pezzi.append(f"rovina a −{regole['rovina']}")
     if regole.get("spianato") == "vale": pezzi.append("Scavo mai azzerato")
+    if regole.get("scavo") == "scavatore": pezzi.append("Scavo a chi scava")
+    if regole.get("sconto") == "altrui": pezzi.append("sconto solo sulle altrui")
+    if regole.get("disturbo", "0") != "0": pezzi.append(f"disturbo {regole['disturbo']}")
     return ", ".join(pezzi)
 
 lotti = [leggi(f) for f in sys.argv[1:]]
