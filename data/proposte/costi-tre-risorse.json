@@ -532,8 +532,8 @@
    "era": 4,
    "cost": {
     "costruzione": 1,
-    "denaro": 1,
-    "idee": 0
+    "denaro": 0,
+    "idee": 1
    },
    "production": {
     "costruzione": 0,
@@ -602,8 +602,8 @@
    "era": 4,
    "cost": {
     "costruzione": 1,
-    "denaro": 1,
-    "idee": 0
+    "denaro": 0,
+    "idee": 1
    },
    "production": {
     "costruzione": 0,
@@ -630,8 +630,8 @@
    "era": 4,
    "cost": {
     "costruzione": 2,
-    "denaro": 2,
-    "idee": 0
+    "denaro": 1,
+    "idee": 1
    },
    "production": {
     "costruzione": 0,
@@ -644,8 +644,8 @@
    "era": 4,
    "cost": {
     "costruzione": 2,
-    "denaro": 2,
-    "idee": 0
+    "denaro": 1,
+    "idee": 1
    },
    "production": {
     "costruzione": 0,
@@ -672,8 +672,8 @@
    "era": 4,
    "cost": {
     "costruzione": 2,
-    "denaro": 2,
-    "idee": 0
+    "denaro": 1,
+    "idee": 1
    },
    "production": {
     "costruzione": 0,
@@ -714,8 +714,8 @@
    "era": 5,
    "cost": {
     "costruzione": 1,
-    "denaro": 1,
-    "idee": 0
+    "denaro": 0,
+    "idee": 1
    },
    "production": {
     "costruzione": 0,
@@ -742,8 +742,8 @@
    "era": 5,
    "cost": {
     "costruzione": 2,
-    "denaro": 4,
-    "idee": 0
+    "denaro": 3,
+    "idee": 1
    },
    "production": {
     "costruzione": 0,
