@@ -1491,8 +1491,27 @@ dato è stato importato da lì. Ma due confronti fra ciò che è stampato e
     fermi, ma gli edifici che cadono nell'era in cui nascono passano dal 17% al
     48%.
 
-    **Da decidere insieme (D15 e D16 dell'audit):** la soglia con un passo solo
-    (1, 2 o 3) e se spianare un proprio edificio attivo conserva lo Scavo. Con
-    la seconda a "si'" l'archeologia rientra da un'altra porta: e' la misura
-    successiva, una manopola da una riga.
+    **Deciso dal designer:** gli stati sono attivo, rovina e sotterrato, e lo
+    Scavo non si azzera mai; con il dubbio "non si spinge troppo a sotterrare
+    i propri?". Misurato (manopola `spianare_conserva_scavo`, spenta;
+    `--scavo_spianato 1`; il torneo conta basi proprie, altrui e spianati):
+    **il dubbio era fondato.** Con lo Scavo conservato gli edifici spianati
+    dal proprietario passano dal 25% di oggi al 44% (69% nell'era 2), le
+    basi altrui da 2,0 a 1,1 per giocatore, lo Scavo da 20 a 52 punti a
+    partita e il punteggio totale sale di 50: spianare il proprio da' insieme
+    lo sconto della Spolia, il livello e lo Scavo pieno. La soglia (3, 2 o 1)
+    non cambia questo esito, decide solo le morti premature (18/32/48%).
+
+    La variante detta subito dopo dal designer - "gli edifici vivi spianati
+    mettono lo Scavo a zero, diventano terrapieni", cioe' la Spolia di oggi -
+    con la soglia 2 e' la piu' vicina al gioco attuale: in piedi 9,1 contro
+    9,3, punteggio +5, vittorie ferme; costa lo Scavo (20,5 -> 13,9) e il 32%
+    di edifici che cadono nell'era in cui nascono (oggi 17%). Terrapieno o
+    rovina non cambia i numeri, solo chi conta gli strati (Archeologo,
+    Demolitore, Soprintendente, la meta' della Verticalita' fra i
+    proprietari): decisione da regolamento.
+
+    **Resta da scegliere** fra spianato a zero (soglia 2 il compromesso) e una
+    via di mezzo non ancora misurata: Scavo pieno ma senza lo sconto della
+    Spolia, o Scavo dimezzato. Tutto in `docs/senza-rudere.md`.
 

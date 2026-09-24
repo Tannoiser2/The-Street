@@ -1,4 +1,4 @@
-# Senza rudere: la prima misura della nuova meccanica
+# Senza rudere: le prime misure della nuova meccanica
 
 > La proposta del designer (`proposte/nuova-meccanica.md`, punto 11) toglie lo stato di rudere:
 > restano attivo, rovina e sotterrato. Qui quel punto è misurato **da solo**, sul motore di oggi,
@@ -120,7 +120,117 @@ dello Scavo, cioè metà del tema del gioco. La decisione da prendere è doppia,
 Le manopole ci sono già tutte: `--senza_rudere 1 --gap 2` misura la soglia intermedia,
 `--senza_rudere 1` con una manopola sullo spianamento misura la seconda domanda.
 
+## Seconda misura: lo Scavo che non si azzera mai
+
+Decisione del designer dopo la prima misura: gli stati sono attivo, rovina e sotterrato, e **lo
+Scavo non si azzera mai**; poi il dubbio: "bisogna controllare se non si spinge troppo a
+sotterrare i propri edifici e basta". E la variante: "gli edifici vivi spianati mettono lo Scavo
+a zero, diventano terrapieni", che è la Spolia di oggi (spianare un proprio intatto sconta metà
+della resistenza e vale Scavo 0). Manopola `spianare_conserva_scavo`, spenta nei dati
+(`--scavo_spianato 1`); il bot, quando è accesa, smette di contare lo spianato come perso. Per
+rispondere al dubbio il torneo conta per giocatore **su che basi** ha costruito (proprie,
+altrui, propri intatti spianati) e la vita delle carte quanti edifici sono stati spianati dal
+proprietario. Stessi semi e stessi lotti della prima misura, sei varianti:
+
+| | rudere | soglia di rovina | spianato |
+|---|---|---|---|
+| **A** oggi | sì | 3 | Scavo 0 |
+| **B** | no | 3 | Scavo 0 |
+| **C** | no | 3 | vale |
+| **D** | no | 2 | vale |
+| **E** | no | 2 | Scavo 0 |
+| **F** ogni fallimento fa rovina | no | 1 | vale |
+
+### La vita degli edifici
+
+| per partita | A oggi | B | C | D | E | F |
+|---|--:|--:|--:|--:|--:|--:|
+| in piedi a fine partita | 9,26 | 11,23 | 10,88 | 8,76 | 9,11 | 6,70 |
+| cade nell'era in cui nasce | 17 % | 17 % | 18 % | 32 % | 32 % | 48 % |
+| sepolti | 51 % | 50 % | 52 % | 52 % | 51 % | 53 % |
+| **spianati dal proprietario** | **25 %** | 42 % | **44 %** | 35 % | 33 % | 25 % |
+| Scavo per sepolto | 1,35 | 0,42 | 3,19 | 3,24 | 0,91 | 3,26 |
+| PV delle carte | 205 | 209 | **255** | 249 | 211 | 233 |
+| Rendita | 66 | 82 | 77 | 72 | 77 | 62 |
+| Verticalità | 74 | 73 | 79 | 80 | 75 | 79 |
+| Scavo | 20,5 | 6,5 | **51,7** | **52,0** | 13,9 | **51,4** |
+| Lampo | 36 | 40 | 40 | 38 | 38 | 36 |
+| Scheletri | 8,3 | 7,3 | 7,5 | 7,3 | 6,9 | 6,2 |
+
+### Il torneo
+
+| per giocatore | A oggi | B | C | D | E | F |
+|---|--:|--:|--:|--:|--:|--:|
+| PV medi | 85,7 | 88,9 | **104,8** | 101,6 | 89,1 | 94,7 |
+| Scavo | 6,8 | 2,1 | 17,6 | 17,7 | 4,7 | 17,3 |
+| Rendita | 22,1 | 27,2 | 25,5 | 24,0 | 25,6 | 20,5 |
+| Verticalità | 25,1 | 24,5 | 26,5 | 26,8 | 25,2 | 26,2 |
+| basi proprie | 4,2 | 5,0 | 5,4 | 5,0 | 4,6 | 4,4 |
+| basi altrui | 2,0 | 1,1 | 1,1 | 1,6 | 1,6 | 2,1 |
+| **propri intatti spianati** | **2,5** | 4,3 | **4,6** | 3,6 | 3,4 | 2,6 |
+| vince Rendita | 41 % | 46 % | 47 % | 50 % | 44 % | 48 % |
+| vince Scavo | 28 % | 39 % | 42 % | 42 % | 38 % | 38 % |
+| vince Verticale | 31 % | 24 % | 27 % | 29 % | 23 % | 33 % |
+| vince Bilanciata | 39 % | 31 % | 29 % | 33 % | 33 % | 33 % |
+| vince Lampo | 27 % | 24 % | 23 % | 19 % | 25 % | 21 % |
+| vince Obiettivi | 34 % | 37 % | 32 % | 28 % | 37 % | 29 % |
+
+Su 750 partite una percentuale di vittoria ha ±5 punti: le differenze fra strategie entro
+quella soglia sono rumore.
+
+### Cosa salta all'occhio
+
+**1. Il dubbio era fondato: con lo Scavo che vale, si seppellisce se stessi.** Già oggi un
+edificio su quattro viene spianato dal suo proprietario (la Spolia è usata, non è una regola di
+nicchia). Con lo Scavo conservato (C) diventano il 44 %, e nell'era 2 il **69 %** degli edifici
+costruiti finisce spianato da chi lo ha costruito. Le basi altrui scendono da 2,0 a 1,1 per
+giocatore: si costruisce sopra i propri, non sopra gli altri. Il motivo è che spianare il proprio
+intatto dà tutto insieme: lo sconto della Spolia (metà della resistenza in pietra), il livello
+di Verticalità **e** lo Scavo pieno. Il canale Scavo passa da 20 a **52 punti a partita**, più
+del doppio, e il punteggio totale sale di 50: la partita cambia scala.
+
+**2. La soglia non cambia questo esito.** C, D e F hanno tutte lo Scavo a 52: a soglia 3, 2 o 1
+l'archeologia che vale la fanno gli spianamenti, non gli eventi. La soglia decide solo quanti
+edifici muoiono giovani: 18 %, 32 %, 48 %.
+
+**3. La variante del designer, spianato a zero e soglia 2 (E), è la più vicina al gioco di
+oggi.** Edifici in piedi 9,1 contro 9,3, punteggio +5, Rendita +10, Verticalità e Lampo ferme,
+vittorie entro l'errore. Paga due prezzi: lo Scavo scende da 20,5 a 13,9 (le rovine da evento
+sono la sola archeologia che vale, e a soglia 2 ce ne sono meno di quante ne facevano i ruderi)
+e il 32 % degli edifici cade nell'era in cui nasce, contro il 17 % di oggi. A soglia 3 (B) lo
+Scavo sparisce; a soglia 1 con spianato a zero (misurato nella prima parte) lo Scavo resta a 22
+ma muore il 48 %.
+
+**4. Terrapieno o rovina non cambia i numeri.** Uno spianato a Scavo 0 e un terrapieno valgono
+uguale nel conteggio; la differenza è solo in chi conta gli strati: Archeologo, Demolitore
+("3+ tuoi spianati", che con lo Scavo conservato diventerebbe un premio gratis), Soprintendente,
+e la metà della Verticalità divisa fra i proprietari degli strati. Da decidere a regolamento,
+non da misurare.
+
+### Cosa resta da decidere
+
+- **Lo Scavo dello spianato.** A zero (la Spolia di oggi, la variante E) l'archeologia vale
+  solo quando arriva dagli eventi; pieno, raddoppia il canale e premia chi seppellisce se
+  stesso. C'è una via di mezzo da misurare, se interessa: **Scavo pieno ma senza lo sconto
+  della Spolia** (spianare costa quanto costruire su una rovina altrui), oppure Scavo dimezzato.
+- **La soglia.** Con lo spianato a zero è la soglia a fare l'archeologia: 2 è il compromesso
+  fra Scavo e morti premature; il punto 10 della proposta (sconto pari a metà della resistenza
+  della rovina) rende le rovine altrui più appetibili e potrebbe spostare le basi dai propri
+  agli altrui. Si misura quando i costi della v2 esistono.
+
 ## Come rifare il conto
 
-I tre lotti sono stati giocati il 24 settembre 2026 sul ramo `claude/niente-rudere` (main a
-`d56bb94` più la manopola). Con gli stessi comandi del metodo escono identici, riga per riga.
+I lotti sono stati giocati il 24 settembre 2026 sul ramo `claude/niente-rudere` (main a
+`d56bb94` più le manopole). Con gli stessi comandi del metodo escono identici, riga per riga:
+
+```bash
+A="--players 3 --vita 2000 --seed 200000"   # o --games 750 --seed 700000 per il torneo
+godot --headless res://scenes/audit_partita.tscn -- $A > A.csv
+godot --headless res://scenes/audit_partita.tscn -- $A --senza_rudere 1 > B.csv
+godot --headless res://scenes/audit_partita.tscn -- $A --senza_rudere 1 --scavo_spianato 1 > C.csv
+godot --headless res://scenes/audit_partita.tscn -- $A --senza_rudere 1 --gap 2 --scavo_spianato 1 > D.csv
+godot --headless res://scenes/audit_partita.tscn -- $A --senza_rudere 1 --gap 2 > E.csv
+godot --headless res://scenes/audit_partita.tscn -- $A --gap 1 --scavo_spianato 1 > F.csv
+python3 tools/confronta_vita.py A.csv B.csv C.csv D.csv E.csv F.csv      # lotti --vita
+python3 tools/confronta_torneo.py A.csv B.csv C.csv D.csv E.csv F.csv    # lotti --games
+```
