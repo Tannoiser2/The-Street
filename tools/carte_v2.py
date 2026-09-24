@@ -80,16 +80,16 @@ TESTI = {
     "ev_invasione": (None, "LAV", "come Migrazione"),
     "ev_carestia_primitiva": (None, "LAV", "come Migrazione"),
     "ev_secolarizzazioni": ("Forza 5. Religione −2 res · durante l'era, ristrutturare una propria rovina Religione non costa risorse (richiede comunque l'azione).", "RUD", ""),
-    "ev_speculazione_edilizia": (None, "RUD", "la Vetustà resta anche senza rudere (cresce a chi regge l'evento); se il designer la toglie, la carta va sostituita"),
+    "ev_speculazione_edilizia": ("Forza 5. Ogni edificio con 2+ potenziamenti: −1 res.", "RUD", "senza Vetustà (registro 95) la carta non colpiva nessuno: proposta, colpisce chi ha costruito sopra il costruito"),
     "ev_anni_della_fame": (None, "", "resta: i round ci sono ancora (quattro lavoratori, quattro giri)"),
     # monumenti
-    "mo_colosseo": ("Primo il cui edificio attivo sopravvive esposto a 3 eventi.", "RUD", "\"in piedi o rudere\" diventa \"attivo\"; resta se la Vetustà resta"),
+    "mo_colosseo": ("Primo ad avere un edificio attivo con resistenza 7 o più.", "RUD", "contava la Vetustà 3, che non esiste più (registro 95): proposta, l'edificio che resiste per costruzione; nel file v2 la condizione vecchia resta e non scatta mai"),
     "mo_pantheon": ("Primo ad avere un edificio dell'era 1 o 2 ancora attivo all'inizio dell'era Moderna.", "RUD", ""),
     "mo_cloaca_massima": ("Primo ad aver speso almeno 3 Costruzione complessive in costi di terrapieno.", "3R", ""),
     "mo_acropoli": (None, "", "resta: i livelli restano, la Verticalità no"),
     # eredita'
     "er_il_guardiano": ("un tuo edificio attivo costruito nell'era 1 o 2.", "RUD", ""),
-    "er_il_silvicoltore": (None, "RUD TES", "resta se la Vetustà resta; il bosco produce Idee e non protegge più"),
+    "er_il_silvicoltore": ("un tuo edificio attivo su bosco costruito nell'era 1 o 2.", "RUD TES", "contava la Vetustà 3, che non esiste più (registro 95): proposta, il vecchio del bosco; nel file v2 la condizione vecchia resta e non scatta mai"),
     "er_il_restauratore": ("hai ristrutturato 2+ tue rovine.", "RUD", ""),
     "er_il_verticalista": (None, "", "resta: il nome ricorda un canale che non c'è più, la condizione vale"),
     "er_il_demolitore": (None, "", "resta: lo spianato è il terrapieno della v2 (registro 87)"),
@@ -100,7 +100,7 @@ TESSERE = {
     "pianura": ("−1 Costruzione a un edificio da 2 o 3 caselle", "oggi: −1 pietra permanente ai 2-3 caselle"),
     "fiume":   ("+1 Denaro all'attivazione", "oggi: \"unico terreno che produce oro\", non più vero"),
     "collina": ("+1 res a un edificio qui, per l'evento", "oggi: +1 res permanente a chi costruisce qui"),
-    "bosco":   ("−1 Costruzione a una ristrutturazione", "oggi: Vetustà massima +4 e restauro −1"),
+    "bosco":   ("−1 Costruzione a una ristrutturazione", "oggi: Vetustà massima +4 (la Vetustà non c'è più) e restauro −1"),
 }
 
 NOME_RIS = {"pietra": "C", "oro": "D", "idee": "I"}
@@ -139,7 +139,8 @@ w("")
 w("Le regole della v2 che i testi presuppongono (registro 87-94): tre risorse, Costruzione (C),")
 w("Denaro (D), Idee (I); tre stati, attivo, rovina, sotterrato, niente rudere; niente Verticalità,")
 w("premio di scavo S×L a chi costruisce sopra, dimezzato nell'era 5; quattro lavoratori che")
-w("attivano la colonna e poi agiscono; il Personaggio preso a inizio era nel draft, gratis;")
+w("attivano la colonna e poi agiscono; il Personaggio preso a inizio era nel draft, gratis, e non")
+w("seppellito; niente Vetustà;")
 w("le tessere pescate a caso, che producono per era; tetto 3 per risorsa e 5 in tutto alla")
 w("dispersione. Costanti: " + ", ".join(f"`{k}` {K[k]}" for k in (
     "workers_base", "resource_cap", "resource_cap_per_resource", "protection_bonus", "rovina_gap",
@@ -218,8 +219,7 @@ w("")
 w("Si prendono nel **draft** a inizio era (registro 93): in ordine di turno, uno a testa fra i")
 w("cinque dell'era, gratis e senza lavoratore; gli avanzi si scartano a fine era. Niente classe")
 w("richiesta nella colonna, niente costo: la classe resta stampata come informazione. A fine era")
-w("il Personaggio si seppellisce sotto un edificio in piedi come oggi e vale 6 meno l'era se")
-w("l'edificio finisce sotterrato (scheletro): con il draft gratis questa regola va decisa.")
+w("il Personaggio si scarta: **non si seppellisce** (registro 95), niente scheletri.")
 w("")
 w("| era | Personaggio | classe | quando | testo | motivo | nota |")
 w("|--:|---|---|---|---|---|---|")
@@ -278,11 +278,11 @@ w("## Quello che non sta su una carta")
 w("")
 for r in [
     "**\"+1 per ogni edificio altrui sotterrato\"** (il disturbo): mai contato né dal motore né dall'oracolo; `disturbo_vp` è 0 finché il designer non decide (registro 88).",
-    "**La Vetustà** senza rudere: il motore la fa crescere a chi regge l'evento; la domanda 18 della proposta è aperta. La nominano Colosseo, Il Silvicoltore, Speculazione edilizia e il bosco.",
+    "**La Vetustà non esiste più** (registro 95): niente cubetti a chi regge l'evento, la Rendita è solo quella stampata. Colosseo, Il Silvicoltore e Speculazione edilizia la contavano e vanno rifatti (proposte nelle tabelle); il bosco perde il +4.",
     "**\"Cultura\"**: oggi è un canale di punti e il nome di una classe; con le Idee come risorsa i punti si chiamano PV e Cultura resta la classe.",
     "**\"Protetto\"**: come oggi, il lavoratore messo sopra un proprio edificio in piedi della colonna attivata (+%d); i tre protettori del draft si legano al primo edificio costruito nell'era." % K["protection_bonus"],
     "**Reclutare** non è un'azione; **la Dinastia** resta un acquisto al posto dell'azione; **passare** è non fare l'azione dopo l'attivazione.",
-    "**Gli scheletri**: il Personaggio del draft seppellito a fine era vale 6 meno l'era (come oggi), e il lavoratore sul potenziamento \"potrebbe\" dare punti (punto 8): da decidere.",
+    "**Gli scheletri**: il Personaggio del draft non si seppellisce (registro 95); nella v2 a quattro lavoratori non ci sono scheletri. Il lavoratore sul potenziamento che \"potrebbe\" dare punti (punto 8) resta un'idea della proposta, non una regola.",
 ]:
     w(f"- {r}")
 w("")

@@ -9,7 +9,8 @@
 Le regole della v2 che i testi presuppongono (registro 87-94): tre risorse, Costruzione (C),
 Denaro (D), Idee (I); tre stati, attivo, rovina, sotterrato, niente rudere; niente Verticalità,
 premio di scavo S×L a chi costruisce sopra, dimezzato nell'era 5; quattro lavoratori che
-attivano la colonna e poi agiscono; il Personaggio preso a inizio era nel draft, gratis;
+attivano la colonna e poi agiscono; il Personaggio preso a inizio era nel draft, gratis, e non
+seppellito; niente Vetustà;
 le tessere pescate a caso, che producono per era; tetto 3 per risorsa e 5 in tutto alla
 dispersione. Costanti: `workers_base` 4, `resource_cap` 5, `resource_cap_per_resource` 3, `protection_bonus` 2, `rovina_gap` 2, `market_size` 6, `side_rows` 3, `terrapieno_cost_pietra` 1.
 
@@ -143,15 +144,14 @@ era è la proposta dell'audit (D20-D22), da decidere.
 | Pianura | 1 C | 1 C + 1 D | 1 D | 2 D | 2 D | −1 Costruzione a un edificio da 2 o 3 caselle | oggi: −1 pietra permanente ai 2-3 caselle |
 | Fiume | 2 C | 2 C | 1 C | 1 C | 1 C | +1 Denaro all'attivazione | oggi: "unico terreno che produce oro", non più vero |
 | Collina | 2 C | 2 C | 1 C | 1 C | 1 C | +1 res a un edificio qui, per l'evento | oggi: +1 res permanente a chi costruisce qui |
-| Bosco | 1 I | 2 I | 2 I | 3 I | 3 I | −1 Costruzione a una ristrutturazione | oggi: Vetustà massima +4 e restauro −1 |
+| Bosco | 1 I | 2 I | 2 I | 3 I | 3 I | −1 Costruzione a una ristrutturazione | oggi: Vetustà massima +4 (la Vetustà non c'è più) e restauro −1 |
 
 ## I 26 Personaggi
 
 Si prendono nel **draft** a inizio era (registro 93): in ordine di turno, uno a testa fra i
 cinque dell'era, gratis e senza lavoratore; gli avanzi si scartano a fine era. Niente classe
 richiesta nella colonna, niente costo: la classe resta stampata come informazione. A fine era
-il Personaggio si seppellisce sotto un edificio in piedi come oggi e vale 6 meno l'era se
-l'edificio finisce sotterrato (scheletro): con il draft gratis questa regola va decisa.
+il Personaggio si scarta: **non si seppellisce** (registro 95), niente scheletri.
 
 | era | Personaggio | classe | quando | testo | motivo | nota |
 |--:|---|---|---|---|---|---|
@@ -246,7 +246,7 @@ Uno per era nelle ere 1-4, forza 2/3/4/5; chi non regge cade in rovina con un pa
 | 4 | Rivoluzione industriale | 5 | Forza 5. Edifici con Scavo 2+: −1 res. |  |  |
 | 4 | Bonifiche | 5 | Forza 5. Edifici su pianura: −2 res. Il primo terrapieno di ogni giocatore in quest’era costa 0. |  |  |
 | 4 | Secolarizzazioni | 5 | **Forza 5. Religione −2 res · durante l'era, ristrutturare una propria rovina Religione non costa risorse (richiede comunque l'azione).** | RUD | oggi: "Forza 5. Religione −2 res · durante l’era, restaurare un rudere Religione non costa risorse (richiede comunque l’azione) e vale sui ruderi già presenti" |
-| 4 | Speculazione edilizia | 5 | Forza 5. Ogni edificio con Vetustà 2+: −1 res. | RUD | la Vetustà resta anche senza rudere (cresce a chi regge l'evento); se il designer la toglie, la carta va sostituita |
+| 4 | Speculazione edilizia | 5 | **Forza 5. Ogni edificio con 2+ potenziamenti: −1 res.** | RUD | oggi: "Forza 5. Ogni edificio con Vetustà 2+: −1 res" — senza Vetustà (registro 95) la carta non colpiva nessuno: proposta, colpisce chi ha costruito sopra il costruito |
 
 ## I 14 Monumenti
 
@@ -255,7 +255,7 @@ Se ne rivelano tanti quanti i giocatori meno uno; li prende il primo che soddisf
 | carta | PV | condizione | motivo | nota |
 |---|--:|---|---|---|
 | San Clemente | 5 | Primo ad avere 3 edifici Religione nella stessa colonna. |  |  |
-| Colosseo | 4 | **Primo il cui edificio attivo sopravvive esposto a 3 eventi.** | RUD | oggi: "Primo il cui edificio sopravvive esposto a 3 eventi" — "in piedi o rudere" diventa "attivo"; resta se la Vetustà resta |
+| Colosseo | 4 | **Primo ad avere un edificio attivo con resistenza 7 o più.** | RUD | oggi: "Primo il cui edificio sopravvive esposto a 3 eventi" — contava la Vetustà 3, che non esiste più (registro 95): proposta, l'edificio che resiste per costruzione; nel file v2 la condizione vecchia resta e non scatta mai |
 | Pantheon | 4 | **Primo ad avere un edificio dell'era 1 o 2 ancora attivo all'inizio dell'era Moderna.** | RUD | oggi: "Primo ad avere un edificio dell’era 1 o 2 ancora in piedi all’inizio dell’era Moderna" |
 | Fori Imperiali | 4 | Primo ad avere 4 propri edifici Sotterrati. |  |  |
 | Acropoli | 4 | Primo a costruire a livello 4. |  | resta: i livelli restano, la Verticalità no |
@@ -288,16 +288,16 @@ Due a testa, se ne tiene una segreta; si conta a fine partita.
 | Il Demolitore | 4 | hai spianato 3+ tuoi edifici intatti. |  | resta: lo spianato è il terrapieno della v2 (registro 87) |
 | Il Massaio | 4 | due tuoi edifici a livello 2 o superiore. |  |  |
 | L’Idraulico | 4 | 3+ tuoi edifici su colonne fiume. |  |  |
-| Il Silvicoltore | 5 | un tuo edificio su bosco con Vetustà 3+. | RUD TES | resta se la Vetustà resta; il bosco produce Idee e non protegge più |
+| Il Silvicoltore | 5 | **un tuo edificio attivo su bosco costruito nell'era 1 o 2.** | RUD TES | oggi: "un tuo edificio su bosco con Vetustà 3+" — contava la Vetustà 3, che non esiste più (registro 95): proposta, il vecchio del bosco; nel file v2 la condizione vecchia resta e non scatta mai |
 | Il Restauratore | 4 | **hai ristrutturato 2+ tue rovine.** | RUD | oggi: "hai restaurato 2+ ruderi" |
 | L’Antiquario | 5 | un tuo edificio Sotterrato con Scavo 6 o più. |  |  |
 
 ## Quello che non sta su una carta
 
 - **"+1 per ogni edificio altrui sotterrato"** (il disturbo): mai contato né dal motore né dall'oracolo; `disturbo_vp` è 0 finché il designer non decide (registro 88).
-- **La Vetustà** senza rudere: il motore la fa crescere a chi regge l'evento; la domanda 18 della proposta è aperta. La nominano Colosseo, Il Silvicoltore, Speculazione edilizia e il bosco.
+- **La Vetustà non esiste più** (registro 95): niente cubetti a chi regge l'evento, la Rendita è solo quella stampata. Colosseo, Il Silvicoltore e Speculazione edilizia la contavano e vanno rifatti (proposte nelle tabelle); il bosco perde il +4.
 - **"Cultura"**: oggi è un canale di punti e il nome di una classe; con le Idee come risorsa i punti si chiamano PV e Cultura resta la classe.
 - **"Protetto"**: come oggi, il lavoratore messo sopra un proprio edificio in piedi della colonna attivata (+2); i tre protettori del draft si legano al primo edificio costruito nell'era.
 - **Reclutare** non è un'azione; **la Dinastia** resta un acquisto al posto dell'azione; **passare** è non fare l'azione dopo l'attivazione.
-- **Gli scheletri**: il Personaggio del draft seppellito a fine era vale 6 meno l'era (come oggi), e il lavoratore sul potenziamento "potrebbe" dare punti (punto 8): da decidere.
+- **Gli scheletri**: il Personaggio del draft non si seppellisce (registro 95); nella v2 a quattro lavoratori non ci sono scheletri. Il lavoratore sul potenziamento che "potrebbe" dare punti (punto 8) resta un'idea della proposta, non una regola.
 

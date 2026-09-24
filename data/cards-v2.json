@@ -51,8 +51,8 @@
     },
     "resource_cap": 5,
     "protection_bonus": 2,
-    "vetusta_max": 3,
-    "vetusta_max_bosco": 4,
+    "vetusta_max": 0,
+    "vetusta_max_bosco": 0,
     "rudere_penalty": 2,
     "rovina_gap": 2,
     "senza_rudere": true,
@@ -96,7 +96,8 @@
     "turno_v2": false,
     "passa_incasso_pietra": 1,
     "passa_incasso_scelta": 1,
-    "draft_personaggi": true
+    "draft_personaggi": true,
+    "personaggi_sepolti": false
   },
   "terrains": [
     {
@@ -214,7 +215,7 @@
         "oro": 0
       },
       "identity": "conservazione",
-      "rule": "Idee, in aumento con le ere. Vetusta massima +4 e ristrutturazione -1.",
+      "rule": "Idee, in aumento con le ere. Ristrutturazione -1.",
       "base_production_by_era": {
         "1": {
           "pietra": 0,

@@ -33,7 +33,7 @@ REGOLE = {
     "fiume": "Costruzione, tanta all'inizio e poco dopo. Requisito 'fiume' stretto.",
     "collina": "Costruzione come il fiume, e ogni edificio costruito qui ha +1 resistenza permanente.",
     "pianura": "Denaro, poco all'inizio e molto dopo. Edifici da 2 o 3 caselle costano 1 in meno.",
-    "bosco": "Idee, in aumento con le ere. Vetusta massima +4 e ristrutturazione -1.",
+    "bosco": "Idee, in aumento con le ere. Ristrutturazione -1.",
 }
 MIX = {"2": {"pianura": 2, "fiume": 1, "collina": 1, "bosco": 1},
        "3": {"pianura": 2, "fiume": 2, "collina": 1, "bosco": 2},
@@ -91,6 +91,13 @@ v2["constants"]["passa_incasso_scelta"] = 1
 # turno, uno a testa fra tutti quelli dell'era, gratis e senza lavoratore.
 # Reclutare come azione sparisce.
 v2["constants"]["draft_personaggi"] = True
+# REGISTRO 95: il Personaggio del draft non si seppellisce a fine era (niente
+# scheletri regalati), e la Vetusta' non esiste piu': il tetto a 0 la spegne
+# senza toccare il motore. Colosseo, Il Silvicoltore e Speculazione edilizia
+# la nominano e vanno rifatti (docs/carte-v2.md).
+v2["constants"]["personaggi_sepolti"] = False
+v2["constants"]["vetusta_max"] = 0
+v2["constants"]["vetusta_max_bosco"] = 0
 out = os.path.join(RADICE, "data/cards-v2.json")
 json.dump(v2, open(out, "w", encoding="utf-8"), indent=2, ensure_ascii=False)
 open(out, "a").write("\n")

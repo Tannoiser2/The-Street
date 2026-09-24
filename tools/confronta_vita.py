@@ -73,6 +73,8 @@ def etichetta(regole):
     if regole.get("turno") == "v2": pezzi.append("turno a un'azione")
     if regole.get("lavoratori", "3") != "3": pezzi.append(f"{regole['lavoratori']} lavoratori")
     if regole.get("draft") == "si": pezzi.append("draft dei Personaggi")
+    if regole.get("sepolti") == "si" and regole.get("draft") == "si": pezzi.append("Personaggi sepolti")
+    if regole.get("vetusta", "3") == "0": pezzi.append("senza Vetustà")
     if regole.get("dati", "").startswith("v2"): pezzi.insert(0, "v2 tre risorse")
     return ", ".join(pezzi)
 

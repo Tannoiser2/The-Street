@@ -110,6 +110,8 @@ static func resolve_event(gs: GameState) -> Array[int]:
 		if not b.is_standing(): continue
 		var eff: int = b.effective_resistance() + Effects.event_resistance_modifier(gs, b)
 		if eff >= force:
+			# La Vetusta' cresce fino a `vetusta_max`; nella v2 e' 0, cioe'
+			# la Vetusta' non esiste (registro 95).
 			var vmax := int(CardDB.constants["vetusta_max"])
 			if _on_terrain(gs, b, Enums.Terrain.BOSCO):
 				vmax = int(CardDB.constants["vetusta_max_bosco"])
@@ -253,6 +255,9 @@ static func disperse(gs: GameState) -> void:
 # I personaggi in eccesso rispetto agli edifici disponibili si scartano.
 static func bury_characters(gs: GameState) -> void:
 	if gs.era >= 5: return
+	# V2 (registro 95): il Personaggio del draft non si seppellisce. Costante
+	# `personaggi_sepolti`, vera dove manca (v1.5).
+	if not bool(CardDB.constants.get("personaggi_sepolti", true)): return
 	for p in gs.players:
 		if p.specialized_characters.is_empty(): continue
 		var hosts := gs.grid.buildings.filter(func(b):

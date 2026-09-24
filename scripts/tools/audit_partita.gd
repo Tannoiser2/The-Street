@@ -143,6 +143,17 @@ func _ready() -> void:
 	if args.has("turno_v2"):
 		CardDB.constants["turno_v2"] = str(args["turno_v2"]) != "0"
 		print("# turno_v2 = %s" % str(bool(CardDB.constants["turno_v2"])))
+	# REGISTRO 95, due manopole per rigiocare la v2 con una sola delle due
+	# decisioni: `--sepolti 1` riseppellisce i Personaggi del draft,
+	# `--vetusta 3` rimette la Vetusta' (tetto 3, bosco +1).
+	if args.has("sepolti"):
+		CardDB.constants["personaggi_sepolti"] = str(args["sepolti"]) != "0"
+		print("# personaggi_sepolti = %s" % str(bool(CardDB.constants["personaggi_sepolti"])))
+	if args.has("vetusta"):
+		var vm := int(args["vetusta"])
+		CardDB.constants["vetusta_max"] = vm
+		CardDB.constants["vetusta_max_bosco"] = vm + 1 if vm > 0 else 0
+		print("# vetusta_max = %d" % vm)
 	# I LAVORATORI PER ERA (`--lavoratori 5`, `workers_base`, 3 nei dati). Nel
 	# turno v2 ogni lavoratore e' UN'azione, non piu' un'attivazione piu'
 	# un'azione: con 3 il ritmo si dimezza (registro 93), e la manopola misura
@@ -337,7 +348,7 @@ func _stampa_vita(acc: Dictionary, quante: int, players: int, seme: int) -> void
 	var vt = CardDB.constants["verticality_vp"]
 	var scala: Array[String] = []
 	for i in 4: scala.append("%d" % int(vt[str(i + 1)]))
-	print("# partite=%d giocatori=%d seme_base=%d bot=%s verticalita=%s prosperita=%d rovina=%d binari=%s versione_bot=%d strategie=%d centro=%s rudere=%s spianato=%s scavo=%s sconto=%s disturbo=%d premio=%s dati=%s era5=%s tetto=%d turno=%s lavoratori=%d draft=%s" % [
+	print("# partite=%d giocatori=%d seme_base=%d bot=%s verticalita=%s prosperita=%d rovina=%d binari=%s versione_bot=%d strategie=%d centro=%s rudere=%s spianato=%s scavo=%s sconto=%s disturbo=%d premio=%s dati=%s era5=%s tetto=%d turno=%s lavoratori=%d draft=%s sepolti=%s vetusta=%d" % [
 		quante, players, seme, "strategie" if _strategie else "caso",
 		"/".join(scala), int(CardDB.constants["prosperity"]["min_buildings"]),
 		int(CardDB.constants.get("rovina_gap", 2)),
@@ -356,7 +367,9 @@ func _stampa_vita(acc: Dictionary, quante: int, players: int, seme: int) -> void
 		int(CardDB.constants.get("resource_cap_per_resource", 0)),
 		"v2" if bool(CardDB.constants.get("turno_v2", false)) else "v1",
 		int(CardDB.constants["workers_base"]),
-		"si" if bool(CardDB.constants.get("draft_personaggi", false)) else "no"])
+		"si" if bool(CardDB.constants.get("draft_personaggi", false)) else "no",
+		"si" if bool(CardDB.constants.get("personaggi_sepolti", true)) else "no",
+		int(CardDB.constants["vetusta_max"])])
 	var intestazione: Array[String] = ["id", "nome", "era", "classi", "larghezza",
 		"costo_pietra", "costo_oro", "resistenza", "rendita", "scavo", "lampo_carta",
 		"copie", "n", "ere_intatto", "ere_piedi", "n_rudere", "n_rovina", "n_sepolto",
