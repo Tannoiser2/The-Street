@@ -643,6 +643,21 @@ const PROSPERITA_FASCIA_GIU := 0.985
 const PROSPERITA_RAPPORTO := 1387.0 / 518.0
 const PROSPERITA_MARGINE := 2.5         # dentro la cornice della tessera
 
+# GIA' PAGATO IN QUEST'ERA. Il Centro Urbano paga una volta per colonna e per
+# era (punto 86): al tavolo il cartellino si gira dopo il pagamento e si
+# rigirano tutti a fine era. A schermo il rovescio e' lo stesso cartellino
+# spento - scuro, come il rudere e' la sagoma in grigio - cosi' si vede ancora
+# che la colonna e' un Centro, ma anche che per quest'era ha gia' dato.
+# Opaco: mezzo trasparente lasciava passare la scritta stampata sotto, e le
+# due scritte sovrapposte non si leggevano piu'.
+const PROSPERITA_SPENTA := Color(0.3, 0.3, 0.3, 1.0)
+
+static func prosperita_pagata(gs: GameState, col: int) -> bool:
+	return gs.grid.prosperity_paid.has(col)
+
+static func prosperita_colore(gs: GameState, col: int) -> Color:
+	return PROSPERITA_SPENTA if prosperita_pagata(gs, col) else Color.WHITE
+
 # Il rettangolo dove si posa, sul piano della tessera.
 static func prosperita_box(col: int) -> AABB:
 	var t := tessera_box(col)

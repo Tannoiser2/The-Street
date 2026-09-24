@@ -1473,5 +1473,6 @@ dato è stato importato da lì. Ma due confronti fra ciò che è stampato e
     **Resta una domanda da tavolo:** al tavolo vero bisogna ricordarsi quali
     Centri hanno gia' pagato in quest'era. Serve un segno fisico - girare il
     cartellino della Prosperita' dopo il pagamento, e rigirarli tutti a fine
-    era - e il regolamento va aggiornato di conseguenza. Il cartellino a
-    schermo oggi non lo mostra.
+    era - e il regolamento va aggiornato di conseguenza. A schermo il
+    cartellino fa gia' cosi': dopo il pagamento resta sulla tessera ma
+    scuro, e a fine era si riaccende.

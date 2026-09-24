@@ -327,8 +327,9 @@ func _tessere() -> void:
 		# dove sembra. Col disegno sopra non si puo' piu' schiarire il colore
 		# della scatola, quindi si posa una velatura chiara sopra la tessera.
 		# Il cartellino della Prosperita': si posa sulla fascia in fondo alla
-		# tessera quando la colonna e' un Centro Urbano attivo. La scritta
-		# stampata c'e' sempre, il cartellino no.
+		# tessera quando la colonna e' un Centro Urbano attivo, e si spegne
+		# quando ha gia' pagato in quest'era. La scritta stampata c'e' sempre,
+		# il cartellino no.
 		if gs.grid.is_prosperity_center(c): _cartello_prosperita(c)
 		if c == _evidenziata:
 			var velo := _quad(Vector2(box.size.x, box.size.z),
@@ -345,7 +346,9 @@ func _cartello_prosperita(col: int) -> void:
 	var tex := load(BoardLayout3D.PROSPERITA_PATH) as Texture2D
 	if tex == null: return
 	var box := BoardLayout3D.prosperita_box(col)
-	var q := _quad(Vector2(box.size.x, box.size.z), Color.WHITE, true)
+	# Il colore moltiplica il disegno: bianco lo lascia com'e', grigio lo
+	# spegne quando il Centro ha gia' pagato in quest'era.
+	var q := _quad(Vector2(box.size.x, box.size.z), BoardLayout3D.prosperita_colore(gs, col), true)
 	var mat := q.material_override as StandardMaterial3D
 	mat.albedo_texture = tex
 	mat.texture_filter = BaseMaterial3D.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
