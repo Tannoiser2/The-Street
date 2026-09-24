@@ -1,0 +1,853 @@
+{
+ "meta": {
+  "origine": "tools/proponi_costi_v2.py",
+  "regole": "docs/proposte/costi-tre-risorse.md",
+  "risorse": [
+   "costruzione",
+   "denaro",
+   "idee"
+  ]
+ },
+ "buildings": [
+  {
+   "id": "ed_approdo",
+   "era": 1,
+   "cost": {
+    "costruzione": 1,
+    "denaro": 0,
+    "idee": 0
+   },
+   "production": {
+    "costruzione": 1,
+    "denaro": 0,
+    "idee": 0
+   }
+  },
+  {
+   "id": "ed_capanne",
+   "era": 1,
+   "cost": {
+    "costruzione": 1,
+    "denaro": 0,
+    "idee": 0
+   },
+   "production": {
+    "costruzione": 1,
+    "denaro": 0,
+    "idee": 0
+   }
+  },
+  {
+   "id": "ed_cava",
+   "era": 1,
+   "cost": {
+    "costruzione": 1,
+    "denaro": 0,
+    "idee": 0
+   },
+   "production": {
+    "costruzione": 2,
+    "denaro": 0,
+    "idee": 0
+   }
+  },
+  {
+   "id": "ed_circolo_di_pietre",
+   "era": 1,
+   "cost": {
+    "costruzione": 2,
+    "denaro": 0,
+    "idee": 1
+   },
+   "production": {
+    "costruzione": 0,
+    "denaro": 0,
+    "idee": 0
+   }
+  },
+  {
+   "id": "ed_dolmen",
+   "era": 1,
+   "cost": {
+    "costruzione": 1,
+    "denaro": 0,
+    "idee": 1
+   },
+   "production": {
+    "costruzione": 0,
+    "denaro": 0,
+    "idee": 0
+   }
+  },
+  {
+   "id": "ed_focolare_comune",
+   "era": 1,
+   "cost": {
+    "costruzione": 1,
+    "denaro": 0,
+    "idee": 0
+   },
+   "production": {
+    "costruzione": 0,
+    "denaro": 0,
+    "idee": 0
+   }
+  },
+  {
+   "id": "ed_grotte_dipinte",
+   "era": 1,
+   "cost": {
+    "costruzione": 0,
+    "denaro": 0,
+    "idee": 1
+   },
+   "production": {
+    "costruzione": 0,
+    "denaro": 0,
+    "idee": 0
+   }
+  },
+  {
+   "id": "ed_menhir",
+   "era": 1,
+   "cost": {
+    "costruzione": 1,
+    "denaro": 0,
+    "idee": 1
+   },
+   "production": {
+    "costruzione": 0,
+    "denaro": 0,
+    "idee": 0
+   }
+  },
+  {
+   "id": "ed_palafitte",
+   "era": 1,
+   "cost": {
+    "costruzione": 1,
+    "denaro": 0,
+    "idee": 0
+   },
+   "production": {
+    "costruzione": 1,
+    "denaro": 0,
+    "idee": 0
+   }
+  },
+  {
+   "id": "ed_trappole_da_pesca",
+   "era": 1,
+   "cost": {
+    "costruzione": 1,
+    "denaro": 0,
+    "idee": 0
+   },
+   "production": {
+    "costruzione": 1,
+    "denaro": 0,
+    "idee": 0
+   }
+  },
+  {
+   "id": "ed_tumulo_funerario",
+   "era": 1,
+   "cost": {
+    "costruzione": 1,
+    "denaro": 0,
+    "idee": 1
+   },
+   "production": {
+    "costruzione": 0,
+    "denaro": 0,
+    "idee": 0
+   }
+  },
+  {
+   "id": "ed_villaggio_palizzato",
+   "era": 1,
+   "cost": {
+    "costruzione": 2,
+    "denaro": 0,
+    "idee": 0
+   },
+   "production": {
+    "costruzione": 0,
+    "denaro": 0,
+    "idee": 0
+   }
+  },
+  {
+   "id": "ed_acquedotto",
+   "era": 2,
+   "cost": {
+    "costruzione": 2,
+    "denaro": 0,
+    "idee": 1
+   },
+   "production": {
+    "costruzione": 0,
+    "denaro": 0,
+    "idee": 0
+   }
+  },
+  {
+   "id": "ed_anfiteatro",
+   "era": 2,
+   "cost": {
+    "costruzione": 4,
+    "denaro": 0,
+    "idee": 1
+   },
+   "production": {
+    "costruzione": 0,
+    "denaro": 1,
+    "idee": 0
+   }
+  },
+  {
+   "id": "ed_castrum",
+   "era": 2,
+   "cost": {
+    "costruzione": 3,
+    "denaro": 0,
+    "idee": 0
+   },
+   "production": {
+    "costruzione": 0,
+    "denaro": 0,
+    "idee": 0
+   }
+  },
+  {
+   "id": "ed_emporio",
+   "era": 2,
+   "cost": {
+    "costruzione": 2,
+    "denaro": 0,
+    "idee": 0
+   },
+   "production": {
+    "costruzione": 0,
+    "denaro": 1,
+    "idee": 0
+   }
+  },
+  {
+   "id": "ed_foro",
+   "era": 2,
+   "cost": {
+    "costruzione": 3,
+    "denaro": 0,
+    "idee": 0
+   },
+   "production": {
+    "costruzione": 0,
+    "denaro": 1,
+    "idee": 0
+   }
+  },
+  {
+   "id": "ed_insulae",
+   "era": 2,
+   "cost": {
+    "costruzione": 2,
+    "denaro": 0,
+    "idee": 0
+   },
+   "production": {
+    "costruzione": 1,
+    "denaro": 0,
+    "idee": 0
+   }
+  },
+  {
+   "id": "ed_ponte",
+   "era": 2,
+   "cost": {
+    "costruzione": 2,
+    "denaro": 0,
+    "idee": 1
+   },
+   "production": {
+    "costruzione": 0,
+    "denaro": 0,
+    "idee": 0
+   }
+  },
+  {
+   "id": "ed_sacello",
+   "era": 2,
+   "cost": {
+    "costruzione": 0,
+    "denaro": 0,
+    "idee": 1
+   },
+   "production": {
+    "costruzione": 0,
+    "denaro": 0,
+    "idee": 0
+   }
+  },
+  {
+   "id": "ed_teatro",
+   "era": 2,
+   "cost": {
+    "costruzione": 1,
+    "denaro": 0,
+    "idee": 1
+   },
+   "production": {
+    "costruzione": 0,
+    "denaro": 0,
+    "idee": 0
+   }
+  },
+  {
+   "id": "ed_tempio",
+   "era": 2,
+   "cost": {
+    "costruzione": 2,
+    "denaro": 0,
+    "idee": 1
+   },
+   "production": {
+    "costruzione": 0,
+    "denaro": 0,
+    "idee": 0
+   }
+  },
+  {
+   "id": "ed_terme",
+   "era": 2,
+   "cost": {
+    "costruzione": 2,
+    "denaro": 0,
+    "idee": 0
+   },
+   "production": {
+    "costruzione": 0,
+    "denaro": 0,
+    "idee": 0
+   }
+  },
+  {
+   "id": "ed_torre_di_vedetta",
+   "era": 2,
+   "cost": {
+    "costruzione": 2,
+    "denaro": 0,
+    "idee": 0
+   },
+   "production": {
+    "costruzione": 0,
+    "denaro": 0,
+    "idee": 0
+   }
+  },
+  {
+   "id": "ed_abbazia",
+   "era": 3,
+   "cost": {
+    "costruzione": 2,
+    "denaro": 1,
+    "idee": 1
+   },
+   "production": {
+    "costruzione": 0,
+    "denaro": 0,
+    "idee": 0
+   }
+  },
+  {
+   "id": "ed_arsenale",
+   "era": 3,
+   "cost": {
+    "costruzione": 3,
+    "denaro": 1,
+    "idee": 0
+   },
+   "production": {
+    "costruzione": 0,
+    "denaro": 0,
+    "idee": 0
+   }
+  },
+  {
+   "id": "ed_borgo",
+   "era": 3,
+   "cost": {
+    "costruzione": 2,
+    "denaro": 0,
+    "idee": 0
+   },
+   "production": {
+    "costruzione": 0,
+    "denaro": 1,
+    "idee": 0
+   }
+  },
+  {
+   "id": "ed_cappella",
+   "era": 3,
+   "cost": {
+    "costruzione": 1,
+    "denaro": 0,
+    "idee": 1
+   },
+   "production": {
+    "costruzione": 0,
+    "denaro": 0,
+    "idee": 0
+   }
+  },
+  {
+   "id": "ed_castello",
+   "era": 3,
+   "cost": {
+    "costruzione": 2,
+    "denaro": 1,
+    "idee": 0
+   },
+   "production": {
+    "costruzione": 0,
+    "denaro": 0,
+    "idee": 0
+   }
+  },
+  {
+   "id": "ed_chiesa",
+   "era": 3,
+   "cost": {
+    "costruzione": 2,
+    "denaro": 0,
+    "idee": 1
+   },
+   "production": {
+    "costruzione": 0,
+    "denaro": 0,
+    "idee": 0
+   }
+  },
+  {
+   "id": "ed_conceria",
+   "era": 3,
+   "cost": {
+    "costruzione": 1,
+    "denaro": 0,
+    "idee": 0
+   },
+   "production": {
+    "costruzione": 0,
+    "denaro": 1,
+    "idee": 0
+   }
+  },
+  {
+   "id": "ed_mercato",
+   "era": 3,
+   "cost": {
+    "costruzione": 2,
+    "denaro": 0,
+    "idee": 0
+   },
+   "production": {
+    "costruzione": 1,
+    "denaro": 1,
+    "idee": 0
+   }
+  },
+  {
+   "id": "ed_mulino",
+   "era": 3,
+   "cost": {
+    "costruzione": 1,
+    "denaro": 0,
+    "idee": 1
+   },
+   "production": {
+    "costruzione": 0,
+    "denaro": 2,
+    "idee": 0
+   }
+  },
+  {
+   "id": "ed_mura",
+   "era": 3,
+   "cost": {
+    "costruzione": 2,
+    "denaro": 0,
+    "idee": 0
+   },
+   "production": {
+    "costruzione": 0,
+    "denaro": 0,
+    "idee": 0
+   }
+  },
+  {
+   "id": "ed_ospedale_dei_pellegrini",
+   "era": 3,
+   "cost": {
+    "costruzione": 2,
+    "denaro": 1,
+    "idee": 0
+   },
+   "production": {
+    "costruzione": 0,
+    "denaro": 0,
+    "idee": 0
+   }
+  },
+  {
+   "id": "ed_torre_civica",
+   "era": 3,
+   "cost": {
+    "costruzione": 2,
+    "denaro": 0,
+    "idee": 0
+   },
+   "production": {
+    "costruzione": 0,
+    "denaro": 0,
+    "idee": 0
+   }
+  },
+  {
+   "id": "ed_accademia",
+   "era": 4,
+   "cost": {
+    "costruzione": 1,
+    "denaro": 0,
+    "idee": 2
+   },
+   "production": {
+    "costruzione": 0,
+    "denaro": 0,
+    "idee": 0
+   }
+  },
+  {
+   "id": "ed_banco",
+   "era": 4,
+   "cost": {
+    "costruzione": 1,
+    "denaro": 0,
+    "idee": 1
+   },
+   "production": {
+    "costruzione": 0,
+    "denaro": 1,
+    "idee": 0
+   }
+  },
+  {
+   "id": "ed_bottega_dartista",
+   "era": 4,
+   "cost": {
+    "costruzione": 1,
+    "denaro": 0,
+    "idee": 1
+   },
+   "production": {
+    "costruzione": 0,
+    "denaro": 0,
+    "idee": 0
+   }
+  },
+  {
+   "id": "ed_duomo",
+   "era": 4,
+   "cost": {
+    "costruzione": 3,
+    "denaro": 1,
+    "idee": 2
+   },
+   "production": {
+    "costruzione": 0,
+    "denaro": 0,
+    "idee": 0
+   }
+  },
+  {
+   "id": "ed_fortezza_bastionata",
+   "era": 4,
+   "cost": {
+    "costruzione": 3,
+    "denaro": 1,
+    "idee": 1
+   },
+   "production": {
+    "costruzione": 0,
+    "denaro": 0,
+    "idee": 0
+   }
+  },
+  {
+   "id": "ed_giardino_allitaliana",
+   "era": 4,
+   "cost": {
+    "costruzione": 0,
+    "denaro": 0,
+    "idee": 2
+   },
+   "production": {
+    "costruzione": 0,
+    "denaro": 0,
+    "idee": 0
+   }
+  },
+  {
+   "id": "ed_loggia",
+   "era": 4,
+   "cost": {
+    "costruzione": 1,
+    "denaro": 0,
+    "idee": 1
+   },
+   "production": {
+    "costruzione": 0,
+    "denaro": 0,
+    "idee": 0
+   }
+  },
+  {
+   "id": "ed_osservatorio",
+   "era": 4,
+   "cost": {
+    "costruzione": 1,
+    "denaro": 1,
+    "idee": 1
+   },
+   "production": {
+    "costruzione": 0,
+    "denaro": 0,
+    "idee": 0
+   }
+  },
+  {
+   "id": "ed_palazzo_signorile",
+   "era": 4,
+   "cost": {
+    "costruzione": 2,
+    "denaro": 1,
+    "idee": 1
+   },
+   "production": {
+    "costruzione": 0,
+    "denaro": 0,
+    "idee": 1
+   }
+  },
+  {
+   "id": "ed_piazza_monumentale",
+   "era": 4,
+   "cost": {
+    "costruzione": 2,
+    "denaro": 1,
+    "idee": 1
+   },
+   "production": {
+    "costruzione": 0,
+    "denaro": 0,
+    "idee": 0
+   }
+  },
+  {
+   "id": "ed_ponte_monumentale",
+   "era": 4,
+   "cost": {
+    "costruzione": 2,
+    "denaro": 1,
+    "idee": 1
+   },
+   "production": {
+    "costruzione": 0,
+    "denaro": 0,
+    "idee": 0
+   }
+  },
+  {
+   "id": "ed_villa",
+   "era": 4,
+   "cost": {
+    "costruzione": 2,
+    "denaro": 1,
+    "idee": 1
+   },
+   "production": {
+    "costruzione": 0,
+    "denaro": 0,
+    "idee": 0
+   }
+  },
+  {
+   "id": "ed_biblioteca",
+   "era": 5,
+   "cost": {
+    "costruzione": 1,
+    "denaro": 1,
+    "idee": 2
+   },
+   "production": {
+    "costruzione": 0,
+    "denaro": 0,
+    "idee": 0
+   }
+  },
+  {
+   "id": "ed_caffe_letterario",
+   "era": 5,
+   "cost": {
+    "costruzione": 0,
+    "denaro": 0,
+    "idee": 2
+   },
+   "production": {
+    "costruzione": 0,
+    "denaro": 0,
+    "idee": 0
+   }
+  },
+  {
+   "id": "ed_condominio",
+   "era": 5,
+   "cost": {
+    "costruzione": 1,
+    "denaro": 0,
+    "idee": 1
+   },
+   "production": {
+    "costruzione": 0,
+    "denaro": 0,
+    "idee": 0
+   }
+  },
+  {
+   "id": "ed_fondazione_darte",
+   "era": 5,
+   "cost": {
+    "costruzione": 1,
+    "denaro": 0,
+    "idee": 2
+   },
+   "production": {
+    "costruzione": 0,
+    "denaro": 0,
+    "idee": 0
+   }
+  },
+  {
+   "id": "ed_grattacielo",
+   "era": 5,
+   "cost": {
+    "costruzione": 2,
+    "denaro": 3,
+    "idee": 1
+   },
+   "production": {
+    "costruzione": 0,
+    "denaro": 0,
+    "idee": 0
+   }
+  },
+  {
+   "id": "ed_monumento_ai_caduti",
+   "era": 5,
+   "cost": {
+    "costruzione": 1,
+    "denaro": 1,
+    "idee": 1
+   },
+   "production": {
+    "costruzione": 0,
+    "denaro": 0,
+    "idee": 0
+   }
+  },
+  {
+   "id": "ed_museo",
+   "era": 5,
+   "cost": {
+    "costruzione": 1,
+    "denaro": 1,
+    "idee": 2
+   },
+   "production": {
+    "costruzione": 0,
+    "denaro": 0,
+    "idee": 0
+   }
+  },
+  {
+   "id": "ed_officina",
+   "era": 5,
+   "cost": {
+    "costruzione": 1,
+    "denaro": 0,
+    "idee": 1
+   },
+   "production": {
+    "costruzione": 0,
+    "denaro": 2,
+    "idee": 0
+   }
+  },
+  {
+   "id": "ed_parco_archeologico",
+   "era": 5,
+   "cost": {
+    "costruzione": 1,
+    "denaro": 0,
+    "idee": 2
+   },
+   "production": {
+    "costruzione": 0,
+    "denaro": 0,
+    "idee": 0
+   }
+  },
+  {
+   "id": "ed_ponte_in_acciaio",
+   "era": 5,
+   "cost": {
+    "costruzione": 1,
+    "denaro": 2,
+    "idee": 1
+   },
+   "production": {
+    "costruzione": 0,
+    "denaro": 0,
+    "idee": 0
+   }
+  },
+  {
+   "id": "ed_stazione",
+   "era": 5,
+   "cost": {
+    "costruzione": 2,
+    "denaro": 3,
+    "idee": 1
+   },
+   "production": {
+    "costruzione": 0,
+    "denaro": 2,
+    "idee": 0
+   }
+  },
+  {
+   "id": "ed_universita",
+   "era": 5,
+   "cost": {
+    "costruzione": 2,
+    "denaro": 1,
+    "idee": 2
+   },
+   "production": {
+    "costruzione": 0,
+    "denaro": 0,
+    "idee": 0
+   }
+  }
+ ]
+}
