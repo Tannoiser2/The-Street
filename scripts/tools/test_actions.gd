@@ -29,7 +29,7 @@ func _ready() -> void:
 	_run("la versione vecchia del bot", _test_versione_del_bot)
 	_run("i bot con una strategia giocano davvero", _test_strategie)
 	_run("la strategia Obiettivi", _test_obiettivi)
-	_run("il Centro Urbano una volta per era, la prova spenta", _test_centro_una_volta)
+	_run("il Centro Urbano una volta per era", _test_centro_una_volta)
 	print("\n%d superati, %d falliti" % [_passed, _failed])
 	get_tree().quit(0 if _failed == 0 else 1)
 
@@ -947,10 +947,12 @@ func _test_obiettivi() -> void:
 	_eq("  a Monumento gia' soddisfatto la carta larga non vale piu' niente",
 		StrategyBot._premio_obiettivi(gs, p, CardDB.buildings[larga], 4, {}), 0.0)
 
-# LA PROSPERITA' UNA VOLTA PER ERA. Manopola spenta nei dati: quando e' spenta
-# il Centro paga a ogni attivazione, come sempre; accesa, paga la prima volta
-# in un'era e poi tace in quella colonna fino all'era dopo. I contatori sono
-# quelli che leggono le misure: se sbagliano loro, sbaglia il documento.
+# LA PROSPERITA' UNA VOLTA PER ERA. Manopola accesa nei dati (punto 86): si
+# provano tutte e due le posizioni, forzandole, cosi' il test non dipende da
+# come e' girata. Spenta, il Centro paga a ogni attivazione; accesa, paga la
+# prima volta in un'era e poi tace in quella colonna fino all'era dopo. I
+# contatori sono quelli che leggono le misure: se sbagliano loro, sbaglia il
+# documento.
 func _test_centro_una_volta() -> void:
 	var ctl := _game(3, 11)
 	var gs := ctl.gs
@@ -958,12 +960,16 @@ func _test_centro_una_volta() -> void:
 	for i in soglia:
 		_put(gs, i % 2, "ed_capanne", 3, i)
 	_ok("la colonna e' un Centro Urbano", gs.grid.is_prosperity_center(3))
+	_ok("nei dati e' accesa", bool(CardDB.constants["prosperity"]["once_per_era"]))
 	var oro := func() -> int: return int(gs.players[1].counters.get("oro_centro", 0))
+	var salvate: Dictionary = CardDB.constants["prosperity"]
+	var spenta := salvate.duplicate()
+	spenta["once_per_era"] = false
+	CardDB.constants["prosperity"] = spenta
 	EraRules.activate(gs, 0, 3)
 	EraRules.activate(gs, 0, 3)
 	_eq("spenta: paga a ogni attivazione", oro.call(), 2)
 	_eq("  e conta le volte a chi attiva", int(gs.players[0].counters.get("centro_attivato", 0)), 2)
-	var salvate: Dictionary = CardDB.constants["prosperity"]
 	var accesa := salvate.duplicate()
 	accesa["once_per_era"] = true
 	CardDB.constants["prosperity"] = accesa

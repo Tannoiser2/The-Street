@@ -21,6 +21,7 @@ def leggi(pattern):
     carte, partite, giocatori, bot, vert, prosp, rov, bin, ver = ({}, 0, None, "caso",
                                                                  "2/6/12/20", 3, 2, "per_era", 1)
     strat = None
+    centro = "ogni_attivazione"
     for f in sorted(glob.glob(pattern)):
         righe = [l.rstrip("\n") for l in open(f) if l.strip()]
         meta = [l for l in righe if l.startswith("# partite=")][0]
@@ -43,6 +44,9 @@ def leggi(pattern):
         # Quante strategie al tavolo: un CSV che non lo dice viene da quando
         # il canone ne aveva cinque (o dal bot a caso, che non ne ha).
         if "strategie=" in meta: strat = int(meta.split("strategie=")[1].split()[0])
+        # E quante volte paga il Centro Urbano: un CSV che non lo dice viene
+        # da quando pagava a ogni attivazione.
+        if "centro=" in meta: centro = meta.split("centro=")[1].split()[0]
         i = righe.index([l for l in righe if l.startswith("id;")][0])
         hdr = righe[i].split(";")
         for l in righe[i+1:]:
@@ -60,12 +64,12 @@ def leggi(pattern):
             else:
                 for k in NUM: c[k] += int(v[k])
     if strat is None: strat = 5 if bot == "strategie" else 0
-    return carte, partite, giocatori, bot, vert, prosp, rov, bin, ver, strat
+    return carte, partite, giocatori, bot, vert, prosp, rov, bin, ver, strat, centro
 
-carte, partite, giocatori, bot, vert, prosp, rov, bin, ver, strat = leggi(sys.argv[1])
+carte, partite, giocatori, bot, vert, prosp, rov, bin, ver, strat, centro = leggi(sys.argv[1])
 altro = None
 if "--confronta" in sys.argv:
-    altro, partite_altro, _, bot_altro, vert_altro, prosp_altro, rov_altro, bin_altro, ver_altro, strat_altro = leggi(
+    altro, partite_altro, _, bot_altro, vert_altro, prosp_altro, rov_altro, bin_altro, ver_altro, strat_altro, centro_altro = leggi(
         sys.argv[sys.argv.index("--confronta") + 1])
     # LE COLONNE SI CHIAMANO COME TUTTO CIO' CHE LE DISTINGUE, non come la
     # prima differenza trovata. Due lotti possono differire in piu' di una
@@ -94,6 +98,12 @@ if "--confronta" in sys.argv:
     if prosp != prosp_altro:
         DIFF.append((f"Centro a {prosp_altro}", f"Centro a {prosp}",
                      f"il Centro Urbano a {prosp} edifici"))
+    if centro != centro_altro:
+        nomi_c = {"ogni_attivazione": "Centro a ogni attivazione",
+                  "una_per_era": "Centro una volta per era"}
+        DIFF.append((nomi_c.get(centro_altro, centro_altro), nomi_c.get(centro, centro),
+                     "il Centro Urbano che paga una volta per era" if centro == "una_per_era"
+                     else "il Centro Urbano che paga a ogni attivazione"))
     if bin != bin_altro:
         DIFF.append(("binari per era" if bin_altro == "per_era" else "binari liberi",
                      "binari per era" if bin == "per_era" else "binari liberi",

@@ -1460,5 +1460,18 @@ dato è stato importato da lì. Ma due confronti fra ciò che è stampato e
     restano dentro l'errore standard (1,2 punti a 3 giocatori): la Rendita
     fa 37,6 / 39,0 / 38,9%, Obiettivi 37,1 / 36,5 / 35,7%. Il distacco fra
     primo e secondo cresce di un punto con meno Prosperita': e' l'unico
-    premio che paga anche gli avversari, e un po' livellava. Decisione del
-    designer; nessuna delle due e' accesa nei dati.
+    premio che paga anche gli avversari, e un po' livellava.
+
+    **ADOTTATA LA SECONDA**: `once_per_era` e' accesa nei dati. Il mondo di
+    oggi rigioca esattamente le 3 000 partite misurate con `--una_per_era`
+    (verificato sulle prime 300); `--una_per_era 0` rimette il Centro a ogni
+    attivazione. L'intestazione delle batterie dice `centro=una_per_era`, e
+    le misure pubblicate prima (vita degli edifici, strategie) sono fatte col
+    Centro a ogni attivazione: la differenza e' quella della tabella qui
+    sopra, 0,4 edifici e 4 PV a partita.
+
+    **Resta una domanda da tavolo:** al tavolo vero bisogna ricordarsi quali
+    Centri hanno gia' pagato in quest'era. Serve un segno fisico - girare il
+    cartellino della Prosperita' dopo il pagamento, e rigirarli tutti a fine
+    era - e il regolamento va aggiornato di conseguenza. Il cartellino a
+    schermo oggi non lo mostra.
