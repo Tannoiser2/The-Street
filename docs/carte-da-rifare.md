@@ -3,9 +3,9 @@
 > L'elenco di tutto quello che, stampato oggi, dice una cosa che nella v2 non è più vera. Le
 > regole della v2 sono quelle decise nel registro (punti 87-93) e nel file `data/cards-v2.json`:
 > tre risorse (Costruzione, Denaro, Idee), niente rudere (attivo, rovina, sotterrato), niente
-> Verticalità (premio di scavo S×L a chi costruisce sopra, dimezzato nell'era 5), il turno a
-> cinque azioni con il lavoratore che va dove agisce, il draft dei Personaggi a inizio era, le
-> tessere pescate a caso con produzione per era. **Non è una decisione sui testi**: per ogni
+> Verticalità (premio di scavo S×L a chi costruisce sopra, dimezzato nell'era 5), il draft dei
+> Personaggi a inizio era, le
+> tessere pescate a caso con produzione per era, quattro lavoratori che attivano e poi agiscono. **Non è una decisione sui testi**: per ogni
 > carta c'è il motivo per cui va rifatta e una proposta, e decide il designer.
 
 Sigle del motivo:
@@ -65,7 +65,7 @@ informazione. Cambia il testo di:
 
 | carta (era) | oggi | motivo | proposta |
 |---|---|---|---|
-| Capotribù (1) | l'edificio protetto da questo lavoratore ha +1 res | LAV | il primo edificio che costruisci in quest'era ha +1 res (è così nel motore v2) |
+| Capotribù (1) | l'edificio protetto da questo lavoratore ha +1 res | LAV | il primo edificio che costruisci in quest'era ha +1 res (è così nel motore v2, con il draft) |
 | Legionario (2), Cavaliere (3) | la sua protezione vale +3/+4 invece di +2; se l'edificio protetto sopravvive, +1 cultura | LAV, CUL | il primo edificio che costruisci in quest'era ha +3/+4 invece di +2; se sopravvive all'evento, +1 PV |
 | Incisore (1), Retore (2) | Impronta: infila questa carta sotto un tuo edificio | DRA | a inizio era 1 nessuno ha edifici: "infila questa carta sotto il primo edificio che costruisci in quest'era" (Scavo +3/+5) |
 | Mercante di ossidiana (1) | fino a 2 scambi pietra↔oro alla pari | 3R | 2 scambi alla pari fra due risorse qualsiasi |
@@ -76,7 +76,7 @@ informazione. Cambia il testo di:
 | Cronista (3), Mecenate (4) | +1 cultura | CUL | +1 PV |
 | Mecenate (4) | i potenziamenti Arte che acquisti valgono +1 PV | — | resta (l'Arte si paga in Idee) |
 | Archeologo (5) | scegli una tua Rovina non Sotterrata | — | resta: la rovina è uno stato della v2 |
-| Dinastia | 4 pietra · 2 pietra + 1 oro · 1 pietra + 2 oro · 3 oro | 3R | 4/3/3/3 Idee (registro 91), sempre un'azione, al posto del turno (D8) |
+| Dinastia | 4 pietra · 2 pietra + 1 oro · 1 pietra + 2 oro · 3 oro; "aggiunge un quarto lavoratore" | 3R | 4/3/3/3 Idee (registro 91), sempre un'azione (D8); con quattro lavoratori di base (registro 94) è il **quinto** |
 
 Da decidere a parte: gli scheletri. Oggi i Personaggi presi si seppelliscono a fine era sotto un
 edificio in piedi e valgono 6 meno l'era se quell'edificio finisce sotterrato; nella v2 il
@@ -104,7 +104,7 @@ scheletro (SAG: serve il posto sulla sagoma). Cambia il testo di:
 | Inverno lungo (1) | tutti perdono 1 pietra | 3R | 1 Costruzione |
 | Secolarizzazioni (4) | restaurare un rudere Religione non costa risorse | RUD | ristrutturare una propria rovina Religione non costa risorse |
 | Speculazione edilizia (4) | ogni edificio con Vetustà 2+: −1 res | RUD | la Vetustà resta anche senza rudere (cresce a chi regge l'evento); se il designer la toglie, la carta va sostituita |
-| Anni della fame (3) | nessuna produzione durante l'ultimo round dell'era | — | resta: i round ci sono ancora (tre lavoratori, tre giri) |
+| Anni della fame (3) | nessuna produzione durante l'ultimo round dell'era | — | resta: i round ci sono ancora (quattro lavoratori, quattro giri) |
 | Eruzione (2), Bonifiche (4) | potenziamento gratis; primo terrapieno a 0 | — | restano (terrapieni e potenziamenti ci sono) |
 
 Gli altri 15 dicono solo classi, terreni e resistenze: restano.
@@ -140,8 +140,9 @@ Gli altri 10 restano (Fori Imperiali e Catacombe usano "sotterrato", che resta).
 - **"Cultura"**: oggi è un canale di punti (Cronista, Legionario, Cavaliere, Mecenate, Artista di
   corte) e il nome della classe; con le Idee come risorsa conviene dire "PV" per i punti e tenere
   "Cultura" solo per la classe.
-- **"Protetto"**: nella v2 protegge solo il lavoratore di chi costruisce, sull'edificio nuovo. I
-  tre eventi "non protetti" e i tre protettori vanno riletti con questo significato.
+- **"Protetto"**: con il turno a quattro lavoratori (registro 94) protegge come oggi il lavoratore
+  messo sopra un proprio edificio in piedi; i tre protettori del draft si legano al primo edificio
+  costruito nell'era.
 - **Reclutare** sparisce dalle azioni; **la Dinastia** resta un acquisto al posto del turno.
 
 ## Come rifare l'elenco

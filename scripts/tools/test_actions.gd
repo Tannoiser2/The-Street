@@ -1153,7 +1153,10 @@ func _test_canone_v2() -> void:
 func _test_turno_v2() -> void:
 	if not FileAccess.file_exists("res://data/cards-v2.json"): return
 	CardDB.load_db("res://data/cards-v2.json")
-	_ok("il file v2 accende il turno v2", bool(CardDB.constants.get("turno_v2", false)))
+	# Dal registro 94 il file v2 gioca il turno a quattro lavoratori: il turno
+	# a un'azione resta una manopola, e qui si accende.
+	CardDB.constants["turno_v2"] = true
+	_ok("la manopola accende il turno v2", bool(CardDB.constants.get("turno_v2", false)))
 	var ctl := _game(3, 990)
 	var gs := ctl.gs
 	# Prima il draft dei Personaggi (v2): qui si prende il primo che c'e'.
@@ -1235,10 +1238,13 @@ func _test_draft_v2() -> void:
 	_eq("finito il draft si gioca", gs.phase, Enums.Phase.PIAZZA)
 	_eq("  e parte il primo dell'ordine", gs.current_index, int(gs.turn_order[0]))
 	_eq("  con la fila scesa a 2", gs.char_row.size(), 2)
+	_eq("  con quattro lavoratori (registro 94)", primo.workers, 4)
+	# Turno v1.5: il lavoratore attiva la colonna, poi si agisce li' o accanto.
+	_ok("  il primo drafter attiva la colonna 1", ctl.place_worker(1))
 	_ok("  reclutare non e' piu' un'azione", not ctl.recruit(gs.char_row[0], null))
 	var costruito: Building = null
 	for card_id in gs.market.duplicate():
-		for c in gs.grid.n_cols:
+		for c in range(0, 3):
 			if ctl.build(card_id, c, false):
 				for b in gs.grid.buildings:
 					if b.owner == primo.index: costruito = b
@@ -1246,8 +1252,9 @@ func _test_draft_v2() -> void:
 		if costruito != null: break
 	_ok("il primo drafter costruisce", costruito != null)
 	if costruito != null:
-		_eq("  e il Capotribu' protegge l'edificio nuovo (+2 +1)", costruito.protection,
-			int(CardDB.constants["protection_bonus"]) + 1)
+		# Nel turno a quattro lavoratori il +2 lo da' solo il lavoratore messo
+		# sopra un proprio edificio in piedi: qui l'edificio e' nuovo, resta il +1.
+		_eq("  e il Capotribu' protegge l'edificio nuovo (+1)", costruito.protection, 1)
 		_eq("  legato a quell'edificio", int(primo.character_targets.get("pe_capotribu", -1)), costruito.uid)
 	var finite := 0
 	var draftati := 0

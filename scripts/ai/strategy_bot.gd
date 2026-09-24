@@ -365,8 +365,9 @@ static func _opzioni(gs: GameState, player: int, col: int) -> Array:
 		if v.legale and v.pagabile(p): out.append(v)
 	for v in AvailableActions.restauri(gs, player, col):
 		if v.legale and v.pagabile(p): out.append(v)
-	for v in AvailableActions.reclutamenti(gs, player, col):
-		if v.legale and v.pagabile(p): out.append(v)
+	if not ctl_draft():
+		for v in AvailableActions.reclutamenti(gs, player, col):
+			if v.legale and v.pagabile(p): out.append(v)
 	var d := AvailableActions.dinastia(gs, player)
 	if d.legale and d.pagabile(p): out.append(d)
 	return out

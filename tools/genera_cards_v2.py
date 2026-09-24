@@ -78,9 +78,13 @@ v2["constants"]["spianare_conserva_scavo"] = False     # lo spianato vale 0 (ter
 v2["constants"]["verticality_vp"] = {"1": 0, "2": 0, "3": 0, "4": 0}   # via la Verticalita'
 v2["constants"]["premio_scavo"] = "per_livello"        # S x L a chi costruisce sopra
 v2["constants"]["premio_era5"] = "dimezzato"           # la correzione all'ultima era
-# IL TURNO V2 (registro 93): un'azione per turno, il lavoratore va dove agisce;
-# passare incassa 1 Costruzione piu' 1 risorsa a scelta (D14).
-v2["constants"]["turno_v2"] = True
+# IL TURNO (registro 94): decisione del designer dopo la misura del turno a
+# un'azione (registro 93, `turno_v2`, che resta come manopola): QUATTRO
+# lavoratori, e ogni lavoratore attiva la colonna e poi fa un'azione
+# (costruire, potenziare, ristrutturare), come nella v1.5. Passare incassa
+# 1 Costruzione piu' 1 risorsa a scelta solo nel turno a un'azione (D14).
+v2["constants"]["turno_v2"] = False
+v2["constants"]["workers_base"] = 4
 v2["constants"]["passa_incasso_pietra"] = 1
 v2["constants"]["passa_incasso_scelta"] = 1
 # IL DRAFT DEI PERSONAGGI (punto 8, registro 93): a inizio era, in ordine di

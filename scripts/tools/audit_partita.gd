@@ -138,6 +138,11 @@ func _ready() -> void:
 	if args.has("tetto"):
 		CardDB.constants["resource_cap_per_resource"] = int(args["tetto"])
 		print("# resource_cap_per_resource = %d" % int(args["tetto"]))
+	# IL TURNO A UN'AZIONE (`--turno_v2 1`, registro 93; spento nel file v2 dal
+	# registro 94): ogni lavoratore fa una cosa sola e va dove agisce.
+	if args.has("turno_v2"):
+		CardDB.constants["turno_v2"] = str(args["turno_v2"]) != "0"
+		print("# turno_v2 = %s" % str(bool(CardDB.constants["turno_v2"])))
 	# I LAVORATORI PER ERA (`--lavoratori 5`, `workers_base`, 3 nei dati). Nel
 	# turno v2 ogni lavoratore e' UN'azione, non piu' un'attivazione piu'
 	# un'azione: con 3 il ritmo si dimezza (registro 93), e la manopola misura

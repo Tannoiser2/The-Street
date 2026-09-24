@@ -100,11 +100,17 @@ static func potenziamenti(gs: GameState, player: int, col: int) -> Array[Voce]:
 
 static func restauri(gs: GameState, player: int, col: int) -> Array[Voce]:
 	var out: Array[Voce] = []
+	# Senza rudere (v2) si ristruttura la PROPRIA rovina nella colonna.
+	var senza_rudere := bool(CardDB.constants.get("senza_rudere", false))
 	for b in gs.grid.in_column(col):
-		if b.state != Enums.BuildingState.RUDERE or b.is_buried: continue
+		if b.is_buried: continue
+		if senza_rudere:
+			if b.state != Enums.BuildingState.ROVINA or b.owner != player: continue
+		elif b.state != Enums.BuildingState.RUDERE: continue
 		var q := ActionRules.quote_restore(gs, player, b)
 		var chi := "" if b.owner == player else " (di G%d: diventa tuo)" % b.owner
-		out.append(_voce("restaura", "Restaura %s%s" % [b.data["name"], chi], q, {"uid": b.uid}))
+		out.append(_voce("restaura", "%s %s%s" % ["Ristruttura" if senza_rudere else "Restaura",
+			b.data["name"], chi], q, {"uid": b.uid}))
 	return out
 
 static func reclutamenti(gs: GameState, player: int, col: int) -> Array[Voce]:

@@ -420,8 +420,9 @@ func build(card_id: String, col_from: int, above: bool, pay_option: int = 0, des
 		# quello (D10: niente base del terreno, niente Centro Urbano).
 		_spendi_lavoratore("costruisci")
 		_lavoratore_su(b, p)
-		if draft_v2(): _protettori_sul_nuovo(b, p)
 		EraRules.paga_edificio(gs, b)
+	# Con il draft i protettori aspettano il primo edificio costruito nell'era.
+	if draft_v2(): _protettori_sul_nuovo(b, p)
 	building_placed.emit(b)
 	_end_turn()
 	return true
@@ -500,12 +501,12 @@ func restore(target: Building) -> bool:
 	var stolen := target.owner != p.index
 	target.owner = p.index
 	gs.log_line("%s restaurato%s" % [target.data["name"], " e appropriato" if stolen else ""])
+	# Ristrutturare (D13): la rovina torna attiva, e' di nuovo un edificio
+	# intero (anche se era stato spianato).
+	if bool(CardDB.constants.get("senza_rudere", false)): target.was_razed = false
 	if turno_v2():
-		# Ristrutturare (D13): la rovina torna attiva, e' di nuovo un
-		# edificio intero (anche se era stato spianato), e il lavoratore
-		# ci resta sopra a proteggerla.
+		# Nel turno a un'azione il lavoratore ci resta sopra a proteggerla.
 		_spendi_lavoratore("ristruttura")
-		target.was_razed = false
 		_lavoratore_su(target, p)
 	building_changed.emit(target)
 	_end_turn()
