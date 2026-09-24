@@ -22,13 +22,14 @@
 7. Una carta a doppia classe segue la classe che chiede Idee, una volta sola; se la risorsa
    da sostituire manca (niente Denaro), si sostituisce Costruzione.
 8. **Chi oggi produce Cultura produce Idee** (D1 dell'audit: Idee = Cultura resa risorsa).
+9. *(spenta)* Nelle ere 4-5 ogni carta paga almeno un'Idea, anche Militare, Commercio e Civico.
 
 Con queste regole la domanda di Idee cresce con le ere quasi da sola, perché crescono le carte
 Cultura (2 / 2 / 1 / 4 / 6 per era) e l'oro da sostituire (0 / 0 / 7 / 22 / 30). **L'era 3 fa
-eccezione**: il Medioevo delle carte è pietra e commercio (Arsenale, Borgo, Castello, Conceria,
-Mercato, Mura, Torre civica), con una sola carta Cultura. Se il designer vuole la curva
-monotona, la via è far pagare 2 Idee alle Religione dell'era 3 (Abbazia, Cappella, Chiesa):
-è una riga da cambiare nella regola 4.
+eccezione**, e il designer l'ha voluta così: il Medioevo è un periodo oscuro, le Idee calano;
+esplodono nel Rinascimento e nell'era Moderna. Se l'esplosione deve essere più netta di
+10 / 16, la regola 9 (spenta) fa pagare almeno un'Idea a **ogni** carta delle ere 4-5, anche
+Militare, Commercio e Civico: la domanda diventa 15 / 18. Si accende in testa allo script.
 
 ## La tabella
 

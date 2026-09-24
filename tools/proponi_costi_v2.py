@@ -25,6 +25,9 @@
 #      Costruzione: nessuna carta che chiede Idee resta senza.
 #  R8. Un edificio che oggi produce Cultura produce Idee (Idee = Cultura resa
 #      risorsa, D1 dell'audit); il resto della produzione si traduce come i costi.
+#  R9. (SPENTA) Nelle ere 4-5 ogni carta paga almeno un'Idea, anche Militare,
+#      Commercio e Civico: l'esplosione delle Idee piu' netta. Accendere qui sotto.
+ESPLOSIONE_ERE_4_5 = False
 import json, collections, os, sys
 
 RADICE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..")
@@ -54,6 +57,10 @@ def proponi(b):
     # R7: se la risorsa da sostituire mancava, si prende dalla Costruzione.
     if ("cultura" in classi or "religione" in classi or ("ingegneria" in classi and era >= 2)) and i == 0:
         sposta("c", 1, "R7: niente Denaro, 1 Idea per 1 Costruzione")
+    # R9 (spenta): nelle ere 4-5 nessuna carta senza Idee.
+    if ESPLOSIONE_ERE_4_5 and era >= 4 and i == 0:
+        sposta("d", 1, "R9: era 4-5, almeno 1 Idea")
+        if i == 0: sposta("c", 1, "R9: era 4-5, almeno 1 Idea (da Costruzione)")
     prod = dict(b["production"])
     p = {"costruzione": int(prod.get("pietra", 0)), "denaro": int(prod.get("oro", 0)),
          "idee": int(prod.get("cultura", 0))}
@@ -91,13 +98,14 @@ w("6. **Militare, Commercio e Civico non pagano Idee.**")
 w("7. Una carta a doppia classe segue la classe che chiede Idee, una volta sola; se la risorsa")
 w("   da sostituire manca (niente Denaro), si sostituisce Costruzione.")
 w("8. **Chi oggi produce Cultura produce Idee** (D1 dell'audit: Idee = Cultura resa risorsa).")
+w("9. *(spenta)* Nelle ere 4-5 ogni carta paga almeno un'Idea, anche Militare, Commercio e Civico.")
 w("")
 w("Con queste regole la domanda di Idee cresce con le ere quasi da sola, perché crescono le carte")
 w("Cultura (2 / 2 / 1 / 4 / 6 per era) e l'oro da sostituire (0 / 0 / 7 / 22 / 30). **L'era 3 fa")
-w("eccezione**: il Medioevo delle carte è pietra e commercio (Arsenale, Borgo, Castello, Conceria,")
-w("Mercato, Mura, Torre civica), con una sola carta Cultura. Se il designer vuole la curva")
-w("monotona, la via è far pagare 2 Idee alle Religione dell'era 3 (Abbazia, Cappella, Chiesa):")
-w("è una riga da cambiare nella regola 4.")
+w("eccezione**, e il designer l'ha voluta così: il Medioevo è un periodo oscuro, le Idee calano;")
+w("esplodono nel Rinascimento e nell'era Moderna. Se l'esplosione deve essere più netta di")
+w("10 / 16, la regola 9 (spenta) fa pagare almeno un'Idea a **ogni** carta delle ere 4-5, anche")
+w("Militare, Commercio e Civico: la domanda diventa 15 / 18. Si accende in testa allo script.")
 w("")
 w("## La tabella")
 w("")
