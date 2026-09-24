@@ -22,9 +22,11 @@ for d in dati:
 
 partite = collections.defaultdict(list)
 for d in dati: partite[d["seme"]].append(d)
-# `piano` dice chi ha pianificato, e forma del tavolo non sono punti: fuori.
+# `piano` dice chi ha pianificato, la forma del tavolo e l'oro del Centro
+# Urbano non sono punti: fuori.
 canali = [k for k in hdr if k not in ("seme", "posto", "giocatore", "pv", "strategia",
-                                      "sopra", "quota_max", "costruiti", "piano")]
+                                      "sopra", "quota_max", "costruiti", "piano",
+                                      "centro_attivato", "oro_centro")]
 
 vinte, giocate, punti = collections.Counter(), collections.Counter(), collections.defaultdict(list)
 per_canale = collections.defaultdict(collections.Counter)

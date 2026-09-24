@@ -30,9 +30,10 @@ def leggi(f):
 
 lotti = [leggi(f) for f in sys.argv[1:]]
 canali = [k for k in lotti[0][1]
-          # `piano` dice chi ha pianificato: non e' un canale di punti.
+          # `piano` dice chi ha pianificato, e l'oro del Centro Urbano non e'
+          # un canale di punti.
           if k not in ("seme", "posto", "giocatore", "pv", "strategia", "sopra", "quota_max",
-                       "costruiti", "piano")]
+                       "costruiti", "piano", "centro_attivato", "oro_centro")]
 
 print("%-12s %7s %7s %8s %8s %8s %8s %8s %8s" % (
     "tabella", "primo", "ultimo", "distacco", "dist/pri", "vertic.", "quota V", "sopra", "quota max"))

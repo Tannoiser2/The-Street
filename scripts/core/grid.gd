@@ -9,6 +9,7 @@ var n_cols: int
 var terrains: Array = []          # Enums.Terrain per colonna
 var buildings: Array = []         # tutti gli edifici mai costruiti
 var risen_this_era: Dictionary = {}  # colonna -> true se ha già guadagnato un livello in quest'era
+var prosperity_paid: Dictionary = {}  # colonna -> true se il Centro Urbano ha gia' pagato in quest'era
 
 func _init(cols: int, terrain_list: Array) -> void:
 	n_cols = cols
@@ -20,6 +21,7 @@ func duplica() -> Grid:
 	for b in buildings:
 		g.buildings.append(b.duplica())
 	g.risen_this_era = risen_this_era.duplicate(true)
+	g.prosperity_paid = prosperity_paid.duplicate(true)
 	return g
 
 # --- interrogazioni -------------------------------------------------
@@ -69,6 +71,7 @@ func owners_alive_in(col: int) -> Array:
 
 func reset_era_flags() -> void:
 	risen_this_era.clear()
+	prosperity_paid.clear()
 
 # --- sotterramento ---------------------------------------------------
 # "Una rovina e' sotterrata quando l'unione degli strati successivi copre

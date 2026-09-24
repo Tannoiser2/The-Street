@@ -67,6 +67,18 @@ func _ready() -> void:
 		pr["min_buildings"] = int(args["prosperita"])
 		CardDB.constants["prosperity"] = pr
 		print("# prosperity.min_buildings = %d" % int(pr["min_buildings"]))
+	# E le due vie per renderla piu' rara senza cambiarne la soglia: piu'
+	# proprietari diversi (`--proprietari 3`) o un pagamento solo per colonna
+	# e per era (`--una_per_era 1`, accesa nei dati; `--una_per_era 0` la spegne).
+	if args.has("proprietari") or args.has("una_per_era"):
+		var pr2: Dictionary = (CardDB.constants["prosperity"] as Dictionary).duplicate()
+		if args.has("proprietari"): pr2["min_owners"] = int(args["proprietari"])
+		# `--una_per_era 0` la spegne: da quando e' accesa nei dati serve anche
+		# il contrario, per rimisurare il mondo di prima.
+		if args.has("una_per_era"): pr2["once_per_era"] = str(args["una_per_era"]) != "0"
+		CardDB.constants["prosperity"] = pr2
+		print("# prosperity.min_owners = %d once_per_era = %s" % [int(pr2["min_owners"]),
+			str(bool(pr2.get("once_per_era", false)))])
 
 	# Le manopole della punizione, per provare "e se il gioco perdonasse di
 	# piu'?" senza toccare i dati:
@@ -150,7 +162,7 @@ func _lotto(seme: int, players: int, quante: int) -> void:
 	# cambiando quanto paga la Verticalita', cambia anche come si gioca e non
 	# solo quanto si segna.
 	print("seme;posto;giocatore;pv;strategia;sopra;quota_max;costruiti;"
-		+ ";".join(Riepilogo.VOCI.map(func(v): return str(v["id"]))) + ";piano")
+		+ ";".join(Riepilogo.VOCI.map(func(v): return str(v["id"]))) + ";piano;centro_attivato;oro_centro")
 	for g in quante:
 		var ctl := GameController.new()
 		ctl.new_game(players, seme + g)
@@ -175,6 +187,9 @@ func _lotto(seme: int, players: int, quante: int) -> void:
 			for v in Riepilogo.VOCI:
 				campi.append("%d" % Riepilogo.punti(riga, str(v["id"])))
 			campi.append("1" if pianifica_qui(chi, g, players) else "0")
+			var cnt: Dictionary = ctl.gs.players[chi].counters
+			campi.append("%d" % int(cnt.get("centro_attivato", 0)))
+			campi.append("%d" % int(cnt.get("oro_centro", 0)))
 			print(";".join(campi))
 	get_tree().quit(0)
 
@@ -251,12 +266,14 @@ func _stampa_vita(acc: Dictionary, quante: int, players: int, seme: int) -> void
 	var vt = CardDB.constants["verticality_vp"]
 	var scala: Array[String] = []
 	for i in 4: scala.append("%d" % int(vt[str(i + 1)]))
-	print("# partite=%d giocatori=%d seme_base=%d bot=%s verticalita=%s prosperita=%d rovina=%d binari=%s versione_bot=%d strategie=%d" % [
+	print("# partite=%d giocatori=%d seme_base=%d bot=%s verticalita=%s prosperita=%d rovina=%d binari=%s versione_bot=%d strategie=%d centro=%s" % [
 		quante, players, seme, "strategie" if _strategie else "caso",
 		"/".join(scala), int(CardDB.constants["prosperity"]["min_buildings"]),
 		int(CardDB.constants.get("rovina_gap", 2)),
 		"liberi" if bool(CardDB.constants.get("binari_liberi", false)) else "per_era",
-		StrategyBot.versione_in_uso, _quante_strategie()])
+		StrategyBot.versione_in_uso, _quante_strategie(),
+		"una_per_era" if bool(CardDB.constants["prosperity"].get("once_per_era", false))
+			else "ogni_attivazione"])
 	var intestazione: Array[String] = ["id", "nome", "era", "classi", "larghezza",
 		"costo_pietra", "costo_oro", "resistenza", "rendita", "scavo", "lampo_carta",
 		"copie", "n", "ere_intatto", "ere_piedi", "n_rudere", "n_rovina", "n_sepolto",
