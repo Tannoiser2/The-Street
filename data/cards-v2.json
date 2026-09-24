@@ -97,7 +97,8 @@
     "passa_incasso_pietra": 1,
     "passa_incasso_scelta": 1,
     "draft_personaggi": true,
-    "personaggi_sepolti": false
+    "personaggi_sepolti": false,
+    "scheletro_potenziamento": true
   },
   "terrains": [
     {

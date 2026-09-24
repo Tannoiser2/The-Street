@@ -96,6 +96,9 @@ v2["constants"]["draft_personaggi"] = True
 # senza toccare il motore. Colosseo, Il Silvicoltore e Speculazione edilizia
 # la nominano e vanno rifatti (docs/carte-v2.md).
 v2["constants"]["personaggi_sepolti"] = False
+# Gli scheletri restano: "se scelgo il potenziamento il lavoratore genera uno
+# scheletro" (punto 8, registro 95): 6 meno l'era se l'edificio finisce sotterrato.
+v2["constants"]["scheletro_potenziamento"] = True
 v2["constants"]["vetusta_max"] = 0
 v2["constants"]["vetusta_max_bosco"] = 0
 out = os.path.join(RADICE, "data/cards-v2.json")

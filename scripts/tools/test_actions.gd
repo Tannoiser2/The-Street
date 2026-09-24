@@ -1287,14 +1287,17 @@ func _test_senza_vetusta_v2() -> void:
 	_eq("il primo ha il suo Personaggio", p.specialized_characters.size(), 1)
 	_ok("  e attiva la colonna 1", ctl.place_worker(1))
 	var costruito: Building = null
+	# Si costruisce ACCANTO alla colonna attivata: cosi' piu' tardi, nella
+	# stessa era, un altro lavoratore puo' attivare la colonna dell'edificio
+	# e potenziarlo (un proprio lavoratore per colonna).
 	for card_id in gs.market.duplicate():
-		for c in range(0, 3):
+		for c in [0, 2]:
 			if ctl.build(card_id, c, false):
 				for b in gs.grid.buildings:
 					if b.owner == p.index: costruito = b
 				break
 		if costruito != null: break
-	_ok("  e costruisce", costruito != null)
+	_ok("  e costruisce accanto", costruito != null)
 	if costruito == null:
 		CardDB.load_db(CardDB.DB_PATH)
 		return
@@ -1303,6 +1306,29 @@ func _test_senza_vetusta_v2() -> void:
 	_eq("regge l'evento senza prendere Vetusta'", costruito.vetusta, 0)
 	EraRules.bury_characters(gs)
 	_eq("a fine era il Personaggio non finisce sotto l'edificio", costruito.buried_character, "")
+	# Lo scheletro lo lascia il potenziamento: il lavoratore resta sotto.
+	_ok("il file v2 accende lo scheletro del potenziamento", bool(CardDB.constants.get("scheletro_potenziamento", false)))
+	var chi := costruito.owner
+	var potenziato := false
+	var guard := 0
+	while not potenziato and guard < 60 and gs.phase != Enums.Phase.FINE_PARTITA:
+		guard += 1
+		while not gs.pending_choice.is_empty():
+			ctl.choose(int((gs.pending_choice["options"] as Array)[0]))
+		var g := gs.current_player()
+		if g.index == chi and gs.phase == Enums.Phase.PIAZZA and costruito.is_alive():
+			g.pietra = 5; g.oro = 5; g.idee = 5
+			if ctl.place_worker(costruito.col_from):
+				for upg_id in gs.upg_row.duplicate():
+					if ctl.upgrade(upg_id, costruito):
+						potenziato = true
+						break
+				if not potenziato: ctl.pass_action()
+				continue
+		StrategyBot.play_turn(ctl)
+	_ok("il proprietario potenzia l'edificio", potenziato)
+	if potenziato:
+		_eq("  e il lavoratore resta sotto come scheletro", costruito.buried_character, "lavoratore")
 	CardDB.load_db(CardDB.DB_PATH)
 	# Con la v1.5 la sepoltura c'e' ancora.
 	var c1 := _game(2, 7)

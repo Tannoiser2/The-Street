@@ -469,14 +469,18 @@ func upgrade(upg_id: String, target: Building) -> bool:
 	gs.upg_row.erase(upg_id)
 	_refill(gs.upg_row, gs.upg_decks[gs.era], int(CardDB.constants["side_rows"]))
 	gs.log_line("%s potenziato con %s" % [target.data["name"], CardDB.upgrades[upg_id]["name"]])
-	if turno_v2():
-		# Il lavoratore resta sotto l'edificio come scheletro (D12): vale come
-		# un Personaggio sepolto, 6 meno l'era, se l'edificio finira'
-		# sotterrato. Uno solo per edificio, e non nell'era Moderna.
-		_spendi_lavoratore("potenzia")
+	if turno_v2(): _spendi_lavoratore("potenzia")
+	# LO SCHELETRO DEL POTENZIAMENTO (punto 8 della proposta, registro 95): il
+	# lavoratore che piazza il potenziamento resta sotto l'edificio come
+	# scheletro, e vale come un Personaggio sepolto, 6 meno l'era, se
+	# l'edificio finira' sotterrato. Uno solo per edificio, non nell'era
+	# Moderna. Costante `scheletro_potenziamento` (vera nel file v2); nel
+	# turno a un'azione era gia' cosi' (D12).
+	if turno_v2() or bool(CardDB.constants.get("scheletro_potenziamento", false)):
 		if gs.era < int(CardDB.constants["eras"]) and target.buried_character == "":
 			target.buried_character = "lavoratore"
 			target.buried_character_era = gs.era
+			gs.log_line("il lavoratore resta sotto %s come scheletro" % target.data["name"])
 	building_changed.emit(target)
 	_end_turn()
 	return true

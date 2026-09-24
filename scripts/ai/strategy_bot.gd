@@ -613,7 +613,14 @@ static func _valore_potenziamento(gs: GameState, p: PlayerState, v, dett := {}) 
 		2.2 if vive else 0.8
 	if b.rendita_value() > 0:
 		dett["rendita dell'ospite"] = float(b.rendita_value()) * 0.3
-	return (2.2 if vive else 0.8) + float(b.rendita_value()) * 0.3
+	var q := (2.2 if vive else 0.8) + float(b.rendita_value()) * 0.3
+	# Lo scheletro del potenziamento (registro 95): 6 meno l'era se l'edificio
+	# finira' sotterrato, contato come una possibilita', come per i Personaggi.
+	if (bool(CardDB.constants.get("scheletro_potenziamento", false)) or bool(CardDB.constants.get("turno_v2", false))) \
+			and gs.era <= 4 and b.buried_character == "":
+		q += 0.3 * float(6 - gs.era)
+		dett["lo scheletro vale %d se sepolto" % (6 - gs.era)] = 0.3 * float(6 - gs.era)
+	return q
 
 static func _valore_restauro(gs: GameState, p: PlayerState, v, dett := {}) -> float:
 	var b := _per_uid(gs, int(v.parametri["uid"]))

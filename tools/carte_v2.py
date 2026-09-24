@@ -219,7 +219,8 @@ w("")
 w("Si prendono nel **draft** a inizio era (registro 93): in ordine di turno, uno a testa fra i")
 w("cinque dell'era, gratis e senza lavoratore; gli avanzi si scartano a fine era. Niente classe")
 w("richiesta nella colonna, niente costo: la classe resta stampata come informazione. A fine era")
-w("il Personaggio si scarta: **non si seppellisce** (registro 95), niente scheletri.")
+w("il Personaggio si scarta: **non si seppellisce** (registro 95); lo scheletro lo lascia il")
+w("lavoratore del potenziamento.")
 w("")
 w("| era | Personaggio | classe | quando | testo | motivo | nota |")
 w("|--:|---|---|---|---|---|---|")
@@ -234,7 +235,8 @@ w("## I 25 potenziamenti")
 w("")
 w("Si paga nella risorsa della famiglia (registro 91): Arte in Idee, Struttura in Costruzione, il")
 w("resto in Denaro; importi di oggi (1 nelle ere 1-3, 2 nelle ere 4-5). Il lavoratore che lo")
-w("piazza resta sotto come scheletro (punto 8): sulla sagoma serve il posto.")
+w("piazza resta sotto l'edificio come scheletro (punto 8, registro 95): uno per edificio, non")
+w("nell'era Moderna, vale 6 meno l'era se l'edificio finisce sotterrato. Sulla sagoma serve il posto.")
 w("")
 w("| era | potenziamento | famiglia | costo C/D/I | testo | motivo | nota |")
 w("|--:|---|---|--:|---|---|---|")
@@ -282,7 +284,7 @@ for r in [
     "**\"Cultura\"**: oggi è un canale di punti e il nome di una classe; con le Idee come risorsa i punti si chiamano PV e Cultura resta la classe.",
     "**\"Protetto\"**: come oggi, il lavoratore messo sopra un proprio edificio in piedi della colonna attivata (+%d); i tre protettori del draft si legano al primo edificio costruito nell'era." % K["protection_bonus"],
     "**Reclutare** non è un'azione; **la Dinastia** resta un acquisto al posto dell'azione; **passare** è non fare l'azione dopo l'attivazione.",
-    "**Gli scheletri**: il Personaggio del draft non si seppellisce (registro 95); nella v2 a quattro lavoratori non ci sono scheletri. Il lavoratore sul potenziamento che \"potrebbe\" dare punti (punto 8) resta un'idea della proposta, non una regola.",
+    "**Gli scheletri** (registro 95): il Personaggio del draft non si seppellisce; lo scheletro è il lavoratore che piazza un potenziamento, che resta sotto l'edificio (uno per edificio, non nell'era Moderna) e vale 6 meno l'era se l'edificio finisce sotterrato.",
 ]:
     w(f"- {r}")
 w("")
