@@ -447,10 +447,16 @@ static func rendite_future(res: int, rendita: int, era: int) -> float:
 # quelle tarate a suo tempo; nella v2 le sei strategie vanno ritarate sul
 # lotto di riferimento, e la taratura si fa misurando, con la manopola
 # `--spinta chiave=valore,...` dell'audit, poi si scrive qui.
+# `protezione_attesa` e' la resistenza in piu' che il valutatore comune si
+# aspetta dai lavoratori a venire quando stima le rendite future di un
+# edificio: con quattro lavoratori (v2) quasi ogni edificio che conta viene
+# protetto, e stimarlo scoperto faceva sembrare la Rendita meno di quello
+# che rende (la strategia Rendita vinceva il 55% proprio perche' ci credeva
+# di piu' del valutatore).
 const SPINTE_V1 := {"rendita_per_era": 0.9, "rendita_zero": -1.5, "lampo": 1.6, "lampo_zero": -1.0,
-	"scavo_premio": 0.8, "scavo_terra": -1.5, "scavo_terra_scavo": 0.0}
+	"scavo_premio": 0.8, "scavo_terra": -1.5, "scavo_terra_scavo": 0.0, "protezione_attesa": 0.0}
 const SPINTE_V2 := {"rendita_per_era": 0.9, "rendita_zero": -1.5, "lampo": 1.6, "lampo_zero": -1.0,
-	"scavo_premio": 0.8, "scavo_terra": -1.5, "scavo_terra_scavo": 0.0}
+	"scavo_premio": 0.8, "scavo_terra": -1.5, "scavo_terra_scavo": 0.0, "protezione_attesa": 0.0}
 static var spinte_override := {}
 
 static func spinte() -> Dictionary:
@@ -472,7 +478,7 @@ static func _valore_costruzione(gs: GameState, p: PlayerState, v, strategia: Str
 
 	var q := float(d["lampo"])
 	if q != 0.0: dett["lampo subito"] = q
-	var rend := rendite_future(res, int(d["rendita"]), gs.era)
+	var rend := rendite_future(res + int(round(float(spinte()["protezione_attesa"]))), int(d["rendita"]), gs.era)
 	if rend != 0.0: dett["rendite future"] = rend
 	q += rend
 	var prod: Dictionary = d.get("production", {})
