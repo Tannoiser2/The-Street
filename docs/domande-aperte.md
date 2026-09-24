@@ -1537,3 +1537,22 @@ dato è stato importato da lì. Ma due confronti fra ciò che è stampato e
     designer: accenderlo a 1 come da regolamento (e rigenerare il
     riferimento, dichiarandolo) o togliere la frase dal regolamento.
 
+89. **Via la Verticalita', il premio di scavo al suo posto.** Proposta del
+    designer: togliere la Verticalita' e premiare, con lo Scavo, chi sta
+    nelle pile alte. Formulazione misurata: chi costruisce al livello L sopra
+    un edificio con Scavo S lo incassa subito (manopola `premio_scavo`,
+    "nessuno" nei dati; `--premio per_livello|piu_livello|per_livello_meno_uno`),
+    il proprietario tiene lo Scavo stampato a fine partita; base senza rudere
+    a soglia 2, Verticalita' a zero. Senza rimpiazzo la citta' si appiattisce
+    (-23 punti a giocatore, altezza 3,1, basi altrui 1,0). **S x L** rimette
+    in piedi la citta' (altezza 4,1) e porta le basi altrui a 2,0 come oggi,
+    con il canale Scavo a 19,6 a giocatore, tre quarti della Verticalita'
+    tolta; ma e' neutro fra proprio e altrui, e **il kingmaker e' reale**:
+    meta' del premio arriva nell'era 5 e in una partita su sei il vincitore
+    cambierebbe senza il bottino dell'ultima era. S + L lo dimezza con un
+    canale piu' piccolo; S x (L-1) paga poco e tardi. Da decidere: la scala
+    (S x L) e la correzione all'ultima era (premio dimezzato nell'era 5, o
+    solo fino all'era 4), entrambe da misurare. La strategia Scavo dei bot
+    insegue la regola vecchia: le strategie vanno riscritte per la v2.
+    Tutto in `docs/senza-rudere.md`.
+

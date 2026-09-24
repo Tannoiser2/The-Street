@@ -283,6 +283,87 @@ Così salire sulla colonna altrui non regala punti a chi sta sotto, e lo Scavo a
 diventa un motivo in più invece che l'unico. È una manopola sul conteggio, da misurare a
 parità di semi; il costo è che il timore del kingmaker si sposta lì, e va rimisurato.
 
+## Quarta misura: via la Verticalità, il premio di scavo al suo posto
+
+Il designer: "toglierei proprio la Verticalità: si prendono punti per lo Scavo, e più le pile
+sono alte più dovremmo premiare chi sta in quella pila". La formulazione scelta: **chi
+costruisce al livello L sopra un edificio con Scavo S lo incassa subito**, come il Lampo; il
+proprietario dell'edificio sepolto tiene lo Scavo stampato a fine partita come oggi. Manopola
+`premio_scavo` ("nessuno" nei dati, `--premio …`), con i tre moltiplicatori chiesti: S×L, S+L,
+S×(L−1). Lo spianato (S 0) non paga. Verticalità a zero con la manopola che c'era già
+(`--verticalita 0,0,0,0`); base: senza rudere, soglia 2, spianato a zero. Il bot conta il premio
+quasi per intero e non conta più l'altezza, quindi gioca la regola che misura.
+
+| per giocatore | base | senza Verticalità | + premio S×L | + premio S+L | + premio S×(L−1) |
+|---|--:|--:|--:|--:|--:|
+| PV medi | 89,1 | **65,7** | 74,6 | 70,4 | 72,3 |
+| Verticalità | 25,2 | 0 | 0 | 0 | 0 |
+| Scavo | 4,7 | 4,6 | **19,6** | 15,6 | 13,0 |
+| Rendita | 25,6 | 28,8 | 22,5 | 22,0 | 26,5 |
+| costruiti sopra un altro | 5,2 | **4,4** | 5,7 | 5,9 | 4,8 |
+| altezza massima | 3,9 | **3,1** | 4,1 | 4,1 | 3,7 |
+| basi proprie | 4,6 | 4,0 | 5,0 | 5,2 | 4,2 |
+| **basi altrui** | 1,6 | **1,0** | **2,0** | 2,0 | 1,7 |
+| propri intatti spianati | 3,4 | 2,5 | 3,7 | 3,9 | 3,0 |
+| premio incassato scavando | 0 | 0 | 14,8 | 10,7 | 8,3 |
+| di cui nell'era 5 | 0 | 0 | 7,1 (48 %) | 4,5 (42 %) | 4,9 (60 %) |
+| vince Rendita | 44 % | 32 % | 37 % | 39 % | 38 % |
+| vince Lampo | 25 % | **35 %** | 29 % | 27 % | 27 % |
+| vince Scavo | 38 % | 42 % | 29 % | 36 % | 33 % |
+| vince Bilanciata | 33 % | 29 % | 38 % | 37 % | 37 % |
+
+Per partita (vita delle carte): sepolti 51 % → 43 % senza Verticalità → 52 / 54 / 47 % con i tre
+premi; sepolti da un altro 15 % → 10 % → 19 / 18 / 17 %; in piedi a fine partita 9,1 → 9,9 →
+8,4 / 8,3 / 9,3; il canale Scavo 13,9 → 13,7 → 59,6 / 47,7 / 38,6 punti a partita, contro i 74,9
+della Verticalità tolta.
+
+**Il kingmaker, misurato** (torneo, 750 partite): quanto del premio arriva nell'era 5, in quante
+partite il bottino dell'ultima era del vincitore supera il suo distacco dal secondo, e in quante
+il vincitore cambierebbe togliendo a tutti il premio dell'era 5.
+
+| | S×L | S+L | S×(L−1) |
+|---|--:|--:|--:|
+| premio nell'era 5 | 48 % | 42 % | 60 % |
+| bottino dell'era 5 del vincitore ≥ distacco | **31 %** | 22 % | 27 % |
+| senza l'era 5 cambierebbe il vincitore | **17 %** | **11 %** | 16 % |
+| bottino massimo visto in un'era 5 | 50 | 28 | 33 |
+| distacco mediano primo-secondo | 16 | 14 | 13 |
+
+Con lo Scavo a chi scava della terza misura erano 6 % e 2 %.
+
+### Cosa salta all'occhio
+
+**1. Senza rimpiazzo la città si appiattisce.** Verticalità a zero e basta: −23 punti a
+giocatore, altezza massima da 3,9 a 3,1, basi altrui a 1,0, sepolti dal 51 % al 43 %. Vince chi
+costruisce e basta (Lampo 35 %). Il premio della colonna era il motore del salire.
+
+**2. S×L rimette in piedi la città e porta le basi altrui al livello di oggi.** Altezza 4,1
+(sopra la base), sepolti 52 %, sepolti da un altro 19 %, basi altrui 2,0 come nel gioco di oggi
+e sopra la base senza rudere (1,6). Il canale Scavo vale 19,6 a giocatore, tre quarti della
+Verticalità tolta; il totale resta 14 punti sotto. Ma è neutro, non parziale: crescono anche le
+basi proprie (5,0) e gli spianati (3,7), perché la propria rovina sepolta da sé paga quanto
+quella altrui. La quota di basi altrui sul totale passa dal 26 % della base al 29 %, contro il
+32 % di oggi.
+
+**3. Il kingmaker c'è, ed è grosso quanto il premio.** Con S×L quasi metà del premio arriva
+nell'era 5, l'ultima mossa sulle pile alte vale fino a 50 punti, e in una partita su sei il
+vincitore cambierebbe senza il bottino dell'ultima era. S+L lo dimezza (11 %) al prezzo di un
+canale più piccolo (15,6). S×(L−1) è il peggiore in rapporto: paga poco e tardi (60 % nell'era
+5), perché il primo livello non vale nulla e le pile alte arrivano alla fine.
+
+**4. La strategia Scavo perde proprio quando lo Scavo vale.** Da 38 % a 29 % con S×L: insegue
+lo Scavo di chi viene sepolto (la regola vecchia), non il premio di chi scava. Le strategie
+dei bot vanno riscritte per la v2, e questa è la prima riga della lista.
+
+### Cosa proporre
+
+- **S×L come scala**, con una correzione all'ultima era da misurare: premio dimezzato nell'era
+  5, oppure premio solo fino all'era 4 (l'era Moderna, che non ha evento, non seppellisce con
+  premio). Sono due manopole da una riga.
+- **S+L** se si preferisce un canale più piccolo e un finale più tranquillo, senza correzioni.
+- Il totale dei punti scende di 14-19 a giocatore: se si vuole tornare alla scala di oggi, il
+  premio si moltiplica (S×L×1,5) o si alza lo Scavo stampato delle carte tarde.
+
 ## Come rifare il conto
 
 I lotti sono stati giocati il 24 settembre 2026 sul ramo `claude/niente-rudere` (main a
@@ -301,4 +382,10 @@ python3 tools/confronta_torneo.py A.csv B.csv C.csv D.csv E.csv F.csv    # lotti
 # terza misura, sulla base E:
 godot --headless res://scenes/audit_partita.tscn -- $A --senza_rudere 1 --gap 2 --scavo_scava 1 > E1.csv
 godot --headless res://scenes/audit_partita.tscn -- $A --senza_rudere 1 --gap 2 --sconto_altrui 1 > E4.csv
+# quarta misura: Verticalita' a zero e il premio di scavo
+V="--senza_rudere 1 --gap 2 --verticalita 0,0,0,0"
+godot --headless res://scenes/audit_partita.tscn -- $A $V > V.csv
+godot --headless res://scenes/audit_partita.tscn -- $A $V --premio per_livello > P1.csv
+godot --headless res://scenes/audit_partita.tscn -- $A $V --premio piu_livello > P2.csv
+godot --headless res://scenes/audit_partita.tscn -- $A $V --premio per_livello_meno_uno > P3.csv
 ```
