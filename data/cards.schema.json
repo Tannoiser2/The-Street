@@ -107,6 +107,9 @@
         "vetusta": {
           "$ref": "#/$defs/range"
         },
+        "resistance": {
+          "$ref": "#/$defs/range"
+        },
         "scavo": {
           "$ref": "#/$defs/range"
         },

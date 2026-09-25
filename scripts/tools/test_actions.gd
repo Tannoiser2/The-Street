@@ -38,6 +38,7 @@ func _ready() -> void:
 	_run("il turno v2: un'azione per turno, il lavoratore dove agisce", _test_turno_v2)
 	_run("il draft dei Personaggi a inizio era (v2)", _test_draft_v2)
 	_run("v2: niente scheletri dal draft, niente Vetusta' (registro 95)", _test_senza_vetusta_v2)
+	_run("v2: le tre carte che contavano la Vetusta' (registro 99)", _test_tre_carte_v2)
 	print("\n%d superati, %d falliti" % [_passed, _failed])
 	get_tree().quit(0 if _failed == 0 else 1)
 
@@ -1357,3 +1358,49 @@ func _costruisci_qualcosa(ctl: GameController, col: int) -> bool:
 		for c in range(maxi(0, col - 1), mini(ctl.gs.grid.n_cols, col + 2)):
 			if ctl.build(card_id, c, false): return true
 	return false
+
+# Registro 99: Colosseo, Il Silvicoltore e Speculazione edilizia senza la
+# Vetusta'. Si prova sul file v2 con un edificio costruito davvero.
+func _test_tre_carte_v2() -> void:
+	if not FileAccess.file_exists("res://data/cards-v2.json"): return
+	CardDB.load_db("res://data/cards-v2.json")
+	var colosseo: Dictionary = CardDB.monuments["mo_colosseo"]["condition"]
+	var silvicoltore: Dictionary = CardDB.legacies["er_il_silvicoltore"]["condition"]
+	var speculazione: Dictionary = CardDB.events["ev_speculazione_edilizia"]
+	_ok("il Colosseo v2 chiede resistenza 7", int(colosseo["target"].get("resistance", {}).get("min", 0)) == 7)
+	_ok("Il Silvicoltore v2 chiede il bosco e l'era 1-2", silvicoltore["target"].has("era") and not silvicoltore["target"].has("vetusta"))
+	_ok("Speculazione edilizia v2 colpisce i 2+ potenziamenti", int(speculazione["effects"][0]["target"].get("upgrades", {}).get("min", 0)) == 2)
+	var ctl := _game(3, 990)
+	var gs := ctl.gs
+	while not gs.pending_choice.is_empty():
+		ctl.choose(int((gs.pending_choice["options"] as Array)[0]))
+	var p := gs.current_player()
+	_ok("il primo attiva la colonna 1", ctl.place_worker(1))
+	var mio: Building = null
+	for card_id in gs.market.duplicate():
+		for c in range(0, 3):
+			if ctl.build(card_id, c, false):
+				for b in gs.grid.buildings:
+					if b.owner == p.index: mio = b
+				break
+		if mio != null: break
+	_ok("  e costruisce", mio != null)
+	if mio == null:
+		CardDB.load_db(CardDB.DB_PATH)
+		return
+	_ok("con la resistenza sotto 7 il Colosseo non scatta", not Conditions.met(gs, p.index, colosseo))
+	mio.bonus_res = 7 - int(mio.data["resistance"])
+	_ok("  a 7 scatta", Conditions.met(gs, p.index, colosseo))
+	# Il Silvicoltore: l'edificio dev'essere su bosco e dell'era 1-2.
+	var su_bosco := false
+	for c in range(mio.col_from, mio.col_to):
+		if gs.grid.terrains[c] == Enums.Terrain.BOSCO: su_bosco = true
+	_eq("Il Silvicoltore segue il terreno dell'edificio", Conditions.met(gs, p.index, silvicoltore), su_bosco)
+	# Speculazione edilizia: -1 res solo con due potenziamenti sotto.
+	gs.current_event = speculazione
+	mio.upgrades.clear()
+	_eq("senza potenziamenti Speculazione edilizia non tocca", Effects.event_resistance_modifier(gs, mio), 0)
+	mio.upgrades.append("po_palizzata")
+	mio.upgrades.append("po_idolo")
+	_eq("  con due potenziamenti vale -1", Effects.event_resistance_modifier(gs, mio), -1)
+	CardDB.load_db(CardDB.DB_PATH)

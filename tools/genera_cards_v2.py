@@ -53,6 +53,28 @@ for b in v2["buildings"]:
     # Fortezza bastionata, Ponte monumentale (3) e Duomo (4) scendono a 2: la
     # strategia Rendita vinceva il 57% delle partite, con il tetto il 49%.
     b["rendita"] = min(int(b["rendita"]), RENDITA_TETTO)
+# LE TRE CARTE CHE CONTAVANO LA VETUSTA' (registro 99), che nella v2 non
+# esiste: il Colosseo premia l'edificio che resiste per costruzione, Il
+# Silvicoltore il vecchio del bosco, Speculazione edilizia colpisce chi ha
+# costruito sopra il costruito. Decisione del designer sulle proposte di
+# docs/carte-v2.md. I dati v1.5 non cambiano.
+TRE_CARTE = {
+    "mo_colosseo": {
+        "condition_text": "Primo ad avere un edificio attivo con resistenza 7 o più.",
+        "condition": {"op": "count_matching", "min": 1,
+                      "target": {"owner": "self", "state": ["intatto"], "buried": False, "resistance": {"min": 7}}}},
+    "er_il_silvicoltore": {
+        "condition_text": "un tuo edificio attivo su bosco costruito nell'era 1 o 2.",
+        "condition": {"op": "count_matching", "min": 1,
+                      "target": {"owner": "self", "terrain": ["bosco"], "state": ["intatto"], "buried": False,
+                                 "era": {"max": 2}}}},
+    "ev_speculazione_edilizia": {
+        "effect_text": "Forza 5. Ogni edificio con 2+ potenziamenti: −1 res.",
+        "effects": [{"hook": "on_event", "op": "resistance", "value": -1, "target": {"upgrades": {"min": 2}}}]},
+}
+for sezione in ("monuments", "legacies", "events"):
+    for c in v2[sezione]:
+        if c["id"] in TRE_CARTE: c.update(TRE_CARTE[c["id"]])
 for t in v2["terrains"]:
     t["base_production_by_era"] = CURVA[t["id"]]
     t["rule"] = REGOLE[t["id"]]
