@@ -692,6 +692,11 @@ const CARTA_SEPOLTA := Color(0.30, 0.28, 0.26)
 func _file_laterali() -> void:
 	for c in BoardLayout3D.side_cards(gs, umano):
 		var r: AABB = c["aabb"]
+		# Lo scheletro del lavoratore (v2) non e' una carta: e' il gettone,
+		# in piedi sulla riga del ventaglio che gli tocca.
+		if str(c["kind"]) == "scheletro":
+			_gettone(BoardLayout3D.scheletro_nel_ventaglio(r), int(str(c["id"])))
+			continue
 		var percorso := BoardLayout3D.carta_path(str(c["kind"]), str(c["id"]))
 		var sfondo := CARTA_SFONDO
 		if percorso != "" and ResourceLoader.exists(percorso): sfondo = Color("#1d1b17")
@@ -712,6 +717,7 @@ func _titolo_carta(c: Dictionary) -> String:
 		"personaggio": return str(CardDB.characters[id]["name"])
 		"potenziamento": return str(CardDB.upgrades[id]["name"])
 		"monumento": return str(CardDB.monuments[id]["name"]) if CardDB.monuments.has(id) else id
+		"scheletro": return "scheletro"
 	return id
 
 # Il costo e i numeri che servono a decidere: il giocatore non deve girare
@@ -730,6 +736,8 @@ func _dettaglio_carta(c: Dictionary) -> String:
 			return "potenziamento · %s" % CardDB.upgrades[id]["family"]
 		"monumento":
 			return "monumento"
+		"scheletro":
+			return "vale %d" % BoardLayout3D.scheletro_valore(int(id))
 	return ""
 
 # IL PUPAZZETTO. Non un parallelepipedo: un corpo che si allarga verso il
@@ -830,7 +838,11 @@ func _segnalini(b: Building) -> void:
 # l'immagine - assets/ si rigenera e non e' versionata - resta il cubetto
 # color ocra di prima, cosi' le partite headless non dipendono dalla grafica.
 func _gettone_scheletro(b: Building) -> void:
-	var piede := BoardLayout3D.scheletro_piede(gs, b)
+	_gettone(BoardLayout3D.scheletro_piede(gs, b), b.buried_character_era)
+
+# Il gettone in se', col piede dove lo si appoggia: serve sulla basetta e,
+# nella v2, nel ventaglio del giocatore sotto la carta dell'edificio.
+func _gettone(piede: Vector3, era: int) -> void:
 	var dim := BoardLayout3D.scheletro_size()
 	var tex: Texture2D = null
 	if ResourceLoader.exists(BoardLayout3D.SCHELETRO_PATH):
@@ -852,7 +864,7 @@ func _gettone_scheletro(b: Building) -> void:
 		Color("#3a3128"))
 	spessore.position = Vector3(0.0, dim.y / 2.0, 0.0)
 	perno.add_child(spessore)
-	var uv: Dictionary = BoardLayout3D.scheletro_uv(b.buried_character_era)
+	var uv: Dictionary = BoardLayout3D.scheletro_uv(era)
 	var faccia := _quad(dim, Color.WHITE)
 	var mat := faccia.material_override as StandardMaterial3D
 	mat.albedo_texture = tex

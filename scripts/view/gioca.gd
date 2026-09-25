@@ -324,6 +324,8 @@ func _descrivi_sotto(pixel: Vector2) -> PackedStringArray:
 			var nomi := PackedStringArray()
 			for u in b.upgrades: nomi.append(str(CardDB.upgrades[u]["name"]))
 			out.append("potenziamenti: " + ", ".join(nomi))
+		var sc := descrivi_scheletro(b)
+		if sc != "": out.append(sc)
 		return out
 	var c := _carta_puntata(pixel)
 	if c.is_empty():
@@ -333,6 +335,18 @@ func _descrivi_sotto(pixel: Vector2) -> PackedStringArray:
 		if col >= 0: return descrivi_tessera(col)
 		return out
 	return _descrivi_sotto_carta(c)
+
+# Chi sta sepolto sotto l'edificio e quanto vale: nella v2 il lavoratore del
+# potenziamento, nella v1.5 il Personaggio di fine era. Prima il riquadro
+# non lo diceva, e il gettone sulla basetta restava senza nome.
+func descrivi_scheletro(b: Building) -> String:
+	if b.buried_character == "": return ""
+	var chi := "il lavoratore del potenziamento"
+	if b.buried_character != Building.LAVORATORE:
+		chi = str(CardDB.characters[b.buried_character]["name"]) \
+			if CardDB.characters.has(b.buried_character) else b.buried_character
+	return "scheletro: %s · era %d · vale %d" % [chi, b.buried_character_era,
+		BoardLayout3D.scheletro_valore(b.buried_character_era)]
 
 # Il riquadro di una carta puntata: {"kind": ..., "id": ...}.
 func _descrivi_sotto_carta(c: Dictionary) -> PackedStringArray:
@@ -358,6 +372,12 @@ func _descrivi_sotto_carta(c: Dictionary) -> PackedStringArray:
 			out.append(str(po["name"]))
 			out.append("potenziamento · %s" % po["family"])
 			if str(po.get("effect_text", "")) != "": out.append(str(po["effect_text"]))
+		"scheletro":
+			var era := int(id)
+			out.append("Scheletro")
+			out.append("il lavoratore del potenziamento · era %d" % era)
+			out.append("vale %d punti, comunque finisca l'edificio"
+				% BoardLayout3D.scheletro_valore(era))
 		"monumento":
 			if CardDB.monuments.has(id):
 				var mo: Dictionary = CardDB.monuments[id]
@@ -637,6 +657,7 @@ func _nome_carta(kind: String, id: String) -> String:
 		"potenziamento": return str(CardDB.upgrades[id]["name"])
 		"monumento":
 			return str(CardDB.monuments[id]["name"]) if CardDB.monuments.has(id) else id
+		"scheletro": return "scheletro"
 	return id
 
 func _esegui(v) -> void:

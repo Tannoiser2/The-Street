@@ -76,7 +76,10 @@ dei Personaggi; carica `data/cards-v2.json`) o la v1.5 congelata
 Personaggio della fila e lo prendi, gratis. Poi clicca una colonna per
 piazzare un lavoratore e attivarla, e scegli un'azione dall'elenco: ognuna
 porta il costo, e quelle non disponibili portano il motivo. Cliccando una
-carta delle file la si legge senza chiudere il menu.
+carta delle file la si legge senza chiudere il menu. Nella v2 il lavoratore
+che piazza un potenziamento resta sotto l'edificio come scheletro: il
+gettone sta sulla basetta e, nel ventaglio del giocatore, in fondo alla
+pila sotto la carta dell'edificio; il riquadro del mouse dice quanto vale.
 
 Sul tavolo: la strada al centro, il mercato lungo il fianco sinistro,
 personaggi, potenziamenti e monumenti lungo il destro, le plance dei giocatori

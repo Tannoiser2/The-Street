@@ -491,7 +491,7 @@ func upgrade(upg_id: String, target: Building) -> bool:
 	# turno a un'azione era gia' cosi' (D12).
 	if turno_v2() or bool(CardDB.constants.get("scheletro_potenziamento", false)):
 		if gs.era < int(CardDB.constants["eras"]) and target.buried_character == "":
-			target.buried_character = "lavoratore"
+			target.buried_character = Building.LAVORATORE
 			target.buried_character_era = gs.era
 			gs.log_line("il lavoratore resta sotto %s come scheletro" % target.data["name"])
 	building_changed.emit(target)

@@ -48,6 +48,11 @@ var upgrades: Array = []      # id dei potenziamenti infilati sotto
 var patrons: Dictionary = {}
 var extra_classes: Array[String] = []  # classi acquisite (po_merlatura: "conta anche come Militare")
 var imprint: String = ""      # Impronta infilata sotto: "un edificio puo' portarne una sola"
+# Chi sta sepolto qui (meccanica Scheletri): l'id di un Personaggio nella
+# v1.5, oppure LAVORATORE nella v2, dove lo scheletro lo lascia il lavoratore
+# che piazza il potenziamento (registri 95-96). Non e' una carta: la vista
+# non deve cercarlo nel mazzo dei Personaggi.
+const LAVORATORE := "lavoratore"
 var buried_character: String = ""   # personaggio sepolto qui (meccanica Scheletri)
 var buried_character_era: int = 0
 var charges: int = 0          # cubetti carica per edifici Esauribili
