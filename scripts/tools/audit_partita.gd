@@ -33,6 +33,15 @@ func _ready() -> void:
 	var args := _parse_args(OS.get_cmdline_user_args())
 	var seme := int(args.get("seed", "1"))
 	var players := int(args.get("players", "3"))
+	# UN ALTRO FILE DATI (`--dati data/cards-v2.json`): la v2 con tre risorse
+	# gioca sullo stesso motore, e `cards.json` resta la fonte della v1.5.
+	if args.has("dati"):
+		CardDB.load_db("res://" + str(args["dati"]).trim_prefix("res://"))
+		print("# dati = %s" % str(args["dati"]))
+		# Il turno lo decide il file dati: lo si dichiara, cosi' due lotti v2
+		# con turni diversi non si confondono.
+		print("# turno_v2 = %s" % str(bool(CardDB.constants.get("turno_v2", false))))
+		print("# draft_personaggi = %s" % str(bool(CardDB.constants.get("draft_personaggi", false))))
 	_muto = args.has("muto")
 	_tutto = args.has("tutto")
 	_strategie = not args.has("caso")
@@ -91,6 +100,98 @@ func _ready() -> void:
 	if args.has("gap"):
 		CardDB.constants["rovina_gap"] = int(args["gap"])
 		print("# rovina_gap = %d" % int(args["gap"]))
+	# SENZA RUDERE (`--senza_rudere 1`, spenta nei dati): fallire di meno della
+	# soglia lascia intatto invece di fare rudere. Prima misura dell'audit
+	# della nuova meccanica (D15), a parita' di tutto il resto.
+	if args.has("senza_rudere"):
+		CardDB.constants["senza_rudere"] = str(args["senza_rudere"]) != "0"
+		print("# senza_rudere = %s" % str(bool(CardDB.constants["senza_rudere"])))
+	# LO SCAVO NON SI AZZERA MAI (`--scavo_spianato 1`, spenta nei dati): un
+	# proprio edificio spianato vale il suo Scavo come gli altri sepolti.
+	# Decisione del designer per la nuova meccanica (registro 87).
+	if args.has("scavo_spianato"):
+		CardDB.constants["spianare_conserva_scavo"] = str(args["scavo_spianato"]) != "0"
+		print("# spianare_conserva_scavo = %s" % str(bool(CardDB.constants["spianare_conserva_scavo"])))
+	# PERCHE' COSTRUIRE SOPRA GLI ALTRI (registro 87), tre manopole spente nei dati:
+	#   --scavo_scava 1    lo Scavo lo incassa chi seppellisce (il proprio vale 0)
+	#   --sconto_altrui 1  lo sconto macerie solo sulle rovine altrui
+	if args.has("scavo_scava"):
+		CardDB.constants["scavo_a_chi_scava"] = str(args["scavo_scava"]) != "0"
+		print("# scavo_a_chi_scava = %s" % str(bool(CardDB.constants["scavo_a_chi_scava"])))
+	if args.has("sconto_altrui"):
+		CardDB.constants["sconto_macerie_solo_altrui"] = str(args["sconto_altrui"]) != "0"
+		print("# sconto_macerie_solo_altrui = %s" % str(bool(CardDB.constants["sconto_macerie_solo_altrui"])))
+	# IL PREMIO DI SCAVO al posto della Verticalita' (registro 89):
+	#   --premio per_livello | piu_livello | per_livello_meno_uno
+	if args.has("premio"):
+		CardDB.constants["premio_scavo"] = str(args["premio"])
+		print("# premio_scavo = %s" % str(args["premio"]))
+	#   --premio_era5 intero | dimezzato | niente   (la correzione all'ultima era)
+	if args.has("premio_era5"):
+		CardDB.constants["premio_era5"] = str(args["premio_era5"])
+		print("# premio_era5 = %s" % str(args["premio_era5"]))
+	#   --tetto N   il tetto per risorsa alla dispersione (0 = solo il totale)
+	if args.has("tetto"):
+		CardDB.constants["resource_cap_per_resource"] = int(args["tetto"])
+		print("# resource_cap_per_resource = %d" % int(args["tetto"]))
+	# IL TURNO A UN'AZIONE (`--turno_v2 1`, registro 93; spento nel file v2 dal
+	# registro 94): ogni lavoratore fa una cosa sola e va dove agisce.
+	if args.has("turno_v2"):
+		CardDB.constants["turno_v2"] = str(args["turno_v2"]) != "0"
+		print("# turno_v2 = %s" % str(bool(CardDB.constants["turno_v2"])))
+	# REGISTRO 95, due manopole per rigiocare la v2 con una sola delle due
+	# decisioni: `--sepolti 1` riseppellisce i Personaggi del draft,
+	# `--vetusta 3` rimette la Vetusta' (tetto 3, bosco +1).
+	if args.has("sepolti"):
+		CardDB.constants["personaggi_sepolti"] = str(args["sepolti"]) != "0"
+		print("# personaggi_sepolti = %s" % str(bool(CardDB.constants["personaggi_sepolti"])))
+	if args.has("vetusta"):
+		var vm := int(args["vetusta"])
+		CardDB.constants["vetusta_max"] = vm
+		CardDB.constants["vetusta_max_bosco"] = vm + 1 if vm > 0 else 0
+		print("# vetusta_max = %d" % vm)
+	# LA PROTEZIONE DEL LAVORATORE (`--protezione 1`, `protection_bonus`, 2 nei
+	# dati): con quattro lavoratori e' quattro edifici protetti per era, e la
+	# Rendita vince il 56% (registro 95). Registro 96: si prova a +1.
+	if args.has("protezione"):
+		CardDB.constants["protection_bonus"] = int(args["protezione"])
+		print("# protection_bonus = %d" % int(args["protezione"]))
+	# GLI SCHELETRI (`--scheletro sotterrato|sempre`, `scheletro_conta`): con
+	# "sempre" lo scheletro del potenziamento paga comunque finisca l'edificio.
+	if args.has("scheletro"):
+		CardDB.constants["scheletro_conta"] = str(args["scheletro"])
+		print("# scheletro_conta = %s" % str(args["scheletro"]))
+	# LA RENDITA DELLE CARTE CARE (`--rendita_tetto N`, registro 97): la Rendita
+	# stampata si taglia a N su ogni edificio. Come `--forza`, si scontano le
+	# carte, non una costante: la Rendita sta sulla carta.
+	if args.has("rendita_tetto"):
+		var rt := int(args["rendita_tetto"])
+		var tagliati := 0
+		for id in CardDB.buildings:
+			var bd: Dictionary = CardDB.buildings[id]
+			if int(bd.get("rendita", 0)) > rt:
+				bd["rendita"] = rt
+				tagliati += 1
+		print("# rendita_tetto = %d (%d edifici tagliati)" % [rt, tagliati])
+	# LE SPINTE DELLE STRATEGIE (`--spinta rendita_per_era=0.6,scavo_terra=-0.5`,
+	# registro 98): sovrascrive la tabella del bot per tarare la v2 misurando.
+	if args.has("spinta"):
+		for pezzo in str(args["spinta"]).split(","):
+			var kv := pezzo.split("=")
+			if kv.size() == 2: StrategyBot.spinte_override[kv[0].strip_edges()] = float(kv[1])
+		print("# spinte = %s" % str(StrategyBot.spinte_override))
+	# LE TESSERE UNA VOLTA PER ERA (`--tessere 0/1`, `tessere_una_volta_per_era`,
+	# registro 100): a 0 le regole delle tessere tornano permanenti come nella v1.5.
+	if args.has("tessere"):
+		CardDB.constants["tessere_una_volta_per_era"] = str(args["tessere"]) != "0"
+		print("# tessere_una_volta_per_era = %s" % str(bool(CardDB.constants["tessere_una_volta_per_era"])))
+	# I LAVORATORI PER ERA (`--lavoratori 5`, `workers_base`, 3 nei dati). Nel
+	# turno v2 ogni lavoratore e' UN'azione, non piu' un'attivazione piu'
+	# un'azione: con 3 il ritmo si dimezza (registro 93), e la manopola misura
+	# quanti ne servono per tornare al ritmo della v1.5.
+	if args.has("lavoratori"):
+		CardDB.constants["workers_base"] = int(args["lavoratori"])
+		print("# workers_base = %d" % int(args["lavoratori"]))
 	# LA FORZA STA SULLA CARTA EVENTO, non nella costante: `event_force_by_era`
 	# e' la tabella di riferimento, ma chi decide e' `gs.current_event["force"]`.
 	# La prima versione di questa manopola scriveva la costante e non cambiava
@@ -162,7 +263,9 @@ func _lotto(seme: int, players: int, quante: int) -> void:
 	# cambiando quanto paga la Verticalita', cambia anche come si gioca e non
 	# solo quanto si segna.
 	print("seme;posto;giocatore;pv;strategia;sopra;quota_max;costruiti;"
-		+ ";".join(Riepilogo.VOCI.map(func(v): return str(v["id"]))) + ";piano;centro_attivato;oro_centro")
+		+ ";".join(Riepilogo.VOCI.map(func(v): return str(v["id"]))) + ";piano;centro_attivato;oro_centro"
+		+ ";sopra_propri;sopra_altrui;spianati;scavo_scavato;scavo_e5;idee_prodotte;idee_spese"
+		+ ";az_colonna;az_costruisci;az_potenzia;az_ristruttura;az_recluta;az_dinastia;az_passa")
 	for g in quante:
 		var ctl := GameController.new()
 		ctl.new_game(players, seme + g)
@@ -190,6 +293,12 @@ func _lotto(seme: int, players: int, quante: int) -> void:
 			var cnt: Dictionary = ctl.gs.players[chi].counters
 			campi.append("%d" % int(cnt.get("centro_attivato", 0)))
 			campi.append("%d" % int(cnt.get("oro_centro", 0)))
+			# Sopra chi ha costruito (registro 87): quante basi erano sue,
+			# quante altrui, e quanti suoi intatti ha spianato.
+			for k in ["sopra_propri", "sopra_altrui", "spianati", "scavo_scavato", "scavo_e5",
+					"idee_prodotte", "idee_spese", "az_colonna", "az_costruisci", "az_potenzia",
+					"az_ristruttura", "az_recluta", "az_dinastia", "az_passa"]:
+				campi.append("%d" % int(cnt.get(k, 0)))
 			print(";".join(campi))
 	get_tree().quit(0)
 
@@ -244,6 +353,8 @@ func _vita(seme: int, players: int, quante: int) -> void:
 			if giu != 99 and giu == b.era_built: r["n_subito"] += 1
 			if b.is_standing(): r["n_in_piedi_fine"] += 1
 			if b.is_alive(): r["n_intatto_fine"] += 1
+			if b.was_razed: r["n_spianato"] += 1
+			if b.is_buried and b.buried_by >= 0 and b.buried_by != b.owner: r["n_sepolto_altrui"] += 1
 			r["vetusta"] += b.vetusta
 			r["potenziamenti"] += b.upgrades.size()
 			for c in b.vp_reso: r["vp_" + str(c)] = int(r.get("vp_" + str(c), 0)) + int(b.vp_reso[c])
@@ -258,6 +369,8 @@ func _riga_vuota() -> Dictionary:
 		"n_sepolto": 0, "n_subito": 0, "n_in_piedi_fine": 0, "n_intatto_fine": 0,
 		"vetusta": 0, "potenziamenti": 0, "vp": 0}
 	for c in CANALI_CARTA: r["vp_" + c] = 0
+	r["n_spianato"] = 0     # in fondo: le colonne nuove si aggiungono in coda
+	r["n_sepolto_altrui"] = 0
 	return r
 
 func _stampa_vita(acc: Dictionary, quante: int, players: int, seme: int) -> void:
@@ -266,19 +379,38 @@ func _stampa_vita(acc: Dictionary, quante: int, players: int, seme: int) -> void
 	var vt = CardDB.constants["verticality_vp"]
 	var scala: Array[String] = []
 	for i in 4: scala.append("%d" % int(vt[str(i + 1)]))
-	print("# partite=%d giocatori=%d seme_base=%d bot=%s verticalita=%s prosperita=%d rovina=%d binari=%s versione_bot=%d strategie=%d centro=%s" % [
+	print("# partite=%d giocatori=%d seme_base=%d bot=%s verticalita=%s prosperita=%d rovina=%d binari=%s versione_bot=%d strategie=%d centro=%s rudere=%s spianato=%s scavo=%s sconto=%s premio=%s dati=%s era5=%s tetto=%d turno=%s lavoratori=%d draft=%s sepolti=%s vetusta=%d protezione=%d scheletro=%s tessere=%s" % [
 		quante, players, seme, "strategie" if _strategie else "caso",
 		"/".join(scala), int(CardDB.constants["prosperity"]["min_buildings"]),
 		int(CardDB.constants.get("rovina_gap", 2)),
 		"liberi" if bool(CardDB.constants.get("binari_liberi", false)) else "per_era",
 		StrategyBot.versione_in_uso, _quante_strategie(),
 		"una_per_era" if bool(CardDB.constants["prosperity"].get("once_per_era", false))
-			else "ogni_attivazione"])
+			else "ogni_attivazione",
+		"no" if bool(CardDB.constants.get("senza_rudere", false)) else "si",
+		"vale" if bool(CardDB.constants.get("spianare_conserva_scavo", false)) else "zero",
+		"scavatore" if bool(CardDB.constants.get("scavo_a_chi_scava", false)) else "proprietario",
+		"altrui" if bool(CardDB.constants.get("sconto_macerie_solo_altrui", false)) else "tutti",
+		str(CardDB.constants.get("premio_scavo", "nessuno")),
+		str(CardDB.ruleset),
+		str(CardDB.constants.get("premio_era5", "intero")),
+		int(CardDB.constants.get("resource_cap_per_resource", 0)),
+		"v2" if bool(CardDB.constants.get("turno_v2", false)) else "v1",
+		int(CardDB.constants["workers_base"]),
+		"si" if bool(CardDB.constants.get("draft_personaggi", false)) else "no",
+		"si" if bool(CardDB.constants.get("personaggi_sepolti", true)) else "no",
+		int(CardDB.constants["vetusta_max"]),
+		int(CardDB.constants["protection_bonus"]),
+		str(CardDB.constants.get("scheletro_conta", "sotterrato")),
+		"una_volta" if bool(CardDB.constants.get("tessere_una_volta_per_era", false)) else "permanenti"])
 	var intestazione: Array[String] = ["id", "nome", "era", "classi", "larghezza",
 		"costo_pietra", "costo_oro", "resistenza", "rendita", "scavo", "lampo_carta",
 		"copie", "n", "ere_intatto", "ere_piedi", "n_rudere", "n_rovina", "n_sepolto",
 		"n_subito", "n_in_piedi_fine", "n_intatto_fine", "vetusta", "potenziamenti", "vp"]
 	for c in CANALI_CARTA: intestazione.append("vp_" + c)
+	intestazione.append("n_spianato")
+	intestazione.append("n_sepolto_altrui")
+	intestazione.append("costo_idee")
 	print(";".join(intestazione))
 	for id in CardDB.buildings:
 		var d: Dictionary = CardDB.buildings[id]
@@ -293,13 +425,16 @@ func _stampa_vita(acc: Dictionary, quante: int, players: int, seme: int) -> void
 				"potenziamenti", "vp"]:
 			campi.append(str(r[k]))
 		for c in CANALI_CARTA: campi.append(str(r["vp_" + c]))
+		campi.append(str(r["n_spianato"]))
+		campi.append(str(r["n_sepolto_altrui"]))
+		campi.append(str(int(d["cost"].get("idee", 0))))
 		print(";".join(campi))
 
 # La strategia del posto `i` nella partita `g`: si ruota, cosi' ogni strategia
 # gioca ogni posto lo stesso numero di volte e il posto non falsa il confronto.
 func strategia_di(i: int, g: int) -> String:
 	if _tutti != "": return _tutti
-	var lista := StrategyBot.tutte() if _candidate else StrategyBot.STRATEGIE
+	var lista := StrategyBot.tutte() if _candidate else StrategyBot.canone()
 	return lista[(i + g) % lista.size()]
 
 # Quante strategie si alternano al tavolo: finisce nell'intestazione, perche'
@@ -307,7 +442,7 @@ func strategia_di(i: int, g: int) -> String:
 func _quante_strategie() -> int:
 	if not _strategie: return 0
 	if _tutti != "": return 1
-	return (StrategyBot.tutte() if _candidate else StrategyBot.STRATEGIE).size()
+	return (StrategyBot.tutte() if _candidate else StrategyBot.canone()).size()
 
 # Chi pianifica in questa partita: un posto solo, a rotazione.
 func pianifica_qui(i: int, g: int, players: int) -> bool:
@@ -316,7 +451,8 @@ func pianifica_qui(i: int, g: int, players: int) -> bool:
 func _muovi(ctl: GameController, g: int) -> void:
 	if _strategie:
 		var chi := ctl.gs.current_index
-		if pianifica_qui(chi, g, ctl.gs.n_players):
+		# Il pianificatore conosce solo il turno v1.5: nella v2 gioca lo StrategyBot.
+		if pianifica_qui(chi, g, ctl.gs.n_players) and not bool(CardDB.constants.get("turno_v2", false)):
 			PlanningBot.play_turn(ctl, strategia_di(chi, g))
 			return
 		StrategyBot.racconta = _perche

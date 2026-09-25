@@ -4,16 +4,22 @@ extends Node3D
 
 func _ready() -> void:
 	var args := _args()
+	# `--dati data/cards-v2.json` scatta il tavolo della v2 (registro 104):
+	# quattro lavoratori, il draft, le tessere girate. Senza, la v1.5.
+	if args.has("dati"):
+		CardDB.load_db("res://" + str(args["dati"]).trim_prefix("res://"))
 	var ctl := GameController.new()
 	ctl.new_game(int(args.get("players", "3")), int(args.get("seed", "7")))
 	var fino := int(args.get("era", "3"))
 	# Gioca StrategyBot, come in partita: un tavolo costruito a caso non e' il
-	# tavolo che si vede giocando, e gli scatti servono a guardare quello.
+	# tavolo che si vede giocando, e gli scatti servono a guardare quello. Il
+	# canone lo dice il file dati.
+	var canone := StrategyBot.canone()
 	while ctl.gs.era < fino and ctl.gs.phase != Enums.Phase.FINE_PARTITA:
-		StrategyBot.play_turn(ctl, StrategyBot.STRATEGIE[ctl.gs.current_index % StrategyBot.STRATEGIE.size()])
+		StrategyBot.play_turn(ctl, canone[ctl.gs.current_index % canone.size()])
 	for i in int(args.get("turns", "6")):
 		if ctl.gs.phase == Enums.Phase.FINE_PARTITA: break
-		StrategyBot.play_turn(ctl, StrategyBot.STRATEGIE[ctl.gs.current_index % StrategyBot.STRATEGIE.size()])
+		StrategyBot.play_turn(ctl, canone[ctl.gs.current_index % canone.size()])
 	var vista := preload("res://scripts/view/board_view_3d.gd").new()
 	add_child(vista)
 	vista.scale = Vector3.ONE * BoardLayout3D.U   # dai millimetri alle unita'

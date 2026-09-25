@@ -77,6 +77,8 @@ func _nuovi_crolli(prima: GameState) -> void:
 			if b.state != Enums.BuildingState.ROVINA: continue
 			if not _stato_prima.has(b.uid): continue
 			if int(_stato_prima[b.uid]) == Enums.BuildingState.ROVINA: continue
+			# Nella v2 la rovina non si abbatte: si gira, e resta in piedi.
+			if BoardLayout3D.sagoma_girata(b): continue
 			_avvia_crollo(b)
 	_stato_prima = adesso
 
@@ -331,6 +333,12 @@ func _tessere() -> void:
 		# quando ha gia' pagato in quest'era. La scritta stampata c'e' sempre,
 		# il cartellino no.
 		if gs.grid.is_prosperity_center(c): _cartello_prosperita(c)
+		# LA TESSERA GIRATA (v2, registro 100 e 103): l'effetto della tessera
+		# scatta una volta per era, poi la tessera si gira. Sul tavolo vero si
+		# capovolge; qui si abbuia e ci si scrive sopra, cosi' il disegno del
+		# terreno resta leggibile e si vede da lontano che per quest'era non
+		# da' piu' niente. A inizio era il motore la rigira e il velo sparisce.
+		if tessera_girata(c): _tessera_girata(c, box)
 		if c == _evidenziata:
 			var velo := _quad(Vector2(box.size.x, box.size.z),
 				Color(1, 1, 1, 0.22), true)
@@ -340,6 +348,29 @@ func _tessere() -> void:
 			velo.position = Vector3(box.position.x + box.size.x / 2.0,
 				box.end.y + 0.8, box.position.z + box.size.z / 2.0)
 			add_child(velo)
+
+# La tessera della colonna e' girata? Lo dice lo stato, non la vista: nella
+# v1.5 la lista e' vuota o tutta falsa e nessuna tessera si abbuia mai.
+func tessera_girata(col: int) -> bool:
+	if gs == null or col < 0 or col >= gs.tessere_usate.size(): return false
+	return bool(gs.tessere_usate[col])
+
+const VELO_GIRATA := Color(0.05, 0.04, 0.03, 0.62)
+
+func _tessera_girata(col: int, box: AABB) -> void:
+	var velo := _quad(Vector2(box.size.x, box.size.z), VELO_GIRATA, true)
+	velo.rotate_x(-PI / 2.0)
+	var mat := velo.material_override as StandardMaterial3D
+	mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	velo.position = Vector3(box.position.x + box.size.x / 2.0,
+		box.end.y + 1.0, box.position.z + box.size.z / 2.0)
+	velo.set_meta("girata", col)
+	add_child(velo)
+	# La scritta sta sulla fascia in fondo, dove sta il cartellino della
+	# Prosperita', e come lui si legge da ogni lato.
+	var dove := BoardLayout3D.prosperita_box(col)
+	_scritta(Vector3(dove.position.x + dove.size.x / 2.0, box.end.y + 6.0,
+		dove.position.z + dove.size.z / 2.0), "girata", 0.28, Color("#d9d2c5"))
 
 func _cartello_prosperita(col: int) -> void:
 	if not ResourceLoader.exists(BoardLayout3D.PROSPERITA_PATH): return
@@ -462,6 +493,26 @@ func _sagoma(b: Building) -> void:
 	# le partite headless non dipendono dalla grafica.
 	var tex: Texture2D = _illustrazione(b)
 	var centro := base + Vector3(0.0, dim.y / 2.0 + BoardLayout3D.BASETTA_Y, 0.0)
+	# LA ROVINA GIRATA (v2): la sagoma resta in piedi ma mostra il retro, il
+	# lato rovina. Non abbiamo il disegno di quel lato, quindi si gira il
+	# cartone di mezzo giro - la stampa in grigio si vede specchiata - e lo
+	# si scurisce come una rovina. Senza le immagini resta la scatola scura.
+	if BoardLayout3D.sagoma_girata(b):
+		var perno := Node3D.new()
+		perno.position = centro
+		perno.rotation = Vector3(0.0, PI, 0.0)
+		perno.set_meta("girata", true)
+		add_child(perno)
+		var dietro: Node3D
+		if tex == null:
+			dietro = _scatola(Vector3(dim.x, dim.y, BoardLayout3D.SAGOMA_SPESSORE_VISTA), col)
+		else:
+			dietro = _quad(dim, Color.WHITE)
+			var mat := dietro.material_override as StandardMaterial3D
+			_stampa(mat, tex)
+			mat.albedo_color = Color(0.55, 0.55, 0.58)
+		perno.add_child(dietro)
+		return
 	if tex == null:
 		var m := _scatola(Vector3(dim.x, dim.y, BoardLayout3D.SAGOMA_SPESSORE_VISTA), col)
 		m.position = centro
@@ -666,6 +717,11 @@ const CARTA_SEPOLTA := Color(0.30, 0.28, 0.26)
 func _file_laterali() -> void:
 	for c in BoardLayout3D.side_cards(gs, umano):
 		var r: AABB = c["aabb"]
+		# Lo scheletro del lavoratore (v2) non e' una carta: e' il gettone,
+		# in piedi sulla riga del ventaglio che gli tocca.
+		if str(c["kind"]) == "scheletro":
+			_gettone(BoardLayout3D.scheletro_nel_ventaglio(r), int(str(c["id"])))
+			continue
 		var percorso := BoardLayout3D.carta_path(str(c["kind"]), str(c["id"]))
 		var sfondo := CARTA_SFONDO
 		if percorso != "" and ResourceLoader.exists(percorso): sfondo = Color("#1d1b17")
@@ -686,6 +742,7 @@ func _titolo_carta(c: Dictionary) -> String:
 		"personaggio": return str(CardDB.characters[id]["name"])
 		"potenziamento": return str(CardDB.upgrades[id]["name"])
 		"monumento": return str(CardDB.monuments[id]["name"]) if CardDB.monuments.has(id) else id
+		"scheletro": return "scheletro"
 	return id
 
 # Il costo e i numeri che servono a decidere: il giocatore non deve girare
@@ -704,6 +761,8 @@ func _dettaglio_carta(c: Dictionary) -> String:
 			return "potenziamento · %s" % CardDB.upgrades[id]["family"]
 		"monumento":
 			return "monumento"
+		"scheletro":
+			return "vale %d" % BoardLayout3D.scheletro_valore(int(id))
 	return ""
 
 # IL PUPAZZETTO. Non un parallelepipedo: un corpo che si allarga verso il
@@ -804,7 +863,11 @@ func _segnalini(b: Building) -> void:
 # l'immagine - assets/ si rigenera e non e' versionata - resta il cubetto
 # color ocra di prima, cosi' le partite headless non dipendono dalla grafica.
 func _gettone_scheletro(b: Building) -> void:
-	var piede := BoardLayout3D.scheletro_piede(gs, b)
+	_gettone(BoardLayout3D.scheletro_piede(gs, b), b.buried_character_era)
+
+# Il gettone in se', col piede dove lo si appoggia: serve sulla basetta e,
+# nella v2, nel ventaglio del giocatore sotto la carta dell'edificio.
+func _gettone(piede: Vector3, era: int) -> void:
 	var dim := BoardLayout3D.scheletro_size()
 	var tex: Texture2D = null
 	if ResourceLoader.exists(BoardLayout3D.SCHELETRO_PATH):
@@ -826,7 +889,7 @@ func _gettone_scheletro(b: Building) -> void:
 		Color("#3a3128"))
 	spessore.position = Vector3(0.0, dim.y / 2.0, 0.0)
 	perno.add_child(spessore)
-	var uv: Dictionary = BoardLayout3D.scheletro_uv(b.buried_character_era)
+	var uv: Dictionary = BoardLayout3D.scheletro_uv(era)
 	var faccia := _quad(dim, Color.WHITE)
 	var mat := faccia.material_override as StandardMaterial3D
 	mat.albedo_texture = tex

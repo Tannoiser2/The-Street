@@ -1,0 +1,62 @@
+# partite=120 giocatori=3 seme_base=100000 bot=strategie verticalita=2/5/9/14 prosperita=3 rovina=3 binari=liberi versione_bot=2 strategie=6 centro=una_per_era
+id;nome;era;classi;larghezza;costo_pietra;costo_oro;resistenza;rendita;scavo;lampo_carta;copie;n;ere_intatto;ere_piedi;n_rudere;n_rovina;n_sepolto;n_subito;n_in_piedi_fine;n_intatto_fine;vetusta;potenziamenti;vp;vp_lampo;vp_rendita;vp_verticalita;vp_scavo;vp_scheletri
+ed_capanne;Capanne;1;civico;1;1;0;1;0;2;1;1;117;126;194;117;117;79;45;0;0;10;0;456;117;0;139;140;60
+ed_dolmen;Dolmen;1;religione;1;2;0;3;1;3;0;1;120;449;506;73;39;25;6;81;78;204;11;1386;0;1236;117;3;30
+ed_grotte_dipinte;Grotte dipinte;1;cultura;1;1;0;2;0;6;0;1;48;114;144;47;39;23;1;9;7;43;1;82;0;0;54;28;0
+ed_approdo;Approdo;1;commercio;1;1;0;1;0;2;0;1;43;43;80;43;43;23;6;0;0;0;0;108;0;0;46;52;10
+ed_menhir;Menhir;1;religione;1;2;0;4;1;3;0;1;119;419;464;81;50;41;7;69;64;206;11;1321;0;1118;127;6;70
+ed_palafitte;Palafitte;1;civico;1;1;0;2;0;2;1;1;115;164;251;115;112;77;10;3;1;48;1;421;115;0;146;125;35
+ed_cava;Cava;1;commercio;1;1;0;1;0;2;0;1;120;130;210;120;120;86;36;0;0;11;0;360;0;0;146;154;60
+ed_focolare_comune;Focolare comune;1;civico;1;1;0;1;0;2;1;1;2;2;4;2;2;1;0;0;0;0;0;6;2;0;2;2;0
+ed_trappole_da_pesca;Trappole da pesca;1;ingegneria;1;1;0;1;0;0;0;1;2;2;4;2;2;0;0;0;0;0;0;2;0;0;2;0;0
+ed_circolo_di_pietre;Circolo di pietre;1;religione;2;3;0;4;1;5;0;1;120;446;473;67;43;40;5;77;77;213;38;1542;0;1267;240;0;35
+ed_villaggio_palizzato;Villaggio palizzato;1;militare;2;2;0;2;0;2;1;1;18;30;37;18;18;17;2;0;0;12;0;110;18;0;45;17;30
+ed_tumulo_funerario;Tumulo funerario;1;religione|cultura;2;2;0;3;0;5;1;1;73;182;198;65;58;49;3;15;14;87;1;284;73;0;156;0;55
+ed_teatro;Teatro;2;cultura;1;2;0;3;0;5;2;1;73;136;178;72;63;46;2;10;9;51;0;299;146;0;74;59;20
+ed_acquedotto;Acquedotto;2;ingegneria;3;3;0;4;1;3;0;1;104;286;297;73;66;40;12;38;38;169;28;961;0;627;301;0;33
+ed_terme;Terme;2;civico;1;2;0;2;0;3;2;1;57;74;116;57;57;39;1;0;0;18;0;268;114;0;64;82;8
+ed_sacello;Sacello;2;religione;1;1;0;2;0;3;1;1;57;71;122;57;54;39;3;3;3;11;0;216;57;0;52;103;4
+ed_torre_di_vedetta;Torre di vedetta;2;militare;1;2;0;3;0;2;1;1;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0
+ed_tempio;Tempio;2;religione;1;3;0;3;1;3;0;1;71;136;166;67;60;50;5;11;9;58;1;333;0;182;62;54;35
+ed_ponte;Ponte;2;ingegneria;2;3;0;3;1;3;0;1;37;87;114;28;20;11;0;17;17;44;5;254;0;183;63;0;8
+ed_emporio;Emporio;2;commercio;1;2;0;2;0;2;1;1;6;7;12;6;6;6;0;0;0;1;0;26;6;0;6;10;4
+ed_insulae;Insulae;2;civico;1;2;0;2;0;2;1;1;71;95;153;70;68;46;2;3;3;22;0;238;71;0;79;68;20
+ed_foro;Foro;2;commercio|civico;2;3;0;3;1;5;0;1;98;205;237;93;83;65;3;15;15;93;5;574;0;285;191;42;56
+ed_anfiteatro;Anfiteatro;2;cultura;3;5;0;5;2;6;0;1;111;302;305;85;82;55;5;29;29;187;31;1249;0;833;347;0;69
+ed_castrum;Castrum;2;militare;2;3;0;4;0;3;1;1;6;12;12;6;6;6;0;0;0;6;1;28;6;0;14;0;8
+ed_borgo;Borgo;3;civico;1;2;0;2;0;2;2;1;96;96;158;96;94;78;36;2;2;1;0;468;192;0;86;160;30
+ed_mura;Mura;3;militare;1;2;0;4;0;2;1;1;10;17;20;10;10;10;0;0;0;7;0;27;10;0;11;6;0
+ed_cappella;Cappella;3;religione;1;1;1;2;0;3;2;1;93;94;148;93;92;68;39;1;1;1;0;489;186;0;92;202;9
+ed_torre_civica;Torre civica;3;civico;1;2;0;3;0;2;2;1;78;94;152;78;76;59;8;2;2;17;0;349;156;0;77;86;30
+ed_conceria;Conceria;3;commercio;1;1;0;1;0;0;1;1;9;9;11;9;9;5;7;0;0;0;0;17;9;0;8;0;0
+ed_mulino;Mulino;3;ingegneria|commercio;1;2;0;2;0;2;1;1;42;43;79;42;40;29;8;2;1;2;0;152;42;0;39;56;15
+ed_chiesa;Chiesa;3;religione|cultura;1;2;1;3;2;3;0;1;91;149;198;79;71;57;13;20;18;57;0;477;0;262;83;109;23
+ed_mercato;Mercato;3;commercio;1;2;0;2;0;2;1;1;59;63;96;59;58;45;23;1;1;3;0;226;59;0;58;88;21
+ed_ospedale_dei_pellegrini;Ospedale dei pellegrini;3;civico;1;2;1;2;0;2;2;1;40;41;70;40;40;28;10;0;0;1;0;175;80;0;35;54;6
+ed_castello;Castello;3;militare;2;2;1;4;3;3;0;1;92;193;197;85;85;83;0;7;7;101;13;729;0;455;184;14;76
+ed_abbazia;Abbazia;3;religione|commercio;2;2;2;3;3;5;0;1;78;148;186;62;49;40;4;29;27;65;7;635;0;422;144;50;19
+ed_arsenale;Arsenale;3;militare;2;3;1;3;0;2;2;1;26;44;52;26;26;24;0;0;0;18;4;146;52;2;53;12;27
+ed_bottega_dartista;Bottega d'artista;4;cultura;1;1;1;2;0;2;2;1;87;87;102;87;79;46;72;8;1;0;0;393;174;0;119;94;6
+ed_giardino_allitaliana;Giardino all'italiana;4;cultura;1;0;2;1;0;0;3;1;50;50;52;50;49;16;48;1;1;0;0;218;150;0;68;0;0
+ed_loggia;Loggia;4;civico;1;1;1;2;0;2;2;1;87;87;104;87;83;58;70;4;1;0;0;387;174;0;95;116;2
+ed_osservatorio;Osservatorio;4;ingegneria;1;1;2;2;0;2;2;1;6;6;10;6;5;4;2;1;0;0;0;24;12;0;2;8;2
+ed_banco;Banco;4;commercio;1;1;1;2;0;0;2;1;77;77;95;77;66;36;59;11;3;0;0;274;154;0;110;2;8
+ed_villa;Villa;4;civico;1;2;2;3;0;3;4;1;88;95;159;86;50;42;17;38;12;7;0;585;352;0;112;111;10
+ed_palazzo_signorile;Palazzo signorile;4;civico;1;2;2;3;0;3;3;1;85;87;140;84;67;56;30;18;6;2;0;536;255;0;100;165;16
+ed_ponte_monumentale;Ponte monumentale;4;ingegneria;2;2;2;4;3;3;0;1;58;103;116;32;20;17;0;38;37;45;7;471;0;317;143;3;8
+ed_accademia;Accademia;4;cultura;1;1;2;2;0;3;2;1;41;41;43;41;40;24;39;1;1;0;0;201;82;0;45;74;0
+ed_duomo;Duomo;4;religione|cultura;2;3;3;4;4;5;0;1;66;113;131;55;53;43;1;13;11;47;3;648;0;290;264;72;22
+ed_fortezza_bastionata;Fortezza bastionata;4;militare|ingegneria;2;3;2;5;3;2;0;1;69;127;138;56;56;49;0;13;13;58;4;595;0;284;269;20;22
+ed_piazza_monumentale;Piazza monumentale;4;civico;2;2;2;3;2;3;0;1;24;36;47;22;21;19;1;3;3;12;3;161;0;44;72;33;12
+ed_fondazione_darte;Fondazione d'arte;5;cultura;1;1;2;2;0;0;3;1;72;72;72;0;0;0;0;72;72;0;0;548;216;0;332;0;0
+ed_condominio;Condominio;5;civico;1;1;1;2;0;0;2;1;78;78;78;0;0;0;0;78;78;0;0;593;156;0;437;0;0
+ed_caffe_letterario;Caffè letterario;5;cultura;1;0;2;1;0;0;2;1;21;21;21;0;0;0;0;21;21;0;0;119;42;0;77;0;0
+ed_officina;Officina;5;ingegneria;1;1;1;2;0;0;2;1;82;82;82;0;0;0;0;82;82;0;0;592;164;0;428;0;0
+ed_monumento_ai_caduti;Monumento ai caduti;5;militare|religione;1;1;2;3;0;0;2;1;27;27;27;0;0;0;0;27;27;0;0;201;54;0;147;0;0
+ed_museo;Museo;5;cultura;1;1;3;3;0;0;4;1;20;20;20;0;0;0;0;20;20;0;0;194;80;0;114;0;0
+ed_grattacielo;Grattacielo;5;commercio;1;2;4;3;0;0;4;1;1;1;1;0;0;0;0;1;1;0;0;12;4;0;8;0;0
+ed_biblioteca;Biblioteca;5;cultura;1;1;3;3;0;0;4;1;28;28;28;0;0;0;0;28;28;0;0;221;112;0;109;0;0
+ed_ponte_in_acciaio;Ponte in acciaio;5;ingegneria;2;1;3;4;0;0;4;1;42;42;42;0;0;0;0;42;42;0;0;453;168;0;285;0;0
+ed_stazione;Stazione;5;commercio|ingegneria;3;2;4;4;0;0;4;1;31;31;31;0;0;0;0;31;31;0;0;770;124;0;646;0;0
+ed_parco_archeologico;Parco archeologico;5;cultura;2;1;2;2;0;0;2;1;68;68;68;0;0;0;0;68;68;0;0;1051;136;0;915;0;0
+ed_universita;Università;5;cultura|civico;2;2;3;3;0;0;4;1;44;44;44;0;0;0;0;44;44;0;0;793;176;0;617;0;0

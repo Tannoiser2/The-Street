@@ -19,6 +19,28 @@ static func final_scoring(gs: GameState) -> void:
 static func _census_final(gs: GameState) -> void:
 	EraRules.census(gs)
 
+# PREMIO DI SCAVO (registro 89, manopola `premio_scavo`, "nessuno" nei dati):
+# chi costruisce al livello L sopra un edificio con Scavo S lo incassa subito,
+# al posto della Verticalita'. Tre moltiplicatori da misurare: "per_livello"
+# S x L, "piu_livello" S + L, "per_livello_meno_uno" S x (L - 1). Uno
+# spianato (S = 0) non paga mai: seppellire il proprio vivo resta a zero.
+# La correzione all'ultima era (registro 91, manopola `premio_era5`): "intero"
+# come nelle altre ere, "dimezzato" per difetto, "niente". Serve perche' con
+# S x L meta' del premio arrivava nell'era 5 e una partita su cinque si
+# decideva li'.
+static func premio_scavo(scavo: int, livello: int, era: int = 1) -> int:
+	if scavo <= 0: return 0
+	var premio := 0
+	match str(CardDB.constants.get("premio_scavo", "nessuno")):
+		"per_livello": premio = scavo * livello
+		"piu_livello": premio = scavo + livello
+		"per_livello_meno_uno": premio = scavo * (livello - 1)
+	if premio > 0 and era >= int(CardDB.constants["eras"]):
+		match str(CardDB.constants.get("premio_era5", "intero")):
+			"dimezzato": premio = premio / 2
+			"niente": premio = 0
+	return premio
+
 # Metà del premio a chi ha la cima; metà divisa in proporzione agli edifici.
 static func _verticality(gs: GameState) -> void:
 	var vp_table = CardDB.constants["verticality_vp"]
@@ -76,18 +98,46 @@ static func _continuity(gs: GameState) -> void:
 			if best >= 3: p.add_vp("continuita", int(table["3"]))
 			elif best >= 2: p.add_vp("continuita", int(table["2"]))
 
-# Lo Scavo va al proprietario dell'edificio sotterrato; chi lo ha sotterrato
-# ne prende 1 se non era suo. TODO: tracciare "sotterrato da" in Building.
+# Lo Scavo va al proprietario dell'edificio sotterrato. Il regolamento dava
+# anche "+1 per ogni edificio altrui che avete sotterrato": ne' il motore ne'
+# l'oracolo Python lo hanno mai contato, e il designer l'ha tolto (registro
+# 100: "cambia poco e aggiunge complessita'"). Manopola `scavo_a_chi_scava`
+# (registro 87): lo Scavo lo
+# incassa chi ha completato la sepoltura, se l'edificio non era suo; il
+# proprio sepolto da se' vale 0, come un terrapieno. I contatori
+# `scavo_scavato` e `scavo_e5` servono all'audit ("l'ultimo che costruisce
+# prende tutto il bottino?"): quanto si incassa scavando, e quanto nell'era 5.
 static func _scavo(gs: GameState) -> void:
+	var a_chi_scava := bool(CardDB.constants.get("scavo_a_chi_scava", false))
 	for b in gs.grid.buildings:
-		if b.is_buried:
-			gs.players[b.owner].add_vp("scavo", b.scavo_value())
-			b.rende("scavo", b.scavo_value())
+		if not b.is_buried: continue
+		# `b` non ha tipo (viene da un Array): il tipo va scritto, se no non compila.
+		var v: int = b.scavo_value()
+		var altrui: bool = b.buried_by >= 0 and b.buried_by != b.owner
+		if a_chi_scava:
+			if altrui:
+				var chi: PlayerState = gs.players[b.buried_by]
+				chi.add_vp("scavo", v)
+				chi.bump("scavo_scavato", v)
+				if b.buried_era >= int(CardDB.constants["eras"]): chi.bump("scavo_e5", v)
+				b.rende("scavo", v)
+			elif b.buried_by < 0:
+				# Sepolto senza uno scavatore (ricalcolo a fine era): al proprietario.
+				gs.players[b.owner].add_vp("scavo", v)
+				b.rende("scavo", v)
+			continue
+		gs.players[b.owner].add_vp("scavo", v)
+		b.rende("scavo", v)
 
 # Personaggi sepolti (ere 1-4): valgono 6 - era se il loro edificio è sotterrato.
+# `scheletro_conta` (registro 96): "sotterrato" e' la regola di sempre;
+# "sempre" paga lo scheletro comunque finisca l'edificio (l'artista viene
+# ricordato anche se la sua casa sta in piedi), una prova per dare piu' peso
+# agli scheletri del potenziamento.
 static func _skeletons(gs: GameState) -> void:
+	var sempre := str(CardDB.constants.get("scheletro_conta", "sotterrato")) == "sempre"
 	for b in gs.grid.buildings:
-		if b.buried_character != "" and b.is_buried:
+		if b.buried_character != "" and (b.is_buried or sempre):
 			gs.players[b.owner].add_vp("scheletri", 6 - b.buried_character_era)
 			b.rende("scheletri", 6 - b.buried_character_era)
 

@@ -49,6 +49,10 @@
         "oro": {
           "type": "integer",
           "minimum": 0
+        },
+        "idee": {
+          "type": "integer",
+          "minimum": 0
         }
       },
       "additionalProperties": false
@@ -101,6 +105,9 @@
           "$ref": "#/$defs/range"
         },
         "vetusta": {
+          "$ref": "#/$defs/range"
+        },
+        "resistance": {
           "$ref": "#/$defs/range"
         },
         "scavo": {
@@ -386,6 +393,27 @@
           },
           "base_production": {
             "$ref": "#/$defs/res"
+          },
+          "base_production_by_era": {
+            "type": "object",
+            "properties": {
+              "1": {
+                "$ref": "#/$defs/res"
+              },
+              "2": {
+                "$ref": "#/$defs/res"
+              },
+              "3": {
+                "$ref": "#/$defs/res"
+              },
+              "4": {
+                "$ref": "#/$defs/res"
+              },
+              "5": {
+                "$ref": "#/$defs/res"
+              }
+            },
+            "additionalProperties": false
           }
         }
       }
@@ -487,6 +515,9 @@
                 "type": "integer"
               },
               "cultura": {
+                "type": "integer"
+              },
+              "idee": {
                 "type": "integer"
               }
             }

@@ -69,10 +69,20 @@ tools/scatta3d.sh strada.png -- --players 3 --seed 7 --era 4    # plancia 3D
 godot res://scenes/gioca.tscn
 ```
 
-Tu sei il giocatore 0, gli altri li gioca il bot. Clicca una colonna per
-piazzare un lavoratore e attivarla, poi scegli un'azione dall'elenco: ognuna
+Tu sei il giocatore 0, gli altri li gioca il bot. Nella schermata di scelta
+si decide il **regolamento**: la v2 (tre risorse, quattro lavoratori, draft
+dei Personaggi; carica `data/cards-v2.json`) o la v1.5 congelata
+(`data/cards.json`). Con la v2 ogni era comincia dal draft: clicca un
+Personaggio della fila e lo prendi, gratis. Poi clicca una colonna per
+piazzare un lavoratore e attivarla, e scegli un'azione dall'elenco: ognuna
 porta il costo, e quelle non disponibili portano il motivo. Cliccando una
-carta delle file la si legge senza chiudere il menu.
+carta delle file la si legge senza chiudere il menu. Nella v2 il lavoratore
+che piazza un potenziamento resta sotto l'edificio come scheletro: il
+gettone sta sulla basetta e, nel ventaglio del giocatore, in fondo alla
+pila sotto la carta dell'edificio; il riquadro del mouse dice quanto vale.
+Sempre nella v2 non c'e' il rudere: chi crolla va in rovina e la sagoma
+resta in piedi, girata e scura, perche' la propria rovina si puo'
+ristrutturare (il tasto dice "Ristruttura").
 
 Sul tavolo: la strada al centro, il mercato lungo il fianco sinistro,
 personaggi, potenziamenti e monumenti lungo il destro, le plance dei giocatori

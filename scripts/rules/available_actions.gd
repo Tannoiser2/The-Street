@@ -18,12 +18,13 @@ class Voce:
 	var motivo: String = ""
 	var pietra: int = 0
 	var oro: int = 0
+	var idee: int = 0
 	var parametri: Dictionary = {}
 
 	# Pagabile e' diverso da legale: l'azione puo' essere permessa e le
 	# risorse mancare. Il giocatore deve vedere due cose diverse.
 	func pagabile(p: PlayerState) -> bool:
-		return p.pietra >= pietra and p.oro >= oro
+		return p.pietra >= pietra and p.oro >= oro and p.idee >= idee
 
 static func _voce(tipo: String, etichetta: String, q, parametri := {}) -> Voce:
 	var v := Voce.new()
@@ -33,6 +34,7 @@ static func _voce(tipo: String, etichetta: String, q, parametri := {}) -> Voce:
 	v.motivo = q.reason
 	v.pietra = q.pietra
 	v.oro = q.oro
+	v.idee = q.idee
 	v.parametri = parametri
 	return v
 
@@ -60,7 +62,7 @@ static func costruzioni(gs: GameState, player: int, col: int) -> Array[Voce]:
 				var q = BuildRules.quote_above(gs, player, d, c) if sopra \
 					else BuildRules.quote_rail(gs, player, d, c)
 				if q.legal:
-					if migliore == null or q.pietra + q.oro < migliore.pietra + migliore.oro:
+					if migliore == null or q.pietra + q.oro + q.idee < migliore.pietra + migliore.oro + migliore.idee:
 						migliore = q
 						migliori_par = {"card_id": card_id, "col_from": c, "above": sopra}
 				elif ripiego == null:
@@ -82,7 +84,7 @@ static func potenziamenti(gs: GameState, player: int, col: int) -> Array[Voce]:
 		for b in gs.grid.in_column(col):
 			var q := ActionRules.quote_upgrade(gs, player, upg_id, b)
 			if q.legal:
-				if migliore == null or q.pietra + q.oro < migliore.pietra + migliore.oro:
+				if migliore == null or q.pietra + q.oro + q.idee < migliore.pietra + migliore.oro + migliore.idee:
 					migliore = q
 					par = {"upg_id": upg_id, "uid": b.uid}
 			elif ripiego == null:
@@ -98,11 +100,17 @@ static func potenziamenti(gs: GameState, player: int, col: int) -> Array[Voce]:
 
 static func restauri(gs: GameState, player: int, col: int) -> Array[Voce]:
 	var out: Array[Voce] = []
+	# Senza rudere (v2) si ristruttura la PROPRIA rovina nella colonna.
+	var senza_rudere := bool(CardDB.constants.get("senza_rudere", false))
 	for b in gs.grid.in_column(col):
-		if b.state != Enums.BuildingState.RUDERE or b.is_buried: continue
+		if b.is_buried: continue
+		if senza_rudere:
+			if b.state != Enums.BuildingState.ROVINA or b.owner != player: continue
+		elif b.state != Enums.BuildingState.RUDERE: continue
 		var q := ActionRules.quote_restore(gs, player, b)
 		var chi := "" if b.owner == player else " (di G%d: diventa tuo)" % b.owner
-		out.append(_voce("restaura", "Restaura %s%s" % [b.data["name"], chi], q, {"uid": b.uid}))
+		out.append(_voce("restaura", "%s %s%s" % ["Ristruttura" if senza_rudere else "Restaura",
+			b.data["name"], chi], q, {"uid": b.uid}))
 	return out
 
 static func reclutamenti(gs: GameState, player: int, col: int) -> Array[Voce]:
@@ -208,6 +216,48 @@ static func bersagli_reclutamento(gs: GameState, player: int, col: int,
 			"Recluta %s (%s) %s %s" % [d["name"], d["class"], verbo, b.data["name"]],
 			q, {"char_id": char_id, "uid": b.uid}))
 	return out
+
+# ---- il turno v2: le voci senza colonna attivata --------------------
+# Nel turno v2 (registro 93) non c'e' una colonna attivata: si costruisce
+# ovunque, si potenzia e si ristruttura qualunque proprio edificio.
+static func piazzamenti_ovunque(gs: GameState, player: int, card_id: String) -> Array[Voce]:
+	var out: Array[Voce] = []
+	if not CardDB.buildings.has(card_id): return out
+	var d: Dictionary = CardDB.buildings[card_id]
+	var w := int(d["width"])
+	for c in range(0, gs.grid.n_cols - w + 1):
+		for sopra in [false, true]:
+			var q = BuildRules.quote_above(gs, player, d, c) if sopra \
+				else BuildRules.quote_rail(gs, player, d, c)
+			if not q.legal: continue
+			out.append(_voce("costruisci", "Costruisci %s in colonna %d%s" % [d["name"], c, " sopra" if sopra else ""],
+				q, {"card_id": card_id, "col_from": c, "above": sopra, "level": q.level}))
+	return out
+
+static func potenziamenti_ovunque(gs: GameState, player: int) -> Array[Voce]:
+	var out: Array[Voce] = []
+	for upg_id in gs.upg_row:
+		var d: Dictionary = CardDB.upgrades[upg_id]
+		for b in gs.grid.buildings:
+			if b.owner != player or not b.is_alive(): continue
+			var q := ActionRules.quote_upgrade(gs, player, upg_id, b)
+			if q.legal:
+				out.append(_voce("potenzia", "Potenzia %s con %s" % [b.data["name"], d["name"]], q,
+					{"upg_id": upg_id, "uid": b.uid}))
+	return out
+
+static func ristrutturazioni(gs: GameState, player: int) -> Array[Voce]:
+	var out: Array[Voce] = []
+	for b in gs.grid.buildings:
+		if b.owner != player or b.state != Enums.BuildingState.ROVINA or b.is_buried: continue
+		var q := ActionRules.quote_restore(gs, player, b)
+		if q.legal:
+			out.append(_voce("restaura", "Ristruttura %s" % b.data["name"], q, {"uid": b.uid}))
+	return out
+
+static func passa(scelta: String) -> Voce:
+	return _voce("passa", "Passa e incassa 1 pietra e 1 %s" % scelta,
+		ActionRules.ActionQuote.yes(0, 0), {"scelta": scelta})
 
 static func dinastia(gs: GameState, player: int) -> Voce:
 	return _voce("dinastia", "Acquista la Dinastia",

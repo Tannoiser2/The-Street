@@ -30,6 +30,16 @@ func _ready() -> void:
 	_run("i bot con una strategia giocano davvero", _test_strategie)
 	_run("la strategia Obiettivi", _test_obiettivi)
 	_run("il Centro Urbano una volta per era", _test_centro_una_volta)
+	_run("chi ha sepolto chi, e lo sconto solo sulle rovine altrui", _test_sepolto_da)
+	_run("il premio di scavo si paga e torna col libro mastro", _test_premio_in_partita)
+	_run("la v2 a tre risorse gira sullo stesso motore", _test_tre_risorse)
+	_run("il tetto per risorsa alla dispersione", _test_tetto_per_risorsa)
+	_run("il canone delle strategie segue il file dati", _test_canone_v2)
+	_run("il turno v2: un'azione per turno, il lavoratore dove agisce", _test_turno_v2)
+	_run("il draft dei Personaggi a inizio era (v2)", _test_draft_v2)
+	_run("v2: niente scheletri dal draft, niente Vetusta' (registro 95)", _test_senza_vetusta_v2)
+	_run("v2: le tre carte che contavano la Vetusta' (registro 99)", _test_tre_carte_v2)
+	_run("v2: le tessere una volta per era (registro 100)", _test_tessere_v2)
 	print("\n%d superati, %d falliti" % [_passed, _failed])
 	get_tree().quit(0 if _failed == 0 else 1)
 
@@ -981,3 +991,462 @@ func _test_centro_una_volta() -> void:
 	_eq("  e all'era dopo paga di nuovo", oro.call(), 4)
 	_ok("  e la copia dello stato se lo ricorda", gs.duplica().grid.prosperity_paid.has(3))
 	CardDB.constants["prosperity"] = salvate
+
+# Chi seppellisce chi lo registra il controller (Building.buried_by, in che
+# era): su partite vere ogni sepolto deve avere uno scavatore e un'era, e
+# qualcuno deve essere stato sepolto da un avversario. Poi la manopola
+# `sconto_macerie_solo_altrui` (registro 87): sopra una rovina altrui lo
+# sconto c'e' sempre, sopra la propria solo con la manopola spenta.
+func _test_sepolto_da() -> void:
+	var sepolti := 0
+	var senza_scavatore := 0
+	var da_altri := 0
+	for g in 6:
+		var ctl := _game(3, 900 + g)
+		var guard := 0
+		while ctl.gs.phase != Enums.Phase.FINE_PARTITA and guard < 10000:
+			RandomBot.play_turn(ctl)
+			guard += 1
+		for b in ctl.gs.grid.buildings:
+			if not b.is_buried: continue
+			sepolti += 1
+			if b.buried_by < 0 or b.buried_era < 1 or b.buried_era > int(CardDB.constants["eras"]):
+				senza_scavatore += 1
+			elif b.buried_by != b.owner:
+				da_altri += 1
+	_ok("su 6 partite ci sono sepolti (%d)" % sepolti, sepolti > 0)
+	_eq("  ognuno con il suo scavatore e la sua era", senza_scavatore, 0)
+	_ok("  e qualcuno sepolto da un avversario (%d)" % da_altri, da_altri > 0)
+
+	var com_era := bool(CardDB.constants.get("sconto_macerie_solo_altrui", false))
+	var ctl2 := _game(3, 31)
+	var gs := ctl2.gs
+	# Una carta dell'era, larga 1, con pietra da scontare, e una colonna dal
+	# terreno giusto: nell'era 1 quasi tutte chiedono un terreno.
+	var id := ""
+	var col := -1
+	for cid in CardDB.buildings:
+		var d: Dictionary = CardDB.buildings[cid]
+		if int(d["era"]) != gs.era or int(d["width"]) != 1 \
+				or int(d["cost"]["pietra"]) < 2 or int(d["level_required"]) > 1:
+			continue
+		for c in gs.grid.n_cols:
+			if BuildRules.terrain_ok(gs, d, c, c + 1, 0):
+				id = cid
+				col = c
+				break
+		if id != "": break
+	_ok("c'e' una carta da provare", id != "")
+	if id == "": return
+	var data: Dictionary = CardDB.buildings[id]
+	var rovina := _put(gs, 1, id, col)
+	rovina.state = Enums.BuildingState.ROVINA
+	CardDB.constants["sconto_macerie_solo_altrui"] = false
+	var q_tutti := BuildRules.quote_above(gs, 0, data, col)
+	CardDB.constants["sconto_macerie_solo_altrui"] = true
+	var q_altrui := BuildRules.quote_above(gs, 0, data, col)
+	_ok("sopra una rovina altrui il preventivo e' legale", q_tutti.legal and q_altrui.legal, q_tutti.reason)
+	_eq("  e lo sconto c'e' con e senza manopola", q_altrui.pietra, q_tutti.pietra)
+	rovina.owner = 0
+	CardDB.constants["sconto_macerie_solo_altrui"] = false
+	var q_mia := BuildRules.quote_above(gs, 0, data, col)
+	CardDB.constants["sconto_macerie_solo_altrui"] = true
+	var q_mia_senza := BuildRules.quote_above(gs, 0, data, col)
+	_eq("sopra la propria rovina, spenta, lo sconto c'e'", q_mia.pietra, q_tutti.pietra)
+	_eq("  accesa, costa %d in piu'" % int(CardDB.constants["rubble_discount_pietra"]),
+		q_mia_senza.pietra, q_mia.pietra + int(CardDB.constants["rubble_discount_pietra"]))
+	CardDB.constants["sconto_macerie_solo_altrui"] = com_era
+
+# Con il premio di scavo acceso, su partite vere qualcuno lo incassa e i punti
+# del canale Scavo tornano ancora, carta per carta, con quelli del tabellone:
+# il premio si segna sull'edificio sepolto, non si inventa un canale nuovo.
+func _test_premio_in_partita() -> void:
+	var com_era: String = str(CardDB.constants.get("premio_scavo", "nessuno"))
+	CardDB.constants["premio_scavo"] = "per_livello"
+	var incassato := 0
+	var storte := 0
+	for g in 4:
+		var ctl := _game(3, 950 + g)
+		var guard := 0
+		while ctl.gs.phase != Enums.Phase.FINE_PARTITA and guard < 10000:
+			RandomBot.play_turn(ctl)
+			guard += 1
+		var tabellone := 0
+		var carte := 0
+		for p in ctl.gs.players:
+			incassato += int(p.counters.get("scavo_scavato", 0))
+			tabellone += int(p.vp_breakdown.get("scavo", 0))
+		for b in ctl.gs.grid.buildings: carte += int(b.vp_reso.get("scavo", 0))
+		if tabellone != carte: storte += 1
+	CardDB.constants["premio_scavo"] = com_era
+	_ok("su 4 partite qualcuno incassa il premio (%d punti)" % incassato, incassato > 0)
+	_eq("  e il canale Scavo torna col libro mastro", storte, 0)
+
+# `data/cards-v2.json` (generato da tools/genera_cards_v2.py) carica le Idee
+# nei costi e nella produzione: su partite vere qualcuno le produce e le
+# spende, nessuno va sotto zero, e ricaricando la v1.5 le Idee spariscono.
+func _test_tre_risorse() -> void:
+	_ok("il file v2 esiste", FileAccess.file_exists("res://data/cards-v2.json"))
+	if not FileAccess.file_exists("res://data/cards-v2.json"): return
+	CardDB.load_db("res://data/cards-v2.json")
+	_eq("il Dolmen costa un'Idea", int(CardDB.buildings["ed_dolmen"]["cost"].get("idee", 0)), 1)
+	var prodotte := 0
+	var spese := 0
+	var sotto_zero := 0
+	for g in 3:
+		var ctl := _game(3, 970 + g)
+		var guard := 0
+		while ctl.gs.phase != Enums.Phase.FINE_PARTITA and guard < 10000:
+			RandomBot.play_turn(ctl)
+			guard += 1
+		for p in ctl.gs.players:
+			prodotte += int(p.counters.get("idee_prodotte", 0))
+			spese += int(p.counters.get("idee_spese", 0))
+			if p.pietra < 0 or p.oro < 0 or p.idee < 0: sotto_zero += 1
+	_ok("su 3 partite si producono Idee (%d)" % prodotte, prodotte > 0)
+	_ok("  e si spendono (%d)" % spese, spese > 0)
+	_eq("  nessuno va sotto zero", sotto_zero, 0)
+	CardDB.load_db(CardDB.DB_PATH)
+	_eq("ricaricata la v1.5, il Dolmen non chiede Idee", int(CardDB.buildings["ed_dolmen"]["cost"].get("idee", 0)), 0)
+
+# "Tetto a tre" (registro 91): alla dispersione ogni risorsa scende a 3, poi
+# vale il tetto totale di sempre. Spento (0, i dati v1.5) non cambia niente.
+func _test_tetto_per_risorsa() -> void:
+	var com_era := int(CardDB.constants.get("resource_cap_per_resource", 0))
+	var gs := _game(3, 41).gs
+	var p: PlayerState = gs.players[0]
+	p.pietra = 4
+	p.oro = 4
+	p.idee = 4
+	CardDB.constants["resource_cap_per_resource"] = 0
+	EraRules.disperse(gs)
+	_eq("spento: resta il tetto totale (5), si scarta prima la pietra", [p.pietra, p.oro, p.idee], [0, 1, 4])
+	p.pietra = 4
+	p.oro = 4
+	p.idee = 4
+	CardDB.constants["resource_cap_per_resource"] = 3
+	EraRules.disperse(gs)
+	_eq("a 3: ogni risorsa scende a 3, poi il totale a 5", [p.pietra, p.oro, p.idee], [0, 2, 3])
+	CardDB.constants["resource_cap_per_resource"] = com_era
+
+# Registro 92: con la v2 caricata il canone e' quello della v2 (niente
+# Verticale, la Continuita' dentro), e le sei strategie giocano partite intere.
+func _test_canone_v2() -> void:
+	_eq("con la v1.5 il canone e' quello di sempre", StrategyBot.canone(), StrategyBot.STRATEGIE)
+	if not FileAccess.file_exists("res://data/cards-v2.json"): return
+	CardDB.load_db("res://data/cards-v2.json")
+	_ok("con la v2 il canone e' quello della v2", StrategyBot.canone() == StrategyBot.STRATEGIE_V2)
+	_ok("  senza la Verticale", not StrategyBot.canone().has("verticale"))
+	_ok("  con la Continuita'", StrategyBot.canone().has("continuita"))
+	var finite := 0
+	for strat in StrategyBot.canone():
+		var ctl := _game(3, 980)
+		var guard := 0
+		while ctl.gs.phase != Enums.Phase.FINE_PARTITA and guard < 10000:
+			StrategyBot.play_turn(ctl, strat)
+			guard += 1
+		if ctl.gs.phase == Enums.Phase.FINE_PARTITA: finite += 1
+	_eq("  e ogni strategia porta in fondo una partita v2", finite, StrategyBot.canone().size())
+	CardDB.load_db(CardDB.DB_PATH)
+
+# Registro 93: nel turno v2 ogni azione consuma un lavoratore e non c'e' la
+# fase AZIONE. Si prova sul file v2: costruire all'inizio del turno passa,
+# mette il lavoratore sull'edificio (+2) e lo attiva; passare incassa; su
+# partite vere del bot casuale si fanno tutte le azioni e le partite finiscono.
+func _test_turno_v2() -> void:
+	if not FileAccess.file_exists("res://data/cards-v2.json"): return
+	CardDB.load_db("res://data/cards-v2.json")
+	# Dal registro 94 il file v2 gioca il turno a quattro lavoratori: il turno
+	# a un'azione resta una manopola, e qui si accende.
+	CardDB.constants["turno_v2"] = true
+	_ok("la manopola accende il turno v2", bool(CardDB.constants.get("turno_v2", false)))
+	var ctl := _game(3, 990)
+	var gs := ctl.gs
+	# Prima il draft dei Personaggi (v2): qui si prende il primo che c'e'.
+	while not gs.pending_choice.is_empty():
+		ctl.choose(int((gs.pending_choice["options"] as Array)[0]))
+	var p := gs.current_player()
+	var usati := p.workers_used
+	# Costruire senza aver attivato: nel turno v2 e' il turno stesso.
+	var fatto := false
+	var nuovo: Building = null
+	for card_id in gs.market.duplicate():
+		for c in gs.grid.n_cols:
+			if ctl.build(card_id, c, false):
+				fatto = true
+				for b in gs.grid.buildings:
+					if b.owner == p.index: nuovo = b
+				break
+		if fatto: break
+	_ok("si costruisce all'inizio del turno", fatto)
+	if fatto:
+		_eq("  e costa il lavoratore", p.workers_used, usati + 1)
+		_eq("  che resta sull'edificio a proteggerlo", nuovo.protection, int(CardDB.constants["protection_bonus"]))
+		_eq("  ed e' ancora fase PIAZZA per il prossimo", gs.phase, Enums.Phase.PIAZZA)
+	var p2 := gs.current_player()
+	var oro_prima := p2.oro
+	var usati2 := p2.workers_used
+	_ok("passare e incassare", ctl.passa("oro"))
+	_eq("  porta 1 oro", p2.oro, oro_prima + 1)
+	_eq("  e costa il lavoratore", p2.workers_used, usati2 + 1)
+	var azioni := {}
+	var finite := 0
+	for g in 4:
+		var c2 := _game(3, 995 + g)
+		var guard := 0
+		while c2.gs.phase != Enums.Phase.FINE_PARTITA and guard < 10000:
+			RandomBot.play_turn(c2)
+			guard += 1
+		if c2.gs.phase == Enums.Phase.FINE_PARTITA: finite += 1
+		for pl in c2.gs.players:
+			for k in pl.counters:
+				if str(k).begins_with("az_"): azioni[k] = int(azioni.get(k, 0)) + int(pl.counters[k])
+	_eq("4 partite del bot casuale arrivano in fondo", finite, 4)
+	# Il bot casuale non passa mai: una colonna libera c'e' sempre. Passare e'
+	# provato sopra, direttamente.
+	for k in ["az_colonna", "az_costruisci", "az_potenzia"]:
+		_ok("  si fa l'azione %s (%d)" % [k, int(azioni.get(k, 0))], int(azioni.get(k, 0)) > 0)
+	CardDB.load_db(CardDB.DB_PATH)
+
+# IL DRAFT (registro 93): a inizio era, in ordine di turno, ogni giocatore
+# prende un Personaggio fra tutti quelli dell'era, gratis e senza lavoratore.
+# I protettori si legano al primo edificio costruito nell'era.
+func _test_draft_v2() -> void:
+	if not FileAccess.file_exists("res://data/cards-v2.json"): return
+	CardDB.load_db("res://data/cards-v2.json")
+	_ok("il file v2 accende il draft", bool(CardDB.constants.get("draft_personaggi", false)))
+	var ctl := _game(3, 990)
+	var gs := ctl.gs
+	_eq("all'inizio dell'era il gioco chiede il draft", str(gs.pending_choice.get("kind", "")), "draft")
+	_eq("  in fila ci sono tutti i Personaggi dell'era 1", gs.char_row.size(), 5)
+	_eq("  e sceglie per primo il primo dell'ordine", int(gs.pending_choice["player"]), int(gs.turn_order[0]))
+	var opzioni: Array = gs.pending_choice["options"]
+	var con_impronta := false
+	for i in opzioni:
+		if bool(CardDB.characters[gs.char_row[int(i)]].get("imprint", false)): con_impronta = true
+	_ok("  senza edifici l'Impronta non si offre", not con_impronta)
+	var primo: PlayerState = gs.players[int(gs.pending_choice["player"])]
+	var pietra := primo.pietra
+	var oro := primo.oro
+	var usati := primo.workers_used
+	var capotribu := gs.char_row.find("pe_capotribu")
+	_ok("  il Capotribu' e' fra le opzioni", capotribu in opzioni)
+	_ok("  si sceglie", ctl.choose(capotribu))
+	_eq("  il Personaggio e' del giocatore", primo.recruited_total, 1)
+	_eq("  senza lavoratore", primo.workers_used, usati)
+	_ok("  senza pagare (il Capotribu' porta +2 pietra)", primo.pietra == pietra + 2 and primo.oro == oro)
+	_eq("  poi tocca al secondo", int(gs.pending_choice["player"]), int(gs.turn_order[1]))
+	while not gs.pending_choice.is_empty():
+		ctl.choose(int((gs.pending_choice["options"] as Array)[0]))
+	_eq("finito il draft si gioca", gs.phase, Enums.Phase.PIAZZA)
+	_eq("  e parte il primo dell'ordine", gs.current_index, int(gs.turn_order[0]))
+	_eq("  con la fila scesa a 2", gs.char_row.size(), 2)
+	_eq("  con quattro lavoratori (registro 94)", primo.workers, 4)
+	# Turno v1.5: il lavoratore attiva la colonna, poi si agisce li' o accanto.
+	_ok("  il primo drafter attiva la colonna 1", ctl.place_worker(1))
+	_ok("  reclutare non e' piu' un'azione", not ctl.recruit(gs.char_row[0], null))
+	var costruito: Building = null
+	for card_id in gs.market.duplicate():
+		for c in range(0, 3):
+			if ctl.build(card_id, c, false):
+				for b in gs.grid.buildings:
+					if b.owner == primo.index: costruito = b
+				break
+		if costruito != null: break
+	_ok("il primo drafter costruisce", costruito != null)
+	if costruito != null:
+		# Nel turno a quattro lavoratori il +2 lo da' solo il lavoratore messo
+		# sopra un proprio edificio in piedi: qui l'edificio e' nuovo, resta il +1.
+		_eq("  e il Capotribu' protegge l'edificio nuovo (+1)", costruito.protection, 1)
+		_eq("  legato a quell'edificio", int(primo.character_targets.get("pe_capotribu", -1)), costruito.uid)
+	var finite := 0
+	var draftati := 0
+	for g in 3:
+		var c2 := _game(3, 995 + g)
+		var guard := 0
+		while c2.gs.phase != Enums.Phase.FINE_PARTITA and guard < 10000:
+			RandomBot.play_turn(c2)
+			guard += 1
+		if c2.gs.phase == Enums.Phase.FINE_PARTITA: finite += 1
+		for pl in c2.gs.players: draftati += int(pl.counters.get("draftati", 0))
+	_eq("3 partite del bot casuale arrivano in fondo", finite, 3)
+	_ok("  con Personaggi draftati (%d)" % draftati, draftati >= 30)
+	CardDB.load_db(CardDB.DB_PATH)
+
+
+# Registro 95: il Personaggio del draft non si seppellisce a fine era, e la
+# Vetusta' non esiste (tetto 0). Con i dati v1.5 tutto come prima.
+func _test_senza_vetusta_v2() -> void:
+	if not FileAccess.file_exists("res://data/cards-v2.json"): return
+	CardDB.load_db("res://data/cards-v2.json")
+	_eq("nel file v2 la Vetusta' ha tetto 0", int(CardDB.constants["vetusta_max"]), 0)
+	_ok("  e i Personaggi non si seppelliscono", not bool(CardDB.constants.get("personaggi_sepolti", true)))
+	var ctl := _game(3, 990)
+	var gs := ctl.gs
+	while not gs.pending_choice.is_empty():
+		ctl.choose(int((gs.pending_choice["options"] as Array)[0]))
+	var p := gs.current_player()
+	_eq("il primo ha il suo Personaggio", p.specialized_characters.size(), 1)
+	_ok("  e attiva la colonna 1", ctl.place_worker(1))
+	var costruito: Building = null
+	# Si costruisce ACCANTO alla colonna attivata: cosi' piu' tardi, nella
+	# stessa era, un altro lavoratore puo' attivare la colonna dell'edificio
+	# e potenziarlo (un proprio lavoratore per colonna).
+	for card_id in gs.market.duplicate():
+		for c in [0, 2]:
+			if ctl.build(card_id, c, false):
+				for b in gs.grid.buildings:
+					if b.owner == p.index: costruito = b
+				break
+		if costruito != null: break
+	_ok("  e costruisce accanto", costruito != null)
+	if costruito == null:
+		CardDB.load_db(CardDB.DB_PATH)
+		return
+	costruito.bonus_res += 10                     # regge l'evento di sicuro
+	EraRules.resolve_event(gs)
+	_eq("regge l'evento senza prendere Vetusta'", costruito.vetusta, 0)
+	EraRules.bury_characters(gs)
+	_eq("a fine era il Personaggio non finisce sotto l'edificio", costruito.buried_character, "")
+	# Lo scheletro lo lascia il potenziamento: il lavoratore resta sotto.
+	_ok("il file v2 accende lo scheletro del potenziamento", bool(CardDB.constants.get("scheletro_potenziamento", false)))
+	var chi := costruito.owner
+	var potenziato := false
+	var guard := 0
+	while not potenziato and guard < 60 and gs.phase != Enums.Phase.FINE_PARTITA:
+		guard += 1
+		while not gs.pending_choice.is_empty():
+			ctl.choose(int((gs.pending_choice["options"] as Array)[0]))
+		var g := gs.current_player()
+		if g.index == chi and gs.phase == Enums.Phase.PIAZZA and costruito.is_alive():
+			g.pietra = 5; g.oro = 5; g.idee = 5
+			if ctl.place_worker(costruito.col_from):
+				for upg_id in gs.upg_row.duplicate():
+					if ctl.upgrade(upg_id, costruito):
+						potenziato = true
+						break
+				if not potenziato: ctl.pass_action()
+				continue
+		StrategyBot.play_turn(ctl)
+	_ok("il proprietario potenzia l'edificio", potenziato)
+	if potenziato:
+		_eq("  e il lavoratore resta sotto come scheletro", costruito.buried_character, "lavoratore")
+		# Registro 96: `scheletro_conta` "sempre" paga lo scheletro anche se
+		# l'edificio sta in piedi; "sotterrato" (la regola di sempre) no.
+		var chi_p: PlayerState = gs.players[chi]
+		var prima := chi_p.vp
+		CardDB.constants["scheletro_conta"] = "sotterrato"
+		Scoring._skeletons(gs)
+		_eq("in piedi, lo scheletro non paga (sotterrato)", chi_p.vp, prima)
+		CardDB.constants["scheletro_conta"] = "sempre"
+		Scoring._skeletons(gs)
+		_eq("  ma con \"sempre\" paga 6 meno l'era", chi_p.vp, prima + 6 - costruito.buried_character_era)
+	CardDB.load_db(CardDB.DB_PATH)
+	# Con la v1.5 la sepoltura c'e' ancora.
+	var c1 := _game(2, 7)
+	var p1 := c1.gs.current_player()
+	p1.specialized_characters.append("pe_sciamano")
+	_ok("v1.5: si costruisce", c1.place_worker(0) and _costruisci_qualcosa(c1, 0))
+	var mio: Building = null
+	for b in c1.gs.grid.buildings:
+		if b.owner == p1.index: mio = b
+	if mio != null:
+		EraRules.bury_characters(c1.gs)
+		_eq("  e il Personaggio si seppellisce come sempre", mio.buried_character, "pe_sciamano")
+
+func _costruisci_qualcosa(ctl: GameController, col: int) -> bool:
+	for card_id in ctl.gs.market.duplicate():
+		for c in range(maxi(0, col - 1), mini(ctl.gs.grid.n_cols, col + 2)):
+			if ctl.build(card_id, c, false): return true
+	return false
+
+# Registro 99: Colosseo, Il Silvicoltore e Speculazione edilizia senza la
+# Vetusta'. Si prova sul file v2 con un edificio costruito davvero.
+func _test_tre_carte_v2() -> void:
+	if not FileAccess.file_exists("res://data/cards-v2.json"): return
+	CardDB.load_db("res://data/cards-v2.json")
+	var colosseo: Dictionary = CardDB.monuments["mo_colosseo"]["condition"]
+	var silvicoltore: Dictionary = CardDB.legacies["er_il_silvicoltore"]["condition"]
+	var speculazione: Dictionary = CardDB.events["ev_speculazione_edilizia"]
+	_ok("il Colosseo v2 chiede resistenza 7", int(colosseo["target"].get("resistance", {}).get("min", 0)) == 7)
+	_ok("Il Silvicoltore v2 chiede il bosco e l'era 1-2", silvicoltore["target"].has("era") and not silvicoltore["target"].has("vetusta"))
+	_ok("Speculazione edilizia v2 colpisce i 2+ potenziamenti", int(speculazione["effects"][0]["target"].get("upgrades", {}).get("min", 0)) == 2)
+	var ctl := _game(3, 990)
+	var gs := ctl.gs
+	while not gs.pending_choice.is_empty():
+		ctl.choose(int((gs.pending_choice["options"] as Array)[0]))
+	var p := gs.current_player()
+	_ok("il primo attiva la colonna 1", ctl.place_worker(1))
+	var mio: Building = null
+	for card_id in gs.market.duplicate():
+		for c in range(0, 3):
+			if ctl.build(card_id, c, false):
+				for b in gs.grid.buildings:
+					if b.owner == p.index: mio = b
+				break
+		if mio != null: break
+	_ok("  e costruisce", mio != null)
+	if mio == null:
+		CardDB.load_db(CardDB.DB_PATH)
+		return
+	_ok("con la resistenza sotto 7 il Colosseo non scatta", not Conditions.met(gs, p.index, colosseo))
+	mio.bonus_res = 7 - int(mio.data["resistance"])
+	_ok("  a 7 scatta", Conditions.met(gs, p.index, colosseo))
+	# Il Silvicoltore: l'edificio dev'essere su bosco e dell'era 1-2.
+	var su_bosco := false
+	for c in range(mio.col_from, mio.col_to):
+		if gs.grid.terrains[c] == Enums.Terrain.BOSCO: su_bosco = true
+	_eq("Il Silvicoltore segue il terreno dell'edificio", Conditions.met(gs, p.index, silvicoltore), su_bosco)
+	# Speculazione edilizia: -1 res solo con due potenziamenti sotto.
+	gs.current_event = speculazione
+	mio.upgrades.clear()
+	_eq("senza potenziamenti Speculazione edilizia non tocca", Effects.event_resistance_modifier(gs, mio), 0)
+	mio.upgrades.append("po_palizzata")
+	mio.upgrades.append("po_idolo")
+	_eq("  con due potenziamenti vale -1", Effects.event_resistance_modifier(gs, mio), -1)
+	CardDB.load_db(CardDB.DB_PATH)
+
+# Registro 100: l'effetto di ogni tessera scatta una volta per era, poi la
+# tessera si gira; a inizio era si rigira. Si prova il fiume (+1 Denaro a chi
+# attiva) e la pianura (lo sconto alla carta larga), che non dipendono da
+# cosa c'e' nel mercato.
+func _test_tessere_v2() -> void:
+	if not FileAccess.file_exists("res://data/cards-v2.json"): return
+	CardDB.load_db("res://data/cards-v2.json")
+	_ok("il file v2 accende le tessere una volta per era", bool(CardDB.constants.get("tessere_una_volta_per_era", false)))
+	_ok("  e il disturbo non c'e' piu'", not CardDB.constants.has("disturbo_vp"))
+	var ctl := _game(3, 990)
+	var gs := ctl.gs
+	while not gs.pending_choice.is_empty():
+		ctl.choose(int((gs.pending_choice["options"] as Array)[0]))
+	_eq("a inizio era nessuna tessera e' girata", gs.tessere_usate.count(true), 0)
+	var fiume := gs.grid.terrains.find(Enums.Terrain.FIUME)
+	var pianura := gs.grid.terrains.find(Enums.Terrain.PIANURA)
+	_ok("c'e' un fiume e una pianura", fiume >= 0 and pianura >= 0)
+	if fiume < 0 or pianura < 0:
+		CardDB.load_db(CardDB.DB_PATH)
+		return
+	# Il fiume: +1 Denaro alla prima attivazione dell'era, poi basta.
+	var p := gs.current_player()
+	var oro := p.oro
+	var base: Dictionary = CardDB.terrains["fiume"]["base_production_by_era"]["1"]
+	_ok("il primo attiva il fiume", ctl.place_worker(fiume))
+	_eq("  e incassa la base piu' 1 Denaro della tessera", p.oro, oro + int(base["oro"]) + 1)
+	_ok("  la tessera del fiume e' girata", gs.tessere_usate[fiume])
+	ctl.pass_action()
+	var p2 := gs.current_player()
+	var oro2 := p2.oro
+	_ok("il secondo attiva lo stesso fiume", ctl.place_worker(fiume))
+	_eq("  e incassa solo la base", p2.oro, oro2 + int(base["oro"]))
+	ctl.pass_action()
+	# La pianura: lo sconto alla carta larga vale finche' la tessera e' da usare.
+	var larga: Dictionary = CardDB.buildings["ed_villaggio_palizzato"]
+	_eq("una carta larga in pianura sconta 1", BuildRules.pianura_discount(gs, larga, pianura), 1)
+	gs.tessere_usate[pianura] = true
+	_eq("  con la tessera girata non sconta", BuildRules.pianura_discount(gs, larga, pianura), 0)
+	# Con le tessere permanenti (v1.5) lo sconto non guarda la tessera.
+	CardDB.constants["tessere_una_volta_per_era"] = false
+	_eq("  con le tessere permanenti sconta comunque", BuildRules.pianura_discount(gs, larga, pianura), 1)
+	CardDB.constants["tessere_una_volta_per_era"] = true
+	CardDB.load_db(CardDB.DB_PATH)
+

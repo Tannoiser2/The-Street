@@ -30,6 +30,13 @@ var monuments_open: Array = []
 # la fine dell'era. Finche' e' piena, nessun comando passa.
 # {"player": int, "kind": String, "prompt": String, "options": Array[int]}
 var pending_choice: Dictionary = {}
+# IL DRAFT DEI PERSONAGGI (v2, registro 93): a inizio era, in ordine di turno,
+# ogni giocatore ne prende uno gratis e senza lavoratore. Chi deve ancora
+# scegliere sta qui, in ordine; vuoto = il draft e' finito o non c'e'.
+var draft_pending: Array[int] = []
+# LE TESSERE USATE NELL'ERA (v2, registro 100): l'effetto di ogni tessera vale
+# una volta per era; qui, colonna per colonna, se e' gia' scattato.
+var tessere_usate: Array[bool] = []
 var next_uid: int = 1
 # LA COLONNA ATTIVATA IN QUESTO TURNO e l'edificio che il lavoratore abita.
 # Stavano nel controller, e sembravano dettagli del comando; invece decidono
@@ -75,6 +82,8 @@ func duplica() -> GameState:
 	g.turn_sequence = turn_sequence.duplicate()
 	g.monuments_open = monuments_open.duplicate()
 	g.pending_choice = pending_choice.duplicate(true)
+	g.draft_pending = draft_pending.duplicate()
+	g.tessere_usate = tessere_usate.duplicate()
 	g.next_uid = next_uid
 	g.colonna_attivata = colonna_attivata
 	g.protetto_uid = protetto_uid

@@ -20,6 +20,12 @@ var level: int = 0            # 0 = nel binario; >0 = sopraelevato
 var state: int = Enums.BuildingState.INTATTO
 var is_buried: bool = false   # condizione di posizione: qualcosa è stato costruito sopra
 var was_razed: bool = false   # spianato dal proprietario da intatto -> Scavo 0
+# CHI LO HA SEPOLTO, E IN CHE ERA: il giocatore la cui costruzione ha
+# completato la copertura (-1 se nessuno, cioe' mai sepolto o sepolto dal
+# ricalcolo a fine era). Serve al punto per il disturbo del regolamento, alla
+# manopola `scavo_a_chi_scava` (registro 87) e all'audit.
+var buried_by: int = -1
+var buried_era: int = 0
 # Su chi poggia: gli uid degli edifici che gli fanno da base. Si fissano
 # quando lo si costruisce e non cambiano piu', perche' la sagoma non deve
 # muoversi quando qualcun altro costruisce li' vicino.
@@ -42,6 +48,11 @@ var upgrades: Array = []      # id dei potenziamenti infilati sotto
 var patrons: Dictionary = {}
 var extra_classes: Array[String] = []  # classi acquisite (po_merlatura: "conta anche come Militare")
 var imprint: String = ""      # Impronta infilata sotto: "un edificio puo' portarne una sola"
+# Chi sta sepolto qui (meccanica Scheletri): l'id di un Personaggio nella
+# v1.5, oppure LAVORATORE nella v2, dove lo scheletro lo lascia il lavoratore
+# che piazza il potenziamento (registri 95-96). Non e' una carta: la vista
+# non deve cercarlo nel mazzo dei Personaggi.
+const LAVORATORE := "lavoratore"
 var buried_character: String = ""   # personaggio sepolto qui (meccanica Scheletri)
 var buried_character_era: int = 0
 var charges: int = 0          # cubetti carica per edifici Esauribili
@@ -80,6 +91,8 @@ func duplica() -> Building:
 	b.state = state
 	b.is_buried = is_buried
 	b.was_razed = was_razed
+	b.buried_by = buried_by
+	b.buried_era = buried_era
 	b.basi = basi.duplicate()
 	b.terrapieno_cols = terrapieno_cols.duplicate()
 	b.bonus_res = bonus_res
@@ -137,7 +150,11 @@ func effective_resistance() -> int:
 	return r
 
 func scavo_value() -> int:
-	if was_razed: return 0
+	# "Spianare azzera lo Scavo" e' la regola v1.5. La nuova meccanica dice che
+	# lo Scavo non si azzera mai (registro 87): manopola `spianare_conserva_scavo`,
+	# spenta nei dati, per misurare quanto spinge a seppellire i propri.
+	if was_razed and not bool(CardDB.constants.get("spianare_conserva_scavo", false)):
+		return 0
 	return int(data["scavo"]) + bonus_scavo
 
 # La Rendita effettiva: quella stampata piu' i potenziamenti che la alzano.

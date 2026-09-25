@@ -33,10 +33,23 @@ const VELOCITA: Array[Dictionary] = [
 ]
 const VELOCITA_NORMALE := 2
 
+# IL REGOLAMENTO (registro 86 e 102): lo stesso progetto gioca la v1.5 e la
+# v2, e a decidere e' il file dati che si carica. La v2 e' quella che si
+# sta disegnando, quindi e' la scelta di partenza; la v1.5 resta a portata
+# di clic, con le regole congelate. Se il file v2 non c'e' resta la v1.5.
+const REGOLAMENTI: Array[Dictionary] = [
+	{"nome": "v1.5", "dati": "res://data/cards.json"},
+	{"nome": "v2", "dati": "res://data/cards-v2.json"},
+]
+
 var giocatori := 3
 var bot := 2
 var seme := 7
 var velocita := VELOCITA_NORMALE
+# Il regolamento con cui si apre la schermata: la v2 nel gioco; i test della
+# vista, che descrivono la v1.5, lo mettono a 0 prima di cominciare.
+static var predefinito := 1
+var regolamento := predefinito
 
 # Ogni scelta passa di qui, cosi' non esiste uno stato che il gioco non sappia
 # cominciare: i giocatori restano fra 2 e 4 e i bot fra 0 e quanti sono.
@@ -44,12 +57,27 @@ func sistema() -> void:
 	giocatori = clampi(giocatori, MIN_GIOCATORI, MAX_GIOCATORI)
 	bot = clampi(bot, 0, giocatori)
 	velocita = clampi(velocita, 0, VELOCITA.size() - 1)
+	regolamento = clampi(regolamento, 0, REGOLAMENTI.size() - 1)
+	if not FileAccess.file_exists(percorso_dati()): regolamento = 0
+
+func percorso_dati() -> String:
+	return str(REGOLAMENTI[regolamento]["dati"])
+
+func nome_regolamento() -> String:
+	return str(REGOLAMENTI[regolamento]["nome"])
+
+func con_regolamento(i: int) -> void:
+	regolamento = i
+	sistema()
 
 # LA STRATEGIA DEL BOT che siede al posto `i`, ricavata dal seme: la stessa
 # partita rigiocata ha gli stessi avversari, con le stesse teste. Prima i bot
 # tiravano a caso, e "guardare i bot giocare" voleva dire guardare rumore.
+# Il canone lo dice il file dati caricato (registro 92): con la v2 la
+# Verticale non c'e' e c'e' la Continuita'.
 func strategia(i: int) -> String:
-	return StrategyBot.STRATEGIE[(i + seme) % StrategyBot.STRATEGIE.size()]
+	var canone := StrategyBot.canone()
+	return canone[(i + seme) % canone.size()]
 
 func nome_strategia(i: int) -> String:
 	return strategia(i).capitalize()
@@ -116,4 +144,4 @@ func descrizione() -> String:
 	else: chi = "%d umani e %d bot" % [u, bot]
 	var come := ""
 	if bot > 0: come = " · bot %s" % nome_velocita()
-	return "%d giocatori · %s%s · seme %d" % [giocatori, chi, come, seme]
+	return "%s · %d giocatori · %s%s · seme %d" % [nome_regolamento(), giocatori, chi, come, seme]

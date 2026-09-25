@@ -15,6 +15,7 @@ class ActionQuote:
 	var reason: String = ""
 	var pietra: int = 0
 	var oro: int = 0
+	var idee: int = 0                # la terza risorsa (v2); 0 nei dati v1.5
 	var target: Building = null      # edificio bersaglio, dove previsto
 
 	static func no(r: String) -> ActionQuote:
@@ -22,11 +23,12 @@ class ActionQuote:
 		q.reason = r
 		return q
 
-	static func yes(p: int, o: int, t: Building = null) -> ActionQuote:
+	static func yes(p: int, o: int, t: Building = null, i: int = 0) -> ActionQuote:
 		var q := ActionQuote.new()
 		q.legal = true
 		q.pietra = p
 		q.oro = o
+		q.idee = i
 		q.target = t
 		return q
 
@@ -79,7 +81,8 @@ static func quote_upgrade(gs: GameState, player: int, upg_id: String, target: Bu
 	# Sconti sui potenziamenti: Bottega d'artista, e il Cardinale sui Religione.
 	var sconto := Effects.cost_delta(gs, player, "upgrade", target)
 	return ActionQuote.yes(max(0, int(cost.get("pietra", 0)) + sconto.x),
-						   max(0, int(cost.get("oro", 0)) + sconto.y), target)
+						   max(0, int(cost.get("oro", 0)) + sconto.y), target,
+						   int(cost.get("idee", 0)))
 
 # ---- restaurare ----------------------------------------------------
 # "pagate meta' del costo originale, arrotondato per eccesso, e torna intatto
@@ -90,7 +93,15 @@ static func quote_restore(gs: GameState, player: int, target: Building) -> Actio
 		return ActionQuote.no("nessun rudere bersaglio")
 	if target.is_buried:
 		return ActionQuote.no("l'edificio e' sotterrato")
-	if target.state != Enums.BuildingState.RUDERE:
+	if bool(CardDB.constants.get("senza_rudere", false)):
+		# SENZA RUDERE (D13): si ristruttura una PROPRIA rovina esposta. Niente
+		# furto: senza rudere ogni edificio caduto sarebbe rubabile. Dipende
+		# dagli stati, non dal turno: vale con tutti e due i turni.
+		if target.state != Enums.BuildingState.ROVINA:
+			return ActionQuote.no("non e' una rovina")
+		if target.owner != player:
+			return ActionQuote.no("la rovina non e' tua")
+	elif target.state != Enums.BuildingState.RUDERE:
 		return ActionQuote.no("non e' un rudere")
 	# ev_secolarizzazioni: "durante l'era, restaurare un rudere Religione non
 	# costa risorse (richiede comunque l'azione) e vale sui ruderi gia' presenti."
@@ -98,11 +109,23 @@ static func quote_restore(gs: GameState, player: int, target: Building) -> Actio
 	if not free.is_empty() and Effects.matches(gs, target, free.get("target", {})):
 		return ActionQuote.yes(0, 0, target)
 	var c: Dictionary = target.data["cost"]
+	# "La ristrutturazione si paga in Costruzione e Denaro" (registro 91): la
+	# parte in Idee del costo originale si paga in Denaro. Con i dati v1.5 le
+	# Idee sono 0 e il conto e' quello di sempre.
 	var p := int(ceil(float(int(c["pietra"])) / 2.0))
-	var o := int(ceil(float(int(c["oro"])) / 2.0))
-	if _touches_terrain(gs, target, Enums.Terrain.BOSCO):
+	var o := int(ceil(float(int(c["oro"]) + int(c.get("idee", 0))) / 2.0))
+	if tessera_bosco(gs, target) >= 0:
 		p = max(0, p - 1)
 	return ActionQuote.yes(p, o, target)
+
+# La colonna di bosco che sconta la ristrutturazione, o -1: nella v1.5 basta
+# toccare il bosco, nella v2 (registro 100) la tessera deve essere ancora da
+# usare in quest'era.
+static func tessera_bosco(gs: GameState, target: Building) -> int:
+	for c in range(target.col_from, target.col_to):
+		if gs.grid.terrains[c] != Enums.Terrain.BOSCO: continue
+		if not EraRules.tessere_una_volta(gs) or EraRules.tessera_disponibile(gs, c): return c
+	return -1
 
 # ---- reclutare -----------------------------------------------------
 # "Reclutare costa 1 oro e richiede che la classe del personaggio sia presente
@@ -125,12 +148,17 @@ static func quote_recruit(gs: GameState, player: int, char_id: String, col: int,
 		if why2 != "": return ActionQuote.no(why2)
 	var cls: String = data["class"]
 	var found := false
-	for b in gs.grid.alive_in_column(col):
+	# V2 (col -1): nessuna colonna attivata, la classe si cerca fra i PROPRI
+	# edifici vivi, ovunque siano.
+	var dove: Array = gs.grid.alive_in_column(col) if col >= 0 \
+		else gs.grid.buildings.filter(func(b): return b.owner == player and b.is_alive())
+	for b in dove:
 		if cls in b.classes():
 			found = true
 			break
 	if not found:
-		return ActionQuote.no("nessun edificio intatto di classe %s nella colonna" % cls)
+		return ActionQuote.no("nessun edificio intatto di classe %s %s" % [cls,
+			"nella colonna" if col >= 0 else "fra i tuoi"])
 	return ActionQuote.yes(0, int(CardDB.constants["recruit_cost_oro"]))
 
 # ---- Dinastia ------------------------------------------------------
@@ -147,7 +175,7 @@ static func quote_dynasty(gs: GameState, player: int) -> ActionQuote:
 	if gs.dynasties_left <= 0:
 		return ActionQuote.no("nessuna Dinastia disponibile")
 	var c: Dictionary = by_era[str(gs.era)]
-	return ActionQuote.yes(int(c.get("pietra", 0)), int(c.get("oro", 0)))
+	return ActionQuote.yes(int(c.get("pietra", 0)), int(c.get("oro", 0)), null, int(c.get("idee", 0)))
 
 # "Impronta: infila questa carta sotto un tuo edificio" — il bersaglio e' una
 # SCELTA del giocatore, non l'edificio abitato: va passato al comando.

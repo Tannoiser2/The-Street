@@ -25,6 +25,7 @@ func new_game(n_players: int, seed_value: int) -> void:
 	for i in n_players:
 		var p := PlayerState.new(i)
 		p.pietra = int(CardDB.constants["start_resources"]["pietra"])
+		p.idee = int(CardDB.constants["start_resources"].get("idee", 0))
 		p.workers = int(CardDB.constants["workers_base"])
 		gs.players.append(p)
 	if n_players == 2:
@@ -77,7 +78,9 @@ func _start_era(era: int) -> void:
 	gs.char_row.clear()
 	gs.upg_row.clear()
 	var side := int(CardDB.constants["side_rows"])
-	_refill(gs.char_row, gs.char_decks[era], side)
+	# Con il draft (v2) in fila ci sono TUTTI i Personaggi dell'era: si
+	# sceglie fra quelli, gli avanzi si scartano a fine era (D7).
+	_refill(gs.char_row, gs.char_decks[era], gs.char_decks[era].size() if draft_v2() else side)
 	_refill(gs.upg_row, gs.upg_decks[era], side)
 
 	if era <= 4:
@@ -91,13 +94,131 @@ func _start_era(era: int) -> void:
 	gs.turn_pos = -1
 	gs.current_index = -1
 	for p in gs.players: p.reset_for_era()
+	# Le tessere si rigirano: ogni effetto vale di nuovo (registro 100).
+	gs.tessere_usate.clear()
+	for _c in gs.grid.n_cols: gs.tessere_usate.append(false)
 	gs.phase = Enums.Phase.PIAZZA
 	Conditions.claim_monuments(gs)      # il Pantheon guarda l'inizio dell'era Moderna
 	gs.log_line("Inizia l'era %d. Evento: %s" % [era, gs.current_event.get("name", "nessuno")])
+	if draft_v2():
+		gs.draft_pending.assign(gs.turn_order)
+		_prosegui_draft()
+		return
+	_primo_turno_dell_era()
+
+func _primo_turno_dell_era() -> void:
 	if _advance_to_next_player():
 		state_changed.emit()
 	else:
 		_finish_era()
+
+# ---- il draft dei Personaggi (v2) ------------------------------------
+# "All'inizio dell'era ogni giocatore a turno sceglie un Personaggio tra
+# quelli disponibili" (punto 8 della proposta): gratis, senza lavoratore, in
+# ordine di turno (primo chi ha costruito meno). Le Impronte e l'"uno a tua
+# scelta" vogliono un edificio: si sceglie prima la carta, poi il bersaglio,
+# in due domande. Chi non ha nessuna carta prendibile salta. Reclutare come
+# azione non esiste piu'.
+func draft_v2() -> bool:
+	return bool(CardDB.constants.get("draft_personaggi", false))
+
+func _prosegui_draft() -> void:
+	while not gs.draft_pending.is_empty():
+		var chi: int = gs.draft_pending[0]
+		var opzioni := _opzioni_draft(chi)
+		if opzioni.is_empty():
+			gs.draft_pending.pop_front()
+			continue
+		gs.current_index = chi
+		gs.pending_choice = {
+			"player": chi,
+			"kind": "draft",
+			"prompt": "Era %d: scegli il tuo Personaggio" % gs.era,
+			"options": opzioni,
+		}
+		choice_required.emit(gs.pending_choice)
+		return
+	gs.pending_choice = {}
+	_primo_turno_dell_era()
+
+# Le opzioni sono POSIZIONI nella fila (`char_row`), perche' le scelte
+# viaggiano come interi. Una carta che vuole un bersaglio e non ne ha (un'
+# Impronta senza edifici) non si offre.
+func _opzioni_draft(chi: int) -> Array[int]:
+	var out: Array[int] = []
+	for i in gs.char_row.size():
+		var d: Dictionary = CardDB.characters[gs.char_row[i]]
+		if bool(d.get("imprint", false)):
+			if ActionRules.imprint_candidates(gs, chi, d).is_empty(): continue
+		elif Effects.requires_designation(d):
+			if ActionRules.designation_candidates(gs, chi, d).is_empty(): continue
+		out.append(i)
+	return out
+
+func _draft_scegli(posto: int) -> void:
+	var chi := int(gs.pending_choice["player"])
+	var char_id: String = gs.char_row[posto]
+	var d: Dictionary = CardDB.characters[char_id]
+	var candidati: Array[Building] = []
+	if bool(d.get("imprint", false)):
+		candidati = ActionRules.imprint_candidates(gs, chi, d)
+	elif Effects.requires_designation(d):
+		candidati = ActionRules.designation_candidates(gs, chi, d)
+	if candidati.is_empty():
+		_draft_prendi(chi, char_id, null)
+		return
+	if candidati.size() == 1:
+		_draft_prendi(chi, char_id, candidati[0])
+		return
+	var uids: Array[int] = []
+	for b in candidati: uids.append(b.uid)
+	gs.pending_choice = {
+		"player": chi,
+		"kind": "draft_bersaglio",
+		"char_id": char_id,
+		"prompt": "%s: scegli l'edificio" % d["name"],
+		"options": uids,
+	}
+	choice_required.emit(gs.pending_choice)
+
+func _draft_prendi(chi: int, char_id: String, bersaglio: Building) -> void:
+	var p: PlayerState = gs.players[chi]
+	var data: Dictionary = CardDB.characters[char_id]
+	p.specialized_characters.append(char_id)
+	p.recruited_total += 1
+	p.bump("draftati")
+	if Effects.requires_designation(data) and bersaglio != null:
+		p.character_targets[char_id] = bersaglio.uid
+		gs.log_line("%s: designato %s" % [data["name"], bersaglio.data["name"]])
+	# Senza lavoratore non c'e' un edificio "abitato": i protettori (+1 res,
+	# "la sua protezione vale +3") si legano al primo edificio che il
+	# giocatore costruisce nell'era (D7), vedi `_protettori_sul_nuovo`.
+	Effects.apply_on_acquire(gs, chi, data, bersaglio if bool(data.get("imprint", false)) else null)
+	if bool(data.get("imprint", false)):
+		bersaglio.imprint = char_id
+		p.specialized_characters.erase(char_id)
+		gs.log_line("%s: Impronta sotto %s" % [data["name"], bersaglio.data["name"]])
+	gs.char_row.erase(char_id)
+	gs.log_line("Giocatore %d prende %s" % [chi, data["name"]])
+	gs.pending_choice = {}
+	gs.draft_pending.pop_front()
+	_prosegui_draft()
+
+# Nel draft nessun lavoratore abita un edificio: la carta che parla di "questo
+# lavoratore" aspetta il primo edificio costruito nell'era e ci si lega.
+func _protettori_sul_nuovo(b: Building, p: PlayerState) -> void:
+	for cid in p.specialized_characters:
+		if p.character_targets.has(cid): continue
+		var data: Dictionary = CardDB.characters[cid]
+		var legato := false
+		for e in data.get("effects", []):
+			if e["hook"] == "on_acquire" and e["op"] == "protection_delta":
+				b.protection += int(e["value"])
+				legato = true
+				gs.log_line("%s: %s protetto meglio (+%d)" % [data["name"], b.data["name"], int(e["value"])])
+			elif e.get("condition", {}).get("op", "") == "protected_survived":
+				legato = true
+		if legato: p.character_targets[cid] = b.uid
 
 # "A ogni nuova era parte primo chi ha costruito meno edifici in totale;
 # a parita' si mantiene l'ordine precedente."
@@ -132,6 +253,38 @@ func _refill(row: Array, deck: Array, size: int) -> void:
 	while row.size() < size and not deck.is_empty():
 		row.append(deck.pop_back())
 
+# ---- il turno della v2 ----------------------------------------------
+# TURNO V2 (registro 93, costante `turno_v2`, vera nel file v2): niente fasi.
+# Ogni turno il giocatore fa UNA cosa e ci mette un lavoratore, che va dove
+# agisce (punto 8 della proposta): attiva una colonna; costruisce (il
+# lavoratore va sull'edificio nuovo, lo protegge con +2 e attiva solo quello);
+# potenzia (il lavoratore resta sotto l'edificio come scheletro); ristruttura
+# una propria rovina; recluta; compra la Dinastia; o passa e incassa. Con i
+# dati v1.5 la costante non c'e' e il turno e' PIAZZA -> ATTIVA -> AZIONE.
+# Le letture adottate dove la proposta tace sono le D9-D14 dell'audit.
+func turno_v2() -> bool:
+	return bool(CardDB.constants.get("turno_v2", false))
+
+# Un'azione si puo' fare: nella v1.5 dopo aver attivato (fase AZIONE), nella
+# v2 all'inizio del turno, con un lavoratore ancora da piazzare.
+func _puo_agire() -> bool:
+	if turno_v2(): return gs.phase == Enums.Phase.PIAZZA and _has_worker(gs.current_index)
+	return gs.phase == Enums.Phase.AZIONE
+
+# Nel turno v2 l'azione E' il piazzamento del lavoratore. Il contatore
+# `az_<azione>` si tiene con tutti e due i turni: il torneo conta le azioni
+# fatte per giocatore anche a quattro lavoratori.
+func _spendi_lavoratore(azione: String) -> void:
+	var p := gs.current_player()
+	p.bump("az_" + azione)
+	if turno_v2(): p.workers_used += 1
+
+# Il lavoratore va sull'edificio (costruito o ristrutturato) e lo protegge
+# per l'era, come oggi il lavoratore piazzato sopra un proprio edificio.
+func _lavoratore_su(b: Building, p: PlayerState) -> void:
+	b.protection += int(CardDB.constants["protection_bonus"])
+	b.protected_by = p.index
+
 # ---- fase 1+2: piazza e attiva --------------------------------------
 func place_worker(col: int, protect: Building = null) -> bool:
 	if not gs.pending_choice.is_empty(): return false
@@ -144,12 +297,20 @@ func place_worker(col: int, protect: Building = null) -> bool:
 	p.workers_used += 1
 	p.worker_cols.append(col)
 	gs.protetto_uid = -1
+	# V2: il lavoratore sulla colonna non abita nessun edificio (D11: protegge
+	# solo chi costruisce).
+	if turno_v2(): protect = null
 	if protect != null and protect.owner == p.index and protect.covers(col) and protect.is_standing():
 		protect.protection += int(CardDB.constants["protection_bonus"])
 		protect.protected_by = p.index
 		gs.protetto_uid = protect.uid
 	EraRules.activate(gs, p.index, col)
 	gs.colonna_attivata = col
+	p.bump("az_colonna")
+	if turno_v2():
+		# Attivare la colonna e' l'azione intera del turno.
+		_end_turn()
+		return true
 	gs.phase = Enums.Phase.AZIONE
 	state_changed.emit()
 	return true
@@ -158,9 +319,10 @@ func place_worker(col: int, protect: Building = null) -> bool:
 # Costruire: nella colonna attivata o in una adiacente.
 # `despoil` e' il rudere opzionalmente depredato (spoliazione).
 func build(card_id: String, col_from: int, above: bool, pay_option: int = 0, despoil: Building = null) -> bool:
-	if gs.phase != Enums.Phase.AZIONE: return false
+	if not _puo_agire(): return false
 	if not gs.pending_choice.is_empty(): return false
-	if abs(col_from - gs.colonna_attivata) > 1: return false
+	# V2: si costruisce in qualsiasi colonna legale (D9), non solo vicino alla attivata.
+	if not turno_v2() and abs(col_from - gs.colonna_attivata) > 1: return false
 	if not card_id in gs.market: return false
 	var p := gs.current_player()
 	var data: Dictionary = CardDB.buildings[card_id]
@@ -171,8 +333,8 @@ func build(card_id: String, col_from: int, above: bool, pay_option: int = 0, des
 		return false
 	var opts := BuildRules.flexible_options(data, q.pietra, q.oro)
 	var cost: Vector2i = opts[clamp(pay_option, 0, opts.size() - 1)]
-	if not p.can_pay(cost.x, cost.y): return false
-	p.pay(cost.x, cost.y)
+	if not p.can_pay(cost.x, cost.y, q.idee): return false
+	p.pay(cost.x, cost.y, q.idee)
 	if q.terrapieno_free_applied:
 		p.terrapieno_free_used = true
 	if q.terrapieno_pietra > 0:
@@ -191,7 +353,11 @@ func build(card_id: String, col_from: int, above: bool, pay_option: int = 0, des
 	# e' una condizione di posizione e si ricalcola sotto, quando il nuovo
 	# edificio e' gia' sulla griglia (Grid.refresh_buried).
 	for base in q.bases:
+		# Sopra chi si costruisce: contatori per l'audit (registro 87, "non si
+		# spinge troppo a sotterrare i propri?"). Non toccano il gioco.
+		p.bump("sopra_propri" if base.owner == p.index else "sopra_altrui")
 		if base in q.razed:
+			p.bump("spianati")
 			base.was_razed = true
 			base.state = Enums.BuildingState.ROVINA
 		elif base.state == Enums.BuildingState.RUDERE:
@@ -221,10 +387,38 @@ func build(card_id: String, col_from: int, above: bool, pay_option: int = 0, des
 	# quota zero in un altro binario gliela sposterebbe sotto i piedi.
 	for base in q.bases: b.basi.append(base.uid)
 	b.bonus_res = q.continuity_bonus
-	if gs.grid.terrains[col_from] == Enums.Terrain.COLLINA: b.bonus_res += 1
+	if EraRules.tessere_una_volta(gs):
+		# V2 (registro 100): la collina da' +1 per l'era al primo edificio
+		# costruito qui, la pianura ha scontato la carta larga: le tessere si girano.
+		if gs.grid.terrains[col_from] == Enums.Terrain.COLLINA and EraRules.tessera_disponibile(gs, col_from):
+			b.protection += 1
+			EraRules.usa_tessera(gs, col_from, "+1 resistenza a %s per l'era" % b.data["name"])
+		if BuildRules.pianura_discount(gs, data, col_from) > 0:
+			EraRules.usa_tessera(gs, col_from, "-1 Costruzione a %s" % b.data["name"])
+	elif gs.grid.terrains[col_from] == Enums.Terrain.COLLINA:
+		b.bonus_res += 1
 	b.charges = int(data.get("exhaustible", 0))
 	gs.grid.buildings.append(b)
+	# Chi finisce sepolto ADESSO lo ha sepolto questo giocatore: si guarda
+	# prima e dopo il ricalcolo, perche' una costruzione puo' completare la
+	# copertura anche di un edificio piu' in basso della sua base.
+	var sepolti_prima := {}
+	for altro in gs.grid.buildings: sepolti_prima[altro.uid] = altro.is_buried
 	gs.grid.refresh_buried()
+	for altro in gs.grid.buildings:
+		if altro.is_buried and not bool(sepolti_prima.get(altro.uid, false)):
+			altro.buried_by = p.index
+			altro.buried_era = gs.era
+			# Il premio di scavo si paga qui, sul momento, come il Lampo: il
+			# livello e' quello dell'edificio appena costruito.
+			var premio := Scoring.premio_scavo(altro.scavo_value(), b.level, gs.era)
+			if premio > 0:
+				p.add_vp("scavo", premio)
+				altro.rende("scavo", premio)
+				p.bump("scavo_scavato", premio)
+				if gs.era >= int(CardDB.constants["eras"]): p.bump("scavo_e5", premio)
+				gs.log_line("%s seppellisce %s al livello %d: premio di scavo %d" % [
+					p.name, altro.data["name"], b.level, premio])
 	Effects.apply_on_build(gs, p.index, b)
 	if above:
 		for c in range(b.col_from, b.col_to): gs.grid.risen_this_era[c] = true
@@ -234,6 +428,14 @@ func build(card_id: String, col_from: int, above: bool, pay_option: int = 0, des
 		b.rende("lampo", int(data["lampo"]))
 	gs.market.erase(card_id)
 	_refill(gs.market, gs.building_decks[gs.era], int(CardDB.constants["market_size"]))
+	_spendi_lavoratore("costruisci")
+	if turno_v2():
+		# Il lavoratore va sull'edificio nuovo: +2 per l'era, e attiva solo
+		# quello (D10: niente base del terreno, niente Centro Urbano).
+		_lavoratore_su(b, p)
+		EraRules.paga_edificio(gs, b)
+	# Con il draft i protettori aspettano il primo edificio costruito nell'era.
+	if draft_v2(): _protettori_sul_nuovo(b, p)
 	building_placed.emit(b)
 	_end_turn()
 	return true
@@ -241,14 +443,15 @@ func build(card_id: String, col_from: int, above: bool, pay_option: int = 0, des
 # Potenziare: carta dalla fila, sotto un tuo edificio in piedi della colonna attivata.
 func upgrade(upg_id: String, target: Building) -> bool:
 	if not gs.pending_choice.is_empty(): return false
-	if gs.phase != Enums.Phase.AZIONE: return false
-	if target == null or not target.covers(gs.colonna_attivata): return false
+	if not _puo_agire(): return false
+	if target == null: return false
+	if not turno_v2() and not target.covers(gs.colonna_attivata): return false
 	var p := gs.current_player()
 	var q := ActionRules.quote_upgrade(gs, p.index, upg_id, target)
 	if not q.legal:
 		gs.log_line("Potenziamento rifiutato: %s" % q.reason)
 		return false
-	if not p.can_pay(q.pietra, q.oro): return false
+	if not p.can_pay(q.pietra, q.oro, q.idee): return false
 	# Il Vescovo si consuma qui, non nel preventivo: il preventivo viene
 	# chiesto anche solo per sapere se l'azione e' legale.
 	var vescovo := Effects.player_override(gs, p.index, "free_upgrade_of_class", target)
@@ -269,7 +472,7 @@ func upgrade(upg_id: String, target: Building) -> bool:
 				target.patrons[p.index] = int(target.patrons.get(p.index, 0)) + rendita
 			gs.log_line("%s: giocatore %d firma %s e ne incassa %d oro a ogni attivazione" % [
 				artista[1]["name"], p.index, target.data["name"], rendita])
-	p.pay(q.pietra, q.oro)
+	p.pay(q.pietra, q.oro, q.idee)
 	target.upgrades.append(upg_id)
 	# Gli effetti vengono dai dati della carta, con l'edificio ospite come
 	# sorgente dei selettori. Prima il cubetto nero dei Struttura era un caso
@@ -279,6 +482,18 @@ func upgrade(upg_id: String, target: Building) -> bool:
 	gs.upg_row.erase(upg_id)
 	_refill(gs.upg_row, gs.upg_decks[gs.era], int(CardDB.constants["side_rows"]))
 	gs.log_line("%s potenziato con %s" % [target.data["name"], CardDB.upgrades[upg_id]["name"]])
+	_spendi_lavoratore("potenzia")
+	# LO SCHELETRO DEL POTENZIAMENTO (punto 8 della proposta, registro 95): il
+	# lavoratore che piazza il potenziamento resta sotto l'edificio come
+	# scheletro, e vale come un Personaggio sepolto, 6 meno l'era, se
+	# l'edificio finira' sotterrato. Uno solo per edificio, non nell'era
+	# Moderna. Costante `scheletro_potenziamento` (vera nel file v2); nel
+	# turno a un'azione era gia' cosi' (D12).
+	if turno_v2() or bool(CardDB.constants.get("scheletro_potenziamento", false)):
+		if gs.era < int(CardDB.constants["eras"]) and target.buried_character == "":
+			target.buried_character = Building.LAVORATORE
+			target.buried_character_era = gs.era
+			gs.log_line("il lavoratore resta sotto %s come scheletro" % target.data["name"])
 	building_changed.emit(target)
 	_end_turn()
 	return true
@@ -287,21 +502,32 @@ func upgrade(upg_id: String, target: Building) -> bool:
 # la Vetusta' si azzera e, se era altrui, cambia proprietario.
 func restore(target: Building) -> bool:
 	if not gs.pending_choice.is_empty(): return false
-	if gs.phase != Enums.Phase.AZIONE: return false
-	if target == null or not target.covers(gs.colonna_attivata): return false
+	if not _puo_agire(): return false
+	if target == null: return false
+	if not turno_v2() and not target.covers(gs.colonna_attivata): return false
 	var p := gs.current_player()
 	var q := ActionRules.quote_restore(gs, p.index, target)
 	if not q.legal:
 		gs.log_line("Restauro rifiutato: %s" % q.reason)
 		return false
-	if not p.can_pay(q.pietra, q.oro): return false
-	p.pay(q.pietra, q.oro)
+	if not p.can_pay(q.pietra, q.oro, q.idee): return false
+	var bosco := ActionRules.tessera_bosco(gs, target)
+	p.pay(q.pietra, q.oro, q.idee)
+	if EraRules.tessere_una_volta(gs) and bosco >= 0 and int(target.data["cost"]["pietra"]) > 0:
+		EraRules.usa_tessera(gs, bosco, "-1 Costruzione alla ristrutturazione di %s" % target.data["name"])
 	target.state = Enums.BuildingState.INTATTO
 	target.vetusta = 0
 	p.bump("restauri")
 	var stolen := target.owner != p.index
 	target.owner = p.index
 	gs.log_line("%s restaurato%s" % [target.data["name"], " e appropriato" if stolen else ""])
+	# Ristrutturare (D13): la rovina torna attiva, e' di nuovo un edificio
+	# intero (anche se era stato spianato).
+	if bool(CardDB.constants.get("senza_rudere", false)): target.was_razed = false
+	_spendi_lavoratore("ristruttura")
+	if turno_v2():
+		# Nel turno a un'azione il lavoratore ci resta sopra a proteggerla.
+		_lavoratore_su(target, p)
 	building_changed.emit(target)
 	_end_turn()
 	return true
@@ -311,14 +537,17 @@ func restore(target: Building) -> bool:
 # un edificio a scelta del giocatore.
 func recruit(char_id: String, imprint_target: Building = null) -> bool:
 	if not gs.pending_choice.is_empty(): return false
-	if gs.phase != Enums.Phase.AZIONE: return false
+	if draft_v2(): return false          # i Personaggi si prendono nel draft
+	if not _puo_agire(): return false
 	var p := gs.current_player()
-	var q := ActionRules.quote_recruit(gs, p.index, char_id, gs.colonna_attivata, imprint_target)
+	# V2: nessuna colonna attivata, la classe si cerca fra i propri edifici.
+	var q := ActionRules.quote_recruit(gs, p.index, char_id,
+		-1 if turno_v2() else gs.colonna_attivata, imprint_target)
 	if not q.legal:
 		gs.log_line("Reclutamento rifiutato: %s" % q.reason)
 		return false
-	if not p.can_pay(q.pietra, q.oro): return false
-	p.pay(q.pietra, q.oro)
+	if not p.can_pay(q.pietra, q.oro, q.idee): return false
+	p.pay(q.pietra, q.oro, q.idee)
 	p.specialized_characters.append(char_id)
 	p.recruited_total += 1
 	# Il lavoratore appena piazzato si specializza: l'edificio che abita e' il
@@ -344,24 +573,26 @@ func recruit(char_id: String, imprint_target: Building = null) -> bool:
 	gs.char_row.erase(char_id)
 	_refill(gs.char_row, gs.char_decks[gs.era], int(CardDB.constants["side_rows"]))
 	gs.log_line("Reclutato %s" % CardDB.characters[char_id]["name"])
+	_spendi_lavoratore("recluta")
 	_end_turn()
 	return true
 
 # Dinastia: quarto lavoratore permanente, attivo da subito. Una sola a testa.
 func buy_dynasty() -> bool:
-	if gs.phase != Enums.Phase.AZIONE: return false
+	if not _puo_agire(): return false
 	if not gs.pending_choice.is_empty(): return false
 	var p := gs.current_player()
 	var q := ActionRules.quote_dynasty(gs, p.index)
 	if not q.legal:
 		gs.log_line("Dinastia rifiutata: %s" % q.reason)
 		return false
-	if not p.can_pay(q.pietra, q.oro): return false
-	p.pay(q.pietra, q.oro)
+	if not p.can_pay(q.pietra, q.oro, q.idee): return false
+	p.pay(q.pietra, q.oro, q.idee)
 	p.has_dynasty = true
 	p.workers += 1          # "attivo da subito e per tutte le ere che restano"
 	gs.dynasties_left -= 1
 	gs.log_line("Giocatore %d acquista la Dinastia" % p.index)
+	_spendi_lavoratore("dinastia")
 	_end_turn()
 	return true
 
@@ -378,7 +609,31 @@ func _protetto() -> Building:
 	return null
 
 func pass_action() -> void:
-	if gs.phase == Enums.Phase.AZIONE: _end_turn()
+	if turno_v2():
+		passa("pietra")
+		return
+	if gs.phase == Enums.Phase.AZIONE:
+		gs.current_player().bump("az_passa")
+		_end_turn()
+
+# V2, "passare e incassare" (D14): il lavoratore va sulla plancia e si incassa
+# 1 Costruzione piu' 1 risorsa a scelta (`passa_incasso_pietra`,
+# `passa_incasso_scelta`). Cosi' l'era finisce come sempre, quando finiscono
+# i lavoratori, senza una regola "tutti hanno passato".
+func passa(scelta := "oro") -> bool:
+	if not turno_v2(): return false
+	if not _puo_agire() or not gs.pending_choice.is_empty(): return false
+	var p := gs.current_player()
+	var base := int(CardDB.constants.get("passa_incasso_pietra", 1))
+	var extra := int(CardDB.constants.get("passa_incasso_scelta", 1))
+	match scelta:
+		"oro": p.gain(base, extra)
+		"idee": p.gain(base, 0, extra)
+		_: p.gain(base + extra, 0)
+	_spendi_lavoratore("passa")
+	gs.log_line("Giocatore %d passa e incassa %d pietra e %d %s" % [p.index, base, extra, scelta])
+	_end_turn()
+	return true
 
 # Mercante di ossidiana: "per l'era, fino a 2 scambi pietra<->oro alla pari".
 # Decisione del designer: alla pari e' 1:1, si scambia durante il proprio
@@ -477,6 +732,13 @@ func _prosegui_fine_era() -> void:
 func choose(uid: int) -> bool:
 	if gs.pending_choice.is_empty(): return false
 	if not uid in (gs.pending_choice["options"] as Array): return false
+	match str(gs.pending_choice.get("kind", "")):
+		"draft":
+			_draft_scegli(uid)
+			return true
+		"draft_bersaglio":
+			_draft_prendi(int(gs.pending_choice["player"]), str(gs.pending_choice["char_id"]), _per_uid(uid))
+			return true
 	var o: Dictionary = _omaggi_da_piazzare.pop_front()
 	EraRules.place_gift(gs, o, _per_uid(uid))
 	gs.pending_choice = {}
