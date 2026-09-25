@@ -1814,3 +1814,18 @@ dato è stato importato da lì. Ma due confronti fra ciò che è stampato e
     il Personaggio sepolto per nome. Nella v1.5 nient'altro cambia. Test
     della vista: il gettone c'e', l'id e' l'era, sta sotto edificio e
     potenziamento, la vista lo disegna, i riquadri lo dicono.
+
+106. **La rovina senza rudere a schermo.** Il designer ("vai"). Nella v2
+    non c'e' il rudere e la propria rovina si ristruttura (registri 88 e
+    seguenti); al tavolo "la sagoma ruotata mostra il lato rovina". A
+    schermo la rovina spariva come nella v1.5, dove e' solo il basamento
+    di chi ci costruisce sopra: cosi' nascondeva proprio la cosa che nella
+    v2 si puo' fare. Ora, con `senza_rudere`, la sagoma della rovina resta
+    in piedi, girata di mezzo giro e scurita (senza il disegno del lato
+    rovina si vede il retro del cartone), non si abbatte, e si clicca per
+    la sagoma; sepolta sparisce come tutte. I testi seguono: il tasto dice
+    "Ristruttura", l'azione "Ristrutturazione", i messaggi parlano di
+    rovina, e il riquadro dell'edificio dice "si puo' ristrutturare" sulle
+    proprie. Nella v1.5 nulla cambia (la costante e' spenta). Test della
+    vista: sagoma in piedi e girata, niente crollo, ingombro del clic,
+    testi; nella v1.5 la rovina resta senza sagoma.

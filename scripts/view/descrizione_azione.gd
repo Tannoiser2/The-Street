@@ -24,7 +24,7 @@ static func tipo(v: AvailableActions.Voce) -> String:
 			return "Sopraelevazione" if bool(v.parametri.get("above", false)) \
 				else "Costruzione"
 		"potenzia": return "Potenziamento"
-		"restaura": return "Restauro"
+		"restaura": return "Ristrutturazione" if BoardLayout3D.senza_rudere() else "Restauro"
 		"recluta": return "Reclutamento"
 		"dinastia": return "Dinastia"
 		"passa": return "Passo"
@@ -59,6 +59,11 @@ static func frase(gs: GameState, v: AvailableActions.Voce, player: int) -> Strin
 		"recluta":
 			return v.etichetta.trim_prefix("Recluta ")
 	return v.etichetta
+
+# Il verbo del tasto: nella v2 non c'e' il rudere, si RISTRUTTURA la propria
+# rovina; nella v1.5 si restaura il rudere, anche altrui.
+static func verbo_restauro() -> String:
+	return "Ristruttura" if BoardLayout3D.senza_rudere() else "Restaura"
 
 # Il conto. Zero non si scrive "0 pietra 0 oro": si scrive che non costa.
 static func prezzo(v: AvailableActions.Voce) -> String:

@@ -63,6 +63,7 @@ func _ready() -> void:
 	_run("la tessera girata (v2)", _test_tessera_girata)
 	_run("il quarto lavoratore sulla bacchetta (v2)", _test_quarto_lavoratore)
 	_run("lo scheletro del lavoratore sotto il potenziamento (v2)", _test_scheletro_lavoratore)
+	_run("la rovina senza rudere resta in piedi, girata (v2)", _test_rovina_senza_rudere)
 	print("\n%d superati, %d falliti" % [_passed, _failed])
 	get_tree().quit(0 if _failed == 0 else 1)
 
@@ -2670,3 +2671,70 @@ func _test_scheletro_lavoratore() -> void:
 	_eq("  e senza sepolto non dice niente", s2.descrivi_scheletro(nessuno), "")
 	remove_child(s2)
 	s2.queue_free()
+
+# Registro 106: nella v2 non c'e' il rudere e la rovina si ristruttura. Al
+# tavolo "la sagoma ruotata mostra il lato rovina": a schermo resta in piedi,
+# girata e scura, invece di sparire come nella v1.5; non si abbatte; si
+# clicca per la sua sagoma; e i testi dicono "ristruttura la rovina".
+func _test_rovina_senza_rudere() -> void:
+	if not FileAccess.file_exists("res://data/cards-v2.json"): return
+	CardDB.load_db("res://data/cards-v2.json")
+	_ok("nella v2 non c'e' il rudere", BoardLayout3D.senza_rudere())
+	var ctl := GameController.new()
+	ctl.new_game(3, 11)
+	var gs := ctl.gs
+	while not gs.pending_choice.is_empty():
+		ctl.choose(int((gs.pending_choice["options"] as Array)[0]))
+	var b := _metti(gs, "ed_capanne", 1, 2)
+	var vista: Node3D = preload("res://scripts/view/board_view_3d.gd").new()
+	add_child(vista)
+	vista.scale = Vector3.ONE * BoardLayout3D.U
+	var girate := func() -> int:
+		var q := 0
+		for f in vista.get_children():
+			if f.has_meta("girata") and f is Node3D and not is_zero_approx((f as Node3D).rotation.y): q += 1
+		return q
+	vista.mostra(gs)
+	_ok("intatto: la sagoma c'e'", BoardLayout3D.ha_sagoma(b) and not BoardLayout3D.sagoma_girata(b))
+	_eq("  e niente e' girato", girate.call(), 0)
+	b.state = Enums.BuildingState.ROVINA
+	_ok("in rovina la sagoma resta in piedi", BoardLayout3D.ha_sagoma(b))
+	_ok("  girata", BoardLayout3D.sagoma_girata(b))
+	var ingombro := BoardLayout3D.ingombro(gs, b)
+	_ok("  e si clicca per la sagoma, non per il solo piede",
+		ingombro.size.y > BoardLayout3D.basetta_box(gs, b).size.y + 1.0)
+	vista.mostra(gs)
+	_eq("  sul tavolo c'e' una sagoma girata", girate.call(), 1)
+	_ok("  e non si abbatte", vista._crolli.is_empty())
+	b.is_buried = true
+	_ok("  sepolta, sparisce come tutte", not BoardLayout3D.ha_sagoma(b))
+	b.is_buried = false
+	vista.queue_free()
+
+	_eq("il tasto dice Ristruttura", DescrizioneAzione.verbo_restauro(), "Ristruttura")
+	var voce := AvailableActions.Voce.new()
+	voce.tipo = "restaura"
+	_eq("  e l'azione si chiama Ristrutturazione", DescrizioneAzione.tipo(voce), "Ristrutturazione")
+	# La scena di gioco, avviata sulla v2: senza rovine il tasto dice che
+	# non c'e' niente da ristrutturare, con la parola giusta.
+	var n := preload("res://scenes/gioca.tscn").instantiate()
+	add_child(n)
+	n.inizio.con_regolamento(1)
+	n.inizio.con_giocatori(3)
+	n.inizio.con_bot(2)
+	n.comincia()
+	n._scegli_restauro()
+	_ok("  e senza rovine il messaggio parla di rovine: \"%s\"" % n._messaggio,
+		str(n._messaggio).begins_with("Nessuna tua rovina"))
+	n.torna_alla_scelta()
+	remove_child(n)
+	n.queue_free()
+	CardDB.load_db(CardDB.DB_PATH)
+
+	# Nella v1.5 tutto come prima: la rovina perde la sagoma e si restaura il rudere.
+	_ok("nella v1.5 il rudere c'e'", not BoardLayout3D.senza_rudere())
+	var g1 := _gioco().gs
+	var b1 := _metti(g1, "ed_capanne", 1, 2)
+	b1.state = Enums.BuildingState.ROVINA
+	_ok("  e la rovina non ha sagoma", not BoardLayout3D.ha_sagoma(b1) and not BoardLayout3D.sagoma_girata(b1))
+	_eq("  e il tasto dice Restaura", DescrizioneAzione.verbo_restauro(), "Restaura")
