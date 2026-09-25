@@ -326,7 +326,12 @@ func _descrivi_sotto(pixel: Vector2) -> PackedStringArray:
 			out.append("potenziamenti: " + ", ".join(nomi))
 		return out
 	var c := _carta_puntata(pixel)
-	if c.is_empty(): return out
+	if c.is_empty():
+		# Ne' un edificio ne' una carta: se il mouse e' su una colonna, si
+		# descrive la tessera, con quel che produce in quest'era e la regola.
+		var col := _colonna_puntata(pixel)
+		if col >= 0: return descrivi_tessera(col)
+		return out
 	var id := str(c["id"])
 	match str(c["kind"]):
 		"mercato":
@@ -363,6 +368,30 @@ func _descrivi_sotto(pixel: Vector2) -> PackedStringArray:
 		"eredita_coperta":
 			out.append("Obiettivo segreto")
 			out.append("coperto: lo vede solo il suo giocatore")
+	return out
+
+# La tessera di una colonna, come la vede chi ci passa sopra col mouse: il
+# terreno, la produzione di quest'era, la regola stampata, e nella v2 se
+# l'effetto e' ancora da usare o la tessera e' gia' girata (registro 103).
+func descrivi_tessera(col: int) -> PackedStringArray:
+	var out := PackedStringArray()
+	if ctl == null or col < 0 or col >= ctl.gs.grid.n_cols: return out
+	var gs := ctl.gs
+	var t_id := Enums.terrain_to_string(gs.grid.terrains[col])
+	var tess: Dictionary = CardDB.terrains[t_id]
+	var base: Dictionary = tess["base_production"]
+	var per_era = tess.get("base_production_by_era", null)
+	if per_era != null and per_era.has(str(gs.era)): base = per_era[str(gs.era)]
+	var pezzi := PackedStringArray()
+	if int(base.get("pietra", 0)) > 0: pezzi.append("%d %s" % [int(base["pietra"]), "Costruzione" if _v2() else "pietra"])
+	if int(base.get("oro", 0)) > 0: pezzi.append("%d %s" % [int(base["oro"]), "Denaro" if _v2() else "oro"])
+	if int(base.get("idee", 0)) > 0: pezzi.append("%d Idee" % int(base["idee"]))
+	out.append("Colonna %d · %s" % [col, t_id.capitalize()])
+	out.append("produce " + (", ".join(pezzi) if not pezzi.is_empty() else "niente") + " in quest'era")
+	if str(tess.get("rule", "")) != "": out.append(str(tess["rule"]))
+	if EraRules.tessere_una_volta(gs):
+		out.append("tessera girata: l'effetto torna nell'era prossima" if not EraRules.tessera_disponibile(gs, col)
+			else "effetto ancora da usare in quest'era")
 	return out
 
 # ---- il clic ---------------------------------------------------------
