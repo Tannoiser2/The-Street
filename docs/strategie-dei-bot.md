@@ -1,4 +1,6 @@
-> **Nota (registro 92).** Questo documento misura le strategie sulla v1.5. Per la v2 a tre risorse il
+> **Nota (registri 92 e 98).** Questo documento misura le strategie sulla v1.5. Per la v2 le spinte
+> sono una tabella a parte nel bot (`SPINTE_V2`), tarata misurando (`la-terza-risorsa.md`, nona
+> misura); `--spinta chiave=valore,...` la sovrascrive lotto per lotto. Per la v2 a tre risorse il
 > canone e' diverso (Rendita, Lampo, Scavo, Continuita', Bilanciata, Obiettivi) ed e' misurato in
 > `la-terza-risorsa.md`, terza misura.
 

@@ -437,6 +437,43 @@ il canone della v2 si chiude.
 cinque righe in `carte-v2.md`), la forbice si stringe di 8 punti senza toccare la città; il
 resto è taratura dei bot, non regola.
 
+## Nona misura: le carte care a 2 e le strategie rifatte per la v2
+
+Decisioni del designer (registro 97-98): le cinque carte care scendono a Rendita 2 nel file v2, e
+le strategie si rifanno. Le spinte delle strategie sono ora una tabella nel bot (una per la
+v1.5, una per la v2) e la manopola `--spinta chiave=valore,...` le sovrascrive lotto per lotto:
+tre giri di quattro tornei sugli stessi semi, poi la tabella scelta si scrive nel bot e il lotto
+rigiocato senza manopola esce identico riga per riga.
+
+**Il primo giro** (spinta della Rendita più bassa, la Scavo che costruisce a terra le carte con lo
+Scavo alto invece di passare) ha dato la risposta sbagliata nel verso giusto: la Scavo dal 22 al
+32 %, ma la Rendita **più forte** (95 punti, 54-56 %) con la spinta a 0,6 o 0,4. Quindi il
+vantaggio non era la spinta: era il valutatore comune, che stima le rendite future di un edificio
+come se restasse scoperto, mentre con quattro lavoratori quasi ogni edificio che conta viene
+protetto; la strategia Rendita vinceva perché ci credeva più del valutatore. **Il secondo giro**
+mette nel valutatore una protezione attesa (+1 o +2 di resistenza nel conto delle rendite): a +2
+la Rendita scende al 40 % senza toccare la sua spinta. **Il terzo giro** (Lampo più morbido,
+Rendita a 0,7) non migliora niente: il Lampo resta il più debole perché le sue carte costano poco
+e cadono, non per la spinta.
+
+| strategia | Z (la v2 prima) | B0 carte care a 2 | **F carte a 2 e strategie rifatte** | PV medi in F |
+|---|--:|--:|--:|--:|
+| Rendita | 57 % | 49 % | **40 %** | 88,6 |
+| Obiettivi | 32 % | 35 % | 37 % | 86,7 |
+| Scavo | 17 % | 22 % | **32 %** | 87,3 |
+| Bilanciata | 33 % | 36 % | 32 % | 85,6 |
+| Continuità | 36 % | 33 % | 31 % | 86,6 |
+| Lampo | 25 % | 25 % | 27 % | 85,9 |
+
+Attesa 33,3 %, errore ±5. La città non cambia (F contro Z: costruiti 13,8, altezza 4,57, basi
+altrui 2,3, sepolti 47 %, kingmaker 11 %), e i punti nemmeno (86,8 contro 87,0): la taratura
+cambia chi vince, non come si gioca.
+
+La tabella v2 (`StrategyBot.SPINTE_V2`): protezione attesa 2; la Scavo a terra −0,5 invece di
+−1,5, più 0,5 per punto di Scavo della carta; il resto come nella v1.5. La Rendita a 40 e il
+Lampo a 27 restano un po' fuori dall'errore: la forbice si è chiusa da 57-17 a 40-27, e il
+resto è la natura delle carte (la Rendita costruisce poco e caro, il Lampo tanto e fragile).
+
 ## Come rifare il conto
 
 ```bash
@@ -471,4 +508,7 @@ python3 tools/confronta_torneo.py W.csv X2.csv
 # ottava misura: lo scheletro che conta sempre sta nel file v2; `--rendita_tetto 2` taglia le carte care
 godot --headless res://scenes/audit_partita.tscn -- --players 3 --games 750 --seed 700000 --dati data/cards-v2.json --rendita_tetto 2 > Y2.csv
 python3 tools/confronta_torneo.py Z.csv Y2.csv
+# nona misura: la tabella delle spinte v2 sta nel bot; `--spinta chiave=valore,...` la sovrascrive
+godot --headless res://scenes/audit_partita.tscn -- --players 3 --games 750 --seed 700000 --dati data/cards-v2.json > F.csv
+python3 tools/confronta_strategie.py F.csv
 ```

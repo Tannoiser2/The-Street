@@ -1704,3 +1704,19 @@ dato è stato importato da lì. Ma due confronti fra ciò che è stampato e
     delle cinque carte care a 2 (cinque righe in `carte-v2.md`, forbice
     piu' stretta di 8 punti senza toccare la citta').
 
+98. **Le strategie rifatte per la v2.** Decisione del designer ("rifai le
+    strategie"). Le spinte delle strategie sono una tabella nel bot
+    (`SPINTE_V1`, `SPINTE_V2`), e `--spinta chiave=valore,...` le sovrascrive
+    lotto per lotto: la taratura si fa misurando, tre giri di quattro
+    tornei sugli stessi semi (`docs/la-terza-risorsa.md`, nona misura).
+    Abbassare la spinta della Rendita la rendeva PIU' forte: il vantaggio
+    era nel valutatore comune, che stimava le rendite future come se
+    l'edificio restasse scoperto, mentre con quattro lavoratori quasi
+    tutto viene protetto (`protezione_attesa`, 2 nella v2). La Scavo
+    costruisce a terra le carte con lo Scavo alto invece di passare
+    (`scavo_terra` -0,5, `scavo_terra_scavo` 0,5). Risultato: Rendita dal
+    57 al 40%, Scavo dal 17 al 32%, le altre fra 27 e 37, citta' e punti
+    invariati; il lotto rigiocato con la tabella scritta nel bot esce
+    identico a quello della manopola. Il Lampo resta il piu' debole (27%)
+    per la natura delle sue carte.
+
