@@ -59,6 +59,7 @@ func _ready() -> void:
 	_run("il gettone del personaggio sepolto", _test_gettone_scheletro)
 	_run("  e la rovina non porta cubetti", _test_cubetti_sulle_rovine)
 	_run("il cartellino della Prosperita' Urbana", _test_cartello_prosperita)
+	_run("il cartellino si spegne dopo il pagamento", _test_cartello_pagato)
 	_run("l'interruttore del regolamento e il draft a schermo (v2)", _test_regolamento_e_draft)
 	_run("la tessera girata (v2)", _test_tessera_girata)
 	_run("il quarto lavoratore sulla bacchetta (v2)", _test_quarto_lavoratore)
@@ -2452,6 +2453,41 @@ func _test_cartello_prosperita() -> void:
 	miei[1].state = Enums.BuildingState.RUDERE
 	_ok("  un rudere non lo riaccende: e' in piedi ma spento",
 		not gs.grid.is_prosperity_center(3))
+
+# Il Centro Urbano paga una volta per colonna e per era: dopo il pagamento il
+# cartellino resta (la colonna e' ancora un Centro) ma spento, e a fine era si
+# riaccende. Si attiva davvero la colonna, cosi' a spegnerlo e' il pagamento e
+# non un segno messo a mano.
+func _test_cartello_pagato() -> void:
+	var gs := _gioco().gs
+	var soglia := int(CardDB.constants["prosperity"]["min_buildings"])
+	for i in soglia:
+		_metti(gs, "ed_capanne", 3, mini(i + 1, 5), i, i % 2)
+	_ok("la colonna e' un Centro", gs.grid.is_prosperity_center(3))
+	_eq("prima di pagare il cartellino e' acceso",
+		BoardLayout3D.prosperita_colore(gs, 3), Color.WHITE)
+	EraRules.activate(gs, 0, 3)
+	_ok("dopo il pagamento e' spento",
+		BoardLayout3D.prosperita_colore(gs, 3) == BoardLayout3D.PROSPERITA_SPENTA)
+	_ok("  ma c'e' ancora: la colonna resta un Centro", gs.grid.is_prosperity_center(3))
+	_eq("  e le altre colonne non ne risentono",
+		BoardLayout3D.prosperita_colore(gs, 2), Color.WHITE)
+	# Scuro per distinguersi, opaco per non lasciar passare la scritta
+	# stampata sotto: due scritte sovrapposte non si leggono.
+	_ok("  spento si distingue: piu' scuro, ma opaco",
+		BoardLayout3D.PROSPERITA_SPENTA.v < 0.5 and BoardLayout3D.PROSPERITA_SPENTA.a == 1.0)
+	gs.grid.reset_era_flags()
+	_eq("a fine era si riaccende", BoardLayout3D.prosperita_colore(gs, 3), Color.WHITE)
+	# Con la regola vecchia - paga a ogni attivazione - non c'e' niente da
+	# girare, e il cartellino non si spegne mai.
+	var salvate: Dictionary = CardDB.constants["prosperity"]
+	var vecchia := salvate.duplicate()
+	vecchia["once_per_era"] = false
+	CardDB.constants["prosperity"] = vecchia
+	EraRules.activate(gs, 0, 3)
+	_eq("pagando a ogni attivazione non si spegne mai",
+		BoardLayout3D.prosperita_colore(gs, 3), Color.WHITE)
+	CardDB.constants["prosperity"] = salvate
 
 # Registro 102: dalla schermata di scelta si sceglie il regolamento, e con la
 # v2 la partita comincia dal draft dei Personaggi, che l'umano fa cliccando

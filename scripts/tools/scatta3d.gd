@@ -53,6 +53,13 @@ func _ready() -> void:
 	for c in ctl.gs.grid.n_cols:
 		terreni.append(["pianura", "fiume", "collina", "bosco"][ctl.gs.grid.terrains[c]])
 	print("terreni da colonna 0: ", ", ".join(terreni))
+	# I Centri Urbani e se hanno gia' pagato in quest'era: il cartellino acceso
+	# e quello spento si cercano qui, prima di guardare lo scatto.
+	var centri := []
+	for c in ctl.gs.grid.n_cols:
+		if ctl.gs.grid.is_prosperity_center(c):
+			centri.append("%d%s" % [c, " (pagato)" if BoardLayout3D.prosperita_pagata(ctl.gs, c) else ""])
+	print("centri urbani: ", ", ".join(centri) if not centri.is_empty() else "nessuno")
 	print("plancia 3D: era %d, %d edifici (%d sopraelevati), %d colonne" % [
 		ctl.gs.era, ctl.gs.grid.buildings.size(), quote, ctl.gs.grid.n_cols])
 
