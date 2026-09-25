@@ -456,13 +456,14 @@ static func rendite_future(res: int, rendita: int, era: int) -> float:
 const SPINTE_V1 := {"rendita_per_era": 0.9, "rendita_zero": -1.5, "lampo": 1.6, "lampo_zero": -1.0,
 	"scavo_premio": 0.8, "scavo_terra": -1.5, "scavo_terra_scavo": 0.0, "protezione_attesa": 0.0,
 	"lampo_potenzia": 0.0, "lampo_sopra": 0.0}
-# La tabella v2 e' il lotto Q2 della taratura (registro 98): protezione
+# La tabella v2 e' il lotto Q2 della taratura (registro 98) piu' la spinta
+# ai potenziamenti della Lampo (registro 101, lotto L2): protezione
 # attesa 2 (il valutatore conta l'edificio protetto), la Scavo costruisce a
 # terra le carte con lo Scavo alto invece di passare; le altre spinte
 # restano quelle della v1.5, perche' abbassarle non aiutava.
 const SPINTE_V2 := {"rendita_per_era": 0.9, "rendita_zero": -1.5, "lampo": 1.6, "lampo_zero": -1.0,
 	"scavo_premio": 0.8, "scavo_terra": -0.5, "scavo_terra_scavo": 0.5, "protezione_attesa": 2.0,
-	"lampo_potenzia": 0.0, "lampo_sopra": 0.0}
+	"lampo_potenzia": 3.0, "lampo_sopra": 0.0}
 static var spinte_override := {}
 
 static func spinte() -> Dictionary:
