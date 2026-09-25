@@ -332,6 +332,11 @@ func _descrivi_sotto(pixel: Vector2) -> PackedStringArray:
 		var col := _colonna_puntata(pixel)
 		if col >= 0: return descrivi_tessera(col)
 		return out
+	return _descrivi_sotto_carta(c)
+
+# Il riquadro di una carta puntata: {"kind": ..., "id": ...}.
+func _descrivi_sotto_carta(c: Dictionary) -> PackedStringArray:
+	var out := PackedStringArray()
 	var id := str(c["id"])
 	match str(c["kind"]):
 		"mercato":
@@ -360,6 +365,10 @@ func _descrivi_sotto(pixel: Vector2) -> PackedStringArray:
 				out.append(str(mo.get("effect_text", "")))
 		"dinastia":
 			out.append("Dinastia")
+			# Nella v2 i lavoratori di base sono quattro: la Dinastia e' il quinto.
+			out.append("un lavoratore in piu', permanente: il %s" % ("quinto" if _v2() else "quarto"))
+			var din := AvailableActions.dinastia(ctl.gs, _in_vetrina())
+			out.append("costa " + DescrizioneAzione.prezzo(din) if din.legale else str(din.motivo))
 		"eredita":
 			if CardDB.legacies.has(id):
 				var er: Dictionary = CardDB.legacies[id]
@@ -1031,7 +1040,7 @@ func _disegna_bottoni(font: Font, p: PlayerState) -> void:
 	var schermo := _hud.get_viewport_rect().size
 	var voci: Array = []
 	var din := AvailableActions.dinastia(ctl.gs, _io())
-	voci.append({"voce": din, "testo": "Dinastia  %dp %do" % [din.pietra, din.oro],
+	voci.append({"voce": din, "testo": "Dinastia  " + DescrizioneAzione.prezzo(din),
 		"attiva": din.legale and din.pagabile(p)})
 	var restauri := AvailableActions.restauri(ctl.gs, _io(), ctl.colonna_attivata())
 	var quanti := 0
