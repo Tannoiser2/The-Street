@@ -1782,3 +1782,14 @@ dato è stato importato da lì. Ma due confronti fra ciò che è stampato e
     Restano da disegnare: le tessere girate, il quarto lavoratore sulla
     plancia, lo scheletro del potenziamento, la rovina senza rudere.
 
+103. **Le tessere girate a schermo.** Il designer ("vai con le tessere
+    girate"). Nella v2 la tessera usata nell'era si abbuia con un velo
+    scuro e porta la scritta "girata" sulla fascia in fondo, dove sta il
+    cartellino della Prosperita'; a inizio era il motore la rigira e il
+    velo sparisce. Nella v1.5 nessuna tessera si abbuia mai (la lista e'
+    tutta falsa). Il riquadro che segue il mouse ora descrive anche la
+    tessera nuda: colonna, terreno, cosa produce in quest'era, la regola
+    stampata, e nella v2 se l'effetto e' ancora da usare o la tessera e'
+    girata. Test della vista: il velo compare sulla colonna giusta dopo
+    l'attivazione del fiume e il riquadro lo dice.
+

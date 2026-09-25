@@ -330,6 +330,12 @@ func _tessere() -> void:
 		# tessera quando la colonna e' un Centro Urbano attivo. La scritta
 		# stampata c'e' sempre, il cartellino no.
 		if gs.grid.is_prosperity_center(c): _cartello_prosperita(c)
+		# LA TESSERA GIRATA (v2, registro 100 e 103): l'effetto della tessera
+		# scatta una volta per era, poi la tessera si gira. Sul tavolo vero si
+		# capovolge; qui si abbuia e ci si scrive sopra, cosi' il disegno del
+		# terreno resta leggibile e si vede da lontano che per quest'era non
+		# da' piu' niente. A inizio era il motore la rigira e il velo sparisce.
+		if tessera_girata(c): _tessera_girata(c, box)
 		if c == _evidenziata:
 			var velo := _quad(Vector2(box.size.x, box.size.z),
 				Color(1, 1, 1, 0.22), true)
@@ -339,6 +345,29 @@ func _tessere() -> void:
 			velo.position = Vector3(box.position.x + box.size.x / 2.0,
 				box.end.y + 0.8, box.position.z + box.size.z / 2.0)
 			add_child(velo)
+
+# La tessera della colonna e' girata? Lo dice lo stato, non la vista: nella
+# v1.5 la lista e' vuota o tutta falsa e nessuna tessera si abbuia mai.
+func tessera_girata(col: int) -> bool:
+	if gs == null or col < 0 or col >= gs.tessere_usate.size(): return false
+	return bool(gs.tessere_usate[col])
+
+const VELO_GIRATA := Color(0.05, 0.04, 0.03, 0.62)
+
+func _tessera_girata(col: int, box: AABB) -> void:
+	var velo := _quad(Vector2(box.size.x, box.size.z), VELO_GIRATA, true)
+	velo.rotate_x(-PI / 2.0)
+	var mat := velo.material_override as StandardMaterial3D
+	mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	velo.position = Vector3(box.position.x + box.size.x / 2.0,
+		box.end.y + 1.0, box.position.z + box.size.z / 2.0)
+	velo.set_meta("girata", col)
+	add_child(velo)
+	# La scritta sta sulla fascia in fondo, dove sta il cartellino della
+	# Prosperita', e come lui si legge da ogni lato.
+	var dove := BoardLayout3D.prosperita_box(col)
+	_scritta(Vector3(dove.position.x + dove.size.x / 2.0, box.end.y + 6.0,
+		dove.position.z + dove.size.z / 2.0), "girata", 0.28, Color("#d9d2c5"))
 
 func _cartello_prosperita(col: int) -> void:
 	if not ResourceLoader.exists(BoardLayout3D.PROSPERITA_PATH): return

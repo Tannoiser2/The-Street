@@ -60,6 +60,7 @@ func _ready() -> void:
 	_run("  e la rovina non porta cubetti", _test_cubetti_sulle_rovine)
 	_run("il cartellino della Prosperita' Urbana", _test_cartello_prosperita)
 	_run("l'interruttore del regolamento e il draft a schermo (v2)", _test_regolamento_e_draft)
+	_run("la tessera girata (v2)", _test_tessera_girata)
 	print("\n%d superati, %d falliti" % [_passed, _failed])
 	get_tree().quit(0 if _failed == 0 else 1)
 
@@ -2491,5 +2492,54 @@ func _test_regolamento_e_draft() -> void:
 	n.torna_alla_scelta()
 	remove_child(n)
 	n.queue_free()
+	CardDB.load_db(CardDB.DB_PATH)
+
+# Registro 103: la tessera usata nell'era si abbuia e porta la scritta
+# "girata"; a inizio era si rigira. Nella v1.5 nessuna tessera si abbuia mai.
+func _test_tessera_girata() -> void:
+	var gs := _gioco().gs
+	var vista: Node3D = preload("res://scripts/view/board_view_3d.gd").new()
+	add_child(vista)
+	vista.scale = Vector3.ONE * BoardLayout3D.U
+	var girate := func() -> int:
+		var q := 0
+		for f in vista.get_children():
+			if f.has_meta("girata"): q += 1
+		return q
+	vista.mostra(gs)
+	_eq("nella v1.5 nessuna tessera e' girata", girate.call(), 0)
+	_ok("  e la vista lo sa", not vista.tessera_girata(0))
+	if not FileAccess.file_exists("res://data/cards-v2.json"):
+		vista.queue_free()
+		return
+	CardDB.load_db("res://data/cards-v2.json")
+	var ctl := GameController.new()
+	ctl.new_game(3, 11)
+	var g2 := ctl.gs
+	while not g2.pending_choice.is_empty():
+		ctl.choose(int((g2.pending_choice["options"] as Array)[0]))
+	vista.mostra(g2)
+	_eq("nella v2 a inizio era nessuna tessera e' girata", girate.call(), 0)
+	var fiume := g2.grid.terrains.find(Enums.Terrain.FIUME)
+	_ok("c'e' un fiume", fiume >= 0)
+	if fiume >= 0:
+		_ok("attivare il fiume lo gira", ctl.place_worker(fiume) and g2.tessere_usate[fiume])
+		vista.mostra(g2)
+		_eq("  e sul tavolo c'e' un velo", girate.call(), 1)
+		_ok("  su quella colonna", vista.tessera_girata(fiume) and not vista.tessera_girata((fiume + 1) % g2.grid.n_cols))
+		var s := preload("res://scenes/gioca.tscn").instantiate()
+		add_child(s)
+		s.ctl = ctl
+		var righe: PackedStringArray = s.descrivi_tessera(fiume)
+		_ok("  e il riquadro del mouse lo dice: \"%s\"" % (righe[righe.size() - 1] if not righe.is_empty() else ""),
+			not righe.is_empty() and righe[righe.size() - 1].begins_with("tessera girata"))
+		var altra := (fiume + 1) % g2.grid.n_cols
+		var righe2: PackedStringArray = s.descrivi_tessera(altra)
+		_ok("  e per l'altra dice che e' da usare",
+			not righe2.is_empty() and righe2[righe2.size() - 1].begins_with("effetto ancora"))
+		s.ctl = null
+		remove_child(s)
+		s.queue_free()
+	vista.queue_free()
 	CardDB.load_db(CardDB.DB_PATH)
 
