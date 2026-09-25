@@ -691,6 +691,19 @@ static func scheletro_piede(gs: GameState, b: Building) -> Vector3:
 	return Vector3(base.x + span_w(b.width()) / 2.0 - largo / 2.0 - 1.5,
 		base.y + BASETTA_Y, base.z + BASETTA_D / 2.0 - 1.5)
 
+# Quanto vale: 6 meno l'era in cui e' stato sepolto (Scoring._skeletons).
+static func scheletro_valore(era: int) -> int:
+	return 6 - era
+
+# Nel ventaglio del giocatore lo scheletro del lavoratore (v2) prende una
+# riga come le carte infilate sotto l'edificio, ma non e' una carta: il
+# gettone sta in piedi sulla striscia che resta scoperta, quella verso il
+# tabellone, appoggiato all'indietro come sulla basetta. Il riquadro `box`
+# e' la riga del ventaglio che gli tocca.
+static func scheletro_nel_ventaglio(box: AABB) -> Vector3:
+	return Vector3(box.position.x + box.size.x / 2.0, box.end.y,
+		box.position.z + minf(VENTAGLIO_Z, box.size.z) / 2.0 + 1.0)
+
 # La casella dell'era: la prima e' l'era 1, che vale 5.
 static func scheletro_uv(era: int) -> Dictionary:
 	var i := clampi(era - 1, 0, SCHELETRI_COLONNE - 1)
@@ -914,7 +927,16 @@ static func carte_giocatore(gs: GameState, player: int, umano := -1) -> Array[Di
 		var sotto: Array[Dictionary] = []
 		for u in b.upgrades:
 			sotto.append({"kind": "potenziamento", "id": str(u)})
-		if b.buried_character != "":
+		# Nella v2 il sepolto e' il lavoratore del potenziamento: non c'e' una
+		# carta da infilare, ci va il GETTONE dello scheletro, con l'era per
+		# id. Prima finiva qui come "personaggio" di nome "lavoratore", e la
+		# vista lo cercava in un mazzo dove non c'e'.
+		# E sta SOTTO il potenziamento, in fondo alla pila: e' il lavoratore che
+		# l'ha piazzato, ed e' li' che al tavolo resta.
+		if b.buried_character == Building.LAVORATORE:
+			sotto.insert(0, {"kind": "scheletro", "id": str(b.buried_character_era),
+				"spenta": true})
+		elif b.buried_character != "":
 			sotto.append({"kind": "personaggio", "id": str(b.buried_character),
 				"spenta": true})
 		out.append({"kind": "mercato", "id": str(b.data["id"]),

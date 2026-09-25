@@ -62,6 +62,7 @@ func _ready() -> void:
 	_run("l'interruttore del regolamento e il draft a schermo (v2)", _test_regolamento_e_draft)
 	_run("la tessera girata (v2)", _test_tessera_girata)
 	_run("il quarto lavoratore sulla bacchetta (v2)", _test_quarto_lavoratore)
+	_run("lo scheletro del lavoratore sotto il potenziamento (v2)", _test_scheletro_lavoratore)
 	print("\n%d superati, %d falliti" % [_passed, _failed])
 	get_tree().quit(0 if _failed == 0 else 1)
 
@@ -2581,3 +2582,91 @@ func _test_quarto_lavoratore() -> void:
 	s.queue_free()
 	CardDB.load_db(CardDB.DB_PATH)
 
+# Registro 105: nella v2 lo scheletro lo lascia il lavoratore che piazza il
+# potenziamento. Non e' una carta: nel ventaglio del giocatore, sotto la
+# carta dell'edificio, ci va il gettone dell'era, e il riquadro del mouse
+# dice chi e' e quanto vale. Prima finiva nel ventaglio come "personaggio"
+# di nome "lavoratore", cercato in un mazzo dove non c'e'.
+func _test_scheletro_lavoratore() -> void:
+	if not FileAccess.file_exists("res://data/cards-v2.json"): return
+	CardDB.load_db("res://data/cards-v2.json")
+	var ctl := GameController.new()
+	ctl.new_game(3, 11)
+	var gs := ctl.gs
+	while not gs.pending_choice.is_empty():
+		ctl.choose(int((gs.pending_choice["options"] as Array)[0]))
+	var b := _metti(gs, "ed_capanne", 3, 1, 0, 0)
+	var upg := str(CardDB.upgrades.keys()[0])
+	b.upgrades.append(upg)
+	b.buried_character = Building.LAVORATORE
+	b.buried_character_era = 2
+	var carte := BoardLayout3D.player_cards(gs, 0)
+	var gettoni := []
+	var fantasmi := 0
+	var edificio := []
+	var pot := []
+	for c in carte:
+		if int(c.get("player", -1)) != 0: continue
+		if str(c["kind"]) == "scheletro": gettoni.append(c)
+		if str(c["kind"]) == "personaggio" and str(c["id"]) == Building.LAVORATORE: fantasmi += 1
+		if str(c["kind"]) == "mercato" and str(c["id"]) == "ed_capanne": edificio.append(c)
+		if str(c["kind"]) == "potenziamento" and str(c["id"]) == upg: pot.append(c)
+	_eq("nel ventaglio c'e' un gettone dello scheletro", gettoni.size(), 1)
+	_eq("  e nessuna carta 'personaggio' di nome lavoratore", fantasmi, 0)
+	if gettoni.is_empty() or edificio.is_empty() or pot.is_empty():
+		CardDB.load_db(CardDB.DB_PATH)
+		return
+	_eq("  con l'era per id", str(gettoni[0]["id"]), "2")
+	var cs: AABB = gettoni[0]["aabb"]
+	var ce: AABB = edificio[0]["aabb"]
+	var cp: AABB = pot[0]["aabb"]
+	_ok("  sotto la carta dell'edificio", cs.position.y < ce.position.y)
+	_ok("  e sotto il potenziamento", cs.position.y < cp.position.y)
+	var piede := BoardLayout3D.scheletro_nel_ventaglio(cs)
+	_ok("  il gettone poggia sulla sua riga, nella striscia scoperta",
+		is_equal_approx(piede.y, cs.end.y) and piede.z >= cs.position.z
+		and piede.z <= cs.position.z + BoardLayout3D.VENTAGLIO_Z
+		and piede.x > cs.position.x and piede.x < cs.end.x)
+	_eq("  e vale 6 meno l'era", BoardLayout3D.scheletro_valore(2), 4)
+
+	# La vista lo disegna senza cercare una carta che non c'e'.
+	var vista: Node3D = preload("res://scripts/view/board_view_3d.gd").new()
+	add_child(vista)
+	vista.scale = Vector3.ONE * BoardLayout3D.U
+	vista.mostra(gs)
+	_ok("la vista disegna il tavolo con lo scheletro del lavoratore", vista.get_child_count() > 0)
+	vista.queue_free()
+
+	var s := preload("res://scenes/gioca.tscn").instantiate()
+	add_child(s)
+	s.ctl = ctl
+	var righe: PackedStringArray = s._descrivi_sotto_carta(gettoni[0])
+	_ok("il riquadro del gettone dice chi e' e quanto vale: \"%s\"" % (righe[2] if righe.size() > 2 else ""),
+		righe.size() > 2 and righe[1].begins_with("il lavoratore") and righe[2].begins_with("vale 4"))
+	var riga: String = s.descrivi_scheletro(b)
+	_ok("  e sull'edificio pure: \"%s\"" % riga,
+		riga.begins_with("scheletro: il lavoratore") and riga.ends_with("vale 4"))
+	s.ctl = null
+	remove_child(s)
+	s.queue_free()
+	CardDB.load_db(CardDB.DB_PATH)
+
+	# Nella v1.5 il sepolto e' un Personaggio, e il riquadro lo chiama per nome.
+	var g1 := _gioco().gs
+	var b1 := _metti(g1, "ed_capanne", 3, 1, 0, 0)
+	b1.buried_character = "pe_mercante"
+	b1.buried_character_era = 1
+	var s1 := preload("res://scenes/gioca.tscn").instantiate()
+	add_child(s1)
+	var riga1: String = s1.descrivi_scheletro(b1)
+	_ok("nella v1.5 il riquadro chiama il sepolto per nome: \"%s\"" % riga1,
+		riga1.begins_with("scheletro: " + str(CardDB.characters["pe_mercante"]["name"]))
+		and riga1.ends_with("vale 5"))
+	remove_child(s1)
+	s1.queue_free()
+	var nessuno := _metti(g1, "ed_capanne", 5, 1, 0, 0)
+	var s2 := preload("res://scenes/gioca.tscn").instantiate()
+	add_child(s2)
+	_eq("  e senza sepolto non dice niente", s2.descrivi_scheletro(nessuno), "")
+	remove_child(s2)
+	s2.queue_free()

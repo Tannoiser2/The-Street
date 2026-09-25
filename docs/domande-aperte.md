@@ -1802,3 +1802,15 @@ dato è stato importato da lì. Ma due confronti fra ciò che è stampato e
     suo prezzo (e ogni prezzo delle azioni) si scrive anche in Idee, con
     l'ammanco. Nella v1.5 niente cambia.
 
+105. **Lo scheletro del lavoratore a schermo.** Il designer ("vai"). Nella
+    v2 il sepolto e' il lavoratore del potenziamento (`Building.LAVORATORE`,
+    registri 95-96), non una carta: finiva nel ventaglio del giocatore come
+    "personaggio" di nome "lavoratore", cercato in un mazzo dove non c'e'.
+    Ora nel ventaglio, sotto la carta dell'edificio e in fondo alla pila
+    (sotto il potenziamento), ci va il gettone dello scheletro dell'era, in
+    piedi sulla striscia scoperta; sulla basetta stava gia'. Il riquadro del
+    mouse lo descrive sia sul gettone sia sull'edificio ("scheletro: il
+    lavoratore del potenziamento · era N · vale 6-N"), e nella v1.5 chiama
+    il Personaggio sepolto per nome. Nella v1.5 nient'altro cambia. Test
+    della vista: il gettone c'e', l'id e' l'era, sta sotto edificio e
+    potenziamento, la vista lo disegna, i riquadri lo dicono.
