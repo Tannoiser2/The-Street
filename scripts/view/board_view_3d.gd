@@ -77,6 +77,8 @@ func _nuovi_crolli(prima: GameState) -> void:
 			if b.state != Enums.BuildingState.ROVINA: continue
 			if not _stato_prima.has(b.uid): continue
 			if int(_stato_prima[b.uid]) == Enums.BuildingState.ROVINA: continue
+			# Nella v2 la rovina non si abbatte: si gira, e resta in piedi.
+			if BoardLayout3D.sagoma_girata(b): continue
 			_avvia_crollo(b)
 	_stato_prima = adesso
 
@@ -488,6 +490,26 @@ func _sagoma(b: Building) -> void:
 	# le partite headless non dipendono dalla grafica.
 	var tex: Texture2D = _illustrazione(b)
 	var centro := base + Vector3(0.0, dim.y / 2.0 + BoardLayout3D.BASETTA_Y, 0.0)
+	# LA ROVINA GIRATA (v2): la sagoma resta in piedi ma mostra il retro, il
+	# lato rovina. Non abbiamo il disegno di quel lato, quindi si gira il
+	# cartone di mezzo giro - la stampa in grigio si vede specchiata - e lo
+	# si scurisce come una rovina. Senza le immagini resta la scatola scura.
+	if BoardLayout3D.sagoma_girata(b):
+		var perno := Node3D.new()
+		perno.position = centro
+		perno.rotation = Vector3(0.0, PI, 0.0)
+		perno.set_meta("girata", true)
+		add_child(perno)
+		var dietro: Node3D
+		if tex == null:
+			dietro = _scatola(Vector3(dim.x, dim.y, BoardLayout3D.SAGOMA_SPESSORE_VISTA), col)
+		else:
+			dietro = _quad(dim, Color.WHITE)
+			var mat := dietro.material_override as StandardMaterial3D
+			_stampa(mat, tex)
+			mat.albedo_color = Color(0.55, 0.55, 0.58)
+		perno.add_child(dietro)
+		return
 	if tex == null:
 		var m := _scatola(Vector3(dim.x, dim.y, BoardLayout3D.SAGOMA_SPESSORE_VISTA), col)
 		m.position = centro

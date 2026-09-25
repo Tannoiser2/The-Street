@@ -408,8 +408,24 @@ static func standee_size(b: Building) -> Vector2:
 #   solo - quello in cima. Gli altri restano INTATTI e finiscono sepolti:
 #   su otto partite a tre sono 76 su 225, e le loro sagome attraversavano
 #   la pila da parte a parte, inglobate negli strati.
+#
+# SENZA RUDERE (v2, costante `senza_rudere`) la rovina e' un altro oggetto:
+# non e' il basamento di nessuno finche' non ci si costruisce sopra - e
+# allora e' sepolta - e si puo' ristrutturare. Al tavolo "la sagoma ruotata
+# mostra il lato rovina con lo Scavo" (docs/carte-v2.md): resta in piedi,
+# GIRATA. Toglierla dal tabellone, come nella v1.5, nascondeva proprio la
+# cosa che nella v2 si puo' fare: ristrutturarla.
 static func ha_sagoma(b: Building) -> bool:
-	return b.state != Enums.BuildingState.ROVINA and not b.is_buried
+	if b.is_buried: return false
+	if b.state == Enums.BuildingState.ROVINA: return senza_rudere()
+	return true
+
+static func senza_rudere() -> bool:
+	return bool(CardDB.constants.get("senza_rudere", false))
+
+# La sagoma che sta in piedi girata, col lato rovina in vista: solo nella v2.
+static func sagoma_girata(b: Building) -> bool:
+	return b.state == Enums.BuildingState.ROVINA and ha_sagoma(b)
 
 static func sagoma_path(b: Building) -> String:
 	var s: Dictionary = CardDB.sagome.get(str(b.data["id"]), {})

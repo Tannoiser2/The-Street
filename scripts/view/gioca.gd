@@ -317,6 +317,11 @@ func _descrivi_sotto(pixel: Vector2) -> PackedStringArray:
 			Enums.BuildingState.RUDERE: stato = "rudere"
 			Enums.BuildingState.ROVINA: stato = "rovina"
 		if b.is_buried: stato += ", sepolto"
+		# Nella v2 la rovina propria si ristruttura: il riquadro lo dice,
+		# perche' e' l'unica cosa che una rovina in piedi invita a fare.
+		elif b.state == Enums.BuildingState.ROVINA and BoardLayout3D.senza_rudere() \
+				and b.owner == _io():
+			stato += ", si puo' ristrutturare"
 		out.append(str(b.data["name"]))
 		out.append("G%d · %s · res %d · vetusta %d" % [b.owner, stato,
 			b.effective_resistance(), b.vetusta])
@@ -636,12 +641,14 @@ func _scegli_restauro() -> void:
 	for v in voci:
 		if v.legale: buoni.append(v)
 	if buoni.is_empty():
-		_messaggio = "Nessun rudere da restaurare in questa colonna."
+		_messaggio = "Nessuna tua rovina da ristrutturare in questa colonna." \
+			if BoardLayout3D.senza_rudere() else "Nessun rudere da restaurare in questa colonna."
 		_aggiorna()
 		return
 	_scelta = {"kind": "restauro", "id": "restauro"}
 	_bersagli = buoni
-	_messaggio = "Restauro: scegli il rudere."
+	_messaggio = "Ristrutturazione: scegli la rovina." \
+		if BoardLayout3D.senza_rudere() else "Restauro: scegli il rudere."
 	_aggiorna()
 
 func _deseleziona(ridisegna := true) -> void:
@@ -1068,7 +1075,7 @@ func _disegna_bottoni(font: Font, p: PlayerState) -> void:
 	for r in restauri:
 		if r.legale: quanti += 1
 	voci.append({"voce": null, "modo": "restauro",
-		"testo": "Restaura  (%d)" % quanti, "attiva": quanti > 0})
+		"testo": "%s  (%d)" % [DescrizioneAzione.verbo_restauro(), quanti], "attiva": quanti > 0})
 	var tutte := AvailableActions.tutte(ctl.gs, _io(), ctl.colonna_attivata())
 	voci.append({"voce": tutte[tutte.size() - 1], "testo": "Passa", "attiva": true})
 
