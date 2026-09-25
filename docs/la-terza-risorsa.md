@@ -625,10 +625,27 @@ nessuna scarsità e nessun avanzo a nessun numero di giocatori.
 **5. La partita si accorcia con i giocatori, come nella v1.5.** 89 punti a tre, 83 a due, 78
 a quattro (v1.5: 86 / 87 / 82): meno suolo a testa a quattro, meno attivazioni altrui a due.
 
-Le controprove ovvie sono due, entrambe con una manopola che c'è già: `--lavoratori 3` a
-quattro giocatori (il turno della v1.5 con il resto della v2: dodici turni contro dodici
-sagome) e, a due, un secondo Monumento rivelato. La prima è in coda; la seconda vuole una
-costante (`monuments_revealed`, oggi "giocatori meno uno" nel codice).
+**6. Controprova: tre lavoratori invece di quattro** (`--lavoratori 3`, stessi semi).
+
+| per giocatore | a 4: 4 lav. | **a 4: 3 lav.** | a 2: 4 lav. | **a 2: 3 lav.** |
+|---|--:|--:|--:|--:|
+| PV | 78,4 | 69,9 | 83,4 | 70,6 |
+| costruiti / passa | 12,2 / 5,1 | 10,8 / 1,9 | 12,9 / 2,8 | 10,9 / 1,1 |
+| altezza / basi altrui | 4,41 / 2,3 | 4,36 / 2,2 | 4,58 / 1,6 | 4,44 / 1,5 |
+| kingmaker | 18 % | 17 % | 10 % | 9 % |
+| vince: Rendita / Continuità / Bilanciata / Obiettivi / Scavo / Lampo | 30 / 27 / 26 / 25 / 22 / 20 | 29 / 27 / 24 / 27 / 21 / 23 | 55 / 58 / 48 / 40 / 44 / 54 | 52 / 55 / 46 / 45 / 43 / 58 |
+
+A quattro giocatori con tre lavoratori i passaggi cadono da 5,1 a 1,9, ma la partita si
+assottiglia (70 punti, 10,8 edifici) e le strategie non si muovono: con dodici turni si
+costruiscono comunque 10,8 sagome, cioè i quattro turni in più di prima erano per tre quarti
+passaggi. Il mercato corto è confermato, ma togliere un lavoratore toglie anche gioco: se si
+vuole intervenire, la strada è dare qualcosa da fare al quarto lavoratore (un incasso quando
+si passa, come nel turno a un'azione: `passa_incasso_*` c'è già) o più sagome a quattro, non un
+lavoratore in meno. A due giocatori con tre lavoratori la forbice si chiude (Continuità 55,
+Obiettivi 45, tutte entro 50 ± 6 tranne Lampo a 58) ma la partita perde 13 punti: la forbice a
+due è in parte un effetto dei quattro turni per otto turni d'era, non solo dei Monumenti.
+Da decidere, con la seconda controprova (un secondo Monumento rivelato a due) ancora da fare:
+vuole una costante, oggi "giocatori meno uno" è nel codice.
 
 ## Come rifare il conto
 

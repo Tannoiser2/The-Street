@@ -1845,5 +1845,10 @@ dato è stato importato da lì. Ma due confronti fra ciò che è stampato e
     della v1.5) ma ognuno passa 5,1 volte a partita: sedici turni per era
     contro dodici sagome dell'era, 49 sagome costruite su 60, e il draft ha
     tolto Reclutare, che nella v1.5 era la valvola; kingmaker 18% (10 a
-    due, 13 a tre). Controprove: `--lavoratori 3` a quattro e a due (in
-    corso), e a due un secondo Monumento rivelato (serve una costante).
+    due, 13 a tre). Controprova con tre lavoratori: a quattro i passaggi
+    cadono a 1,9 ma la partita perde 9 punti e le strategie non si muovono
+    (il mercato corto e' confermato; se si interviene, meglio un incasso al
+    passaggio o piu' sagome che un lavoratore in meno); a due la forbice si
+    chiude (Continuita' 55, Obiettivi 45) al costo di 13 punti. Resta da
+    fare la controprova del secondo Monumento rivelato a due (serve una
+    costante: oggi "giocatori meno uno" e' nel codice).
