@@ -9,6 +9,9 @@ var _passed := 0
 var _failed := 0
 
 func _ready() -> void:
+	# I test della vista descrivono la v1.5: la schermata di scelta parte da
+	# li'. Il test del regolamento (registro 102) prova la v2 da solo.
+	ScelteInizio.predefinito = 0
 	_run("una casella, una colonna", _test_colonne)
 	_run("i binari sono le ere", _test_binari)
 	_run("la fascia laterale sta sopra, e in ordine di quota", _test_quote)
@@ -56,6 +59,7 @@ func _ready() -> void:
 	_run("il gettone del personaggio sepolto", _test_gettone_scheletro)
 	_run("  e la rovina non porta cubetti", _test_cubetti_sulle_rovine)
 	_run("il cartellino della Prosperita' Urbana", _test_cartello_prosperita)
+	_run("l'interruttore del regolamento e il draft a schermo (v2)", _test_regolamento_e_draft)
 	print("\n%d superati, %d falliti" % [_passed, _failed])
 	get_tree().quit(0 if _failed == 0 else 1)
 
@@ -2444,3 +2448,48 @@ func _test_cartello_prosperita() -> void:
 	miei[1].state = Enums.BuildingState.RUDERE
 	_ok("  un rudere non lo riaccende: e' in piedi ma spento",
 		not gs.grid.is_prosperity_center(3))
+
+# Registro 102: dalla schermata di scelta si sceglie il regolamento, e con la
+# v2 la partita comincia dal draft dei Personaggi, che l'umano fa cliccando
+# la carta nella fila. Alla fine si torna alla v1.5, che e' quella che gli
+# altri test si aspettano.
+func _test_regolamento_e_draft() -> void:
+	if not FileAccess.file_exists("res://data/cards-v2.json"): return
+	var scena := ResourceLoader.load("res://scenes/gioca.tscn") as PackedScene
+	if scena == null: return
+	# Nel gioco la schermata parte dalla v2; qui e' a 0 per gli altri test.
+	ScelteInizio.predefinito = 1
+	var fresco := ScelteInizio.new()
+	_eq("nel gioco la scelta parte dalla v2", fresco.nome_regolamento(), "v2")
+	ScelteInizio.predefinito = 0
+	var n := scena.instantiate()
+	add_child(n)
+	_eq("  e nei test dalla v1.5", n.inizio.percorso_dati(), "res://data/cards.json")
+	n.inizio.con_regolamento(1)
+	_eq("  e si passa alla v2 con un clic", n.inizio.nome_regolamento(), "v2")
+	n.inizio.con_giocatori(3)
+	n.inizio.con_bot(2)
+	n.inizio.con_velocita(4)
+	n.comincia()
+	var gs: GameState = n.ctl.gs
+	_ok("cominciando con la v2 il motore gioca la v2", str(CardDB.ruleset).begins_with("v2"))
+	_eq("  con quattro lavoratori", int(gs.players[0].workers), 4)
+	_ok("  e la partita si apre sul draft dell'umano", not gs.pending_choice.is_empty()
+		and str(gs.pending_choice.get("kind", "")) == "draft" and int(gs.pending_choice["player"]) == 0)
+	var opzioni: Array = gs.pending_choice.get("options", [])
+	_ok("  con delle carte fra cui scegliere", not opzioni.is_empty())
+	if not opzioni.is_empty():
+		var posto := int(opzioni[0])
+		var id: String = gs.char_row[posto]
+		_ok("  e la fila mostra quel Personaggio",
+			BoardLayout3D.side_cards(gs, 0).any(func(c): return str(c.get("id", "")) == id))
+		_ok("  scegliendo la carta si prende", n.ctl.choose(posto))
+		_eq("  ed e' dell'umano", gs.players[0].recruited_total, 1)
+		n._turni_dei_bot()
+		_ok("  poi i bot fanno il loro draft e si gioca",
+			gs.pending_choice.is_empty() or int(gs.pending_choice["player"]) == 0)
+	n.torna_alla_scelta()
+	remove_child(n)
+	n.queue_free()
+	CardDB.load_db(CardDB.DB_PATH)
+
