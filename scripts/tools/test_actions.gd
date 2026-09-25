@@ -39,6 +39,7 @@ func _ready() -> void:
 	_run("il draft dei Personaggi a inizio era (v2)", _test_draft_v2)
 	_run("v2: niente scheletri dal draft, niente Vetusta' (registro 95)", _test_senza_vetusta_v2)
 	_run("v2: le tre carte che contavano la Vetusta' (registro 99)", _test_tre_carte_v2)
+	_run("v2: le tessere una volta per era (registro 100)", _test_tessere_v2)
 	print("\n%d superati, %d falliti" % [_passed, _failed])
 	get_tree().quit(0 if _failed == 0 else 1)
 
@@ -1404,3 +1405,48 @@ func _test_tre_carte_v2() -> void:
 	mio.upgrades.append("po_idolo")
 	_eq("  con due potenziamenti vale -1", Effects.event_resistance_modifier(gs, mio), -1)
 	CardDB.load_db(CardDB.DB_PATH)
+
+# Registro 100: l'effetto di ogni tessera scatta una volta per era, poi la
+# tessera si gira; a inizio era si rigira. Si prova il fiume (+1 Denaro a chi
+# attiva) e la pianura (lo sconto alla carta larga), che non dipendono da
+# cosa c'e' nel mercato.
+func _test_tessere_v2() -> void:
+	if not FileAccess.file_exists("res://data/cards-v2.json"): return
+	CardDB.load_db("res://data/cards-v2.json")
+	_ok("il file v2 accende le tessere una volta per era", bool(CardDB.constants.get("tessere_una_volta_per_era", false)))
+	_ok("  e il disturbo non c'e' piu'", not CardDB.constants.has("disturbo_vp"))
+	var ctl := _game(3, 990)
+	var gs := ctl.gs
+	while not gs.pending_choice.is_empty():
+		ctl.choose(int((gs.pending_choice["options"] as Array)[0]))
+	_eq("a inizio era nessuna tessera e' girata", gs.tessere_usate.count(true), 0)
+	var fiume := gs.grid.terrains.find(Enums.Terrain.FIUME)
+	var pianura := gs.grid.terrains.find(Enums.Terrain.PIANURA)
+	_ok("c'e' un fiume e una pianura", fiume >= 0 and pianura >= 0)
+	if fiume < 0 or pianura < 0:
+		CardDB.load_db(CardDB.DB_PATH)
+		return
+	# Il fiume: +1 Denaro alla prima attivazione dell'era, poi basta.
+	var p := gs.current_player()
+	var oro := p.oro
+	var base: Dictionary = CardDB.terrains["fiume"]["base_production_by_era"]["1"]
+	_ok("il primo attiva il fiume", ctl.place_worker(fiume))
+	_eq("  e incassa la base piu' 1 Denaro della tessera", p.oro, oro + int(base["oro"]) + 1)
+	_ok("  la tessera del fiume e' girata", gs.tessere_usate[fiume])
+	ctl.pass_action()
+	var p2 := gs.current_player()
+	var oro2 := p2.oro
+	_ok("il secondo attiva lo stesso fiume", ctl.place_worker(fiume))
+	_eq("  e incassa solo la base", p2.oro, oro2 + int(base["oro"]))
+	ctl.pass_action()
+	# La pianura: lo sconto alla carta larga vale finche' la tessera e' da usare.
+	var larga: Dictionary = CardDB.buildings["ed_villaggio_palizzato"]
+	_eq("una carta larga in pianura sconta 1", BuildRules.pianura_discount(gs, larga, pianura), 1)
+	gs.tessere_usate[pianura] = true
+	_eq("  con la tessera girata non sconta", BuildRules.pianura_discount(gs, larga, pianura), 0)
+	# Con le tessere permanenti (v1.5) lo sconto non guarda la tessera.
+	CardDB.constants["tessere_una_volta_per_era"] = false
+	_eq("  con le tessere permanenti sconta comunque", BuildRules.pianura_discount(gs, larga, pianura), 1)
+	CardDB.constants["tessere_una_volta_per_era"] = true
+	CardDB.load_db(CardDB.DB_PATH)
+

@@ -6,9 +6,32 @@ extends RefCounted
 # ---- attivazione --------------------------------------------------
 # Il terreno produce per chi attiva; ogni edificio vivo paga il proprio proprietario;
 # se la colonna è un Centro Urbano, ogni proprietario vivo riceve 1 oro.
+# LE TESSERE UNA VOLTA PER ERA (punto 6 della proposta, registro 100): con la
+# costante `tessere_una_volta_per_era` (vera nel file v2) l'effetto di ogni
+# tessera scatta una volta per era, alla prima occasione, e poi la tessera
+# si gira: pianura, -1 Costruzione a un edificio da 2 o 3 caselle; fiume, +1
+# Denaro a chi la attiva; collina, +1 resistenza per l'era al primo edificio
+# costruito qui; bosco, -1 Costruzione a una ristrutturazione. Nella v1.5 le
+# stesse regole sono permanenti (e il fiume produce oro dalla base).
+static func tessere_una_volta(gs: GameState) -> bool:
+	return bool(CardDB.constants.get("tessere_una_volta_per_era", false))
+
+static func tessera_disponibile(gs: GameState, col: int) -> bool:
+	if col < 0 or col >= gs.tessere_usate.size(): return false
+	return not gs.tessere_usate[col]
+
+static func usa_tessera(gs: GameState, col: int, cosa: String) -> void:
+	if col < 0 or col >= gs.tessere_usate.size(): return
+	gs.tessere_usate[col] = true
+	gs.log_line("La tessera della colonna %d si gira: %s" % [col, cosa])
+
 static func activate(gs: GameState, player: int, col: int) -> void:
 	var g := gs.grid
 	var t_id: String = ["pianura", "fiume", "collina", "bosco"][g.terrains[col]]
+	# Fiume, una volta per era: +1 Denaro a chi attiva.
+	if tessere_una_volta(gs) and g.terrains[col] == Enums.Terrain.FIUME and tessera_disponibile(gs, col):
+		gs.players[player].gain(0, 1)
+		usa_tessera(gs, col, "+1 Denaro a giocatore %d" % player)
 	var base = CardDB.terrains[t_id]["base_production"]
 	# V2: la tessera produce secondo una curva per era (`base_production_by_era`,
 	# punto 7 della proposta). Nei dati v1.5 la chiave non c'e' e vale la base fissa.

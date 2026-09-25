@@ -65,7 +65,7 @@ def etichetta(regole):
     if regole.get("spianato") == "vale": pezzi.append("Scavo mai azzerato")
     if regole.get("scavo") == "scavatore": pezzi.append("Scavo a chi scava")
     if regole.get("sconto") == "altrui": pezzi.append("sconto solo sulle altrui")
-    if regole.get("disturbo", "0") != "0": pezzi.append(f"disturbo {regole['disturbo']}")
+    if regole.get("tessere") == "una_volta": pezzi.append("tessere una volta per era")
     if regole.get("verticalita") == "0/0/0/0": pezzi.append("senza Verticalità")
     if regole.get("premio", "nessuno") != "nessuno": pezzi.append(NOMI_PREMIO.get(regole["premio"], regole["premio"]))
     if regole.get("era5", "intero") != "intero": pezzi.append(f"era 5 {regole['era5']}")

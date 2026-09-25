@@ -115,16 +115,12 @@ func _ready() -> void:
 	# PERCHE' COSTRUIRE SOPRA GLI ALTRI (registro 87), tre manopole spente nei dati:
 	#   --scavo_scava 1    lo Scavo lo incassa chi seppellisce (il proprio vale 0)
 	#   --sconto_altrui 1  lo sconto macerie solo sulle rovine altrui
-	#   --disturbo N       i punti a chi sotterra un edificio altrui (regolamento: 1)
 	if args.has("scavo_scava"):
 		CardDB.constants["scavo_a_chi_scava"] = str(args["scavo_scava"]) != "0"
 		print("# scavo_a_chi_scava = %s" % str(bool(CardDB.constants["scavo_a_chi_scava"])))
 	if args.has("sconto_altrui"):
 		CardDB.constants["sconto_macerie_solo_altrui"] = str(args["sconto_altrui"]) != "0"
 		print("# sconto_macerie_solo_altrui = %s" % str(bool(CardDB.constants["sconto_macerie_solo_altrui"])))
-	if args.has("disturbo"):
-		CardDB.constants["disturbo_vp"] = int(args["disturbo"])
-		print("# disturbo_vp = %d" % int(args["disturbo"]))
 	# IL PREMIO DI SCAVO al posto della Verticalita' (registro 89):
 	#   --premio per_livello | piu_livello | per_livello_meno_uno
 	if args.has("premio"):
@@ -184,6 +180,11 @@ func _ready() -> void:
 			var kv := pezzo.split("=")
 			if kv.size() == 2: StrategyBot.spinte_override[kv[0].strip_edges()] = float(kv[1])
 		print("# spinte = %s" % str(StrategyBot.spinte_override))
+	# LE TESSERE UNA VOLTA PER ERA (`--tessere 0/1`, `tessere_una_volta_per_era`,
+	# registro 100): a 0 le regole delle tessere tornano permanenti come nella v1.5.
+	if args.has("tessere"):
+		CardDB.constants["tessere_una_volta_per_era"] = str(args["tessere"]) != "0"
+		print("# tessere_una_volta_per_era = %s" % str(bool(CardDB.constants["tessere_una_volta_per_era"])))
 	# I LAVORATORI PER ERA (`--lavoratori 5`, `workers_base`, 3 nei dati). Nel
 	# turno v2 ogni lavoratore e' UN'azione, non piu' un'attivazione piu'
 	# un'azione: con 3 il ritmo si dimezza (registro 93), e la manopola misura
@@ -378,7 +379,7 @@ func _stampa_vita(acc: Dictionary, quante: int, players: int, seme: int) -> void
 	var vt = CardDB.constants["verticality_vp"]
 	var scala: Array[String] = []
 	for i in 4: scala.append("%d" % int(vt[str(i + 1)]))
-	print("# partite=%d giocatori=%d seme_base=%d bot=%s verticalita=%s prosperita=%d rovina=%d binari=%s versione_bot=%d strategie=%d centro=%s rudere=%s spianato=%s scavo=%s sconto=%s disturbo=%d premio=%s dati=%s era5=%s tetto=%d turno=%s lavoratori=%d draft=%s sepolti=%s vetusta=%d protezione=%d scheletro=%s" % [
+	print("# partite=%d giocatori=%d seme_base=%d bot=%s verticalita=%s prosperita=%d rovina=%d binari=%s versione_bot=%d strategie=%d centro=%s rudere=%s spianato=%s scavo=%s sconto=%s premio=%s dati=%s era5=%s tetto=%d turno=%s lavoratori=%d draft=%s sepolti=%s vetusta=%d protezione=%d scheletro=%s tessere=%s" % [
 		quante, players, seme, "strategie" if _strategie else "caso",
 		"/".join(scala), int(CardDB.constants["prosperity"]["min_buildings"]),
 		int(CardDB.constants.get("rovina_gap", 2)),
@@ -390,7 +391,6 @@ func _stampa_vita(acc: Dictionary, quante: int, players: int, seme: int) -> void
 		"vale" if bool(CardDB.constants.get("spianare_conserva_scavo", false)) else "zero",
 		"scavatore" if bool(CardDB.constants.get("scavo_a_chi_scava", false)) else "proprietario",
 		"altrui" if bool(CardDB.constants.get("sconto_macerie_solo_altrui", false)) else "tutti",
-		int(CardDB.constants.get("disturbo_vp", 0)),
 		str(CardDB.constants.get("premio_scavo", "nessuno")),
 		str(CardDB.ruleset),
 		str(CardDB.constants.get("premio_era5", "intero")),
@@ -401,7 +401,8 @@ func _stampa_vita(acc: Dictionary, quante: int, players: int, seme: int) -> void
 		"si" if bool(CardDB.constants.get("personaggi_sepolti", true)) else "no",
 		int(CardDB.constants["vetusta_max"]),
 		int(CardDB.constants["protection_bonus"]),
-		str(CardDB.constants.get("scheletro_conta", "sotterrato"))])
+		str(CardDB.constants.get("scheletro_conta", "sotterrato")),
+		"una_volta" if bool(CardDB.constants.get("tessere_una_volta_per_era", false)) else "permanenti"])
 	var intestazione: Array[String] = ["id", "nome", "era", "classi", "larghezza",
 		"costo_pietra", "costo_oro", "resistenza", "rendita", "scavo", "lampo_carta",
 		"copie", "n", "ere_intatto", "ere_piedi", "n_rudere", "n_rovina", "n_sepolto",

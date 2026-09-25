@@ -57,7 +57,6 @@
     "spianare_conserva_scavo": false,
     "scavo_a_chi_scava": false,
     "sconto_macerie_solo_altrui": false,
-    "disturbo_vp": 0,
     "premio_scavo": "nessuno",
     "binari_liberi": true,
     "verticality_vp": {

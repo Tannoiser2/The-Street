@@ -72,9 +72,9 @@ Domanda per era (C / D / I): era 1: 13 / 0 / 5 · era 2: 25 / 0 / 6 · era 3: 22
 | Acquedotto | ingegneria | Fiume | 3 | 2/0/1 | 4 | 1 | 0 | 3 | — | 0 | — | **Colossale: 2 slot adiacenti (3 pagando +1 Costruzione; in 2 giocatori il terzo slot è vietato), almeno uno con fiume. Eco: +2 PV (lampo) se ancora in piedi nel Moderno.** | 3R | oggi: "Colossale: 2 slot adiacenti (3 pagando +1 pietra; in 2 giocatori il terzo slot è vietato), almeno uno con fiume. Eco: +2 PV (lampo) se ancora in piedi nel Moderno" |
 | Anfiteatro | cultura | qualsiasi | 3 | 4/0/1 | 5 | 2 | 0 | 6 | 1 D | 0 | — | Colossale: occupa 2 slot adiacenti, si attiva da entrambe le colonne e conta come strato in entrambe. Produce 1 oro a ogni attivazione — il Colosseo vende i biglietti. |  |  |
 | Castrum | militare | Pianura | 2 | 3/0/0 | 4 | 0 | 1 | 3 | — | 0 | — | +1 res ai tuoi edifici in questa colonna. |  |  |
-| Emporio | commercio | Fiume | 1 | 2/0/0 | 2 | 0 | 1 | 2 | 1 D | 0 | — | — |  |  |
+| Emporio | commercio | Fiume | 1 | 2/0/0 | 2 | 0 | 2 | 2 | 1 D | 0 | — | — |  | Lampo 1 → 2 (registro 100) |
 | Foro | commercio, civico | Pianura | 2 | 3/0/0 | 3 | 1 | 0 | 5 | 1 D | 0 | — | — |  |  |
-| Insulae | civico | Pianura | 1 | 2/0/0 | 2 | 0 | 1 | 2 | 1 C | 0 | — | — |  |  |
+| Insulae | civico | Pianura | 1 | 2/0/0 | 2 | 0 | 2 | 2 | 1 C | 0 | — | — |  | Lampo 1 → 2 (registro 100) |
 | Ponte | ingegneria | Fiume | 2 | 2/0/1 | 3 | 1 | 0 | 3 | — | 0 | — | Quartiere: +1 produzione agli edifici adiacenti. |  |  |
 | Sacello | religione | Collina | 1 | 0/0/1 | 2 | 0 | 1 | 3 | — | 0 | — | — |  |  |
 | Teatro | cultura | qualsiasi | 1 | 1/0/1 | 3 | 0 | 2 | 5 | — | 0 | — | — |  |  |
@@ -88,7 +88,7 @@ Domanda per era (C / D / I): era 1: 13 / 0 / 5 · era 2: 25 / 0 / 6 · era 3: 22
 |---|---|---|--:|--:|--:|--:|--:|--:|---|--:|--:|---|---|---|
 | Abbazia | religione, commercio | Bosco | 2 | 2/1/1 | 3 | 2 | 0 | 5 | — | 0 | — | — |  | Rendita 3 → 2 (registro 97: le carte care) |
 | Arsenale | militare | Fiume | 2 | 3/1/0 | 3 | 0 | 2 | 2 | — | 0 | — | Quartiere: i tuoi edifici Militari adiacenti +1 res. |  |  |
-| Borgo | civico | Pianura | 1 | 2/0/0 | 2 | 0 | 2 | 2 | 1 D | 0 | — | — |  |  |
+| Borgo | civico | Pianura | 1 | 2/0/0 | 2 | 0 | 3 | 2 | 1 D | 0 | — | — |  | Lampo 2 → 3 (registro 100) |
 | Cappella | religione | qualsiasi | 1 | 1/0/1 | 2 | 0 | 2 | 3 | — | 0 | — | — |  |  |
 | Castello | militare | Collina | 2 | 2/1/0 | 4 | 2 | 0 | 3 | — | 1 | — | — |  | Rendita 3 → 2 (registro 97) |
 | Chiesa | religione, cultura | qualsiasi | 1 | 2/0/1 | 3 | 2 | 0 | 3 | — | 0 | — | — |  |  |
@@ -97,19 +97,19 @@ Domanda per era (C / D / I): era 1: 13 / 0 / 5 · era 2: 25 / 0 / 6 · era 3: 22
 | Mulino | ingegneria, commercio | Pianura | 1 | 1/0/1 | 2 | 0 | 1 | 2 | 2 D | 0 | — | — |  |  |
 | Mura | militare | qualsiasi | 1 | 2/0/0 | 4 | 0 | 1 | 2 | — | 0 | — | Quartiere: +1 res agli edifici adiacenti (anche altrui). |  |  |
 | Ospedale dei pellegrini | civico | qualsiasi | 1 | 2/1/0 | 2 | 0 | 2 | 2 | — | 0 | — | **Quando lo attivi, +1 Denaro.** | LAV 3R | oggi: "Quando abiti qui, +1 oro" |
-| Torre civica | civico | qualsiasi | 1 | 2/0/0 | 3 | 0 | 2 | 2 | — | 0 | — | — |  |  |
+| Torre civica | civico | qualsiasi | 1 | 2/0/0 | 3 | 0 | 3 | 2 | — | 0 | — | — |  | Lampo 2 → 3 (registro 100) |
 
 ### Era 4
 
 | edificio | classi | terreno | slot | costo C/D/I | res | Rendita | Lampo | Scavo | produce | liv. | esaur. | testo | motivo | nota |
 |---|---|---|--:|--:|--:|--:|--:|--:|---|--:|--:|---|---|---|
 | Accademia | cultura | qualsiasi | 1 | 1/0/2 | 2 | 0 | 2 | 3 | — | 0 | — | — |  |  |
-| Banco | commercio | qualsiasi | 1 | 1/0/1 | 2 | 0 | 2 | 0 | 1 D | 0 | — | — |  |  |
+| Banco | commercio | qualsiasi | 1 | 1/0/1 | 2 | 0 | 3 | 0 | 1 D | 0 | — | — |  | Lampo 2 → 3 (registro 100) |
 | Bottega d'artista | cultura | qualsiasi | 1 | 1/0/1 | 2 | 0 | 2 | 2 | — | 0 | — | **I tuoi potenziamenti costano 1 in meno, nella loro risorsa.** | 3R | oggi: "I tuoi potenziamenti costano 1 oro in meno" — i potenziamenti pagano per famiglia: Arte in Idee, Struttura in Costruzione, il resto in Denaro |
 | Duomo | religione, cultura | qualsiasi | 2 | 3/1/2 | 4 | 2 | 0 | 5 | — | 2 | — | — |  | Rendita 4 → 2 (registro 97) |
 | Fortezza bastionata | militare, ingegneria | Collina | 2 | 3/1/1 | 5 | 2 | 0 | 2 | — | 1 | — | — |  | Rendita 3 → 2 (registro 97) |
 | Giardino all'italiana | cultura | Collina | 1 | 0/0/2 | 1 | 0 | 3 | 0 | — | 0 | — | Effimero per eccellenza: PV subito, difficilmente sopravvivrà. |  |  |
-| Loggia | civico | qualsiasi | 1 | 1/0/1 | 2 | 0 | 2 | 2 | — | 0 | — | — |  |  |
+| Loggia | civico | qualsiasi | 1 | 1/0/1 | 2 | 0 | 3 | 2 | — | 0 | — | — |  | Lampo 2 → 3 (registro 100) |
 | Osservatorio | ingegneria | Collina | 1 | 1/1/1 | 2 | 0 | 2 | 2 | — | 0 | — | Eco: +2 PV (lampo) se ancora in piedi a fine partita. |  |  |
 | Palazzo signorile | civico | Pianura | 1 | 2/1/1 | 3 | 0 | 3 | 3 | 1 I | 0 | — | — | 3R | produce 1 Idea al posto di 1 cultura (già nel file v2) |
 | Piazza monumentale | civico | Pianura | 2 | 2/1/1 | 3 | 2 | 0 | 3 | — | 1 | — | A fine partita: +1 PV per tuo edificio in cima adiacente. Richiede livello 1+. |  |  |
@@ -122,12 +122,12 @@ Domanda per era (C / D / I): era 1: 13 / 0 / 5 · era 2: 25 / 0 / 6 · era 3: 22
 |---|---|---|--:|--:|--:|--:|--:|--:|---|--:|--:|---|---|---|
 | Biblioteca | cultura | qualsiasi | 1 | 1/1/2 | 3 | 0 | 4 | 0 | — | 0 | — | +1 PV per classe diversa fra i tuoi edifici in questa colonna, Sotterrati inclusi. |  |  |
 | Caffè letterario | cultura | qualsiasi | 1 | 0/0/2 | 1 | 0 | 2 | 0 | — | 0 | — | Quartiere: +1 PV se adiacente a un edificio Cultura. |  |  |
-| Condominio | civico | qualsiasi | 1 | 1/0/1 | 2 | 0 | 2 | 0 | — | 0 | — | Economico: costruire il presente sopra il passato non è mai stato così facile. |  | resta: si costruisce sopra le rovine con lo sconto di metà resistenza (punto 10) |
+| Condominio | civico | qualsiasi | 1 | 1/0/1 | 2 | 0 | 3 | 0 | — | 0 | — | Economico: costruire il presente sopra il passato non è mai stato così facile. |  | resta: si costruisce sopra le rovine con lo sconto di metà resistenza (punto 10); Lampo 2 → 3 (registro 100) |
 | Fondazione d'arte | cultura | qualsiasi | 1 | 1/0/2 | 2 | 0 | 3 | 0 | — | 0 | — | I tuoi potenziamenti valgono +1 PV. |  |  |
 | Grattacielo | commercio | Pianura | 1 | 2/3/1 | 3 | 0 | 4 | 0 | — | 2 | — | Svettante: +1 PV per livello a cui è costruito. Quartiere: −1 PV agli edifici in cima adiacenti altrui, valutato a fine partita. Richiede livello 2+. |  |  |
 | Monumento ai caduti | militare, religione | qualsiasi | 1 | 1/1/1 | 3 | 0 | 2 | 0 | — | 0 | — | Sacrario: +1 PV per ogni altro tuo edificio Militare, in piedi o Sotterrato. |  |  |
 | Museo | cultura | qualsiasi | 1 | 1/1/2 | 3 | 0 | 4 | 0 | — | 1 | — | +2 PV per ogni edificio Sotterrato sotto di sé. Richiede livello 1+. |  |  |
-| Officina | ingegneria | qualsiasi | 1 | 1/0/1 | 2 | 0 | 2 | 0 | 2 D | 0 | — | — |  |  |
+| Officina | ingegneria | qualsiasi | 1 | 1/0/1 | 2 | 0 | 3 | 0 | 2 D | 0 | — | — |  | Lampo 2 → 3 (registro 100) |
 | Parco archeologico | cultura | qualsiasi | 2 | 1/0/2 | 2 | 0 | 2 | 0 | — | 0 | — | Finale: fino a 2 tuoi edifici non Sotterrati nelle colonne adiacenti valgono il loro Scavo come se lo fossero. |  |  |
 | Ponte in acciaio | ingegneria | Fiume | 2 | 1/2/1 | 4 | 0 | 4 | 0 | — | 0 | — | — |  |  |
 | Stazione | commercio, ingegneria | Pianura | 3 | 2/3/1 | 4 | 0 | 4 | 0 | 2 D | 1 | — | Colossale: 2 slot adiacenti, si attiva da entrambe le colonne. Produce 2 oro. Richiede livello 1+. |  |  |
@@ -136,15 +136,15 @@ Domanda per era (C / D / I): era 1: 13 / 0 / 5 · era 2: 25 / 0 / 6 · era 3: 22
 ## Le tessere terreno
 
 Si pescano a caso (punto 6); il mix garantisce il bosco: 2 giocatori 2 pianura, 1 fiume, 1 collina, 1 bosco; 3 giocatori 2 pianura, 2 fiume, 1 collina, 2 bosco; 4 giocatori 3 pianura, 2 fiume, 2 collina, 2 bosco.
-Ogni tessera produce per tipo, con una curva per era, a chi la attiva; l'effetto una volta per
-era è la proposta dell'audit (D20-D22), da decidere.
+Ogni tessera produce per tipo, con una curva per era, a chi la attiva, e ha un effetto che
+scatta **una volta per era** alla prima occasione, poi la tessera si gira (registro 100).
 
-| tessera | era 1 | era 2 | era 3 | era 4 | era 5 | effetto una volta per era (proposta) | oggi |
+| tessera | era 1 | era 2 | era 3 | era 4 | era 5 | regola (nel file v2) | oggi |
 |---|---|---|---|---|---|---|---|
-| Pianura | 1 C | 1 C + 1 D | 1 D | 2 D | 2 D | −1 Costruzione a un edificio da 2 o 3 caselle | oggi: −1 pietra permanente ai 2-3 caselle |
-| Fiume | 2 C | 2 C | 1 C | 1 C | 1 C | +1 Denaro all'attivazione | oggi: "unico terreno che produce oro", non più vero |
-| Collina | 2 C | 2 C | 1 C | 1 C | 1 C | +1 res a un edificio qui, per l'evento | oggi: +1 res permanente a chi costruisce qui |
-| Bosco | 1 I | 2 I | 2 I | 3 I | 3 I | −1 Costruzione a una ristrutturazione | oggi: Vetustà massima +4 (la Vetustà non c'è più) e restauro −1 |
+| Pianura | 1 C | 1 C + 1 D | 1 D | 2 D | 2 D | Denaro, poco all'inizio e molto dopo. Una volta per era: un edificio da 2 o 3 caselle costa 1 Costruzione in meno. | −1 pietra permanente agli edifici da 2 o 3 caselle |
+| Fiume | 2 C | 2 C | 1 C | 1 C | 1 C | Costruzione, tanta all'inizio e poco dopo. Una volta per era: +1 Denaro a chi la attiva. Requisito 'fiume' stretto. | "unico terreno che produce oro" (1 pietra 1 oro) |
+| Collina | 2 C | 2 C | 1 C | 1 C | 1 C | Costruzione come il fiume. Una volta per era: il primo edificio costruito qui ha +1 resistenza per l'era. | +1 res permanente a ogni edificio costruito qui |
+| Bosco | 1 I | 2 I | 2 I | 3 I | 3 I | Idee, in aumento con le ere. Una volta per era: una ristrutturazione costa 1 Costruzione in meno. | Vetustà massima +4 (la Vetustà non c'è più) e restauro −1 pietra |
 
 ## I 26 Personaggi
 
@@ -296,7 +296,7 @@ Due a testa, se ne tiene una segreta; si conta a fine partita.
 
 ## Quello che non sta su una carta
 
-- **"+1 per ogni edificio altrui sotterrato"** (il disturbo): mai contato né dal motore né dall'oracolo; `disturbo_vp` è 0 finché il designer non decide (registro 88).
+- **"+1 per ogni edificio altrui sotterrato"** (il disturbo): tolto dal designer (registro 100), non c'è più né nel regolamento né nel motore.
 - **La Vetustà non esiste più** (registro 95): niente cubetti a chi regge l'evento, la Rendita è solo quella stampata. Colosseo, Il Silvicoltore e Speculazione edilizia la contavano e sono stati rifatti (registro 99, nel file v2); il bosco perde il +4.
 - **"Cultura"**: oggi è un canale di punti e il nome di una classe; con le Idee come risorsa i punti si chiamano PV e Cultura resta la classe.
 - **"Protetto"**: come oggi, il lavoratore messo sopra un proprio edificio in piedi della colonna attivata (+2); i tre protettori del draft si legano al primo edificio costruito nell'era.

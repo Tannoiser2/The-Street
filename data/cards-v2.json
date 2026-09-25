@@ -59,7 +59,6 @@
     "spianare_conserva_scavo": false,
     "scavo_a_chi_scava": false,
     "sconto_macerie_solo_altrui": false,
-    "disturbo_vp": 0,
     "premio_scavo": "per_livello",
     "binari_liberi": true,
     "verticality_vp": {
@@ -99,7 +98,8 @@
     "draft_personaggi": true,
     "personaggi_sepolti": false,
     "scheletro_potenziamento": true,
-    "scheletro_conta": "sempre"
+    "scheletro_conta": "sempre",
+    "tessere_una_volta_per_era": true
   },
   "terrains": [
     {
@@ -109,7 +109,7 @@
         "oro": 0
       },
       "identity": "sviluppo",
-      "rule": "Denaro, poco all'inizio e molto dopo. Edifici da 2 o 3 caselle costano 1 in meno.",
+      "rule": "Denaro, poco all'inizio e molto dopo. Una volta per era: un edificio da 2 o 3 caselle costa 1 Costruzione in meno.",
       "base_production_by_era": {
         "1": {
           "pietra": 1,
@@ -145,7 +145,7 @@
         "oro": 1
       },
       "identity": "liquidita",
-      "rule": "Costruzione, tanta all'inizio e poco dopo. Requisito 'fiume' stretto.",
+      "rule": "Costruzione, tanta all'inizio e poco dopo. Una volta per era: +1 Denaro a chi la attiva. Requisito 'fiume' stretto.",
       "base_production_by_era": {
         "1": {
           "pietra": 2,
@@ -181,7 +181,7 @@
         "oro": 0
       },
       "identity": "monumentalita",
-      "rule": "Costruzione come il fiume, e ogni edificio costruito qui ha +1 resistenza permanente.",
+      "rule": "Costruzione come il fiume. Una volta per era: il primo edificio costruito qui ha +1 resistenza per l'era.",
       "base_production_by_era": {
         "1": {
           "pietra": 2,
@@ -217,7 +217,7 @@
         "oro": 0
       },
       "identity": "conservazione",
-      "rule": "Idee, in aumento con le ere. Ristrutturazione -1.",
+      "rule": "Idee, in aumento con le ere. Una volta per era: una ristrutturazione costa 1 Costruzione in meno.",
       "base_production_by_era": {
         "1": {
           "pietra": 0,
@@ -876,7 +876,7 @@
       "flexible": true,
       "resistance": 2,
       "rendita": 0,
-      "lampo": 1,
+      "lampo": 2,
       "scavo": 2,
       "level_required": 0,
       "production": {
@@ -904,7 +904,7 @@
       "flexible": false,
       "resistance": 2,
       "rendita": 0,
-      "lampo": 1,
+      "lampo": 2,
       "scavo": 2,
       "level_required": 0,
       "production": {
@@ -1037,7 +1037,7 @@
       "flexible": false,
       "resistance": 2,
       "rendita": 0,
-      "lampo": 2,
+      "lampo": 3,
       "scavo": 2,
       "level_required": 0,
       "production": {
@@ -1134,7 +1134,7 @@
       "flexible": false,
       "resistance": 3,
       "rendita": 0,
-      "lampo": 2,
+      "lampo": 3,
       "scavo": 2,
       "level_required": 0,
       "production": {
@@ -1488,7 +1488,7 @@
       "flexible": false,
       "resistance": 2,
       "rendita": 0,
-      "lampo": 2,
+      "lampo": 3,
       "scavo": 2,
       "level_required": 0,
       "production": {
@@ -1564,7 +1564,7 @@
       "flexible": true,
       "resistance": 2,
       "rendita": 0,
-      "lampo": 2,
+      "lampo": 3,
       "scavo": 0,
       "level_required": 0,
       "production": {
@@ -1847,7 +1847,7 @@
       "flexible": false,
       "resistance": 2,
       "rendita": 0,
-      "lampo": 2,
+      "lampo": 3,
       "scavo": 0,
       "level_required": 0,
       "production": {
@@ -1922,7 +1922,7 @@
       "flexible": true,
       "resistance": 2,
       "rendita": 0,
-      "lampo": 2,
+      "lampo": 3,
       "scavo": 0,
       "level_required": 0,
       "production": {
