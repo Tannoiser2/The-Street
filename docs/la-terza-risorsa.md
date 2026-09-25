@@ -474,6 +474,47 @@ La tabella v2 (`StrategyBot.SPINTE_V2`): protezione attesa 2; la Scavo a terra �
 Lampo a 27 restano un po' fuori dall'errore: la forbice si è chiusa da 57-17 a 40-27, e il
 resto è la natura delle carte (la Rendita costruisce poco e caro, il Lampo tanto e fragile).
 
+## Decima misura: le tessere una volta per era, via il disturbo, più Lampo a otto carte
+
+Tre decisioni del designer (registro 100). **Le tessere** (punto 6 della proposta, D20-D22): la
+produzione per era resta, l'abilità permanente diventa un effetto che scatta una volta per era
+alla prima occasione, poi la tessera si gira e si rigira a inizio era (`tessere_una_volta_per_era`,
+`--tessere 0` la spegne): pianura −1 Costruzione a una carta da 2 o 3 caselle, fiume +1 Denaro a
+chi la attiva, collina +1 resistenza per l'era al primo edificio costruito qui, bosco −1
+Costruzione a una ristrutturazione. **Via il "+1 per il disturbo"**, mai contato: il lotto di
+riferimento v1.5 esce identico. **Più Lampo** (+1) a otto carte a solo Lampo (Insulae, Emporio,
+Borgo, Torre civica, Loggia, Banco, Condominio, Officina), per la strategia Lampo che era la più
+debole. Stessi semi, una decisione alla volta:
+
+| per giocatore | F la v2 di prima | Ga Lampo +1, tessere permanenti | **Gb + tessere una volta per era** |
+|---|--:|--:|--:|
+| PV medi | 86,8 | 89,1 | 89,0 |
+| Lampo | 19,4 | 22,1 | 22,2 |
+| Rendita / Scavo / Scheletri | 9,9 / 16,4 / 10,2 | 9,8 / 16,6 / 9,9 | 9,6 / 16,7 / 9,8 |
+| costruiti | 13,8 | 14,0 | 14,0 |
+| altezza massima | 4,57 | 4,59 | 4,57 |
+| basi proprie / altrui | 6,0 / 2,3 | 6,1 / 2,3 | 6,1 / 2,4 |
+| senza l'era 5 cambierebbe il vincitore | 11 % | 15 % | 14 % |
+| vince Rendita / Lampo | 40 / 27 % | 38 / 24 % | 37 / 23 % |
+| vince Obiettivi / Scavo / Bilanciata / Continuità | 37 / 32 / 32 / 31 % | 41 / 33 / 30 / 34 % | 36 / 36 / 34 / 35 % |
+
+Per partita (2 000 `--vita`, F → Gb): costruiti 41,5 → 42,1; in piedi a fine 14,0 → 13,6; sepolti
+47 → 47 %; Lampo 58 → 67; il resto uguale.
+
+**1. Le tessere una volta per era non cambiano la partita.** Gb contro Ga: stessi punti, stessa
+città, stesse vittorie entro l'errore. È il risultato giusto: l'effetto una tantum toglie una
+regola permanente che pesava poco (uno sconto, un +1) e mette al suo posto una scelta di
+tempo (chi attiva per primo il fiume prende il Denaro), senza spostare l'economia. Le tessere
+hanno ora un motivo per essere pescate a caso: cambiano dove conviene andare per primi.
+
+**2. Più Lampo a otto carte alza il Lampo di tutti, non della strategia Lampo.** Ga contro F:
++2,7 punti di Lampo a giocatore per ogni strategia, perché quelle otto carte le costruiscono
+tutti; la strategia Lampo passa da 29,5 a 33 di Lampo ma resta ultima (86,7 punti contro 88-91),
+al 23-24 % di vittorie. Il suo problema non è il valore delle carte: è che costruisce 16 edifici
+a bassa resistenza che cadono (Rendita 3, Scheletri 8, contro 9-16 e 10 delle altre). Le otto
+carte restano a +1 come deciso; se il Lampo deve vincere di più, la strada è il bot (che
+potenzi e protegga come gli altri), non le carte.
+
 ## Come rifare il conto
 
 ```bash
@@ -511,4 +552,7 @@ python3 tools/confronta_torneo.py Z.csv Y2.csv
 # nona misura: la tabella delle spinte v2 sta nel bot; `--spinta chiave=valore,...` la sovrascrive
 godot --headless res://scenes/audit_partita.tscn -- --players 3 --games 750 --seed 700000 --dati data/cards-v2.json > F.csv
 python3 tools/confronta_strategie.py F.csv
+# decima misura: le tessere una volta per era e il Lampo stanno nel file v2; `--tessere 0` rimette le regole permanenti
+godot --headless res://scenes/audit_partita.tscn -- --players 3 --games 750 --seed 700000 --dati data/cards-v2.json --tessere 0 > Ga.csv
+python3 tools/confronta_torneo.py F.csv Ga.csv Gb.csv
 ```
