@@ -365,8 +365,9 @@ static func _opzioni(gs: GameState, player: int, col: int) -> Array:
 		if v.legale and v.pagabile(p): out.append(v)
 	for v in AvailableActions.restauri(gs, player, col):
 		if v.legale and v.pagabile(p): out.append(v)
-	for v in AvailableActions.reclutamenti(gs, player, col):
-		if v.legale and v.pagabile(p): out.append(v)
+	if not ctl_draft():
+		for v in AvailableActions.reclutamenti(gs, player, col):
+			if v.legale and v.pagabile(p): out.append(v)
 	var d := AvailableActions.dinastia(gs, player)
 	if d.legale and d.pagabile(p): out.append(d)
 	return out
@@ -442,6 +443,33 @@ static func rendite_future(res: int, rendita: int, era: int) -> float:
 		totale += float(rendita + vet)
 	return totale
 
+# LE SPINTE DELLE STRATEGIE, in tabella (registro 98): nella v1.5 sono
+# quelle tarate a suo tempo; nella v2 le sei strategie vanno ritarate sul
+# lotto di riferimento, e la taratura si fa misurando, con la manopola
+# `--spinta chiave=valore,...` dell'audit, poi si scrive qui.
+# `protezione_attesa` e' la resistenza in piu' che il valutatore comune si
+# aspetta dai lavoratori a venire quando stima le rendite future di un
+# edificio: con quattro lavoratori (v2) quasi ogni edificio che conta viene
+# protetto, e stimarlo scoperto faceva sembrare la Rendita meno di quello
+# che rende (la strategia Rendita vinceva il 55% proprio perche' ci credeva
+# di piu' del valutatore).
+const SPINTE_V1 := {"rendita_per_era": 0.9, "rendita_zero": -1.5, "lampo": 1.6, "lampo_zero": -1.0,
+	"scavo_premio": 0.8, "scavo_terra": -1.5, "scavo_terra_scavo": 0.0, "protezione_attesa": 0.0}
+# La tabella v2 e' il lotto Q2 della taratura (registro 98): protezione
+# attesa 2 (il valutatore conta l'edificio protetto), la Scavo costruisce a
+# terra le carte con lo Scavo alto invece di passare; le altre spinte
+# restano quelle della v1.5, perche' abbassarle non aiutava.
+const SPINTE_V2 := {"rendita_per_era": 0.9, "rendita_zero": -1.5, "lampo": 1.6, "lampo_zero": -1.0,
+	"scavo_premio": 0.8, "scavo_terra": -0.5, "scavo_terra_scavo": 0.5, "protezione_attesa": 2.0}
+static var spinte_override := {}
+
+static func spinte() -> Dictionary:
+	var base := SPINTE_V2 if e_v2() else SPINTE_V1
+	if spinte_override.is_empty(): return base
+	var out := base.duplicate()
+	for k in spinte_override: out[k] = spinte_override[k]
+	return out
+
 static func _valore_costruzione(gs: GameState, p: PlayerState, v, strategia: String,
 		r: Vector2, dett := {}) -> float:
 	var par: Dictionary = v.parametri
@@ -454,7 +482,7 @@ static func _valore_costruzione(gs: GameState, p: PlayerState, v, strategia: Str
 
 	var q := float(d["lampo"])
 	if q != 0.0: dett["lampo subito"] = q
-	var rend := rendite_future(res, int(d["rendita"]), gs.era)
+	var rend := rendite_future(res + int(round(float(spinte()["protezione_attesa"]))), int(d["rendita"]), gs.era)
 	if rend != 0.0: dett["rendite future"] = rend
 	q += rend
 	var prod: Dictionary = d.get("production", {})
@@ -527,19 +555,21 @@ static func _valore_costruzione(gs: GameState, p: PlayerState, v, strategia: Str
 	# bastava - il valutatore comune vale molto di piu' della spinta, e le
 	# cinque finivano per giocare la stessa partita.
 	var prima_della_spinta := q
+	var sp := spinte()
 	match strategia:
 		"rendita":
-			q += float(d["rendita"]) * float(rimaste) * 0.9
-			if int(d["rendita"]) == 0: q -= 1.5
+			q += float(d["rendita"]) * float(rimaste) * float(sp["rendita_per_era"])
+			if int(d["rendita"]) == 0: q += float(sp["rendita_zero"])
 		"lampo":
-			q += float(d["lampo"]) * 1.6
-			if int(d["lampo"]) == 0: q -= 1.0
+			q += float(d["lampo"]) * float(sp["lampo"])
+			if int(d["lampo"]) == 0: q += float(sp["lampo_zero"])
 		"scavo":
 			if e_v2():
 				# V2: lo Scavo lo incassa chi scava, sul momento. La strategia
-				# cerca le pile ricche e alte, e non vuole restare a terra.
-				q += premio_stimato * 0.8
-				if not sopra: q -= 1.5
+				# cerca le pile ricche e alte; a terra costruisce le carte con
+				# lo Scavo alto, che sepolte pagano.
+				q += premio_stimato * float(sp["scavo_premio"])
+				if not sopra: q += float(sp["scavo_terra"]) + float(d["scavo"]) * float(sp["scavo_terra_scavo"])
 			else:
 				q += float(d["scavo"]) * 0.9 + (2.0 if sopra else 0.0)
 				if int(d["scavo"]) == 0: q -= 1.0
@@ -612,7 +642,17 @@ static func _valore_potenziamento(gs: GameState, p: PlayerState, v, dett := {}) 
 		2.2 if vive else 0.8
 	if b.rendita_value() > 0:
 		dett["rendita dell'ospite"] = float(b.rendita_value()) * 0.3
-	return (2.2 if vive else 0.8) + float(b.rendita_value()) * 0.3
+	var q := (2.2 if vive else 0.8) + float(b.rendita_value()) * 0.3
+	# Lo scheletro del potenziamento (registro 95): 6 meno l'era se l'edificio
+	# finira' sotterrato, contato come una possibilita', come per i Personaggi.
+	if (bool(CardDB.constants.get("scheletro_potenziamento", false)) or bool(CardDB.constants.get("turno_v2", false))) \
+			and gs.era <= 4 and b.buried_character == "":
+		# Se conta comunque ("sempre") sono punti quasi sicuri; se conta
+		# solo da sotterrato, una possibilita'.
+		var peso := 0.8 if str(CardDB.constants.get("scheletro_conta", "sotterrato")) == "sempre" else 0.3
+		q += peso * float(6 - gs.era)
+		dett["lo scheletro vale %d" % (6 - gs.era)] = peso * float(6 - gs.era)
+	return q
 
 static func _valore_restauro(gs: GameState, p: PlayerState, v, dett := {}) -> float:
 	var b := _per_uid(gs, int(v.parametri["uid"]))

@@ -93,9 +93,10 @@ static func quote_restore(gs: GameState, player: int, target: Building) -> Actio
 		return ActionQuote.no("nessun rudere bersaglio")
 	if target.is_buried:
 		return ActionQuote.no("l'edificio e' sotterrato")
-	if bool(CardDB.constants.get("turno_v2", false)):
-		# V2 (D13): si ristruttura una PROPRIA rovina esposta. Niente furto:
-		# senza rudere ogni edificio caduto sarebbe rubabile.
+	if bool(CardDB.constants.get("senza_rudere", false)):
+		# SENZA RUDERE (D13): si ristruttura una PROPRIA rovina esposta. Niente
+		# furto: senza rudere ogni edificio caduto sarebbe rubabile. Dipende
+		# dagli stati, non dal turno: vale con tutti e due i turni.
 		if target.state != Enums.BuildingState.ROVINA:
 			return ActionQuote.no("non e' una rovina")
 		if target.owner != player:

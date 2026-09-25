@@ -1,7 +1,7 @@
 {
  "meta": {
   "origine": "tools/proponi_costi_v2.py",
-  "regole": "docs/proposte/costi-tre-risorse.md",
+  "regole": "docs/carte-v2.md",
   "risorse": [
    "costruzione",
    "denaro",

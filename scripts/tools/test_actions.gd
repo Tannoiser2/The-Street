@@ -37,6 +37,7 @@ func _ready() -> void:
 	_run("il canone delle strategie segue il file dati", _test_canone_v2)
 	_run("il turno v2: un'azione per turno, il lavoratore dove agisce", _test_turno_v2)
 	_run("il draft dei Personaggi a inizio era (v2)", _test_draft_v2)
+	_run("v2: niente scheletri dal draft, niente Vetusta' (registro 95)", _test_senza_vetusta_v2)
 	print("\n%d superati, %d falliti" % [_passed, _failed])
 	get_tree().quit(0 if _failed == 0 else 1)
 
@@ -1153,7 +1154,10 @@ func _test_canone_v2() -> void:
 func _test_turno_v2() -> void:
 	if not FileAccess.file_exists("res://data/cards-v2.json"): return
 	CardDB.load_db("res://data/cards-v2.json")
-	_ok("il file v2 accende il turno v2", bool(CardDB.constants.get("turno_v2", false)))
+	# Dal registro 94 il file v2 gioca il turno a quattro lavoratori: il turno
+	# a un'azione resta una manopola, e qui si accende.
+	CardDB.constants["turno_v2"] = true
+	_ok("la manopola accende il turno v2", bool(CardDB.constants.get("turno_v2", false)))
 	var ctl := _game(3, 990)
 	var gs := ctl.gs
 	# Prima il draft dei Personaggi (v2): qui si prende il primo che c'e'.
@@ -1235,10 +1239,13 @@ func _test_draft_v2() -> void:
 	_eq("finito il draft si gioca", gs.phase, Enums.Phase.PIAZZA)
 	_eq("  e parte il primo dell'ordine", gs.current_index, int(gs.turn_order[0]))
 	_eq("  con la fila scesa a 2", gs.char_row.size(), 2)
+	_eq("  con quattro lavoratori (registro 94)", primo.workers, 4)
+	# Turno v1.5: il lavoratore attiva la colonna, poi si agisce li' o accanto.
+	_ok("  il primo drafter attiva la colonna 1", ctl.place_worker(1))
 	_ok("  reclutare non e' piu' un'azione", not ctl.recruit(gs.char_row[0], null))
 	var costruito: Building = null
 	for card_id in gs.market.duplicate():
-		for c in gs.grid.n_cols:
+		for c in range(0, 3):
 			if ctl.build(card_id, c, false):
 				for b in gs.grid.buildings:
 					if b.owner == primo.index: costruito = b
@@ -1246,8 +1253,9 @@ func _test_draft_v2() -> void:
 		if costruito != null: break
 	_ok("il primo drafter costruisce", costruito != null)
 	if costruito != null:
-		_eq("  e il Capotribu' protegge l'edificio nuovo (+2 +1)", costruito.protection,
-			int(CardDB.constants["protection_bonus"]) + 1)
+		# Nel turno a quattro lavoratori il +2 lo da' solo il lavoratore messo
+		# sopra un proprio edificio in piedi: qui l'edificio e' nuovo, resta il +1.
+		_eq("  e il Capotribu' protegge l'edificio nuovo (+1)", costruito.protection, 1)
 		_eq("  legato a quell'edificio", int(primo.character_targets.get("pe_capotribu", -1)), costruito.uid)
 	var finite := 0
 	var draftati := 0
@@ -1262,3 +1270,90 @@ func _test_draft_v2() -> void:
 	_eq("3 partite del bot casuale arrivano in fondo", finite, 3)
 	_ok("  con Personaggi draftati (%d)" % draftati, draftati >= 30)
 	CardDB.load_db(CardDB.DB_PATH)
+
+
+# Registro 95: il Personaggio del draft non si seppellisce a fine era, e la
+# Vetusta' non esiste (tetto 0). Con i dati v1.5 tutto come prima.
+func _test_senza_vetusta_v2() -> void:
+	if not FileAccess.file_exists("res://data/cards-v2.json"): return
+	CardDB.load_db("res://data/cards-v2.json")
+	_eq("nel file v2 la Vetusta' ha tetto 0", int(CardDB.constants["vetusta_max"]), 0)
+	_ok("  e i Personaggi non si seppelliscono", not bool(CardDB.constants.get("personaggi_sepolti", true)))
+	var ctl := _game(3, 990)
+	var gs := ctl.gs
+	while not gs.pending_choice.is_empty():
+		ctl.choose(int((gs.pending_choice["options"] as Array)[0]))
+	var p := gs.current_player()
+	_eq("il primo ha il suo Personaggio", p.specialized_characters.size(), 1)
+	_ok("  e attiva la colonna 1", ctl.place_worker(1))
+	var costruito: Building = null
+	# Si costruisce ACCANTO alla colonna attivata: cosi' piu' tardi, nella
+	# stessa era, un altro lavoratore puo' attivare la colonna dell'edificio
+	# e potenziarlo (un proprio lavoratore per colonna).
+	for card_id in gs.market.duplicate():
+		for c in [0, 2]:
+			if ctl.build(card_id, c, false):
+				for b in gs.grid.buildings:
+					if b.owner == p.index: costruito = b
+				break
+		if costruito != null: break
+	_ok("  e costruisce accanto", costruito != null)
+	if costruito == null:
+		CardDB.load_db(CardDB.DB_PATH)
+		return
+	costruito.bonus_res += 10                     # regge l'evento di sicuro
+	EraRules.resolve_event(gs)
+	_eq("regge l'evento senza prendere Vetusta'", costruito.vetusta, 0)
+	EraRules.bury_characters(gs)
+	_eq("a fine era il Personaggio non finisce sotto l'edificio", costruito.buried_character, "")
+	# Lo scheletro lo lascia il potenziamento: il lavoratore resta sotto.
+	_ok("il file v2 accende lo scheletro del potenziamento", bool(CardDB.constants.get("scheletro_potenziamento", false)))
+	var chi := costruito.owner
+	var potenziato := false
+	var guard := 0
+	while not potenziato and guard < 60 and gs.phase != Enums.Phase.FINE_PARTITA:
+		guard += 1
+		while not gs.pending_choice.is_empty():
+			ctl.choose(int((gs.pending_choice["options"] as Array)[0]))
+		var g := gs.current_player()
+		if g.index == chi and gs.phase == Enums.Phase.PIAZZA and costruito.is_alive():
+			g.pietra = 5; g.oro = 5; g.idee = 5
+			if ctl.place_worker(costruito.col_from):
+				for upg_id in gs.upg_row.duplicate():
+					if ctl.upgrade(upg_id, costruito):
+						potenziato = true
+						break
+				if not potenziato: ctl.pass_action()
+				continue
+		StrategyBot.play_turn(ctl)
+	_ok("il proprietario potenzia l'edificio", potenziato)
+	if potenziato:
+		_eq("  e il lavoratore resta sotto come scheletro", costruito.buried_character, "lavoratore")
+		# Registro 96: `scheletro_conta` "sempre" paga lo scheletro anche se
+		# l'edificio sta in piedi; "sotterrato" (la regola di sempre) no.
+		var chi_p: PlayerState = gs.players[chi]
+		var prima := chi_p.vp
+		CardDB.constants["scheletro_conta"] = "sotterrato"
+		Scoring._skeletons(gs)
+		_eq("in piedi, lo scheletro non paga (sotterrato)", chi_p.vp, prima)
+		CardDB.constants["scheletro_conta"] = "sempre"
+		Scoring._skeletons(gs)
+		_eq("  ma con \"sempre\" paga 6 meno l'era", chi_p.vp, prima + 6 - costruito.buried_character_era)
+	CardDB.load_db(CardDB.DB_PATH)
+	# Con la v1.5 la sepoltura c'e' ancora.
+	var c1 := _game(2, 7)
+	var p1 := c1.gs.current_player()
+	p1.specialized_characters.append("pe_sciamano")
+	_ok("v1.5: si costruisce", c1.place_worker(0) and _costruisci_qualcosa(c1, 0))
+	var mio: Building = null
+	for b in c1.gs.grid.buildings:
+		if b.owner == p1.index: mio = b
+	if mio != null:
+		EraRules.bury_characters(c1.gs)
+		_eq("  e il Personaggio si seppellisce come sempre", mio.buried_character, "pe_sciamano")
+
+func _costruisci_qualcosa(ctl: GameController, col: int) -> bool:
+	for card_id in ctl.gs.market.duplicate():
+		for c in range(maxi(0, col - 1), mini(ctl.gs.grid.n_cols, col + 2)):
+			if ctl.build(card_id, c, false): return true
+	return false

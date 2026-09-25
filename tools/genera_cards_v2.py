@@ -33,11 +33,13 @@ REGOLE = {
     "fiume": "Costruzione, tanta all'inizio e poco dopo. Requisito 'fiume' stretto.",
     "collina": "Costruzione come il fiume, e ogni edificio costruito qui ha +1 resistenza permanente.",
     "pianura": "Denaro, poco all'inizio e molto dopo. Edifici da 2 o 3 caselle costano 1 in meno.",
-    "bosco": "Idee, in aumento con le ere. Vetusta massima +4 e ristrutturazione -1.",
+    "bosco": "Idee, in aumento con le ere. Ristrutturazione -1.",
 }
 MIX = {"2": {"pianura": 2, "fiume": 1, "collina": 1, "bosco": 1},
        "3": {"pianura": 2, "fiume": 2, "collina": 1, "bosco": 2},
        "4": {"pianura": 3, "fiume": 2, "collina": 2, "bosco": 2}}
+
+RENDITA_TETTO = 2
 
 v2 = json.loads(json.dumps(base))
 v2["meta"]["ruleset"] = "v2-tre-risorse"
@@ -47,6 +49,10 @@ for b in v2["buildings"]:
     b["cost"] = {"pietra": c["costruzione"], "oro": c["denaro"], "idee": c["idee"]}
     p = per_id[b["id"]]["production"]
     b["production"] = {"pietra": p["costruzione"], "oro": p["denaro"], "cultura": 0, "idee": p["idee"]}
+    # LA RENDITA DELLE CARTE CARE (registro 97): tetto a 2. Abbazia, Castello,
+    # Fortezza bastionata, Ponte monumentale (3) e Duomo (4) scendono a 2: la
+    # strategia Rendita vinceva il 57% delle partite, con il tetto il 49%.
+    b["rendita"] = min(int(b["rendita"]), RENDITA_TETTO)
 for t in v2["terrains"]:
     t["base_production_by_era"] = CURVA[t["id"]]
     t["rule"] = REGOLE[t["id"]]
@@ -78,15 +84,32 @@ v2["constants"]["spianare_conserva_scavo"] = False     # lo spianato vale 0 (ter
 v2["constants"]["verticality_vp"] = {"1": 0, "2": 0, "3": 0, "4": 0}   # via la Verticalita'
 v2["constants"]["premio_scavo"] = "per_livello"        # S x L a chi costruisce sopra
 v2["constants"]["premio_era5"] = "dimezzato"           # la correzione all'ultima era
-# IL TURNO V2 (registro 93): un'azione per turno, il lavoratore va dove agisce;
-# passare incassa 1 Costruzione piu' 1 risorsa a scelta (D14).
-v2["constants"]["turno_v2"] = True
+# IL TURNO (registro 94): decisione del designer dopo la misura del turno a
+# un'azione (registro 93, `turno_v2`, che resta come manopola): QUATTRO
+# lavoratori, e ogni lavoratore attiva la colonna e poi fa un'azione
+# (costruire, potenziare, ristrutturare), come nella v1.5. Passare incassa
+# 1 Costruzione piu' 1 risorsa a scelta solo nel turno a un'azione (D14).
+v2["constants"]["turno_v2"] = False
+v2["constants"]["workers_base"] = 4
 v2["constants"]["passa_incasso_pietra"] = 1
 v2["constants"]["passa_incasso_scelta"] = 1
 # IL DRAFT DEI PERSONAGGI (punto 8, registro 93): a inizio era, in ordine di
 # turno, uno a testa fra tutti quelli dell'era, gratis e senza lavoratore.
 # Reclutare come azione sparisce.
 v2["constants"]["draft_personaggi"] = True
+# REGISTRO 95: il Personaggio del draft non si seppellisce a fine era (niente
+# scheletri regalati), e la Vetusta' non esiste piu': il tetto a 0 la spegne
+# senza toccare il motore. Colosseo, Il Silvicoltore e Speculazione edilizia
+# la nominano e vanno rifatti (docs/carte-v2.md).
+v2["constants"]["personaggi_sepolti"] = False
+# Gli scheletri restano: "se scelgo il potenziamento il lavoratore genera uno
+# scheletro" (punto 8, registro 95): 6 meno l'era se l'edificio finisce sotterrato.
+v2["constants"]["scheletro_potenziamento"] = True
+# Registro 96: lo scheletro conta SEMPRE, comunque finisca l'edificio (6 meno
+# l'era): cosi' potenziare e' una scelta, non un resto.
+v2["constants"]["scheletro_conta"] = "sempre"
+v2["constants"]["vetusta_max"] = 0
+v2["constants"]["vetusta_max_bosco"] = 0
 out = os.path.join(RADICE, "data/cards-v2.json")
 json.dump(v2, open(out, "w", encoding="utf-8"), indent=2, ensure_ascii=False)
 open(out, "a").write("\n")

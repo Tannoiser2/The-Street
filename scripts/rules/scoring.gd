@@ -137,9 +137,14 @@ static func _scavo(gs: GameState) -> void:
 			b.rende("scavo", disturbo)
 
 # Personaggi sepolti (ere 1-4): valgono 6 - era se il loro edificio è sotterrato.
+# `scheletro_conta` (registro 96): "sotterrato" e' la regola di sempre;
+# "sempre" paga lo scheletro comunque finisca l'edificio (l'artista viene
+# ricordato anche se la sua casa sta in piedi), una prova per dare piu' peso
+# agli scheletri del potenziamento.
 static func _skeletons(gs: GameState) -> void:
+	var sempre := str(CardDB.constants.get("scheletro_conta", "sotterrato")) == "sempre"
 	for b in gs.grid.buildings:
-		if b.buried_character != "" and b.is_buried:
+		if b.buried_character != "" and (b.is_buried or sempre):
 			gs.players[b.owner].add_vp("scheletri", 6 - b.buried_character_era)
 			b.rende("scheletri", 6 - b.buried_character_era)
 

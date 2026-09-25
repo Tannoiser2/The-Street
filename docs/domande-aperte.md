@@ -1565,7 +1565,7 @@ dato è stato importato da lì. Ma due confronti fra ciò che è stampato e
     per tipo con la curva dell'audit (fiume e collina Costruzione 2/2/1/1/1,
     pianura Denaro 0/1/1/2/2 piu' 1 Costruzione nelle ere 1-2, bosco Idee
     1/2/2/3/3) e il mix garantisce il bosco. Tabella e regole in
-    `proposte/costi-tre-risorse.md` (generate da `tools/proponi_costi_v2.py`),
+    `carte-v2.md` (le regole dei costi, da `tools/proponi_costi_v2.py`),
     file dati `data/cards-v2.json` (da `tools/genera_cards_v2.py`), misura in
     `docs/la-terza-risorsa.md`. Da sola la terza risorsa sposta poco (+2 punti,
     basi altrui da 2,0 a 2,5); con il pacchetto di regole si comporta come con
@@ -1627,4 +1627,96 @@ dato è stato importato da lì. Ma due confronti fra ciò che è stampato e
     agisce, come oggi? le azioni senza lavoratore?) va scritta e misurata.
     Il bot v2 sconta l'incasso oltre quello che il mercato assorbe: senza,
     passava l'era a incassare (15 punti a giocatore).
+
+94. **Quattro lavoratori che attivano e poi agiscono.** Decisione del
+    designer dopo il punto 93: "voglio tre lavoratori come prima che fanno
+    una delle cinque azioni" era la lettura giusta della proposta, ma la
+    misura ha mostrato che nella v1.5 ogni lavoratore faceva DUE cose
+    (attivava e poi agiva) e con una sola la partita si dimezza. Quindi: i
+    lavoratori diventano **quattro**, e ogni lavoratore attiva la colonna e
+    poi fa un'azione (costruire, potenziare, ristrutturare) li' o accanto,
+    come nella v1.5; il Personaggio resta quello del draft (punto 93). Il
+    file v2 spegne `turno_v2`, che resta come manopola (`--turno_v2 1`), e
+    porta `workers_base` a 4; la ristrutturazione della propria rovina
+    dipende da `senza_rudere` e non dal turno; i protettori del draft si
+    legano al primo edificio costruito nell'era con tutti e due i turni.
+    Misurato (`docs/la-terza-risorsa.md`, quinta misura): la v2 torna una
+    partita intera, 13,6 edifici e 97 punti a giocatore, basi altrui 2,2,
+    kingmaker 11%; il draft da solo vale 13 punti (Scheletri e Rendita);
+    la **Rendita vince il 47%** delle partite e il Lampo il 23%: quattro
+    attivazioni pagano piu' censimenti. Aperto: la regola degli scheletri
+    per il Personaggio del draft, e la Vetusta' come prima manopola contro
+    la Rendita. Un documento solo per le carte: `docs/carte-v2.md`
+    (generato da `tools/carte_v2.py`), al posto di `carte-da-rifare.md` e
+    `proposte/costi-tre-risorse.md`.
+
+95. **Niente Personaggi sepolti, niente Vetusta', lo scheletro e' il
+    lavoratore del potenziamento.** Tre decisioni del designer dopo il
+    punto 94: il Personaggio del draft non si seppellisce
+    (`personaggi_sepolti` falso nel file v2, vero dove manca); la Vetusta'
+    non esiste piu' ("non mi e' mai piaciuta, semplifichiamo": tetto
+    `vetusta_max` 0 nel file v2, il motore non cambia; Colosseo, Il
+    Silvicoltore e Speculazione edilizia la contavano e non scattano piu',
+    proposte in `docs/carte-v2.md`; il bosco perde il +4); gli scheletri ci
+    sono e li lascia il lavoratore che piazza un potenziamento
+    (`scheletro_potenziamento`, vero nel file v2: resta sotto l'edificio,
+    uno per edificio, non nell'era Moderna, 6 meno l'era se l'edificio
+    finisce sotterrato; nel turno a un'azione era gia' cosi', D12).
+    Manopole `--sepolti` e `--vetusta` per rigiocare con una decisione
+    sola. Misurato (`docs/la-terza-risorsa.md`, sesta misura): le
+    sepolture del draft erano solo 4,6 punti regalati; la Vetusta' era due
+    terzi della Rendita (27,9 -> 10,6) e senza si costruisce piu' sopra
+    (altezza 4,66, premio 12,2, kingmaker 15%); lo scheletro del
+    potenziamento vale 2,8 punti. La **Rendita vince il 56%** delle
+    partite anche senza Vetusta': il motivo e' la protezione, quattro
+    lavoratori proteggono quattro edifici per era. Prossima manopola:
+    `protection_bonus` o il censimento. Il torneo ora conta le azioni per
+    giocatore anche a quattro lavoratori.
+
+96. **La protezione a +1, e quanto valgono gli scheletri.** Due domande
+    del designer dopo il punto 95. Misurato sulla base W, stessi semi
+    (`docs/la-terza-risorsa.md`, settima misura): la protezione a +1
+    (`--protezione 1`) non cambia niente, stessi punti, stessa citta', la
+    Rendita vince ancora il 54%: la strategia Rendita costruisce meno
+    edifici ma cari e duraturi con la Rendita stampata alta, e con quattro
+    lavoratori le risorse per comprarli ci sono sempre. Prossima manopola:
+    il valore di Rendita delle carte care, o il censimento. Gli scheletri
+    del potenziamento oggi valgono 2,8 punti a giocatore (3%), e pagano
+    solo se l'edificio finisce sotterrato: non sono un motivo per
+    potenziare. Con lo scheletro che **conta sempre** (`--scheletro sempre`,
+    costante `scheletro_conta`, 6 meno l'era comunque finisca l'edificio)
+    valgono 9,6 punti (11%), i potenziamenti salgono da 2,8 a 3,4 a
+    giocatore, la citta' non cambia e il kingmaker scende al 13%.
+    Raccomandato: conta sempre. In attesa della decisione del designer.
+
+97. **La Rendita delle carte care.** Prova chiesta dal designer contro la
+    strategia Rendita che vince il 57%: `--rendita_tetto N` taglia la
+    Rendita stampata di ogni carta a N (a 2 cinque carte: Abbazia,
+    Castello, Fortezza bastionata, Ponte monumentale, Duomo; a 1 otto).
+    Misurato sulla base Z, la v2 di oggi con lo scheletro che conta sempre
+    (`docs/la-terza-risorsa.md`, ottava misura): a 2 la Rendita vince il
+    49%, a 1 il 44%, con il canale Rendita quasi cancellato (5 punti su
+    84). Il resto del vantaggio e' lo stile di quella strategia, meno
+    edifici e piu' potenziamenti (4,9 contro 2,7-3,8), che con lo scheletro
+    che conta sempre valgono 12 punti: con quattro lavoratori costruire
+    poco e bene batte costruire tanto. La Scavo e' la strategia debole
+    (17-22%): da ritarare il bot, non la regola. Da decidere: la Rendita
+    delle cinque carte care a 2 (cinque righe in `carte-v2.md`, forbice
+    piu' stretta di 8 punti senza toccare la citta').
+
+98. **Le strategie rifatte per la v2.** Decisione del designer ("rifai le
+    strategie"). Le spinte delle strategie sono una tabella nel bot
+    (`SPINTE_V1`, `SPINTE_V2`), e `--spinta chiave=valore,...` le sovrascrive
+    lotto per lotto: la taratura si fa misurando, tre giri di quattro
+    tornei sugli stessi semi (`docs/la-terza-risorsa.md`, nona misura).
+    Abbassare la spinta della Rendita la rendeva PIU' forte: il vantaggio
+    era nel valutatore comune, che stimava le rendite future come se
+    l'edificio restasse scoperto, mentre con quattro lavoratori quasi
+    tutto viene protetto (`protezione_attesa`, 2 nella v2). La Scavo
+    costruisce a terra le carte con lo Scavo alto invece di passare
+    (`scavo_terra` -0,5, `scavo_terra_scavo` 0,5). Risultato: Rendita dal
+    57 al 40%, Scavo dal 17 al 32%, le altre fra 27 e 37, citta' e punti
+    invariati; il lotto rigiocato con la tabella scritta nel bot esce
+    identico a quello della manopola. Il Lampo resta il piu' debole (27%)
+    per la natura delle sue carte.
 

@@ -2,7 +2,7 @@
 
 > Prima misura con i **dati nuovi**: `data/cards-v2.json`, generato da `tools/genera_cards_v2.py`
 > dalla v1.5 e dalla tabella dei costi in tre risorse approvata dal designer
-> (`proposte/costi-tre-risorse.md`: le Idee sostituiscono, esplodono nelle ere 4-5). Le tessere
+> (`carte-v2.md`, le regole dei costi: le Idee sostituiscono, esplodono nelle ere 4-5). Le tessere
 > producono per tipo con la curva dell'audit, fiume e collina Costruzione 2/2/1/1/1, pianura
 > Denaro 0/1/1/2/2 (più 1 Costruzione nelle ere 1-2), bosco Idee 1/2/2/3/3; il mix di terreni
 > garantisce il bosco, due a tre giocatori. Tutto il resto è la v1.5: con `cards.json` il motore
@@ -248,6 +248,232 @@ di meno (cade nell'era in cui nasce 12 % contro 33 %: si costruisce meno, e gli 
 sono protetti), la città ha la stessa altezza. Tutto il resto della v2 (tre risorse, niente
 rudere, premio S×L) non cambia lettura.
 
+## Quinta misura: quattro lavoratori che attivano e poi agiscono
+
+Decisione del designer dopo la quarta misura (registro 94): il turno resta quello della v1.5, il
+lavoratore attiva la colonna e poi si costruisce, potenzia o ristruttura lì o accanto; i
+lavoratori diventano **quattro**; il Personaggio resta quello del draft. Il file v2 spegne
+`turno_v2` (che resta come manopola) e porta `workers_base` a 4. Tre lotti sugli stessi semi:
+S (il lotto v2 di riferimento: tre lavoratori, Reclutare come azione), U3 (tre lavoratori e il
+draft, il controllo che isola il draft) e U4 (quattro lavoratori e il draft, la v2 di oggi):
+
+| per giocatore | S v2 di riferimento | U3 3 lavoratori + draft | **U4 4 lavoratori + draft** |
+|---|--:|--:|--:|
+| PV medi | 74,3 | 87,0 | **97,1** |
+| Rendita | 18,7 | 23,5 | 27,9 |
+| Lampo | 15,3 | 16,8 | 19,2 |
+| Scavo | 17,0 | 15,1 | 15,6 |
+| Continuità | 10,3 | 11,2 | 12,9 |
+| Scheletri | 1,8 | 5,8 | 4,6 |
+| costruiti | 10,8 | 11,7 | 13,6 |
+| costruiti sopra un altro | 5,8 | 5,7 | 6,1 |
+| altezza massima | 4,09 | 4,11 | 4,24 |
+| basi proprie / altrui | 5,0 / 2,3 | 5,2 / 2,1 | 5,5 / 2,2 |
+| premio incassato scavando | 11,5 | 9,9 | 10,4 |
+| Idee prodotte / spese | 11,6 / 9,7 | 12,9 / 11,6 | 16,4 / 14,2 |
+| senza l'era 5 cambierebbe il vincitore | 11 % | 11 % | 11 % |
+| vince Rendita / Lampo / Bilanciata | 35 / 28 / 37 % | 44 / 23 / 38 % | **47** / 23 / 38 % |
+
+Per partita (2 000 `--vita`, S contro U4): costruiti 32,4 → 40,9; in piedi a fine partita 9,5 →
+14,6; cade nell'era in cui nasce 33 → 33 %; sepolti 54 → 44 %; sepolti da un altro 21 → 15 %;
+spianati dal proprietario 33 → 27 %; Scavo per sepolto 2,96 → 2,66; Scheletri 5,7 → 14,1.
+
+**1. La v2 torna una partita intera.** 13,6 edifici e 97 punti a giocatore, la città alta 4,2 con
+le basi altrui a 2,2 come nella v2 di riferimento: il quarto lavoratore rimette in piedi tutto
+quello che il turno a un'azione aveva spento, e l'archeologia riparte (premio scavato 10,4,
+kingmaker fermo all'11 %). Si costruisce di più e si seppellisce di meno (44 % contro 54 %):
+con quattro turni per era conviene più allargare che coprire.
+
+**2. Il draft da solo vale 13 punti.** U3 contro S: +4 Scheletri (il Personaggio gratis
+seppellito vale 6 meno l'era), +5 Rendita, +2,4 Cultura (i "+1 cultura" dei Personaggi presi
+ogni era). Non è il quarto lavoratore, è il regalo: un Personaggio a testa per era senza pagare
+nulla. Da decidere se il Personaggio del draft si seppellisce ancora a fine era.
+
+**3. La Rendita domina.** Vince il 47 % delle partite (atteso 33, errore 5), il Lampo scende al
+23 %. Quattro attivazioni per era pagano più censimenti a chi tiene in piedi gli edifici (Rendita
+27,9 contro 18,7), e la Rendita è già il canale più grosso. Il Lampo, che vince costruendo,
+paga di più il ritmo: il mercato scorre più in fretta e le carte a Lampo alto finiscono a tutti.
+È il primo squilibrio da correggere nella v2 a quattro lavoratori: la Vetustà (24 cubetti a
+partita contro 17) è la prima manopola da provare, perché è quella che gonfia la Rendita.
+
+**4. Le Idee bastano ancora.** Prodotte 16,4, spese 14,2 (87 %): con quattro attivazioni le
+Idee crescono, e si spendono. Il tetto a 3 non morde.
+
+## Sesta misura: niente Personaggi sepolti, niente Vetustà, lo scheletro del potenziamento
+
+Tre decisioni del designer (registro 95): il Personaggio del draft **non si seppellisce**; la
+**Vetustà non esiste più** ("non mi è mai piaciuta, semplifichiamo": tetto a 0, il motore non
+cambia); gli scheletri ci sono e li lascia **il lavoratore che piazza un potenziamento**, che
+resta sotto l'edificio, uno per edificio, non nell'era Moderna, e vale 6 meno l'era se
+l'edificio finisce sotterrato. Sulla base U4 (quattro lavoratori e draft), stessi semi, una
+decisione alla volta:
+
+| per giocatore | U4 | Va senza sepolture | Vb + senza Vetustà | **W + scheletro del potenziamento** |
+|---|--:|--:|--:|--:|
+| PV medi | 97,1 | 92,5 | 79,0 | **81,3** |
+| Rendita | 27,9 | 27,9 | 10,6 | 10,3 |
+| Lampo | 19,2 | 19,2 | 20,8 | 20,7 |
+| Scavo | 15,6 | 15,6 | 17,4 | 17,4 |
+| Scheletri | 4,6 | 0 | 0 | **2,8** |
+| costruiti | 13,6 | 13,6 | 14,2 | 14,0 |
+| altezza massima | 4,24 | 4,24 | 4,66 | 4,64 |
+| basi proprie / altrui | 5,5 / 2,2 | 5,5 / 2,2 | 6,4 / 2,3 | 6,3 / 2,3 |
+| premio incassato scavando | 10,4 | 10,4 | 12,2 | 12,2 |
+| senza l'era 5 cambierebbe il vincitore | 11 % | 9 % | 16 % | 15 % |
+| vince Rendita / Lampo / Bilanciata | 47 / 23 / 38 % | 48 / 24 / 36 % | 54 / 22 / 30 % | **56** / 26 / 33 % |
+
+Per partita (2 000 `--vita`, U4 → W): costruiti 40,9 → 41,9; in piedi a fine partita 14,6 →
+13,7; sepolti 44 → 49 %; spianati dal proprietario 27 → 32 %; cubetti Vetustà 24,1 → 0;
+Rendita 83 → 31; Scheletri 14,1 → 8,5.
+
+**1. Le sepolture del draft erano solo punti regalati.** Va contro U4: identico in tutto, meno
+4,6 punti di Scheletri. I bot non giocavano intorno ai Personaggi da seppellire, quindi la
+regola non cambiava la partita: la toglie e basta.
+
+**2. La Vetustà era due terzi della Rendita.** Vb contro Va: la Rendita scende da 27,9 a 10,6,
+la partita da 92 a 79 punti. Senza cubetti si tiene meno agli edifici vecchi: si costruisce di
+più sopra (altezza 4,66, sepolti 49 %), il premio di scavo sale a 12,2 e il kingmaker
+dell'ultima era torna al 15-16 %, perché il premio pesa di più su un totale più basso.
+
+**3. La Rendita domina ancora di più, e non è la Vetustà.** La strategia Rendita vince il 54-56
+% delle partite (atteso 33, errore 5) con 8 punti di vantaggio: senza cubetti la sua Rendita
+è 23,6 contro 8-11 delle altre. Il motivo è la protezione: quattro lavoratori proteggono
+quattro edifici per era (+2), e chi costruisce edifici a Rendita alta e li tiene in piedi
+incassa quattro censimenti. La prossima manopola è la protezione (`protection_bonus` 2, oggi
+per ogni lavoratore) o il censimento; la Vetustà non c'entrava.
+
+**4. Lo scheletro del potenziamento vale 2,8 punti a giocatore** (8,5 a partita), poco più
+della metà di quello che valevano i Personaggi sepolti, e non cambia la forma della città.
+
+## Settima misura: la protezione a +1, e quanto valgono gli scheletri
+
+Due domande del designer sulla base W (la v2 di oggi: quattro lavoratori, draft, niente
+sepolture, niente Vetustà, scheletro del potenziamento): la protezione del lavoratore a +1
+invece di +2 (`--protezione 1`), contro la Rendita che vince il 56 %; e se gli scheletri
+sono un valore aggiunto o vanno valorizzati di più. Per la seconda una prova: lo scheletro
+**conta sempre** (`--scheletro sempre`, costante `scheletro_conta`), cioè paga 6 meno l'era
+comunque finisca l'edificio, non solo se viene sotterrato. Stessi semi:
+
+| per giocatore | W | X1 protezione +1 | X2 protezione +1, scheletro conta sempre |
+|---|--:|--:|--:|
+| PV medi | 81,3 | 81,0 | **86,5** |
+| Rendita | 10,3 | 10,0 | 9,7 |
+| Lampo | 20,7 | 20,7 | 20,4 |
+| Scavo | 17,4 | 17,8 | 17,2 |
+| Scheletri | 2,8 | 2,8 | **9,6** |
+| costruiti | 14,0 | 14,0 | 13,7 |
+| potenziamenti per giocatore | n.d. | 2,8 | 3,4 |
+| altezza massima | 4,64 | 4,64 | 4,58 |
+| basi proprie / altrui | 6,3 / 2,3 | 6,2 / 2,4 | 6,1 / 2,4 |
+| senza l'era 5 cambierebbe il vincitore | 15 % | 16 % | 13 % |
+| vince Rendita / Lampo / Continuità | 56 / 26 / 32 % | 54 / 21 / 32 % | 53 / 22 / 37 % |
+
+Per partita (2 000 `--vita`, W → X1): costruiti 41,9 → 42,0; in piedi a fine 13,7 → 13,3; cade
+nell'era in cui nasce 35 → 35 %; sepolti 49 → 49 %; Scheletri 8,5 → 8,4.
+
+**1. La protezione non c'entra.** X1 contro W: stessi punti, stessa città, stessa vita delle
+carte, la Rendita vince ancora il 54 %. La strategia Rendita costruisce meno edifici (12
+contro 14-17) ma cari e duraturi, con la Rendita stampata alta (22 punti contro 8-11 delle
+altre), e con quattro lavoratori le risorse per comprarli ci sono sempre (Idee spese 14 su
+16). È un fatto delle carte, non del lavoratore: la prossima manopola è il valore di Rendita
+delle carte care, o il censimento.
+
+**2. Gli scheletri oggi contano poco.** 2,8 punti a giocatore, il 3 % del totale: circa tre
+potenziamenti a partita a testa, e lo scheletro paga solo se l'edificio finisce sotterrato
+(la metà dei casi). Non sono un motivo per potenziare: il potenziamento si sceglie per il
+suo effetto, lo scheletro è un resto.
+
+**3. Se lo scheletro conta sempre, diventa una scelta.** X2: 9,6 punti a giocatore, l'11 %
+del totale; i potenziamenti passano da 2,8 a 3,4 a giocatore (la strategia Rendita ne fa
+4,5), la città non cambia (altezza 4,58, basi altrui 2,4), nessuna strategia si deforma, e
+il kingmaker dell'ultima era scende dal 16 al 13 % perché il premio pesa su un totale più
+alto. Un lavoratore che diventa 6 meno l'era di punti sicuri è una decisione vera, e
+premia chi potenzia presto. Raccomandato: **conta sempre**.
+
+## Ottava misura: la Rendita delle carte care
+
+Decisione del designer (registro 96): lo scheletro **conta sempre**, nel file v2. Poi la prova
+chiesta: la Rendita stampata delle carte care, contro la strategia Rendita che vince il 57 %.
+Manopola `--rendita_tetto N`: la Rendita di ogni carta si taglia a N. A 2 si toccano cinque
+carte (Abbazia, Castello, Fortezza bastionata, Ponte monumentale da 3, Duomo da 4); a 1 otto
+(anche Anfiteatro, Chiesa e Piazza monumentale da 2).
+Stessi semi, base Z (la v2 di oggi):
+
+| per giocatore | W (scheletro da sotterrato) | **Z scheletro conta sempre** | Y2 Rendita al massimo 2 | Y1 Rendita al massimo 1 |
+|---|--:|--:|--:|--:|
+| PV medi | 81,3 | 87,0 | 85,6 | 84,1 |
+| Rendita | 10,3 | 9,9 | 7,8 | 4,9 |
+| Lampo | 20,7 | 20,4 | 20,7 | 21,4 |
+| Scavo | 17,4 | 16,7 | 17,5 | 18,0 |
+| Scheletri | 2,8 | **10,0** | 9,8 | 9,9 |
+| costruiti | 14,0 | 13,6 | 13,7 | 13,8 |
+| potenziamenti per giocatore | n.d. | 3,6 | 3,5 | 3,5 |
+| altezza massima | 4,64 | 4,57 | 4,59 | 4,60 |
+| basi proprie / altrui | 6,3 / 2,3 | 6,1 / 2,3 | 6,1 / 2,4 | 6,2 / 2,4 |
+| senza l'era 5 cambierebbe il vincitore | 15 % | 12 % | 13 % | 17 % |
+| vince Rendita | 56 % | **57 %** | 49 % | 44 % |
+| vince Obiettivi / Bilanciata / Continuità | 29 / 33 / 32 % | 32 / 33 / 36 % | 35 / 36 / 33 % | 37 / 33 / 34 % |
+| vince Lampo / Scavo | 26 / 24 % | 25 / 17 % | 25 / 22 % | 30 / 21 % |
+
+Per strategia in Z: la Rendita fa 94,6 punti con 21,3 di Rendita, 12,0 di Scheletri (4,9
+potenziamenti) e 11,5 edifici; le altre 80-87 con 3-11 di Rendita e 14-16 edifici. Per partita
+(2 000 `--vita`, W → Z): Scheletri 8,5 → 29,8, tutto il resto uguale (costruiti 41, sepolti 49 %).
+
+**1. Lo scheletro che conta sempre fa quello che prometteva.** Z contro W: +7 punti di
+Scheletri a giocatore, 3,6 potenziamenti a testa, città identica, kingmaker al 12 %.
+
+**2. La Rendita delle carte care conta, ma non è tutto.** Tagliando a 2 la strategia Rendita
+scende dal 57 al 49 %, tagliando a 1 al 44 %: ancora 11 sopra l'atteso, con il canale Rendita
+ridotto a 5 punti su 84, cioè quasi cancellato. Il resto del vantaggio non è la Rendita: è lo
+**stile** di quella strategia, meno edifici (11,5 contro 14-16) e più potenziamenti (4,9 contro
+2,7-3,8), che con lo scheletro che conta sempre valgono 12 punti. Con quattro lavoratori e le
+risorse che bastano, costruire poco e bene batte costruire tanto.
+
+**3. La Scavo è la strategia debole**, 17-22 % e 80 punti: passa il doppio delle altre (6,8 turni
+di solo incasso) e costruisce poco. Non è una regola da cambiare, è il bot da ritarare quando
+il canone della v2 si chiude.
+
+**4. Da decidere.** Se la Rendita delle cinque carte care scende a 2 (Y2: un cambio piccolo,
+cinque righe in `carte-v2.md`), la forbice si stringe di 8 punti senza toccare la città; il
+resto è taratura dei bot, non regola.
+
+## Nona misura: le carte care a 2 e le strategie rifatte per la v2
+
+Decisioni del designer (registro 97-98): le cinque carte care scendono a Rendita 2 nel file v2, e
+le strategie si rifanno. Le spinte delle strategie sono ora una tabella nel bot (una per la
+v1.5, una per la v2) e la manopola `--spinta chiave=valore,...` le sovrascrive lotto per lotto:
+tre giri di quattro tornei sugli stessi semi, poi la tabella scelta si scrive nel bot e il lotto
+rigiocato senza manopola esce identico riga per riga.
+
+**Il primo giro** (spinta della Rendita più bassa, la Scavo che costruisce a terra le carte con lo
+Scavo alto invece di passare) ha dato la risposta sbagliata nel verso giusto: la Scavo dal 22 al
+32 %, ma la Rendita **più forte** (95 punti, 54-56 %) con la spinta a 0,6 o 0,4. Quindi il
+vantaggio non era la spinta: era il valutatore comune, che stima le rendite future di un edificio
+come se restasse scoperto, mentre con quattro lavoratori quasi ogni edificio che conta viene
+protetto; la strategia Rendita vinceva perché ci credeva più del valutatore. **Il secondo giro**
+mette nel valutatore una protezione attesa (+1 o +2 di resistenza nel conto delle rendite): a +2
+la Rendita scende al 40 % senza toccare la sua spinta. **Il terzo giro** (Lampo più morbido,
+Rendita a 0,7) non migliora niente: il Lampo resta il più debole perché le sue carte costano poco
+e cadono, non per la spinta.
+
+| strategia | Z (la v2 prima) | B0 carte care a 2 | **F carte a 2 e strategie rifatte** | PV medi in F |
+|---|--:|--:|--:|--:|
+| Rendita | 57 % | 49 % | **40 %** | 88,6 |
+| Obiettivi | 32 % | 35 % | 37 % | 86,7 |
+| Scavo | 17 % | 22 % | **32 %** | 87,3 |
+| Bilanciata | 33 % | 36 % | 32 % | 85,6 |
+| Continuità | 36 % | 33 % | 31 % | 86,6 |
+| Lampo | 25 % | 25 % | 27 % | 85,9 |
+
+Attesa 33,3 %, errore ±5. La città non cambia (F contro Z: costruiti 13,8, altezza 4,57, basi
+altrui 2,3, sepolti 47 %, kingmaker 11 %), e i punti nemmeno (86,8 contro 87,0): la taratura
+cambia chi vince, non come si gioca.
+
+La tabella v2 (`StrategyBot.SPINTE_V2`): protezione attesa 2; la Scavo a terra −0,5 invece di
+−1,5, più 0,5 per punto di Scavo della carta; il resto come nella v1.5. La Rendita a 40 e il
+Lampo a 27 restano un po' fuori dall'errore: la forbice si è chiusa da 57-17 a 40-27, e il
+resto è la natura delle carte (la Rendita costruisce poco e caro, il Lampo tanto e fragile).
+
 ## Come rifare il conto
 
 ```bash
@@ -268,4 +494,21 @@ godot --headless res://scenes/audit_partita.tscn -- $A --dati data/cards-v2.json
 # `--lavoratori 5` prova un altro numero di lavoratori per era
 godot --headless res://scenes/audit_partita.tscn -- --players 3 --games 750 --seed 700000 --dati data/cards-v2.json > T.csv
 python3 tools/confronta_torneo.py S.csv T.csv
+# quinta misura: quattro lavoratori e il draft stanno nel file v2 (oggi il comando di S produce U4);
+# `--lavoratori 3` e' il controllo U3, `--turno_v2 1` rigioca il turno a un'azione
+godot --headless res://scenes/audit_partita.tscn -- --players 3 --games 750 --seed 700000 --dati data/cards-v2.json > U4.csv
+python3 tools/confronta_torneo.py S.csv U4.csv
+# sesta misura: le tre decisioni stanno nel file v2 (oggi il comando di U4 produce W);
+# `--sepolti 1` riseppellisce i Personaggi, `--vetusta 3` rimette la Vetusta'
+godot --headless res://scenes/audit_partita.tscn -- --players 3 --games 750 --seed 700000 --dati data/cards-v2.json > W.csv
+python3 tools/confronta_torneo.py U4.csv W.csv
+# settima misura: la protezione a +1 e lo scheletro che conta sempre, manopole sulla base W
+godot --headless res://scenes/audit_partita.tscn -- --players 3 --games 750 --seed 700000 --dati data/cards-v2.json --protezione 1 --scheletro sempre > X2.csv
+python3 tools/confronta_torneo.py W.csv X2.csv
+# ottava misura: lo scheletro che conta sempre sta nel file v2; `--rendita_tetto 2` taglia le carte care
+godot --headless res://scenes/audit_partita.tscn -- --players 3 --games 750 --seed 700000 --dati data/cards-v2.json --rendita_tetto 2 > Y2.csv
+python3 tools/confronta_torneo.py Z.csv Y2.csv
+# nona misura: la tabella delle spinte v2 sta nel bot; `--spinta chiave=valore,...` la sovrascrive
+godot --headless res://scenes/audit_partita.tscn -- --players 3 --games 750 --seed 700000 --dati data/cards-v2.json > F.csv
+python3 tools/confronta_strategie.py F.csv
 ```

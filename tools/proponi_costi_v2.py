@@ -4,7 +4,7 @@
 # tabella ne discende. Cambiare una regola e rilanciare rifà la tabella; i
 # numeri non si scrivono a mano, cosi' non si perde il criterio.
 #
-#   python3 tools/proponi_costi_v2.py            # scrive docs/proposte/costi-tre-risorse.md
+#   python3 tools/proponi_costi_v2.py            # scrive data/proposte/costi-tre-risorse.json
 #                                                # e data/proposte/costi-tre-risorse.json
 #
 # Le regole:
@@ -146,12 +146,14 @@ w("  seconda passata, dopo aver misurato la terza risorsa da sola.")
 w("- **Le tessere.** Cosa produce ogni tipo di terreno (D21) e con quale curva per era (D4).")
 w("- **Potenziamenti, Dinastia, ristrutturazione** (D2): in Idee o in Denaro. La proposta")
 w("  dell'audit era Idee per potenziamenti e Dinastia, Denaro per la ristrutturazione.")
-open(os.path.join(RADICE, "docs/proposte/costi-tre-risorse.md"), "w", encoding="utf-8").write("\n".join(out) + "\n")
+# Il documento delle carte e' uno solo, docs/carte-v2.md (tools/carte_v2.py): le
+# regole dei costi stanno la', questa spiegazione resta solo a video.
+print("\n".join(out))
 
-json.dump({"meta": {"origine": "tools/proponi_costi_v2.py", "regole": "docs/proposte/costi-tre-risorse.md",
+json.dump({"meta": {"origine": "tools/proponi_costi_v2.py", "regole": "docs/carte-v2.md",
                     "risorse": ["costruzione", "denaro", "idee"]},
            "buildings": [{k: r[k] for k in ("id", "era", "cost", "production")} for r in righe]},
           open(os.path.join(RADICE, "data/proposte/costi-tre-risorse.json"), "w", encoding="utf-8"),
           indent=1, ensure_ascii=False)
-print("scritti docs/proposte/costi-tre-risorse.md e data/proposte/costi-tre-risorse.json")
+print("scritto data/proposte/costi-tre-risorse.json")
 for e in range(1, 6): print("era", e, dict(tot[e]))
