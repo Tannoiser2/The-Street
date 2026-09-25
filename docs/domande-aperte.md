@@ -1831,6 +1831,20 @@ dato è stato importato da lì. Ma due confronti fra ciò che è stampato e
     vista: sagoma in piedi e girata, niente crollo, ingombro del clic,
     testi; nella v1.5 la rovina resta senza sagoma.
 
+107. **Il regolamento della v2, scritto.** Il designer ("fammi il nuovo
+    regolamento"). `docs/regolamento-v2.md`: la struttura e il testo del
+    regolamento v1.5 dove la v2 non cambia, e le decisioni dei punti 84-106
+    dove cambia: tre risorse, tessere pescate con produzione per era ed
+    effetto una volta per era, draft dei Personaggi, quattro lavoratori che
+    attivano e agiscono, premio di scavo S x L dimezzato nell'era Moderna al
+    posto della Verticalita', niente rudere ne' Vetusta', rovina girata che
+    si ristruttura (propria, meta' costo in C e D), scheletro del
+    potenziamento che conta sempre, Prosperita' una volta per era in Denaro,
+    tetto 3 per risorsa e 5 in tutto, Dinastia in Idee. Ogni numero e' quello
+    che gioca il motore con `data/cards-v2.json`. In fondo le cose che
+    restano da decidere al tavolo (mercato, di chi e' la rovina, misure
+    delle sagome). Le varianti non sono misurate con la v2.
+
 108. **La v2 a 2 e a 4 giocatori.** Il designer ("vai con le misure a 2 e 4
     giocatori"): tutte le misure erano a tre. Stessi lotti (750 torneo, 2 000
     vita) a 2, 3 e 4, v2 e v1.5 (`docs/la-terza-risorsa.md`, dodicesima
