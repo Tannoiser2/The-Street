@@ -36,7 +36,7 @@ func _ready() -> void:
 	_run("Eruzione: il potenziamento in cambio della perdita", _test_eruzione)
 	_run("senza rudere: chi fallisce di poco resta intatto", _test_senza_rudere)
 	_run("spianare conserva lo Scavo: la manopola", _test_scavo_spianato)
-	_run("lo Scavo a chi scava, e il punto per il disturbo", _test_scavo_a_chi_scava)
+	_run("lo Scavo a chi scava", _test_scavo_a_chi_scava)
 	_run("il premio di scavo: i tre moltiplicatori", _test_premio_scavo)
 	_run("Mercante di ossidiana", _test_mercante_scambi)
 	_run("Ingegnere militare: uno a tua scelta", _test_designazione)
@@ -2330,24 +2330,16 @@ func _scavo_di(gs: GameState, chi: int) -> int:
 
 func _test_scavo_a_chi_scava() -> void:
 	var scava_era: bool = bool(CardDB.constants.get("scavo_a_chi_scava", false))
-	var disturbo_era: int = int(CardDB.constants.get("disturbo_vp", 0))
 	var v := int(CardDB.buildings["ed_capanne"]["scavo"])
 
 	CardDB.constants["scavo_a_chi_scava"] = false
-	CardDB.constants["disturbo_vp"] = 0
 	var a := _scena_sepolti()
 	Scoring._scavo(a)
 	_eq("oggi: lo Scavo dell'altrui va al suo proprietario", _scavo_di(a, 1), v)
 	_eq("  e chi l'ha sepolto prende solo il proprio", _scavo_di(a, 0), v)
+	# Il "+1 per il disturbo" del regolamento non esiste piu' (registro 100).
+	_ok("  e nessun punto per il disturbo", not CardDB.constants.has("disturbo_vp"))
 
-	CardDB.constants["disturbo_vp"] = 1
-	var b := _scena_sepolti()
-	Scoring._scavo(b)
-	_eq("disturbo 1: chi ha sepolto l'altrui prende 1 in piu'", _scavo_di(b, 0), v + 1)
-	_eq("  il proprietario non perde nulla", _scavo_di(b, 1), v)
-	_eq("  e il proprio sepolto da se' non da' disturbo", int(b.players[0].counters.get("scavo_scavato", 0)), 1)
-
-	CardDB.constants["disturbo_vp"] = 0
 	CardDB.constants["scavo_a_chi_scava"] = true
 	var c := _scena_sepolti()
 	Scoring._scavo(c)
@@ -2357,7 +2349,6 @@ func _test_scavo_a_chi_scava() -> void:
 	_eq("  e l'era 5 conta solo lo scavato altrui", int(c.players[0].counters.get("scavo_e5", 0)), 0)
 
 	CardDB.constants["scavo_a_chi_scava"] = scava_era
-	CardDB.constants["disturbo_vp"] = disturbo_era
 
 # ---- il premio di scavo ----------------------------------------------
 # Manopola `premio_scavo` (registro 89), "nessuno" nei dati: chi costruisce al

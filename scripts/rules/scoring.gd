@@ -98,18 +98,17 @@ static func _continuity(gs: GameState) -> void:
 			if best >= 3: p.add_vp("continuita", int(table["3"]))
 			elif best >= 2: p.add_vp("continuita", int(table["2"]))
 
-# Lo Scavo va al proprietario dell'edificio sotterrato. Il regolamento da'
+# Lo Scavo va al proprietario dell'edificio sotterrato. Il regolamento dava
 # anche "+1 per ogni edificio altrui che avete sotterrato": ne' il motore ne'
-# l'oracolo Python lo hanno mai contato, e le 80 000 partite del bilanciamento
-# sono senza; sta in `disturbo_vp`, a 0 finche' il designer non decide
-# (registro 88). Manopola `scavo_a_chi_scava` (registro 87): lo Scavo lo
+# l'oracolo Python lo hanno mai contato, e il designer l'ha tolto (registro
+# 100: "cambia poco e aggiunge complessita'"). Manopola `scavo_a_chi_scava`
+# (registro 87): lo Scavo lo
 # incassa chi ha completato la sepoltura, se l'edificio non era suo; il
 # proprio sepolto da se' vale 0, come un terrapieno. I contatori
 # `scavo_scavato` e `scavo_e5` servono all'audit ("l'ultimo che costruisce
 # prende tutto il bottino?"): quanto si incassa scavando, e quanto nell'era 5.
 static func _scavo(gs: GameState) -> void:
 	var a_chi_scava := bool(CardDB.constants.get("scavo_a_chi_scava", false))
-	var disturbo := int(CardDB.constants.get("disturbo_vp", 0))
 	for b in gs.grid.buildings:
 		if not b.is_buried: continue
 		# `b` non ha tipo (viene da un Array): il tipo va scritto, se no non compila.
@@ -129,12 +128,6 @@ static func _scavo(gs: GameState) -> void:
 			continue
 		gs.players[b.owner].add_vp("scavo", v)
 		b.rende("scavo", v)
-		if altrui and disturbo > 0:
-			var chi2: PlayerState = gs.players[b.buried_by]
-			chi2.add_vp("scavo", disturbo)
-			chi2.bump("scavo_scavato", disturbo)
-			if b.buried_era >= int(CardDB.constants["eras"]): chi2.bump("scavo_e5", disturbo)
-			b.rende("scavo", disturbo)
 
 # Personaggi sepolti (ere 1-4): valgono 6 - era se il loro edificio è sotterrato.
 # `scheletro_conta` (registro 96): "sotterrato" e' la regola di sempre;

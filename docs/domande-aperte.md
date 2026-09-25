@@ -1733,3 +1733,23 @@ dato è stato importato da lì. Ma due confronti fra ciò che è stampato e
     La PR #29 (quattro lavoratori, draft, niente Vetusta', scheletro del
     potenziamento, carte care a 2, strategie rifatte) e' su main.
 
+100. **Le tessere una volta per era, via il disturbo, piu' Lampo a otto
+    carte.** Tre decisioni del designer. Le tessere (punto 6, D20-D22): la
+    produzione per era resta, l'abilita' permanente diventa un effetto
+    che scatta una volta per era alla prima occasione, poi la tessera si
+    gira (`tessere_una_volta_per_era`, vera nel file v2, `--tessere 0` la
+    spegne; `gs.tessere_usate` colonna per colonna): pianura -1
+    Costruzione a una carta da 2 o 3 caselle, fiume +1 Denaro a chi la
+    attiva, collina +1 resistenza per l'era al primo edificio costruito
+    qui, bosco -1 Costruzione a una ristrutturazione; con i dati v1.5 le
+    regole restano permanenti. Il "+1 per il disturbo" (punto 88) non
+    esiste piu': "cambia poco e aggiunge complessita'", costante e codice
+    tolti da tutti e due i file, il lotto di riferimento v1.5 esce
+    identico. Il Lampo sale di 1 su otto carte a solo Lampo (Insulae,
+    Emporio, Borgo, Torre civica, Loggia, Banco, Condominio, Officina).
+    Misurato (`docs/la-terza-risorsa.md`, decima misura): le tessere una
+    volta per era non cambiano la partita (stessa citta', stessi punti);
+    il Lampo in piu' alza il Lampo di tutti (+2,7 a giocatore) e non la
+    strategia Lampo, che resta ultima (23-24%) perche' costruisce edifici
+    che cadono: se deve vincere di piu', la strada e' il bot, non le carte.
+

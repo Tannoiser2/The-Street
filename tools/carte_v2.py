@@ -42,12 +42,19 @@ TESTI = {
         "i potenziamenti pagano per famiglia: Arte in Idee, Struttura in Costruzione, il resto in Denaro"),
     "ed_palazzo_signorile": (None, "3R", "produce 1 Idea al posto di 1 cultura (già nel file v2)"),
     "ed_universita": ("+1 PV per ogni tuo Personaggio preso nel draft. Richiede livello 1+.", "DRA", ""),
-    "ed_condominio": (None, "", "resta: si costruisce sopra le rovine con lo sconto di metà resistenza (punto 10)"),
     "ed_abbazia": (None, "", "Rendita 3 → 2 (registro 97: le carte care)"),
     "ed_castello": (None, "", "Rendita 3 → 2 (registro 97)"),
     "ed_fortezza_bastionata": (None, "", "Rendita 3 → 2 (registro 97)"),
     "ed_ponte_monumentale": (None, "", "Rendita 3 → 2 (registro 97)"),
     "ed_duomo": (None, "", "Rendita 4 → 2 (registro 97)"),
+    "ed_insulae": (None, "", "Lampo 1 → 2 (registro 100)"),
+    "ed_emporio": (None, "", "Lampo 1 → 2 (registro 100)"),
+    "ed_borgo": (None, "", "Lampo 2 → 3 (registro 100)"),
+    "ed_torre_civica": (None, "", "Lampo 2 → 3 (registro 100)"),
+    "ed_loggia": (None, "", "Lampo 2 → 3 (registro 100)"),
+    "ed_banco": (None, "", "Lampo 2 → 3 (registro 100)"),
+    "ed_condominio": (None, "", "resta: si costruisce sopra le rovine con lo sconto di metà resistenza (punto 10); Lampo 2 → 3 (registro 100)"),
+    "ed_officina": (None, "", "Lampo 2 → 3 (registro 100)"),
     # personaggi
     "pe_capotribu": ("Subito: +2 Costruzione. Per l'era: il primo edificio che costruisci ha +1 res.", "LAV 3R",
         "è così nel motore: senza lavoratore che abita, il protettore si lega al primo edificio costruito nell'era"),
@@ -100,12 +107,13 @@ TESTI = {
     "er_il_demolitore": (None, "", "resta: lo spianato è il terrapieno della v2 (registro 87)"),
 }
 
-# Le tessere: la curva sta nel JSON, l'effetto una volta per era e' una proposta (D20-D22).
-TESSERE = {
-    "pianura": ("−1 Costruzione a un edificio da 2 o 3 caselle", "oggi: −1 pietra permanente ai 2-3 caselle"),
-    "fiume":   ("+1 Denaro all'attivazione", "oggi: \"unico terreno che produce oro\", non più vero"),
-    "collina": ("+1 res a un edificio qui, per l'evento", "oggi: +1 res permanente a chi costruisce qui"),
-    "bosco":   ("−1 Costruzione a una ristrutturazione", "oggi: Vetustà massima +4 (la Vetustà non c'è più) e restauro −1"),
+# Le tessere: la curva e la regola stanno nel JSON (registro 100); qui solo
+# cos'era la regola nella v1.5.
+TESSERE_OGGI = {
+    "pianura": "−1 pietra permanente agli edifici da 2 o 3 caselle",
+    "fiume":   "\"unico terreno che produce oro\" (1 pietra 1 oro)",
+    "collina": "+1 res permanente a ogni edificio costruito qui",
+    "bosco":   "Vetustà massima +4 (la Vetustà non c'è più) e restauro −1 pietra",
 }
 
 NOME_RIS = {"pietra": "C", "oro": "D", "idee": "I"}
@@ -214,15 +222,14 @@ w("## Le tessere terreno")
 w("")
 w("Si pescano a caso (punto 6); il mix garantisce il bosco: " + "; ".join(
     f"{n} giocatori " + ", ".join(f"{v} {k}" for k, v in m.items()) for n, m in K["terrain_mix_by_players"].items()) + ".")
-w("Ogni tessera produce per tipo, con una curva per era, a chi la attiva; l'effetto una volta per")
-w("era è la proposta dell'audit (D20-D22), da decidere.")
+w("Ogni tessera produce per tipo, con una curva per era, a chi la attiva, e ha un effetto che")
+w("scatta **una volta per era** alla prima occasione, poi la tessera si gira (registro 100).")
 w("")
-w("| tessera | era 1 | era 2 | era 3 | era 4 | era 5 | effetto una volta per era (proposta) | oggi |")
+w("| tessera | era 1 | era 2 | era 3 | era 4 | era 5 | regola (nel file v2) | oggi |")
 w("|---|---|---|---|---|---|---|---|")
 for t in V2["terrains"]:
     curva = [produzione(t["base_production_by_era"][str(e)]) for e in range(1, 6)]
-    eff, oggi = TESSERE[t["id"]]
-    w(f"| {NOME_TER[t['id']]} | " + " | ".join(curva) + f" | {eff} | {oggi} |")
+    w(f"| {NOME_TER[t['id']]} | " + " | ".join(curva) + f" | {t['rule']} | {TESSERE_OGGI[t['id']]} |")
 w("")
 
 # ---- personaggi ----------------------------------------------------------
@@ -291,7 +298,7 @@ for titolo, sez, intro in (
 w("## Quello che non sta su una carta")
 w("")
 for r in [
-    "**\"+1 per ogni edificio altrui sotterrato\"** (il disturbo): mai contato né dal motore né dall'oracolo; `disturbo_vp` è 0 finché il designer non decide (registro 88).",
+    "**\"+1 per ogni edificio altrui sotterrato\"** (il disturbo): tolto dal designer (registro 100), non c'è più né nel regolamento né nel motore.",
     "**La Vetustà non esiste più** (registro 95): niente cubetti a chi regge l'evento, la Rendita è solo quella stampata. Colosseo, Il Silvicoltore e Speculazione edilizia la contavano e sono stati rifatti (registro 99, nel file v2); il bosco perde il +4.",
     "**\"Cultura\"**: oggi è un canale di punti e il nome di una classe; con le Idee come risorsa i punti si chiamano PV e Cultura resta la classe.",
     "**\"Protetto\"**: come oggi, il lavoratore messo sopra un proprio edificio in piedi della colonna attivata (+%d); i tre protettori del draft si legano al primo edificio costruito nell'era." % K["protection_bonus"],

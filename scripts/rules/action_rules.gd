@@ -114,9 +114,18 @@ static func quote_restore(gs: GameState, player: int, target: Building) -> Actio
 	# Idee sono 0 e il conto e' quello di sempre.
 	var p := int(ceil(float(int(c["pietra"])) / 2.0))
 	var o := int(ceil(float(int(c["oro"]) + int(c.get("idee", 0))) / 2.0))
-	if _touches_terrain(gs, target, Enums.Terrain.BOSCO):
+	if tessera_bosco(gs, target) >= 0:
 		p = max(0, p - 1)
 	return ActionQuote.yes(p, o, target)
+
+# La colonna di bosco che sconta la ristrutturazione, o -1: nella v1.5 basta
+# toccare il bosco, nella v2 (registro 100) la tessera deve essere ancora da
+# usare in quest'era.
+static func tessera_bosco(gs: GameState, target: Building) -> int:
+	for c in range(target.col_from, target.col_to):
+		if gs.grid.terrains[c] != Enums.Terrain.BOSCO: continue
+		if not EraRules.tessere_una_volta(gs) or EraRules.tessera_disponibile(gs, c): return c
+	return -1
 
 # ---- reclutare -----------------------------------------------------
 # "Reclutare costa 1 oro e richiede che la classe del personaggio sia presente

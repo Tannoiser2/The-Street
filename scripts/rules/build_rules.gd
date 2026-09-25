@@ -80,6 +80,8 @@ static func base_idee(data: Dictionary) -> int:
 
 static func pianura_discount(gs: GameState, data: Dictionary, col_from: int) -> int:
 	if int(data["width"]) >= 2 and gs.grid.terrains[col_from] == Enums.Terrain.PIANURA:
+		# V2 (registro 100): lo sconto e' l'effetto della tessera, una volta per era.
+		if EraRules.tessere_una_volta(gs) and not EraRules.tessera_disponibile(gs, col_from): return 0
 		return 1
 	return 0
 

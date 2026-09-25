@@ -29,17 +29,22 @@ CURVA = {
     "pianura": {e: {"pietra": c, "oro": d, "idee": 0} for e, c, d in zip("12345", [1, 1, 0, 0, 0], [0, 1, 1, 2, 2])},
     "bosco":   {e: {"pietra": 0, "oro": 0, "idee": i} for e, i in zip("12345", [1, 2, 2, 3, 3])},
 }
+# LE TESSERE UNA VOLTA PER ERA (punto 6, registro 100): la produzione per era
+# resta, l'abilita' permanente diventa un effetto che scatta una volta per
+# era e poi la tessera si gira.
 REGOLE = {
-    "fiume": "Costruzione, tanta all'inizio e poco dopo. Requisito 'fiume' stretto.",
-    "collina": "Costruzione come il fiume, e ogni edificio costruito qui ha +1 resistenza permanente.",
-    "pianura": "Denaro, poco all'inizio e molto dopo. Edifici da 2 o 3 caselle costano 1 in meno.",
-    "bosco": "Idee, in aumento con le ere. Ristrutturazione -1.",
+    "fiume": "Costruzione, tanta all'inizio e poco dopo. Una volta per era: +1 Denaro a chi la attiva. Requisito 'fiume' stretto.",
+    "collina": "Costruzione come il fiume. Una volta per era: il primo edificio costruito qui ha +1 resistenza per l'era.",
+    "pianura": "Denaro, poco all'inizio e molto dopo. Una volta per era: un edificio da 2 o 3 caselle costa 1 Costruzione in meno.",
+    "bosco": "Idee, in aumento con le ere. Una volta per era: una ristrutturazione costa 1 Costruzione in meno.",
 }
 MIX = {"2": {"pianura": 2, "fiume": 1, "collina": 1, "bosco": 1},
        "3": {"pianura": 2, "fiume": 2, "collina": 1, "bosco": 2},
        "4": {"pianura": 3, "fiume": 2, "collina": 2, "bosco": 2}}
 
 RENDITA_TETTO = 2
+LAMPO_PIU = {"ed_insulae", "ed_emporio", "ed_borgo", "ed_torre_civica", "ed_loggia", "ed_banco",
+             "ed_condominio", "ed_officina"}
 
 v2 = json.loads(json.dumps(base))
 v2["meta"]["ruleset"] = "v2-tre-risorse"
@@ -53,6 +58,10 @@ for b in v2["buildings"]:
     # Fortezza bastionata, Ponte monumentale (3) e Duomo (4) scendono a 2: la
     # strategia Rendita vinceva il 57% delle partite, con il tetto il 49%.
     b["rendita"] = min(int(b["rendita"]), RENDITA_TETTO)
+    # IL LAMPO DI QUALCHE CARTA (registro 100): la strategia Lampo era la piu'
+    # debole (27%) per la natura delle sue carte; otto carte a solo Lampo
+    # salgono di 1.
+    if b["id"] in LAMPO_PIU: b["lampo"] = int(b["lampo"]) + 1
 # LE TRE CARTE CHE CONTAVANO LA VETUSTA' (registro 99), che nella v2 non
 # esiste: il Colosseo premia l'edificio che resiste per costruzione, Il
 # Silvicoltore il vecchio del bosco, Speculazione edilizia colpisce chi ha
@@ -130,6 +139,10 @@ v2["constants"]["scheletro_potenziamento"] = True
 # Registro 96: lo scheletro conta SEMPRE, comunque finisca l'edificio (6 meno
 # l'era): cosi' potenziare e' una scelta, non un resto.
 v2["constants"]["scheletro_conta"] = "sempre"
+# Registro 100: le tessere scattano una volta per era (REGOLE qui sopra); il
+# "+1 per il disturbo" non esiste piu' (la costante sparisce da tutti e due i file).
+v2["constants"]["tessere_una_volta_per_era"] = True
+v2["constants"].pop("disturbo_vp", None)
 v2["constants"]["vetusta_max"] = 0
 v2["constants"]["vetusta_max_bosco"] = 0
 out = os.path.join(RADICE, "data/cards-v2.json")

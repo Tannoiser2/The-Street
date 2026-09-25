@@ -94,6 +94,9 @@ func _start_era(era: int) -> void:
 	gs.turn_pos = -1
 	gs.current_index = -1
 	for p in gs.players: p.reset_for_era()
+	# Le tessere si rigirano: ogni effetto vale di nuovo (registro 100).
+	gs.tessere_usate.clear()
+	for _c in gs.grid.n_cols: gs.tessere_usate.append(false)
 	gs.phase = Enums.Phase.PIAZZA
 	Conditions.claim_monuments(gs)      # il Pantheon guarda l'inizio dell'era Moderna
 	gs.log_line("Inizia l'era %d. Evento: %s" % [era, gs.current_event.get("name", "nessuno")])
@@ -384,7 +387,16 @@ func build(card_id: String, col_from: int, above: bool, pay_option: int = 0, des
 	# quota zero in un altro binario gliela sposterebbe sotto i piedi.
 	for base in q.bases: b.basi.append(base.uid)
 	b.bonus_res = q.continuity_bonus
-	if gs.grid.terrains[col_from] == Enums.Terrain.COLLINA: b.bonus_res += 1
+	if EraRules.tessere_una_volta(gs):
+		# V2 (registro 100): la collina da' +1 per l'era al primo edificio
+		# costruito qui, la pianura ha scontato la carta larga: le tessere si girano.
+		if gs.grid.terrains[col_from] == Enums.Terrain.COLLINA and EraRules.tessera_disponibile(gs, col_from):
+			b.protection += 1
+			EraRules.usa_tessera(gs, col_from, "+1 resistenza a %s per l'era" % b.data["name"])
+		if BuildRules.pianura_discount(gs, data, col_from) > 0:
+			EraRules.usa_tessera(gs, col_from, "-1 Costruzione a %s" % b.data["name"])
+	elif gs.grid.terrains[col_from] == Enums.Terrain.COLLINA:
+		b.bonus_res += 1
 	b.charges = int(data.get("exhaustible", 0))
 	gs.grid.buildings.append(b)
 	# Chi finisce sepolto ADESSO lo ha sepolto questo giocatore: si guarda
@@ -499,7 +511,10 @@ func restore(target: Building) -> bool:
 		gs.log_line("Restauro rifiutato: %s" % q.reason)
 		return false
 	if not p.can_pay(q.pietra, q.oro, q.idee): return false
+	var bosco := ActionRules.tessera_bosco(gs, target)
 	p.pay(q.pietra, q.oro, q.idee)
+	if EraRules.tessere_una_volta(gs) and bosco >= 0 and int(target.data["cost"]["pietra"]) > 0:
+		EraRules.usa_tessera(gs, bosco, "-1 Costruzione alla ristrutturazione di %s" % target.data["name"])
 	target.state = Enums.BuildingState.INTATTO
 	target.vetusta = 0
 	p.bump("restauri")
