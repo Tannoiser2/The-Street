@@ -1720,3 +1720,16 @@ dato è stato importato da lì. Ma due confronti fra ciò che è stampato e
     identico a quello della manopola. Il Lampo resta il piu' debole (27%)
     per la natura delle sue carte.
 
+99. **Le tre carte che contavano la Vetusta'.** Decisione del designer
+    ("cambia le tre carte"), sulle proposte di `docs/carte-v2.md`, nel solo
+    file v2: **Colosseo** premia il primo edificio attivo con resistenza 7
+    o piu' (il matcher degli effetti impara l'intervallo `resistance`,
+    sulla resistenza efficace); **Il Silvicoltore** vale per un edificio
+    attivo su bosco costruito nell'era 1 o 2 (il vecchio del bosco);
+    **Speculazione edilizia** toglie 1 res a ogni edificio con 2 o piu'
+    potenziamenti (colpisce chi ha costruito sopra il costruito). I dati
+    v1.5 non cambiano. Il documento delle carte ora mostra come "oggi" il
+    testo della v1.5 e in grassetto quello del file v2 quando differisce.
+    La PR #29 (quattro lavoratori, draft, niente Vetusta', scheletro del
+    potenziamento, carte care a 2, strategie rifatte) e' su main.
+

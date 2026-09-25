@@ -85,16 +85,16 @@ TESTI = {
     "ev_invasione": (None, "LAV", "come Migrazione"),
     "ev_carestia_primitiva": (None, "LAV", "come Migrazione"),
     "ev_secolarizzazioni": ("Forza 5. Religione −2 res · durante l'era, ristrutturare una propria rovina Religione non costa risorse (richiede comunque l'azione).", "RUD", ""),
-    "ev_speculazione_edilizia": ("Forza 5. Ogni edificio con 2+ potenziamenti: −1 res.", "RUD", "senza Vetustà (registro 95) la carta non colpiva nessuno: proposta, colpisce chi ha costruito sopra il costruito"),
+    "ev_speculazione_edilizia": (None, "RUD", "registro 99: senza Vetustà non colpiva nessuno, ora colpisce chi ha costruito sopra il costruito (nel file v2)"),
     "ev_anni_della_fame": (None, "", "resta: i round ci sono ancora (quattro lavoratori, quattro giri)"),
     # monumenti
-    "mo_colosseo": ("Primo ad avere un edificio attivo con resistenza 7 o più.", "RUD", "contava la Vetustà 3, che non esiste più (registro 95): proposta, l'edificio che resiste per costruzione; nel file v2 la condizione vecchia resta e non scatta mai"),
+    "mo_colosseo": (None, "RUD", "registro 99: contava la Vetustà 3, ora premia l'edificio che resiste per costruzione (nel file v2)"),
     "mo_pantheon": ("Primo ad avere un edificio dell'era 1 o 2 ancora attivo all'inizio dell'era Moderna.", "RUD", ""),
     "mo_cloaca_massima": ("Primo ad aver speso almeno 3 Costruzione complessive in costi di terrapieno.", "3R", ""),
     "mo_acropoli": (None, "", "resta: i livelli restano, la Verticalità no"),
     # eredita'
     "er_il_guardiano": ("un tuo edificio attivo costruito nell'era 1 o 2.", "RUD", ""),
-    "er_il_silvicoltore": ("un tuo edificio attivo su bosco costruito nell'era 1 o 2.", "RUD TES", "contava la Vetustà 3, che non esiste più (registro 95): proposta, il vecchio del bosco; nel file v2 la condizione vecchia resta e non scatta mai"),
+    "er_il_silvicoltore": (None, "RUD TES", "registro 99: contava la Vetustà 3, ora è il vecchio del bosco (nel file v2)"),
     "er_il_restauratore": ("hai ristrutturato 2+ tue rovine.", "RUD", ""),
     "er_il_verticalista": (None, "", "resta: il nome ricorda un canale che non c'è più, la condizione vale"),
     "er_il_demolitore": (None, "", "resta: lo spianato è il terrapieno della v2 (registro 87)"),
@@ -121,9 +121,16 @@ def produzione(pr):
     pezzi = [f"{int(v)} {NOME_RIS[k]}" for k, v in pr.items() if k in NOME_RIS and int(v)]
     return " + ".join(pezzi) if pezzi else "—"
 
+V1_PER_ID = {c["id"]: c for sez in ("buildings", "characters", "upgrades", "events", "monuments", "legacies") for c in V1[sez]}
+
 def testo_e_nota(c, campo="effect_text"):
-    oggi = (c.get(campo) or "").strip()
+    # "oggi" e' il testo della v1.5; il testo della v2 e' quello del file v2,
+    # o la proposta in TESTI se il file v2 non e' ancora cambiato.
+    oggi = (V1_PER_ID.get(c["id"], c).get(campo) or "").strip()
     nuovo, sigle, nota = TESTI.get(c["id"], (None, "", ""))
+    if not nuovo:
+        nel_v2 = (c.get(campo) or "").strip()
+        if nel_v2 != oggi: nuovo = nel_v2
     testo = nuovo if nuovo else oggi
     if nuovo and nuovo != oggi:
         testo = f"**{nuovo}**"
@@ -285,7 +292,7 @@ w("## Quello che non sta su una carta")
 w("")
 for r in [
     "**\"+1 per ogni edificio altrui sotterrato\"** (il disturbo): mai contato né dal motore né dall'oracolo; `disturbo_vp` è 0 finché il designer non decide (registro 88).",
-    "**La Vetustà non esiste più** (registro 95): niente cubetti a chi regge l'evento, la Rendita è solo quella stampata. Colosseo, Il Silvicoltore e Speculazione edilizia la contavano e vanno rifatti (proposte nelle tabelle); il bosco perde il +4.",
+    "**La Vetustà non esiste più** (registro 95): niente cubetti a chi regge l'evento, la Rendita è solo quella stampata. Colosseo, Il Silvicoltore e Speculazione edilizia la contavano e sono stati rifatti (registro 99, nel file v2); il bosco perde il +4.",
     "**\"Cultura\"**: oggi è un canale di punti e il nome di una classe; con le Idee come risorsa i punti si chiamano PV e Cultura resta la classe.",
     "**\"Protetto\"**: come oggi, il lavoratore messo sopra un proprio edificio in piedi della colonna attivata (+%d); i tre protettori del draft si legano al primo edificio costruito nell'era." % K["protection_bonus"],
     "**Reclutare** non è un'azione; **la Dinastia** resta un acquisto al posto dell'azione; **passare** è non fare l'azione dopo l'attivazione.",

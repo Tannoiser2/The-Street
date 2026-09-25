@@ -181,7 +181,7 @@ lavoratore del potenziamento.
 | 5 | Industriale | commercio | misto | **Subito: +2 Denaro. Per l'era: le tue prime 2 produzioni di Denaro danno +1.** | 3R | oggi: "Subito: +2 oro. Per l'era: le tue prime 2 produzioni di oro danno +1" |
 | 5 | Soprintendente | ingegneria | finale | Finale: fino a 3 tuoi edifici Sotterrati hanno Scavo +2. |  |  |
 | 5 | Veterano | militare | finale | Finale: +1 PV per ogni tuo edificio Militare in piedi (max +4). |  |  |
-| — | Dinastia | civico | permanente | **Sempre disponibile, fuori dal draft, al posto dell'azione. Costo in Idee: era 1 = 4 · era 2 = 3 · era 3 = 3 · era 4 = 3. Nessuna abilità: aggiunge un quinto lavoratore, permanente e attivo da subito. Massimo una a testa.** | 3R | oggi: "Sempre disponibile fuori dalle file, nessuna classe richiesta. Costo a scalare in Idee: era 1 = 4 · era 2 = 3 · era 3 = 3 · era 4 = 3. Nessuna abilita': aggiunge un quarto lavoratore, permanente e attivo da subito. Massimo una a testa" — con quattro lavoratori di base (registro 94) è il quinto |
+| — | Dinastia | civico | permanente | **Sempre disponibile, fuori dal draft, al posto dell'azione. Costo in Idee: era 1 = 4 · era 2 = 3 · era 3 = 3 · era 4 = 3. Nessuna abilità: aggiunge un quinto lavoratore, permanente e attivo da subito. Massimo una a testa.** | 3R | oggi: "Sempre disponibile fuori dalle file, nessuna classe richiesta. Costo a scalare secondo l'era: era 1 = 4 pietra · era 2 = 2 pietra + 1 oro · era 3 = 1 pietra + 2 oro · era 4 = 3 oro. Nessuna abilità: aggiunge un quarto lavoratore, permanente e attivo da subito. Massimo una a testa" — con quattro lavoratori di base (registro 94) è il quinto |
 
 ## I 25 potenziamenti
 
@@ -248,7 +248,7 @@ Uno per era nelle ere 1-4, forza 2/3/4/5; chi non regge cade in rovina con un pa
 | 4 | Rivoluzione industriale | 5 | Forza 5. Edifici con Scavo 2+: −1 res. |  |  |
 | 4 | Bonifiche | 5 | Forza 5. Edifici su pianura: −2 res. Il primo terrapieno di ogni giocatore in quest’era costa 0. |  |  |
 | 4 | Secolarizzazioni | 5 | **Forza 5. Religione −2 res · durante l'era, ristrutturare una propria rovina Religione non costa risorse (richiede comunque l'azione).** | RUD | oggi: "Forza 5. Religione −2 res · durante l’era, restaurare un rudere Religione non costa risorse (richiede comunque l’azione) e vale sui ruderi già presenti" |
-| 4 | Speculazione edilizia | 5 | **Forza 5. Ogni edificio con 2+ potenziamenti: −1 res.** | RUD | oggi: "Forza 5. Ogni edificio con Vetustà 2+: −1 res" — senza Vetustà (registro 95) la carta non colpiva nessuno: proposta, colpisce chi ha costruito sopra il costruito |
+| 4 | Speculazione edilizia | 5 | **Forza 5. Ogni edificio con 2+ potenziamenti: −1 res.** | RUD | oggi: "Forza 5. Ogni edificio con Vetustà 2+: −1 res" — registro 99: senza Vetustà non colpiva nessuno, ora colpisce chi ha costruito sopra il costruito (nel file v2) |
 
 ## I 14 Monumenti
 
@@ -257,7 +257,7 @@ Se ne rivelano tanti quanti i giocatori meno uno; li prende il primo che soddisf
 | carta | PV | condizione | motivo | nota |
 |---|--:|---|---|---|
 | San Clemente | 5 | Primo ad avere 3 edifici Religione nella stessa colonna. |  |  |
-| Colosseo | 4 | **Primo ad avere un edificio attivo con resistenza 7 o più.** | RUD | oggi: "Primo il cui edificio sopravvive esposto a 3 eventi" — contava la Vetustà 3, che non esiste più (registro 95): proposta, l'edificio che resiste per costruzione; nel file v2 la condizione vecchia resta e non scatta mai |
+| Colosseo | 4 | **Primo ad avere un edificio attivo con resistenza 7 o più.** | RUD | oggi: "Primo il cui edificio sopravvive esposto a 3 eventi" — registro 99: contava la Vetustà 3, ora premia l'edificio che resiste per costruzione (nel file v2) |
 | Pantheon | 4 | **Primo ad avere un edificio dell'era 1 o 2 ancora attivo all'inizio dell'era Moderna.** | RUD | oggi: "Primo ad avere un edificio dell’era 1 o 2 ancora in piedi all’inizio dell’era Moderna" |
 | Fori Imperiali | 4 | Primo ad avere 4 propri edifici Sotterrati. |  |  |
 | Acropoli | 4 | Primo a costruire a livello 4. |  | resta: i livelli restano, la Verticalità no |
@@ -290,14 +290,14 @@ Due a testa, se ne tiene una segreta; si conta a fine partita.
 | Il Demolitore | 4 | hai spianato 3+ tuoi edifici intatti. |  | resta: lo spianato è il terrapieno della v2 (registro 87) |
 | Il Massaio | 4 | due tuoi edifici a livello 2 o superiore. |  |  |
 | L’Idraulico | 4 | 3+ tuoi edifici su colonne fiume. |  |  |
-| Il Silvicoltore | 5 | **un tuo edificio attivo su bosco costruito nell'era 1 o 2.** | RUD TES | oggi: "un tuo edificio su bosco con Vetustà 3+" — contava la Vetustà 3, che non esiste più (registro 95): proposta, il vecchio del bosco; nel file v2 la condizione vecchia resta e non scatta mai |
+| Il Silvicoltore | 5 | **un tuo edificio attivo su bosco costruito nell'era 1 o 2.** | RUD TES | oggi: "un tuo edificio su bosco con Vetustà 3+" — registro 99: contava la Vetustà 3, ora è il vecchio del bosco (nel file v2) |
 | Il Restauratore | 4 | **hai ristrutturato 2+ tue rovine.** | RUD | oggi: "hai restaurato 2+ ruderi" |
 | L’Antiquario | 5 | un tuo edificio Sotterrato con Scavo 6 o più. |  |  |
 
 ## Quello che non sta su una carta
 
 - **"+1 per ogni edificio altrui sotterrato"** (il disturbo): mai contato né dal motore né dall'oracolo; `disturbo_vp` è 0 finché il designer non decide (registro 88).
-- **La Vetustà non esiste più** (registro 95): niente cubetti a chi regge l'evento, la Rendita è solo quella stampata. Colosseo, Il Silvicoltore e Speculazione edilizia la contavano e vanno rifatti (proposte nelle tabelle); il bosco perde il +4.
+- **La Vetustà non esiste più** (registro 95): niente cubetti a chi regge l'evento, la Rendita è solo quella stampata. Colosseo, Il Silvicoltore e Speculazione edilizia la contavano e sono stati rifatti (registro 99, nel file v2); il bosco perde il +4.
 - **"Cultura"**: oggi è un canale di punti e il nome di una classe; con le Idee come risorsa i punti si chiamano PV e Cultura resta la classe.
 - **"Protetto"**: come oggi, il lavoratore messo sopra un proprio edificio in piedi della colonna attivata (+2); i tre protettori del draft si legano al primo edificio costruito nell'era.
 - **Reclutare** non è un'azione; **la Dinastia** resta un acquisto al posto dell'azione; **passare** è non fare l'azione dopo l'attivazione.

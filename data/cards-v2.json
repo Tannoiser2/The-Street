@@ -4238,14 +4238,14 @@
       "force": 5,
       "severity": "grave",
       "kind": "comportamentale",
-      "effect_text": "Forza 5. Ogni edificio con Vetustà 2+: −1 res.",
+      "effect_text": "Forza 5. Ogni edificio con 2+ potenziamenti: −1 res.",
       "effects": [
         {
           "hook": "on_event",
           "op": "resistance",
           "value": -1,
           "target": {
-            "vetusta": {
+            "upgrades": {
               "min": 2
             }
           }
@@ -4274,21 +4274,20 @@
       "id": "mo_colosseo",
       "name": "Colosseo",
       "vp": 4,
-      "condition_text": "Primo il cui edificio sopravvive esposto a 3 eventi.",
+      "condition_text": "Primo ad avere un edificio attivo con resistenza 7 o più.",
       "condition": {
         "op": "count_matching",
+        "min": 1,
         "target": {
           "owner": "self",
           "state": [
-            "intatto",
-            "rudere"
+            "intatto"
           ],
           "buried": false,
-          "vetusta": {
-            "min": 3
+          "resistance": {
+            "min": 7
           }
-        },
-        "min": 1
+        }
       }
     },
     {
@@ -4684,24 +4683,23 @@
       "id": "er_il_silvicoltore",
       "name": "Il Silvicoltore",
       "vp": 5,
-      "condition_text": "un tuo edificio su bosco con Vetustà 3+.",
+      "condition_text": "un tuo edificio attivo su bosco costruito nell'era 1 o 2.",
       "condition": {
         "op": "count_matching",
+        "min": 1,
         "target": {
           "owner": "self",
           "terrain": [
             "bosco"
           ],
           "state": [
-            "intatto",
-            "rudere"
+            "intatto"
           ],
           "buried": false,
-          "vetusta": {
-            "min": 3
+          "era": {
+            "max": 2
           }
-        },
-        "min": 1
+        }
       }
     },
     {
