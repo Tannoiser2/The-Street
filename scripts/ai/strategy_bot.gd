@@ -420,7 +420,7 @@ static func _valore(gs: GameState, p: PlayerState, v, strategia: String, col: in
 			dett["passare e incassare"] = q
 			return q
 		"costruisci": return _valore_costruzione(gs, p, v, strategia, r, dett) - speso
-		"potenzia": return _valore_potenziamento(gs, p, v, dett) - speso
+		"potenzia": return _valore_potenziamento(gs, p, v, dett, strategia) - speso
 		"restaura": return _valore_restauro(gs, p, v, dett) - speso
 		"recluta": return _valore_reclutamento(gs, p, v, strategia, r, dett) - speso
 		"dinastia": return _valore_dinastia(gs, dett) - speso
@@ -454,13 +454,16 @@ static func rendite_future(res: int, rendita: int, era: int) -> float:
 # che rende (la strategia Rendita vinceva il 55% proprio perche' ci credeva
 # di piu' del valutatore).
 const SPINTE_V1 := {"rendita_per_era": 0.9, "rendita_zero": -1.5, "lampo": 1.6, "lampo_zero": -1.0,
-	"scavo_premio": 0.8, "scavo_terra": -1.5, "scavo_terra_scavo": 0.0, "protezione_attesa": 0.0}
-# La tabella v2 e' il lotto Q2 della taratura (registro 98): protezione
+	"scavo_premio": 0.8, "scavo_terra": -1.5, "scavo_terra_scavo": 0.0, "protezione_attesa": 0.0,
+	"lampo_potenzia": 0.0, "lampo_sopra": 0.0}
+# La tabella v2 e' il lotto Q2 della taratura (registro 98) piu' la spinta
+# ai potenziamenti della Lampo (registro 101, lotto L2): protezione
 # attesa 2 (il valutatore conta l'edificio protetto), la Scavo costruisce a
 # terra le carte con lo Scavo alto invece di passare; le altre spinte
 # restano quelle della v1.5, perche' abbassarle non aiutava.
 const SPINTE_V2 := {"rendita_per_era": 0.9, "rendita_zero": -1.5, "lampo": 1.6, "lampo_zero": -1.0,
-	"scavo_premio": 0.8, "scavo_terra": -0.5, "scavo_terra_scavo": 0.5, "protezione_attesa": 2.0}
+	"scavo_premio": 0.8, "scavo_terra": -0.5, "scavo_terra_scavo": 0.5, "protezione_attesa": 2.0,
+	"lampo_potenzia": 3.0, "lampo_sopra": 0.0}
 static var spinte_override := {}
 
 static func spinte() -> Dictionary:
@@ -564,6 +567,7 @@ static func _valore_costruzione(gs: GameState, p: PlayerState, v, strategia: Str
 		"lampo":
 			q += float(d["lampo"]) * float(sp["lampo"])
 			if int(d["lampo"]) == 0: q += float(sp["lampo_zero"])
+			if sopra: q += float(sp["lampo_sopra"])
 		"scavo":
 			if e_v2():
 				# V2: lo Scavo lo incassa chi scava, sul momento. La strategia
@@ -633,17 +637,22 @@ static func _premio_obiettivi(gs: GameState, p: PlayerState, d: Dictionary,
 		if Conditions.met(gs, p.index, l2["condition"]): senza += float(l2["vp"]) * 0.7
 	return maxf(0.0, q - senza)
 
-static func _valore_potenziamento(gs: GameState, p: PlayerState, v, dett := {}) -> float:
+static func _valore_potenziamento(gs: GameState, p: PlayerState, v, dett := {}, strategia := "") -> float:
 	var par: Dictionary = v.parametri
 	var b := _per_uid(gs, int(par["uid"])) if par.has("uid") else null
 	if b == null: return 0.0
+	# LA STRATEGIA LAMPO POTENZIA (registro 101): costruiva 16 edifici fragili
+	# e restava ultima; una spinta ai potenziamenti (che con lo scheletro che
+	# conta sempre sono punti sicuri) le da' il canale che le mancava.
+	var spinta_lampo := float(spinte()["lampo_potenzia"]) if strategia == "lampo" else 0.0
+	if spinta_lampo != 0.0: dett["spinta della strategia lampo"] = spinta_lampo
 	# Una carta infilata sotto dura quanto l'edificio che la ospita.
 	var vive := b.effective_resistance() >= gs.era + 1
 	dett["l'ospite regge l'evento" if vive else "l'ospite rischia di crollare"] = \
 		2.2 if vive else 0.8
 	if b.rendita_value() > 0:
 		dett["rendita dell'ospite"] = float(b.rendita_value()) * 0.3
-	var q := (2.2 if vive else 0.8) + float(b.rendita_value()) * 0.3
+	var q := (2.2 if vive else 0.8) + float(b.rendita_value()) * 0.3 + spinta_lampo
 	# Lo scheletro del potenziamento (registro 95): 6 meno l'era se l'edificio
 	# finira' sotterrato, contato come una possibilita', come per i Personaggi.
 	if (bool(CardDB.constants.get("scheletro_potenziamento", false)) or bool(CardDB.constants.get("turno_v2", false))) \

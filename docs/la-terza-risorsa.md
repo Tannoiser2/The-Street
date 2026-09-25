@@ -515,6 +515,37 @@ a bassa resistenza che cadono (Rendita 3, Scheletri 8, contro 9-16 e 10 delle al
 carte restano a +1 come deciso; se il Lampo deve vincere di più, la strada è il bot (che
 potenzi e protegga come gli altri), non le carte.
 
+## Undicesima misura: la strategia Lampo potenzia
+
+Dopo la decima misura (alzare il Lampo delle carte alza il Lampo di tutti) il designer ha detto di
+andare avanti sul bot (registro 101). Due spinte nuove nella tabella delle strategie, solo per la
+Lampo: `lampo_potenzia` (ai potenziamenti, che con lo scheletro che conta sempre sono punti
+sicuri) e `lampo_sopra` (al costruire sopra). Quattro tornei con `--spinta`, stessi semi:
+
+| strategia | Gb (prima) | potenzia 1,5 | **potenzia 3** | potenzia 1,5 + sopra 1,5 | potenzia 3 + sopra 1,5 |
+|---|--:|--:|--:|--:|--:|
+| Rendita | 37 % | 38 % | 38 % | 38 % | 38 % |
+| Obiettivi | 36 % | 34 % | 33 % | 34 % | 34 % |
+| Scavo | 36 % | 33 % | 30 % | 36 % | 32 % |
+| Bilanciata | 34 % | 34 % | 34 % | 34 % | 34 % |
+| Continuità | 35 % | 35 % | 34 % | 33 % | 34 % |
+| Lampo | 23 % | 27 % | **31 %** | 25 % | 28 % |
+| la Lampo: PV, Lampo, Scheletri, potenziamenti | 86,7 / 33 / 8,2 / 2,5 | 87,9 / 32 / 9,7 / 3,1 | **90,0 / 31 / 11,1 / 3,6** | 87,7 / 32 / 9,2 / 3,0 | 88,7 / 32 / 10,2 / 3,4 |
+
+La tabella v2 prende `lampo_potenzia` 3 e lascia `lampo_sopra` a 0 (H, il lotto rigiocato con
+la tabella scritta nel bot, è identico riga per riga a quello della manopola). Per giocatore la
+partita non cambia (89,0 → 89,3 punti, costruiti 14,0 → 13,9, altezza 4,57 → 4,56, basi altrui
+2,4); per partita (2 000 `--vita`) Scheletri 29,5 → 31,1, il resto uguale.
+
+**1. Sei strategie entro l'errore, per la prima volta.** Rendita 38, Continuità 34, Bilanciata 34,
+Obiettivi 33, Lampo 31, Scavo 30: tutte fra 30 e 38 con l'atteso a 33 e l'errore a 5. La Lampo
+resta la Lampo (31 punti di Lampo, 15 edifici) e aggiunge il canale che le mancava.
+
+**2. Costruire sopra non era il problema.** Le due varianti con `lampo_sopra` non aiutano: la
+Lampo costruisce già sopra quanto gli altri (2,1-2,2 basi altrui). Quello che non faceva era
+potenziare, perché il suo valutatore preferiva sempre una carta nuova a un potenziamento; ora,
+con lo scheletro che conta sempre, la spinta la porta a 3,6 potenziamenti a partita.
+
 ## Come rifare il conto
 
 ```bash
@@ -555,4 +586,7 @@ python3 tools/confronta_strategie.py F.csv
 # decima misura: le tessere una volta per era e il Lampo stanno nel file v2; `--tessere 0` rimette le regole permanenti
 godot --headless res://scenes/audit_partita.tscn -- --players 3 --games 750 --seed 700000 --dati data/cards-v2.json --tessere 0 > Ga.csv
 python3 tools/confronta_torneo.py F.csv Ga.csv Gb.csv
+# undicesima misura: la spinta della Lampo sta nella tabella v2; `--spinta lampo_potenzia=0` la spegne
+godot --headless res://scenes/audit_partita.tscn -- --players 3 --games 750 --seed 700000 --dati data/cards-v2.json > H.csv
+python3 tools/confronta_strategie.py H.csv
 ```
