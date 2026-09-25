@@ -1830,3 +1830,20 @@ dato è stato importato da lì. Ma due confronti fra ciò che è stampato e
     proprie. Nella v1.5 nulla cambia (la costante e' spenta). Test della
     vista: sagoma in piedi e girata, niente crollo, ingombro del clic,
     testi; nella v1.5 la rovina resta senza sagoma.
+
+108. **La v2 a 2 e a 4 giocatori.** Il designer ("vai con le misure a 2 e 4
+    giocatori"): tutte le misure erano a tre. Stessi lotti (750 torneo, 2 000
+    vita) a 2, 3 e 4, v2 e v1.5 (`docs/la-terza-risorsa.md`, dodicesima
+    misura). La citta' della v2 ha la stessa forma a ogni numero di
+    giocatori (altezza 4,4-4,6, un terzo cade nell'era in cui nasce, 6-7
+    sopraelevazioni a testa) e le Idee si spendono (90-97%). Due cose da
+    decidere. **A due** le strategie si aprono: Continuita' 58% e Obiettivi
+    40% fuori dall'errore (50 +- 6), nella v1.5 a due tutte fra 46 e 54;
+    Obiettivi ha un Monumento solo (giocatori meno uno) e senza la
+    Verticalita' e' la piu' povera, Continuita' costruisce sopra i propri
+    nelle cinque colonne. **A quattro** le strategie tengono (25 +- 4, meglio
+    della v1.5) ma ognuno passa 5,1 volte a partita: sedici turni per era
+    contro dodici sagome dell'era, 49 sagome costruite su 60, e il draft ha
+    tolto Reclutare, che nella v1.5 era la valvola; kingmaker 18% (10 a
+    due, 13 a tre). Controprove: `--lavoratori 3` a quattro e a due (in
+    corso), e a due un secondo Monumento rivelato (serve una costante).
