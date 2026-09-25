@@ -1753,3 +1753,17 @@ dato è stato importato da lì. Ma due confronti fra ciò che è stampato e
     strategia Lampo, che resta ultima (23-24%) perche' costruisce edifici
     che cadono: se deve vincere di piu', la strada e' il bot, non le carte.
 
+101. **La strategia Lampo potenzia.** Dopo il punto 100 (il Lampo delle
+    carte e' di tutti) il designer ha detto di andare avanti sul bot. Due
+    spinte nuove nella tabella delle strategie, solo per la Lampo:
+    `lampo_potenzia` (ai potenziamenti, punti sicuri con lo scheletro che
+    conta sempre) e `lampo_sopra` (al costruire sopra), misurate con
+    `--spinta` in quattro tornei sugli stessi semi
+    (`docs/la-terza-risorsa.md`, undicesima misura). Vince
+    `lampo_potenzia` 3, `lampo_sopra` resta 0: la Lampo dal 23 al 31%,
+    3,6 potenziamenti a partita invece di 2,5, i suoi 31 punti di Lampo
+    intatti; tutte e sei le strategie fra il 30 e il 38% (atteso 33,
+    errore 5), per la prima volta nessuna fuori; citta' e punti
+    invariati. Il lotto rigiocato con la tabella scritta nel bot esce
+    identico a quello della manopola. Con i dati v1.5 niente cambia.
+
