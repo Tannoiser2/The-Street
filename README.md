@@ -69,8 +69,12 @@ tools/scatta3d.sh strada.png -- --players 3 --seed 7 --era 4    # plancia 3D
 godot res://scenes/gioca.tscn
 ```
 
-Tu sei il giocatore 0, gli altri li gioca il bot. Clicca una colonna per
-piazzare un lavoratore e attivarla, poi scegli un'azione dall'elenco: ognuna
+Tu sei il giocatore 0, gli altri li gioca il bot. Nella schermata di scelta
+si decide il **regolamento**: la v2 (tre risorse, quattro lavoratori, draft
+dei Personaggi; carica `data/cards-v2.json`) o la v1.5 congelata
+(`data/cards.json`). Con la v2 ogni era comincia dal draft: clicca un
+Personaggio della fila e lo prendi, gratis. Poi clicca una colonna per
+piazzare un lavoratore e attivarla, e scegli un'azione dall'elenco: ognuna
 porta il costo, e quelle non disponibili portano il motivo. Cliccando una
 carta delle file la si legge senza chiudere il menu.
 

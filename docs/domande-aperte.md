@@ -1767,3 +1767,18 @@ dato è stato importato da lì. Ma due confronti fra ciò che è stampato e
     invariati. Il lotto rigiocato con la tabella scritta nel bot esce
     identico a quello della manopola. Con i dati v1.5 niente cambia.
 
+102. **La v2 nella schermata di gioco: l'interruttore e il draft.** Il
+    designer ("prima l'interruttore e il draft"). Nella schermata di scelta
+    c'e' la riga "Regolamento": v1.5 (`data/cards.json`) o v2
+    (`data/cards-v2.json`); il gioco parte dalla v2, i test della vista
+    dalla v1.5 (`ScelteInizio.predefinito`). `comincia()` carica il file
+    dati scelto ogni volta, cosi' si passa da un regolamento all'altro
+    senza riavviare; il canone dei bot segue il file. Il draft a schermo:
+    la scelta in sospeso di tipo "draft" si risolve cliccando la carta
+    nella fila dei Personaggi (le opzioni sono posizioni nella fila), la
+    riga di stato lo dice; il bersaglio di un'Impronta si clicca
+    sull'edificio come le scelte di sempre. La riga in alto mostra le tre
+    risorse e la carta del mercato il costo in C/D/I quando il file e' v2.
+    Restano da disegnare: le tessere girate, il quarto lavoratore sulla
+    plancia, lo scheletro del potenziamento, la rovina senza rudere.
+
