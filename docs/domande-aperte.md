@@ -1793,3 +1793,12 @@ dato è stato importato da lì. Ma due confronti fra ciò che è stampato e
     girata. Test della vista: il velo compare sulla colonna giusta dopo
     l'attivazione del fiume e il riquadro lo dice.
 
+104. **Il quarto lavoratore a schermo.** Il designer ("vai con il quarto
+    lavoratore"). Il disegno dei pupazzetti legge `p.workers`, quindi con il
+    file v2 i quattro lavoratori stavano gia' sulla bacchetta (scatto con
+    `tools/scatta3d.sh -- --dati data/cards-v2.json`, che ora carica il
+    file v2 e gioca col canone v2); il test lo fissa. Quel che mancava era
+    il resto: la Dinastia e' il quinto lavoratore e il riquadro lo dice, il
+    suo prezzo (e ogni prezzo delle azioni) si scrive anche in Idee, con
+    l'ammanco. Nella v1.5 niente cambia.
+

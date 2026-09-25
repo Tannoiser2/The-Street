@@ -61,6 +61,7 @@ func _ready() -> void:
 	_run("il cartellino della Prosperita' Urbana", _test_cartello_prosperita)
 	_run("l'interruttore del regolamento e il draft a schermo (v2)", _test_regolamento_e_draft)
 	_run("la tessera girata (v2)", _test_tessera_girata)
+	_run("il quarto lavoratore sulla bacchetta (v2)", _test_quarto_lavoratore)
 	print("\n%d superati, %d falliti" % [_passed, _failed])
 	get_tree().quit(0 if _failed == 0 else 1)
 
@@ -2541,5 +2542,42 @@ func _test_tessera_girata() -> void:
 		remove_child(s)
 		s.queue_free()
 	vista.queue_free()
+	CardDB.load_db(CardDB.DB_PATH)
+
+# Registro 104: nella v2 i lavoratori sono quattro e stanno tutti sulla
+# bacchetta; la Dinastia e' il quinto e il suo prezzo si scrive in Idee. Il
+# disegno legge `p.workers`, quindi non c'era niente da cambiare nella
+# geometria: questo test lo fissa, perche' e' quello che si vede.
+func _test_quarto_lavoratore() -> void:
+	if not FileAccess.file_exists("res://data/cards-v2.json"): return
+	CardDB.load_db("res://data/cards-v2.json")
+	var ctl := GameController.new()
+	ctl.new_game(3, 11)
+	var gs := ctl.gs
+	while not gs.pending_choice.is_empty():
+		ctl.choose(int((gs.pending_choice["options"] as Array)[0]))
+	_eq("nella v2 il giocatore ha quattro lavoratori", gs.players[0].workers, 4)
+	_eq("  e sulla bacchetta ci sono quattro pupazzetti", BoardLayout3D.meeple_liberi(gs, 0).size(), 4)
+	var bacchetta := BoardLayout3D.bacchetta_box(gs, 0)
+	var dentro := true
+	for pos in BoardLayout3D.meeple_liberi(gs, 0):
+		if pos.x < bacchetta.position.x or pos.x > bacchetta.end.x: dentro = false
+	_ok("  tutti dentro la bacchetta", dentro)
+	_ok("  e i pupazzetti della Dinastia ci sono", BoardLayout3D.meeple_dinastia(gs).size() == 3)
+	var din := AvailableActions.dinastia(gs, 0)
+	_ok("il prezzo della Dinastia si scrive in Idee: \"%s\"" % DescrizioneAzione.prezzo(din),
+		DescrizioneAzione.prezzo(din).ends_with("Idee"))
+	gs.players[0].idee = 0
+	_ok("  e l'ammanco pure: \"%s\"" % DescrizioneAzione.ammanco(din, gs.players[0]),
+		DescrizioneAzione.ammanco(din, gs.players[0]).ends_with("Idee"))
+	var s := preload("res://scenes/gioca.tscn").instantiate()
+	add_child(s)
+	s.ctl = ctl
+	var righe: PackedStringArray = s._descrivi_sotto_carta({"kind": "dinastia", "id": "pe_dinastia"})
+	_ok("  e il riquadro dice che e' il quinto: \"%s\"" % (righe[1] if righe.size() > 1 else ""),
+		righe.size() > 1 and righe[1].ends_with("quinto"))
+	s.ctl = null
+	remove_child(s)
+	s.queue_free()
 	CardDB.load_db(CardDB.DB_PATH)
 
