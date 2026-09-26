@@ -2011,5 +2011,11 @@ dato è stato importato da lì. Ma due confronti fra ciò che è stampato e
     case grandi delle ere 4-5 (Palazzetto, Condominio popolare) scendono
     da Lampo 3 a 2. Nota: a pari costo e resistenza la casa con lo Scavo
     domina la piccola nelle ere 1-4; la piccola resta la scelta solo
-    quando le due copie dell'altra sono finite. Misura a 2, 3 e 4 e vita
-    delle carte a tre (diciassettesima misura).
+    quando le due copie dell'altra sono finite. Misurato (diciassettesima
+    misura): il Lampo a testa scende di 1-1,5 punti senza toccare edifici
+    e passaggi; la casa con lo Scavo ha sostituito la piccola nelle ere
+    1-3 (0 / 87 / 4 copie su 4000), le Case popolari sono la casa piu'
+    comprata (3884 su 4000), il Palazzetto scende a 562. Lampo a tre (40 %)
+    e Rendita a quattro (32 %) restano sul bordo: e' la presenza delle
+    case, non il loro Lampo; da ritarare i bot a tre e quattro. Aperto:
+    la piccola nelle ere 1-3, che non si compra piu'.
