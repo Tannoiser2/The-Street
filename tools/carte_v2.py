@@ -174,7 +174,7 @@ for s, d in SIGLE: w(f"| **{s}** | {d} |")
 w("")
 
 # ---- edifici ------------------------------------------------------------
-w("## I 60 edifici")
+w("## I %d edifici" % len(V2["buildings"]))
 w("")
 w("Ogni edificio è una sagoma unica (punto 2 della proposta): costo, produzione, resistenza,")
 w("Rendita, Lampo e Scavo stanno sulla sagoma, che ruotata mostra il lato rovina con lo Scavo.")
@@ -182,6 +182,16 @@ w("Costo e produzione in C/D/I. \"Slot\" è la larghezza; \"liv.\" il livello mi
 w("costruito; \"esaur.\" quante attivazioni produce prima di esaurirsi (la Cava). Classi e terreno")
 w("richiesto sono quelli di oggi.")
 w("")
+riserva = [b for b in V2["buildings"] if b.get("riserva")]
+if riserva:
+    w("### Le case della riserva (registro 116)")
+    w("")
+    w("Le %d case (tre per era: la piccola, la grande e quella del borgo) non stanno nel mazzo dell'era:" % len(riserva))
+    w("sono **sempre disponibili**, tutte scoperte accanto al mercato, in %d copie ciascuna, e si" % riserva[0].get("copie", 1))
+    w("comprano come dal mercato; a fine era le copie avanzate si scartano con le file. Non producono")
+    w("e non rendono: danno Lampo (la piccola 1, la grande 2, 3 nelle ere 4-5) o Scavo (quella del")
+    w("borgo, 2). Classe civico, nessun terreno richiesto. Nelle tabelle portano la sigla **RIS**.")
+    w("")
 w("### Da dove vengono i costi")
 w("")
 w("Dalle regole di `tools/proponi_costi_v2.py` (registro 90), che scrive `data/proposte/costi-tre-risorse.json`:")
@@ -211,6 +221,9 @@ for era in range(1, 6):
     w("|---|---|---|--:|--:|--:|--:|--:|--:|---|--:|--:|---|---|---|")
     for b in sorted([b for b in V2["buildings"] if b["era"] == era], key=lambda b: b["name"]):
         testo, sigle, nota = testo_e_nota(b)
+        if b.get("riserva"):
+            sigle = ("RIS x%d" % b.get("copie", 1)) if not sigle else sigle + ", RIS x%d" % b.get("copie", 1)
+            nota = nota or "nuova: in riserva, sempre disponibile; niente lato di oggi"
         w("| %s | %s | %s | %d | %s | %d | %d | %d | %d | %s | %d | %s | %s | %s | %s |" % (
             b["name"], ", ".join(b["classes"]), NOME_TER.get(b.get("terrain")), b["width"], costo(b["cost"]),
             b["resistance"], b["rendita"], b["lampo"], b["scavo"], produzione(b["production"]),

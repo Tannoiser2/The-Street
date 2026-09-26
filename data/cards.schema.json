@@ -479,6 +479,13 @@
             "minimum": 0,
             "maximum": 4
           },
+          "riserva": {
+            "type": "boolean"
+          },
+          "copie": {
+            "type": "integer",
+            "minimum": 1
+          },
           "flexible": {
             "type": "boolean"
           },

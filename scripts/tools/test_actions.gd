@@ -42,6 +42,7 @@ func _ready() -> void:
 	_run("v2: le tessere una volta per era (registro 100)", _test_tessere_v2)
 	_run("l'incasso al passaggio nel turno v1 (registro 109)", _test_passa_incasso)
 	_run("i Monumenti rivelati e le sagome da quattro giocatori (registro 110)", _test_monumenti_e_sagome_in_piu)
+	_run("v2: le case della riserva, sempre disponibili (registro 116)", _test_riserva)
 	print("\n%d superati, %d falliti" % [_passed, _failed])
 	get_tree().quit(0 if _failed == 0 else 1)
 
@@ -1519,7 +1520,7 @@ func _test_monumenti_e_sagome_in_piu() -> void:
 
 	if FileAccess.file_exists("res://data/proposte/cards-v2-abitazioni.json"):
 		CardDB.load_db("res://data/proposte/cards-v2-abitazioni.json")
-		_eq("il file delle abitazioni ha 70 sagome", CardDB.buildings.size(), 70)
+		_eq("il file delle abitazioni ha 85 sagome (60, 15 case in riserva, 10 abitazioni)", CardDB.buildings.size(), 85)
 		var in_piu := 0
 		for b in CardDB.buildings.values():
 			if int(b.get("min_players", 0)) == 4: in_piu += 1
@@ -1531,8 +1532,60 @@ func _test_monumenti_e_sagome_in_piu() -> void:
 		for e in range(1, 6):
 			mazzo3 += (c3.gs.building_decks[e] as Array).size() + (c3.gs.market.size() if e == 1 else 0)
 			mazzo4 += (c4.gs.building_decks[e] as Array).size() + (c4.gs.market.size() if e == 1 else 0)
-		_eq("  a tre nei mazzi ce ne sono 60", mazzo3, 60)
+		_eq("  a tre nei mazzi ce ne sono 60 (le case della riserva non ci stanno)", mazzo3, 60)
 		_eq("  a quattro 70", mazzo4, 70)
 		CardDB.load_db("res://data/cards-v2.json")
-		_eq("ricaricando il file v2 le abitazioni non restano", CardDB.buildings.size(), 60)
+		_eq("ricaricando il file v2 le abitazioni non restano", CardDB.buildings.size(), 75)
+	CardDB.load_db(CardDB.DB_PATH)
+
+
+# Registro 116: le case non stanno nel mazzo dell'era, stanno nella riserva,
+# tutte scoperte con le loro copie; si comprano come dal mercato, senza
+# rimpiazzo; a fine era la riserva e' quella dell'era nuova. Nella v1.5 la
+# riserva e' vuota.
+func _test_riserva() -> void:
+	var g1 := _game(3, 41).gs
+	_ok("nella v1.5 la riserva e' vuota", g1.riserva.is_empty())
+	if not FileAccess.file_exists("res://data/cards-v2.json"): return
+	CardDB.load_db("res://data/cards-v2.json")
+	var ctl := _game(3, 41)
+	var gs := ctl.gs
+	while not gs.pending_choice.is_empty():
+		ctl.choose(int((gs.pending_choice["options"] as Array)[0]))
+	_eq("nella v2 la riserva dell'era 1 ha sei voci: tre case per due copie", gs.riserva.size(), 6)
+	var tipi := {}
+	for id in gs.riserva: tipi[id] = int(tipi.get(id, 0)) + 1
+	_eq("  tre tipi", tipi.size(), 3)
+	_ok("  due copie ciascuno", tipi.values().all(func(n): return int(n) == 2))
+	var nel_mazzo := 0
+	for e in range(1, 6):
+		for id in gs.building_decks[e]:
+			if bool(CardDB.buildings[id].get("riserva", false)): nel_mazzo += 1
+	for id in gs.market:
+		if bool(CardDB.buildings[id].get("riserva", false)): nel_mazzo += 1
+	_eq("  e nessuna casa sta nel mazzo o nel mercato", nel_mazzo, 0)
+	_eq("  in vendita c'e' il mercato piu' la riserva", gs.in_vendita().size(), gs.market.size() + 6)
+	var casa: String = gs.riserva[0]
+	var p := gs.current_player()
+	p.pietra = 5; p.oro = 5; p.idee = 5
+	_ok("si attiva una colonna", ctl.place_worker(0))
+	var mercato_prima := gs.market.duplicate()
+	var costruita := false
+	for c in gs.grid.n_cols:
+		if ctl.build(casa, c, false):
+			costruita = true
+			break
+	_ok("  e si costruisce una casa dalla riserva", costruita)
+	_eq("  che perde una copia", gs.riserva.count(casa), 1)
+	_eq("  e il mercato non si tocca", gs.market, mercato_prima)
+	var copia := gs.duplica()
+	_eq("la copia della partita porta la riserva", copia.riserva, gs.riserva)
+	# A fine era la riserva e' quella dell'era nuova.
+	var guard := 0
+	while gs.era == 1 and gs.phase != Enums.Phase.FINE_PARTITA and guard < 200:
+		StrategyBot.play_turn(ctl, "bilanciata")
+		guard += 1
+	if gs.era == 2:
+		_eq("nell'era 2 la riserva e' di nuovo piena", gs.riserva.size(), 6)
+		_ok("  con le case dell'era 2", gs.riserva.all(func(id): return int(CardDB.buildings[id]["era"]) == 2))
 	CardDB.load_db(CardDB.DB_PATH)

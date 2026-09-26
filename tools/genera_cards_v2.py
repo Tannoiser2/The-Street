@@ -252,21 +252,29 @@ def case_nulle(v): case(v, "nulle")
 # 4-5) e la casa con Scavo (costa 1, Lampo 0, Scavo 2); resistenza bassa,
 # niente produzione, niente Rendita. Una copia per tipo: tre sagome per era,
 # quindici in tutto, 75 sagome.
-def case_tutti(v):
+# Registro 116: le case stanno nel file v2, per tutti, NELLA RISERVA (sempre
+# disponibili, non nel mazzo dell'era) con due copie ciascuna: "due copie di
+# ognuna e poi il giocatore decide cosa comprare; sono sempre disponibili,
+# non vengono pescate".
+def case_tutti(v, riserva=False, copie=1):
     for era, taglie in CASE.items():
         (nome_p, costo_p, res_p, lampo_p), (nome_g, costo_g, res_g, lampo_g) = taglie
         tipi = [("p", nome_p, costo_p, res_p, lampo_p, 1),
                 ("g", nome_g, costo_g, res_g, lampo_g, 1),
                 ("s", nome_p + " del borgo", costo_p, res_p, 0, 2)]
         for sigla, nome, costo, res, lampo, scavo in tipi:
-            v["buildings"].append({
+            b = {
                 "id": "ed_casa_e%d_%s" % (era, sigla), "name": nome, "era": era,
                 "classes": ["civico"], "terrain": None, "width": 1,
                 "cost": dict(costo), "flexible": False, "resistance": res,
                 "rendita": 0, "lampo": lampo, "scavo": scavo, "level_required": 0,
                 "production": {"pietra": 0, "oro": 0, "cultura": 0, "idee": 0},
                 "exhaustible": 0,
-            })
+            }
+            if riserva:
+                b["riserva"] = True
+                b["copie"] = copie
+            v["buildings"].append(b)
 # "mista": la piccola da' Lampo 1 (e Scavo 1), la grande niente Lampo e Scavo 3.
 def case_mista(v):
     case(v, "lampo")
@@ -302,6 +310,9 @@ def case_doppioni(v):
 
 import sys
 variante = sys.argv[sys.argv.index("--variante") + 1] if "--variante" in sys.argv else ""
+# Le case in riserva stanno nel file v2 di tutti (registro 116); le varianti di
+# prova ci si aggiungono sopra, come misura.
+case_tutti(v2, riserva=True, copie=2)
 if variante:
     {"doppioni": doppioni, "abitazioni": abitazioni, "case": case,
      "case_doppioni": case_doppioni, "case_scavo": case_scavo, "case_nulle": case_nulle,

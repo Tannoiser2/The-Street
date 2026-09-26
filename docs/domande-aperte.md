@@ -1976,3 +1976,16 @@ dato è stato importato da lì. Ma due confronti fra ciò che è stampato e
     punti perche' diluiscono il mercato; kingmaker 8/12/13%. Il mercato a 8
     non cambia niente: si lascia a 6. Da decidere: tre per era una copia,
     o due copie della piccola. Il file v2 non cambia finche' non si decide.
+
+116. **Le case nel file v2: in riserva, due copie.** Decisione del designer
+    dopo il punto 115 ("confermo, ma farei due copie di ognuna, poi il
+    giocatore decide cosa comprare; sono sempre disponibili, non vengono
+    pescate"). Le quindici case (tre per era) stanno nel file v2 per tutti
+    i tavoli con `riserva` vero e `copie` 2: non entrano nel mazzo
+    dell'era, a inizio era si scoprono tutte accanto al mercato
+    (`gs.riserva`, una voce per copia), si comprano come dal mercato senza
+    rimpiazzo e a fine era le avanzate si scartano. Bot, azioni e vista
+    guardano `gs.in_vendita()`, mercato piu' riserva; nella v1.5 la riserva
+    e' vuota e il riferimento e' identico. Il documento delle carte le
+    porta con la sigla RIS; il regolamento ha la riserva e le case. Misura
+    a 2, 3 e 4 sul torneo corretto (sedicesima misura).

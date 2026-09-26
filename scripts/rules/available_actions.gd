@@ -52,7 +52,7 @@ static func _partenze(gs: GameState, col: int, w: int) -> Array[int]:
 # spiegazione e' la cosa che rende un'interfaccia incomprensibile.
 static func costruzioni(gs: GameState, player: int, col: int) -> Array[Voce]:
 	var out: Array[Voce] = []
-	for card_id in gs.market:
+	for card_id in gs.in_vendita():
 		var d: Dictionary = CardDB.buildings[card_id]
 		var migliore = null
 		var migliori_par := {}

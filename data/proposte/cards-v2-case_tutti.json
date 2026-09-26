@@ -2284,6 +2284,456 @@
         "cultura": 0,
         "idee": 0
       },
+      "exhaustible": 0,
+      "riserva": true,
+      "copie": 2
+    },
+    {
+      "id": "ed_casa_e1_g",
+      "name": "Case di pietra",
+      "era": 1,
+      "classes": [
+        "civico"
+      ],
+      "terrain": null,
+      "width": 1,
+      "cost": {
+        "pietra": 2,
+        "oro": 0,
+        "idee": 0
+      },
+      "flexible": false,
+      "resistance": 2,
+      "rendita": 0,
+      "lampo": 2,
+      "scavo": 1,
+      "level_required": 0,
+      "production": {
+        "pietra": 0,
+        "oro": 0,
+        "cultura": 0,
+        "idee": 0
+      },
+      "exhaustible": 0,
+      "riserva": true,
+      "copie": 2
+    },
+    {
+      "id": "ed_casa_e1_s",
+      "name": "Capanne di fango del borgo",
+      "era": 1,
+      "classes": [
+        "civico"
+      ],
+      "terrain": null,
+      "width": 1,
+      "cost": {
+        "pietra": 1,
+        "oro": 0,
+        "idee": 0
+      },
+      "flexible": false,
+      "resistance": 1,
+      "rendita": 0,
+      "lampo": 0,
+      "scavo": 2,
+      "level_required": 0,
+      "production": {
+        "pietra": 0,
+        "oro": 0,
+        "cultura": 0,
+        "idee": 0
+      },
+      "exhaustible": 0,
+      "riserva": true,
+      "copie": 2
+    },
+    {
+      "id": "ed_casa_e2_p",
+      "name": "Case a schiera",
+      "era": 2,
+      "classes": [
+        "civico"
+      ],
+      "terrain": null,
+      "width": 1,
+      "cost": {
+        "pietra": 1,
+        "oro": 0,
+        "idee": 0
+      },
+      "flexible": false,
+      "resistance": 2,
+      "rendita": 0,
+      "lampo": 1,
+      "scavo": 1,
+      "level_required": 0,
+      "production": {
+        "pietra": 0,
+        "oro": 0,
+        "cultura": 0,
+        "idee": 0
+      },
+      "exhaustible": 0,
+      "riserva": true,
+      "copie": 2
+    },
+    {
+      "id": "ed_casa_e2_g",
+      "name": "Domus",
+      "era": 2,
+      "classes": [
+        "civico"
+      ],
+      "terrain": null,
+      "width": 1,
+      "cost": {
+        "pietra": 2,
+        "oro": 0,
+        "idee": 0
+      },
+      "flexible": false,
+      "resistance": 3,
+      "rendita": 0,
+      "lampo": 2,
+      "scavo": 1,
+      "level_required": 0,
+      "production": {
+        "pietra": 0,
+        "oro": 0,
+        "cultura": 0,
+        "idee": 0
+      },
+      "exhaustible": 0,
+      "riserva": true,
+      "copie": 2
+    },
+    {
+      "id": "ed_casa_e2_s",
+      "name": "Case a schiera del borgo",
+      "era": 2,
+      "classes": [
+        "civico"
+      ],
+      "terrain": null,
+      "width": 1,
+      "cost": {
+        "pietra": 1,
+        "oro": 0,
+        "idee": 0
+      },
+      "flexible": false,
+      "resistance": 2,
+      "rendita": 0,
+      "lampo": 0,
+      "scavo": 2,
+      "level_required": 0,
+      "production": {
+        "pietra": 0,
+        "oro": 0,
+        "cultura": 0,
+        "idee": 0
+      },
+      "exhaustible": 0,
+      "riserva": true,
+      "copie": 2
+    },
+    {
+      "id": "ed_casa_e3_p",
+      "name": "Case a graticcio",
+      "era": 3,
+      "classes": [
+        "civico"
+      ],
+      "terrain": null,
+      "width": 1,
+      "cost": {
+        "pietra": 1,
+        "oro": 0,
+        "idee": 0
+      },
+      "flexible": false,
+      "resistance": 2,
+      "rendita": 0,
+      "lampo": 1,
+      "scavo": 1,
+      "level_required": 0,
+      "production": {
+        "pietra": 0,
+        "oro": 0,
+        "cultura": 0,
+        "idee": 0
+      },
+      "exhaustible": 0,
+      "riserva": true,
+      "copie": 2
+    },
+    {
+      "id": "ed_casa_e3_g",
+      "name": "Casa torre",
+      "era": 3,
+      "classes": [
+        "civico"
+      ],
+      "terrain": null,
+      "width": 1,
+      "cost": {
+        "pietra": 1,
+        "oro": 1,
+        "idee": 0
+      },
+      "flexible": false,
+      "resistance": 3,
+      "rendita": 0,
+      "lampo": 2,
+      "scavo": 1,
+      "level_required": 0,
+      "production": {
+        "pietra": 0,
+        "oro": 0,
+        "cultura": 0,
+        "idee": 0
+      },
+      "exhaustible": 0,
+      "riserva": true,
+      "copie": 2
+    },
+    {
+      "id": "ed_casa_e3_s",
+      "name": "Case a graticcio del borgo",
+      "era": 3,
+      "classes": [
+        "civico"
+      ],
+      "terrain": null,
+      "width": 1,
+      "cost": {
+        "pietra": 1,
+        "oro": 0,
+        "idee": 0
+      },
+      "flexible": false,
+      "resistance": 2,
+      "rendita": 0,
+      "lampo": 0,
+      "scavo": 2,
+      "level_required": 0,
+      "production": {
+        "pietra": 0,
+        "oro": 0,
+        "cultura": 0,
+        "idee": 0
+      },
+      "exhaustible": 0,
+      "riserva": true,
+      "copie": 2
+    },
+    {
+      "id": "ed_casa_e4_p",
+      "name": "Casa borghese",
+      "era": 4,
+      "classes": [
+        "civico"
+      ],
+      "terrain": null,
+      "width": 1,
+      "cost": {
+        "pietra": 0,
+        "oro": 0,
+        "idee": 1
+      },
+      "flexible": false,
+      "resistance": 2,
+      "rendita": 0,
+      "lampo": 2,
+      "scavo": 1,
+      "level_required": 0,
+      "production": {
+        "pietra": 0,
+        "oro": 0,
+        "cultura": 0,
+        "idee": 0
+      },
+      "exhaustible": 0,
+      "riserva": true,
+      "copie": 2
+    },
+    {
+      "id": "ed_casa_e4_g",
+      "name": "Palazzetto",
+      "era": 4,
+      "classes": [
+        "civico"
+      ],
+      "terrain": null,
+      "width": 1,
+      "cost": {
+        "pietra": 0,
+        "oro": 1,
+        "idee": 1
+      },
+      "flexible": false,
+      "resistance": 3,
+      "rendita": 0,
+      "lampo": 3,
+      "scavo": 1,
+      "level_required": 0,
+      "production": {
+        "pietra": 0,
+        "oro": 0,
+        "cultura": 0,
+        "idee": 0
+      },
+      "exhaustible": 0,
+      "riserva": true,
+      "copie": 2
+    },
+    {
+      "id": "ed_casa_e4_s",
+      "name": "Casa borghese del borgo",
+      "era": 4,
+      "classes": [
+        "civico"
+      ],
+      "terrain": null,
+      "width": 1,
+      "cost": {
+        "pietra": 0,
+        "oro": 0,
+        "idee": 1
+      },
+      "flexible": false,
+      "resistance": 2,
+      "rendita": 0,
+      "lampo": 0,
+      "scavo": 2,
+      "level_required": 0,
+      "production": {
+        "pietra": 0,
+        "oro": 0,
+        "cultura": 0,
+        "idee": 0
+      },
+      "exhaustible": 0,
+      "riserva": true,
+      "copie": 2
+    },
+    {
+      "id": "ed_casa_e5_p",
+      "name": "Palazzina",
+      "era": 5,
+      "classes": [
+        "civico"
+      ],
+      "terrain": null,
+      "width": 1,
+      "cost": {
+        "pietra": 0,
+        "oro": 0,
+        "idee": 1
+      },
+      "flexible": false,
+      "resistance": 3,
+      "rendita": 0,
+      "lampo": 2,
+      "scavo": 1,
+      "level_required": 0,
+      "production": {
+        "pietra": 0,
+        "oro": 0,
+        "cultura": 0,
+        "idee": 0
+      },
+      "exhaustible": 0,
+      "riserva": true,
+      "copie": 2
+    },
+    {
+      "id": "ed_casa_e5_g",
+      "name": "Condominio popolare",
+      "era": 5,
+      "classes": [
+        "civico"
+      ],
+      "terrain": null,
+      "width": 1,
+      "cost": {
+        "pietra": 0,
+        "oro": 1,
+        "idee": 1
+      },
+      "flexible": false,
+      "resistance": 4,
+      "rendita": 0,
+      "lampo": 3,
+      "scavo": 1,
+      "level_required": 0,
+      "production": {
+        "pietra": 0,
+        "oro": 0,
+        "cultura": 0,
+        "idee": 0
+      },
+      "exhaustible": 0,
+      "riserva": true,
+      "copie": 2
+    },
+    {
+      "id": "ed_casa_e5_s",
+      "name": "Palazzina del borgo",
+      "era": 5,
+      "classes": [
+        "civico"
+      ],
+      "terrain": null,
+      "width": 1,
+      "cost": {
+        "pietra": 0,
+        "oro": 0,
+        "idee": 1
+      },
+      "flexible": false,
+      "resistance": 3,
+      "rendita": 0,
+      "lampo": 0,
+      "scavo": 2,
+      "level_required": 0,
+      "production": {
+        "pietra": 0,
+        "oro": 0,
+        "cultura": 0,
+        "idee": 0
+      },
+      "exhaustible": 0,
+      "riserva": true,
+      "copie": 2
+    },
+    {
+      "id": "ed_casa_e1_p",
+      "name": "Capanne di fango",
+      "era": 1,
+      "classes": [
+        "civico"
+      ],
+      "terrain": null,
+      "width": 1,
+      "cost": {
+        "pietra": 1,
+        "oro": 0,
+        "idee": 0
+      },
+      "flexible": false,
+      "resistance": 1,
+      "rendita": 0,
+      "lampo": 1,
+      "scavo": 1,
+      "level_required": 0,
+      "production": {
+        "pietra": 0,
+        "oro": 0,
+        "cultura": 0,
+        "idee": 0
+      },
       "exhaustible": 0
     },
     {
