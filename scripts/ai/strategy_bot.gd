@@ -476,8 +476,12 @@ const SPINTE_V1 := {"rendita_per_era": 0.9, "rendita_zero": -1.5, "lampo": 1.6, 
 # attesa 2 (il valutatore conta l'edificio protetto), la Scavo costruisce a
 # terra le carte con lo Scavo alto invece di passare; le altre spinte
 # restano quelle della v1.5, perche' abbassarle non aiutava.
+# Registro 114: col torneo su tutte le combinazioni (`--giro tutte`) la Scavo
+# era la debole a due e a tre (38% e 26%), e spingerla di piu' la peggiorava:
+# le spinte sono handicap rispetto al valutatore comune, non aiuti. A meta'
+# (premio 0,4, Scavo a terra 0,25) torna nella media a tutti e due i tavoli.
 const SPINTE_V2 := {"rendita_per_era": 0.9, "rendita_zero": -1.5, "lampo": 1.6, "lampo_zero": -1.0,
-	"scavo_premio": 0.8, "scavo_terra": -0.5, "scavo_terra_scavo": 0.5, "protezione_attesa": 2.0,
+	"scavo_premio": 0.4, "scavo_terra": -0.5, "scavo_terra_scavo": 0.25, "protezione_attesa": 2.0,
 	"lampo_potenzia": 3.0, "lampo_sopra": 0.0, "obiettivi_peso": 1.0, "continuita_peso": 1.0}
 # LE SPINTE PER NUMERO DI GIOCATORI (registro 114). Le regole non cambiano
 # col numero di giocatori (registro 113), i bot si': a due la Continuita'
@@ -485,7 +489,9 @@ const SPINTE_V2 := {"rendita_per_era": 0.9, "rendita_zero": -1.5, "lampo": 1.6, 
 # Lampo il 20%. Qui, per la v2, la tabella di un tavolo sovrascrive le voci
 # della tabella base; il tavolo lo dice `giocatori`, che `play_turn` legge
 # dalla partita. Vuota dove la tabella base va bene.
-const SPINTE_V2_PER_GIOCATORI := {2: {}, 4: {}}
+# A quattro la Lampo vinceva il 18%: con meta' peso al Lampo delle carte e
+# piu' ai potenziamenti (5) sale al 26%, e la Rendita scende da 36 a 32.
+const SPINTE_V2_PER_GIOCATORI := {2: {}, 4: {"lampo": 0.8, "lampo_potenzia": 5.0}}
 static var giocatori := 0
 static var spinte_override := {}
 
