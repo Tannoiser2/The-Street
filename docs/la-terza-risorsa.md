@@ -977,6 +977,30 @@ ritoccano i bot, non da correggere nelle regole.
 **4. Il kingmaker non si muove.** 10 / 14 / 15 % contro 12 / 15 / 15 % senza case: la riserva
 non aggiunge bottino all'ultima era (quota era 5: 42 / 38 / 36 %).
 
+**5. Quali case si comprano (vita delle carte a tre, 2000 partite).** Copie costruite su
+4000 disponibili (due per partita), per era: piccola / grande / con lo Scavo.
+
+| era | 1 | 2 | 3 | 4 | 5 |
+|---|--:|--:|--:|--:|--:|
+| piccola | 181 | 1182 | 206 | 3097 | 3234 |
+| grande | 1611 | 411 | 3147 | **3989** | **3969** |
+| con lo Scavo | 0 | 2 | 0 | 96 | – |
+| case a partita | 0,9 | 0,8 | 1,7 | 3,6 | 3,6 |
+
+Tre cose. **Le case con lo Scavo non le compra nessuno**: 98 costruzioni su 16 000 copie. Alla
+stessa spesa c'è la piccola con Lampo 1, e Scavo 2 paga solo se qualcuno costruisce sopra una
+sagoma da resistenza 1–2: per il bot non vale mai, e il ragionamento regge anche per un
+giocatore. **Le case delle ere 4–5 finiscono quasi ogni partita**: il Palazzetto (1 Denaro,
+1 Idea, Lampo 3) e il Condominio popolare escono in 3989 e 3969 copie su 4000, la Casa borghese
+e la Palazzina in tre su quattro; nelle ere 4–5 si costruiscono 3,6 case a partita, più di una
+a testa per era. Nelle ere 1–3 le case sono un ripiego (0,8–1,7 a partita), come dovevano
+essere. In tutto **10,7 case a partita a tre, 3,6 a testa** su 15,1 edifici: le case danno
+8,1 Lampo a testa, un terzo del Lampo totale. Il Lampo 3 a costo 2 nelle ere 4–5 è più
+efficiente di gran parte del mazzo, ed è per questo che tutti lo comprano.
+
+Da decidere: se le case con lo Scavo restano (oggi sono quattro sagome che non si giocano), e
+se il Lampo delle case grandi nelle ere 4–5 va portato a 2 per farne un ripiego anche lì.
+
 ## Come rifare il conto
 
 ```bash

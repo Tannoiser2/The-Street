@@ -1996,4 +1996,9 @@ dato è stato importato da lì. Ma due confronti fra ciò che è stampato e
     niente (84 PV contro 83), perche' il mazzo dell'era non e' diluito;
     kingmaker 10 / 14 / 15 %. Due strategie sul bordo: Lampo a tre 39 %
     (bordo 38), Rendita a quattro 33 % (bordo 29). Si tiene cosi'; da
-    rimisurare se si ritoccano i bot.
+    rimisurare se si ritoccano i bot. La vita delle carte a tre dice
+    pero' che le case con lo Scavo non le compra nessuno (98 costruzioni
+    su 16 000 copie: alla stessa spesa c'e' la piccola con Lampo 1) e che
+    le case grandi delle ere 4-5 (Lampo 3 a costo 2) finiscono quasi ogni
+    partita (3989 e 3969 copie su 4000); 3,6 case a testa a tre. Aperto:
+    tenere le case con lo Scavo, e il Lampo 3 delle grandi nelle ere 4-5.
