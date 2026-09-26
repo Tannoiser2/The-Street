@@ -816,22 +816,26 @@ static func side_cards(gs: GameState, umano := -1) -> Array[Dictionary]:
 # tabellone, sospesa nel nulla; in due file ci stanno tutte dentro.
 # Le file sono appoggiate al bordo verso la strada, cosi' le carte la
 # guardano invece di ballare al centro.
+# LA RISERVA (registro 116) sta in fila col mercato, dopo: sono le case che
+# si comprano allo stesso modo, e una copia per voce, cosi' si vede quante
+# ne restano.
 static func _fila_sinistra(gs: GameState) -> Array[Dictionary]:
 	var out: Array[Dictionary] = []
-	if gs.market.is_empty(): return out
+	var vendita: Array = gs.in_vendita()
+	if vendita.is_empty(): return out
 	var m := misura_carta("mercato")
-	var per_fila: int = int(ceil(gs.market.size() / 2.0))
-	var righe: int = mini(per_fila, gs.market.size())
+	var per_fila: int = int(ceil(vendita.size() / 2.0))
+	var righe: int = mini(per_fila, vendita.size())
 	var alto := righe * m.y + maxf(0.0, righe - 1) * CARTA_GAP
 	var z0 := board_d() / 2.0 - alto / 2.0
 	# Il bordo destro del blocco tocca lo stacco dalla strada; la fila con la
 	# x piu' grande e' quella vicina alla strada.
-	var quante_file: int = 1 if gs.market.size() <= per_fila else 2
+	var quante_file: int = 1 if vendita.size() <= per_fila else 2
 	var x0 := -(BORDO + quante_file * m.x + (quante_file - 1) * CARTA_GAP)
-	for i in gs.market.size():
+	for i in vendita.size():
 		var fila := i / per_fila
 		var riga := i % per_fila
-		out.append({"kind": "mercato", "id": str(gs.market[i]),
+		out.append({"kind": "mercato", "id": str(vendita[i]),
 			"aabb": AABB(
 				Vector3(x0 + fila * (m.x + CARTA_GAP), 0.0, z0 + riga * (m.y + CARTA_GAP)),
 				Vector3(m.x, TESSERA_Y, m.y))})

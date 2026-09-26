@@ -68,7 +68,7 @@ static func _own_standing(gs: GameState, p: PlayerState, col: int) -> Building:
 
 static func _try_build(ctl: GameController, col: int) -> bool:
 	var gs := ctl.gs
-	for card_id in gs.market.duplicate():
+	for card_id in gs.in_vendita():
 		for c in range(max(0, col - 1), min(gs.grid.n_cols, col + 2)):
 			# ogni tanto prova anche a depredare un rudere vicino
 			var despoil: Building = _ruin_near(gs, c) if gs.rng.randi_range(0, 2) == 0 else null
@@ -136,7 +136,7 @@ static func _play_turn_v2(ctl: GameController, p: PlayerState) -> void:
 				var col := _free_column(gs, p)
 				if col >= 0 and ctl.place_worker(col): return
 			1:
-				for card_id in gs.market.duplicate():
+				for card_id in gs.in_vendita():
 					for c in gs.grid.n_cols:
 						for above in [false, true]:
 							if ctl.build(card_id, c, above): return

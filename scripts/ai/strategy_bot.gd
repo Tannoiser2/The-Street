@@ -78,7 +78,7 @@ const VALORE_MEDIO := 0.8
 static func valore_risorse(gs: GameState, p: PlayerState) -> Vector2:
 	var chiede_p := 0.0
 	var chiede_o := 0.0
-	for id in gs.market:
+	for id in gs.in_vendita():
 		var c: Dictionary = CardDB.buildings[id]["cost"]
 		chiede_p += float(c["pietra"])
 		chiede_o += float(c["oro"])
@@ -300,7 +300,7 @@ static func _valore_incasso(gs: GameState, p: PlayerState, dp: int, do: int, di:
 	var max_o := tetto
 	var max_i := tetto
 	if not ultimo:
-		for id in gs.market:
+		for id in gs.in_vendita():
 			var c: Dictionary = CardDB.buildings[id]["cost"]
 			max_p = maxi(max_p, int(c["pietra"]))
 			max_o = maxi(max_o, int(c["oro"]))
@@ -344,7 +344,7 @@ static func _play_turn_v2(ctl: GameController, p: PlayerState, strategia: String
 static func _opzioni_v2(gs: GameState, player: int, r: Vector2) -> Array:
 	var p: PlayerState = gs.players[player]
 	var out := []
-	for card_id in gs.market:
+	for card_id in gs.in_vendita():
 		for v in AvailableActions.piazzamenti_ovunque(gs, player, card_id):
 			if v.pagabile(p): out.append(v)
 	for v in AvailableActions.potenziamenti_ovunque(gs, player):
@@ -373,7 +373,7 @@ static func _opzioni(gs: GameState, player: int, col: int) -> Array:
 	# costruzione che vale poco, che e' il punto della regola.
 	if bool(CardDB.constants.get("passa_incasso", false)) and not bool(CardDB.constants.get("turno_v2", false)):
 		out.append(AvailableActions.passa(_risorsa_da_passare(p, valore_risorse(gs, p))))
-	for card_id in gs.market:
+	for card_id in gs.in_vendita():
 		for v in AvailableActions.piazzamenti(gs, player, col, card_id):
 			if v.pagabile(p): out.append(v)
 	for v in AvailableActions.potenziamenti(gs, player, col):

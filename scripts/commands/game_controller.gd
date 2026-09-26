@@ -42,8 +42,10 @@ func new_game(n_players: int, seed_value: int) -> void:
 		# Le sagome "da N giocatori in su" (`min_players`, registro 110: i
 		# doppioni e le abitazioni di prova a quattro) entrano nel mazzo solo
 		# se al tavolo ci sono abbastanza giocatori, come le tessere in piu'.
+		# Le case della riserva (registro 116) non stanno nel mazzo: si
+		# scoprono tutte a inizio era, con le loro copie.
 		var ids := CardDB.buildings_of_era(e).filter(
-			func(b): return int(b.get("min_players", 0)) <= n_players
+			func(b): return int(b.get("min_players", 0)) <= n_players and not bool(b.get("riserva", false))
 		).map(func(b): return b["id"])
 		_shuffle(ids)
 		gs.building_decks[e] = ids
@@ -84,6 +86,12 @@ func _start_era(era: int) -> void:
 	gs.era = era
 	gs.market.clear()
 	_refill(gs.market, gs.building_decks[era], int(CardDB.constants["market_size"]))
+	# LA RISERVA (registro 116): le case dell'era, tutte scoperte, una voce
+	# per copia; quelle dell'era prima si scartano come le file.
+	gs.riserva.clear()
+	for b in CardDB.buildings_of_era(era):
+		if not bool(b.get("riserva", false)): continue
+		for k in int(b.get("copie", 1)): gs.riserva.append(str(b["id"]))
 	# "quando un'era finisce, le file non usate si scartano": si riparte da zero.
 	gs.char_row.clear()
 	gs.upg_row.clear()
@@ -333,7 +341,7 @@ func build(card_id: String, col_from: int, above: bool, pay_option: int = 0, des
 	if not gs.pending_choice.is_empty(): return false
 	# V2: si costruisce in qualsiasi colonna legale (D9), non solo vicino alla attivata.
 	if not turno_v2() and abs(col_from - gs.colonna_attivata) > 1: return false
-	if not card_id in gs.market: return false
+	if not card_id in gs.market and not card_id in gs.riserva: return false
 	var p := gs.current_player()
 	var data: Dictionary = CardDB.buildings[card_id]
 	var q := BuildRules.quote_above(gs, p.index, data, col_from, despoil) if above \
@@ -436,8 +444,12 @@ func build(card_id: String, col_from: int, above: bool, pay_option: int = 0, des
 	if int(data["lampo"]) > 0:
 		p.add_vp("lampo", int(data["lampo"]))
 		b.rende("lampo", int(data["lampo"]))
-	gs.market.erase(card_id)
-	_refill(gs.market, gs.building_decks[gs.era], int(CardDB.constants["market_size"]))
+	# Dal mercato si rimpiazza; dalla riserva se ne va una copia e basta.
+	if card_id in gs.market:
+		gs.market.erase(card_id)
+		_refill(gs.market, gs.building_decks[gs.era], int(CardDB.constants["market_size"]))
+	else:
+		gs.riserva.erase(card_id)
 	_spendi_lavoratore("costruisci")
 	if turno_v2():
 		# Il lavoratore va sull'edificio nuovo: +2 per l'era, e attiva solo

@@ -15,6 +15,10 @@ var turn_pos: int = 0               # posizione nel giro normale
 var current_index: int = -1         # giocatore di turno (puo' non seguire turn_pos: snake)
 var current_event: Dictionary = {}
 var market: Array = []             # id edifici visibili
+# LA RISERVA (registro 116): le case dell'era, sempre disponibili, con le loro
+# copie (un id per copia). Non stanno nel mazzo: si comprano come dal mercato
+# e a fine era si scartano con le file.
+var riserva: Array = []
 var building_decks: Dictionary = {}# era -> Array di id
 var char_decks: Dictionary = {}    # era -> Array di id
 var upg_decks: Dictionary = {}     # era -> Array di id
@@ -73,6 +77,7 @@ func duplica() -> GameState:
 	g.current_index = current_index
 	g.current_event = current_event          # carta, condivisa
 	g.market = market.duplicate()
+	g.riserva = riserva.duplicate()
 	g.building_decks = building_decks.duplicate(true)
 	g.char_decks = char_decks.duplicate(true)
 	g.upg_decks = upg_decks.duplicate(true)
@@ -99,3 +104,10 @@ func log_line(s: String) -> void:
 func new_uid() -> int:
 	next_uid += 1
 	return next_uid - 1
+
+# Quello che si puo' costruire adesso: il mercato e la riserva delle case.
+# E' l'unica lista che bot, azioni e vista devono guardare.
+func in_vendita() -> Array:
+	var out := market.duplicate()
+	out.append_array(riserva)
+	return out

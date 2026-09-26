@@ -49,6 +49,7 @@ tabellone; girata mostra il lato rovina, con il valore di Scavo in vista.
 |---|--:|
 | Tessere terreno | 11 (4 pianura, 2 fiume, 2 collina, 3 bosco) |
 | Sagome edificio | 60 (12 per era) |
+| Case della riserva | 28 (3 tipi per era, 2 nell'era Moderna, 2 copie ciascuno) |
 | Personaggi | 25 (5 per era) + 4 Dinastia |
 | Potenziamenti | 25 |
 | Eventi | 24 (6 per era, ere 1–4) |
@@ -90,10 +91,22 @@ Ogni giocatore prende 4 lavoratori, le basette e i gettoni del proprio colore e 
 due giocatori, il secondo riceve anche 1 Denaro.
 
 Separate le sagome per era in cinque mazzi e scoprite il mercato dell'Era 1: sei edifici
-visibili. Accanto, una fila da tre potenziamenti dell'era corrente. I cinque Personaggi dell'era
-si scoprono tutti: sono le carte del draft. Ogni sagoma o potenziamento preso viene subito
-rimpiazzato; quando un'era finisce, le file non usate si scartano — il passato non si costruisce
-più.
+visibili. Accanto al mercato mettete **la riserva**: le case dell'era, tre tipi in due copie (due tipi
+nell'era Moderna), tutte scoperte. Accanto, una fila da tre potenziamenti dell'era corrente. I cinque Personaggi
+dell'era si scoprono tutti: sono le carte del draft. Ogni sagoma o potenziamento preso dal
+mercato o dalle file viene subito rimpiazzato; una casa presa dalla riserva no: quando le copie
+finiscono, finiscono. Quando un'era finisce, le file non usate e le case avanzate si scartano —
+il passato non si costruisce più.
+
+#### Le case
+
+Ogni era ha tre case generiche, in due copie: la **casa piccola** (costa 1, poca resistenza,
+Lampo 1), la **casa grande** (costa 2, Lampo 2, 3 nelle ere 4–5) e la **casa con lo Scavo**
+(Ripari, Tuguri, Casupole, Case popolari: costa 1, niente Lampo, Scavo 2). Nell'era Moderna la
+casa con lo Scavo non c'è: dopo l'ultima era nessuno costruisce più sopra, e lo Scavo non vale.
+Non producono e non rendono: sono suolo a buon mercato e un rientro annacquato di punti, per chi
+non trova niente nel mercato o vuole riempire una colonna. Classe civico, nessun terreno
+richiesto. Sono uguali a ogni numero di giocatori.
 
 Mescolate i sei eventi di ciascuna era e rivelate quello dell'Era 1: tutti devono sapere in
 anticipo cosa arriverà alla fine. Rivelate tanti Monumenti celebri quanti sono i giocatori meno
@@ -166,7 +179,8 @@ gira: per quell'era il Centro ha già dato. A inizio era si rigirano tutti.
 ## Costruire — A terra, o sopra il passato
 
 Costruire significa pagare il costo della sagoma e metterla sul tabellone, nella colonna che avete
-attivato o in una adiacente. Si costruiscono solo edifici dell'era corrente, dal mercato.
+attivato o in una adiacente. Si costruiscono solo edifici dell'era corrente, dal mercato o dalla
+riserva delle case.
 L'edificio occupa 1, 2 o 3 caselle contigue secondo la sua taglia. Ci sono due modi.
 
 ### Costruire a terra
@@ -281,7 +295,8 @@ vostro edificio in piedi paga la sua Rendita stampata.
 e scarta il resto a sua scelta. Fra un'era e l'altra passano generazioni, e i granai non
 attraversano i secoli.
 
-**Il ricambio**: i lavoratori tornano ai proprietari, i Personaggi dell'era si scartano, le
+**Il ricambio**: i lavoratori tornano ai proprietari, i Personaggi dell'era e le case avanzate
+si scartano, le
 tessere e i cartellini della Prosperità si rigirano, si scartano le file vecchie, si aprono
 quelle dell'era nuova e si rivela il nuovo evento.
 

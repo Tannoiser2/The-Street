@@ -71,7 +71,7 @@ godot res://scenes/gioca.tscn
 
 Tu sei il giocatore 0, gli altri li gioca il bot. Nella schermata di scelta
 si decide il **regolamento**: la v2 (tre risorse, quattro lavoratori, draft
-dei Personaggi; carica `data/cards-v2.json`; le regole sono in
+dei Personaggi, le case della riserva; carica `data/cards-v2.json`; le regole sono in
 `docs/regolamento-v2.md`) o la v1.5 congelata (`data/cards.json`). Con la v2 ogni era comincia dal draft: clicca un
 Personaggio della fila e lo prendi, gratis. Poi clicca una colonna per
 piazzare un lavoratore e attivarla, e scegli un'azione dall'elenco: ognuna
