@@ -892,6 +892,49 @@ quattro sul bordo. Abbassare ancora la Rendita a quattro (0,6 e penalità dimezz
 rialza a 29: si lascia. La v1.5 non cambia (`SPINTE_V1` uguale, riferimento identico), e
 nemmeno la partita: i lotti nuovi hanno gli stessi edifici, altezza e basi di prima.
 
+## Quindicesima misura: le case per tutti
+
+Decisione del designer dopo la tredicesima misura (registro 115): le case generiche entrano
+per tutti i tavoli, senza regole diverse per numero di giocatori; se qualcosa dipende dal
+numero di giocatori è la misura del mercato. Tre tipi per era, una copia ciascuno, per ogni
+numero di giocatori (`--variante case_tutti`, 75 sagome): la **casa piccola** (costa 1,
+resistenza 1–3, Lampo 1), la **casa grande** (costa 2, resistenza 2–4, Lampo 2, 3 nelle ere
+4–5) e la **casa del borgo** (costa 1, Lampo 0, Scavo 2). Niente produzione, niente Rendita,
+classe civico, nessun terreno. Misurato sul torneo corretto con i bot tarati (quattordicesima
+misura), stessi semi; a quattro anche col mercato a 8 sagome (`--mercato 8`).
+
+| per giocatore | a 2: senza | **a 2: case** | a 3: senza | **a 3: case** | a 4: senza | **a 4: case** | a 4: case, mercato 8 |
+|---|--:|--:|--:|--:|--:|--:|--:|
+| PV | 83,3 | 80,4 | 88,7 | 89,3 | 78,3 | 80,5 | 80,4 |
+| Lampo / Rendita / Scavo / Continuità | 19,5 / 10,7 / 14,5 / 12,7 | 20,4 / 9,3 / 13,7 / 12,7 | 21,9 / 9,5 / 16,4 / 13,2 | 23,8 / 8,8 / 16,2 / 14,1 | 18,8 / 8,3 / 14,6 / 11,1 | 20,7 / 8,1 / 14,7 / 12,3 | – |
+| costruiti / passa | 12,8 / 3,0 | 12,9 / 3,2 | 13,8 / 3,2 | 14,7 / 2,5 | 12,0 / 5,4 | 13,2 / 4,1 | 13,2 / 4,2 |
+| altezza / basi altrui | 4,58 / 1,6 | 4,43 / 1,6 | 4,56 / 2,4 | 4,51 / 2,4 | 4,40 / 2,3 | 4,34 / 2,3 | – |
+| kingmaker | 12 % | 8 % | 15 % | 12 % | 15 % | 13 % | 16 % |
+| vince: Rendita / Continuità / Bilanciata / Obiettivi / Scavo / Lampo | 53 / 44 / 54 / 53 / 53 / 44 | 49 / 45 / 51 / 56 / 49 / 50 | 35 / 32 / 37 / 32 / 34 / 30 | 36 / 29 / 33 / 36 / 33 / 33 | 27 / 21 / 25 / 25 / 23 / 28 | **30** / 21 / 26 / 25 / 22 / 25 | 34 / 18 / 25 / 27 / 20 / 26 |
+
+**1. Le case reggono a tutti e tre i tavoli.** A due e a tre tutte le strategie stanno
+nell'errore (a 2: 45–56; a 3: 29–36); a quattro la Rendita sta al 30 contro il 29 di bordo,
+le altre dentro. Il kingmaker scende ovunque (8 / 12 / 13 %). La forma della città non
+cambia: stesse basi altrui, altezza un decimo più bassa.
+
+**2. A tre e a quattro danno l'edificio in più che mancava.** A quattro 13,2 edifici a testa
+invece di 12,0 e i passaggi da 5,4 a 4,1; a tre 14,7 invece di 13,8 e i passaggi da 3,2 a
+2,5. Le case si costruiscono. A due, dove il mercato non era corto, tolgono tre punti: quindici
+carte deboli su settantacinque diluiscono il mercato, e la Rendita perde 1,3.
+
+**3. Il mercato a 8 non fa niente.** A quattro con le case, 8 sagome scoperte invece di 6:
+stessi edifici (13,2), stessi passaggi (4,2), la Rendita sale a 34. I passaggi che restano non
+sono del mercato stretto: sono del mazzo dell'era, che con quindici case in più ha quindici
+sagome per era contro sedici turni. La misura del mercato si lascia a 6.
+
+**4. Il Lampo non è più di tutti.** Con una copia per tipo e i bot tarati, il Lampo sale di
+1–2 punti a testa e la strategia Lampo resta nell'errore (50 / 33 / 25): il problema della
+tredicesima misura era il calendario e le venti case a Lampo, non l'idea.
+
+Da decidere: se le case entrano nel file v2 così (tre per era, una copia), o con due copie
+della piccola (venti sagome, per chiudere del tutto il mercato a quattro al costo di
+diluire di più a due).
+
 ## Come rifare il conto
 
 ```bash
@@ -954,4 +997,8 @@ python3 tools/confronta_torneo.py case_p4.csv case_scavo_p4.csv case_nulle_p4.cs
 # quattordicesima misura: il giro su tutte le combinazioni; la taratura sta nelle tabelle del bot
 for p in 2 3 4; do godot --headless res://scenes/audit_partita.tscn -- --players $p --games 750 --seed 700000 --dati data/cards-v2.json --giro tutte > tutte_p$p.csv; done
 python3 tools/confronta_strategie.py tutte_p4.csv
+# quindicesima misura: le case per tutti (tre tipi per era, per ogni tavolo); `--mercato 8` allarga il mercato
+python3 tools/genera_cards_v2.py --variante case_tutti
+for p in 2 3 4; do godot --headless res://scenes/audit_partita.tscn -- --players $p --games 750 --seed 700000 --dati data/proposte/cards-v2-case_tutti.json --giro tutte > case_p$p.csv; done
+python3 tools/confronta_torneo.py tutte_p4.csv case_p4.csv
 ```
