@@ -2000,5 +2000,23 @@ dato è stato importato da lì. Ma due confronti fra ciò che è stampato e
     pero' che le case con lo Scavo non le compra nessuno (98 costruzioni
     su 16 000 copie: alla stessa spesa c'e' la piccola con Lampo 1) e che
     le case grandi delle ere 4-5 (Lampo 3 a costo 2) finiscono quasi ogni
-    partita (3989 e 3969 copie su 4000); 3,6 case a testa a tre. Aperto:
-    tenere le case con lo Scavo, e il Lampo 3 delle grandi nelle ere 4-5.
+    partita (3989 e 3969 copie su 4000); 3,6 case a testa a tre. Deciso
+    al punto 117.
+
+117. **Le case: lo Scavo prende anche il Lampo, la grande non supera 2.**
+    Decisione del designer dopo la sedicesima misura ("le case con lo
+    Scavo le rafforziamo portando anche i PV, e Lampo 3 lo portiamo a 2").
+    La casa con lo Scavo (Ripari, Tuguri, Casupole, Case popolari) ha
+    Lampo 1 come la piccola, oltre allo Scavo 2, allo stesso costo; le
+    case grandi delle ere 4-5 (Palazzetto, Condominio popolare) scendono
+    da Lampo 3 a 2. Nota: a pari costo e resistenza la casa con lo Scavo
+    domina la piccola nelle ere 1-4; la piccola resta la scelta solo
+    quando le due copie dell'altra sono finite. Misurato (diciassettesima
+    misura): il Lampo a testa scende di 1-1,5 punti senza toccare edifici
+    e passaggi; la casa con lo Scavo ha sostituito la piccola nelle ere
+    1-3 (0 / 87 / 4 copie su 4000), le Case popolari sono la casa piu'
+    comprata (3884 su 4000), il Palazzetto scende a 562. Lampo a tre (40 %)
+    e Rendita a quattro (32 %) restano sul bordo: e' la presenza delle
+    case, non il loro Lampo; da ritarare i bot a tre e quattro. La
+    piccola nelle ere 1-3, che non si compra piu', resta: e' la terza e la
+    quarta copia della casa da 1 (deciso dal designer).

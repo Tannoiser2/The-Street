@@ -38,8 +38,8 @@ richiesto sono quelli di oggi.
 Le 14 case (tre per era: la piccola, la grande e quella con lo Scavo; due nell'era Moderna, dove lo Scavo non vale) non stanno nel mazzo dell'era:
 sono **sempre disponibili**, tutte scoperte accanto al mercato, in 2 copie ciascuna, e si
 comprano come dal mercato; a fine era le copie avanzate si scartano con le file. Non producono
-e non rendono: danno Lampo (la piccola 1, la grande 2, 3 nelle ere 4-5) o Scavo (Ripari, Tuguri,
-Casupole, Case popolari: 2). Classe civico, nessun terreno richiesto. Nelle tabelle
+e non rendono: danno Lampo (la piccola 1, la grande 2) e quella con lo Scavo (Ripari, Tuguri,
+Casupole, Case popolari) Lampo 1 e Scavo 2 (registro 117). Classe civico, nessun terreno richiesto. Nelle tabelle
 portano la sigla **RIS**.
 
 ### Da dove vengono i costi
@@ -72,7 +72,7 @@ Domanda per era (C / D / I): era 1: 17 / 0 / 5 · era 2: 29 / 0 / 6 · era 3: 25
 | Grotte dipinte | cultura | Collina | 1 | 0/0/1 | 2 | 0 | 0 | 6 | — | 0 | — | — |  |  |
 | Menhir | religione | Bosco | 1 | 1/0/1 | 4 | 1 | 0 | 3 | — | 0 | — | Piccolo ma quasi indistruttibile. |  |  |
 | Palafitte | civico | Fiume | 1 | 1/0/0 | 2 | 0 | 1 | 2 | 1 C | 0 | — | — |  |  |
-| Ripari | civico | qualsiasi | 1 | 1/0/0 | 1 | 0 | 0 | 2 | — | 0 | — | — | RIS x2 | nuova: in riserva, sempre disponibile; niente lato di oggi |
+| Ripari | civico | qualsiasi | 1 | 1/0/0 | 1 | 0 | 1 | 2 | — | 0 | — | — | RIS x2 | nuova: in riserva, sempre disponibile; niente lato di oggi |
 | Trappole da pesca | ingegneria | Fiume | 1 | 1/0/0 | 1 | 0 | 0 | 0 | 1 C | 0 | — | — |  |  |
 | Tumulo funerario | religione, cultura | Collina | 2 | 1/0/1 | 3 | 0 | 1 | 5 | — | 0 | — | — |  |  |
 | Villaggio palizzato | militare | Pianura | 2 | 2/0/0 | 2 | 0 | 1 | 2 | — | 0 | — | Quartiere: +1 res ai tuoi edifici adiacenti. |  |  |
@@ -95,7 +95,7 @@ Domanda per era (C / D / I): era 1: 17 / 0 / 5 · era 2: 29 / 0 / 6 · era 3: 25
 | Tempio | religione | Collina | 1 | 2/0/1 | 3 | 1 | 0 | 3 | — | 0 | — | — |  |  |
 | Terme | civico | qualsiasi | 1 | 2/0/0 | 2 | 0 | 2 | 3 | — | 0 | — | — |  |  |
 | Torre di vedetta | militare | Collina | 1 | 2/0/0 | 3 | 0 | 1 | 2 | — | 0 | — | Quartiere: +1 res ai tuoi edifici adiacenti. |  |  |
-| Tuguri | civico | qualsiasi | 1 | 1/0/0 | 2 | 0 | 0 | 2 | — | 0 | — | — | RIS x2 | nuova: in riserva, sempre disponibile; niente lato di oggi |
+| Tuguri | civico | qualsiasi | 1 | 1/0/0 | 2 | 0 | 1 | 2 | — | 0 | — | — | RIS x2 | nuova: in riserva, sempre disponibile; niente lato di oggi |
 
 ### Era 3
 
@@ -108,7 +108,7 @@ Domanda per era (C / D / I): era 1: 17 / 0 / 5 · era 2: 29 / 0 / 6 · era 3: 25
 | Casa torre | civico | qualsiasi | 1 | 1/1/0 | 3 | 0 | 2 | 1 | — | 0 | — | — | RIS x2 | nuova: in riserva, sempre disponibile; niente lato di oggi |
 | Case di legno | civico | qualsiasi | 1 | 1/0/0 | 2 | 0 | 1 | 1 | — | 0 | — | — | RIS x2 | nuova: in riserva, sempre disponibile; niente lato di oggi |
 | Castello | militare | Collina | 2 | 2/1/0 | 4 | 2 | 0 | 3 | — | 1 | — | — |  | Rendita 3 → 2 (registro 97) |
-| Casupole | civico | qualsiasi | 1 | 1/0/0 | 2 | 0 | 0 | 2 | — | 0 | — | — | RIS x2 | nuova: in riserva, sempre disponibile; niente lato di oggi |
+| Casupole | civico | qualsiasi | 1 | 1/0/0 | 2 | 0 | 1 | 2 | — | 0 | — | — | RIS x2 | nuova: in riserva, sempre disponibile; niente lato di oggi |
 | Chiesa | religione, cultura | qualsiasi | 1 | 2/0/1 | 3 | 2 | 0 | 3 | — | 0 | — | — |  |  |
 | Conceria | commercio | Fiume | 1 | 1/0/0 | 1 | 0 | 1 | 0 | 1 D | 0 | — | — |  |  |
 | Mercato | commercio | Fiume | 1 | 2/0/0 | 2 | 0 | 1 | 2 | 1 C + 1 D | 0 | — | — |  |  |
@@ -125,13 +125,13 @@ Domanda per era (C / D / I): era 1: 17 / 0 / 5 · era 2: 29 / 0 / 6 · era 3: 25
 | Banco | commercio | qualsiasi | 1 | 1/0/1 | 2 | 0 | 3 | 0 | 1 D | 0 | — | — |  | Lampo 2 → 3 (registro 100) |
 | Bottega d'artista | cultura | qualsiasi | 1 | 1/0/1 | 2 | 0 | 2 | 2 | — | 0 | — | **I tuoi potenziamenti costano 1 in meno, nella loro risorsa.** | 3R | oggi: "I tuoi potenziamenti costano 1 oro in meno" — i potenziamenti pagano per famiglia: Arte in Idee, Struttura in Costruzione, il resto in Denaro |
 | Casa borghese | civico | qualsiasi | 1 | 0/0/1 | 2 | 0 | 2 | 1 | — | 0 | — | — | RIS x2 | nuova: in riserva, sempre disponibile; niente lato di oggi |
-| Case popolari | civico | qualsiasi | 1 | 0/0/1 | 2 | 0 | 0 | 2 | — | 0 | — | — | RIS x2 | nuova: in riserva, sempre disponibile; niente lato di oggi |
+| Case popolari | civico | qualsiasi | 1 | 0/0/1 | 2 | 0 | 2 | 2 | — | 0 | — | — | RIS x2 | nuova: in riserva, sempre disponibile; niente lato di oggi |
 | Duomo | religione, cultura | qualsiasi | 2 | 3/1/2 | 4 | 2 | 0 | 5 | — | 2 | — | — |  | Rendita 4 → 2 (registro 97) |
 | Fortezza bastionata | militare, ingegneria | Collina | 2 | 3/1/1 | 5 | 2 | 0 | 2 | — | 1 | — | — |  | Rendita 3 → 2 (registro 97) |
 | Giardino all'italiana | cultura | Collina | 1 | 0/0/2 | 1 | 0 | 3 | 0 | — | 0 | — | Effimero per eccellenza: PV subito, difficilmente sopravvivrà. |  |  |
 | Loggia | civico | qualsiasi | 1 | 1/0/1 | 2 | 0 | 3 | 2 | — | 0 | — | — |  | Lampo 2 → 3 (registro 100) |
 | Osservatorio | ingegneria | Collina | 1 | 1/1/1 | 2 | 0 | 2 | 2 | — | 0 | — | Eco: +2 PV (lampo) se ancora in piedi a fine partita. |  |  |
-| Palazzetto | civico | qualsiasi | 1 | 0/1/1 | 3 | 0 | 3 | 1 | — | 0 | — | — | RIS x2 | nuova: in riserva, sempre disponibile; niente lato di oggi |
+| Palazzetto | civico | qualsiasi | 1 | 0/1/1 | 3 | 0 | 2 | 1 | — | 0 | — | — | RIS x2 | nuova: in riserva, sempre disponibile; niente lato di oggi |
 | Palazzo signorile | civico | Pianura | 1 | 2/1/1 | 3 | 0 | 3 | 3 | 1 I | 0 | — | — | 3R | produce 1 Idea al posto di 1 cultura (già nel file v2) |
 | Piazza monumentale | civico | Pianura | 2 | 2/1/1 | 3 | 2 | 0 | 3 | — | 1 | — | A fine partita: +1 PV per tuo edificio in cima adiacente. Richiede livello 1+. |  |  |
 | Ponte monumentale | ingegneria | Fiume | 2 | 2/1/1 | 4 | 2 | 0 | 3 | — | 0 | — | — |  | Rendita 3 → 2 (registro 97) |
@@ -144,7 +144,7 @@ Domanda per era (C / D / I): era 1: 17 / 0 / 5 · era 2: 29 / 0 / 6 · era 3: 25
 | Biblioteca | cultura | qualsiasi | 1 | 1/1/2 | 3 | 0 | 4 | 0 | — | 0 | — | +1 PV per classe diversa fra i tuoi edifici in questa colonna, Sotterrati inclusi. |  |  |
 | Caffè letterario | cultura | qualsiasi | 1 | 0/0/2 | 1 | 0 | 2 | 0 | — | 0 | — | Quartiere: +1 PV se adiacente a un edificio Cultura. |  |  |
 | Condominio | civico | qualsiasi | 1 | 1/0/1 | 2 | 0 | 3 | 0 | — | 0 | — | Economico: costruire il presente sopra il passato non è mai stato così facile. |  | resta: si costruisce sopra le rovine con lo sconto di metà resistenza (punto 10); Lampo 2 → 3 (registro 100) |
-| Condominio popolare | civico | qualsiasi | 1 | 0/1/1 | 4 | 0 | 3 | 1 | — | 0 | — | — | RIS x2 | nuova: in riserva, sempre disponibile; niente lato di oggi |
+| Condominio popolare | civico | qualsiasi | 1 | 0/1/1 | 4 | 0 | 2 | 1 | — | 0 | — | — | RIS x2 | nuova: in riserva, sempre disponibile; niente lato di oggi |
 | Fondazione d'arte | cultura | qualsiasi | 1 | 1/0/2 | 2 | 0 | 3 | 0 | — | 0 | — | I tuoi potenziamenti valgono +1 PV. |  |  |
 | Grattacielo | commercio | Pianura | 1 | 2/3/1 | 3 | 0 | 4 | 0 | — | 2 | — | Svettante: +1 PV per livello a cui è costruito. Quartiere: −1 PV agli edifici in cima adiacenti altrui, valutato a fine partita. Richiede livello 2+. |  |  |
 | Monumento ai caduti | militare, religione | qualsiasi | 1 | 1/1/1 | 3 | 0 | 2 | 0 | — | 0 | — | Sacrario: +1 PV per ogni altro tuo edificio Militare, in piedi o Sotterrato. |  |  |

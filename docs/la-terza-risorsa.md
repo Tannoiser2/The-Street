@@ -1001,6 +1001,58 @@ efficiente di gran parte del mazzo, ed è per questo che tutti lo comprano.
 Da decidere: se le case con lo Scavo restano (oggi sono quattro sagome che non si giocano), e
 se il Lampo delle case grandi nelle ere 4–5 va portato a 2 per farne un ripiego anche lì.
 
+## Diciassettesima misura: le case ritoccate
+
+Decisione del designer dopo la sedicesima misura (registro 117): le case con lo Scavo, che
+nessuno comprava, prendono anche il Lampo della piccola (Ripari, Tuguri, Casupole: Lampo 1 e
+Scavo 2; Case popolari: Lampo 2 e Scavo 2), allo stesso costo e resistenza; le case grandi delle
+ere 4–5 (Palazzetto, Condominio popolare), che finivano quasi ogni partita, scendono da Lampo 3 a
+2. Stessi tornei della sedicesima misura, stessi semi; "riserva" è la sedicesima, "ritocco" è oggi.
+
+| per giocatore | a 2: senza | a 2: riserva | **a 2: ritocco** | a 3: senza | a 3: riserva | **a 3: ritocco** | a 4: senza | a 4: riserva | **a 4: ritocco** |
+|---|--:|--:|--:|--:|--:|--:|--:|--:|--:|
+| PV | 83,3 | 84,1 | 83,4 | 88,7 | 90,4 | 90,2 | 78,3 | 81,3 | 81,8 |
+| Lampo / Rendita / Scavo / Continuità | 19,5 / 10,7 / 14,5 / 12,7 | 21,9 / 10,4 / 13,8 / 14,2 | 20,5 / 10,4 / 14,2 / 14,1 | 21,9 / 9,5 / 16,4 / 13,2 | 25,1 / 9,1 / 15,5 / 15,3 | 23,9 / 9,1 / 16,2 / 15,3 | 18,8 / 8,3 / 14,6 / 11,1 | 21,8 / 8,1 / 14,2 / 13,3 | 21,1 / 8,1 / 15,2 / 13,6 |
+| costruiti / passa | 12,8 / 3,0 | 13,6 / 2,5 | 13,6 / 2,4 | 13,8 / 3,2 | 15,1 / 2,0 | 15,2 / 2,0 | 12,0 / 5,4 | 13,4 / 3,9 | 13,7 / 3,7 |
+| altezza / basi altrui | 4,58 / 1,6 | 4,57 / 1,6 | 4,58 / 1,6 | 4,56 / 2,4 | 4,56 / 2,3 | 4,56 / 2,3 | 4,40 / 2,3 | 4,39 / 2,3 | 4,41 / 2,4 |
+| kingmaker | 12 % | 10 % | 10 % | 15 % | 14 % | 16 % | 15 % | 15 % | 15 % |
+| vince: Rendita / Continuità / Bilanciata / Obiettivi / Scavo / Lampo | 53 / 44 / 54 / 53 / 53 / 44 | 53 / 46 / 49 / 50 / 50 / 52 | 56 / 46 / 47 / 52 / 52 / 46 | 35 / 32 / 37 / 32 / 34 / 30 | 30 / 29 / 36 / 35 / 31 / **39** | 35 / 29 / 33 / 32 / 31 / **40** | 27 / 21 / 25 / 25 / 23 / 28 | **33** / 21 / 25 / 26 / 21 / 24 | **32** / 21 / 26 / 26 / **19** / 26 |
+
+**1. Il ritocco toglie Lampo senza togliere case.** Il Lampo a testa scende di 1–1,5 punti
+rispetto alla riserva (a 3: 25,1 → 23,9), i PV totali tornano quasi a quelli senza case a due
+(83,4) e restano sopra a tre e a quattro; edifici, passaggi, altezza e basi altrui non si
+muovono. Lo Scavo risale di mezzo punto (a 4: 14,2 → 15,2): le case con lo Scavo ora si
+comprano e qualcuno ci costruisce sopra.
+
+**2. Quali case si comprano (vita delle carte a tre, 2000 partite).** Copie costruite su 4000.
+
+| era | 1 | 2 | 3 | 4 | 5 |
+|---|--:|--:|--:|--:|--:|
+| piccola | **0** | 87 | **4** | 2617 | 3890 |
+| grande | 1610 | 401 | 3176 | 562 | 2569 |
+| con lo Scavo | 232 | 1588 | 526 | **3884** | – |
+| case a partita | 0,9 | 1,0 | 1,9 | 3,5 | 3,2 |
+
+Come previsto nel registro 117, **la casa con lo Scavo ha sostituito la piccola nelle ere
+1–3**: a pari costo e resistenza vale di più, e la piccola non si compra più (0 / 87 / 4 copie).
+Nelle ere 4–5 la grande non è più la prima scelta: il Palazzetto scende da 3989 a 562 copie
+(costa un Denaro in più della Casa borghese per lo stesso Lampo 2), il Condominio da 3969 a 2569,
+comprato quando le due Palazzine sono finite. Le Case popolari (Lampo 2, Scavo 2, costa un'Idea)
+sono la casa più comprata del gioco: 3884 copie su 4000, e da sole 1,9 PV di Scavo a partita a chi
+ci costruisce sopra. In tutto 10,6 case a partita, 3,5 a testa: come prima.
+
+**3. Le strategie sul bordo restano sul bordo.** A tre il Lampo vince il 40 % (39 con la
+riserva, bordo 38); a quattro la Rendita il 32 % (33, bordo 29) e lo Scavo il 19 (bordo 21). A due
+tutto dentro (46–56). Non è il Lampo delle case: con il Lampo tagliato la strategia Lampo a tre
+sale di un punto. È la loro presenza: a tre chi punta al Lampo non passa più mai (2,0 passaggi
+contro 3,2), a quattro la Rendita è l'unica che non spende turni in case e la sua rendita vale
+di più con un mercato che gli altri lasciano stare. Le tabelle dei bot per tre e quattro
+giocatori (quattordicesima misura) sono state tarate senza le case: il prossimo passo, se si
+vuole rientrare nell'errore, è ritararle, non toccare le case.
+
+Deciso dal designer: la piccola nelle ere 1–3, che oggi non si compra, resta come terza e
+quarta copia della casa da 1.
+
 ## Come rifare il conto
 
 ```bash
@@ -1071,4 +1123,5 @@ python3 tools/confronta_torneo.py tutte_p4.csv case_p4.csv
 for p in 2 3 4; do godot --headless res://scenes/audit_partita.tscn -- --players $p --games 750 --seed 700000 --dati data/cards-v2.json --giro tutte > riserva_p$p.csv; done
 python3 tools/confronta_torneo.py tutte_p4.csv case_p4.csv riserva_p4.csv
 godot --headless res://scenes/audit_partita.tscn -- --players 3 --vita 2000 --seed 200000 --dati data/cards-v2.json > vita_riserva.csv
+# diciassettesima misura: le case ritoccate stanno nel file v2 (oggi gli stessi comandi producono ritocco_p$p e vita_ritocco)
 ```

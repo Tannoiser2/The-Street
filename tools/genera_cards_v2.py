@@ -218,7 +218,8 @@ CASE = {
     5: (("Palazzina",        {"pietra": 0, "oro": 0, "idee": 1}, 3, 2),
         ("Condominio popolare", {"pietra": 0, "oro": 1, "idee": 1}, 4, 3)),
 }
-# La casa con lo Scavo (niente Lampo, Scavo 2): costa e regge come la piccola.
+# La casa con lo Scavo (Scavo 2, e dal registro 117 anche il Lampo della
+# piccola): costa e regge come la piccola.
 # Non c'e' nell'era Moderna: "lo scavo nell'era 5 non vale" (nessuno costruisce
 # sopra dopo l'ultima era), quindi li' restano solo la piccola e la grande.
 CASE_SCAVO = {1: "Ripari", 2: "Tuguri", 3: "Casupole", 4: "Case popolari"}
@@ -252,8 +253,8 @@ def case_nulle(v): case(v, "nulle")
 # LE CASE PER TUTTI (registro 115): la decisione del designer dopo le prove a
 # quattro. Tre tipi per era, per ogni numero di giocatori (niente
 # `min_players`: le regole sono le stesse a due, tre e quattro): la casa
-# piccola (costa 1, Lampo 1), la casa grande (costa 2, Lampo 2, 3 nelle ere
-# 4-5) e la casa con Scavo (costa 1, Lampo 0, Scavo 2); resistenza bassa,
+# piccola (costa 1, Lampo 1), la casa grande (costa 2, Lampo 2) e la casa con
+# Scavo (costa 1, Lampo 1, Scavo 2); resistenza bassa,
 # niente produzione, niente Rendita. Nell'era Moderna manca la casa con Scavo
 # (lo Scavo li' non vale): quattordici case in tutto.
 # Registro 116: le case stanno nel file v2, per tutti, NELLA RISERVA (sempre
@@ -263,10 +264,15 @@ def case_nulle(v): case(v, "nulle")
 def case_tutti(v, riserva=False, copie=1):
     for era, taglie in CASE.items():
         (nome_p, costo_p, res_p, lampo_p), (nome_g, costo_g, res_g, lampo_g) = taglie
+        # Registro 117, dopo la sedicesima misura: la grande non supera Lampo 2
+        # (con 3 nelle ere 4-5 finiva quasi ogni partita) e la casa con lo
+        # Scavo prende anche il Lampo della piccola (con Lampo 0 non la
+        # comprava nessuno). La tabella CASE resta com'era per le varianti
+        # di prova gia' misurate.
         tipi = [("p", nome_p, costo_p, res_p, lampo_p, 1),
-                ("g", nome_g, costo_g, res_g, lampo_g, 1)]
+                ("g", nome_g, costo_g, res_g, min(lampo_g, 2), 1)]
         if era in CASE_SCAVO:
-            tipi.append(("s", CASE_SCAVO[era], costo_p, res_p, 0, 2))
+            tipi.append(("s", CASE_SCAVO[era], costo_p, res_p, lampo_p, 2))
         for sigla, nome, costo, res, lampo, scavo in tipi:
             b = {
                 "id": "ed_casa_e%d_%s" % (era, sigla), "name": nome, "era": era,
