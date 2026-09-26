@@ -101,8 +101,8 @@ il passato non si costruisce più.
 #### Le case
 
 Ogni era ha tre case generiche, in due copie: la **casa piccola** (costa 1, poca resistenza,
-Lampo 1), la **casa grande** (costa 2, Lampo 2, 3 nelle ere 4–5) e la **casa con lo Scavo**
-(Ripari, Tuguri, Casupole, Case popolari: costa 1, niente Lampo, Scavo 2). Nell'era Moderna la
+Lampo 1), la **casa grande** (costa 2, Lampo 2) e la **casa con lo Scavo**
+(Ripari, Tuguri, Casupole, Case popolari: costa 1, Lampo 1, Scavo 2). Nell'era Moderna la
 casa con lo Scavo non c'è: dopo l'ultima era nessuno costruisce più sopra, e lo Scavo non vale.
 Non producono e non rendono: sono suolo a buon mercato e un rientro annacquato di punti, per chi
 non trova niente nel mercato o vuole riempire una colonna. Classe civico, nessun terreno

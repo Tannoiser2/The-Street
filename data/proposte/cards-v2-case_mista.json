@@ -2335,7 +2335,7 @@
       "flexible": false,
       "resistance": 1,
       "rendita": 0,
-      "lampo": 0,
+      "lampo": 1,
       "scavo": 2,
       "level_required": 0,
       "production": {
@@ -2425,7 +2425,7 @@
       "flexible": false,
       "resistance": 2,
       "rendita": 0,
-      "lampo": 0,
+      "lampo": 1,
       "scavo": 2,
       "level_required": 0,
       "production": {
@@ -2515,7 +2515,7 @@
       "flexible": false,
       "resistance": 2,
       "rendita": 0,
-      "lampo": 0,
+      "lampo": 1,
       "scavo": 2,
       "level_required": 0,
       "production": {
@@ -2575,7 +2575,7 @@
       "flexible": false,
       "resistance": 3,
       "rendita": 0,
-      "lampo": 3,
+      "lampo": 2,
       "scavo": 1,
       "level_required": 0,
       "production": {
@@ -2605,7 +2605,7 @@
       "flexible": false,
       "resistance": 2,
       "rendita": 0,
-      "lampo": 0,
+      "lampo": 2,
       "scavo": 2,
       "level_required": 0,
       "production": {
@@ -2665,7 +2665,7 @@
       "flexible": false,
       "resistance": 4,
       "rendita": 0,
-      "lampo": 3,
+      "lampo": 2,
       "scavo": 1,
       "level_required": 0,
       "production": {
