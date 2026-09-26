@@ -826,6 +826,72 @@ quattro giocatori, non le case.
 | case senza niente | 77 | 12,6 / 5,1 | nessuna (ma non si costruiscono) |
 | case miste | 80 | 13,5 / 3,9 | Rendita 34, Scavo 18 |
 
+## Quattordicesima misura: il calendario del torneo, e i bot a due e a quattro
+
+Il designer ha chiesto di sistemare i bot a due e a quattro (registro 114), dove la dodicesima
+misura dava Continuità 58 % e Obiettivi 40 % a due, Rendita 30 % e Lampo 20 % a quattro.
+
+### Il calendario era sbagliato
+
+Il torneo assegnava le strategie a **finestre consecutive della lista**: la partita g dava al
+posto i la strategia (i + g) mod 6. Con meno posti che strategie ogni strategia incontrava
+solo le vicine di lista, sempre le stesse. A due: Continuità giocava solo contro Scavo e
+Bilanciata (e le batteva il 55 e il 62 %), Obiettivi solo contro Bilanciata e Rendita (e
+perdeva il 58 e il 62 %). A quattro sei quaterne fisse. Il 58 e il 40 erano accoppiamenti,
+non forza; per questo le spinte non li muovevano.
+
+Il torneo ha ora il giro `--giro tutte`: la partita g prende una delle combinazioni di k
+strategie fra le sei, in ordine, e ruota i posti quando le ha fatte tutte (15 coppie, 20
+terne, 15 quaterne, ognuna giocata lo stesso numero di volte). Il giro vecchio resta dove non
+si chiede, così i lotti precedenti si rigiocano uguali. **Anche il lotto a tre andava rifatto**:
+"tutte nell'errore" era misurato col calendario vecchio.
+
+| vince (atteso 50 / 33 / 25) | a 2, vicini | **a 2, tutte** | a 3, vicini (H) | **a 3, tutte** | a 4, vicini | **a 4, tutte** |
+|---|--:|--:|--:|--:|--:|--:|
+| Rendita | 55 | 55 | 38 | 37 | 30 | **36** |
+| Bilanciata | 48 | 55 | 34 | 38 | 26 | 29 |
+| Obiettivi | 40 | 56 | 33 | 35 | 25 | 26 |
+| Continuità | 58 | 49 | 34 | 34 | 27 | 22 |
+| Lampo | 54 | 46 | 31 | 30 | 20 | **18** |
+| Scavo | 44 | **38** | 30 | **26** | 22 | 20 |
+
+La partita è identica (punti, edifici, altezza, basi: uguali al decimale): cambia solo a chi
+si attribuiscono le vittorie. La mappa vera: la Scavo è la debole a due e a tre, a quattro la
+Rendita è forte e la Lampo debole. Continuità e Obiettivi erano a posto.
+
+### Le spinte sono handicap, non aiuti
+
+Sul calendario corretto, stessi semi. Spingere di più la Scavo (premio 1,2, Scavo a terra
+0,8) la peggiora: 26 → 24 → 22 a tre, 38 → 37 → 30 a due. La protezione attesa a 3 non
+cambia niente (a +2 gli edifici che contano reggono già). I potenziamenti della Lampo a 5
+danno +2 a quattro. La Bilanciata, che non ha spinte, è la più forte o quasi a ogni tavolo:
+**le spinte tolgono, non aggiungono**, e la taratura giusta è verso il basso.
+
+| vince | a 2: base | Scavo a metà | a 3: base | Scavo a metà | a 4: base | Lampo 0,8 + pot. 5 | Rendita 0,6 | tutte e due |
+|---|--:|--:|--:|--:|--:|--:|--:|--:|
+| Scavo | 38 | **53** | 26 | **34** | 20 | 18 | 20 | 20 |
+| Lampo | 46 | 44 | 30 | 30 | 18 | **26** | 19 | 25 |
+| Rendita | 55 | 53 | 37 | 35 | 36 | 32 | 35 | 32 |
+
+Le tabelle del bot: `SPINTE_V2` con la Scavo a metà (`scavo_premio` 0,4, `scavo_terra_scavo`
+0,25), che vale a ogni tavolo; `SPINTE_V2_PER_GIOCATORI[4]` con `lampo` 0,8 e
+`lampo_potenzia` 5, solo a quattro. Rigiocato senza manopole:
+
+| vince (atteso 50 / 33 / 25, errore 6 / 5 / 4) | a 2 | a 3 | a 4 |
+|---|--:|--:|--:|
+| Rendita | 53 | 35 | 27 |
+| Bilanciata | 54 | 37 | 25 |
+| Obiettivi | 53 | 32 | 25 |
+| Continuità | 44 | 32 | 21 |
+| Lampo | 44 | 30 | 28 |
+| Scavo | 53 | 34 | 23 |
+| kingmaker | 12 % | 15 % | 15 % |
+
+**Tutte entro l'errore a tutti e tre i tavoli**, con Continuità e Lampo a due e Continuità a
+quattro sul bordo. Abbassare ancora la Rendita a quattro (0,6 e penalità dimezzata) la
+rialza a 29: si lascia. La v1.5 non cambia (`SPINTE_V1` uguale, riferimento identico), e
+nemmeno la partita: i lotti nuovi hanno gli stessi edifici, altezza e basi di prima.
+
 ## Come rifare il conto
 
 ```bash
@@ -885,4 +951,7 @@ python3 tools/confronta_torneo.py v2_p4.csv doppioni_p4.csv case_p4.csv case_dop
 for v in case_scavo case_nulle case_mista; do python3 tools/genera_cards_v2.py --variante $v; godot --headless res://scenes/audit_partita.tscn -- --players 4 --games 750 --seed 700000 --dati data/proposte/cards-v2-$v.json > ${v}_p4.csv; done
 godot --headless res://scenes/audit_partita.tscn -- --players 4 --games 750 --seed 700000 --dati data/proposte/cards-v2-case.json --spinta lampo=2.5 > case_L25.csv
 python3 tools/confronta_torneo.py case_p4.csv case_scavo_p4.csv case_nulle_p4.csv case_L25.csv
+# quattordicesima misura: il giro su tutte le combinazioni; la taratura sta nelle tabelle del bot
+for p in 2 3 4; do godot --headless res://scenes/audit_partita.tscn -- --players $p --games 750 --seed 700000 --dati data/cards-v2.json --giro tutte > tutte_p$p.csv; done
+python3 tools/confronta_strategie.py tutte_p4.csv
 ```

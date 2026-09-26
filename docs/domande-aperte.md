@@ -1940,3 +1940,22 @@ dato è stato importato da lì. Ma due confronti fra ciò che è stampato e
     e la Rendita al 30%; a due Continuita' 58% e Obiettivi 40%: sono i
     numeri del gioco a quei tavoli, da riguardare con i bot, non con le
     regole.
+
+114. **Il calendario del torneo, e i bot a due e a quattro.** Il designer
+    ("i bot a due e quattro"). Cercando le spinte e' venuto fuori che il
+    torneo assegnava le strategie a finestre consecutive della lista: con
+    meno posti che strategie ognuna incontrava solo le vicine, sempre le
+    stesse, e il 58% della Continuita' e il 40% della Obiettivi a due erano
+    accoppiamenti. Il torneo ha ora `--giro tutte` (ogni combinazione di
+    strategie lo stesso numero di volte, posti a rotazione); il giro vecchio
+    resta dove non si chiede. Rimisurato a 2, 3 e 4
+    (`docs/la-terza-risorsa.md`, quattordicesima misura): la partita e'
+    identica, la mappa vera e' Scavo debole a due e a tre (38%, 26%),
+    Rendita forte (36%) e Lampo debole (18%) a quattro. Le spinte sono
+    handicap: spingere di piu' peggiora, la Bilanciata senza spinte e' la
+    piu' forte quasi ovunque. Taratura verso il basso: Scavo a meta' spinta
+    (in `SPINTE_V2`, vale ovunque), a quattro Lampo con meta' peso al Lampo
+    e potenziamenti a 5 (`SPINTE_V2_PER_GIOCATORI`, le regole non cambiano,
+    cambia il bot). Rigiocato senza manopole: tutte entro l'errore a tutti
+    e tre i tavoli (a 2: 44-54; a 3: 30-37; a 4: 21-28). La v1.5 e la
+    partita non cambiano.

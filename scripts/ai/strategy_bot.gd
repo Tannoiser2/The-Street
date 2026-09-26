@@ -119,6 +119,7 @@ static func play_turn(ctl: GameController, strategia := "bilanciata") -> void:
 		if not ctl.choose(_scelta(gs, strategia)): break
 	if gs.phase == Enums.Phase.FINE_PARTITA: return
 	if not gs.pending_choice.is_empty(): return
+	giocatori = gs.n_players
 	var p := gs.current_player()
 	if bool(CardDB.constants.get("turno_v2", false)):
 		_play_turn_v2(ctl, p, strategia)
@@ -469,21 +470,37 @@ static func rendite_future(res: int, rendita: int, era: int) -> float:
 # di piu' del valutatore).
 const SPINTE_V1 := {"rendita_per_era": 0.9, "rendita_zero": -1.5, "lampo": 1.6, "lampo_zero": -1.0,
 	"scavo_premio": 0.8, "scavo_terra": -1.5, "scavo_terra_scavo": 0.0, "protezione_attesa": 0.0,
-	"lampo_potenzia": 0.0, "lampo_sopra": 0.0}
+	"lampo_potenzia": 0.0, "lampo_sopra": 0.0, "obiettivi_peso": 1.0, "continuita_peso": 1.0}
 # La tabella v2 e' il lotto Q2 della taratura (registro 98) piu' la spinta
 # ai potenziamenti della Lampo (registro 101, lotto L2): protezione
 # attesa 2 (il valutatore conta l'edificio protetto), la Scavo costruisce a
 # terra le carte con lo Scavo alto invece di passare; le altre spinte
 # restano quelle della v1.5, perche' abbassarle non aiutava.
+# Registro 114: col torneo su tutte le combinazioni (`--giro tutte`) la Scavo
+# era la debole a due e a tre (38% e 26%), e spingerla di piu' la peggiorava:
+# le spinte sono handicap rispetto al valutatore comune, non aiuti. A meta'
+# (premio 0,4, Scavo a terra 0,25) torna nella media a tutti e due i tavoli.
 const SPINTE_V2 := {"rendita_per_era": 0.9, "rendita_zero": -1.5, "lampo": 1.6, "lampo_zero": -1.0,
-	"scavo_premio": 0.8, "scavo_terra": -0.5, "scavo_terra_scavo": 0.5, "protezione_attesa": 2.0,
-	"lampo_potenzia": 3.0, "lampo_sopra": 0.0}
+	"scavo_premio": 0.4, "scavo_terra": -0.5, "scavo_terra_scavo": 0.25, "protezione_attesa": 2.0,
+	"lampo_potenzia": 3.0, "lampo_sopra": 0.0, "obiettivi_peso": 1.0, "continuita_peso": 1.0}
+# LE SPINTE PER NUMERO DI GIOCATORI (registro 114). Le regole non cambiano
+# col numero di giocatori (registro 113), i bot si': a due la Continuita'
+# vinceva il 58% e la Obiettivi il 40%, a quattro la Rendita il 30% e la
+# Lampo il 20%. Qui, per la v2, la tabella di un tavolo sovrascrive le voci
+# della tabella base; il tavolo lo dice `giocatori`, che `play_turn` legge
+# dalla partita. Vuota dove la tabella base va bene.
+# A quattro la Lampo vinceva il 18%: con meta' peso al Lampo delle carte e
+# piu' ai potenziamenti (5) sale al 26%, e la Rendita scende da 36 a 32.
+const SPINTE_V2_PER_GIOCATORI := {2: {}, 4: {"lampo": 0.8, "lampo_potenzia": 5.0}}
+static var giocatori := 0
 static var spinte_override := {}
 
 static func spinte() -> Dictionary:
 	var base := SPINTE_V2 if e_v2() else SPINTE_V1
-	if spinte_override.is_empty(): return base
+	var tavolo: Dictionary = SPINTE_V2_PER_GIOCATORI.get(giocatori, {}) if e_v2() else {}
+	if spinte_override.is_empty() and tavolo.is_empty(): return base
 	var out := base.duplicate()
+	for k in tavolo: out[k] = tavolo[k]
 	for k in spinte_override: out[k] = spinte_override[k]
 	return out
 
@@ -595,8 +612,8 @@ static func _valore_costruzione(gs: GameState, p: PlayerState, v, strategia: Str
 		"verticale":
 			if sopra: q += 3.0 + 1.2 * float(par.get("level", 1))
 			else: q -= 1.5
-		"continuita": q += _premio_catena(mie, d)
-		"obiettivi": q += _premio_obiettivi(gs, p, d, col_from, par)
+		"continuita": q += _premio_catena(mie, d) * float(sp["continuita_peso"])
+		"obiettivi": q += _premio_obiettivi(gs, p, d, col_from, par) * float(sp["obiettivi_peso"])
 	if q != prima_della_spinta:
 		dett["spinta della strategia %s" % strategia] = q - prima_della_spinta
 	return q

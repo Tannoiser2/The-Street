@@ -244,6 +244,29 @@ def case(v, modo="lampo"):
 
 def case_scavo(v): case(v, "scavo")
 def case_nulle(v): case(v, "nulle")
+
+# LE CASE PER TUTTI (registro 115): la decisione del designer dopo le prove a
+# quattro. Tre tipi per era, per ogni numero di giocatori (niente
+# `min_players`: le regole sono le stesse a due, tre e quattro): la casa
+# piccola (costa 1, Lampo 1), la casa grande (costa 2, Lampo 2, 3 nelle ere
+# 4-5) e la casa con Scavo (costa 1, Lampo 0, Scavo 2); resistenza bassa,
+# niente produzione, niente Rendita. Una copia per tipo: tre sagome per era,
+# quindici in tutto, 75 sagome.
+def case_tutti(v):
+    for era, taglie in CASE.items():
+        (nome_p, costo_p, res_p, lampo_p), (nome_g, costo_g, res_g, lampo_g) = taglie
+        tipi = [("p", nome_p, costo_p, res_p, lampo_p, 1),
+                ("g", nome_g, costo_g, res_g, lampo_g, 1),
+                ("s", nome_p + " del borgo", costo_p, res_p, 0, 2)]
+        for sigla, nome, costo, res, lampo, scavo in tipi:
+            v["buildings"].append({
+                "id": "ed_casa_e%d_%s" % (era, sigla), "name": nome, "era": era,
+                "classes": ["civico"], "terrain": None, "width": 1,
+                "cost": dict(costo), "flexible": False, "resistance": res,
+                "rendita": 0, "lampo": lampo, "scavo": scavo, "level_required": 0,
+                "production": {"pietra": 0, "oro": 0, "cultura": 0, "idee": 0},
+                "exhaustible": 0,
+            })
 # "mista": la piccola da' Lampo 1 (e Scavo 1), la grande niente Lampo e Scavo 3.
 def case_mista(v):
     case(v, "lampo")
@@ -282,7 +305,7 @@ variante = sys.argv[sys.argv.index("--variante") + 1] if "--variante" in sys.arg
 if variante:
     {"doppioni": doppioni, "abitazioni": abitazioni, "case": case,
      "case_doppioni": case_doppioni, "case_scavo": case_scavo, "case_nulle": case_nulle,
-     "case_mista": case_mista}[variante](v2)
+     "case_mista": case_mista, "case_tutti": case_tutti}[variante](v2)
     v2["meta"]["ruleset"] = "v2-" + variante
     v2["meta"]["origine"] = "generato da tools/genera_cards_v2.py --variante %s: non modificare a mano" % variante
     out = os.path.join(RADICE, "data/proposte/cards-v2-%s.json" % variante)

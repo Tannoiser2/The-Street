@@ -227,3 +227,13 @@ Senza `--candidate` giocano solo le sei del canone; con `--candidate` entra anch
 Continuità, e con `--caso` torna in campo il bot casuale, che resta il metro di paragone.
 L'intestazione di ogni batteria dice quante strategie c'erano al tavolo (`strategie=6`): un
 lotto giocato con cinque e uno con sei non sono lo stesso esperimento.
+
+## Il calendario del torneo (registro 114)
+
+Fino alla quattordicesima misura il torneo assegnava le strategie a finestre consecutive
+della lista: con meno posti che strategie ogni strategia incontrava solo le vicine di lista.
+Le percentuali di vittoria a due e a quattro giocatori misurate prima (dodicesima misura e
+precedenti) sono accoppiamenti, non forza. Con `--giro tutte` ogni combinazione di
+strategie si gioca lo stesso numero di volte; i numeri validi sono quelli della
+quattordicesima misura in `la-terza-risorsa.md`. Le spinte della v2 stanno in
+`SPINTE_V2` e, per il tavolo a quattro, in `SPINTE_V2_PER_GIOCATORI`.
