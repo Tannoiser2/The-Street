@@ -546,6 +546,31 @@ Lampo costruisce già sopra quanto gli altri (2,1-2,2 basi altrui). Quello che n
 potenziare, perché il suo valutatore preferiva sempre una carta nuova a un potenziamento; ora,
 con lo scheletro che conta sempre, la spinta la porta a 3,6 potenziamenti a partita.
 
+## Tredicesima misura: le controprove a quattro e a due
+
+Le due domande lasciate dalla dodicesima misura, più le due idee del designer per la scarsità di
+sagome a quattro (registro 109-110). Stessi lotti (750 partite di torneo, seme 700000), stessi
+semi dei lotti di confronto.
+
+### L'incasso al passaggio (`--passa_incasso 1`, costante `passa_incasso`)
+
+Nel turno della v1.5 chi non fa l'azione dopo l'attivazione incassa 1 Costruzione più 1 risorsa
+a scelta, come nel turno a un'azione. Il bot la valuta come una mossa fra le altre.
+
+| per giocatore | a 4: base | **a 4: incasso** | a 3: H | a 3: incasso | a 2: base | a 2: incasso |
+|---|--:|--:|--:|--:|--:|--:|
+| PV | 78,4 | 78,3 | 89,3 | 88,0 | 83,4 | 82,8 |
+| costruiti / passa | 12,2 / 5,1 | 12,2 / 5,3 | 13,9 / 3,1 | 13,6 / 3,4 | 12,9 / 2,8 | 12,9 / 3,2 |
+| Idee spese | 13,1 | 12,6 | 14,5 | 13,7 | 10,5 | 9,5 |
+| kingmaker | 18 % | 15 % | 13 % | 15 % | 10 % | 10 % |
+| vince: Rendita / Continuità / Bilanciata / Obiettivi / Scavo / Lampo | 30 / 27 / 26 / 25 / 22 / 20 | 31 / 28 / 22 / 29 / 19 / 21 | 38 / 34 / 34 / 33 / 30 / 31 | 30 / 32 / 37 / 34 / 30 / 37 | 55 / 58 / 48 / 40 / 44 / 54 | 54 / 59 / 47 / 42 / 43 / 56 |
+
+**Non cambia niente, a nessun numero di giocatori.** A quattro i passaggi restano cinque a testa
+e gli edifici 12,2: il vincolo non sono le risorse, sono le sagome, e le due risorse incassate
+si perdono alla dispersione (tetto 3 per risorsa). A tre la Rendita scende da 38 a 30 e la Lampo
+sale da 31 a 37, tutte e due sul bordo dell'errore, con la partita uguale: rumore o un piccolo
+spostamento, non un effetto. Non entra nel file v2.
+
 ## Come rifare il conto
 
 ```bash
