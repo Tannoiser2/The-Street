@@ -546,6 +546,107 @@ Lampo costruisce già sopra quanto gli altri (2,1-2,2 basi altrui). Quello che n
 potenziare, perché il suo valutatore preferiva sempre una carta nuova a un potenziamento; ora,
 con lo scheletro che conta sempre, la spinta la porta a 3,6 potenziamenti a partita.
 
+## Dodicesima misura: la v2 a 2 e a 4 giocatori
+
+Tutte le misure fin qui sono a tre giocatori. Il designer ha chiesto le altre due (registro 108).
+Stessi lotti della v2 di oggi (H: la tabella delle spinte nel bot, il file v2 com'è): 750 partite
+di torneo (seme 700000) e 2 000 di vita (seme 200000) a 2, 3 e 4 giocatori, e per confronto la
+v1.5 (`data/cards.json`) agli stessi numeri e semi.
+
+### Il torneo, per giocatore
+
+| per giocatore | v2 a 2 | **v2 a 3 (H)** | v2 a 4 | v1.5 a 2 | v1.5 a 3 | v1.5 a 4 |
+|---|--:|--:|--:|--:|--:|--:|
+| PV | 83,4 | 89,3 | 78,4 | 87,0 | 85,7 | 82,0 |
+| costruiti | 12,9 | 13,9 | 12,2 | 10,3 | 9,9 | 9,4 |
+| costruiti sopra un altro | 6,6 | 6,6 | 6,1 | 5,6 | 5,1 | 5,0 |
+| altezza massima | 4,58 | 4,56 | 4,41 | 4,02 | 3,88 | 3,97 |
+| basi proprie / altrui | 6,9 / 1,6 | 6,0 / 2,3 | 5,3 / 2,3 | 5,2 / 1,7 | 4,2 / 2,0 | 3,8 / 2,3 |
+| premio di scavo (di cui era 5) | 10,3 (3,9) | 11,4 (4,3) | 9,9 (3,6) | – | – | – |
+| Idee prodotte / spese | 10,8 / 10,5 | 16,2 / 14,5 | 14,5 / 13,1 | – | – | – |
+| azioni: costruisci / potenzia / ristruttura | 12,9 / 3,7 / 0,8 | 13,9 / 3,7 / 0,7 | 12,2 / 3,5 / 0,7 | 10,3 / 0,5 / 0,5 | 9,9 / 0,4 / 0,8 | 9,4 / 0,5 / 0,8 |
+| Dinastia / passa | 0,12 / 2,8 | 0,63 / 3,1 | 0,75 / **5,1** | 0,08 / 1,3 | 0,04 / 1,0 | 0,06 / 1,0 |
+| kingmaker (cambia vincitore senza il bottino dell'era 5) | 10 % | 13 % | **18 %** | – | – | – |
+
+### Le strategie
+
+| vince | v2 a 2 (atteso 50 ± 6) | v2 a 3 (33 ± 5) | v2 a 4 (25 ± 4) | v1.5 a 2 | v1.5 a 3 | v1.5 a 4 |
+|---|--:|--:|--:|--:|--:|--:|
+| Rendita | 55 % | 38 % | 30 % | 47 % | 41 % | 30 % |
+| Continuità | **58 %** | 34 % | 27 % | – | – | – |
+| Bilanciata | 48 % | 34 % | 26 % | 52 % | 39 % | 29 % |
+| Obiettivi | **40 %** | 33 % | 25 % | 54 % | 34 % | 33 % |
+| Scavo | 44 % | 30 % | 22 % | 46 % | 29 % | **15 %** |
+| Lampo | 54 % | 31 % | 20 % | 50 % | 27 % | 20 % |
+| Verticale | – | – | – | 52 % | 31 % | 23 % |
+
+### La vita degli edifici, per partita
+
+| per partita | v2 a 2 | v2 a 3 | v2 a 4 | v1.5 a 2 | v1.5 a 3 | v1.5 a 4 |
+|---|--:|--:|--:|--:|--:|--:|
+| costruiti | 25,8 | 41,7 | 48,9 | 20,5 | 29,5 | 37,6 |
+| in piedi a fine | 7,7 | 13,6 | 16,3 | 5,7 | 9,3 | 11,4 |
+| cade nell'era in cui nasce | 34 % | 35 % | 34 % | 19 % | 17 % | 18 % |
+| sepolti (spianati dal proprietario / da un altro) | 51 % (37 / 13) | 47 % (31 / 17) | 48 % (32 / 19) | 53 % (27 / 15) | 51 % (25 / 19) | 54 % (25 / 24) |
+| PV delle carte: Rendita / Lampo / Scavo / Scheletri | 22 / 39 / 30 / 20 | 29 / 66 / 50 / 31 | 33 / 76 / 59 / 38 | 38 / 26 / 14 / 6 | 66 / 36 / 21 / 8 | 73 / 48 / 29 / 15 |
+
+### Cosa salta all'occhio
+
+**1. La città della v2 ha la stessa forma a 2, 3 e 4 giocatori.** Altezza 4,4–4,6, un terzo
+degli edifici cade nell'era in cui nasce (34–35 %, contro il 17–19 % della v1.5: è la rovina a
+−2 senza il rudere), 6–7 edifici costruiti sopra un altro per giocatore, i canali nelle stesse
+proporzioni. Il numero di giocatori cambia l'affollamento (basi altrui 1,6 a due, 2,3 a tre e
+quattro), non il gioco. Le regole non hanno una dipendenza nascosta dal tre.
+
+**2. A due giocatori le strategie si aprono.** Continuità 58 % e Obiettivi 40 % stanno fuori
+dall'errore (atteso 50 ± 6); nella v1.5 a due sono tutte fra 46 e 54. I due casi hanno cause
+diverse. Obiettivi insegue i Monumenti e a due giocatori se ne rivela uno solo (giocatori meno
+uno): il suo canale vale 1,7 punti, e senza la Verticalità che nella v1.5 la reggeva (25 punti)
+resta la strategia più povera (77,9 PV contro 81–88). Continuità gode delle cinque colonne: con
+poco suolo e nessun avversario nella colonna costruisce sopra i propri (basi proprie 6,9 contro
+6,0 a tre), e la classe in colonna paga. Da decidere se è un difetto delle regole a due
+(Monumenti rivelati: due invece di uno; da misurare) o solo dei bot.
+
+**3. A quattro giocatori le strategie tengono, ma si passa il doppio.** Rendita 30 e Lampo 20
+stanno sul bordo dell'errore (25 ± 4), le altre dentro; meglio della v1.5 a quattro, dove la
+Scavo vince il 15 %. Ma ogni giocatore passa 5,1 volte a partita (3,1 a tre, 2,8 a due): un
+turno per era a testa senza niente da fare. Il motivo è aritmetico: **quattro giocatori per
+quattro lavoratori fanno sedici turni per era, e le sagome dell'era sono dodici.** A tre i turni
+sono dodici, a due otto. Si costruiscono 49 delle 60 sagome (41,7 a tre): il mazzo dell'era si
+svuota, il mercato si restringe e il bot, che non ha più niente che valga, passa (nella partita
+raccontata con `--perche`, seme 700003: 20 passaggi a quattro, 6 a tre, tutti "nessuna mossa
+vale più di zero"). Nella v1.5 la valvola era Reclutare (3,6 azioni a giocatore a quattro): nel
+draft non c'è più. Il kingmaker sale al 18 % (10 % a due, 13 % a tre): con quattro giocatori
+il distacco fra primo e secondo è più piccolo e il bottino dell'ultima era lo copre più spesso.
+
+**4. Le Idee si spendono.** Prodotte 10,8 / 16,2 / 14,5 per giocatore, spese il 97 / 90 / 90 %:
+nessuna scarsità e nessun avanzo a nessun numero di giocatori.
+
+**5. La partita si accorcia con i giocatori, come nella v1.5.** 89 punti a tre, 83 a due, 78
+a quattro (v1.5: 86 / 87 / 82): meno suolo a testa a quattro, meno attivazioni altrui a due.
+
+**6. Controprova: tre lavoratori invece di quattro** (`--lavoratori 3`, stessi semi).
+
+| per giocatore | a 4: 4 lav. | **a 4: 3 lav.** | a 2: 4 lav. | **a 2: 3 lav.** |
+|---|--:|--:|--:|--:|
+| PV | 78,4 | 69,9 | 83,4 | 70,6 |
+| costruiti / passa | 12,2 / 5,1 | 10,8 / 1,9 | 12,9 / 2,8 | 10,9 / 1,1 |
+| altezza / basi altrui | 4,41 / 2,3 | 4,36 / 2,2 | 4,58 / 1,6 | 4,44 / 1,5 |
+| kingmaker | 18 % | 17 % | 10 % | 9 % |
+| vince: Rendita / Continuità / Bilanciata / Obiettivi / Scavo / Lampo | 30 / 27 / 26 / 25 / 22 / 20 | 29 / 27 / 24 / 27 / 21 / 23 | 55 / 58 / 48 / 40 / 44 / 54 | 52 / 55 / 46 / 45 / 43 / 58 |
+
+A quattro giocatori con tre lavoratori i passaggi cadono da 5,1 a 1,9, ma la partita si
+assottiglia (70 punti, 10,8 edifici) e le strategie non si muovono: con dodici turni si
+costruiscono comunque 10,8 sagome, cioè i quattro turni in più di prima erano per tre quarti
+passaggi. Il mercato corto è confermato, ma togliere un lavoratore toglie anche gioco: se si
+vuole intervenire, la strada è dare qualcosa da fare al quarto lavoratore (un incasso quando
+si passa, come nel turno a un'azione: `passa_incasso_*` c'è già) o più sagome a quattro, non un
+lavoratore in meno. A due giocatori con tre lavoratori la forbice si chiude (Continuità 55,
+Obiettivi 45, tutte entro 50 ± 6 tranne Lampo a 58) ma la partita perde 13 punti: la forbice a
+due è in parte un effetto dei quattro turni per otto turni d'era, non solo dei Monumenti.
+Da decidere, con la seconda controprova (un secondo Monumento rivelato a due) ancora da fare:
+vuole una costante, oggi "giocatori meno uno" è nel codice.
+
 ## Tredicesima misura: le controprove a quattro e a due
 
 Le due domande lasciate dalla dodicesima misura, più le due idee del designer per la scarsità di
@@ -633,4 +734,8 @@ python3 tools/confronta_torneo.py F.csv Ga.csv Gb.csv
 # undicesima misura: la spinta della Lampo sta nella tabella v2; `--spinta lampo_potenzia=0` la spegne
 godot --headless res://scenes/audit_partita.tscn -- --players 3 --games 750 --seed 700000 --dati data/cards-v2.json > H.csv
 python3 tools/confronta_strategie.py H.csv
+# dodicesima misura: la v2 e la v1.5 a 2 e a 4 giocatori, stessi semi; `--lavoratori 3` e' la controprova a quattro
+for p in 2 4; do godot --headless res://scenes/audit_partita.tscn -- --players $p --games 750 --seed 700000 --dati data/cards-v2.json > v2_p$p.csv; done
+python3 tools/confronta_torneo.py v2_p2.csv H.csv v2_p4.csv
+python3 tools/confronta_strategie.py v2_p4.csv
 ```

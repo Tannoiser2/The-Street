@@ -1844,3 +1844,25 @@ dato è stato importato da lì. Ma due confronti fra ciò che è stampato e
     che gioca il motore con `data/cards-v2.json`. In fondo le cose che
     restano da decidere al tavolo (mercato, di chi e' la rovina, misure
     delle sagome). Le varianti non sono misurate con la v2.
+
+108. **La v2 a 2 e a 4 giocatori.** Il designer ("vai con le misure a 2 e 4
+    giocatori"): tutte le misure erano a tre. Stessi lotti (750 torneo, 2 000
+    vita) a 2, 3 e 4, v2 e v1.5 (`docs/la-terza-risorsa.md`, dodicesima
+    misura). La citta' della v2 ha la stessa forma a ogni numero di
+    giocatori (altezza 4,4-4,6, un terzo cade nell'era in cui nasce, 6-7
+    sopraelevazioni a testa) e le Idee si spendono (90-97%). Due cose da
+    decidere. **A due** le strategie si aprono: Continuita' 58% e Obiettivi
+    40% fuori dall'errore (50 +- 6), nella v1.5 a due tutte fra 46 e 54;
+    Obiettivi ha un Monumento solo (giocatori meno uno) e senza la
+    Verticalita' e' la piu' povera, Continuita' costruisce sopra i propri
+    nelle cinque colonne. **A quattro** le strategie tengono (25 +- 4, meglio
+    della v1.5) ma ognuno passa 5,1 volte a partita: sedici turni per era
+    contro dodici sagome dell'era, 49 sagome costruite su 60, e il draft ha
+    tolto Reclutare, che nella v1.5 era la valvola; kingmaker 18% (10 a
+    due, 13 a tre). Controprova con tre lavoratori: a quattro i passaggi
+    cadono a 1,9 ma la partita perde 9 punti e le strategie non si muovono
+    (il mercato corto e' confermato; se si interviene, meglio un incasso al
+    passaggio o piu' sagome che un lavoratore in meno); a due la forbice si
+    chiude (Continuita' 55, Obiettivi 45) al costo di 13 punti. Resta da
+    fare la controprova del secondo Monumento rivelato a due (serve una
+    costante: oggi "giocatori meno uno" e' nel codice).
