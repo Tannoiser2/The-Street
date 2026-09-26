@@ -145,8 +145,70 @@ v2["constants"]["tessere_una_volta_per_era"] = True
 v2["constants"].pop("disturbo_vp", None)
 v2["constants"]["vetusta_max"] = 0
 v2["constants"]["vetusta_max_bosco"] = 0
-out = os.path.join(RADICE, "data/cards-v2.json")
+# ---- le varianti di prova per la scarsita' di sagome a quattro (registro 110) --
+# A quattro giocatori sedici turni per era contro dodici sagome. Due idee del
+# designer, ognuna un file a parte in data/proposte/, che il file v2 non tocca:
+#   --variante doppioni    per era, una seconda copia della chiesa e del villaggio
+#                          piu' economici (1 casella: civico e religione, o cultura
+#                          dove la religione manca);
+#   --variante abitazioni  per era, due abitazioni generiche nuove, che costano
+#                          poco e rendono poco.
+# Le sagome in piu' portano `min_players` 4: entrano nel mazzo solo a quattro,
+# come le tessere in piu'; a due e a tre il gioco non cambia.
+ABITAZIONI = {
+    1: ("Capanne di fango",  {"pietra": 1, "oro": 0, "idee": 0}, 1, {"pietra": 1, "oro": 0}),
+    2: ("Case a schiera",    {"pietra": 1, "oro": 0, "idee": 0}, 2, {"pietra": 1, "oro": 0}),
+    3: ("Case a graticcio",  {"pietra": 1, "oro": 1, "idee": 0}, 2, {"pietra": 0, "oro": 1}),
+    4: ("Casa borghese",     {"pietra": 1, "oro": 0, "idee": 1}, 3, {"pietra": 0, "oro": 1}),
+    5: ("Palazzina",         {"pietra": 0, "oro": 1, "idee": 1}, 3, {"pietra": 0, "oro": 1}),
+}
+
+def _costo_totale(b):
+    return sum(b["cost"].values())
+
+def _piu_economico(edifici, classe):
+    # A parita' di costo vince chi produce (le Insulae, non le Terme): sono
+    # "villaggi", case, non edifici pubblici.
+    quali = [b for b in edifici if b["width"] == 1 and classe in b["classes"]]
+    return min(quali, key=lambda b: (_costo_totale(b), -sum(b["production"].values()))) if quali else None
+
+def doppioni(v):
+    extra = []
+    for era in range(1, 6):
+        dell_era = [b for b in v["buildings"] if b["era"] == era]
+        scelti = [_piu_economico(dell_era, "civico"),
+                  _piu_economico(dell_era, "religione") or _piu_economico(dell_era, "cultura")]
+        for b in scelti:
+            c = json.loads(json.dumps(b))
+            c["id"] = b["id"] + "_bis"
+            c["name"] = b["name"] + " (II)"
+            c["min_players"] = 4
+            c["sagoma_di"] = b["id"]
+            extra.append(c)
+    v["buildings"].extend(extra)
+
+def abitazioni(v):
+    for era, (nome, costo, res, prod) in ABITAZIONI.items():
+        for k in (1, 2):
+            v["buildings"].append({
+                "id": "ed_abitazioni_e%d_%d" % (era, k), "name": nome, "era": era,
+                "classes": ["civico"], "terrain": None, "width": 1,
+                "cost": dict(costo), "flexible": False, "resistance": res,
+                "rendita": 0, "lampo": 1, "scavo": 1, "level_required": 0,
+                "production": {"pietra": prod["pietra"], "oro": prod["oro"], "cultura": 0, "idee": 0},
+                "exhaustible": 0, "min_players": 4,
+            })
+
+import sys
+variante = sys.argv[sys.argv.index("--variante") + 1] if "--variante" in sys.argv else ""
+if variante:
+    {"doppioni": doppioni, "abitazioni": abitazioni}[variante](v2)
+    v2["meta"]["ruleset"] = "v2-" + variante
+    v2["meta"]["origine"] = "generato da tools/genera_cards_v2.py --variante %s: non modificare a mano" % variante
+    out = os.path.join(RADICE, "data/proposte/cards-v2-%s.json" % variante)
+else:
+    out = os.path.join(RADICE, "data/cards-v2.json")
 json.dump(v2, open(out, "w", encoding="utf-8"), indent=2, ensure_ascii=False)
 open(out, "a").write("\n")
 n_idee = sum(1 for b in v2["buildings"] if b["cost"]["idee"])
-print(f"scritto data/cards-v2.json: {n_idee} edifici con Idee nel costo, mix {MIX['3']} a 3 giocatori")
+print(f"scritto {os.path.relpath(out, RADICE)}: {n_idee} edifici con Idee nel costo, mix {MIX['3']} a 3 giocatori")

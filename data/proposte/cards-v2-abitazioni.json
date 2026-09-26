@@ -1,0 +1,5024 @@
+{
+  "meta": {
+    "game": "La Strada delle Ere",
+    "ruleset": "v2-abitazioni",
+    "language": "it",
+    "source": "distinta-carte (fonte unica)",
+    "origine": "generato da tools/genera_cards_v2.py --variante abitazioni: non modificare a mano"
+  },
+  "constants": {
+    "eras": 5,
+    "rails": 5,
+    "columns_by_players": {
+      "2": 5,
+      "3": 7,
+      "4": 9
+    },
+    "terrain_mix_by_players": {
+      "2": {
+        "pianura": 2,
+        "fiume": 1,
+        "collina": 1,
+        "bosco": 1
+      },
+      "3": {
+        "pianura": 2,
+        "fiume": 2,
+        "collina": 1,
+        "bosco": 2
+      },
+      "4": {
+        "pianura": 3,
+        "fiume": 2,
+        "collina": 2,
+        "bosco": 2
+      }
+    },
+    "workers_base": 4,
+    "start_resources": {
+      "pietra": 2,
+      "oro": 0,
+      "idee": 0
+    },
+    "second_player_bonus_2p": {
+      "oro": 1
+    },
+    "event_force_by_era": {
+      "1": 2,
+      "2": 3,
+      "3": 4,
+      "4": 5
+    },
+    "resource_cap": 5,
+    "protection_bonus": 2,
+    "vetusta_max": 0,
+    "vetusta_max_bosco": 0,
+    "rudere_penalty": 2,
+    "rovina_gap": 2,
+    "senza_rudere": true,
+    "spianare_conserva_scavo": false,
+    "scavo_a_chi_scava": false,
+    "sconto_macerie_solo_altrui": false,
+    "premio_scavo": "per_livello",
+    "binari_liberi": true,
+    "verticality_vp": {
+      "1": 0,
+      "2": 0,
+      "3": 0,
+      "4": 0
+    },
+    "continuity_vp": {
+      "2": 2,
+      "3": 5
+    },
+    "upgrade_cost_by_era": {
+      "1": 1,
+      "2": 1,
+      "3": 1,
+      "4": 2,
+      "5": 2
+    },
+    "recruit_cost_oro": 1,
+    "terrapieno_cost_pietra": 1,
+    "rubble_discount_pietra": 1,
+    "prosperity": {
+      "min_buildings": 3,
+      "min_owners": 2,
+      "gold_per_owner": 1,
+      "once_per_era": true
+    },
+    "level_cap_per_era_per_column": 1,
+    "market_size": 6,
+    "side_rows": 3,
+    "resource_cap_per_resource": 3,
+    "premio_era5": "dimezzato",
+    "turno_v2": false,
+    "passa_incasso_pietra": 1,
+    "passa_incasso_scelta": 1,
+    "draft_personaggi": true,
+    "personaggi_sepolti": false,
+    "scheletro_potenziamento": true,
+    "scheletro_conta": "sempre",
+    "tessere_una_volta_per_era": true
+  },
+  "terrains": [
+    {
+      "id": "pianura",
+      "base_production": {
+        "pietra": 2,
+        "oro": 0
+      },
+      "identity": "sviluppo",
+      "rule": "Denaro, poco all'inizio e molto dopo. Una volta per era: un edificio da 2 o 3 caselle costa 1 Costruzione in meno.",
+      "base_production_by_era": {
+        "1": {
+          "pietra": 1,
+          "oro": 0,
+          "idee": 0
+        },
+        "2": {
+          "pietra": 1,
+          "oro": 1,
+          "idee": 0
+        },
+        "3": {
+          "pietra": 0,
+          "oro": 1,
+          "idee": 0
+        },
+        "4": {
+          "pietra": 0,
+          "oro": 2,
+          "idee": 0
+        },
+        "5": {
+          "pietra": 0,
+          "oro": 2,
+          "idee": 0
+        }
+      }
+    },
+    {
+      "id": "fiume",
+      "base_production": {
+        "pietra": 1,
+        "oro": 1
+      },
+      "identity": "liquidita",
+      "rule": "Costruzione, tanta all'inizio e poco dopo. Una volta per era: +1 Denaro a chi la attiva. Requisito 'fiume' stretto.",
+      "base_production_by_era": {
+        "1": {
+          "pietra": 2,
+          "oro": 0,
+          "idee": 0
+        },
+        "2": {
+          "pietra": 2,
+          "oro": 0,
+          "idee": 0
+        },
+        "3": {
+          "pietra": 1,
+          "oro": 0,
+          "idee": 0
+        },
+        "4": {
+          "pietra": 1,
+          "oro": 0,
+          "idee": 0
+        },
+        "5": {
+          "pietra": 1,
+          "oro": 0,
+          "idee": 0
+        }
+      }
+    },
+    {
+      "id": "collina",
+      "base_production": {
+        "pietra": 2,
+        "oro": 0
+      },
+      "identity": "monumentalita",
+      "rule": "Costruzione come il fiume. Una volta per era: il primo edificio costruito qui ha +1 resistenza per l'era.",
+      "base_production_by_era": {
+        "1": {
+          "pietra": 2,
+          "oro": 0,
+          "idee": 0
+        },
+        "2": {
+          "pietra": 2,
+          "oro": 0,
+          "idee": 0
+        },
+        "3": {
+          "pietra": 1,
+          "oro": 0,
+          "idee": 0
+        },
+        "4": {
+          "pietra": 1,
+          "oro": 0,
+          "idee": 0
+        },
+        "5": {
+          "pietra": 1,
+          "oro": 0,
+          "idee": 0
+        }
+      }
+    },
+    {
+      "id": "bosco",
+      "base_production": {
+        "pietra": 2,
+        "oro": 0
+      },
+      "identity": "conservazione",
+      "rule": "Idee, in aumento con le ere. Una volta per era: una ristrutturazione costa 1 Costruzione in meno.",
+      "base_production_by_era": {
+        "1": {
+          "pietra": 0,
+          "oro": 0,
+          "idee": 1
+        },
+        "2": {
+          "pietra": 0,
+          "oro": 0,
+          "idee": 2
+        },
+        "3": {
+          "pietra": 0,
+          "oro": 0,
+          "idee": 2
+        },
+        "4": {
+          "pietra": 0,
+          "oro": 0,
+          "idee": 3
+        },
+        "5": {
+          "pietra": 0,
+          "oro": 0,
+          "idee": 3
+        }
+      }
+    }
+  ],
+  "buildings": [
+    {
+      "id": "ed_capanne",
+      "name": "Capanne",
+      "era": 1,
+      "classes": [
+        "civico"
+      ],
+      "terrain": "pianura",
+      "width": 1,
+      "cost": {
+        "pietra": 1,
+        "oro": 0,
+        "idee": 0
+      },
+      "flexible": false,
+      "resistance": 1,
+      "rendita": 0,
+      "lampo": 1,
+      "scavo": 2,
+      "level_required": 0,
+      "production": {
+        "pietra": 1,
+        "oro": 0,
+        "cultura": 0,
+        "idee": 0
+      },
+      "exhaustible": 0
+    },
+    {
+      "id": "ed_dolmen",
+      "name": "Dolmen",
+      "era": 1,
+      "classes": [
+        "religione"
+      ],
+      "terrain": "collina",
+      "width": 1,
+      "cost": {
+        "pietra": 1,
+        "oro": 0,
+        "idee": 1
+      },
+      "flexible": false,
+      "resistance": 3,
+      "rendita": 1,
+      "lampo": 0,
+      "scavo": 3,
+      "level_required": 0,
+      "production": {
+        "pietra": 0,
+        "oro": 0,
+        "cultura": 0,
+        "idee": 0
+      },
+      "exhaustible": 0,
+      "effect_text": ""
+    },
+    {
+      "id": "ed_grotte_dipinte",
+      "name": "Grotte dipinte",
+      "era": 1,
+      "classes": [
+        "cultura"
+      ],
+      "terrain": "collina",
+      "width": 1,
+      "cost": {
+        "pietra": 0,
+        "oro": 0,
+        "idee": 1
+      },
+      "flexible": false,
+      "resistance": 2,
+      "rendita": 0,
+      "lampo": 0,
+      "scavo": 6,
+      "level_required": 0,
+      "production": {
+        "pietra": 0,
+        "oro": 0,
+        "cultura": 0,
+        "idee": 0
+      },
+      "exhaustible": 0
+    },
+    {
+      "id": "ed_approdo",
+      "name": "Approdo",
+      "era": 1,
+      "classes": [
+        "commercio"
+      ],
+      "terrain": "fiume",
+      "width": 1,
+      "cost": {
+        "pietra": 1,
+        "oro": 0,
+        "idee": 0
+      },
+      "flexible": true,
+      "resistance": 1,
+      "rendita": 0,
+      "lampo": 0,
+      "scavo": 2,
+      "level_required": 0,
+      "production": {
+        "pietra": 1,
+        "oro": 0,
+        "cultura": 0,
+        "idee": 0
+      },
+      "exhaustible": 0
+    },
+    {
+      "id": "ed_menhir",
+      "name": "Menhir",
+      "era": 1,
+      "classes": [
+        "religione"
+      ],
+      "terrain": "bosco",
+      "width": 1,
+      "cost": {
+        "pietra": 1,
+        "oro": 0,
+        "idee": 1
+      },
+      "flexible": false,
+      "resistance": 4,
+      "rendita": 1,
+      "lampo": 0,
+      "scavo": 3,
+      "level_required": 0,
+      "production": {
+        "pietra": 0,
+        "oro": 0,
+        "cultura": 0,
+        "idee": 0
+      },
+      "exhaustible": 0,
+      "effect_text": "Piccolo ma quasi indistruttibile."
+    },
+    {
+      "id": "ed_palafitte",
+      "name": "Palafitte",
+      "era": 1,
+      "classes": [
+        "civico"
+      ],
+      "terrain": "fiume",
+      "width": 1,
+      "cost": {
+        "pietra": 1,
+        "oro": 0,
+        "idee": 0
+      },
+      "flexible": false,
+      "resistance": 2,
+      "rendita": 0,
+      "lampo": 1,
+      "scavo": 2,
+      "level_required": 0,
+      "production": {
+        "pietra": 1,
+        "oro": 0,
+        "cultura": 0,
+        "idee": 0
+      },
+      "exhaustible": 0
+    },
+    {
+      "id": "ed_cava",
+      "name": "Cava",
+      "era": 1,
+      "classes": [
+        "commercio"
+      ],
+      "terrain": "pianura",
+      "width": 1,
+      "cost": {
+        "pietra": 1,
+        "oro": 0,
+        "idee": 0
+      },
+      "flexible": true,
+      "resistance": 1,
+      "rendita": 0,
+      "lampo": 0,
+      "scavo": 2,
+      "level_required": 0,
+      "production": {
+        "pietra": 2,
+        "oro": 0,
+        "cultura": 0,
+        "idee": 0
+      },
+      "exhaustible": 4
+    },
+    {
+      "id": "ed_focolare_comune",
+      "name": "Focolare comune",
+      "era": 1,
+      "classes": [
+        "civico"
+      ],
+      "terrain": "pianura",
+      "width": 1,
+      "cost": {
+        "pietra": 1,
+        "oro": 0,
+        "idee": 0
+      },
+      "flexible": false,
+      "resistance": 1,
+      "rendita": 0,
+      "lampo": 1,
+      "scavo": 2,
+      "level_required": 0,
+      "production": {
+        "pietra": 0,
+        "oro": 0,
+        "cultura": 0,
+        "idee": 0
+      },
+      "exhaustible": 0,
+      "effect_text": "Quartiere: +1 pietra quando abiti qui.",
+      "effects": [
+        {
+          "hook": "on_activate",
+          "op": "resource",
+          "pietra": 1,
+          "target": {
+            "is_self": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "ed_trappole_da_pesca",
+      "name": "Trappole da pesca",
+      "era": 1,
+      "classes": [
+        "ingegneria"
+      ],
+      "terrain": "fiume",
+      "width": 1,
+      "cost": {
+        "pietra": 1,
+        "oro": 0,
+        "idee": 0
+      },
+      "flexible": true,
+      "resistance": 1,
+      "rendita": 0,
+      "lampo": 0,
+      "scavo": 0,
+      "level_required": 0,
+      "production": {
+        "pietra": 1,
+        "oro": 0,
+        "cultura": 0,
+        "idee": 0
+      },
+      "exhaustible": 0
+    },
+    {
+      "id": "ed_circolo_di_pietre",
+      "name": "Circolo di pietre",
+      "era": 1,
+      "classes": [
+        "religione"
+      ],
+      "terrain": null,
+      "width": 2,
+      "cost": {
+        "pietra": 2,
+        "oro": 0,
+        "idee": 1
+      },
+      "flexible": false,
+      "resistance": 4,
+      "rendita": 1,
+      "lampo": 0,
+      "scavo": 5,
+      "level_required": 0,
+      "production": {
+        "pietra": 0,
+        "oro": 0,
+        "cultura": 0,
+        "idee": 0
+      },
+      "exhaustible": 0,
+      "effect_text": "Lo Stonehenge della strada."
+    },
+    {
+      "id": "ed_villaggio_palizzato",
+      "name": "Villaggio palizzato",
+      "era": 1,
+      "classes": [
+        "militare"
+      ],
+      "terrain": "pianura",
+      "width": 2,
+      "cost": {
+        "pietra": 2,
+        "oro": 0,
+        "idee": 0
+      },
+      "flexible": false,
+      "resistance": 2,
+      "rendita": 0,
+      "lampo": 1,
+      "scavo": 2,
+      "level_required": 0,
+      "production": {
+        "pietra": 0,
+        "oro": 0,
+        "cultura": 0,
+        "idee": 0
+      },
+      "exhaustible": 0,
+      "effect_text": "Quartiere: +1 res ai tuoi edifici adiacenti.",
+      "effects": [
+        {
+          "hook": "on_event",
+          "op": "resistance",
+          "value": 1,
+          "target": {
+            "owner": "self",
+            "adjacent_to_self": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "ed_tumulo_funerario",
+      "name": "Tumulo funerario",
+      "era": 1,
+      "classes": [
+        "religione",
+        "cultura"
+      ],
+      "terrain": "collina",
+      "width": 2,
+      "cost": {
+        "pietra": 1,
+        "oro": 0,
+        "idee": 1
+      },
+      "flexible": false,
+      "resistance": 3,
+      "rendita": 0,
+      "lampo": 1,
+      "scavo": 5,
+      "level_required": 0,
+      "production": {
+        "pietra": 0,
+        "oro": 0,
+        "cultura": 0,
+        "idee": 0
+      },
+      "exhaustible": 0
+    },
+    {
+      "id": "ed_teatro",
+      "name": "Teatro",
+      "era": 2,
+      "classes": [
+        "cultura"
+      ],
+      "terrain": null,
+      "width": 1,
+      "cost": {
+        "pietra": 1,
+        "oro": 0,
+        "idee": 1
+      },
+      "flexible": false,
+      "resistance": 3,
+      "rendita": 0,
+      "lampo": 2,
+      "scavo": 5,
+      "level_required": 0,
+      "production": {
+        "pietra": 0,
+        "oro": 0,
+        "cultura": 0,
+        "idee": 0
+      },
+      "exhaustible": 0,
+      "effect_text": ""
+    },
+    {
+      "id": "ed_acquedotto",
+      "name": "Acquedotto",
+      "era": 2,
+      "classes": [
+        "ingegneria"
+      ],
+      "terrain": "fiume",
+      "width": 3,
+      "cost": {
+        "pietra": 2,
+        "oro": 0,
+        "idee": 1
+      },
+      "flexible": true,
+      "resistance": 4,
+      "rendita": 1,
+      "lampo": 0,
+      "scavo": 3,
+      "level_required": 0,
+      "production": {
+        "pietra": 0,
+        "oro": 0,
+        "cultura": 0,
+        "idee": 0
+      },
+      "exhaustible": 0,
+      "effect_text": "Colossale: 2 slot adiacenti (3 pagando +1 pietra; in 2 giocatori il terzo slot è vietato), almeno uno con fiume. Eco: +2 PV (lampo) se ancora in piedi nel Moderno.",
+      "effects": [
+        {
+          "hook": "on_final_scoring",
+          "op": "vp",
+          "value": 2,
+          "condition": {
+            "op": "count_matching",
+            "min": 1,
+            "target": {
+              "is_self": true,
+              "state": [
+                "intatto"
+              ],
+              "buried": false
+            }
+          }
+        },
+        {
+          "hook": "on_build",
+          "op": "rule_override",
+          "name": "colossal"
+        }
+      ]
+    },
+    {
+      "id": "ed_terme",
+      "name": "Terme",
+      "era": 2,
+      "classes": [
+        "civico"
+      ],
+      "terrain": null,
+      "width": 1,
+      "cost": {
+        "pietra": 2,
+        "oro": 0,
+        "idee": 0
+      },
+      "flexible": false,
+      "resistance": 2,
+      "rendita": 0,
+      "lampo": 2,
+      "scavo": 3,
+      "level_required": 0,
+      "production": {
+        "pietra": 0,
+        "oro": 0,
+        "cultura": 0,
+        "idee": 0
+      },
+      "exhaustible": 0,
+      "effect_text": ""
+    },
+    {
+      "id": "ed_sacello",
+      "name": "Sacello",
+      "era": 2,
+      "classes": [
+        "religione"
+      ],
+      "terrain": "collina",
+      "width": 1,
+      "cost": {
+        "pietra": 0,
+        "oro": 0,
+        "idee": 1
+      },
+      "flexible": false,
+      "resistance": 2,
+      "rendita": 0,
+      "lampo": 1,
+      "scavo": 3,
+      "level_required": 0,
+      "production": {
+        "pietra": 0,
+        "oro": 0,
+        "cultura": 0,
+        "idee": 0
+      },
+      "exhaustible": 0,
+      "effect_text": ""
+    },
+    {
+      "id": "ed_torre_di_vedetta",
+      "name": "Torre di vedetta",
+      "era": 2,
+      "classes": [
+        "militare"
+      ],
+      "terrain": "collina",
+      "width": 1,
+      "cost": {
+        "pietra": 2,
+        "oro": 0,
+        "idee": 0
+      },
+      "flexible": false,
+      "resistance": 3,
+      "rendita": 0,
+      "lampo": 1,
+      "scavo": 2,
+      "level_required": 0,
+      "production": {
+        "pietra": 0,
+        "oro": 0,
+        "cultura": 0,
+        "idee": 0
+      },
+      "exhaustible": 0,
+      "effect_text": "Quartiere: +1 res ai tuoi edifici adiacenti.",
+      "effects": [
+        {
+          "hook": "on_event",
+          "op": "resistance",
+          "value": 1,
+          "target": {
+            "owner": "self",
+            "adjacent_to_self": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "ed_tempio",
+      "name": "Tempio",
+      "era": 2,
+      "classes": [
+        "religione"
+      ],
+      "terrain": "collina",
+      "width": 1,
+      "cost": {
+        "pietra": 2,
+        "oro": 0,
+        "idee": 1
+      },
+      "flexible": false,
+      "resistance": 3,
+      "rendita": 1,
+      "lampo": 0,
+      "scavo": 3,
+      "level_required": 0,
+      "production": {
+        "pietra": 0,
+        "oro": 0,
+        "cultura": 0,
+        "idee": 0
+      },
+      "exhaustible": 0,
+      "effect_text": ""
+    },
+    {
+      "id": "ed_ponte",
+      "name": "Ponte",
+      "era": 2,
+      "classes": [
+        "ingegneria"
+      ],
+      "terrain": "fiume",
+      "width": 2,
+      "cost": {
+        "pietra": 2,
+        "oro": 0,
+        "idee": 1
+      },
+      "flexible": true,
+      "resistance": 3,
+      "rendita": 1,
+      "lampo": 0,
+      "scavo": 3,
+      "level_required": 0,
+      "production": {
+        "pietra": 0,
+        "oro": 0,
+        "cultura": 0,
+        "idee": 0
+      },
+      "exhaustible": 0,
+      "effect_text": "Quartiere: +1 produzione agli edifici adiacenti.",
+      "effects": [
+        {
+          "hook": "on_activate",
+          "op": "production_delta",
+          "value": 1,
+          "own_production": true,
+          "target": {
+            "adjacent_to_self": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "ed_emporio",
+      "name": "Emporio",
+      "era": 2,
+      "classes": [
+        "commercio"
+      ],
+      "terrain": "fiume",
+      "width": 1,
+      "cost": {
+        "pietra": 2,
+        "oro": 0,
+        "idee": 0
+      },
+      "flexible": true,
+      "resistance": 2,
+      "rendita": 0,
+      "lampo": 2,
+      "scavo": 2,
+      "level_required": 0,
+      "production": {
+        "pietra": 0,
+        "oro": 1,
+        "cultura": 0,
+        "idee": 0
+      },
+      "exhaustible": 0
+    },
+    {
+      "id": "ed_insulae",
+      "name": "Insulae",
+      "era": 2,
+      "classes": [
+        "civico"
+      ],
+      "terrain": "pianura",
+      "width": 1,
+      "cost": {
+        "pietra": 2,
+        "oro": 0,
+        "idee": 0
+      },
+      "flexible": false,
+      "resistance": 2,
+      "rendita": 0,
+      "lampo": 2,
+      "scavo": 2,
+      "level_required": 0,
+      "production": {
+        "pietra": 1,
+        "oro": 0,
+        "cultura": 0,
+        "idee": 0
+      },
+      "exhaustible": 0
+    },
+    {
+      "id": "ed_foro",
+      "name": "Foro",
+      "era": 2,
+      "classes": [
+        "commercio",
+        "civico"
+      ],
+      "terrain": "pianura",
+      "width": 2,
+      "cost": {
+        "pietra": 3,
+        "oro": 0,
+        "idee": 0
+      },
+      "flexible": false,
+      "resistance": 3,
+      "rendita": 1,
+      "lampo": 0,
+      "scavo": 5,
+      "level_required": 0,
+      "production": {
+        "pietra": 0,
+        "oro": 1,
+        "cultura": 0,
+        "idee": 0
+      },
+      "exhaustible": 0
+    },
+    {
+      "id": "ed_anfiteatro",
+      "name": "Anfiteatro",
+      "era": 2,
+      "classes": [
+        "cultura"
+      ],
+      "terrain": null,
+      "width": 3,
+      "cost": {
+        "pietra": 4,
+        "oro": 0,
+        "idee": 1
+      },
+      "flexible": false,
+      "resistance": 5,
+      "rendita": 2,
+      "lampo": 0,
+      "scavo": 6,
+      "level_required": 0,
+      "production": {
+        "pietra": 0,
+        "oro": 1,
+        "cultura": 0,
+        "idee": 0
+      },
+      "exhaustible": 0,
+      "effect_text": "Colossale: occupa 2 slot adiacenti, si attiva da entrambe le colonne e conta come strato in entrambe. Produce 1 oro a ogni attivazione — il Colosseo vende i biglietti.",
+      "effects": [
+        {
+          "hook": "on_build",
+          "op": "rule_override",
+          "name": "colossal"
+        }
+      ]
+    },
+    {
+      "id": "ed_castrum",
+      "name": "Castrum",
+      "era": 2,
+      "classes": [
+        "militare"
+      ],
+      "terrain": "pianura",
+      "width": 2,
+      "cost": {
+        "pietra": 3,
+        "oro": 0,
+        "idee": 0
+      },
+      "flexible": false,
+      "resistance": 4,
+      "rendita": 0,
+      "lampo": 1,
+      "scavo": 3,
+      "level_required": 0,
+      "production": {
+        "pietra": 0,
+        "oro": 0,
+        "cultura": 0,
+        "idee": 0
+      },
+      "exhaustible": 0,
+      "effect_text": "+1 res ai tuoi edifici in questa colonna.",
+      "effects": [
+        {
+          "hook": "on_event",
+          "op": "resistance",
+          "value": 1,
+          "target": {
+            "owner": "self",
+            "same_column_as_self": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "ed_borgo",
+      "name": "Borgo",
+      "era": 3,
+      "classes": [
+        "civico"
+      ],
+      "terrain": "pianura",
+      "width": 1,
+      "cost": {
+        "pietra": 2,
+        "oro": 0,
+        "idee": 0
+      },
+      "flexible": false,
+      "resistance": 2,
+      "rendita": 0,
+      "lampo": 3,
+      "scavo": 2,
+      "level_required": 0,
+      "production": {
+        "pietra": 0,
+        "oro": 1,
+        "cultura": 0,
+        "idee": 0
+      },
+      "exhaustible": 0
+    },
+    {
+      "id": "ed_mura",
+      "name": "Mura",
+      "era": 3,
+      "classes": [
+        "militare"
+      ],
+      "terrain": null,
+      "width": 1,
+      "cost": {
+        "pietra": 2,
+        "oro": 0,
+        "idee": 0
+      },
+      "flexible": false,
+      "resistance": 4,
+      "rendita": 0,
+      "lampo": 1,
+      "scavo": 2,
+      "level_required": 0,
+      "production": {
+        "pietra": 0,
+        "oro": 0,
+        "cultura": 0,
+        "idee": 0
+      },
+      "exhaustible": 0,
+      "effect_text": "Quartiere: +1 res agli edifici adiacenti (anche altrui).",
+      "effects": [
+        {
+          "hook": "on_event",
+          "op": "resistance",
+          "value": 1,
+          "target": {
+            "owner": "any",
+            "adjacent_to_self": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "ed_cappella",
+      "name": "Cappella",
+      "era": 3,
+      "classes": [
+        "religione"
+      ],
+      "terrain": null,
+      "width": 1,
+      "cost": {
+        "pietra": 1,
+        "oro": 0,
+        "idee": 1
+      },
+      "flexible": false,
+      "resistance": 2,
+      "rendita": 0,
+      "lampo": 2,
+      "scavo": 3,
+      "level_required": 0,
+      "production": {
+        "pietra": 0,
+        "oro": 0,
+        "cultura": 0,
+        "idee": 0
+      },
+      "exhaustible": 0,
+      "effect_text": ""
+    },
+    {
+      "id": "ed_torre_civica",
+      "name": "Torre civica",
+      "era": 3,
+      "classes": [
+        "civico"
+      ],
+      "terrain": null,
+      "width": 1,
+      "cost": {
+        "pietra": 2,
+        "oro": 0,
+        "idee": 0
+      },
+      "flexible": false,
+      "resistance": 3,
+      "rendita": 0,
+      "lampo": 3,
+      "scavo": 2,
+      "level_required": 0,
+      "production": {
+        "pietra": 0,
+        "oro": 0,
+        "cultura": 0,
+        "idee": 0
+      },
+      "exhaustible": 0,
+      "effect_text": ""
+    },
+    {
+      "id": "ed_conceria",
+      "name": "Conceria",
+      "era": 3,
+      "classes": [
+        "commercio"
+      ],
+      "terrain": "fiume",
+      "width": 1,
+      "cost": {
+        "pietra": 1,
+        "oro": 0,
+        "idee": 0
+      },
+      "flexible": true,
+      "resistance": 1,
+      "rendita": 0,
+      "lampo": 1,
+      "scavo": 0,
+      "level_required": 0,
+      "production": {
+        "pietra": 0,
+        "oro": 1,
+        "cultura": 0,
+        "idee": 0
+      },
+      "exhaustible": 0
+    },
+    {
+      "id": "ed_mulino",
+      "name": "Mulino",
+      "era": 3,
+      "classes": [
+        "ingegneria",
+        "commercio"
+      ],
+      "terrain": "pianura",
+      "width": 1,
+      "cost": {
+        "pietra": 1,
+        "oro": 0,
+        "idee": 1
+      },
+      "flexible": false,
+      "resistance": 2,
+      "rendita": 0,
+      "lampo": 1,
+      "scavo": 2,
+      "level_required": 0,
+      "production": {
+        "pietra": 0,
+        "oro": 2,
+        "cultura": 0,
+        "idee": 0
+      },
+      "exhaustible": 0,
+      "terrain_adjacent": "fiume"
+    },
+    {
+      "id": "ed_chiesa",
+      "name": "Chiesa",
+      "era": 3,
+      "classes": [
+        "religione",
+        "cultura"
+      ],
+      "terrain": null,
+      "width": 1,
+      "cost": {
+        "pietra": 2,
+        "oro": 0,
+        "idee": 1
+      },
+      "flexible": false,
+      "resistance": 3,
+      "rendita": 2,
+      "lampo": 0,
+      "scavo": 3,
+      "level_required": 0,
+      "production": {
+        "pietra": 0,
+        "oro": 0,
+        "cultura": 0,
+        "idee": 0
+      },
+      "exhaustible": 0,
+      "upgrade_slots": 2
+    },
+    {
+      "id": "ed_mercato",
+      "name": "Mercato",
+      "era": 3,
+      "classes": [
+        "commercio"
+      ],
+      "terrain": "fiume",
+      "width": 1,
+      "cost": {
+        "pietra": 2,
+        "oro": 0,
+        "idee": 0
+      },
+      "flexible": true,
+      "resistance": 2,
+      "rendita": 0,
+      "lampo": 1,
+      "scavo": 2,
+      "level_required": 0,
+      "production": {
+        "pietra": 1,
+        "oro": 1,
+        "cultura": 0,
+        "idee": 0
+      },
+      "exhaustible": 0
+    },
+    {
+      "id": "ed_ospedale_dei_pellegrini",
+      "name": "Ospedale dei pellegrini",
+      "era": 3,
+      "classes": [
+        "civico"
+      ],
+      "terrain": null,
+      "width": 1,
+      "cost": {
+        "pietra": 2,
+        "oro": 1,
+        "idee": 0
+      },
+      "flexible": false,
+      "resistance": 2,
+      "rendita": 0,
+      "lampo": 2,
+      "scavo": 2,
+      "level_required": 0,
+      "production": {
+        "pietra": 0,
+        "oro": 0,
+        "cultura": 0,
+        "idee": 0
+      },
+      "exhaustible": 0,
+      "effect_text": "Quando abiti qui, +1 oro.",
+      "effects": [
+        {
+          "hook": "on_activate",
+          "op": "resource",
+          "oro": 1,
+          "target": {
+            "is_self": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "ed_castello",
+      "name": "Castello",
+      "era": 3,
+      "classes": [
+        "militare"
+      ],
+      "terrain": "collina",
+      "width": 2,
+      "cost": {
+        "pietra": 2,
+        "oro": 1,
+        "idee": 0
+      },
+      "flexible": false,
+      "resistance": 4,
+      "rendita": 2,
+      "lampo": 0,
+      "scavo": 3,
+      "level_required": 1,
+      "production": {
+        "pietra": 0,
+        "oro": 0,
+        "cultura": 0,
+        "idee": 0
+      },
+      "exhaustible": 0
+    },
+    {
+      "id": "ed_abbazia",
+      "name": "Abbazia",
+      "era": 3,
+      "classes": [
+        "religione",
+        "commercio"
+      ],
+      "terrain": "bosco",
+      "width": 2,
+      "cost": {
+        "pietra": 2,
+        "oro": 1,
+        "idee": 1
+      },
+      "flexible": false,
+      "resistance": 3,
+      "rendita": 2,
+      "lampo": 0,
+      "scavo": 5,
+      "level_required": 0,
+      "production": {
+        "pietra": 0,
+        "oro": 0,
+        "cultura": 0,
+        "idee": 0
+      },
+      "exhaustible": 0,
+      "upgrade_slots": 2
+    },
+    {
+      "id": "ed_arsenale",
+      "name": "Arsenale",
+      "era": 3,
+      "classes": [
+        "militare"
+      ],
+      "terrain": "fiume",
+      "width": 2,
+      "cost": {
+        "pietra": 3,
+        "oro": 1,
+        "idee": 0
+      },
+      "flexible": false,
+      "resistance": 3,
+      "rendita": 0,
+      "lampo": 2,
+      "scavo": 2,
+      "level_required": 0,
+      "production": {
+        "pietra": 0,
+        "oro": 0,
+        "cultura": 0,
+        "idee": 0
+      },
+      "exhaustible": 0,
+      "effect_text": "Quartiere: i tuoi edifici Militari adiacenti +1 res.",
+      "effects": [
+        {
+          "hook": "on_event",
+          "op": "resistance",
+          "value": 1,
+          "target": {
+            "owner": "self",
+            "class": [
+              "militare"
+            ],
+            "adjacent_to_self": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "ed_bottega_dartista",
+      "name": "Bottega d'artista",
+      "era": 4,
+      "classes": [
+        "cultura"
+      ],
+      "terrain": null,
+      "width": 1,
+      "cost": {
+        "pietra": 1,
+        "oro": 0,
+        "idee": 1
+      },
+      "flexible": false,
+      "resistance": 2,
+      "rendita": 0,
+      "lampo": 2,
+      "scavo": 2,
+      "level_required": 0,
+      "production": {
+        "pietra": 0,
+        "oro": 0,
+        "cultura": 0,
+        "idee": 0
+      },
+      "exhaustible": 0,
+      "effect_text": "I tuoi potenziamenti costano 1 oro in meno.",
+      "effects": [
+        {
+          "hook": "on_build",
+          "op": "cost_delta",
+          "oro": -1,
+          "what": "upgrade",
+          "target": {
+            "owner": "self"
+          }
+        }
+      ]
+    },
+    {
+      "id": "ed_giardino_allitaliana",
+      "name": "Giardino all'italiana",
+      "era": 4,
+      "classes": [
+        "cultura"
+      ],
+      "terrain": "collina",
+      "width": 1,
+      "cost": {
+        "pietra": 0,
+        "oro": 0,
+        "idee": 2
+      },
+      "flexible": false,
+      "resistance": 1,
+      "rendita": 0,
+      "lampo": 3,
+      "scavo": 0,
+      "level_required": 0,
+      "production": {
+        "pietra": 0,
+        "oro": 0,
+        "cultura": 0,
+        "idee": 0
+      },
+      "exhaustible": 0,
+      "effect_text": "Effimero per eccellenza: PV subito, difficilmente sopravvivrà."
+    },
+    {
+      "id": "ed_loggia",
+      "name": "Loggia",
+      "era": 4,
+      "classes": [
+        "civico"
+      ],
+      "terrain": null,
+      "width": 1,
+      "cost": {
+        "pietra": 1,
+        "oro": 0,
+        "idee": 1
+      },
+      "flexible": false,
+      "resistance": 2,
+      "rendita": 0,
+      "lampo": 3,
+      "scavo": 2,
+      "level_required": 0,
+      "production": {
+        "pietra": 0,
+        "oro": 0,
+        "cultura": 0,
+        "idee": 0
+      },
+      "exhaustible": 0,
+      "effect_text": ""
+    },
+    {
+      "id": "ed_osservatorio",
+      "name": "Osservatorio",
+      "era": 4,
+      "classes": [
+        "ingegneria"
+      ],
+      "terrain": "collina",
+      "width": 1,
+      "cost": {
+        "pietra": 1,
+        "oro": 1,
+        "idee": 1
+      },
+      "flexible": true,
+      "resistance": 2,
+      "rendita": 0,
+      "lampo": 2,
+      "scavo": 2,
+      "level_required": 0,
+      "production": {
+        "pietra": 0,
+        "oro": 0,
+        "cultura": 0,
+        "idee": 0
+      },
+      "exhaustible": 0,
+      "effect_text": "Eco: +2 PV (lampo) se ancora in piedi a fine partita.",
+      "effects": [
+        {
+          "hook": "on_final_scoring",
+          "op": "vp",
+          "value": 2,
+          "condition": {
+            "op": "count_matching",
+            "min": 1,
+            "target": {
+              "is_self": true,
+              "state": [
+                "intatto"
+              ],
+              "buried": false
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "ed_banco",
+      "name": "Banco",
+      "era": 4,
+      "classes": [
+        "commercio"
+      ],
+      "terrain": null,
+      "width": 1,
+      "cost": {
+        "pietra": 1,
+        "oro": 0,
+        "idee": 1
+      },
+      "flexible": true,
+      "resistance": 2,
+      "rendita": 0,
+      "lampo": 3,
+      "scavo": 0,
+      "level_required": 0,
+      "production": {
+        "pietra": 0,
+        "oro": 1,
+        "cultura": 0,
+        "idee": 0
+      },
+      "exhaustible": 0
+    },
+    {
+      "id": "ed_villa",
+      "name": "Villa",
+      "era": 4,
+      "classes": [
+        "civico"
+      ],
+      "terrain": "collina",
+      "width": 1,
+      "cost": {
+        "pietra": 2,
+        "oro": 1,
+        "idee": 1
+      },
+      "flexible": false,
+      "resistance": 3,
+      "rendita": 0,
+      "lampo": 4,
+      "scavo": 3,
+      "level_required": 0,
+      "production": {
+        "pietra": 0,
+        "oro": 0,
+        "cultura": 0,
+        "idee": 0
+      },
+      "exhaustible": 0,
+      "effect_text": ""
+    },
+    {
+      "id": "ed_palazzo_signorile",
+      "name": "Palazzo signorile",
+      "era": 4,
+      "classes": [
+        "civico"
+      ],
+      "terrain": "pianura",
+      "width": 1,
+      "cost": {
+        "pietra": 2,
+        "oro": 1,
+        "idee": 1
+      },
+      "flexible": false,
+      "resistance": 3,
+      "rendita": 0,
+      "lampo": 3,
+      "scavo": 3,
+      "level_required": 0,
+      "production": {
+        "pietra": 0,
+        "oro": 0,
+        "cultura": 0,
+        "idee": 1
+      },
+      "exhaustible": 0
+    },
+    {
+      "id": "ed_ponte_monumentale",
+      "name": "Ponte monumentale",
+      "era": 4,
+      "classes": [
+        "ingegneria"
+      ],
+      "terrain": "fiume",
+      "width": 2,
+      "cost": {
+        "pietra": 2,
+        "oro": 1,
+        "idee": 1
+      },
+      "flexible": true,
+      "resistance": 4,
+      "rendita": 2,
+      "lampo": 0,
+      "scavo": 3,
+      "level_required": 0,
+      "production": {
+        "pietra": 0,
+        "oro": 0,
+        "cultura": 0,
+        "idee": 0
+      },
+      "exhaustible": 0,
+      "effect_text": ""
+    },
+    {
+      "id": "ed_accademia",
+      "name": "Accademia",
+      "era": 4,
+      "classes": [
+        "cultura"
+      ],
+      "terrain": null,
+      "width": 1,
+      "cost": {
+        "pietra": 1,
+        "oro": 0,
+        "idee": 2
+      },
+      "flexible": false,
+      "resistance": 2,
+      "rendita": 0,
+      "lampo": 2,
+      "scavo": 3,
+      "level_required": 0,
+      "production": {
+        "pietra": 0,
+        "oro": 0,
+        "cultura": 0,
+        "idee": 0
+      },
+      "exhaustible": 0,
+      "upgrade_slots": 2
+    },
+    {
+      "id": "ed_duomo",
+      "name": "Duomo",
+      "era": 4,
+      "classes": [
+        "religione",
+        "cultura"
+      ],
+      "terrain": null,
+      "width": 2,
+      "cost": {
+        "pietra": 3,
+        "oro": 1,
+        "idee": 2
+      },
+      "flexible": false,
+      "resistance": 4,
+      "rendita": 2,
+      "lampo": 0,
+      "scavo": 5,
+      "level_required": 2,
+      "production": {
+        "pietra": 0,
+        "oro": 0,
+        "cultura": 0,
+        "idee": 0
+      },
+      "exhaustible": 0,
+      "upgrade_slots": 3
+    },
+    {
+      "id": "ed_fortezza_bastionata",
+      "name": "Fortezza bastionata",
+      "era": 4,
+      "classes": [
+        "militare",
+        "ingegneria"
+      ],
+      "terrain": "collina",
+      "width": 2,
+      "cost": {
+        "pietra": 3,
+        "oro": 1,
+        "idee": 1
+      },
+      "flexible": false,
+      "resistance": 5,
+      "rendita": 2,
+      "lampo": 0,
+      "scavo": 2,
+      "level_required": 1,
+      "production": {
+        "pietra": 0,
+        "oro": 0,
+        "cultura": 0,
+        "idee": 0
+      },
+      "exhaustible": 0
+    },
+    {
+      "id": "ed_piazza_monumentale",
+      "name": "Piazza monumentale",
+      "era": 4,
+      "classes": [
+        "civico"
+      ],
+      "terrain": "pianura",
+      "width": 2,
+      "cost": {
+        "pietra": 2,
+        "oro": 1,
+        "idee": 1
+      },
+      "flexible": false,
+      "resistance": 3,
+      "rendita": 2,
+      "lampo": 0,
+      "scavo": 3,
+      "level_required": 1,
+      "production": {
+        "pietra": 0,
+        "oro": 0,
+        "cultura": 0,
+        "idee": 0
+      },
+      "exhaustible": 0,
+      "effect_text": "A fine partita: +1 PV per tuo edificio in cima adiacente. Richiede livello 1+.",
+      "effects": [
+        {
+          "hook": "on_final_scoring",
+          "op": "vp_per",
+          "value": 1,
+          "target": {
+            "owner": "self",
+            "adjacent_to_self": true,
+            "is_top": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "ed_fondazione_darte",
+      "name": "Fondazione d'arte",
+      "era": 5,
+      "classes": [
+        "cultura"
+      ],
+      "terrain": null,
+      "width": 1,
+      "cost": {
+        "pietra": 1,
+        "oro": 0,
+        "idee": 2
+      },
+      "flexible": false,
+      "resistance": 2,
+      "rendita": 0,
+      "lampo": 3,
+      "scavo": 0,
+      "level_required": 0,
+      "production": {
+        "pietra": 0,
+        "oro": 0,
+        "cultura": 0,
+        "idee": 0
+      },
+      "exhaustible": 0,
+      "effect_text": "I tuoi potenziamenti valgono +1 PV.",
+      "effects": [
+        {
+          "hook": "on_final_scoring",
+          "op": "vp_per",
+          "value": 1,
+          "per": "upgrade",
+          "target": {
+            "owner": "self"
+          }
+        }
+      ]
+    },
+    {
+      "id": "ed_condominio",
+      "name": "Condominio",
+      "era": 5,
+      "classes": [
+        "civico"
+      ],
+      "terrain": null,
+      "width": 1,
+      "cost": {
+        "pietra": 1,
+        "oro": 0,
+        "idee": 1
+      },
+      "flexible": false,
+      "resistance": 2,
+      "rendita": 0,
+      "lampo": 3,
+      "scavo": 0,
+      "level_required": 0,
+      "production": {
+        "pietra": 0,
+        "oro": 0,
+        "cultura": 0,
+        "idee": 0
+      },
+      "exhaustible": 0,
+      "effect_text": "Economico: costruire il presente sopra il passato non è mai stato così facile."
+    },
+    {
+      "id": "ed_caffe_letterario",
+      "name": "Caffè letterario",
+      "era": 5,
+      "classes": [
+        "cultura"
+      ],
+      "terrain": null,
+      "width": 1,
+      "cost": {
+        "pietra": 0,
+        "oro": 0,
+        "idee": 2
+      },
+      "flexible": false,
+      "resistance": 1,
+      "rendita": 0,
+      "lampo": 2,
+      "scavo": 0,
+      "level_required": 0,
+      "production": {
+        "pietra": 0,
+        "oro": 0,
+        "cultura": 0,
+        "idee": 0
+      },
+      "exhaustible": 0,
+      "effect_text": "Quartiere: +1 PV se adiacente a un edificio Cultura.",
+      "effects": [
+        {
+          "hook": "on_final_scoring",
+          "op": "vp",
+          "value": 1,
+          "condition": {
+            "op": "count_matching",
+            "min": 1,
+            "target": {
+              "adjacent_to_self": true,
+              "class": [
+                "cultura"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "ed_officina",
+      "name": "Officina",
+      "era": 5,
+      "classes": [
+        "ingegneria"
+      ],
+      "terrain": null,
+      "width": 1,
+      "cost": {
+        "pietra": 1,
+        "oro": 0,
+        "idee": 1
+      },
+      "flexible": true,
+      "resistance": 2,
+      "rendita": 0,
+      "lampo": 3,
+      "scavo": 0,
+      "level_required": 0,
+      "production": {
+        "pietra": 0,
+        "oro": 2,
+        "cultura": 0,
+        "idee": 0
+      },
+      "exhaustible": 0
+    },
+    {
+      "id": "ed_monumento_ai_caduti",
+      "name": "Monumento ai caduti",
+      "era": 5,
+      "classes": [
+        "militare",
+        "religione"
+      ],
+      "terrain": null,
+      "width": 1,
+      "cost": {
+        "pietra": 1,
+        "oro": 1,
+        "idee": 1
+      },
+      "flexible": false,
+      "resistance": 3,
+      "rendita": 0,
+      "lampo": 2,
+      "scavo": 0,
+      "level_required": 0,
+      "production": {
+        "pietra": 0,
+        "oro": 0,
+        "cultura": 0,
+        "idee": 0
+      },
+      "exhaustible": 0,
+      "effect_text": "Sacrario: +1 PV per ogni altro tuo edificio Militare, in piedi o Sotterrato.",
+      "effects": [
+        {
+          "hook": "on_final_scoring",
+          "op": "vp_per",
+          "value": 1,
+          "target": {
+            "owner": "self",
+            "class": [
+              "militare"
+            ],
+            "is_self": false
+          }
+        }
+      ]
+    },
+    {
+      "id": "ed_museo",
+      "name": "Museo",
+      "era": 5,
+      "classes": [
+        "cultura"
+      ],
+      "terrain": null,
+      "width": 1,
+      "cost": {
+        "pietra": 1,
+        "oro": 1,
+        "idee": 2
+      },
+      "flexible": false,
+      "resistance": 3,
+      "rendita": 0,
+      "lampo": 4,
+      "scavo": 0,
+      "level_required": 1,
+      "production": {
+        "pietra": 0,
+        "oro": 0,
+        "cultura": 0,
+        "idee": 0
+      },
+      "exhaustible": 0,
+      "effect_text": "+2 PV per ogni edificio Sotterrato sotto di sé. Richiede livello 1+.",
+      "effects": [
+        {
+          "hook": "on_final_scoring",
+          "op": "vp_per",
+          "value": 2,
+          "target": {
+            "buried": true,
+            "below_self": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "ed_grattacielo",
+      "name": "Grattacielo",
+      "era": 5,
+      "classes": [
+        "commercio"
+      ],
+      "terrain": "pianura",
+      "width": 1,
+      "cost": {
+        "pietra": 2,
+        "oro": 3,
+        "idee": 1
+      },
+      "flexible": true,
+      "resistance": 3,
+      "rendita": 0,
+      "lampo": 4,
+      "scavo": 0,
+      "level_required": 2,
+      "production": {
+        "pietra": 0,
+        "oro": 0,
+        "cultura": 0,
+        "idee": 0
+      },
+      "exhaustible": 0,
+      "effect_text": "Svettante: +1 PV per livello a cui è costruito. Quartiere: −1 PV agli edifici in cima adiacenti altrui, valutato a fine partita. Richiede livello 2+.",
+      "effects": [
+        {
+          "hook": "on_final_scoring",
+          "op": "vp_per",
+          "value": 1,
+          "per": "level",
+          "target": {
+            "is_self": true
+          }
+        },
+        {
+          "hook": "on_final_scoring",
+          "op": "vp_per",
+          "value": -1,
+          "to": "target_owner",
+          "target": {
+            "owner": "others",
+            "adjacent_to_self": true,
+            "is_top": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "ed_biblioteca",
+      "name": "Biblioteca",
+      "era": 5,
+      "classes": [
+        "cultura"
+      ],
+      "terrain": null,
+      "width": 1,
+      "cost": {
+        "pietra": 1,
+        "oro": 1,
+        "idee": 2
+      },
+      "flexible": false,
+      "resistance": 3,
+      "rendita": 0,
+      "lampo": 4,
+      "scavo": 0,
+      "level_required": 0,
+      "production": {
+        "pietra": 0,
+        "oro": 0,
+        "cultura": 0,
+        "idee": 0
+      },
+      "exhaustible": 0,
+      "effect_text": "+1 PV per classe diversa fra i tuoi edifici in questa colonna, Sotterrati inclusi.",
+      "effects": [
+        {
+          "hook": "on_final_scoring",
+          "op": "vp_per",
+          "value": 1,
+          "per": "distinct_class",
+          "target": {
+            "owner": "self",
+            "same_column_as_self": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "ed_ponte_in_acciaio",
+      "name": "Ponte in acciaio",
+      "era": 5,
+      "classes": [
+        "ingegneria"
+      ],
+      "terrain": "fiume",
+      "width": 2,
+      "cost": {
+        "pietra": 1,
+        "oro": 2,
+        "idee": 1
+      },
+      "flexible": true,
+      "resistance": 4,
+      "rendita": 0,
+      "lampo": 4,
+      "scavo": 0,
+      "level_required": 0,
+      "production": {
+        "pietra": 0,
+        "oro": 0,
+        "cultura": 0,
+        "idee": 0
+      },
+      "exhaustible": 0,
+      "effect_text": ""
+    },
+    {
+      "id": "ed_stazione",
+      "name": "Stazione",
+      "era": 5,
+      "classes": [
+        "commercio",
+        "ingegneria"
+      ],
+      "terrain": "pianura",
+      "width": 3,
+      "cost": {
+        "pietra": 2,
+        "oro": 3,
+        "idee": 1
+      },
+      "flexible": false,
+      "resistance": 4,
+      "rendita": 0,
+      "lampo": 4,
+      "scavo": 0,
+      "level_required": 1,
+      "production": {
+        "pietra": 0,
+        "oro": 2,
+        "cultura": 0,
+        "idee": 0
+      },
+      "exhaustible": 0,
+      "effect_text": "Colossale: 2 slot adiacenti, si attiva da entrambe le colonne. Produce 2 oro. Richiede livello 1+.",
+      "effects": [
+        {
+          "hook": "on_build",
+          "op": "rule_override",
+          "name": "colossal"
+        }
+      ]
+    },
+    {
+      "id": "ed_parco_archeologico",
+      "name": "Parco archeologico",
+      "era": 5,
+      "classes": [
+        "cultura"
+      ],
+      "terrain": null,
+      "width": 2,
+      "cost": {
+        "pietra": 1,
+        "oro": 0,
+        "idee": 2
+      },
+      "flexible": false,
+      "resistance": 2,
+      "rendita": 0,
+      "lampo": 2,
+      "scavo": 0,
+      "level_required": 0,
+      "production": {
+        "pietra": 0,
+        "oro": 0,
+        "cultura": 0,
+        "idee": 0
+      },
+      "exhaustible": 0,
+      "effect_text": "Finale: fino a 2 tuoi edifici non Sotterrati nelle colonne adiacenti valgono il loro Scavo come se lo fossero.",
+      "effects": [
+        {
+          "hook": "on_final_scoring",
+          "op": "vp_per",
+          "value_from": "scavo",
+          "target": {
+            "owner": "self",
+            "buried": false,
+            "adjacent_to_self": true
+          },
+          "times": 2
+        }
+      ]
+    },
+    {
+      "id": "ed_universita",
+      "name": "Università",
+      "era": 5,
+      "classes": [
+        "cultura",
+        "civico"
+      ],
+      "terrain": null,
+      "width": 2,
+      "cost": {
+        "pietra": 2,
+        "oro": 1,
+        "idee": 2
+      },
+      "flexible": false,
+      "resistance": 3,
+      "rendita": 0,
+      "lampo": 4,
+      "scavo": 0,
+      "level_required": 1,
+      "production": {
+        "pietra": 0,
+        "oro": 0,
+        "cultura": 0,
+        "idee": 0
+      },
+      "exhaustible": 0,
+      "effect_text": "+1 PV per ogni tuo personaggio reclutato. Richiede livello 1+.",
+      "effects": [
+        {
+          "hook": "on_final_scoring",
+          "op": "vp_per",
+          "value": 1,
+          "per": "recruited_character",
+          "target": {
+            "owner": "self"
+          }
+        }
+      ]
+    },
+    {
+      "id": "ed_abitazioni_e1_1",
+      "name": "Capanne di fango",
+      "era": 1,
+      "classes": [
+        "civico"
+      ],
+      "terrain": null,
+      "width": 1,
+      "cost": {
+        "pietra": 1,
+        "oro": 0,
+        "idee": 0
+      },
+      "flexible": false,
+      "resistance": 1,
+      "rendita": 0,
+      "lampo": 1,
+      "scavo": 1,
+      "level_required": 0,
+      "production": {
+        "pietra": 1,
+        "oro": 0,
+        "cultura": 0,
+        "idee": 0
+      },
+      "exhaustible": 0,
+      "min_players": 4
+    },
+    {
+      "id": "ed_abitazioni_e1_2",
+      "name": "Capanne di fango",
+      "era": 1,
+      "classes": [
+        "civico"
+      ],
+      "terrain": null,
+      "width": 1,
+      "cost": {
+        "pietra": 1,
+        "oro": 0,
+        "idee": 0
+      },
+      "flexible": false,
+      "resistance": 1,
+      "rendita": 0,
+      "lampo": 1,
+      "scavo": 1,
+      "level_required": 0,
+      "production": {
+        "pietra": 1,
+        "oro": 0,
+        "cultura": 0,
+        "idee": 0
+      },
+      "exhaustible": 0,
+      "min_players": 4
+    },
+    {
+      "id": "ed_abitazioni_e2_1",
+      "name": "Case a schiera",
+      "era": 2,
+      "classes": [
+        "civico"
+      ],
+      "terrain": null,
+      "width": 1,
+      "cost": {
+        "pietra": 1,
+        "oro": 0,
+        "idee": 0
+      },
+      "flexible": false,
+      "resistance": 2,
+      "rendita": 0,
+      "lampo": 1,
+      "scavo": 1,
+      "level_required": 0,
+      "production": {
+        "pietra": 1,
+        "oro": 0,
+        "cultura": 0,
+        "idee": 0
+      },
+      "exhaustible": 0,
+      "min_players": 4
+    },
+    {
+      "id": "ed_abitazioni_e2_2",
+      "name": "Case a schiera",
+      "era": 2,
+      "classes": [
+        "civico"
+      ],
+      "terrain": null,
+      "width": 1,
+      "cost": {
+        "pietra": 1,
+        "oro": 0,
+        "idee": 0
+      },
+      "flexible": false,
+      "resistance": 2,
+      "rendita": 0,
+      "lampo": 1,
+      "scavo": 1,
+      "level_required": 0,
+      "production": {
+        "pietra": 1,
+        "oro": 0,
+        "cultura": 0,
+        "idee": 0
+      },
+      "exhaustible": 0,
+      "min_players": 4
+    },
+    {
+      "id": "ed_abitazioni_e3_1",
+      "name": "Case a graticcio",
+      "era": 3,
+      "classes": [
+        "civico"
+      ],
+      "terrain": null,
+      "width": 1,
+      "cost": {
+        "pietra": 1,
+        "oro": 1,
+        "idee": 0
+      },
+      "flexible": false,
+      "resistance": 2,
+      "rendita": 0,
+      "lampo": 1,
+      "scavo": 1,
+      "level_required": 0,
+      "production": {
+        "pietra": 0,
+        "oro": 1,
+        "cultura": 0,
+        "idee": 0
+      },
+      "exhaustible": 0,
+      "min_players": 4
+    },
+    {
+      "id": "ed_abitazioni_e3_2",
+      "name": "Case a graticcio",
+      "era": 3,
+      "classes": [
+        "civico"
+      ],
+      "terrain": null,
+      "width": 1,
+      "cost": {
+        "pietra": 1,
+        "oro": 1,
+        "idee": 0
+      },
+      "flexible": false,
+      "resistance": 2,
+      "rendita": 0,
+      "lampo": 1,
+      "scavo": 1,
+      "level_required": 0,
+      "production": {
+        "pietra": 0,
+        "oro": 1,
+        "cultura": 0,
+        "idee": 0
+      },
+      "exhaustible": 0,
+      "min_players": 4
+    },
+    {
+      "id": "ed_abitazioni_e4_1",
+      "name": "Casa borghese",
+      "era": 4,
+      "classes": [
+        "civico"
+      ],
+      "terrain": null,
+      "width": 1,
+      "cost": {
+        "pietra": 1,
+        "oro": 0,
+        "idee": 1
+      },
+      "flexible": false,
+      "resistance": 3,
+      "rendita": 0,
+      "lampo": 1,
+      "scavo": 1,
+      "level_required": 0,
+      "production": {
+        "pietra": 0,
+        "oro": 1,
+        "cultura": 0,
+        "idee": 0
+      },
+      "exhaustible": 0,
+      "min_players": 4
+    },
+    {
+      "id": "ed_abitazioni_e4_2",
+      "name": "Casa borghese",
+      "era": 4,
+      "classes": [
+        "civico"
+      ],
+      "terrain": null,
+      "width": 1,
+      "cost": {
+        "pietra": 1,
+        "oro": 0,
+        "idee": 1
+      },
+      "flexible": false,
+      "resistance": 3,
+      "rendita": 0,
+      "lampo": 1,
+      "scavo": 1,
+      "level_required": 0,
+      "production": {
+        "pietra": 0,
+        "oro": 1,
+        "cultura": 0,
+        "idee": 0
+      },
+      "exhaustible": 0,
+      "min_players": 4
+    },
+    {
+      "id": "ed_abitazioni_e5_1",
+      "name": "Palazzina",
+      "era": 5,
+      "classes": [
+        "civico"
+      ],
+      "terrain": null,
+      "width": 1,
+      "cost": {
+        "pietra": 0,
+        "oro": 1,
+        "idee": 1
+      },
+      "flexible": false,
+      "resistance": 3,
+      "rendita": 0,
+      "lampo": 1,
+      "scavo": 1,
+      "level_required": 0,
+      "production": {
+        "pietra": 0,
+        "oro": 1,
+        "cultura": 0,
+        "idee": 0
+      },
+      "exhaustible": 0,
+      "min_players": 4
+    },
+    {
+      "id": "ed_abitazioni_e5_2",
+      "name": "Palazzina",
+      "era": 5,
+      "classes": [
+        "civico"
+      ],
+      "terrain": null,
+      "width": 1,
+      "cost": {
+        "pietra": 0,
+        "oro": 1,
+        "idee": 1
+      },
+      "flexible": false,
+      "resistance": 3,
+      "rendita": 0,
+      "lampo": 1,
+      "scavo": 1,
+      "level_required": 0,
+      "production": {
+        "pietra": 0,
+        "oro": 1,
+        "cultura": 0,
+        "idee": 0
+      },
+      "exhaustible": 0,
+      "min_players": 4
+    }
+  ],
+  "characters": [
+    {
+      "id": "pe_capotribu",
+      "name": "Capotribù",
+      "era": 1,
+      "class": "civico",
+      "is_dynasty": false,
+      "timing": "misto",
+      "imprint": false,
+      "effect_text": "Subito: +2 pietra. Per l'era: l'edificio protetto da questo lavoratore ha +1 res.",
+      "effects": [
+        {
+          "hook": "on_acquire",
+          "op": "resource",
+          "pietra": 2
+        },
+        {
+          "hook": "on_acquire",
+          "op": "protection_delta",
+          "value": 1
+        }
+      ]
+    },
+    {
+      "id": "pe_sciamano",
+      "name": "Sciamano",
+      "era": 1,
+      "class": "religione",
+      "is_dynasty": false,
+      "timing": "era",
+      "imprint": false,
+      "effect_text": "Per l'era: i tuoi edifici Religione hanno +1 res.",
+      "effects": [
+        {
+          "hook": "on_event",
+          "op": "resistance",
+          "value": 1,
+          "duration": "era",
+          "target": {
+            "owner": "self",
+            "class": [
+              "religione"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "pe_mercante_di_ossidiana",
+      "name": "Mercante di ossidiana",
+      "era": 1,
+      "class": "commercio",
+      "is_dynasty": false,
+      "timing": "misto",
+      "imprint": false,
+      "effect_text": "Subito: +1 oro. Per l'era: fino a 2 scambi pietra↔oro alla pari.",
+      "effects": [
+        {
+          "hook": "on_acquire",
+          "op": "resource",
+          "pietra": 0,
+          "oro": 1
+        },
+        {
+          "hook": "on_activate",
+          "op": "rule_override",
+          "name": "resource_exchange",
+          "duration": "era",
+          "times": 2
+        }
+      ]
+    },
+    {
+      "id": "pe_incisore",
+      "name": "Incisore",
+      "era": 1,
+      "class": "cultura",
+      "is_dynasty": false,
+      "timing": "subito",
+      "imprint": true,
+      "effect_text": "Subito — Impronta: infila questa carta sotto un tuo edificio; Scavo +3 permanente. Max 1 impronta per edificio.",
+      "effects": [
+        {
+          "hook": "on_acquire",
+          "op": "scavo_delta",
+          "value": 3,
+          "duration": "permanent",
+          "target": {
+            "is_self": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "pe_costruttore_di_zattere",
+      "name": "Costruttore di zattere",
+      "era": 1,
+      "class": "ingegneria",
+      "is_dynasty": false,
+      "timing": "misto",
+      "imprint": false,
+      "effect_text": "Subito: +1 pietra. Per l'era: −1 pietra alle costruzioni su slot con fiume.",
+      "effects": [
+        {
+          "hook": "on_acquire",
+          "op": "resource",
+          "pietra": 1,
+          "oro": 0
+        },
+        {
+          "hook": "on_build",
+          "op": "cost_delta",
+          "pietra": -1,
+          "what": "building",
+          "duration": "era",
+          "target": {
+            "terrain": [
+              "fiume"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "pe_architetto",
+      "name": "Architetto",
+      "era": 2,
+      "class": "ingegneria",
+      "is_dynasty": false,
+      "timing": "misto",
+      "imprint": false,
+      "effect_text": "Subito: +1 pietra. Per l'era: −1 pietra agli edifici da 2 o 3 caselle.",
+      "effects": [
+        {
+          "hook": "on_acquire",
+          "op": "resource",
+          "pietra": 1,
+          "oro": 0
+        },
+        {
+          "hook": "on_build",
+          "op": "cost_delta",
+          "pietra": -1,
+          "what": "building",
+          "duration": "era",
+          "target": {
+            "width": {
+              "min": 2
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "pe_legionario",
+      "name": "Legionario",
+      "era": 2,
+      "class": "militare",
+      "is_dynasty": false,
+      "timing": "era",
+      "imprint": false,
+      "effect_text": "Per l'era: la sua protezione vale +3 invece di +2; se l'edificio protetto sopravvive all'evento, +1 cultura.",
+      "effects": [
+        {
+          "hook": "on_acquire",
+          "op": "protection_delta",
+          "value": 1
+        },
+        {
+          "hook": "on_era_end",
+          "op": "vp",
+          "value": 1,
+          "condition": {
+            "op": "protected_survived",
+            "min": 1
+          }
+        }
+      ]
+    },
+    {
+      "id": "pe_sacerdotessa",
+      "name": "Sacerdotessa",
+      "era": 2,
+      "class": "religione",
+      "is_dynasty": false,
+      "timing": "misto",
+      "imprint": false,
+      "effect_text": "Subito: +1 oro. Per l'era: il primo edificio Religione che costruisci ti rimborsa 1 oro.",
+      "effects": [
+        {
+          "hook": "on_acquire",
+          "op": "resource",
+          "pietra": 0,
+          "oro": 1
+        },
+        {
+          "hook": "on_build",
+          "op": "resource",
+          "oro": 1,
+          "duration": "era",
+          "times": 1,
+          "target": {
+            "owner": "self",
+            "class": [
+              "religione"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "pe_console",
+      "name": "Console",
+      "era": 2,
+      "class": "civico",
+      "is_dynasty": false,
+      "timing": "misto",
+      "imprint": false,
+      "effect_text": "Subito: +1 oro. Per l'era: quando attivi una colonna con un tuo strato Civico, +1 oro (max 2).",
+      "effects": [
+        {
+          "hook": "on_acquire",
+          "op": "resource",
+          "pietra": 0,
+          "oro": 1
+        },
+        {
+          "hook": "on_activate",
+          "op": "resource",
+          "oro": 1,
+          "duration": "era",
+          "cap": 2,
+          "target": {
+            "owner": "self",
+            "class": [
+              "civico"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "pe_retore",
+      "name": "Retore",
+      "era": 2,
+      "class": "cultura",
+      "is_dynasty": false,
+      "timing": "subito",
+      "imprint": true,
+      "effect_text": "Subito — Impronta: infila questa carta sotto un tuo edificio Cultura; Scavo +5 permanente. Max 1 impronta per edificio.",
+      "effects": [
+        {
+          "hook": "on_acquire",
+          "op": "scavo_delta",
+          "value": 5,
+          "duration": "permanent",
+          "target": {
+            "is_self": true,
+            "class": [
+              "cultura"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "pe_mastro_costruttore",
+      "name": "Mastro costruttore",
+      "era": 3,
+      "class": "ingegneria",
+      "is_dynasty": false,
+      "timing": "misto",
+      "imprint": false,
+      "effect_text": "Subito: +1 pietra. Per l'era: puoi costruire in qualsiasi slot; la tua prima costruzione successiva ha +1 res permanente.",
+      "effects": [
+        {
+          "hook": "on_acquire",
+          "op": "resource",
+          "pietra": 1,
+          "oro": 0
+        },
+        {
+          "hook": "on_build",
+          "op": "rule_override",
+          "name": "ignore_terrain_requirement",
+          "duration": "era"
+        },
+        {
+          "hook": "on_build",
+          "op": "resistance",
+          "value": 1,
+          "duration": "permanent",
+          "times": 1
+        }
+      ]
+    },
+    {
+      "id": "pe_vescovo",
+      "name": "Vescovo",
+      "era": 3,
+      "class": "religione",
+      "is_dynasty": false,
+      "timing": "misto",
+      "imprint": false,
+      "effect_text": "Subito: il prossimo potenziamento su un tuo edificio Religione in quest'era costa 0. Per l'era: capienza dei tuoi Religione +1.",
+      "effects": [
+        {
+          "hook": "on_build",
+          "op": "rule_override",
+          "name": "free_upgrade_of_class",
+          "times": 1,
+          "target": {
+            "owner": "self",
+            "class": [
+              "religione"
+            ]
+          }
+        },
+        {
+          "hook": "on_build",
+          "op": "upgrade_slots_delta",
+          "value": 1,
+          "duration": "era",
+          "target": {
+            "owner": "self",
+            "class": [
+              "religione"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "pe_cavaliere",
+      "name": "Cavaliere",
+      "era": 3,
+      "class": "militare",
+      "is_dynasty": false,
+      "timing": "era",
+      "imprint": false,
+      "effect_text": "Per l'era: la sua protezione vale +4 invece di +2; se l'edificio protetto sopravvive, +1 cultura.",
+      "effects": [
+        {
+          "hook": "on_acquire",
+          "op": "protection_delta",
+          "value": 2
+        },
+        {
+          "hook": "on_era_end",
+          "op": "vp",
+          "value": 1,
+          "condition": {
+            "op": "protected_survived",
+            "min": 1
+          }
+        }
+      ]
+    },
+    {
+      "id": "pe_mercante",
+      "name": "Mercante",
+      "era": 3,
+      "class": "commercio",
+      "is_dynasty": false,
+      "timing": "misto",
+      "imprint": false,
+      "effect_text": "Subito: +1 oro. Per l'era: quando un avversario attiva una colonna con tuoi strati visibili, +1 oro (max 2).",
+      "effects": [
+        {
+          "hook": "on_acquire",
+          "op": "resource",
+          "pietra": 0,
+          "oro": 1
+        },
+        {
+          "hook": "on_activate",
+          "op": "resource",
+          "oro": 1,
+          "duration": "era",
+          "cap": 2,
+          "target": {
+            "owner": "self"
+          },
+          "when": "other_activates"
+        }
+      ]
+    },
+    {
+      "id": "pe_cronista",
+      "name": "Cronista",
+      "era": 3,
+      "class": "civico",
+      "is_dynasty": false,
+      "timing": "misto",
+      "imprint": false,
+      "effect_text": "Subito: se la colonna contiene edifici di 3+ ere diverse, +1 cultura. Per l'era: quando attivi una colonna che contiene edifici di 3+ ere diverse (in qualsiasi condizione), +1 cultura (max 2 ulteriori).",
+      "effects": [
+        {
+          "hook": "on_acquire",
+          "op": "vp",
+          "value": 1
+        },
+        {
+          "hook": "on_activate",
+          "op": "vp",
+          "value": 1,
+          "duration": "era",
+          "cap": 2,
+          "target": {
+            "column": {
+              "min_eras": 3
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "pe_mecenate",
+      "name": "Mecenate",
+      "era": 4,
+      "class": "cultura",
+      "is_dynasty": false,
+      "timing": "misto",
+      "imprint": false,
+      "effect_text": "Subito: +1 cultura. Per l'era: i potenziamenti Arte che acquisti valgono +1 PV.",
+      "effects": [
+        {
+          "hook": "on_acquire",
+          "op": "vp",
+          "value": 1
+        },
+        {
+          "hook": "on_acquire",
+          "op": "rule_override",
+          "name": "arte_vp_bonus",
+          "value": 1,
+          "duration": "era"
+        }
+      ]
+    },
+    {
+      "id": "pe_banchiere",
+      "name": "Banchiere",
+      "era": 4,
+      "class": "commercio",
+      "is_dynasty": false,
+      "timing": "subito",
+      "imprint": false,
+      "effect_text": "Subito: +3 oro.",
+      "effects": [
+        {
+          "hook": "on_acquire",
+          "op": "resource",
+          "pietra": 0,
+          "oro": 3
+        }
+      ]
+    },
+    {
+      "id": "pe_ingegnere_militare",
+      "name": "Ingegnere militare",
+      "era": 4,
+      "class": "militare",
+      "is_dynasty": false,
+      "timing": "era",
+      "imprint": false,
+      "effect_text": "Per l'era: i tuoi edifici Militari hanno +1 res; uno a tua scelta +2.",
+      "effects": [
+        {
+          "hook": "on_event",
+          "op": "resistance",
+          "value": 1,
+          "duration": "era",
+          "target": {
+            "owner": "self",
+            "class": [
+              "militare"
+            ]
+          }
+        },
+        {
+          "hook": "on_event",
+          "op": "resistance",
+          "value": 1,
+          "duration": "era",
+          "designated": true,
+          "target": {
+            "owner": "self",
+            "class": [
+              "militare"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "pe_cardinale",
+      "name": "Cardinale",
+      "era": 4,
+      "class": "religione",
+      "is_dynasty": false,
+      "timing": "misto",
+      "imprint": false,
+      "effect_text": "Subito: +1 oro. Per l'era: −1 oro agli edifici Religione (minimo 0).",
+      "effects": [
+        {
+          "hook": "on_acquire",
+          "op": "resource",
+          "pietra": 0,
+          "oro": 1
+        },
+        {
+          "hook": "on_build",
+          "op": "cost_delta",
+          "oro": -1,
+          "what": "building",
+          "duration": "era",
+          "target": {
+            "class": [
+              "religione"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "pe_artista_di_corte",
+      "name": "Artista di corte",
+      "era": 4,
+      "class": "cultura",
+      "is_dynasty": false,
+      "timing": "misto",
+      "imprint": false,
+      "effect_text": "Subito: +1 cultura. Per l'era: il primo potenziamento che piazzi su un edificio altrui è gratis e incassi 1 oro dal proprietario.",
+      "effects": [
+        {
+          "hook": "on_acquire",
+          "op": "vp",
+          "value": 1
+        },
+        {
+          "hook": "on_build",
+          "op": "rule_override",
+          "name": "upgrade_on_others_building",
+          "value": 1,
+          "oro": 1,
+          "duration": "era",
+          "times": 1
+        }
+      ]
+    },
+    {
+      "id": "pe_archeologo",
+      "name": "Archeologo",
+      "era": 5,
+      "class": "cultura",
+      "is_dynasty": false,
+      "timing": "finale",
+      "imprint": false,
+      "effect_text": "Finale: scegli una tua Rovina non Sotterrata: vale il suo Scavo. Se hai già 3+ edifici Sotterrati, +1 PV.",
+      "effects": [
+        {
+          "hook": "on_final_scoring",
+          "op": "vp_per",
+          "value_from": "scavo",
+          "times": 1,
+          "target": {
+            "owner": "self",
+            "state": [
+              "rovina"
+            ],
+            "buried": false
+          }
+        },
+        {
+          "hook": "on_final_scoring",
+          "op": "vp",
+          "value": 1,
+          "condition": {
+            "op": "count_matching",
+            "min": 3,
+            "target": {
+              "owner": "self",
+              "buried": true
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "pe_urbanista",
+      "name": "Urbanista",
+      "era": 5,
+      "class": "civico",
+      "is_dynasty": false,
+      "timing": "finale",
+      "imprint": false,
+      "effect_text": "Finale: +1 PV per ogni tuo strato in catene da 4+ ere (max +4).",
+      "effects": [
+        {
+          "hook": "on_final_scoring",
+          "op": "vp_per",
+          "value": 1,
+          "cap": 4,
+          "target": {
+            "owner": "self",
+            "column": {
+              "min_eras": 4
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "pe_industriale",
+      "name": "Industriale",
+      "era": 5,
+      "class": "commercio",
+      "is_dynasty": false,
+      "timing": "misto",
+      "imprint": false,
+      "effect_text": "Subito: +2 oro. Per l'era: le tue prime 2 produzioni di oro danno +1.",
+      "effects": [
+        {
+          "hook": "on_acquire",
+          "op": "resource",
+          "pietra": 0,
+          "oro": 2
+        },
+        {
+          "hook": "on_activate",
+          "op": "production_delta",
+          "oro": 1,
+          "duration": "era",
+          "times": 2
+        }
+      ]
+    },
+    {
+      "id": "pe_soprintendente",
+      "name": "Soprintendente",
+      "era": 5,
+      "class": "ingegneria",
+      "is_dynasty": false,
+      "timing": "finale",
+      "imprint": false,
+      "effect_text": "Finale: fino a 3 tuoi edifici Sotterrati hanno Scavo +2.",
+      "effects": [
+        {
+          "hook": "on_final_scoring",
+          "op": "scavo_delta",
+          "value": 2,
+          "target": {
+            "owner": "self",
+            "buried": true
+          },
+          "times": 3
+        }
+      ]
+    },
+    {
+      "id": "pe_veterano",
+      "name": "Veterano",
+      "era": 5,
+      "class": "militare",
+      "is_dynasty": false,
+      "timing": "finale",
+      "imprint": false,
+      "effect_text": "Finale: +1 PV per ogni tuo edificio Militare in piedi (max +4).",
+      "effects": [
+        {
+          "hook": "on_final_scoring",
+          "op": "vp_per",
+          "value": 1,
+          "cap": 4,
+          "target": {
+            "owner": "self",
+            "class": [
+              "militare"
+            ],
+            "state": [
+              "intatto"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "pe_dinastia",
+      "name": "Dinastia",
+      "era": null,
+      "class": "civico",
+      "is_dynasty": true,
+      "timing": "permanente",
+      "imprint": false,
+      "effect_text": "Sempre disponibile fuori dalle file, nessuna classe richiesta. Costo a scalare in Idee: era 1 = 4 · era 2 = 3 · era 3 = 3 · era 4 = 3. Nessuna abilita': aggiunge un quarto lavoratore, permanente e attivo da subito. Massimo una a testa.",
+      "copies": 4,
+      "cost_by_era": {
+        "1": {
+          "pietra": 0,
+          "oro": 0,
+          "idee": 4
+        },
+        "2": {
+          "pietra": 0,
+          "oro": 0,
+          "idee": 3
+        },
+        "3": {
+          "pietra": 0,
+          "oro": 0,
+          "idee": 3
+        },
+        "4": {
+          "pietra": 0,
+          "oro": 0,
+          "idee": 3
+        }
+      }
+    }
+  ],
+  "upgrades": [
+    {
+      "id": "po_pittura_rupestre",
+      "name": "Pittura rupestre",
+      "era": 1,
+      "class": "cultura",
+      "cost": {
+        "pietra": 0,
+        "oro": 0,
+        "idee": 1
+      },
+      "family": "arte",
+      "effect_text": "Arte: +1 PV. Scavo dell'edificio +2.",
+      "effects": [
+        {
+          "hook": "on_acquire",
+          "op": "vp",
+          "value": 1
+        },
+        {
+          "hook": "on_acquire",
+          "op": "scavo_delta",
+          "value": 2,
+          "duration": "permanent",
+          "target": {
+            "is_self": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "po_palizzata",
+      "name": "Palizzata",
+      "era": 1,
+      "class": "militare",
+      "cost": {
+        "pietra": 1,
+        "oro": 0,
+        "idee": 0
+      },
+      "family": "struttura",
+      "effect_text": "Struttura: +1 res.",
+      "effects": [
+        {
+          "hook": "on_acquire",
+          "op": "resistance",
+          "value": 1,
+          "duration": "permanent",
+          "target": {
+            "is_self": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "po_idolo",
+      "name": "Idolo",
+      "era": 1,
+      "class": "religione",
+      "cost": {
+        "pietra": 0,
+        "oro": 0,
+        "idee": 1
+      },
+      "family": "arte",
+      "effect_text": "Arte: +1 PV (+1 extra su edificio Religione).",
+      "effects": [
+        {
+          "hook": "on_acquire",
+          "op": "vp",
+          "value": 1
+        },
+        {
+          "hook": "on_acquire",
+          "op": "vp",
+          "value": 1,
+          "condition": {
+            "op": "count_matching",
+            "min": 1,
+            "target": {
+              "is_self": true,
+              "class": [
+                "religione"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "po_granaio_comune",
+      "name": "Granaio comune",
+      "era": 1,
+      "class": "civico",
+      "cost": {
+        "pietra": 0,
+        "oro": 1,
+        "idee": 0
+      },
+      "family": "altro",
+      "effect_text": "Quando abiti questo edificio, +1 pietra.",
+      "effects": [
+        {
+          "hook": "on_activate",
+          "op": "resource",
+          "pietra": 1,
+          "target": {
+            "is_self": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "po_fondamenta_in_pietra",
+      "name": "Fondamenta in pietra",
+      "era": 1,
+      "class": "ingegneria",
+      "cost": {
+        "pietra": 1,
+        "oro": 0,
+        "idee": 0
+      },
+      "family": "struttura",
+      "effect_text": "Struttura: +1 res.",
+      "effects": [
+        {
+          "hook": "on_acquire",
+          "op": "resistance",
+          "value": 1,
+          "duration": "permanent",
+          "target": {
+            "is_self": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "po_statua",
+      "name": "Statua",
+      "era": 2,
+      "class": "cultura",
+      "cost": {
+        "pietra": 0,
+        "oro": 0,
+        "idee": 1
+      },
+      "family": "arte",
+      "effect_text": "Arte: +2 PV.",
+      "effects": [
+        {
+          "hook": "on_acquire",
+          "op": "vp",
+          "value": 2
+        }
+      ]
+    },
+    {
+      "id": "po_altare",
+      "name": "Altare",
+      "era": 2,
+      "class": "religione",
+      "cost": {
+        "pietra": 0,
+        "oro": 0,
+        "idee": 1
+      },
+      "family": "arte",
+      "effect_text": "Arte: +1 PV. Scavo +2.",
+      "effects": [
+        {
+          "hook": "on_acquire",
+          "op": "vp",
+          "value": 1
+        },
+        {
+          "hook": "on_acquire",
+          "op": "scavo_delta",
+          "value": 2,
+          "duration": "permanent",
+          "target": {
+            "is_self": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "po_bastioni",
+      "name": "Bastioni",
+      "era": 2,
+      "class": "militare",
+      "cost": {
+        "pietra": 1,
+        "oro": 0,
+        "idee": 0
+      },
+      "family": "struttura",
+      "effect_text": "Struttura: +1 res.",
+      "effects": [
+        {
+          "hook": "on_acquire",
+          "op": "resistance",
+          "value": 1,
+          "duration": "permanent",
+          "target": {
+            "is_self": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "po_banchina",
+      "name": "Banchina",
+      "era": 2,
+      "class": "commercio",
+      "cost": {
+        "pietra": 0,
+        "oro": 1,
+        "idee": 0
+      },
+      "family": "altro",
+      "effect_text": "Solo su slot fiume: quando abiti qui, +1 oro.",
+      "effects": [
+        {
+          "hook": "on_activate",
+          "op": "resource",
+          "oro": 1,
+          "target": {
+            "is_self": true
+          },
+          "condition": {
+            "op": "count_matching",
+            "min": 1,
+            "target": {
+              "is_self": true,
+              "terrain": [
+                "fiume"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "po_iscrizione",
+      "name": "Iscrizione",
+      "era": 2,
+      "class": "cultura",
+      "cost": {
+        "pietra": 0,
+        "oro": 1,
+        "idee": 0
+      },
+      "family": "altro",
+      "effect_text": "Scavo dell'edificio +2.",
+      "effects": [
+        {
+          "hook": "on_acquire",
+          "op": "scavo_delta",
+          "value": 2,
+          "duration": "permanent",
+          "target": {
+            "is_self": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "po_contrafforte",
+      "name": "Contrafforte",
+      "era": 3,
+      "class": "ingegneria",
+      "cost": {
+        "pietra": 1,
+        "oro": 0,
+        "idee": 0
+      },
+      "family": "struttura",
+      "effect_text": "Struttura: +1 res.",
+      "effects": [
+        {
+          "hook": "on_acquire",
+          "op": "resistance",
+          "value": 1,
+          "duration": "permanent",
+          "target": {
+            "is_self": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "po_campanile",
+      "name": "Campanile",
+      "era": 3,
+      "class": "religione",
+      "cost": {
+        "pietra": 0,
+        "oro": 1,
+        "idee": 0
+      },
+      "family": "altro",
+      "effect_text": "Ibrido: +1 PV e +1 res.",
+      "effects": [
+        {
+          "hook": "on_acquire",
+          "op": "vp",
+          "value": 1
+        },
+        {
+          "hook": "on_acquire",
+          "op": "resistance",
+          "value": 1,
+          "duration": "permanent",
+          "target": {
+            "is_self": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "po_merlatura",
+      "name": "Merlatura",
+      "era": 3,
+      "class": "militare",
+      "cost": {
+        "pietra": 1,
+        "oro": 0,
+        "idee": 0
+      },
+      "family": "struttura",
+      "effect_text": "Struttura: +1 res. L'edificio conta anche come Militare.",
+      "effects": [
+        {
+          "hook": "on_acquire",
+          "op": "resistance",
+          "value": 1,
+          "duration": "permanent",
+          "target": {
+            "is_self": true
+          }
+        },
+        {
+          "hook": "on_acquire",
+          "op": "rule_override",
+          "name": "counts_as_class",
+          "target": {
+            "is_self": true
+          },
+          "adds_class": [
+            "militare"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "po_stalli_mercantili",
+      "name": "Stalli mercantili",
+      "era": 3,
+      "class": "commercio",
+      "cost": {
+        "pietra": 0,
+        "oro": 1,
+        "idee": 0
+      },
+      "family": "altro",
+      "effect_text": "L'affitto incassato da questo edificio è +1.",
+      "effects": [
+        {
+          "hook": "on_acquire",
+          "op": "rendita_delta",
+          "value": 1,
+          "duration": "permanent",
+          "target": {
+            "is_self": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "po_reliquia",
+      "name": "Reliquia",
+      "era": 3,
+      "class": "religione",
+      "cost": {
+        "pietra": 0,
+        "oro": 0,
+        "idee": 1
+      },
+      "family": "arte",
+      "effect_text": "Arte: +2 PV su edificio Religione, altrimenti +1.",
+      "effects": [
+        {
+          "hook": "on_acquire",
+          "op": "vp",
+          "value": 1
+        },
+        {
+          "hook": "on_acquire",
+          "op": "vp",
+          "value": 1,
+          "condition": {
+            "op": "count_matching",
+            "min": 1,
+            "target": {
+              "is_self": true,
+              "class": [
+                "religione"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "po_opera_darte",
+      "name": "Opera d'arte",
+      "era": 4,
+      "class": "cultura",
+      "cost": {
+        "pietra": 0,
+        "oro": 0,
+        "idee": 2
+      },
+      "family": "arte",
+      "effect_text": "Arte: +3 PV.",
+      "effects": [
+        {
+          "hook": "on_acquire",
+          "op": "vp",
+          "value": 3
+        }
+      ]
+    },
+    {
+      "id": "po_affreschi",
+      "name": "Affreschi",
+      "era": 4,
+      "class": "cultura",
+      "cost": {
+        "pietra": 0,
+        "oro": 0,
+        "idee": 2
+      },
+      "family": "arte",
+      "effect_text": "Arte: +2 PV.",
+      "effects": [
+        {
+          "hook": "on_acquire",
+          "op": "vp",
+          "value": 2
+        }
+      ]
+    },
+    {
+      "id": "po_cupola",
+      "name": "Cupola",
+      "era": 4,
+      "class": "ingegneria",
+      "cost": {
+        "pietra": 0,
+        "oro": 2,
+        "idee": 0
+      },
+      "family": "altro",
+      "effect_text": "Ibrido: +2 PV e +1 res.",
+      "effects": [
+        {
+          "hook": "on_acquire",
+          "op": "vp",
+          "value": 2
+        },
+        {
+          "hook": "on_acquire",
+          "op": "resistance",
+          "value": 1,
+          "duration": "permanent",
+          "target": {
+            "is_self": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "po_giardino_pensile",
+      "name": "Giardino pensile",
+      "era": 4,
+      "class": "civico",
+      "cost": {
+        "pietra": 0,
+        "oro": 0,
+        "idee": 2
+      },
+      "family": "arte",
+      "effect_text": "Arte: +2 PV.",
+      "effects": [
+        {
+          "hook": "on_acquire",
+          "op": "vp",
+          "value": 2
+        }
+      ]
+    },
+    {
+      "id": "po_cannoniere",
+      "name": "Cannoniere",
+      "era": 4,
+      "class": "militare",
+      "cost": {
+        "pietra": 2,
+        "oro": 0,
+        "idee": 0
+      },
+      "family": "struttura",
+      "effect_text": "Struttura: +1 res (+2 su edificio Militare).",
+      "effects": [
+        {
+          "hook": "on_acquire",
+          "op": "resistance",
+          "value": 1,
+          "duration": "permanent",
+          "target": {
+            "is_self": true
+          }
+        },
+        {
+          "hook": "on_acquire",
+          "op": "resistance",
+          "value": 1,
+          "duration": "permanent",
+          "target": {
+            "is_self": true
+          },
+          "condition": {
+            "op": "count_matching",
+            "min": 1,
+            "target": {
+              "is_self": true,
+              "class": [
+                "militare"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "po_installazione",
+      "name": "Installazione",
+      "era": 5,
+      "class": "cultura",
+      "cost": {
+        "pietra": 0,
+        "oro": 0,
+        "idee": 2
+      },
+      "family": "arte",
+      "effect_text": "Arte: +3 PV.",
+      "effects": [
+        {
+          "hook": "on_acquire",
+          "op": "vp",
+          "value": 3
+        }
+      ]
+    },
+    {
+      "id": "po_targa_storica",
+      "name": "Targa storica",
+      "era": 5,
+      "class": "civico",
+      "cost": {
+        "pietra": 0,
+        "oro": 2,
+        "idee": 0
+      },
+      "family": "altro",
+      "effect_text": "Finale: +2 Scavo a ogni edificio Sotterrato sotto questo edificio.",
+      "effects": [
+        {
+          "hook": "on_final_scoring",
+          "op": "scavo_delta",
+          "value": 2,
+          "target": {
+            "buried": true,
+            "below_self": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "po_ascensore_panoramico",
+      "name": "Ascensore panoramico",
+      "era": 5,
+      "class": "ingegneria",
+      "cost": {
+        "pietra": 0,
+        "oro": 2,
+        "idee": 0
+      },
+      "family": "altro",
+      "effect_text": "+2 PV.",
+      "effects": [
+        {
+          "hook": "on_acquire",
+          "op": "vp",
+          "value": 2
+        }
+      ]
+    },
+    {
+      "id": "po_boutique",
+      "name": "Boutique",
+      "era": 5,
+      "class": "commercio",
+      "cost": {
+        "pietra": 0,
+        "oro": 2,
+        "idee": 0
+      },
+      "family": "altro",
+      "effect_text": "Quando abiti questo edificio, +2 oro.",
+      "effects": [
+        {
+          "hook": "on_activate",
+          "op": "resource",
+          "oro": 2,
+          "target": {
+            "is_self": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "po_memoriale",
+      "name": "Memoriale",
+      "era": 5,
+      "class": "religione",
+      "cost": {
+        "pietra": 0,
+        "oro": 2,
+        "idee": 0
+      },
+      "family": "altro",
+      "effect_text": "+2 PV.",
+      "effects": [
+        {
+          "hook": "on_acquire",
+          "op": "vp",
+          "value": 2
+        }
+      ]
+    }
+  ],
+  "events": [
+    {
+      "id": "ev_diluvio",
+      "name": "Diluvio",
+      "era": 1,
+      "force": 2,
+      "severity": "lieve",
+      "kind": "geografico",
+      "effect_text": "Forza 2. Edifici su colonne fiume: −1 res.",
+      "effects": [
+        {
+          "hook": "on_event",
+          "op": "resistance",
+          "value": -1,
+          "target": {
+            "terrain": [
+              "fiume"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "ev_eta_degli_spiriti",
+      "name": "Età degli spiriti",
+      "era": 1,
+      "force": 2,
+      "severity": "lieve",
+      "kind": "classe",
+      "effect_text": "Forza 2. Religione +1 res · Commercio −1 res.",
+      "effects": [
+        {
+          "hook": "on_event",
+          "op": "resistance",
+          "value": 1,
+          "target": {
+            "class": [
+              "religione"
+            ]
+          }
+        },
+        {
+          "hook": "on_event",
+          "op": "resistance",
+          "value": -1,
+          "target": {
+            "class": [
+              "commercio"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "ev_migrazione",
+      "name": "Migrazione",
+      "era": 1,
+      "force": 2,
+      "severity": "lieve",
+      "kind": "comportamentale",
+      "effect_text": "Forza 2. Edifici non protetti: −1 res extra.",
+      "effects": [
+        {
+          "hook": "on_event",
+          "op": "resistance",
+          "value": -1,
+          "target": {
+            "protected": false
+          }
+        }
+      ]
+    },
+    {
+      "id": "ev_inverno_lungo",
+      "name": "Inverno lungo",
+      "era": 1,
+      "force": 2,
+      "severity": "grave",
+      "kind": "geografico",
+      "effect_text": "Forza 2. Edifici su bosco e collina: −1 res. Tutti i giocatori perdono 1 pietra.",
+      "effects": [
+        {
+          "hook": "on_event",
+          "op": "resistance",
+          "value": -1,
+          "target": {
+            "terrain": [
+              "bosco",
+              "collina"
+            ]
+          }
+        },
+        {
+          "hook": "on_era_end",
+          "op": "resource",
+          "pietra": -1,
+          "target": {
+            "owner": "any"
+          }
+        }
+      ]
+    },
+    {
+      "id": "ev_faide_tribali",
+      "name": "Faide tribali",
+      "era": 1,
+      "force": 2,
+      "severity": "grave",
+      "kind": "classe",
+      "effect_text": "Forza 2. Militare +1 res · Civico −2 res.",
+      "effects": [
+        {
+          "hook": "on_event",
+          "op": "resistance",
+          "value": 1,
+          "target": {
+            "class": [
+              "militare"
+            ]
+          }
+        },
+        {
+          "hook": "on_event",
+          "op": "resistance",
+          "value": -2,
+          "target": {
+            "class": [
+              "civico"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "ev_carestia_primitiva",
+      "name": "Carestia primitiva",
+      "era": 1,
+      "force": 2,
+      "severity": "grave",
+      "kind": "comportamentale",
+      "effect_text": "Forza 2. Edifici a livello 0 non protetti che producono risorse: −2 res.",
+      "effects": [
+        {
+          "hook": "on_event",
+          "op": "resistance",
+          "value": -2,
+          "target": {
+            "level": {
+              "max": 0
+            },
+            "protected": false,
+            "produces": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "ev_terremoto",
+      "name": "Terremoto",
+      "era": 2,
+      "force": 3,
+      "severity": "lieve",
+      "kind": "geografico",
+      "effect_text": "Forza 3. Edifici da 2 o 3 caselle: −1 res.",
+      "effects": [
+        {
+          "hook": "on_event",
+          "op": "resistance",
+          "value": -1,
+          "target": {
+            "width": {
+              "min": 2
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "ev_pax_imperiale",
+      "name": "Pax imperiale",
+      "era": 2,
+      "force": 3,
+      "severity": "lieve",
+      "kind": "classe",
+      "effect_text": "Forza 3. Ingegneria +1 res · Militare −1 res.",
+      "effects": [
+        {
+          "hook": "on_event",
+          "op": "resistance",
+          "value": 1,
+          "target": {
+            "class": [
+              "ingegneria"
+            ]
+          }
+        },
+        {
+          "hook": "on_event",
+          "op": "resistance",
+          "value": -1,
+          "target": {
+            "class": [
+              "militare"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "ev_invasione",
+      "name": "Invasione",
+      "era": 2,
+      "force": 3,
+      "severity": "lieve",
+      "kind": "comportamentale",
+      "effect_text": "Forza 3. Edifici non protetti: −1 res extra.",
+      "effects": [
+        {
+          "hook": "on_event",
+          "op": "resistance",
+          "value": -1,
+          "target": {
+            "protected": false
+          }
+        }
+      ]
+    },
+    {
+      "id": "ev_eruzione",
+      "name": "Eruzione",
+      "era": 2,
+      "force": 3,
+      "severity": "grave",
+      "kind": "geografico",
+      "effect_text": "Forza 3. Edifici su collina: −2 res. Chi perde un edificio pesca un potenziamento gratis (massimo uno per giocatore).",
+      "effects": [
+        {
+          "hook": "on_event",
+          "op": "resistance",
+          "value": -2,
+          "target": {
+            "terrain": [
+              "collina"
+            ]
+          }
+        },
+        {
+          "hook": "on_event",
+          "op": "rule_override",
+          "name": "free_upgrade_on_loss",
+          "times": 1
+        }
+      ]
+    },
+    {
+      "id": "ev_persecuzioni",
+      "name": "Persecuzioni",
+      "era": 2,
+      "force": 3,
+      "severity": "grave",
+      "kind": "classe",
+      "effect_text": "Forza 3. Religione −2 res · Civico +1 res.",
+      "effects": [
+        {
+          "hook": "on_event",
+          "op": "resistance",
+          "value": -2,
+          "target": {
+            "class": [
+              "religione"
+            ]
+          }
+        },
+        {
+          "hook": "on_event",
+          "op": "resistance",
+          "value": 1,
+          "target": {
+            "class": [
+              "civico"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "ev_guerra_civile",
+      "name": "Guerra civile",
+      "era": 2,
+      "force": 3,
+      "severity": "grave",
+      "kind": "comportamentale",
+      "effect_text": "Forza 3. Nelle colonne con edifici di 2+ giocatori: tutti −1 res.",
+      "effects": [
+        {
+          "hook": "on_event",
+          "op": "resistance",
+          "value": -1,
+          "target": {
+            "column": {
+              "min_owners": 2
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "ev_incursioni_fluviali",
+      "name": "Incursioni fluviali",
+      "era": 3,
+      "force": 4,
+      "severity": "lieve",
+      "kind": "geografico",
+      "effect_text": "Forza 4. Edifici su colonne fiume: −1 res.",
+      "effects": [
+        {
+          "hook": "on_event",
+          "op": "resistance",
+          "value": -1,
+          "target": {
+            "terrain": [
+              "fiume"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "ev_guerra",
+      "name": "Guerra",
+      "era": 3,
+      "force": 4,
+      "severity": "lieve",
+      "kind": "classe",
+      "effect_text": "Forza 4. Militare +1 res · Civico −1 res.",
+      "effects": [
+        {
+          "hook": "on_event",
+          "op": "resistance",
+          "value": 1,
+          "target": {
+            "class": [
+              "militare"
+            ]
+          }
+        },
+        {
+          "hook": "on_event",
+          "op": "resistance",
+          "value": -1,
+          "target": {
+            "class": [
+              "civico"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "ev_peste",
+      "name": "Peste",
+      "era": 3,
+      "force": 4,
+      "severity": "lieve",
+      "kind": "comportamentale",
+      "effect_text": "Forza 4. Colonne con 3+ edifici in piedi: tutti −1 res.",
+      "effects": [
+        {
+          "hook": "on_event",
+          "op": "resistance",
+          "value": -1,
+          "target": {
+            "column": {
+              "min_standing": 3
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "ev_grande_incendio",
+      "name": "Grande incendio",
+      "era": 3,
+      "force": 4,
+      "severity": "grave",
+      "kind": "geografico",
+      "effect_text": "Forza 4. Edifici a livello 0 o 1: −1 res; a livello 2+: −2 res.",
+      "effects": [
+        {
+          "hook": "on_event",
+          "op": "resistance",
+          "value": -1,
+          "target": {
+            "level": {
+              "max": 1
+            }
+          }
+        },
+        {
+          "hook": "on_event",
+          "op": "resistance",
+          "value": -2,
+          "target": {
+            "level": {
+              "min": 2
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "ev_scisma",
+      "name": "Scisma",
+      "era": 3,
+      "force": 4,
+      "severity": "grave",
+      "kind": "classe",
+      "effect_text": "Forza 4. Religione −2 res · Cultura −1 res · Commercio +1 res.",
+      "effects": [
+        {
+          "hook": "on_event",
+          "op": "resistance",
+          "value": -2,
+          "target": {
+            "class": [
+              "religione"
+            ]
+          }
+        },
+        {
+          "hook": "on_event",
+          "op": "resistance",
+          "value": -1,
+          "target": {
+            "class": [
+              "cultura"
+            ]
+          }
+        },
+        {
+          "hook": "on_event",
+          "op": "resistance",
+          "value": 1,
+          "target": {
+            "class": [
+              "commercio"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "ev_anni_della_fame",
+      "name": "Anni della fame",
+      "era": 3,
+      "force": 4,
+      "severity": "grave",
+      "kind": "comportamentale",
+      "effect_text": "Forza 4. Nessuna produzione durante l’ultimo round dell’era.",
+      "effects": [
+        {
+          "hook": "on_activate",
+          "op": "rule_override",
+          "name": "no_production_last_round"
+        }
+      ]
+    },
+    {
+      "id": "ev_alluvione",
+      "name": "Alluvione",
+      "era": 4,
+      "force": 5,
+      "severity": "lieve",
+      "kind": "geografico",
+      "effect_text": "Forza 5. Edifici su colonne fiume: −1 res.",
+      "effects": [
+        {
+          "hook": "on_event",
+          "op": "resistance",
+          "value": -1,
+          "target": {
+            "terrain": [
+              "fiume"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "ev_controriforma",
+      "name": "Controriforma",
+      "era": 4,
+      "force": 5,
+      "severity": "lieve",
+      "kind": "classe",
+      "effect_text": "Forza 5. Religione +1 res · Cultura −1 res.",
+      "effects": [
+        {
+          "hook": "on_event",
+          "op": "resistance",
+          "value": 1,
+          "target": {
+            "class": [
+              "religione"
+            ]
+          }
+        },
+        {
+          "hook": "on_event",
+          "op": "resistance",
+          "value": -1,
+          "target": {
+            "class": [
+              "cultura"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "ev_rivoluzione_industriale",
+      "name": "Rivoluzione industriale",
+      "era": 4,
+      "force": 5,
+      "severity": "lieve",
+      "kind": "comportamentale",
+      "effect_text": "Forza 5. Edifici con Scavo 2+: −1 res.",
+      "effects": [
+        {
+          "hook": "on_event",
+          "op": "resistance",
+          "value": -1,
+          "target": {
+            "scavo": {
+              "min": 2
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "ev_bonifiche",
+      "name": "Bonifiche",
+      "era": 4,
+      "force": 5,
+      "severity": "grave",
+      "kind": "geografico",
+      "effect_text": "Forza 5. Edifici su pianura: −2 res. Il primo terrapieno di ogni giocatore in quest’era costa 0.",
+      "effects": [
+        {
+          "hook": "on_event",
+          "op": "resistance",
+          "value": -2,
+          "target": {
+            "terrain": [
+              "pianura"
+            ]
+          }
+        },
+        {
+          "hook": "on_build",
+          "op": "rule_override",
+          "name": "first_terrapieno_free",
+          "cap": 1
+        }
+      ]
+    },
+    {
+      "id": "ev_secolarizzazioni",
+      "name": "Secolarizzazioni",
+      "era": 4,
+      "force": 5,
+      "severity": "grave",
+      "kind": "classe",
+      "effect_text": "Forza 5. Religione −2 res · durante l’era, restaurare un rudere Religione non costa risorse (richiede comunque l’azione) e vale sui ruderi già presenti.",
+      "effects": [
+        {
+          "hook": "on_event",
+          "op": "resistance",
+          "value": -2,
+          "target": {
+            "class": [
+              "religione"
+            ]
+          }
+        },
+        {
+          "hook": "on_build",
+          "op": "rule_override",
+          "name": "free_restore_of_class",
+          "target": {
+            "class": [
+              "religione"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "ev_speculazione_edilizia",
+      "name": "Speculazione edilizia",
+      "era": 4,
+      "force": 5,
+      "severity": "grave",
+      "kind": "comportamentale",
+      "effect_text": "Forza 5. Ogni edificio con 2+ potenziamenti: −1 res.",
+      "effects": [
+        {
+          "hook": "on_event",
+          "op": "resistance",
+          "value": -1,
+          "target": {
+            "upgrades": {
+              "min": 2
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "monuments": [
+    {
+      "id": "mo_san_clemente",
+      "name": "San Clemente",
+      "vp": 5,
+      "condition_text": "Primo ad avere 3 edifici Religione nella stessa colonna.",
+      "condition": {
+        "op": "same_column_count",
+        "target": {
+          "owner": "self",
+          "class": [
+            "religione"
+          ]
+        },
+        "min": 3
+      }
+    },
+    {
+      "id": "mo_colosseo",
+      "name": "Colosseo",
+      "vp": 4,
+      "condition_text": "Primo ad avere un edificio attivo con resistenza 7 o più.",
+      "condition": {
+        "op": "count_matching",
+        "min": 1,
+        "target": {
+          "owner": "self",
+          "state": [
+            "intatto"
+          ],
+          "buried": false,
+          "resistance": {
+            "min": 7
+          }
+        }
+      }
+    },
+    {
+      "id": "mo_pantheon",
+      "name": "Pantheon",
+      "vp": 4,
+      "condition_text": "Primo ad avere un edificio dell’era 1 o 2 ancora in piedi all’inizio dell’era Moderna.",
+      "condition": {
+        "op": "count_matching",
+        "target": {
+          "owner": "self",
+          "era": {
+            "max": 2
+          },
+          "state": [
+            "intatto",
+            "rudere"
+          ],
+          "buried": false
+        },
+        "min": 1,
+        "min_era": 5
+      }
+    },
+    {
+      "id": "mo_fori_imperiali",
+      "name": "Fori Imperiali",
+      "vp": 4,
+      "condition_text": "Primo ad avere 4 propri edifici Sotterrati.",
+      "condition": {
+        "op": "count_matching",
+        "target": {
+          "owner": "self",
+          "buried": true
+        },
+        "min": 4
+      }
+    },
+    {
+      "id": "mo_acropoli",
+      "name": "Acropoli",
+      "vp": 4,
+      "condition_text": "Primo a costruire a livello 4.",
+      "condition": {
+        "op": "count_matching",
+        "target": {
+          "owner": "self",
+          "level": {
+            "min": 4
+          }
+        },
+        "min": 1
+      }
+    },
+    {
+      "id": "mo_via_appia",
+      "name": "Via Appia",
+      "vp": 5,
+      "condition_text": "Primo ad avere propri edifici in cima a 4 colonne consecutive.",
+      "condition": {
+        "op": "consecutive_columns",
+        "target": {
+          "owner": "self",
+          "is_top": true
+        },
+        "min": 4
+      }
+    },
+    {
+      "id": "mo_terme_di_caracalla",
+      "name": "Terme di Caracalla",
+      "vp": 4,
+      "condition_text": "Primo a costruire un edificio da 3 caselle.",
+      "condition": {
+        "op": "count_matching",
+        "target": {
+          "owner": "self",
+          "width": {
+            "min": 3
+          }
+        },
+        "min": 1
+      }
+    },
+    {
+      "id": "mo_ponte_milvio",
+      "name": "Ponte Milvio",
+      "vp": 4,
+      "condition_text": "Primo ad avere 2 edifici su colonne fiume distinte.",
+      "condition": {
+        "op": "distinct_columns",
+        "target": {
+          "owner": "self",
+          "terrain": [
+            "fiume"
+          ]
+        },
+        "min": 2
+      }
+    },
+    {
+      "id": "mo_mura_aureliane",
+      "name": "Mura Aureliane",
+      "vp": 5,
+      "condition_text": "Primo ad avere 3 edifici Militari in piedi contemporaneamente.",
+      "condition": {
+        "op": "count_matching",
+        "target": {
+          "owner": "self",
+          "class": [
+            "militare"
+          ],
+          "state": [
+            "intatto"
+          ],
+          "buried": false
+        },
+        "min": 3
+      }
+    },
+    {
+      "id": "mo_cloaca_massima",
+      "name": "Cloaca Massima",
+      "vp": 4,
+      "condition_text": "Primo ad aver speso almeno 3 pietra complessive in costi di terrapieno.",
+      "condition": {
+        "op": "counter",
+        "name": "terrapieno_pietra",
+        "min": 3
+      }
+    },
+    {
+      "id": "mo_domus_aurea",
+      "name": "Domus Aurea",
+      "vp": 5,
+      "condition_text": "Primo ad avere un edificio con 3 potenziamenti.",
+      "condition": {
+        "op": "count_matching",
+        "target": {
+          "owner": "self",
+          "upgrades": {
+            "min": 3
+          }
+        },
+        "min": 1
+      }
+    },
+    {
+      "id": "mo_campidoglio",
+      "name": "Campidoglio",
+      "vp": 4,
+      "condition_text": "Primo ad avere 2 edifici Civici nella stessa colonna.",
+      "condition": {
+        "op": "same_column_count",
+        "target": {
+          "owner": "self",
+          "class": [
+            "civico"
+          ]
+        },
+        "min": 2
+      }
+    },
+    {
+      "id": "mo_isola_tiberina",
+      "name": "Isola Tiberina",
+      "vp": 4,
+      "condition_text": "Primo a costruire su una colonna fiume a livello 2+.",
+      "condition": {
+        "op": "count_matching",
+        "target": {
+          "owner": "self",
+          "terrain": [
+            "fiume"
+          ],
+          "level": {
+            "min": 2
+          }
+        },
+        "min": 1
+      }
+    },
+    {
+      "id": "mo_catacombe",
+      "name": "Catacombe",
+      "vp": 5,
+      "condition_text": "Primo ad avere 3 edifici sotterrati nella stessa colonna.",
+      "condition": {
+        "op": "same_column_count",
+        "target": {
+          "buried": true
+        },
+        "min": 3
+      }
+    }
+  ],
+  "legacies": [
+    {
+      "id": "er_larcheologo",
+      "name": "L’Archeologo",
+      "vp": 5,
+      "condition_text": "4+ tuoi edifici Sotterrati.",
+      "condition": {
+        "op": "count_matching",
+        "target": {
+          "owner": "self",
+          "buried": true
+        },
+        "min": 4
+      }
+    },
+    {
+      "id": "er_il_costruttore_di_cattedrali",
+      "name": "Il Costruttore di cattedrali",
+      "vp": 4,
+      "condition_text": "3+ tuoi edifici Religione, in qualsiasi stato.",
+      "condition": {
+        "op": "count_matching",
+        "target": {
+          "owner": "self",
+          "class": [
+            "religione"
+          ]
+        },
+        "min": 3
+      }
+    },
+    {
+      "id": "er_il_verticalista",
+      "name": "Il Verticalista",
+      "vp": 4,
+      "condition_text": "hai costruito un edificio a livello 4 o superiore.",
+      "condition": {
+        "op": "count_matching",
+        "target": {
+          "owner": "self",
+          "level": {
+            "min": 4
+          }
+        },
+        "min": 1
+      }
+    },
+    {
+      "id": "er_il_geografo",
+      "name": "Il Geografo",
+      "vp": 4,
+      "condition_text": "tuoi edifici su tutti e quattro i terreni.",
+      "condition": {
+        "op": "all_terrains",
+        "target": {
+          "owner": "self"
+        }
+      }
+    },
+    {
+      "id": "er_il_colonizzatore",
+      "name": "Il Colonizzatore",
+      "vp": 4,
+      "condition_text": "tuoi edifici in 5+ colonne diverse.",
+      "condition": {
+        "op": "distinct_columns",
+        "target": {
+          "owner": "self"
+        },
+        "min": 5
+      }
+    },
+    {
+      "id": "er_il_mecenate",
+      "name": "Il Mecenate",
+      "vp": 4,
+      "condition_text": "4+ potenziamenti collocati sui tuoi edifici, inclusi quelli poi Sotterrati.",
+      "condition": {
+        "op": "counter",
+        "name": "potenziamenti_piazzati",
+        "min": 4
+      }
+    },
+    {
+      "id": "er_il_condottiero",
+      "name": "Il Condottiero",
+      "vp": 4,
+      "condition_text": "3+ tuoi edifici Militari in piedi.",
+      "condition": {
+        "op": "count_matching",
+        "target": {
+          "owner": "self",
+          "class": [
+            "militare"
+          ],
+          "state": [
+            "intatto"
+          ],
+          "buried": false
+        },
+        "min": 3
+      }
+    },
+    {
+      "id": "er_il_cronista",
+      "name": "Il Cronista",
+      "vp": 5,
+      "condition_text": "tuoi edifici di tutte e cinque le ere.",
+      "condition": {
+        "op": "all_eras",
+        "target": {
+          "owner": "self"
+        }
+      }
+    },
+    {
+      "id": "er_il_guardiano",
+      "name": "Il Guardiano",
+      "vp": 5,
+      "condition_text": "un tuo edificio in piedi costruito nell’era 1 o 2.",
+      "condition": {
+        "op": "count_matching",
+        "target": {
+          "owner": "self",
+          "era": {
+            "max": 2
+          },
+          "state": [
+            "intatto",
+            "rudere"
+          ],
+          "buried": false
+        },
+        "min": 1
+      }
+    },
+    {
+      "id": "er_il_lastricatore",
+      "name": "Il Lastricatore",
+      "vp": 4,
+      "condition_text": "tuoi edifici in 3 colonne consecutive.",
+      "condition": {
+        "op": "consecutive_columns",
+        "target": {
+          "owner": "self"
+        },
+        "min": 3
+      }
+    },
+    {
+      "id": "er_il_demolitore",
+      "name": "Il Demolitore",
+      "vp": 4,
+      "condition_text": "hai spianato 3+ tuoi edifici intatti.",
+      "condition": {
+        "op": "count_matching",
+        "target": {
+          "owner": "self",
+          "razed": true
+        },
+        "min": 3
+      }
+    },
+    {
+      "id": "er_il_massaio",
+      "name": "Il Massaio",
+      "vp": 4,
+      "condition_text": "due tuoi edifici a livello 2 o superiore.",
+      "condition": {
+        "op": "count_matching",
+        "target": {
+          "owner": "self",
+          "level": {
+            "min": 2
+          }
+        },
+        "min": 2
+      }
+    },
+    {
+      "id": "er_lidraulico",
+      "name": "L’Idraulico",
+      "vp": 4,
+      "condition_text": "3+ tuoi edifici su colonne fiume.",
+      "condition": {
+        "op": "count_matching",
+        "target": {
+          "owner": "self",
+          "terrain": [
+            "fiume"
+          ]
+        },
+        "min": 3
+      }
+    },
+    {
+      "id": "er_il_silvicoltore",
+      "name": "Il Silvicoltore",
+      "vp": 5,
+      "condition_text": "un tuo edificio attivo su bosco costruito nell'era 1 o 2.",
+      "condition": {
+        "op": "count_matching",
+        "min": 1,
+        "target": {
+          "owner": "self",
+          "terrain": [
+            "bosco"
+          ],
+          "state": [
+            "intatto"
+          ],
+          "buried": false,
+          "era": {
+            "max": 2
+          }
+        }
+      }
+    },
+    {
+      "id": "er_il_restauratore",
+      "name": "Il Restauratore",
+      "vp": 4,
+      "condition_text": "hai restaurato 2+ ruderi.",
+      "condition": {
+        "op": "counter",
+        "name": "restauri",
+        "min": 2
+      }
+    },
+    {
+      "id": "er_lantiquario",
+      "name": "L’Antiquario",
+      "vp": 5,
+      "condition_text": "un tuo edificio Sotterrato con Scavo 6 o più.",
+      "condition": {
+        "op": "count_matching",
+        "target": {
+          "owner": "self",
+          "buried": true,
+          "scavo": {
+            "min": 6
+          }
+        },
+        "min": 1
+      }
+    }
+  ]
+}
