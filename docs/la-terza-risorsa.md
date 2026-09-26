@@ -1050,9 +1050,8 @@ di più con un mercato che gli altri lasciano stare. Le tabelle dei bot per tre 
 giocatori (quattordicesima misura) sono state tarate senza le case: il prossimo passo, se si
 vuole rientrare nell'errore, è ritararle, non toccare le case.
 
-Da decidere: se la piccola nelle ere 1–3, che oggi non si compra, resta come terza e quarta
-copia della casa da 1, o si toglie (due tipi per era nelle ere 1–3, come nella Moderna), o la
-casa con lo Scavo costa di più.
+Deciso dal designer: la piccola nelle ere 1–3, che oggi non si compra, resta come terza e
+quarta copia della casa da 1.
 
 ## Come rifare il conto
 

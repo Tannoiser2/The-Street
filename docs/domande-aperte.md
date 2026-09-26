@@ -2017,5 +2017,6 @@ dato è stato importato da lì. Ma due confronti fra ciò che è stampato e
     1-3 (0 / 87 / 4 copie su 4000), le Case popolari sono la casa piu'
     comprata (3884 su 4000), il Palazzetto scende a 562. Lampo a tre (40 %)
     e Rendita a quattro (32 %) restano sul bordo: e' la presenza delle
-    case, non il loro Lampo; da ritarare i bot a tre e quattro. Aperto:
-    la piccola nelle ere 1-3, che non si compra piu'.
+    case, non il loro Lampo; da ritarare i bot a tre e quattro. La
+    piccola nelle ere 1-3, che non si compra piu', resta: e' la terza e la
+    quarta copia della casa da 1 (deciso dal designer).
