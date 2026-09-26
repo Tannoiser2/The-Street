@@ -935,6 +935,72 @@ Da decidere: se le case entrano nel file v2 così (tre per era, una copia), o co
 della piccola (venti sagome, per chiudere del tutto il mercato a quattro al costo di
 diluire di più a due).
 
+## Sedicesima misura: le case in riserva
+
+Decisione del designer dopo la quindicesima misura (registro 116): le case stanno nel file v2
+per tutti i tavoli, ma **non nel mazzo dell'era**: sono in una riserva sempre scoperta accanto
+al mercato, in **due copie ciascuna**, e il giocatore sceglie cosa comprare; non si pescano, non
+si rimpiazzano, a fine era le avanzate si scartano. Tre tipi per era (piccola, grande, con lo
+Scavo), due nell'era Moderna dove lo Scavo non vale: quattordici case, 74 sagome. Misurato sul
+torneo corretto con i bot tarati, stessi semi della quindicesima; nelle colonne "mazzo" le case
+della quindicesima misura (una copia, nel mazzo dell'era), in "riserva" quelle di oggi.
+
+| per giocatore | a 2: senza | a 2: mazzo | **a 2: riserva** | a 3: senza | a 3: mazzo | **a 3: riserva** | a 4: senza | a 4: mazzo | **a 4: riserva** |
+|---|--:|--:|--:|--:|--:|--:|--:|--:|--:|
+| PV | 83,3 | 80,4 | 84,1 | 88,7 | 89,3 | 90,4 | 78,3 | 80,5 | 81,3 |
+| Lampo / Rendita / Scavo / Continuità | 19,5 / 10,7 / 14,5 / 12,7 | 20,4 / 9,3 / 13,7 / 12,7 | 21,9 / 10,4 / 13,8 / 14,2 | 21,9 / 9,5 / 16,4 / 13,2 | 23,8 / 8,8 / 16,2 / 14,1 | 25,1 / 9,1 / 15,5 / 15,3 | 18,8 / 8,3 / 14,6 / 11,1 | 20,7 / 8,1 / 14,7 / 12,3 | 21,8 / 8,1 / 14,2 / 13,3 |
+| costruiti / passa | 12,8 / 3,0 | 12,9 / 3,2 | 13,6 / 2,5 | 13,8 / 3,2 | 14,7 / 2,5 | 15,1 / 2,0 | 12,0 / 5,4 | 13,2 / 4,1 | 13,4 / 3,9 |
+| altezza / basi altrui | 4,58 / 1,6 | 4,43 / 1,6 | 4,57 / 1,6 | 4,56 / 2,4 | 4,51 / 2,4 | 4,56 / 2,3 | 4,40 / 2,3 | 4,34 / 2,3 | 4,39 / 2,3 |
+| kingmaker | 12 % | 8 % | 10 % | 15 % | 12 % | 14 % | 15 % | 13 % | 15 % |
+| vince: Rendita / Continuità / Bilanciata / Obiettivi / Scavo / Lampo | 53 / 44 / 54 / 53 / 53 / 44 | 49 / 45 / 51 / 56 / 49 / 50 | 53 / 46 / 49 / 50 / 50 / 52 | 35 / 32 / 37 / 32 / 34 / 30 | 36 / 29 / 33 / 36 / 33 / 33 | 30 / 29 / 36 / 35 / 31 / **39** | 27 / 21 / 25 / 25 / 23 / 28 | 30 / 21 / 26 / 25 / 22 / 25 | **33** / 21 / 25 / 26 / 21 / 24 |
+
+**1. La riserva si compra più del mazzo, e a due non toglie più niente.** Le case in riserva
+danno l'edificio in più a tutti i tavoli (a 2: 13,6 contro 12,8; a 3: 15,1 contro 13,8; a 4:
+13,4 contro 12,0) e tagliano i passaggi (a 4 da 5,4 a 3,9, a 3 da 3,2 a 2,0). A due i tre punti
+persi dalla quindicesima misura tornano (84,1 contro 83,3): il mercato non è più diluito, perché
+le case non stanno nel mazzo dell'era. La città non cambia forma: stessa altezza, stesse basi
+altrui.
+
+**2. I punti in più sono Lampo e Continuità.** Il Lampo sale di 2–3 punti a testa e la
+Continuità di 1,5–2: le case sono suolo economico che si impila. Lo Scavo cala di mezzo punto
+(meno Idee spese, meno Potenzia): con una casa sempre disponibile a 1, il bot costruisce invece
+di potenziare.
+
+**3. Due strategie toccano il bordo.** A tre il Lampo vince il 39 % (bordo 38) e a quattro la
+Rendita il 33 % (bordo 29), che era già al 30 con le case nel mazzo; a quattro lo Scavo sta al
+21, sul bordo basso. A due tutto dentro (46–53). Con quattordici case sempre disponibili il
+Lampo a tre ha sempre qualcosa da comprare, e a quattro la Rendita — che ignora le case — è
+l'unica a non spendere turni su sagome da 1–2 punti mentre gli altri riempiono. Sono due
+scostamenti di un punto sul bordo, su sei strategie per tre tavoli: da rimisurare se si
+ritoccano i bot, non da correggere nelle regole.
+
+**4. Il kingmaker non si muove.** 10 / 14 / 15 % contro 12 / 15 / 15 % senza case: la riserva
+non aggiunge bottino all'ultima era (quota era 5: 42 / 38 / 36 %).
+
+**5. Quali case si comprano (vita delle carte a tre, 2000 partite).** Copie costruite su
+4000 disponibili (due per partita), per era: piccola / grande / con lo Scavo.
+
+| era | 1 | 2 | 3 | 4 | 5 |
+|---|--:|--:|--:|--:|--:|
+| piccola | 181 | 1182 | 206 | 3097 | 3234 |
+| grande | 1611 | 411 | 3147 | **3989** | **3969** |
+| con lo Scavo | 0 | 2 | 0 | 96 | – |
+| case a partita | 0,9 | 0,8 | 1,7 | 3,6 | 3,6 |
+
+Tre cose. **Le case con lo Scavo non le compra nessuno**: 98 costruzioni su 16 000 copie. Alla
+stessa spesa c'è la piccola con Lampo 1, e Scavo 2 paga solo se qualcuno costruisce sopra una
+sagoma da resistenza 1–2: per il bot non vale mai, e il ragionamento regge anche per un
+giocatore. **Le case delle ere 4–5 finiscono quasi ogni partita**: il Palazzetto (1 Denaro,
+1 Idea, Lampo 3) e il Condominio popolare escono in 3989 e 3969 copie su 4000, la Casa borghese
+e la Palazzina in tre su quattro; nelle ere 4–5 si costruiscono 3,6 case a partita, più di una
+a testa per era. Nelle ere 1–3 le case sono un ripiego (0,8–1,7 a partita), come dovevano
+essere. In tutto **10,7 case a partita a tre, 3,6 a testa** su 15,1 edifici: le case danno
+8,1 Lampo a testa, un terzo del Lampo totale. Il Lampo 3 a costo 2 nelle ere 4–5 è più
+efficiente di gran parte del mazzo, ed è per questo che tutti lo comprano.
+
+Da decidere: se le case con lo Scavo restano (oggi sono quattro sagome che non si giocano), e
+se il Lampo delle case grandi nelle ere 4–5 va portato a 2 per farne un ripiego anche lì.
+
 ## Come rifare il conto
 
 ```bash
@@ -1001,4 +1067,8 @@ python3 tools/confronta_strategie.py tutte_p4.csv
 python3 tools/genera_cards_v2.py --variante case_tutti
 for p in 2 3 4; do godot --headless res://scenes/audit_partita.tscn -- --players $p --games 750 --seed 700000 --dati data/proposte/cards-v2-case_tutti.json --giro tutte > case_p$p.csv; done
 python3 tools/confronta_torneo.py tutte_p4.csv case_p4.csv
+# sedicesima misura: le case in riserva stanno nel file v2 (oggi il comando di tutte_p$p produce riserva_p$p)
+for p in 2 3 4; do godot --headless res://scenes/audit_partita.tscn -- --players $p --games 750 --seed 700000 --dati data/cards-v2.json --giro tutte > riserva_p$p.csv; done
+python3 tools/confronta_torneo.py tutte_p4.csv case_p4.csv riserva_p4.csv
+godot --headless res://scenes/audit_partita.tscn -- --players 3 --vita 2000 --seed 200000 --dati data/cards-v2.json > vita_riserva.csv
 ```
