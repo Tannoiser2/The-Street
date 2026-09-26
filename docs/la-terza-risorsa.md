@@ -571,6 +571,25 @@ si perdono alla dispersione (tetto 3 per risorsa). A tre la Rendita scende da 38
 sale da 31 a 37, tutte e due sul bordo dell'errore, con la partita uguale: rumore o un piccolo
 spostamento, non un effetto. Non entra nel file v2.
 
+### Il secondo Monumento a due (`--monumenti 2`, costante `monumenti_rivelati_by_players`)
+
+La regola rivela "giocatori meno uno" Monumenti: a due, uno solo. Con due rivelati, stessi semi:
+
+| per giocatore, a 2 | base (1 Monumento) | **2 Monumenti** |
+|---|--:|--:|
+| PV | 83,4 | 85,0 |
+| di cui Monumenti | 1,6 | 3,1 |
+| costruiti / sopra / altezza / basi altrui | 12,9 / 6,6 / 4,58 / 1,6 | 12,9 / 6,6 / 4,58 / 1,6 |
+| vince: Continuità / Rendita / Lampo / Bilanciata / Scavo / Obiettivi | 58 / 55 / 54 / 48 / 44 / 40 | 58 / 53 / 54 / 48 / 45 / 42 |
+| PV della Obiettivi (le altre) | 77,9 (81–88) | 79,6 (83–90) |
+
+**Non risolve.** La partita è la stessa carta per carta (costruiti, altezza, basi: identici), il
+canale Monumenti raddoppia per tutti, e la Obiettivi guadagna due punti su cento: resta la più
+povera di 4–10 punti. Il suo problema a due non sono i Monumenti che mancano ma il modo in cui
+li insegue: costruisce per soddisfare condizioni e perde altrove. È un difetto del bot a due
+giocatori, non delle regole; si ritara con le spinte, come si è fatto per la Lampo (undicesima
+misura), se e quando serve. La costante resta come manopola, spenta.
+
 ## Come rifare il conto
 
 ```bash
