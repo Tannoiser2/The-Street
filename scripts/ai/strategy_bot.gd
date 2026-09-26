@@ -144,9 +144,18 @@ static func play_turn(ctl: GameController, strategia := "bilanciata") -> void:
 		taccuino["mosse"] = lista
 		taccuino["scelta"] = scelta
 	if scelta.is_empty():
-		ctl.pass_action()
+		_passa(ctl, gs, p)
 		return
 	if not _esegui(ctl, scelta["mossa"]):
+		_passa(ctl, gs, p)
+
+# Passare nel turno v1: con l'incasso al passaggio (`passa_incasso`) si
+# sceglie la risorsa che vale di piu', come nel turno a un'azione; senza, si
+# passa e basta.
+static func _passa(ctl: GameController, gs: GameState, p: PlayerState) -> void:
+	if ctl.passa_incasso():
+		ctl.passa(_risorsa_da_passare(p, valore_risorse(gs, p)))
+	else:
 		ctl.pass_action()
 
 # ---- la classifica che il bot si fa in testa ------------------------
@@ -358,6 +367,11 @@ static func _risorsa_da_passare(p: PlayerState, r: Vector2) -> String:
 static func _opzioni(gs: GameState, player: int, col: int) -> Array:
 	var p: PlayerState = gs.players[player]
 	var out := []
+	# Con l'incasso al passaggio (registro 109) passare e' una mossa fra le
+	# altre, con il valore delle due risorse: il bot puo' preferirla a una
+	# costruzione che vale poco, che e' il punto della regola.
+	if bool(CardDB.constants.get("passa_incasso", false)) and not bool(CardDB.constants.get("turno_v2", false)):
+		out.append(AvailableActions.passa(_risorsa_da_passare(p, valore_risorse(gs, p))))
 	for card_id in gs.market:
 		for v in AvailableActions.piazzamenti(gs, player, col, card_id):
 			if v.pagabile(p): out.append(v)

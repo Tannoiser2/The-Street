@@ -608,20 +608,29 @@ func _protetto() -> Building:
 		if b.uid == gs.protetto_uid: return b
 	return null
 
-func pass_action() -> void:
-	if turno_v2():
-		passa("pietra")
+func pass_action(scelta := "pietra") -> void:
+	if passa_incasso():
+		passa(scelta)
 		return
 	if gs.phase == Enums.Phase.AZIONE:
 		gs.current_player().bump("az_passa")
 		_end_turn()
+
+# L'INCASSO AL PASSAGGIO (registro 109, costante `passa_incasso`, spenta dove
+# manca): anche nel turno della v1.5 chi non fa l'azione dopo l'attivazione
+# incassa 1 Costruzione piu' 1 risorsa a scelta. Nasce dalla dodicesima
+# misura: a quattro giocatori sedici turni per era contro dodici sagome, e un
+# turno a testa a era finiva senza niente da fare. Nel turno a un'azione
+# l'incasso c'era gia' (D14).
+func passa_incasso() -> bool:
+	return turno_v2() or bool(CardDB.constants.get("passa_incasso", false))
 
 # V2, "passare e incassare" (D14): il lavoratore va sulla plancia e si incassa
 # 1 Costruzione piu' 1 risorsa a scelta (`passa_incasso_pietra`,
 # `passa_incasso_scelta`). Cosi' l'era finisce come sempre, quando finiscono
 # i lavoratori, senza una regola "tutti hanno passato".
 func passa(scelta := "oro") -> bool:
-	if not turno_v2(): return false
+	if not passa_incasso(): return false
 	if not _puo_agire() or not gs.pending_choice.is_empty(): return false
 	var p := gs.current_player()
 	var base := int(CardDB.constants.get("passa_incasso_pietra", 1))
