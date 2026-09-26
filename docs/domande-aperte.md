@@ -1913,3 +1913,15 @@ dato è stato importato da lì. Ma due confronti fra ciò che è stampato e
     una strategia. Da decidere: case che danno Scavo invece di Lampo, case
     senza niente (puro suolo), o il bot Lampo ritarato a quattro. Il file
     v2 non cambia.
+
+112. **"Prova tutto": case con Scavo, case senza niente, bot Lampo
+    ritarato.** Il designer, dopo il punto 111. Misurato a quattro, stessi
+    semi (`docs/la-terza-risorsa.md`, tredicesima misura). Le case senza
+    niente non si costruiscono (passaggi 5,1 come senza case): inutili. Le
+    case con Scavo 2 e 3 sono il compromesso: la Lampo torna al 23% e le
+    strategie stanno nell'errore tranne la Scavo al 18%, ma si costruiscono
+    meno (13,0 edifici, passaggi 4,5): il mercato corto e' mezzo risolto.
+    Ritarare il bot Lampo sulle case con Lampo non serve (lampo 2,5 lo
+    porta al 7%, potenzia 5 al 18%): il problema e' il canale che non
+    distingue piu' nessuno, non il bot. In coda una variante mista (piccola
+    con Lampo 1, grande con Scavo 3). Il file v2 non cambia.

@@ -771,6 +771,45 @@ Lampo (un rientro ancora più annacquato, che paga solo se qualcuno ci costruisc
 case **senza niente** (costano 1, resistenza 1, Scavo 1: puro suolo e Continuità), o il bot
 Lampo ritarato a quattro come si è fatto a tre. Da decidere.
 
+La vita delle carte con le case (2 000 partite a quattro): 55,7 edifici a partita invece di
+48,9, in piedi a fine 17,8 invece di 16,3, il 37 % cade nell'era in cui nasce (34 % prima:
+le case piccole reggono poco), sepolti 46 %, Lampo per partita da 76 a 93 punti, il resto
+uguale.
+
+### "Prova tutto": case con Scavo, case senza niente, il bot Lampo ritarato
+
+Registro 112. Le tre alternative, stessi semi, a quattro. **Case con Scavo**: le stesse venti
+case senza Lampo e con Scavo 2 (piccola) e 3 (grande). **Case senza niente**: venti case
+piccole, costano 1, Lampo 0, Scavo 1. **Bot Lampo ritarato** sul file delle case con Lampo:
+`--spinta lampo=2.5`, `lampo_potenzia=5`, tutte e due.
+
+| per giocatore, a 4 | base | case Lampo | **case Scavo** | case nulle | Lampo: lampo 2,5 | potenzia 5 | entrambe |
+|---|--:|--:|--:|--:|--:|--:|--:|
+| PV | 78,4 | 83,4 | 78,1 | 76,8 | 84,1 | 83,4 | 83,6 |
+| Lampo di tutti | 19,1 | 23,1 | 17,8 | 18,0 | – | – | – |
+| costruiti / passa | 12,2 / 5,1 | 13,9 / 3,5 | 13,0 / 4,5 | 12,6 / 5,1 | 14,1 / 3,4 | 13,9 / 3,4 | 13,9 / 3,4 |
+| kingmaker | 18 % | 16 % | 18 % | 18 % | 17 % | 17 % | 18 % |
+| vince: Rendita / Continuità / Bilanciata / Obiettivi / Scavo / Lampo (25 ± 4) | 30 / 27 / 26 / 25 / 22 / 20 | 34 / 22 / 30 / 26 / 24 / 14 | 32 / 23 / 29 / 25 / **18** / 23 | 31 / 25 / 27 / 23 / 20 / 25 | 35 / 24 / 29 / 30 / 24 / **7** | 38 / 20 / 29 / 27 / 19 / 18 | 34 / 24 / 29 / 27 / 23 / 12 |
+
+**1. Le case senza niente non si costruiscono.** Passaggi 5,1 come senza case, edifici 12,6:
+il bot non compra suolo nudo, e non lo farebbe nemmeno un giocatore. Le strategie tornano
+tutte nell'errore perché la partita è quella di prima, meno due punti. Inutili.
+
+**2. Le case con Scavo sono il compromesso.** La Lampo torna al 23 % (il Lampo non è più di
+tutti: 17,8 a testa), tutte le strategie stanno nell'errore tranne la Scavo al 18 %, i punti
+restano 78 come senza case. Ma si costruiscono meno delle case con Lampo (13,0 contro 13,9)
+e i passaggi restano 4,5: una casa che paga solo se qualcuno ci costruisce sopra vale poco
+per chi la compra, e il bot spesso preferisce passare. Il mercato corto è mezzo risolto.
+
+**3. Ritarare il bot Lampo non serve.** Dare più peso al Lampo delle carte (lampo 2,5) lo fa
+comprare più case e vincere il 7 %; il peso ai potenziamenti lo porta al 18 % e basta. Il
+problema non è come il bot Lampo sceglie: è che con le case a Lampo il canale non distingue
+più nessuno.
+
+**4. Quello che resta da capire** è se esiste una casa che i giocatori comprano (come quella
+con Lampo) senza regalare a tutti il canale di una strategia (come quella con Scavo non fa).
+In coda una variante mista, piccola con Lampo 1 e grande con Scavo 3.
+
 ## Come rifare il conto
 
 ```bash
@@ -827,4 +866,7 @@ python3 tools/confronta_torneo.py v2_p4.csv doppioni_p4.csv abitazioni_p4.csv
 python3 tools/genera_cards_v2.py --variante case; python3 tools/genera_cards_v2.py --variante case_doppioni
 for v in case case_doppioni; do godot --headless res://scenes/audit_partita.tscn -- --players 4 --games 750 --seed 700000 --dati data/proposte/cards-v2-$v.json > ${v}_p4.csv; done
 python3 tools/confronta_torneo.py v2_p4.csv doppioni_p4.csv case_p4.csv case_doppioni_p4.csv
+for v in case_scavo case_nulle case_mista; do python3 tools/genera_cards_v2.py --variante $v; godot --headless res://scenes/audit_partita.tscn -- --players 4 --games 750 --seed 700000 --dati data/proposte/cards-v2-$v.json > ${v}_p4.csv; done
+godot --headless res://scenes/audit_partita.tscn -- --players 4 --games 750 --seed 700000 --dati data/proposte/cards-v2-case.json --spinta lampo=2.5 > case_L25.csv
+python3 tools/confronta_torneo.py case_p4.csv case_scavo_p4.csv case_nulle_p4.csv case_L25.csv
 ```

@@ -244,6 +244,13 @@ def case(v, modo="lampo"):
 
 def case_scavo(v): case(v, "scavo")
 def case_nulle(v): case(v, "nulle")
+# "mista": la piccola da' Lampo 1 (e Scavo 1), la grande niente Lampo e Scavo 3.
+def case_mista(v):
+    case(v, "lampo")
+    for b in v["buildings"]:
+        if b.get("min_players") and b["id"].startswith("ed_casa_") and "_g" in b["id"]:
+            b["lampo"] = 0
+            b["scavo"] = 3
 
 # I doppioni "di edifici che non siano enormi o speciali, tipo chiese": per
 # era una seconda copia dei due edifici da una casella di classe religione
@@ -274,7 +281,8 @@ import sys
 variante = sys.argv[sys.argv.index("--variante") + 1] if "--variante" in sys.argv else ""
 if variante:
     {"doppioni": doppioni, "abitazioni": abitazioni, "case": case,
-     "case_doppioni": case_doppioni, "case_scavo": case_scavo, "case_nulle": case_nulle}[variante](v2)
+     "case_doppioni": case_doppioni, "case_scavo": case_scavo, "case_nulle": case_nulle,
+     "case_mista": case_mista}[variante](v2)
     v2["meta"]["ruleset"] = "v2-" + variante
     v2["meta"]["origine"] = "generato da tools/genera_cards_v2.py --variante %s: non modificare a mano" % variante
     out = os.path.join(RADICE, "data/proposte/cards-v2-%s.json" % variante)
