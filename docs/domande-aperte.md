@@ -1929,3 +1929,14 @@ dato è stato importato da lì. Ma due confronti fra ciò che è stampato e
     Rendita, che a quattro lavoratori compra sempre: la domanda vera a
     quattro e' la Rendita, non le case. Le case con Scavo restano il
     compromesso. Il file v2 non cambia.
+
+113. **Le regole non cambiano col numero di giocatori.** Decisione del
+    designer dopo il punto 112 ("non voglio che le regole cambino al
+    variare dei giocatori"). Niente sagome "da quattro in su" nel file v2,
+    niente Monumenti in piu' a due: le manopole (`min_players`,
+    `monumenti_rivelati_by_players`, `passa_incasso`) restano nel motore,
+    spente, e i file di prova in `data/proposte/` restano come misura. A
+    quattro il mercato resta corto (un turno per era a testa senza azione)
+    e la Rendita al 30%; a due Continuita' 58% e Obiettivi 40%: sono i
+    numeri del gioco a quei tavoli, da riguardare con i bot, non con le
+    regole.
