@@ -808,7 +808,23 @@ più nessuno.
 
 **4. Quello che resta da capire** è se esiste una casa che i giocatori comprano (come quella
 con Lampo) senza regalare a tutti il canale di una strategia (come quella con Scavo non fa).
-In coda una variante mista, piccola con Lampo 1 e grande con Scavo 3.
+La variante mista, piccola con Lampo 1 e grande con Scavo 3, sta in mezzo e non aiuta:
+80,1 punti, 13,5 edifici, 3,9 passaggi, Lampo 19 %, ma Rendita 34 % e Scavo 18 %, tutte e
+due fuori dall'errore. Ogni casa che si compra volentieri regala qualcosa alla Rendita, che a
+quattro lavoratori compra sempre: la Rendita sta al 30 % già senza case, e ogni sagoma in più
+la porta a 32–36. Se si vuole il mercato pieno a quattro, la domanda vera è la Rendita a
+quattro giocatori, non le case.
+
+| variante | punti | edifici / passa | fuori dall'errore (25 ± 4) |
+|---|--:|--:|---|
+| nessuna | 78 | 12,2 / 5,1 | Rendita 30, Lampo 20 (bordo) |
+| doppioni per classe | 85 | 13,2 / 4,1 | Lampo 15 |
+| abitazioni che producono | 81 | 13,4 / 3,9 | Rendita 36, Continuità 18 |
+| case con Lampo | 83 | 13,9 / 3,5 | Lampo 14, Rendita 34 |
+| case con Lampo + chiese | 84 | 13,9 / 3,5 | Lampo 13, Rendita 36 |
+| **case con Scavo** | 78 | 13,0 / 4,5 | Scavo 18 |
+| case senza niente | 77 | 12,6 / 5,1 | nessuna (ma non si costruiscono) |
+| case miste | 80 | 13,5 / 3,9 | Rendita 34, Scavo 18 |
 
 ## Come rifare il conto
 

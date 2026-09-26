@@ -1923,5 +1923,9 @@ dato è stato importato da lì. Ma due confronti fra ciò che è stampato e
     meno (13,0 edifici, passaggi 4,5): il mercato corto e' mezzo risolto.
     Ritarare il bot Lampo sulle case con Lampo non serve (lampo 2,5 lo
     porta al 7%, potenzia 5 al 18%): il problema e' il canale che non
-    distingue piu' nessuno, non il bot. In coda una variante mista (piccola
-    con Lampo 1, grande con Scavo 3). Il file v2 non cambia.
+    distingue piu' nessuno, non il bot. La variante mista (piccola con
+    Lampo 1, grande con Scavo 3) sta in mezzo e non aiuta (Rendita 34,
+    Scavo 18). Ogni casa che si compra volentieri regala qualcosa alla
+    Rendita, che a quattro lavoratori compra sempre: la domanda vera a
+    quattro e' la Rendita, non le case. Le case con Scavo restano il
+    compromesso. Il file v2 non cambia.
