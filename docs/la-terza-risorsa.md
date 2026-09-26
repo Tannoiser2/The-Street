@@ -691,6 +691,48 @@ li insegue: costruisce per soddisfare condizioni e perde altrove. È un difetto 
 giocatori, non delle regole; si ritara con le spinte, come si è fatto per la Lampo (undicesima
 misura), se e quando serve. La costante resta come manopola, spenta.
 
+### Più sagome a quattro: doppioni o abitazioni (`data/proposte/cards-v2-*.json`)
+
+Le due idee del designer per i sedici turni contro dodici sagome. Tutte e due aggiungono dieci
+sagome con `min_players` 4, che entrano nel mazzo solo a quattro giocatori: a due e a tre il
+gioco non cambia. **Doppioni**: per era una seconda copia della chiesa e del villaggio più
+economici da una casella (Capanne, Dolmen; Insulae, Sacello; Borgo, Cappella; Loggia, Bottega
+d'artista; Condominio, Monumento ai caduti). **Abitazioni**: per era due case generiche nuove,
+civiche, senza terreno, che costano 1–2 e producono 1 (Capanne di fango, Case a schiera, Case a
+graticcio, Casa borghese, Palazzina; resistenza 1–3, Lampo 1, Scavo 1). Generate da
+`tools/genera_cards_v2.py --variante doppioni|abitazioni`.
+
+| per giocatore, a 4 | base (60 sagome) | **doppioni (70)** | abitazioni (70) |
+|---|--:|--:|--:|
+| PV | 78,4 | 84,7 | 80,8 |
+| Lampo / Scavo / Continuità / Scheletri | 19,1 / 14,6 / 11,1 / 9,6 | 21,5 / 18,2 / 11,9 / 9,3 | 19,9 / 15,8 / 12,4 / 9,2 |
+| costruiti / passa | 12,2 / 5,1 | 13,2 / 4,1 | 13,4 / 3,9 |
+| sopra / altezza / basi altrui | 6,1 / 4,41 / 2,3 | 6,4 / 4,41 / 2,5 | 6,5 / 4,37 / 2,5 |
+| premio di scavo (era 5) | 9,9 (3,6) | 12,5 (4,1) | 10,7 (3,8) |
+| kingmaker | 18 % | 15 % | 13 % |
+| vince: Rendita / Continuità / Bilanciata / Obiettivi / Scavo / Lampo (atteso 25 ± 4) | 30 / 27 / 26 / 25 / 22 / 20 | 32 / 26 / 29 / 28 / 20 / **15** | **36** / **18** / 22 / 28 / 26 / 19 |
+
+**1. Dieci sagome in più danno un edificio in più a testa e tolgono un passaggio.** Da 12,2 a
+13,2–13,4 edifici, da 5,1 a 4 passaggi a testa: il mercato corto era il vincolo, e le sagome
+sono la leva giusta (l'incasso non muoveva niente). Non basta: quattro passaggi a testa sono
+ancora uno per era, perché sedici turni chiedono più di quattordici sagome; la stima è sedici
+per era, cioè venti in più e non dieci.
+
+**2. I doppioni sono meglio delle abitazioni.** +6 punti a giocatore contro +2, il premio di
+scavo sale (12,5, con più basi altrui: 2,5), il kingmaker scende al 15 %. Le abitazioni
+spostano le strategie: Rendita 36 e Continuità 18, tutte e due fuori dall'errore, perché una
+casa da 1 che produce 1 è la carta che la Rendita compra e la Continuità (classe civico in
+colonna) non sa usare quanto pensa. I doppioni costano niente da disegnare: sono sagome che ci
+sono già.
+
+**3. Ma i doppioni scelti così affossano la Lampo**: 15 % contro 20 di prima e 25 atteso. Le
+copie sono chiese e villaggi economici con poco Lampo (0–3): il Lampo di tutti sale (+2,4) per
+la carta in più, ma la Lampo, che vive di carte a Lampo alto, trova il mercato pieno di carte
+che non le servono e le altre strategie con più edifici. Da decidere come scegliere i doppioni:
+non per classe ma per Lampo (una copia delle due carte a Lampo più alto da una casella per
+era), oppure quattro copie per era invece di due, e poi ricontrollare la Lampo. Il file v2 non
+cambia finché non si decide.
+
 ## Come rifare il conto
 
 ```bash
@@ -738,4 +780,10 @@ python3 tools/confronta_strategie.py H.csv
 for p in 2 4; do godot --headless res://scenes/audit_partita.tscn -- --players $p --games 750 --seed 700000 --dati data/cards-v2.json > v2_p$p.csv; done
 python3 tools/confronta_torneo.py v2_p2.csv H.csv v2_p4.csv
 python3 tools/confronta_strategie.py v2_p4.csv
+# tredicesima misura: l'incasso al passaggio, il secondo Monumento a due, le sagome in piu' a quattro
+godot --headless res://scenes/audit_partita.tscn -- --players 4 --games 750 --seed 700000 --dati data/cards-v2.json --passa_incasso 1 > inc_p4.csv
+godot --headless res://scenes/audit_partita.tscn -- --players 2 --games 750 --seed 700000 --dati data/cards-v2.json --monumenti 2 > mon2_p2.csv
+python3 tools/genera_cards_v2.py --variante doppioni; python3 tools/genera_cards_v2.py --variante abitazioni
+for v in doppioni abitazioni; do godot --headless res://scenes/audit_partita.tscn -- --players 4 --games 750 --seed 700000 --dati data/proposte/cards-v2-$v.json > ${v}_p4.csv; done
+python3 tools/confronta_torneo.py v2_p4.csv doppioni_p4.csv abitazioni_p4.csv
 ```

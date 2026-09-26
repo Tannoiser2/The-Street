@@ -1866,3 +1866,32 @@ dato è stato importato da lì. Ma due confronti fra ciò che è stampato e
     chiude (Continuita' 55, Obiettivi 45) al costo di 13 punti. Resta da
     fare la controprova del secondo Monumento rivelato a due (serve una
     costante: oggi "giocatori meno uno" e' nel codice).
+
+109. **L'incasso al passaggio non cambia niente.** Il designer ("vai con
+    l'incasso al passaggio a quattro"). Costante `passa_incasso` (spenta dove
+    manca, `--passa_incasso 1`): nel turno della v1.5 chi non fa l'azione
+    incassa 1 Costruzione piu' 1 risorsa a scelta, e il bot la valuta come
+    una mossa. Misurato a 4, 3 e 2 giocatori, stessi semi
+    (`docs/la-terza-risorsa.md`, tredicesima misura): a quattro i passaggi
+    restano 5 a testa e gli edifici 12,2, perche' il vincolo sono le sagome
+    e le risorse in piu' si perdono alla dispersione; a tre e a due
+    niente. Non entra nel file v2; la manopola resta.
+
+110. **Il secondo Monumento a due, e piu' sagome a quattro.** Il designer
+    ("vai anche con il secondo monumento a due"; per la scarsita' a
+    quattro: raddoppiare chiese o villaggi, o aggiungere abitazioni
+    generiche che costano poco e rendono poco). Costante
+    `monumenti_rivelati_by_players` (`--monumenti N`; assente: giocatori
+    meno uno); `min_players` sulle sagome che entrano nel mazzo solo con
+    abbastanza giocatori; due file di prova in `data/proposte/` da
+    `genera_cards_v2.py --variante doppioni|abitazioni`, dieci sagome in
+    piu', solo a quattro. Misurato (tredicesima misura). Il secondo
+    Monumento a due non risolve: la partita e' identica, Obiettivi da 40 a
+    42% e resta la piu' povera; e' il bot, non i Monumenti. A quattro le
+    dieci sagome in piu' danno un edificio in piu' a testa e tolgono un
+    passaggio (da 5,1 a 4): la leva e' giusta ma dieci non bastano, ne
+    servono circa venti. I doppioni sono meglio delle abitazioni (+6 punti
+    contro +2, kingmaker 15%, niente da disegnare; le abitazioni spostano
+    Rendita a 36 e Continuita' a 18), ma scelti per classe affossano la
+    Lampo (15%). Da decidere: doppioni scelti per Lampo, o quattro per
+    era, poi ricontrollare la Lampo. Il file v2 non cambia.
