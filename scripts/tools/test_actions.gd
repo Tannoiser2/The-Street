@@ -1520,7 +1520,7 @@ func _test_monumenti_e_sagome_in_piu() -> void:
 
 	if FileAccess.file_exists("res://data/proposte/cards-v2-abitazioni.json"):
 		CardDB.load_db("res://data/proposte/cards-v2-abitazioni.json")
-		_eq("il file delle abitazioni ha 85 sagome (60, 15 case in riserva, 10 abitazioni)", CardDB.buildings.size(), 85)
+		_eq("il file delle abitazioni ha 84 sagome (60, 14 case in riserva, 10 abitazioni)", CardDB.buildings.size(), 84)
 		var in_piu := 0
 		for b in CardDB.buildings.values():
 			if int(b.get("min_players", 0)) == 4: in_piu += 1
@@ -1535,7 +1535,7 @@ func _test_monumenti_e_sagome_in_piu() -> void:
 		_eq("  a tre nei mazzi ce ne sono 60 (le case della riserva non ci stanno)", mazzo3, 60)
 		_eq("  a quattro 70", mazzo4, 70)
 		CardDB.load_db("res://data/cards-v2.json")
-		_eq("ricaricando il file v2 le abitazioni non restano", CardDB.buildings.size(), 75)
+		_eq("ricaricando il file v2 le abitazioni non restano", CardDB.buildings.size(), 74)
 	CardDB.load_db(CardDB.DB_PATH)
 
 

@@ -186,11 +186,11 @@ riserva = [b for b in V2["buildings"] if b.get("riserva")]
 if riserva:
     w("### Le case della riserva (registro 116)")
     w("")
-    w("Le %d case (tre per era: la piccola, la grande e quella con lo Scavo) non stanno nel mazzo dell'era:" % len(riserva))
+    w("Le %d case (tre per era: la piccola, la grande e quella con lo Scavo; due nell'era Moderna, dove lo Scavo non vale) non stanno nel mazzo dell'era:" % len(riserva))
     w("sono **sempre disponibili**, tutte scoperte accanto al mercato, in %d copie ciascuna, e si" % riserva[0].get("copie", 1))
     w("comprano come dal mercato; a fine era le copie avanzate si scartano con le file. Non producono")
     w("e non rendono: danno Lampo (la piccola 1, la grande 2, 3 nelle ere 4-5) o Scavo (Ripari, Tuguri,")
-    w("Casupole, Case popolari, Case operaie: 2). Classe civico, nessun terreno richiesto. Nelle tabelle")
+    w("Casupole, Case popolari: 2). Classe civico, nessun terreno richiesto. Nelle tabelle")
     w("portano la sigla **RIS**.")
     w("")
 w("### Da dove vengono i costi")

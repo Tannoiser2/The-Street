@@ -1980,8 +1980,10 @@ dato è stato importato da lì. Ma due confronti fra ciò che è stampato e
 116. **Le case nel file v2: in riserva, due copie.** Decisione del designer
     dopo il punto 115 ("confermo, ma farei due copie di ognuna, poi il
     giocatore decide cosa comprare; sono sempre disponibili, non vengono
-    pescate"). Le quindici case (tre per era) stanno nel file v2 per tutti
-    i tavoli con `riserva` vero e `copie` 2: non entrano nel mazzo
+    pescate"). Le quattordici case (tre per era: piccola, grande e con lo
+    Scavo; nell'era Moderna solo le prime due, perche' "lo scavo nell'era 5
+    non vale") stanno nel file v2 per tutti i tavoli con `riserva` vero e
+    `copie` 2: non entrano nel mazzo
     dell'era, a inizio era si scoprono tutte accanto al mercato
     (`gs.riserva`, una voce per copia), si comprano come dal mercato senza
     rimpiazzo e a fine era le avanzate si scartano. Bot, azioni e vista

@@ -219,7 +219,9 @@ CASE = {
         ("Condominio popolare", {"pietra": 0, "oro": 1, "idee": 1}, 4, 3)),
 }
 # La casa con lo Scavo (niente Lampo, Scavo 2): costa e regge come la piccola.
-CASE_SCAVO = {1: "Ripari", 2: "Tuguri", 3: "Casupole", 4: "Case popolari", 5: "Case operaie"}
+# Non c'e' nell'era Moderna: "lo scavo nell'era 5 non vale" (nessuno costruisce
+# sopra dopo l'ultima era), quindi li' restano solo la piccola e la grande.
+CASE_SCAVO = {1: "Ripari", 2: "Tuguri", 3: "Casupole", 4: "Case popolari"}
 
 # Tre modi (registro 112, "prova tutto"): "lampo" come sopra; "scavo" le stesse
 # case senza Lampo e con Scavo 2 e 3, un rientro che paga solo se qualcuno ci
@@ -252,8 +254,8 @@ def case_nulle(v): case(v, "nulle")
 # `min_players`: le regole sono le stesse a due, tre e quattro): la casa
 # piccola (costa 1, Lampo 1), la casa grande (costa 2, Lampo 2, 3 nelle ere
 # 4-5) e la casa con Scavo (costa 1, Lampo 0, Scavo 2); resistenza bassa,
-# niente produzione, niente Rendita. Una copia per tipo: tre sagome per era,
-# quindici in tutto, 75 sagome.
+# niente produzione, niente Rendita. Nell'era Moderna manca la casa con Scavo
+# (lo Scavo li' non vale): quattordici case in tutto.
 # Registro 116: le case stanno nel file v2, per tutti, NELLA RISERVA (sempre
 # disponibili, non nel mazzo dell'era) con due copie ciascuna: "due copie di
 # ognuna e poi il giocatore decide cosa comprare; sono sempre disponibili,
@@ -262,8 +264,9 @@ def case_tutti(v, riserva=False, copie=1):
     for era, taglie in CASE.items():
         (nome_p, costo_p, res_p, lampo_p), (nome_g, costo_g, res_g, lampo_g) = taglie
         tipi = [("p", nome_p, costo_p, res_p, lampo_p, 1),
-                ("g", nome_g, costo_g, res_g, lampo_g, 1),
-                ("s", CASE_SCAVO[era], costo_p, res_p, 0, 2)]
+                ("g", nome_g, costo_g, res_g, lampo_g, 1)]
+        if era in CASE_SCAVO:
+            tipi.append(("s", CASE_SCAVO[era], costo_p, res_p, 0, 2))
         for sigla, nome, costo, res, lampo, scavo in tipi:
             b = {
                 "id": "ed_casa_e%d_%s" % (era, sigla), "name": nome, "era": era,

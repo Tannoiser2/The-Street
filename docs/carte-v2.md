@@ -25,7 +25,7 @@ Sigle del motivo di un cambio:
 | **TES** | presuppone le tessere di oggi (abilità permanente, mix fisso) |
 | **CUL** | dice "cultura" per i punti: con le Idee come risorsa la parola va cambiata (proposta: "PV") |
 
-## I 75 edifici
+## I 74 edifici
 
 Ogni edificio è una sagoma unica (punto 2 della proposta): costo, produzione, resistenza,
 Rendita, Lampo e Scavo stanno sulla sagoma, che ruotata mostra il lato rovina con lo Scavo.
@@ -35,11 +35,11 @@ richiesto sono quelli di oggi.
 
 ### Le case della riserva (registro 116)
 
-Le 15 case (tre per era: la piccola, la grande e quella con lo Scavo) non stanno nel mazzo dell'era:
+Le 14 case (tre per era: la piccola, la grande e quella con lo Scavo; due nell'era Moderna, dove lo Scavo non vale) non stanno nel mazzo dell'era:
 sono **sempre disponibili**, tutte scoperte accanto al mercato, in 2 copie ciascuna, e si
 comprano come dal mercato; a fine era le copie avanzate si scartano con le file. Non producono
 e non rendono: danno Lampo (la piccola 1, la grande 2, 3 nelle ere 4-5) o Scavo (Ripari, Tuguri,
-Casupole, Case popolari, Case operaie: 2). Classe civico, nessun terreno richiesto. Nelle tabelle
+Casupole, Case popolari: 2). Classe civico, nessun terreno richiesto. Nelle tabelle
 portano la sigla **RIS**.
 
 ### Da dove vengono i costi
@@ -55,7 +55,7 @@ Dalle regole di `tools/proponi_costi_v2.py` (registro 90), che scrive `data/prop
 - Chi oggi produce Cultura produce Idee.
 - Nelle ere 4-5 ogni carta paga almeno un'Idea (l'esplosione delle Idee: "15 e 18"); l'era 3 è il periodo oscuro, le Idee calano.
 
-Domanda per era (C / D / I): era 1: 17 / 0 / 5 · era 2: 29 / 0 / 6 · era 3: 25 / 5 / 4 · era 4: 19 / 8 / 18 · era 5: 14 / 13 / 21.
+Domanda per era (C / D / I): era 1: 17 / 0 / 5 · era 2: 29 / 0 / 6 · era 3: 25 / 5 / 4 · era 4: 19 / 8 / 18 · era 5: 14 / 13 / 20.
 
 ### Era 1
 
@@ -143,7 +143,6 @@ Domanda per era (C / D / I): era 1: 17 / 0 / 5 · era 2: 29 / 0 / 6 · era 3: 25
 |---|---|---|--:|--:|--:|--:|--:|--:|---|--:|--:|---|---|---|
 | Biblioteca | cultura | qualsiasi | 1 | 1/1/2 | 3 | 0 | 4 | 0 | — | 0 | — | +1 PV per classe diversa fra i tuoi edifici in questa colonna, Sotterrati inclusi. |  |  |
 | Caffè letterario | cultura | qualsiasi | 1 | 0/0/2 | 1 | 0 | 2 | 0 | — | 0 | — | Quartiere: +1 PV se adiacente a un edificio Cultura. |  |  |
-| Case operaie | civico | qualsiasi | 1 | 0/0/1 | 3 | 0 | 0 | 2 | — | 0 | — | — | RIS x2 | nuova: in riserva, sempre disponibile; niente lato di oggi |
 | Condominio | civico | qualsiasi | 1 | 1/0/1 | 2 | 0 | 3 | 0 | — | 0 | — | Economico: costruire il presente sopra il passato non è mai stato così facile. |  | resta: si costruisce sopra le rovine con lo sconto di metà resistenza (punto 10); Lampo 2 → 3 (registro 100) |
 | Condominio popolare | civico | qualsiasi | 1 | 0/1/1 | 4 | 0 | 3 | 1 | — | 0 | — | — | RIS x2 | nuova: in riserva, sempre disponibile; niente lato di oggi |
 | Fondazione d'arte | cultura | qualsiasi | 1 | 1/0/2 | 2 | 0 | 3 | 0 | — | 0 | — | I tuoi potenziamenti valgono +1 PV. |  |  |

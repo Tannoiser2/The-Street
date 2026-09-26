@@ -2677,36 +2677,6 @@
       "exhaustible": 0,
       "riserva": true,
       "copie": 2
-    },
-    {
-      "id": "ed_casa_e5_s",
-      "name": "Case operaie",
-      "era": 5,
-      "classes": [
-        "civico"
-      ],
-      "terrain": null,
-      "width": 1,
-      "cost": {
-        "pietra": 0,
-        "oro": 0,
-        "idee": 1
-      },
-      "flexible": false,
-      "resistance": 3,
-      "rendita": 0,
-      "lampo": 0,
-      "scavo": 2,
-      "level_required": 0,
-      "production": {
-        "pietra": 0,
-        "oro": 0,
-        "cultura": 0,
-        "idee": 0
-      },
-      "exhaustible": 0,
-      "riserva": true,
-      "copie": 2
     }
   ],
   "characters": [
