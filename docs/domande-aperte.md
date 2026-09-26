@@ -1959,3 +1959,20 @@ dato è stato importato da lì. Ma due confronti fra ciò che è stampato e
     cambia il bot). Rigiocato senza manopole: tutte entro l'errore a tutti
     e tre i tavoli (a 2: 44-54; a 3: 30-37; a 4: 21-28). La v1.5 e la
     partita non cambiano.
+
+115. **Le case per tutti.** Il designer, dopo il punto 113: "volevo introdurre
+    gli edifici generici, che per me risolvono: due o tre tipi diversi, con
+    costi e resistenza bassi e incasso Lampo di PV, magari uno che da'
+    anche Scavo. Nessuna regola diversa per numero di giocatori; magari si
+    puo' decidere il numero di carte del mercato in base ai giocatori."
+    File di prova `--variante case_tutti`: tre case per era, una copia
+    ciascuna, per ogni tavolo (piccola: costa 1, Lampo 1; grande: costa 2,
+    Lampo 2-3; del borgo: costa 1, Scavo 2), 75 sagome; manopola
+    `--mercato N`. Misurato sul torneo corretto coi bot tarati
+    (`docs/la-terza-risorsa.md`, quindicesima misura): reggono a tutti e
+    tre i tavoli (strategie nell'errore a 2 e a 3, a 4 la Rendita al 30
+    contro 29 di bordo), a tre e quattro danno l'edificio in piu' che
+    mancava (13,2 a quattro, passaggi da 5,4 a 4,1), a due tolgono tre
+    punti perche' diluiscono il mercato; kingmaker 8/12/13%. Il mercato a 8
+    non cambia niente: si lascia a 6. Da decidere: tre per era una copia,
+    o due copie della piccola. Il file v2 non cambia finche' non si decide.
