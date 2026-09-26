@@ -17,6 +17,8 @@ var _muto := false
 var _perche := false
 var _piano := false
 var _tutti := ""
+var _giro := "vicini"        # --giro vicini|tutte
+var _posti := 3               # quanti posti al tavolo, per il giro "tutte"
 # Chi muove i bot: le sei strategie vere o il tira-a-caso di RandomBot.
 # Il caso serve ancora come metro di paragone - "quanto pesa la testa di chi
 # gioca" e' la differenza fra le due colonne.
@@ -197,6 +199,11 @@ func _ready() -> void:
 	if args.has("monumenti"):
 		CardDB.constants["monumenti_rivelati_by_players"] = {str(players): int(args["monumenti"])}
 		print("# monumenti_rivelati = %d" % int(args["monumenti"]))
+	# IL GIRO DELLE STRATEGIE (`--giro vicini|tutte`, registro 114): vedi
+	# `strategia_di`.
+	_giro = str(args.get("giro", "vicini"))
+	_posti = players
+	print("# giro = %s" % _giro)
 	# I LAVORATORI PER ERA (`--lavoratori 5`, `workers_base`, 3 nei dati). Nel
 	# turno v2 ogni lavoratore e' UN'azione, non piu' un'attivazione piu'
 	# un'azione: con 3 il ritmo si dimezza (registro 93), e la manopola misura
@@ -391,7 +398,7 @@ func _stampa_vita(acc: Dictionary, quante: int, players: int, seme: int) -> void
 	var vt = CardDB.constants["verticality_vp"]
 	var scala: Array[String] = []
 	for i in 4: scala.append("%d" % int(vt[str(i + 1)]))
-	print("# partite=%d giocatori=%d seme_base=%d bot=%s verticalita=%s prosperita=%d rovina=%d binari=%s versione_bot=%d strategie=%d centro=%s rudere=%s spianato=%s scavo=%s sconto=%s premio=%s dati=%s era5=%s tetto=%d turno=%s lavoratori=%d draft=%s sepolti=%s vetusta=%d protezione=%d scheletro=%s tessere=%s incasso=%s monumenti=%s sagome=%d" % [
+	print("# partite=%d giocatori=%d seme_base=%d bot=%s verticalita=%s prosperita=%d rovina=%d binari=%s versione_bot=%d strategie=%d centro=%s rudere=%s spianato=%s scavo=%s sconto=%s premio=%s dati=%s era5=%s tetto=%d turno=%s lavoratori=%d draft=%s sepolti=%s vetusta=%d protezione=%d scheletro=%s tessere=%s incasso=%s monumenti=%s sagome=%d giro=%s" % [
 		quante, players, seme, "strategie" if _strategie else "caso",
 		"/".join(scala), int(CardDB.constants["prosperity"]["min_buildings"]),
 		int(CardDB.constants.get("rovina_gap", 2)),
@@ -417,7 +424,8 @@ func _stampa_vita(acc: Dictionary, quante: int, players: int, seme: int) -> void
 		"una_volta" if bool(CardDB.constants.get("tessere_una_volta_per_era", false)) else "permanenti",
 		"si" if bool(CardDB.constants.get("passa_incasso", false)) else "no",
 		str(CardDB.constants.get("monumenti_rivelati_by_players", {}).get(str(players), players - 1)),
-		CardDB.buildings.values().filter(func(b): return int(b.get("min_players", 0)) <= players).size()])
+		CardDB.buildings.values().filter(func(b): return int(b.get("min_players", 0)) <= players).size(),
+		_giro])
 	var intestazione: Array[String] = ["id", "nome", "era", "classi", "larghezza",
 		"costo_pietra", "costo_oro", "resistenza", "rendita", "scavo", "lampo_carta",
 		"copie", "n", "ere_intatto", "ere_piedi", "n_rudere", "n_rovina", "n_sepolto",
@@ -447,10 +455,44 @@ func _stampa_vita(acc: Dictionary, quante: int, players: int, seme: int) -> void
 
 # La strategia del posto `i` nella partita `g`: si ruota, cosi' ogni strategia
 # gioca ogni posto lo stesso numero di volte e il posto non falsa il confronto.
+#
+# IL GIRO (`--giro vicini|tutte`, registro 114). "vicini", quello di sempre:
+# la partita g prende una finestra di posti consecutivi della lista, a
+# partire da g. Con meno posti che strategie ogni strategia incontra SOLO le
+# vicine di lista: a due la Continuita' giocava solo contro Scavo e
+# Bilanciata, la Obiettivi solo contro Bilanciata e Rendita, e il 58% e il
+# 40% erano accoppiamenti, non forza. "tutte": la partita g prende una delle
+# combinazioni di k strategie fra le n, in ordine, e ruota i posti quando le
+# ha fatte tutte; a due sono 15 coppie, a tre 20 terne, a quattro 15
+# quaterne, ognuna giocata lo stesso numero di volte. Resta "vicini" dove
+# manca, cosi' i lotti vecchi si rigiocano uguali.
 func strategia_di(i: int, g: int) -> String:
 	if _tutti != "": return _tutti
 	var lista := StrategyBot.tutte() if _candidate else StrategyBot.canone()
-	return lista[(i + g) % lista.size()]
+	if _giro != "tutte": return lista[(i + g) % lista.size()]
+	var combo := _combinazioni(lista.size(), _posti)
+	var c: Array = combo[g % combo.size()]
+	var rotazione: int = (g / combo.size()) % c.size()
+	return lista[int(c[(i + rotazione) % c.size()])]
+
+# Le combinazioni di k indici fra n, in ordine lessicografico, calcolate una
+# volta sola.
+static var _combo_cache := {}
+static func _combinazioni(n: int, k: int) -> Array:
+	var chiave := "%d/%d" % [n, k]
+	if _combo_cache.has(chiave): return _combo_cache[chiave]
+	var out := []
+	var idx := []
+	for j in k: idx.append(j)
+	while true:
+		out.append(idx.duplicate())
+		var t := k - 1
+		while t >= 0 and int(idx[t]) == n - k + t: t -= 1
+		if t < 0: break
+		idx[t] = int(idx[t]) + 1
+		for j in range(t + 1, k): idx[j] = int(idx[j - 1]) + 1
+	_combo_cache[chiave] = out
+	return out
 
 # Quante strategie si alternano al tavolo: finisce nell'intestazione, perche'
 # un lotto giocato con cinque e uno con sei non sono lo stesso esperimento.
