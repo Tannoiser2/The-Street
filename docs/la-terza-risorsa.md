@@ -733,6 +733,44 @@ non per classe ma per Lampo (una copia delle due carte a Lampo più alto da una 
 era), oppure quattro copie per era invece di due, e poi ricontrollare la Lampo. Il file v2 non
 cambia finché non si decide.
 
+### Le case: solo Lampo, due taglie, con e senza i doppioni delle chiese
+
+Seconda idea del designer (registro 111): abitazioni generiche che **non producono** e danno
+solo Lampo, cioè punti subito, "un rientro annacquato"; due taglie per era, due copie
+ciascuna: la piccola costa 1 e dà Lampo 1, la grande costa 2 e dà Lampo 2 (3 nelle ere 4–5).
+Venti sagome, la stima per sedici turni. Poi le stesse più una seconda copia dei due edifici da
+una casella di religione (o cultura dove manca) più economici di ogni era, non esauribili:
+trenta. Tutte solo a quattro (`--variante case`, `--variante case_doppioni`).
+
+| per giocatore, a 4 | base | doppioni (10) | **case (20)** | case + chiese (30) |
+|---|--:|--:|--:|--:|
+| PV | 78,4 | 84,7 | 83,4 | 84,3 |
+| Lampo di tutti / della strategia Lampo | 19,1 / 27,5 | 21,5 / – | 23,1 / 32,3 | 22,2 / – |
+| costruiti / passa | 12,2 / 5,1 | 13,2 / 4,1 | 13,9 / 3,5 | 13,9 / 3,5 |
+| sopra / altezza / basi altrui | 6,1 / 4,41 / 2,3 | 6,4 / 4,41 / 2,5 | 6,6 / 4,38 / 2,4 | 6,6 / 4,32 / 2,4 |
+| kingmaker | 18 % | 15 % | 16 % | 14 % |
+| vince: Rendita / Continuità / Bilanciata / Obiettivi / Scavo / Lampo (25 ± 4) | 30 / 27 / 26 / 25 / 22 / 20 | 32 / 26 / 29 / 28 / 20 / 15 | **34** / 22 / 30 / 26 / 24 / **14** | **36** / 22 / 29 / 29 / 21 / **13** |
+
+**1. Le case fanno il loro mestiere sul mercato.** Venti sagome in più: 13,9 edifici a testa,
+3,5 passaggi (da 5,1), +5 punti, la città uguale. Le case si costruiscono: la strategia Lampo ne
+mette 15,3 edifici a partita (13,9 prima). Aggiungere le chiese non aggiunge niente: 13,9 e
+3,5 anche a trenta, perché i passaggi che restano non sono più del mercato vuoto ma del bot che
+non trova niente che valga (una casa vale poco, e a volte niente vale più di zero).
+
+**2. Ma il Lampo diventa di tutti, e la strategia Lampo affonda.** Con le case tutti prendono
+4 punti di Lampo in più; la Lampo ne prende 5 (32,3) ma resta la più povera (80,8 contro
+82–87) e vince il 14 %, poi il 13 % con le chiese. È lo stesso effetto della decima misura
+(alzare il Lampo delle carte alza il Lampo di tutti) portato all'estremo: se il Lampo si compra
+con una casa da 1, specializzarsi nel Lampo non è più una strategia. E la Rendita, che con
+quattro lavoratori ha sempre di che comprare, vince il 34–36 %.
+
+**3. Cosa se ne ricava.** La scarsità di sagome a quattro si risolve con venti sagome in più,
+e le case generiche la risolvono; il prezzo è che le case non devono dare quello che una
+strategia insegue. Le alternative da misurare, in ordine: case che danno **Scavo** invece di
+Lampo (un rientro ancora più annacquato, che paga solo se qualcuno ci costruisce sopra), o
+case **senza niente** (costano 1, resistenza 1, Scavo 1: puro suolo e Continuità), o il bot
+Lampo ritarato a quattro come si è fatto a tre. Da decidere.
+
 ## Come rifare il conto
 
 ```bash
@@ -786,4 +824,7 @@ godot --headless res://scenes/audit_partita.tscn -- --players 2 --games 750 --se
 python3 tools/genera_cards_v2.py --variante doppioni; python3 tools/genera_cards_v2.py --variante abitazioni
 for v in doppioni abitazioni; do godot --headless res://scenes/audit_partita.tscn -- --players 4 --games 750 --seed 700000 --dati data/proposte/cards-v2-$v.json > ${v}_p4.csv; done
 python3 tools/confronta_torneo.py v2_p4.csv doppioni_p4.csv abitazioni_p4.csv
+python3 tools/genera_cards_v2.py --variante case; python3 tools/genera_cards_v2.py --variante case_doppioni
+for v in case case_doppioni; do godot --headless res://scenes/audit_partita.tscn -- --players 4 --games 750 --seed 700000 --dati data/proposte/cards-v2-$v.json > ${v}_p4.csv; done
+python3 tools/confronta_torneo.py v2_p4.csv doppioni_p4.csv case_p4.csv case_doppioni_p4.csv
 ```

@@ -1895,3 +1895,21 @@ dato è stato importato da lì. Ma due confronti fra ciò che è stampato e
     Rendita a 36 e Continuita' a 18), ma scelti per classe affossano la
     Lampo (15%). Da decidere: doppioni scelti per Lampo, o quattro per
     era, poi ricontrollare la Lampo. Il file v2 non cambia.
+
+111. **Le case generiche a quattro: solo Lampo, due taglie.** Il designer
+    (dopo il punto 110): "copie generiche di edifici che costano poco e
+    danno PV Lampo, e altre che costano poco di piu' e danno un po' piu'
+    PV; non fanno consumare risorse e danno un rientro annacquato; poi si
+    possono raddoppiare edifici non enormi ne' speciali, tipo chiese".
+    Due file di prova (`--variante case`, `--variante case_doppioni`):
+    venti case (due taglie per era, due copie, senza produzione, Lampo 1 e
+    2-3), e le stesse piu' dieci doppioni di chiese; solo a quattro.
+    Misurato (`docs/la-terza-risorsa.md`, tredicesima misura): le case
+    risolvono il mercato (13,9 edifici a testa, passaggi da 5,1 a 3,5, +5
+    punti, citta' uguale, kingmaker 16%) e le chiese in piu' non aggiungono
+    niente; ma il Lampo diventa di tutti (+4 a testa) e la strategia Lampo
+    affonda al 14% (13 con le chiese), la Rendita sale al 34-36%. Se il
+    Lampo si compra con una casa da 1, specializzarsi nel Lampo non e' piu'
+    una strategia. Da decidere: case che danno Scavo invece di Lampo, case
+    senza niente (puro suolo), o il bot Lampo ritarato a quattro. Il file
+    v2 non cambia.
