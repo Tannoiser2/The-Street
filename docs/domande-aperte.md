@@ -1866,3 +1866,77 @@ dato è stato importato da lì. Ma due confronti fra ciò che è stampato e
     chiude (Continuita' 55, Obiettivi 45) al costo di 13 punti. Resta da
     fare la controprova del secondo Monumento rivelato a due (serve una
     costante: oggi "giocatori meno uno" e' nel codice).
+
+109. **L'incasso al passaggio non cambia niente.** Il designer ("vai con
+    l'incasso al passaggio a quattro"). Costante `passa_incasso` (spenta dove
+    manca, `--passa_incasso 1`): nel turno della v1.5 chi non fa l'azione
+    incassa 1 Costruzione piu' 1 risorsa a scelta, e il bot la valuta come
+    una mossa. Misurato a 4, 3 e 2 giocatori, stessi semi
+    (`docs/la-terza-risorsa.md`, tredicesima misura): a quattro i passaggi
+    restano 5 a testa e gli edifici 12,2, perche' il vincolo sono le sagome
+    e le risorse in piu' si perdono alla dispersione; a tre e a due
+    niente. Non entra nel file v2; la manopola resta.
+
+110. **Il secondo Monumento a due, e piu' sagome a quattro.** Il designer
+    ("vai anche con il secondo monumento a due"; per la scarsita' a
+    quattro: raddoppiare chiese o villaggi, o aggiungere abitazioni
+    generiche che costano poco e rendono poco). Costante
+    `monumenti_rivelati_by_players` (`--monumenti N`; assente: giocatori
+    meno uno); `min_players` sulle sagome che entrano nel mazzo solo con
+    abbastanza giocatori; due file di prova in `data/proposte/` da
+    `genera_cards_v2.py --variante doppioni|abitazioni`, dieci sagome in
+    piu', solo a quattro. Misurato (tredicesima misura). Il secondo
+    Monumento a due non risolve: la partita e' identica, Obiettivi da 40 a
+    42% e resta la piu' povera; e' il bot, non i Monumenti. A quattro le
+    dieci sagome in piu' danno un edificio in piu' a testa e tolgono un
+    passaggio (da 5,1 a 4): la leva e' giusta ma dieci non bastano, ne
+    servono circa venti. I doppioni sono meglio delle abitazioni (+6 punti
+    contro +2, kingmaker 15%, niente da disegnare; le abitazioni spostano
+    Rendita a 36 e Continuita' a 18), ma scelti per classe affossano la
+    Lampo (15%). Da decidere: doppioni scelti per Lampo, o quattro per
+    era, poi ricontrollare la Lampo. Il file v2 non cambia.
+
+111. **Le case generiche a quattro: solo Lampo, due taglie.** Il designer
+    (dopo il punto 110): "copie generiche di edifici che costano poco e
+    danno PV Lampo, e altre che costano poco di piu' e danno un po' piu'
+    PV; non fanno consumare risorse e danno un rientro annacquato; poi si
+    possono raddoppiare edifici non enormi ne' speciali, tipo chiese".
+    Due file di prova (`--variante case`, `--variante case_doppioni`):
+    venti case (due taglie per era, due copie, senza produzione, Lampo 1 e
+    2-3), e le stesse piu' dieci doppioni di chiese; solo a quattro.
+    Misurato (`docs/la-terza-risorsa.md`, tredicesima misura): le case
+    risolvono il mercato (13,9 edifici a testa, passaggi da 5,1 a 3,5, +5
+    punti, citta' uguale, kingmaker 16%) e le chiese in piu' non aggiungono
+    niente; ma il Lampo diventa di tutti (+4 a testa) e la strategia Lampo
+    affonda al 14% (13 con le chiese), la Rendita sale al 34-36%. Se il
+    Lampo si compra con una casa da 1, specializzarsi nel Lampo non e' piu'
+    una strategia. Da decidere: case che danno Scavo invece di Lampo, case
+    senza niente (puro suolo), o il bot Lampo ritarato a quattro. Il file
+    v2 non cambia.
+
+112. **"Prova tutto": case con Scavo, case senza niente, bot Lampo
+    ritarato.** Il designer, dopo il punto 111. Misurato a quattro, stessi
+    semi (`docs/la-terza-risorsa.md`, tredicesima misura). Le case senza
+    niente non si costruiscono (passaggi 5,1 come senza case): inutili. Le
+    case con Scavo 2 e 3 sono il compromesso: la Lampo torna al 23% e le
+    strategie stanno nell'errore tranne la Scavo al 18%, ma si costruiscono
+    meno (13,0 edifici, passaggi 4,5): il mercato corto e' mezzo risolto.
+    Ritarare il bot Lampo sulle case con Lampo non serve (lampo 2,5 lo
+    porta al 7%, potenzia 5 al 18%): il problema e' il canale che non
+    distingue piu' nessuno, non il bot. La variante mista (piccola con
+    Lampo 1, grande con Scavo 3) sta in mezzo e non aiuta (Rendita 34,
+    Scavo 18). Ogni casa che si compra volentieri regala qualcosa alla
+    Rendita, che a quattro lavoratori compra sempre: la domanda vera a
+    quattro e' la Rendita, non le case. Le case con Scavo restano il
+    compromesso. Il file v2 non cambia.
+
+113. **Le regole non cambiano col numero di giocatori.** Decisione del
+    designer dopo il punto 112 ("non voglio che le regole cambino al
+    variare dei giocatori"). Niente sagome "da quattro in su" nel file v2,
+    niente Monumenti in piu' a due: le manopole (`min_players`,
+    `monumenti_rivelati_by_players`, `passa_incasso`) restano nel motore,
+    spente, e i file di prova in `data/proposte/` restano come misura. A
+    quattro il mercato resta corto (un turno per era a testa senza azione)
+    e la Rendita al 30%; a due Continuita' 58% e Obiettivi 40%: sono i
+    numeri del gioco a quei tavoli, da riguardare con i bot, non con le
+    regole.

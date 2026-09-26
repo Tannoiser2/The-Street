@@ -66,6 +66,10 @@ func load_db(path: String) -> bool:
 		return false
 	ruleset = parsed["meta"]["ruleset"]
 	constants = parsed["constants"]
+	# Si riparte da vuoto: i file di prova con carte in piu' (registro 110)
+	# lasciavano le loro carte nel mazzo di chi caricava dopo.
+	terrains.clear(); buildings.clear(); characters.clear()
+	upgrades.clear(); events.clear(); monuments.clear(); legacies.clear()
 	for t in parsed["terrains"]: terrains[t["id"]] = t
 	for b in parsed["buildings"]: buildings[b["id"]] = b
 	for c in parsed["characters"]: characters[c["id"]] = c

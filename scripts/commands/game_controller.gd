@@ -39,7 +39,12 @@ func new_game(n_players: int, seed_value: int) -> void:
 	gs.grid = Grid.new(terr.size(), terr)
 
 	for e in range(1, 6):
-		var ids := CardDB.buildings_of_era(e).map(func(b): return b["id"])
+		# Le sagome "da N giocatori in su" (`min_players`, registro 110: i
+		# doppioni e le abitazioni di prova a quattro) entrano nel mazzo solo
+		# se al tavolo ci sono abbastanza giocatori, come le tessere in piu'.
+		var ids := CardDB.buildings_of_era(e).filter(
+			func(b): return int(b.get("min_players", 0)) <= n_players
+		).map(func(b): return b["id"])
 		_shuffle(ids)
 		gs.building_decks[e] = ids
 		var cids := CardDB.characters.values().filter(
@@ -52,10 +57,15 @@ func new_game(n_players: int, seed_value: int) -> void:
 		gs.upg_decks[e] = uids
 	gs.dynasties_left = int(CardDB.characters[ActionRules.dynasty_id()].get("copies", 0))
 
-	# "Rivelate tanti Monumenti celebri quanti sono i giocatori meno uno"
+	# "Rivelate tanti Monumenti celebri quanti sono i giocatori meno uno":
+	# salvo la costante `monumenti_rivelati_by_players` (registro 110, la
+	# prova del secondo Monumento a due), assente dove vale la regola.
 	var mons := CardDB.monuments.keys()
 	_shuffle(mons)
-	for i in max(0, n_players - 1):
+	var quanti_mon: int = max(0, n_players - 1)
+	var tab = CardDB.constants.get("monumenti_rivelati_by_players", null)
+	if tab is Dictionary and tab.has(str(n_players)): quanti_mon = int(tab[str(n_players)])
+	for i in quanti_mon:
 		if i < mons.size(): gs.monuments_open.append(mons[i])
 
 	# "distribuite 2 carte Eredita' a testa: ognuno ne tiene una segreta"
@@ -608,20 +618,29 @@ func _protetto() -> Building:
 		if b.uid == gs.protetto_uid: return b
 	return null
 
-func pass_action() -> void:
-	if turno_v2():
-		passa("pietra")
+func pass_action(scelta := "pietra") -> void:
+	if passa_incasso():
+		passa(scelta)
 		return
 	if gs.phase == Enums.Phase.AZIONE:
 		gs.current_player().bump("az_passa")
 		_end_turn()
+
+# L'INCASSO AL PASSAGGIO (registro 109, costante `passa_incasso`, spenta dove
+# manca): anche nel turno della v1.5 chi non fa l'azione dopo l'attivazione
+# incassa 1 Costruzione piu' 1 risorsa a scelta. Nasce dalla dodicesima
+# misura: a quattro giocatori sedici turni per era contro dodici sagome, e un
+# turno a testa a era finiva senza niente da fare. Nel turno a un'azione
+# l'incasso c'era gia' (D14).
+func passa_incasso() -> bool:
+	return turno_v2() or bool(CardDB.constants.get("passa_incasso", false))
 
 # V2, "passare e incassare" (D14): il lavoratore va sulla plancia e si incassa
 # 1 Costruzione piu' 1 risorsa a scelta (`passa_incasso_pietra`,
 # `passa_incasso_scelta`). Cosi' l'era finisce come sempre, quando finiscono
 # i lavoratori, senza una regola "tutti hanno passato".
 func passa(scelta := "oro") -> bool:
-	if not turno_v2(): return false
+	if not passa_incasso(): return false
 	if not _puo_agire() or not gs.pending_choice.is_empty(): return false
 	var p := gs.current_player()
 	var base := int(CardDB.constants.get("passa_incasso_pietra", 1))

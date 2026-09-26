@@ -185,6 +185,18 @@ func _ready() -> void:
 	if args.has("tessere"):
 		CardDB.constants["tessere_una_volta_per_era"] = str(args["tessere"]) != "0"
 		print("# tessere_una_volta_per_era = %s" % str(bool(CardDB.constants["tessere_una_volta_per_era"])))
+	# L'INCASSO AL PASSAGGIO (`--passa_incasso 0/1`, `passa_incasso`, spenta
+	# dove manca, registro 109): nel turno v1 chi passa incassa 1 Costruzione
+	# piu' 1 risorsa a scelta, come nel turno a un'azione.
+	if args.has("passa_incasso"):
+		CardDB.constants["passa_incasso"] = str(args["passa_incasso"]) != "0"
+		print("# passa_incasso = %s" % str(bool(CardDB.constants["passa_incasso"])))
+	# I MONUMENTI RIVELATI (`--monumenti N`, `monumenti_rivelati_by_players`,
+	# registro 110): la regola e' "giocatori meno uno"; la manopola prova un
+	# altro numero per questo numero di giocatori.
+	if args.has("monumenti"):
+		CardDB.constants["monumenti_rivelati_by_players"] = {str(players): int(args["monumenti"])}
+		print("# monumenti_rivelati = %d" % int(args["monumenti"]))
 	# I LAVORATORI PER ERA (`--lavoratori 5`, `workers_base`, 3 nei dati). Nel
 	# turno v2 ogni lavoratore e' UN'azione, non piu' un'attivazione piu'
 	# un'azione: con 3 il ritmo si dimezza (registro 93), e la manopola misura
@@ -379,7 +391,7 @@ func _stampa_vita(acc: Dictionary, quante: int, players: int, seme: int) -> void
 	var vt = CardDB.constants["verticality_vp"]
 	var scala: Array[String] = []
 	for i in 4: scala.append("%d" % int(vt[str(i + 1)]))
-	print("# partite=%d giocatori=%d seme_base=%d bot=%s verticalita=%s prosperita=%d rovina=%d binari=%s versione_bot=%d strategie=%d centro=%s rudere=%s spianato=%s scavo=%s sconto=%s premio=%s dati=%s era5=%s tetto=%d turno=%s lavoratori=%d draft=%s sepolti=%s vetusta=%d protezione=%d scheletro=%s tessere=%s" % [
+	print("# partite=%d giocatori=%d seme_base=%d bot=%s verticalita=%s prosperita=%d rovina=%d binari=%s versione_bot=%d strategie=%d centro=%s rudere=%s spianato=%s scavo=%s sconto=%s premio=%s dati=%s era5=%s tetto=%d turno=%s lavoratori=%d draft=%s sepolti=%s vetusta=%d protezione=%d scheletro=%s tessere=%s incasso=%s monumenti=%s sagome=%d" % [
 		quante, players, seme, "strategie" if _strategie else "caso",
 		"/".join(scala), int(CardDB.constants["prosperity"]["min_buildings"]),
 		int(CardDB.constants.get("rovina_gap", 2)),
@@ -402,7 +414,10 @@ func _stampa_vita(acc: Dictionary, quante: int, players: int, seme: int) -> void
 		int(CardDB.constants["vetusta_max"]),
 		int(CardDB.constants["protection_bonus"]),
 		str(CardDB.constants.get("scheletro_conta", "sotterrato")),
-		"una_volta" if bool(CardDB.constants.get("tessere_una_volta_per_era", false)) else "permanenti"])
+		"una_volta" if bool(CardDB.constants.get("tessere_una_volta_per_era", false)) else "permanenti",
+		"si" if bool(CardDB.constants.get("passa_incasso", false)) else "no",
+		str(CardDB.constants.get("monumenti_rivelati_by_players", {}).get(str(players), players - 1)),
+		CardDB.buildings.values().filter(func(b): return int(b.get("min_players", 0)) <= players).size()])
 	var intestazione: Array[String] = ["id", "nome", "era", "classi", "larghezza",
 		"costo_pietra", "costo_oro", "resistenza", "rendita", "scavo", "lampo_carta",
 		"copie", "n", "ere_intatto", "ere_piedi", "n_rudere", "n_rovina", "n_sepolto",

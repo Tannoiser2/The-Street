@@ -647,6 +647,185 @@ due è in parte un effetto dei quattro turni per otto turni d'era, non solo dei 
 Da decidere, con la seconda controprova (un secondo Monumento rivelato a due) ancora da fare:
 vuole una costante, oggi "giocatori meno uno" è nel codice.
 
+## Tredicesima misura: le controprove a quattro e a due
+
+Le due domande lasciate dalla dodicesima misura, più le due idee del designer per la scarsità di
+sagome a quattro (registro 109-110). Stessi lotti (750 partite di torneo, seme 700000), stessi
+semi dei lotti di confronto.
+
+### L'incasso al passaggio (`--passa_incasso 1`, costante `passa_incasso`)
+
+Nel turno della v1.5 chi non fa l'azione dopo l'attivazione incassa 1 Costruzione più 1 risorsa
+a scelta, come nel turno a un'azione. Il bot la valuta come una mossa fra le altre.
+
+| per giocatore | a 4: base | **a 4: incasso** | a 3: H | a 3: incasso | a 2: base | a 2: incasso |
+|---|--:|--:|--:|--:|--:|--:|
+| PV | 78,4 | 78,3 | 89,3 | 88,0 | 83,4 | 82,8 |
+| costruiti / passa | 12,2 / 5,1 | 12,2 / 5,3 | 13,9 / 3,1 | 13,6 / 3,4 | 12,9 / 2,8 | 12,9 / 3,2 |
+| Idee spese | 13,1 | 12,6 | 14,5 | 13,7 | 10,5 | 9,5 |
+| kingmaker | 18 % | 15 % | 13 % | 15 % | 10 % | 10 % |
+| vince: Rendita / Continuità / Bilanciata / Obiettivi / Scavo / Lampo | 30 / 27 / 26 / 25 / 22 / 20 | 31 / 28 / 22 / 29 / 19 / 21 | 38 / 34 / 34 / 33 / 30 / 31 | 30 / 32 / 37 / 34 / 30 / 37 | 55 / 58 / 48 / 40 / 44 / 54 | 54 / 59 / 47 / 42 / 43 / 56 |
+
+**Non cambia niente, a nessun numero di giocatori.** A quattro i passaggi restano cinque a testa
+e gli edifici 12,2: il vincolo non sono le risorse, sono le sagome, e le due risorse incassate
+si perdono alla dispersione (tetto 3 per risorsa). A tre la Rendita scende da 38 a 30 e la Lampo
+sale da 31 a 37, tutte e due sul bordo dell'errore, con la partita uguale: rumore o un piccolo
+spostamento, non un effetto. Non entra nel file v2.
+
+### Il secondo Monumento a due (`--monumenti 2`, costante `monumenti_rivelati_by_players`)
+
+La regola rivela "giocatori meno uno" Monumenti: a due, uno solo. Con due rivelati, stessi semi:
+
+| per giocatore, a 2 | base (1 Monumento) | **2 Monumenti** |
+|---|--:|--:|
+| PV | 83,4 | 85,0 |
+| di cui Monumenti | 1,6 | 3,1 |
+| costruiti / sopra / altezza / basi altrui | 12,9 / 6,6 / 4,58 / 1,6 | 12,9 / 6,6 / 4,58 / 1,6 |
+| vince: Continuità / Rendita / Lampo / Bilanciata / Scavo / Obiettivi | 58 / 55 / 54 / 48 / 44 / 40 | 58 / 53 / 54 / 48 / 45 / 42 |
+| PV della Obiettivi (le altre) | 77,9 (81–88) | 79,6 (83–90) |
+
+**Non risolve.** La partita è la stessa carta per carta (costruiti, altezza, basi: identici), il
+canale Monumenti raddoppia per tutti, e la Obiettivi guadagna due punti su cento: resta la più
+povera di 4–10 punti. Il suo problema a due non sono i Monumenti che mancano ma il modo in cui
+li insegue: costruisce per soddisfare condizioni e perde altrove. È un difetto del bot a due
+giocatori, non delle regole; si ritara con le spinte, come si è fatto per la Lampo (undicesima
+misura), se e quando serve. La costante resta come manopola, spenta.
+
+### Più sagome a quattro: doppioni o abitazioni (`data/proposte/cards-v2-*.json`)
+
+Le due idee del designer per i sedici turni contro dodici sagome. Tutte e due aggiungono dieci
+sagome con `min_players` 4, che entrano nel mazzo solo a quattro giocatori: a due e a tre il
+gioco non cambia. **Doppioni**: per era una seconda copia della chiesa e del villaggio più
+economici da una casella (Capanne, Dolmen; Insulae, Sacello; Borgo, Cappella; Loggia, Bottega
+d'artista; Condominio, Monumento ai caduti). **Abitazioni**: per era due case generiche nuove,
+civiche, senza terreno, che costano 1–2 e producono 1 (Capanne di fango, Case a schiera, Case a
+graticcio, Casa borghese, Palazzina; resistenza 1–3, Lampo 1, Scavo 1). Generate da
+`tools/genera_cards_v2.py --variante doppioni|abitazioni`.
+
+| per giocatore, a 4 | base (60 sagome) | **doppioni (70)** | abitazioni (70) |
+|---|--:|--:|--:|
+| PV | 78,4 | 84,7 | 80,8 |
+| Lampo / Scavo / Continuità / Scheletri | 19,1 / 14,6 / 11,1 / 9,6 | 21,5 / 18,2 / 11,9 / 9,3 | 19,9 / 15,8 / 12,4 / 9,2 |
+| costruiti / passa | 12,2 / 5,1 | 13,2 / 4,1 | 13,4 / 3,9 |
+| sopra / altezza / basi altrui | 6,1 / 4,41 / 2,3 | 6,4 / 4,41 / 2,5 | 6,5 / 4,37 / 2,5 |
+| premio di scavo (era 5) | 9,9 (3,6) | 12,5 (4,1) | 10,7 (3,8) |
+| kingmaker | 18 % | 15 % | 13 % |
+| vince: Rendita / Continuità / Bilanciata / Obiettivi / Scavo / Lampo (atteso 25 ± 4) | 30 / 27 / 26 / 25 / 22 / 20 | 32 / 26 / 29 / 28 / 20 / **15** | **36** / **18** / 22 / 28 / 26 / 19 |
+
+**1. Dieci sagome in più danno un edificio in più a testa e tolgono un passaggio.** Da 12,2 a
+13,2–13,4 edifici, da 5,1 a 4 passaggi a testa: il mercato corto era il vincolo, e le sagome
+sono la leva giusta (l'incasso non muoveva niente). Non basta: quattro passaggi a testa sono
+ancora uno per era, perché sedici turni chiedono più di quattordici sagome; la stima è sedici
+per era, cioè venti in più e non dieci.
+
+**2. I doppioni sono meglio delle abitazioni.** +6 punti a giocatore contro +2, il premio di
+scavo sale (12,5, con più basi altrui: 2,5), il kingmaker scende al 15 %. Le abitazioni
+spostano le strategie: Rendita 36 e Continuità 18, tutte e due fuori dall'errore, perché una
+casa da 1 che produce 1 è la carta che la Rendita compra e la Continuità (classe civico in
+colonna) non sa usare quanto pensa. I doppioni costano niente da disegnare: sono sagome che ci
+sono già.
+
+**3. Ma i doppioni scelti così affossano la Lampo**: 15 % contro 20 di prima e 25 atteso. Le
+copie sono chiese e villaggi economici con poco Lampo (0–3): il Lampo di tutti sale (+2,4) per
+la carta in più, ma la Lampo, che vive di carte a Lampo alto, trova il mercato pieno di carte
+che non le servono e le altre strategie con più edifici. Da decidere come scegliere i doppioni:
+non per classe ma per Lampo (una copia delle due carte a Lampo più alto da una casella per
+era), oppure quattro copie per era invece di due, e poi ricontrollare la Lampo. Il file v2 non
+cambia finché non si decide.
+
+### Le case: solo Lampo, due taglie, con e senza i doppioni delle chiese
+
+Seconda idea del designer (registro 111): abitazioni generiche che **non producono** e danno
+solo Lampo, cioè punti subito, "un rientro annacquato"; due taglie per era, due copie
+ciascuna: la piccola costa 1 e dà Lampo 1, la grande costa 2 e dà Lampo 2 (3 nelle ere 4–5).
+Venti sagome, la stima per sedici turni. Poi le stesse più una seconda copia dei due edifici da
+una casella di religione (o cultura dove manca) più economici di ogni era, non esauribili:
+trenta. Tutte solo a quattro (`--variante case`, `--variante case_doppioni`).
+
+| per giocatore, a 4 | base | doppioni (10) | **case (20)** | case + chiese (30) |
+|---|--:|--:|--:|--:|
+| PV | 78,4 | 84,7 | 83,4 | 84,3 |
+| Lampo di tutti / della strategia Lampo | 19,1 / 27,5 | 21,5 / – | 23,1 / 32,3 | 22,2 / – |
+| costruiti / passa | 12,2 / 5,1 | 13,2 / 4,1 | 13,9 / 3,5 | 13,9 / 3,5 |
+| sopra / altezza / basi altrui | 6,1 / 4,41 / 2,3 | 6,4 / 4,41 / 2,5 | 6,6 / 4,38 / 2,4 | 6,6 / 4,32 / 2,4 |
+| kingmaker | 18 % | 15 % | 16 % | 14 % |
+| vince: Rendita / Continuità / Bilanciata / Obiettivi / Scavo / Lampo (25 ± 4) | 30 / 27 / 26 / 25 / 22 / 20 | 32 / 26 / 29 / 28 / 20 / 15 | **34** / 22 / 30 / 26 / 24 / **14** | **36** / 22 / 29 / 29 / 21 / **13** |
+
+**1. Le case fanno il loro mestiere sul mercato.** Venti sagome in più: 13,9 edifici a testa,
+3,5 passaggi (da 5,1), +5 punti, la città uguale. Le case si costruiscono: la strategia Lampo ne
+mette 15,3 edifici a partita (13,9 prima). Aggiungere le chiese non aggiunge niente: 13,9 e
+3,5 anche a trenta, perché i passaggi che restano non sono più del mercato vuoto ma del bot che
+non trova niente che valga (una casa vale poco, e a volte niente vale più di zero).
+
+**2. Ma il Lampo diventa di tutti, e la strategia Lampo affonda.** Con le case tutti prendono
+4 punti di Lampo in più; la Lampo ne prende 5 (32,3) ma resta la più povera (80,8 contro
+82–87) e vince il 14 %, poi il 13 % con le chiese. È lo stesso effetto della decima misura
+(alzare il Lampo delle carte alza il Lampo di tutti) portato all'estremo: se il Lampo si compra
+con una casa da 1, specializzarsi nel Lampo non è più una strategia. E la Rendita, che con
+quattro lavoratori ha sempre di che comprare, vince il 34–36 %.
+
+**3. Cosa se ne ricava.** La scarsità di sagome a quattro si risolve con venti sagome in più,
+e le case generiche la risolvono; il prezzo è che le case non devono dare quello che una
+strategia insegue. Le alternative da misurare, in ordine: case che danno **Scavo** invece di
+Lampo (un rientro ancora più annacquato, che paga solo se qualcuno ci costruisce sopra), o
+case **senza niente** (costano 1, resistenza 1, Scavo 1: puro suolo e Continuità), o il bot
+Lampo ritarato a quattro come si è fatto a tre. Da decidere.
+
+La vita delle carte con le case (2 000 partite a quattro): 55,7 edifici a partita invece di
+48,9, in piedi a fine 17,8 invece di 16,3, il 37 % cade nell'era in cui nasce (34 % prima:
+le case piccole reggono poco), sepolti 46 %, Lampo per partita da 76 a 93 punti, il resto
+uguale.
+
+### "Prova tutto": case con Scavo, case senza niente, il bot Lampo ritarato
+
+Registro 112. Le tre alternative, stessi semi, a quattro. **Case con Scavo**: le stesse venti
+case senza Lampo e con Scavo 2 (piccola) e 3 (grande). **Case senza niente**: venti case
+piccole, costano 1, Lampo 0, Scavo 1. **Bot Lampo ritarato** sul file delle case con Lampo:
+`--spinta lampo=2.5`, `lampo_potenzia=5`, tutte e due.
+
+| per giocatore, a 4 | base | case Lampo | **case Scavo** | case nulle | Lampo: lampo 2,5 | potenzia 5 | entrambe |
+|---|--:|--:|--:|--:|--:|--:|--:|
+| PV | 78,4 | 83,4 | 78,1 | 76,8 | 84,1 | 83,4 | 83,6 |
+| Lampo di tutti | 19,1 | 23,1 | 17,8 | 18,0 | – | – | – |
+| costruiti / passa | 12,2 / 5,1 | 13,9 / 3,5 | 13,0 / 4,5 | 12,6 / 5,1 | 14,1 / 3,4 | 13,9 / 3,4 | 13,9 / 3,4 |
+| kingmaker | 18 % | 16 % | 18 % | 18 % | 17 % | 17 % | 18 % |
+| vince: Rendita / Continuità / Bilanciata / Obiettivi / Scavo / Lampo (25 ± 4) | 30 / 27 / 26 / 25 / 22 / 20 | 34 / 22 / 30 / 26 / 24 / 14 | 32 / 23 / 29 / 25 / **18** / 23 | 31 / 25 / 27 / 23 / 20 / 25 | 35 / 24 / 29 / 30 / 24 / **7** | 38 / 20 / 29 / 27 / 19 / 18 | 34 / 24 / 29 / 27 / 23 / 12 |
+
+**1. Le case senza niente non si costruiscono.** Passaggi 5,1 come senza case, edifici 12,6:
+il bot non compra suolo nudo, e non lo farebbe nemmeno un giocatore. Le strategie tornano
+tutte nell'errore perché la partita è quella di prima, meno due punti. Inutili.
+
+**2. Le case con Scavo sono il compromesso.** La Lampo torna al 23 % (il Lampo non è più di
+tutti: 17,8 a testa), tutte le strategie stanno nell'errore tranne la Scavo al 18 %, i punti
+restano 78 come senza case. Ma si costruiscono meno delle case con Lampo (13,0 contro 13,9)
+e i passaggi restano 4,5: una casa che paga solo se qualcuno ci costruisce sopra vale poco
+per chi la compra, e il bot spesso preferisce passare. Il mercato corto è mezzo risolto.
+
+**3. Ritarare il bot Lampo non serve.** Dare più peso al Lampo delle carte (lampo 2,5) lo fa
+comprare più case e vincere il 7 %; il peso ai potenziamenti lo porta al 18 % e basta. Il
+problema non è come il bot Lampo sceglie: è che con le case a Lampo il canale non distingue
+più nessuno.
+
+**4. Quello che resta da capire** è se esiste una casa che i giocatori comprano (come quella
+con Lampo) senza regalare a tutti il canale di una strategia (come quella con Scavo non fa).
+La variante mista, piccola con Lampo 1 e grande con Scavo 3, sta in mezzo e non aiuta:
+80,1 punti, 13,5 edifici, 3,9 passaggi, Lampo 19 %, ma Rendita 34 % e Scavo 18 %, tutte e
+due fuori dall'errore. Ogni casa che si compra volentieri regala qualcosa alla Rendita, che a
+quattro lavoratori compra sempre: la Rendita sta al 30 % già senza case, e ogni sagoma in più
+la porta a 32–36. Se si vuole il mercato pieno a quattro, la domanda vera è la Rendita a
+quattro giocatori, non le case.
+
+| variante | punti | edifici / passa | fuori dall'errore (25 ± 4) |
+|---|--:|--:|---|
+| nessuna | 78 | 12,2 / 5,1 | Rendita 30, Lampo 20 (bordo) |
+| doppioni per classe | 85 | 13,2 / 4,1 | Lampo 15 |
+| abitazioni che producono | 81 | 13,4 / 3,9 | Rendita 36, Continuità 18 |
+| case con Lampo | 83 | 13,9 / 3,5 | Lampo 14, Rendita 34 |
+| case con Lampo + chiese | 84 | 13,9 / 3,5 | Lampo 13, Rendita 36 |
+| **case con Scavo** | 78 | 13,0 / 4,5 | Scavo 18 |
+| case senza niente | 77 | 12,6 / 5,1 | nessuna (ma non si costruiscono) |
+| case miste | 80 | 13,5 / 3,9 | Rendita 34, Scavo 18 |
+
 ## Come rifare il conto
 
 ```bash
@@ -694,4 +873,16 @@ python3 tools/confronta_strategie.py H.csv
 for p in 2 4; do godot --headless res://scenes/audit_partita.tscn -- --players $p --games 750 --seed 700000 --dati data/cards-v2.json > v2_p$p.csv; done
 python3 tools/confronta_torneo.py v2_p2.csv H.csv v2_p4.csv
 python3 tools/confronta_strategie.py v2_p4.csv
+# tredicesima misura: l'incasso al passaggio, il secondo Monumento a due, le sagome in piu' a quattro
+godot --headless res://scenes/audit_partita.tscn -- --players 4 --games 750 --seed 700000 --dati data/cards-v2.json --passa_incasso 1 > inc_p4.csv
+godot --headless res://scenes/audit_partita.tscn -- --players 2 --games 750 --seed 700000 --dati data/cards-v2.json --monumenti 2 > mon2_p2.csv
+python3 tools/genera_cards_v2.py --variante doppioni; python3 tools/genera_cards_v2.py --variante abitazioni
+for v in doppioni abitazioni; do godot --headless res://scenes/audit_partita.tscn -- --players 4 --games 750 --seed 700000 --dati data/proposte/cards-v2-$v.json > ${v}_p4.csv; done
+python3 tools/confronta_torneo.py v2_p4.csv doppioni_p4.csv abitazioni_p4.csv
+python3 tools/genera_cards_v2.py --variante case; python3 tools/genera_cards_v2.py --variante case_doppioni
+for v in case case_doppioni; do godot --headless res://scenes/audit_partita.tscn -- --players 4 --games 750 --seed 700000 --dati data/proposte/cards-v2-$v.json > ${v}_p4.csv; done
+python3 tools/confronta_torneo.py v2_p4.csv doppioni_p4.csv case_p4.csv case_doppioni_p4.csv
+for v in case_scavo case_nulle case_mista; do python3 tools/genera_cards_v2.py --variante $v; godot --headless res://scenes/audit_partita.tscn -- --players 4 --games 750 --seed 700000 --dati data/proposte/cards-v2-$v.json > ${v}_p4.csv; done
+godot --headless res://scenes/audit_partita.tscn -- --players 4 --games 750 --seed 700000 --dati data/proposte/cards-v2-case.json --spinta lampo=2.5 > case_L25.csv
+python3 tools/confronta_torneo.py case_p4.csv case_scavo_p4.csv case_nulle_p4.csv case_L25.csv
 ```

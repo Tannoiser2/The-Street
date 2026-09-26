@@ -40,6 +40,8 @@ func _ready() -> void:
 	_run("v2: niente scheletri dal draft, niente Vetusta' (registro 95)", _test_senza_vetusta_v2)
 	_run("v2: le tre carte che contavano la Vetusta' (registro 99)", _test_tre_carte_v2)
 	_run("v2: le tessere una volta per era (registro 100)", _test_tessere_v2)
+	_run("l'incasso al passaggio nel turno v1 (registro 109)", _test_passa_incasso)
+	_run("i Monumenti rivelati e le sagome da quattro giocatori (registro 110)", _test_monumenti_e_sagome_in_piu)
 	print("\n%d superati, %d falliti" % [_passed, _failed])
 	get_tree().quit(0 if _failed == 0 else 1)
 
@@ -1450,3 +1452,87 @@ func _test_tessere_v2() -> void:
 	CardDB.constants["tessere_una_volta_per_era"] = true
 	CardDB.load_db(CardDB.DB_PATH)
 
+
+
+# Registro 109: con `passa_incasso` acceso, nel turno della v1.5 chi non fa
+# l'azione dopo l'attivazione incassa 1 Costruzione piu' 1 risorsa a scelta.
+# Spenta, passare non porta niente: cosi' la v1.5 e il file v2 di oggi non
+# cambiano.
+func _test_passa_incasso() -> void:
+	if not FileAccess.file_exists("res://data/cards-v2.json"): return
+	CardDB.load_db("res://data/cards-v2.json")
+	_ok("nel file v2 la manopola e' spenta", not bool(CardDB.constants.get("passa_incasso", false)))
+	var ctl := _game(3, 991)
+	var gs := ctl.gs
+	while not gs.pending_choice.is_empty():
+		ctl.choose(int((gs.pending_choice["options"] as Array)[0]))
+	var p := gs.current_player()
+	_ok("si attiva una colonna", ctl.place_worker(0))
+	var pietra := p.pietra
+	var oro := p.oro
+	_ok("  spenta, passare non incassa", not ctl.passa("oro"))
+	ctl.pass_action()
+	_eq("  e le risorse restano", p.pietra + p.oro, pietra + oro)
+	_eq("  ma il turno e' passato", int(p.counters.get("az_passa", 0)), 1)
+
+	CardDB.constants["passa_incasso"] = true
+	var p2 := gs.current_player()
+	_ok("accesa, si attiva", ctl.place_worker(1))
+	var pietra2 := p2.pietra
+	var idee2 := p2.idee
+	_ok("  e passare incassa", ctl.passa("idee"))
+	_eq("  1 Costruzione", p2.pietra, pietra2 + 1)
+	_eq("  e 1 della risorsa scelta", p2.idee, idee2 + 1)
+	_eq("  e il passaggio si conta", int(p2.counters.get("az_passa", 0)), 1)
+	var p3 := gs.current_player()
+	_ok("  anche dal tasto Passa", ctl.place_worker(2))
+	var pietra3 := p3.pietra
+	ctl.pass_action()
+	_eq("  che senza scelta prende 2 Costruzione", p3.pietra, pietra3 + 2)
+	# Il bot con la manopola accesa gioca partite intere e passa incassando.
+	var finite := 0
+	for g in 3:
+		var c2 := _game(4, 996 + g)
+		var guard := 0
+		while c2.gs.phase != Enums.Phase.FINE_PARTITA and guard < 20000:
+			StrategyBot.play_turn(c2, StrategyBot.canone()[g % StrategyBot.canone().size()])
+			guard += 1
+		if c2.gs.phase == Enums.Phase.FINE_PARTITA: finite += 1
+	_eq("il bot finisce le partite con l'incasso acceso", finite, 3)
+	CardDB.constants.erase("passa_incasso")
+	CardDB.load_db(CardDB.DB_PATH)
+
+
+# Registro 110: la regola rivela "giocatori meno uno" Monumenti; la costante
+# `monumenti_rivelati_by_players` ne prova un altro numero. Le sagome con
+# `min_players` entrano nel mazzo solo con abbastanza giocatori, e ricaricare
+# un file dati non lascia avanzi del precedente.
+func _test_monumenti_e_sagome_in_piu() -> void:
+	var g2 := _game(2, 31).gs
+	_eq("a due si rivela un Monumento", g2.monuments_open.size(), 1)
+	CardDB.constants["monumenti_rivelati_by_players"] = {"2": 2}
+	var g2b := _game(2, 31).gs
+	_eq("  con la costante, due", g2b.monuments_open.size(), 2)
+	var g3 := _game(3, 31).gs
+	_eq("  e a tre restano due: la costante vale per il suo numero", g3.monuments_open.size(), 2)
+	CardDB.constants.erase("monumenti_rivelati_by_players")
+
+	if FileAccess.file_exists("res://data/proposte/cards-v2-abitazioni.json"):
+		CardDB.load_db("res://data/proposte/cards-v2-abitazioni.json")
+		_eq("il file delle abitazioni ha 70 sagome", CardDB.buildings.size(), 70)
+		var in_piu := 0
+		for b in CardDB.buildings.values():
+			if int(b.get("min_players", 0)) == 4: in_piu += 1
+		_eq("  dieci da quattro giocatori", in_piu, 10)
+		var c3 := _game(3, 32)
+		var c4 := _game(4, 32)
+		var mazzo3 := 0
+		var mazzo4 := 0
+		for e in range(1, 6):
+			mazzo3 += (c3.gs.building_decks[e] as Array).size() + (c3.gs.market.size() if e == 1 else 0)
+			mazzo4 += (c4.gs.building_decks[e] as Array).size() + (c4.gs.market.size() if e == 1 else 0)
+		_eq("  a tre nei mazzi ce ne sono 60", mazzo3, 60)
+		_eq("  a quattro 70", mazzo4, 70)
+		CardDB.load_db("res://data/cards-v2.json")
+		_eq("ricaricando il file v2 le abitazioni non restano", CardDB.buildings.size(), 60)
+	CardDB.load_db(CardDB.DB_PATH)

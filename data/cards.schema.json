@@ -474,6 +474,11 @@
           "cost": {
             "$ref": "#/$defs/res"
           },
+          "min_players": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 4
+          },
           "flexible": {
             "type": "boolean"
           },
