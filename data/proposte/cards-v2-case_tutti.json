@@ -2320,7 +2320,7 @@
     },
     {
       "id": "ed_casa_e1_s",
-      "name": "Capanne di fango del borgo",
+      "name": "Ripari",
       "era": 1,
       "classes": [
         "civico"
@@ -2410,7 +2410,7 @@
     },
     {
       "id": "ed_casa_e2_s",
-      "name": "Case a schiera del borgo",
+      "name": "Tuguri",
       "era": 2,
       "classes": [
         "civico"
@@ -2440,7 +2440,7 @@
     },
     {
       "id": "ed_casa_e3_p",
-      "name": "Case a graticcio",
+      "name": "Case di legno",
       "era": 3,
       "classes": [
         "civico"
@@ -2500,7 +2500,7 @@
     },
     {
       "id": "ed_casa_e3_s",
-      "name": "Case a graticcio del borgo",
+      "name": "Casupole",
       "era": 3,
       "classes": [
         "civico"
@@ -2590,7 +2590,7 @@
     },
     {
       "id": "ed_casa_e4_s",
-      "name": "Casa borghese del borgo",
+      "name": "Case popolari",
       "era": 4,
       "classes": [
         "civico"
@@ -2680,7 +2680,7 @@
     },
     {
       "id": "ed_casa_e5_s",
-      "name": "Palazzina del borgo",
+      "name": "Case operaie",
       "era": 5,
       "classes": [
         "civico"
@@ -2766,7 +2766,7 @@
     },
     {
       "id": "ed_casa_e1_s",
-      "name": "Capanne di fango del borgo",
+      "name": "Ripari",
       "era": 1,
       "classes": [
         "civico"
@@ -2850,7 +2850,7 @@
     },
     {
       "id": "ed_casa_e2_s",
-      "name": "Case a schiera del borgo",
+      "name": "Tuguri",
       "era": 2,
       "classes": [
         "civico"
@@ -2878,7 +2878,7 @@
     },
     {
       "id": "ed_casa_e3_p",
-      "name": "Case a graticcio",
+      "name": "Case di legno",
       "era": 3,
       "classes": [
         "civico"
@@ -2934,7 +2934,7 @@
     },
     {
       "id": "ed_casa_e3_s",
-      "name": "Case a graticcio del borgo",
+      "name": "Casupole",
       "era": 3,
       "classes": [
         "civico"
@@ -3018,7 +3018,7 @@
     },
     {
       "id": "ed_casa_e4_s",
-      "name": "Casa borghese del borgo",
+      "name": "Case popolari",
       "era": 4,
       "classes": [
         "civico"
@@ -3102,7 +3102,7 @@
     },
     {
       "id": "ed_casa_e5_s",
-      "name": "Palazzina del borgo",
+      "name": "Case operaie",
       "era": 5,
       "classes": [
         "civico"

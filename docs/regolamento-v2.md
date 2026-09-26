@@ -101,8 +101,8 @@ il passato non si costruisce più.
 #### Le case
 
 Ogni era ha tre case generiche, in due copie: la **casa piccola** (costa 1, poca resistenza,
-Lampo 1), la **casa grande** (costa 2, Lampo 2, 3 nelle ere 4–5) e la **casa del borgo** (costa
-1, niente Lampo, Scavo 2). Non producono e non rendono: sono suolo a buon mercato e un rientro
+Lampo 1), la **casa grande** (costa 2, Lampo 2, 3 nelle ere 4–5) e la **casa con lo Scavo**
+(Ripari, Tuguri, Casupole, Case popolari, Case operaie: costa 1, niente Lampo, Scavo 2). Non producono e non rendono: sono suolo a buon mercato e un rientro
 annacquato di punti, per chi non trova niente nel mercato o vuole riempire una colonna. Classe
 civico, nessun terreno richiesto. Sono uguali a ogni numero di giocatori.
 

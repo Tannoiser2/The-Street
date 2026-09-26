@@ -211,13 +211,15 @@ CASE = {
         ("Case di pietra",   {"pietra": 2, "oro": 0, "idee": 0}, 2, 2)),
     2: (("Case a schiera",   {"pietra": 1, "oro": 0, "idee": 0}, 2, 1),
         ("Domus",            {"pietra": 2, "oro": 0, "idee": 0}, 3, 2)),
-    3: (("Case a graticcio", {"pietra": 1, "oro": 0, "idee": 0}, 2, 1),
+    3: (("Case di legno",    {"pietra": 1, "oro": 0, "idee": 0}, 2, 1),
         ("Casa torre",       {"pietra": 1, "oro": 1, "idee": 0}, 3, 2)),
     4: (("Casa borghese",    {"pietra": 0, "oro": 0, "idee": 1}, 2, 2),
         ("Palazzetto",       {"pietra": 0, "oro": 1, "idee": 1}, 3, 3)),
     5: (("Palazzina",        {"pietra": 0, "oro": 0, "idee": 1}, 3, 2),
         ("Condominio popolare", {"pietra": 0, "oro": 1, "idee": 1}, 4, 3)),
 }
+# La casa con lo Scavo (niente Lampo, Scavo 2): costa e regge come la piccola.
+CASE_SCAVO = {1: "Ripari", 2: "Tuguri", 3: "Casupole", 4: "Case popolari", 5: "Case operaie"}
 
 # Tre modi (registro 112, "prova tutto"): "lampo" come sopra; "scavo" le stesse
 # case senza Lampo e con Scavo 2 e 3, un rientro che paga solo se qualcuno ci
@@ -261,7 +263,7 @@ def case_tutti(v, riserva=False, copie=1):
         (nome_p, costo_p, res_p, lampo_p), (nome_g, costo_g, res_g, lampo_g) = taglie
         tipi = [("p", nome_p, costo_p, res_p, lampo_p, 1),
                 ("g", nome_g, costo_g, res_g, lampo_g, 1),
-                ("s", nome_p + " del borgo", costo_p, res_p, 0, 2)]
+                ("s", CASE_SCAVO[era], costo_p, res_p, 0, 2)]
         for sigla, nome, costo, res, lampo, scavo in tipi:
             b = {
                 "id": "ed_casa_e%d_%s" % (era, sigla), "name": nome, "era": era,
