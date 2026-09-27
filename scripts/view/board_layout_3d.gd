@@ -39,11 +39,14 @@ const BANDA_GIU := 160.0
 const SLOT_D := (BANDA_GIU - BANDA_SU) / float(RAILS)   # 26 mm per binario
 const SAGOMA_MODULO := 60.3      # 1/2/3 slot -> 60,3 / 120,6 / 180,9 mm
 const SAGOMA_SPESSORE := 4.0     # cartone vero, misurato
-# A schermo 4 mm non si vedono: una sagoma disegnata cosi' sembra un adesivo.
-# Il DISEGNO la ingrossa, i conti no - il raggio del clic e la geometria usano
-# sempre la misura vera. E' una scelta di leggibilita', scritta qui perche'
-# non sembri una misura sbagliata.
-const SAGOMA_SPESSORE_VISTA := 9.0
+# Il DISEGNO ingrossa appena il cartone, i conti no: il raggio del clic e la
+# geometria usano sempre la misura vera. E' una scelta di leggibilita',
+# scritta qui perche' non sembri una misura sbagliata.
+# Stava a 9 finche' la sagoma era una pila di quattro copie del disegno e lo
+# spessore andava esagerato per farsi vedere. Adesso il cartone e' estruso per
+# davvero, col taglio scuro lungo il bordo, e 9 mm sembravano un bordino
+# disegnato attorno alla figura: bastano 5.
+const SAGOMA_SPESSORE_VISTA := 5.0
 const BASETTA_D := 15.0          # il piede che tiene in piedi la sagoma
 const BASETTA_Y := 10.0
 # Le sagome sono contigue sul binario, ma la basetta ne occupa 15 mm sui 54:
@@ -63,17 +66,33 @@ const LEVEL_H := BASETTA_Y
 # il panorama non si deforma. Il valore qui e' quello di materiali/Sfondo.png
 # (1672x941); la vista passa il rapporto vero della texture che ha caricato.
 const CIELO_RAPPORTO := 1672.0 / 941.0
+# Quanta parte dell'immagine si mostra, dal basso. A pannello intero il
+# fondale saliva quasi quanto e' profonda la strada - un muro dietro il
+# tabellone - e la meta' alta era cielo vuoto. Si mostra la meta' bassa,
+# cioe' l'orizzonte e la terra: il pannello cala della meta' e il panorama
+# NON si schiaccia, perche' quel che resta tiene le sue proporzioni.
+# E' un numero solo: per farlo piu' alto o piu' basso si cambia qui.
+const CIELO_QUOTA := 0.5
 const SFONDO_PATH := "res://assets/sfondo.png"
 
 static func col_x(col: int) -> float:
 	return col * TESSERA_W
 
-# L'era 1 sta DAVANTI, cioe' dalla parte della telecamera, che guarda verso
-# le z calanti. Con la telecamera dall'altro lato lo schermo specchierebbe la
-# X e la colonna 0 finirebbe a destra: chi legge "colonna 2" guarderebbe dalla
-# parte sbagliata.
+# L'ERA 1 STA IN FONDO, le ere recenti davanti, dalla parte della telecamera.
+# La telecamera guarda verso le z calanti, quindi l'era 1 ha la z minore.
+#
+# Prima era il contrario, ed era una scelta che si ritorceva contro il
+# disegno: SI COSTRUISCE IN ALTO SULLE ROVINE DELLE PRIME ERE, perche' sono
+# quelle che hanno avuto il tempo di crollare. Le pile alte crescevano quindi
+# sul binario piu' vicino a chi guarda e facevano da muro a tutto quello che
+# veniva costruito dopo, che stava dietro ed era anche piu' basso: della
+# citta' recente si vedevano i tetti.
+# Cosi' invece la citta' sale verso il fondo - le torri stanno dietro - e le
+# costruzioni nuove, basse, restano in prima fila dove si vedono.
+# La X non si tocca: la telecamera resta da questo lato, e la colonna 0 resta
+# a sinistra come la legge chi gioca.
 static func rail_z(era: int) -> float:
-	return BANDA_SU + (RAILS - era) * SLOT_D
+	return BANDA_SU + (era - 1) * SLOT_D
 
 # La tessera intera, che e' piu' lunga della fascia dei binari.
 static func tessera_box(col: int) -> AABB:
@@ -111,26 +130,246 @@ static func standee_base(gs: GameState, b: Building) -> Vector3:
 static func z_sagoma(gs: GameState, b: Building, giri := 0) -> float:
 	if b.level == 0:
 		# sul davanti dello slot, cioe' dal lato della telecamera
-		return rail_z(b.era_built) + SLOT_D - BASETTA_D / 2.0
+		return rail_z(b.binario_effettivo()) + SLOT_D - BASETTA_D / 2.0
+	# LE BASI SONO QUELLE DI QUANDO LO SI E' COSTRUITO, non quelle che si
+	# trovano adesso nelle sue colonne. A quota zero una colonna porta fino
+	# a cinque edifici, uno per binario d'era: chiedendolo alla colonna, un
+	# edificio costruito dopo in un altro binario entrava nella media e
+	# spostava la sagoma sopra, che a schermo scivolava verso il fondo.
+	# Una sagoma costruita non si muove piu'.
+	if not b.basi.is_empty(): return _z_di_uid(gs, b.basi, giri)
+	# Senza basi segnate - i fissaggi dei test, o una pila tutta terrapieno -
+	# si ripiega sulla colonna, che e' il conto di prima.
 	return z_basi(gs, b.col_from, b.col_to, b.level, giri)
 
+# LA BASE PIU' ALTA, e fra quelle alla stessa quota la piu' avanti.
+# Le basi di un edificio non stanno per forza tutte alla stessa quota: uno
+# largo puo' poggiare su una pila da una parte e su una rovina a terra
+# dall'altra, e il dislivello lo riempie il terrapieno. Il piede vero e'
+# quello ALTO - e' li' che il cartone appoggia - mentre quello basso e' sotto
+# la terra riportata. Seguendo il piu' avanti e basta, un edificio che avesse
+# davanti la base bassa se ne andava a stare sopra di lei e perdeva il
+# contatto con la base alta, che restava un binario piu' in la'.
+static func _z_di_uid(gs: GameState, uid: Array, giri: int) -> float:
+	var avanti := -INF
+	var alto := -1
+	if giri < RAILS:
+		for s in gs.grid.buildings:
+			if not s.uid in uid: continue
+			var z := z_sagoma(gs, s, giri + 1)
+			if s.level > alto or (s.level == alto and z > avanti):
+				alto = s.level
+				avanti = z
+	return avanti if avanti > -INF else (BANDA_SU + BANDA_GIU) / 2.0
+
 # La z di cio' che regge una pila alla quota `livello` fra due colonne: la
-# media delle basi trovate, perche' un edificio largo puo' poggiare su due
-# basi di ere diverse e allora sta in mezzo, come farebbe il cartone vero.
+# base PIU' AVANTI, dalla parte di chi guarda.
+#
+# Prima era la media delle basi trovate, per mettere in mezzo un edificio
+# largo che poggia su due basi di ere diverse. Ma i binari distano 26 mm e
+# una basetta ne e' profonda 15: a due ere di distanza la media non tocca
+# nessuno dei due piedi, e l'edificio resta sospeso fra loro. Appoggiandolo
+# a quello davanti sta sempre su un piede vero, che e' quello che farebbe
+# il cartone.
 # Se sotto non c'e' niente - tutto terrapieno - si torna al centro della
 # fascia: e' l'unico caso in cui non c'e' una base da seguire.
 static func z_basi(gs: GameState, col_from: int, col_to: int, livello: int,
 		giri := 0) -> float:
-	var somma := 0.0
-	var quante := 0
+	var avanti := -INF
 	if giri < RAILS:
 		for s in gs.grid.buildings:
 			if s.level != livello - 1: continue
 			if s.col_to <= col_from or s.col_from >= col_to: continue
-			somma += z_sagoma(gs, s, giri + 1)
-			quante += 1
-	if quante == 0: return (BANDA_SU + BANDA_GIU) / 2.0
-	return somma / float(quante)
+			avanti = maxf(avanti, z_sagoma(gs, s, giri + 1))
+	return avanti if avanti > -INF else (BANDA_SU + BANDA_GIU) / 2.0
+
+# IL TERRAPIENO: la terra riportata sotto una colonna dell'impronta che non
+# arriva da sola alla quota del piede. E' un blocco che parte da cio' che c'e'
+# sotto in quella colonna - il piano del tavolo se non c'e' niente - e arriva
+# esatto sotto il piede, largo la fetta di basetta di quella colonna.
+#
+# I casi sono due e sul tavolo si riempiono allo stesso modo:
+#  - la colonna NUDA, il terrapieno che il regolamento fa pagare 1 pietra;
+#  - la colonna la cui base sta PIU' IN BASSO del piede. Questa non si paga
+#    - "per colonna priva di base, una volta sola, qualunque sia la quota da
+#    raggiungere" - perche' l'edificio prende il livello della base piu' alta
+#    piu' uno, e le altre restano indietro. Ma la terra ci va lo stesso: e'
+#    il caso dell'edificio largo appoggiato a una pila alta da un lato e a una
+#    rovina a terra dall'altro, che restava con mezza sagoma sul vuoto.
+static func terrapieno_box(gs: GameState, b: Building, col: int) -> AABB:
+	var base := basetta_box(gs, b)
+	var fetta := base.size.x / float(b.width())
+	var da := level_y(quota_sotto(gs, b, col) + 1)
+	return AABB(
+		Vector3(base.position.x + (col - b.col_from) * fetta, da, base.position.z),
+		Vector3(fetta, maxf(base.position.y - da, 0.0), base.size.z))
+
+static func terrapieni(gs: GameState, b: Building) -> Array[AABB]:
+	var out: Array[AABB] = []
+	if b.level == 0: return out
+	for col in range(b.col_from, b.col_to):
+		var box := terrapieno_box(gs, b, col)
+		if box.size.y > 0.0: out.append(box)
+	return out
+
+# Il livello di cio' che regge questa colonna, -1 se sotto non c'e' niente.
+# Si guardano le basi fissate alla costruzione - come per la z, quello che
+# regge non cambia piu' - e solo quando l'edificio non le ha (i fissaggi dei
+# test) si ripiega sulla colonna di adesso.
+static func quota_sotto(gs: GameState, b: Building, col: int) -> int:
+	var mia := basetta_box(gs, b)
+	var q := -1
+	for s in gs.grid.buildings:
+		if s == b or not s.covers(col) or s.level >= b.level: continue
+		# SOLO QUELLO CHE STA ALLA STESSA PROFONDITA'. Un edificio del binario
+		# accanto e' DI FIANCO, non sotto: riempire fino a lui lascerebbe il
+		# vuoto sotto la terra.
+		# E' il caso del Parco archeologico che poggia su due basi a quote e
+		# profondita' diverse - una al livello 2 sul binario dell'era 2, una
+		# al livello 1 su quello dell'era 3: alla profondita' in cui viene
+		# disegnato, sotto di lui c'e' il livello 0, e la terra deve partire
+		# da li'.
+		var r := basetta_box(gs, s)
+		if r.end.z <= mia.position.z + 0.01 or r.position.z >= mia.end.z - 0.01:
+			continue
+		q = maxi(q, s.level)
+	return q
+
+# ---- lo sgretolamento ------------------------------------------------
+# Quando un edificio crolla in rovina la sua sagoma sparisce dal tabellone, e
+# prima spariva e basta: un fotogramma prima c'era, quello dopo no. Chi stava
+# guardando altrove non si accorgeva di niente - ed e' la cosa piu' importante
+# che succede a fine era.
+#
+# Adesso si abbatte in avanti come farebbe il cartone: il piede resta dov'e' e
+# il resto cade verso chi guarda, accelerando; mentre cade si spegne, e un
+# pugno di macerie rotola giu' dalla basetta. Sono numeri puri, quindi si
+# provano headless come tutto il resto: la vista ci mette solo le mesh.
+const CROLLO_DURATA := 1.1
+const CROLLO_MACERIE := 7
+const CROLLO_MACERIA_LATO := 6.0
+const GRAVITA := 2600.0          # mm/s^2, scelta perche' le macerie cadano
+                                 # nel tempo del crollo e non dopo
+
+# A che punto e' la caduta. `t` va da 0 a 1.
+static func crollo(t: float) -> Dictionary:
+	var q := clampf(t, 0.0, 1.0)
+	# La caduta accelera come accelera una cosa che cade: al quadrato, non
+	# lineare, e arriva a terra prima della fine - l'ultimo pezzo di tempo
+	# serve a spegnersi da sdraiata.
+	var angolo := (PI / 2.0) * minf(1.0, q * q / 0.64)
+	# Si spegne sul finire: se cominciasse subito cadrebbe gia' invisibile.
+	var opacita := clampf((1.0 - q) / 0.3, 0.0, 1.0)
+	return {"angolo": angolo, "opacita": opacita, "finito": q >= 1.0}
+
+# Il mucchietto di macerie che si stacca. Tutto ricavato dall'uid: la stessa
+# rovina fa sempre lo stesso mucchio, e una partita rigiocata col suo seme si
+# vede uguale.
+static func macerie(uid: int, larghezza: float, quante := CROLLO_MACERIE) -> Array[Dictionary]:
+	var out: Array[Dictionary] = []
+	for i in quante:
+		var h := _rumore(uid * 31 + i * 7)
+		var h2 := _rumore(uid * 17 + i * 13 + 5)
+		var h3 := _rumore(uid * 11 + i * 29 + 3)
+		out.append({
+			# da dove parte, lungo il fronte della sagoma
+			"x": (h - 0.5) * larghezza * 0.8,
+			"y": 6.0 + h2 * larghezza * 0.25,
+			# come schizza via: un po' di lato e un po' verso chi guarda
+			"vx": (h2 - 0.5) * 70.0,
+			"vy": 60.0 + h3 * 120.0,
+			"vz": 20.0 + h * 60.0,
+			"lato": CROLLO_MACERIA_LATO * (0.6 + h3 * 0.8),
+		})
+	return out
+
+# Dove sta una maceria dopo `t` secondi: tiro parabolico, e quando tocca il
+# piano ci resta.
+static func maceria_pos(m: Dictionary, t: float) -> Vector3:
+	var y := float(m["y"]) + float(m["vy"]) * t - 0.5 * GRAVITA * t * t
+	var q := clampf(t, 0.0, CROLLO_DURATA)
+	if y < 0.0:
+		# atterrata: si ferma dov'e' caduta invece di sprofondare
+		var caduta := (float(m["vy"]) + sqrt(float(m["vy"]) * float(m["vy"])
+			+ 2.0 * GRAVITA * float(m["y"]))) / GRAVITA
+		q = minf(q, caduta)
+		y = 0.0
+	return Vector3(float(m["x"]) + float(m["vx"]) * q, y, float(m["vz"]) * q)
+
+# Un numero fra 0 e 1 ricavato da un intero. Non serve che sia un buon
+# generatore: serve che sia SEMPRE LO STESSO per lo stesso uid.
+static func _rumore(n: int) -> float:
+	var x := (n * 1103515245 + 12345) & 0x7fffffff
+	x = (x >> 7) ^ (x * 2654435761)
+	return float(absi(x) % 10000) / 10000.0
+
+# ---- il banner dello Scavo -------------------------------------------
+# IL VALORE DI SCAVO STA SCRITTO SULLA BASETTA, davanti e dietro. Prima lo
+# sapeva solo chi apriva il riquadro col mouse, eppure e' il numero che decide
+# se valga la pena sotterrare un edificio invece di restaurarlo.
+#
+# L'immagine e' UNA SOLA: dieci strisce sovrapposte, una per valore, dallo 0
+# al 9. La striscia e' lunga quanto un edificio da tre slot; per quelli piu'
+# corti si taglia da SINISTRA, dove ci sono solo macerie, e resta la parte
+# destra col numero. Non si ritaglia in dieci file: si sposta la finestra
+# sulla texture, cosi' aggiungere un valore domani vuol dire cambiare
+# l'immagine e basta.
+#
+# L'atlante lo prepara `tools/estrai_grafica.py`, che dall'originale del
+# designer ritrova le strisce una per una e le rimette in righe tutte uguali:
+# l'immagine e' disegnata, non impaginata, e le strisce non sono alte uguali.
+const SCAVO_PATH := "res://assets/scavo.png"
+const SCAVO_RIGHE := 10          # le strisce dell'atlante: da 0 a 9
+const SCAVO_SLOT_MAX := 3        # la striscia copre un edificio da tre slot
+
+# Che fetta di texture mostrare per questo edificio. Il valore e' quello
+# EFFETTIVO - `scavo_value` tiene conto delle Impronte e dello spianamento,
+# che porta lo Scavo a 0 - quindi il banner dice sempre la verita' di adesso.
+static func scavo_uv(b: Building) -> Dictionary:
+	var valore := clampi(b.scavo_value(), 0, SCAVO_RIGHE - 1)
+	var frazione := span_w(b.width()) / span_w(SCAVO_SLOT_MAX)
+	return {
+		"valore": valore,
+		"fuori_scala": b.scavo_value() > SCAVO_RIGHE - 1,
+		"scala": Vector2(frazione, 1.0 / float(SCAVO_RIGHE)),
+		"offset": Vector2(1.0 - frazione, float(valore) / float(SCAVO_RIGHE)),
+	}
+
+# LA TERRA DEL TERRAPIENO ha un disegno suo: una sezione di terreno, senza
+# macerie e senza numero, perche' li' non c'e' niente da contare.
+const TERRAPIENO_PATH := "res://assets/terrapieno.png"
+const TERRAPIENO_RAPPORTO := 2000.0 / 173.0
+
+# La finestra da ritagliare per un blocco. Non si prende tutta l'immagine per
+# poi schiacciarla nel riquadro: si prende una finestra che ha LE STESSE
+# PROPORZIONI del blocco, cosi' i sassi restano tondi invece di diventare
+# ellissi. Un blocco piu' lungo di quanto sia lunga l'immagine non lascia
+# scelta: li' si prende tutto.
+#
+# `variante` sposta la finestra di lato - basta la colonna - cosi' due
+# terrapieni vicini non mostrano lo stesso identico sasso.
+static func terra_uv(box: AABB, variante := 0) -> Dictionary:
+	if box.size.y <= 0.0: return {"scala": Vector2.ONE, "offset": Vector2.ZERO}
+	var voluto := box.size.x / box.size.y
+	var frazione := clampf(voluto / TERRAPIENO_RAPPORTO, 0.05, 1.0)
+	var resto := 1.0 - frazione
+	var dove := fposmod(0.37 * float(variante) + 0.5, 1.0)
+	return {
+		"scala": Vector2(frazione, 1.0),
+		"offset": Vector2(resto * dove, 0.0),
+	}
+
+# Le due facce della basetta su cui va il banner: quella davanti, dal lato di
+# chi guarda, e quella dietro. Restituisce centro e dimensioni del rettangolo.
+static func facce_basetta(gs: GameState, b: Building) -> Array[Dictionary]:
+	var r := basetta_box(gs, b)
+	var centro := Vector2(r.position.x + r.size.x / 2.0, r.position.y + r.size.y / 2.0)
+	return [
+		{"davanti": true, "pos": Vector3(centro.x, centro.y, r.end.z),
+			"dim": Vector2(r.size.x, r.size.y)},
+		{"davanti": false, "pos": Vector3(centro.x, centro.y, r.position.z),
+			"dim": Vector2(r.size.x, r.size.y)},
+	]
 
 # La basetta: ogni sagoma ne ha una. 15 mm di profondita' per 4 mm di cartone.
 static func basetta_box(gs: GameState, b: Building) -> AABB:
@@ -159,8 +398,34 @@ static func standee_size(b: Building) -> Vector2:
 # Chi e' CROLLATO IN ROVINA non ha piu' una sagoma in piedi: resta la
 # basetta, che fa da fondamenta a chi ci costruisce sopra. Il RUDERE invece e'
 # "in piedi ma spento" e la sagoma ce l'ha ancora, in grigio.
+# Chi ha ancora una sagoma in piedi. Due casi la perdono, e resta il piede:
+#
+# - CHI E' CROLLATO IN ROVINA: non e' piu' un edificio, e' il basamento di
+#   chi ci costruira' sopra.
+# - CHI E' SEPOLTO: sta sotto gli strati, quindi in piedi non puo' esserci.
+#   Non e' un caso raro: a quota zero una colonna porta fino a cinque
+#   edifici, uno per binario d'era, e chi costruisce sopra ne spiana uno
+#   solo - quello in cima. Gli altri restano INTATTI e finiscono sepolti:
+#   su otto partite a tre sono 76 su 225, e le loro sagome attraversavano
+#   la pila da parte a parte, inglobate negli strati.
+#
+# SENZA RUDERE (v2, costante `senza_rudere`) la rovina e' un altro oggetto:
+# non e' il basamento di nessuno finche' non ci si costruisce sopra - e
+# allora e' sepolta - e si puo' ristrutturare. Al tavolo "la sagoma ruotata
+# mostra il lato rovina con lo Scavo" (docs/carte-v2.md): resta in piedi,
+# GIRATA. Toglierla dal tabellone, come nella v1.5, nascondeva proprio la
+# cosa che nella v2 si puo' fare: ristrutturarla.
 static func ha_sagoma(b: Building) -> bool:
-	return b.state != Enums.BuildingState.ROVINA
+	if b.is_buried: return false
+	if b.state == Enums.BuildingState.ROVINA: return senza_rudere()
+	return true
+
+static func senza_rudere() -> bool:
+	return bool(CardDB.constants.get("senza_rudere", false))
+
+# La sagoma che sta in piedi girata, col lato rovina in vista: solo nella v2.
+static func sagoma_girata(b: Building) -> bool:
+	return b.state == Enums.BuildingState.ROVINA and ha_sagoma(b)
 
 static func sagoma_path(b: Building) -> String:
 	var s: Dictionary = CardDB.sagome.get(str(b.data["id"]), {})
@@ -211,10 +476,11 @@ static func carta_path(tipo: String, id: String) -> String:
 	var d: Array = CARTELLE_CARTE[tipo]
 	return "res://assets/carte/%s/%s.%s" % [d[0], id, d[1]]
 
-static func sky_rect(gs: GameState, rapporto := CIELO_RAPPORTO) -> AABB:
+static func sky_rect(gs: GameState, rapporto := CIELO_RAPPORTO,
+		quota := CIELO_QUOTA) -> AABB:
 	var largo := board_w(gs)
 	return AABB(Vector3(0.0, 0.0, 0.0),
-		Vector3(largo, largo / maxf(rapporto, 0.05), 0.0))
+		Vector3(largo, largo / maxf(rapporto, 0.05) * clampf(quota, 0.05, 1.0), 0.0))
 
 # L'inquadratura e' DERIVATA, non aggiustata a occhio: inclinazione fissa e
 # distanza calcolata perche' la strada riempia il fotogramma. Cosi' vale per
@@ -342,17 +608,30 @@ const LINGUETTA_D := 9.0
 
 # I cubetti di un edificio, in fila sul davanti della basetta.
 # Ogni voce: {"pos": Vector3, "tipo": "vetusta"|"resistenza"}.
+# UNA ROVINA NON PORTA CUBETTI. Nessuna regola glieli toglie - il crollo
+# azzera i potenziamenti, e la Vetusta' si azzera solo col restauro, che vale
+# sui ruderi - ma su una rovina non contano piu' niente: gli eventi guardano
+# solo chi e' in piedi, il restauro non la riguarda, le spolia si pagano solo
+# spianando un intatto, e da quando il Colosseo e Il Silvicoltore chiedono un
+# edificio "sopravvissuto" (intatto o rudere) nemmeno la Vetusta' le serve
+# piu'. Sul tabellone restava una fila di cubetti che non diceva piu' niente
+# a nessuno: 1851 rovine su 6167 in 300 partite.
 static func cubetti(gs: GameState, b: Building) -> Array[Dictionary]:
 	var out: Array[Dictionary] = []
+	if b.state == Enums.BuildingState.ROVINA: return out
 	var quanti := b.vetusta + maxi(0, b.bonus_res)
 	if quanti <= 0: return out
 	var passo := CUBETTO + CUBETTO_GAP
 	var base := standee_base(gs, b)
 	var larghezza := (quanti * CUBETTO + (quanti - 1) * CUBETTO_GAP)
 	# Se sono troppi per la basetta si stringono: meglio affollati che fuori.
-	var disponibile := span_w(b.width()) - 4.0
+	# E il pezzo di basetta dove sta il gettone dello scheletro non e' loro:
+	# senza tenerglielo da parte, su un edificio con tanta vetusta i cubetti
+	# ci finivano sotto e si vedeva una fila di cubi mezzi dentro un gettone.
+	var riservato := (scheletro_size().x + 2.0) if b.buried_character != "" else 0.0
+	var disponibile := span_w(b.width()) - 4.0 - riservato
 	var scala: float = minf(1.0, disponibile / maxf(larghezza, 0.001))
-	var x0 := base.x - larghezza * scala / 2.0
+	var x0 := base.x - riservato / 2.0 - larghezza * scala / 2.0
 	var z := base.z + BASETTA_D / 2.0 - CUBETTO / 2.0 - 1.0
 	for i in quanti:
 		out.append({
@@ -361,6 +640,106 @@ static func cubetti(gs: GameState, b: Building) -> Array[Dictionary]:
 			"tipo": "vetusta" if i < b.vetusta else "resistenza",
 		})
 	return out
+
+# ---- il cartellino della Prosperita' Urbana --------------------------
+# Un Centro Urbano e' una colonna con almeno tre edifici intatti di almeno due
+# proprietari diversi: ogni volta che la si attiva, ognuno di quei proprietari
+# incassa un oro. La condizione si fa e si disfa da sola - basta che un
+# edificio crolli - e sul tabellone non si vedeva: la scritta "Prosperita'
+# Urbana" e' stampata sulla tessera di tutte le colonne, accesa o spenta che
+# sia, e per sapere se quella li' pagava bisognava contare gli edifici a mano.
+#
+# Il cartellino si posa proprio su quella fascia, in fondo alla tessera: la
+# scritta stampata c'e' sempre, il cartellino solo quando il Centro e' attivo.
+# La fascia e' misurata sull'immagine della tessera - e' l'ultimo riquadro
+# scuro prima della cornice - e sta fra il 90% e il 98,5% della sua lunghezza.
+const PROSPERITA_PATH := "res://assets/prosperita.png"
+const PROSPERITA_FASCIA_SU := 0.898     # in frazioni di TESSERA_D
+const PROSPERITA_FASCIA_GIU := 0.985
+const PROSPERITA_RAPPORTO := 1387.0 / 518.0
+const PROSPERITA_MARGINE := 2.5         # dentro la cornice della tessera
+
+# GIA' PAGATO IN QUEST'ERA. Il Centro Urbano paga una volta per colonna e per
+# era (punto 86): al tavolo il cartellino si gira dopo il pagamento e si
+# rigirano tutti a fine era. A schermo il rovescio e' lo stesso cartellino
+# spento - scuro, come il rudere e' la sagoma in grigio - cosi' si vede ancora
+# che la colonna e' un Centro, ma anche che per quest'era ha gia' dato.
+# Opaco: mezzo trasparente lasciava passare la scritta stampata sotto, e le
+# due scritte sovrapposte non si leggevano piu'.
+const PROSPERITA_SPENTA := Color(0.3, 0.3, 0.3, 1.0)
+
+static func prosperita_pagata(gs: GameState, col: int) -> bool:
+	return gs.grid.prosperity_paid.has(col)
+
+static func prosperita_colore(gs: GameState, col: int) -> Color:
+	return PROSPERITA_SPENTA if prosperita_pagata(gs, col) else Color.WHITE
+
+# Il rettangolo dove si posa, sul piano della tessera.
+static func prosperita_box(col: int) -> AABB:
+	var t := tessera_box(col)
+	var largo := TESSERA_W - 2.0 * PROSPERITA_MARGINE
+	var alto := largo / PROSPERITA_RAPPORTO
+	var centro_z := TESSERA_D * (PROSPERITA_FASCIA_SU + PROSPERITA_FASCIA_GIU) / 2.0
+	return AABB(Vector3(t.position.x + PROSPERITA_MARGINE, t.end.y,
+			t.position.z + centro_z - alto / 2.0),
+		Vector3(largo, 0.0, alto))
+
+# ---- il gettone dello scheletro --------------------------------------
+# "Nelle ere 1-4, a fine era il personaggio non si scarta: infilatelo sotto la
+# carta di un vostro edificio ancora in piedi." Quel personaggio sepolto vale
+# 6 meno l'era in cui e' stato sepolto - 5, 4, 3, 2 - ed e' l'unica cosa che
+# un edificio continua a rendere anche da rovina.
+#
+# Sul tavolo e' un gettone quadrato posato sulla basetta, uno per era, con
+# sopra lo scheletro dell'epoca e il suo valore. Prima era un cubetto color
+# ocra: si vedeva che li' sotto c'era qualcuno, non chi ne' quanto valeva.
+# I gettoni sono QUATTRO perche' quattro sono le ere che seppelliscono: "i
+# personaggi dell'era Moderna si scartano".
+#
+# L'immagine e' una sola, quattro caselle in fila: si sposta la finestra
+# sulla texture invece di ritagliare quattro file, come per il banner dello
+# Scavo. L'atlante lo prepara `tools/estrai_grafica.py`.
+const SCHELETRO_PATH := "res://assets/scheletri.png"
+const SCHELETRI_COLONNE := 4
+const SCHELETRO_LATO := 13.0                # quanto e' alto il gettone
+const SCHELETRO_RAPPORTO := 487.0 / 450.0   # il gettone e' quasi quadrato
+const SCHELETRO_SPESSORE := 1.6             # cartoncino spesso, non un cubo
+# Non disteso sulla basetta: APPOGGIATO ALL'INDIETRO contro la sagoma. La
+# telecamera guarda il tavolo quasi di taglio, e un gettone steso di piatto
+# si vede come una riga di due millimetri - cioe' meno del cubetto che
+# sostituisce. In piedi si legge, e sul tavolo vero e' come lo si appoggia
+# quando lo si vuole far vedere.
+const SCHELETRO_PENDENZA := 0.30            # rad, all'indietro
+
+static func scheletro_size() -> Vector2:
+	return Vector2(SCHELETRO_LATO * SCHELETRO_RAPPORTO, SCHELETRO_LATO)
+
+# Dove poggia: a destra sulla basetta, sul davanti, dove non copre la sagoma
+# ne' i cubetti della vetusta, che stanno a sinistra.
+static func scheletro_piede(gs: GameState, b: Building) -> Vector3:
+	var base := standee_base(gs, b)
+	var largo := scheletro_size().x
+	return Vector3(base.x + span_w(b.width()) / 2.0 - largo / 2.0 - 1.5,
+		base.y + BASETTA_Y, base.z + BASETTA_D / 2.0 - 1.5)
+
+# Quanto vale: 6 meno l'era in cui e' stato sepolto (Scoring._skeletons).
+static func scheletro_valore(era: int) -> int:
+	return 6 - era
+
+# Nel ventaglio del giocatore lo scheletro del lavoratore (v2) prende una
+# riga come le carte infilate sotto l'edificio, ma non e' una carta: il
+# gettone sta in piedi sulla striscia che resta scoperta, quella verso il
+# tabellone, appoggiato all'indietro come sulla basetta. Il riquadro `box`
+# e' la riga del ventaglio che gli tocca.
+static func scheletro_nel_ventaglio(box: AABB) -> Vector3:
+	return Vector3(box.position.x + box.size.x / 2.0, box.end.y,
+		box.position.z + minf(VENTAGLIO_Z, box.size.z) / 2.0 + 1.0)
+
+# La casella dell'era: la prima e' l'era 1, che vale 5.
+static func scheletro_uv(era: int) -> Dictionary:
+	var i := clampi(era - 1, 0, SCHELETRI_COLONNE - 1)
+	return {"scala": Vector2(1.0 / float(SCHELETRI_COLONNE), 1.0),
+		"offset": Vector2(float(i) / float(SCHELETRI_COLONNE), 0.0)}
 
 # Le linguette dei potenziamenti, che sporgono da sotto la sagoma.
 static func linguette(gs: GameState, b: Building) -> Array[Vector3]:
@@ -403,47 +782,63 @@ const MISURE_CARTE := {
 	"dinastia": Vector2(95.0, 95.0),
 }
 
-static func misura_carta(tipo: String) -> Vector2:
-	return MISURE_CARTE.get(tipo, Vector2(CARTA, CARTA))
+# TUTTE LE CARTE IN PIEDI ALLA STESSA ALTEZZA. Sul foglio di stampa non lo
+# sono - la Dinastia e' 95 mm, un edificio 62 - e a schermo la differenza
+# diventava enorme: le carte grandi schiacciavano le altre e il tavolo non
+# sembrava piu' un mazzo solo. Si porta ognuna alla stessa altezza tenendo
+# le sue proporzioni, cosi' i disegni non si deformano e le larghezze
+# restano diverse come sul cartone.
+#
+# Monumenti ed eredita' non entrano nel conto: sono tessere lunghe e basse,
+# impaginate di traverso, e tirarle a questa altezza le farebbe larghe mezzo
+# metro. Restano quello che sono, cioe' un altro oggetto.
+const ALTEZZA_CARTA := 72.0
+const CARTE_IN_PIEDI: Array[String] = ["mercato", "personaggio",
+	"potenziamento", "dinastia"]
 
-# Impila le carte in colonna lungo Z, ognuna con la SUA misura: una fila che
-# mescola personaggi, potenziamenti e monumenti mette insieme tre formati
-# diversi, e forzarli tutti in un quadrato deformava i disegni.
-# `x` e' il bordo verso la strada: le carte piu' strette restano allineate a
-# quel lato invece di ballare al centro.
-static func _colonna_di_carte(x: float, misure: Array) -> Array[AABB]:
-	var out: Array[AABB] = []
-	if misure.is_empty(): return out
-	var totale := 0.0
-	for m in misure: totale += m.y
-	totale += CARTA_GAP * (misure.size() - 1)
-	var z := board_d() / 2.0 - totale / 2.0
-	for m in misure:
-		out.append(AABB(Vector3(x, 0.0, z), Vector3(m.x, TESSERA_Y, m.y)))
-		z += m.y + CARTA_GAP
-	return out
+static func misura_carta(tipo: String) -> Vector2:
+	var m: Vector2 = MISURE_CARTE.get(tipo, Vector2(CARTA, CARTA))
+	if not (tipo in CARTE_IN_PIEDI) or m.y <= 0.0: return m
+	return Vector2(m.x * ALTEZZA_CARTA / m.y, ALTEZZA_CARTA)
 
 # Tutte le carte delle file, ognuna col suo riquadro: serve a disegnarle e a
 # cliccarle. `kind` dice a quale fila appartiene, `id` quale carta e'.
 static func side_cards(gs: GameState, umano := -1) -> Array[Dictionary]:
 	var out: Array[Dictionary] = []
 
-	# A SINISTRA il mercato, una colonna sola, appoggiata al proprio bordo
-	# destro cosi' le carte guardano la strada.
-	var sinistra: Array = []
-	for id in gs.market: sinistra.append(["mercato", str(id)])
-	var mis_sx: Array = []
-	for c in sinistra: mis_sx.append(misura_carta(str(c[0])))
-	var largo_sx := 0.0
-	for m in mis_sx: largo_sx = maxf(largo_sx, m.x)
-	var box_sx := _colonna_di_carte(-(largo_sx + BORDO), mis_sx)
-	for i in sinistra.size():
-		var b: AABB = box_sx[i]
-		b.position.x += largo_sx - b.size.x
-		out.append({"kind": str(sinistra[i][0]), "id": str(sinistra[i][1]), "aabb": b})
-
+	out.append_array(_fila_sinistra(gs))
 	out.append_array(_fila_destra(gs))
 	out.append_array(player_cards(gs, umano))
+	return out
+
+# A SINISTRA il mercato, in DUE FILE DA TRE. In una colonna sola le sei
+# carte erano piu' lunghe della strada e la prima finiva fuori dal
+# tabellone, sospesa nel nulla; in due file ci stanno tutte dentro.
+# Le file sono appoggiate al bordo verso la strada, cosi' le carte la
+# guardano invece di ballare al centro.
+# LA RISERVA (registro 116) sta in fila col mercato, dopo: sono le case che
+# si comprano allo stesso modo, e una copia per voce, cosi' si vede quante
+# ne restano.
+static func _fila_sinistra(gs: GameState) -> Array[Dictionary]:
+	var out: Array[Dictionary] = []
+	var vendita: Array = gs.in_vendita()
+	if vendita.is_empty(): return out
+	var m := misura_carta("mercato")
+	var per_fila: int = int(ceil(vendita.size() / 2.0))
+	var righe: int = mini(per_fila, vendita.size())
+	var alto := righe * m.y + maxf(0.0, righe - 1) * CARTA_GAP
+	var z0 := board_d() / 2.0 - alto / 2.0
+	# Il bordo destro del blocco tocca lo stacco dalla strada; la fila con la
+	# x piu' grande e' quella vicina alla strada.
+	var quante_file: int = 1 if vendita.size() <= per_fila else 2
+	var x0 := -(BORDO + quante_file * m.x + (quante_file - 1) * CARTA_GAP)
+	for i in vendita.size():
+		var fila := i / per_fila
+		var riga := i % per_fila
+		out.append({"kind": "mercato", "id": str(vendita[i]),
+			"aabb": AABB(
+				Vector3(x0 + fila * (m.x + CARTA_GAP), 0.0, z0 + riga * (m.y + CARTA_GAP)),
+				Vector3(m.x, TESSERA_Y, m.y))})
 	return out
 
 # A DESTRA due file affiancate: i personaggi in colonna e, a fianco di
@@ -457,12 +852,20 @@ static func _fila_destra(gs: GameState) -> Array[Dictionary]:
 	var m_mon := misura_carta("monumento")
 	var righe: int = maxi(gs.char_row.size(), gs.upg_row.size())
 
+	# La Dinastia sta "sempre disponibile fuori dalle file": in cima, sopra i
+	# personaggi, e non si sposta mai. Chi la compra ne prende il pupazzetto.
+	var m_din := misura_carta("dinastia")
 	var alto_righe := righe * m_pers.y + maxf(0.0, righe - 1) * CARTA_GAP
 	var alto_mon := gs.monuments_open.size() * m_mon.y \
 		+ maxf(0.0, gs.monuments_open.size() - 1) * CARTA_GAP
-	var totale := alto_righe + (CARTA_GAP * 3.0 + alto_mon if alto_mon > 0.0 else 0.0)
+	var totale := m_din.y + CARTA_GAP * 3.0 + alto_righe \
+		+ (CARTA_GAP * 3.0 + alto_mon if alto_mon > 0.0 else 0.0)
 	var z := board_d() / 2.0 - totale / 2.0
 	var x := board_w(gs) + BORDO
+
+	out.append({"kind": "dinastia", "id": "dinastia_1",
+		"aabb": AABB(Vector3(x, 0.0, z), Vector3(m_din.x, TESSERA_Y, m_din.y))})
+	z += m_din.y + CARTA_GAP * 3.0
 
 	for i in righe:
 		if i < gs.char_row.size():
@@ -489,6 +892,19 @@ static func _fila_destra(gs: GameState) -> Array[Dictionary]:
 # bacchetta sottile, e sotto ci si impilano le carte comprate.
 const BACCHETTA_D := 7.0
 const CARTE_GIOCATORE_GAP := 5.0
+# Le carte degli edifici si accumulano - una decina a testa a fine partita -
+# e distese una a fianco all'altra allungherebbero il tavolo di mezzo metro.
+# Si impilano a ventaglio come si fa al tavolo vero: ognuna copre la
+# precedente lasciandone fuori la fascia del titolo, che e' quanto basta a
+# sapere cosa si ha.
+const VENTAGLIO_Z := 20.0     # quanto resta scoperto di una carta coperta
+# Il mazzetto sta in DUE colonne, e le carte si stringono quel tanto che basta
+# a entrarci: una colonna sola lunga il doppio allungava il tavolo davanti al
+# giocatore piu' della strada stessa. La stretta e' poca - in quattro e' 0,88,
+# in due non serve affatto - e si calcola dal posto disponibile invece di
+# essere un numero scelto a occhio.
+const MAZZETTO_COLONNE := 2
+const VENTAGLIO_Y := 0.25     # ogni carta un filo piu' alta: chi copre sta sopra
 
 # Le carte che un giocatore ha davanti. I potenziamenti no: quelli stanno
 # infilati sotto l'edificio, ed e' li' che il regolamento li vuole. L'Eredita'
@@ -500,32 +916,164 @@ static func carte_giocatore(gs: GameState, player: int, umano := -1) -> Array[Di
 	# nessuna parte: sta davanti al suo giocatore, scoperto per lui e coperto
 	# per gli altri - come sul tavolo vero.
 	if p.legacy_id != "":
-		if player == umano:
+		# A partita finita si girano tutte, come al tavolo vero: e' il momento
+		# in cui si scopre cosa stava inseguendo ciascuno, e senza quello il
+		# riepilogo direbbe "eredita': 7 punti" senza dire di quale.
+		if player == umano or gs.phase == Enums.Phase.FINE_PARTITA:
 			out.append({"kind": "eredita", "id": p.legacy_id})
 		else:
 			out.append({"kind": "eredita_coperta", "id": "eredita_1"})
-	if p.has_dynasty: out.append({"kind": "dinastia", "id": "dinastia_1"})
-	for m in p.monuments_claimed: out.append({"kind": "monumento", "id": str(m)})
+	# La Dinastia non sta piu' qui: la carta resta fuori dalle file e quello
+	# che il giocatore ha preso e' il PUPAZZETTO, che si vede sulla bacchetta.
+	# I PERSONAGGI DI QUEST'ERA stanno subito sotto la bacchetta, perche' sono
+	# i lavoratori che ha in gioco adesso; quelli gia' sepolti non si ripetono
+	# qui, stanno sotto la carta del loro edificio.
+	var sepolti := {}
+	for b in gs.grid.buildings:
+		if b.owner == player and b.buried_character != "": sepolti[b.buried_character] = true
 	var visti := {}
 	for c in p.specialized_characters:
+		if sepolti.has(str(c)): continue
 		visti[str(c)] = true
 		out.append({"kind": "personaggio", "id": str(c)})
 	for c in p.final_characters:
-		if visti.has(str(c)): continue
+		if visti.has(str(c)) or sepolti.has(str(c)): continue
 		visti[str(c)] = true
 		out.append({"kind": "personaggio", "id": str(c)})
+	for m in p.monuments_claimed: out.append({"kind": "monumento", "id": str(m)})
+	# LE CARTE DEGLI EDIFICI COSTRUITI. "Costruire significa pagare il costo
+	# della carta e mettere la sagoma sul tabellone": la carta resta davanti
+	# a chi l'ha presa - il regolamento ci fa infilare sotto i personaggi a
+	# fine era - e prima spariva nel nulla. Vanno in fondo, a ventaglio,
+	# nell'ordine in cui sono state costruite.
+	for b in gs.grid.buildings:
+		if b.owner != player: continue
+		# Ogni carta si porta dietro lo stato dell'edificio: la colonna di
+		# sinistra tiene quelle in gioco - accese se intatte, spente in
+		# grigio se rudere o rovina - e quella di destra le sotterrate, che
+		# sono il mazzetto dello Scavo.
+		# LE CARTE INFILATE SOTTO QUESTA. Sono due cose diverse che al tavolo
+		# si fanno allo stesso modo: i potenziamenti, che si infilano sotto
+		# l'edificio lasciando sporgere la linguetta, e il personaggio che a
+		# fine era finisce sepolto li' sotto. Viaggiano con la carta che le
+		# copre, se no dei potenziamenti restava solo una linguetta gialla sul
+		# tabellone e del personaggio non si capiva ne' chi fosse ne' sotto
+		# cosa fosse finito.
+		var sotto: Array[Dictionary] = []
+		for u in b.upgrades:
+			sotto.append({"kind": "potenziamento", "id": str(u)})
+		# Nella v2 il sepolto e' il lavoratore del potenziamento: non c'e' una
+		# carta da infilare, ci va il GETTONE dello scheletro, con l'era per
+		# id. Prima finiva qui come "personaggio" di nome "lavoratore", e la
+		# vista lo cercava in un mazzo dove non c'e'.
+		# E sta SOTTO il potenziamento, in fondo alla pila: e' il lavoratore che
+		# l'ha piazzato, ed e' li' che al tavolo resta.
+		if b.buried_character == Building.LAVORATORE:
+			sotto.insert(0, {"kind": "scheletro", "id": str(b.buried_character_era),
+				"spenta": true})
+		elif b.buried_character != "":
+			sotto.append({"kind": "personaggio", "id": str(b.buried_character),
+				"spenta": true})
+		out.append({"kind": "mercato", "id": str(b.data["id"]),
+			"ventaglio": true, "sepolta": b.is_buried,
+			"spenta": b.state != Enums.BuildingState.INTATTO,
+			"sotto": sotto})
 	return out
+
+# ---- i pupazzetti ---------------------------------------------------
+# I LAVORATORI SI VEDONO. Prima esisteva solo il parallelepipedo sull'edificio
+# abitato: chi guardava non sapeva quanti lavoratori avesse ancora in mano un
+# giocatore, ne' che quelli sulla strada tornano indietro a fine era. Adesso
+# stanno sulla bacchetta del loro colore e da li' vanno sulla colonna che
+# attivano - e a fine era, quando `worker_cols` si svuota, tornano da soli.
+const MEEPLE_W := 8.0
+const MEEPLE_H := 15.0
+const MEEPLE_D := 6.0
+const MEEPLE_GAP := 3.0
+
+# Quelli ancora in mano: in fila sulla bacchetta, da sinistra.
+static func meeple_liberi(gs: GameState, player: int) -> Array[Vector3]:
+	var out: Array[Vector3] = []
+	var p: PlayerState = gs.players[player]
+	var quanti: int = maxi(0, p.workers - p.workers_used)
+	if quanti <= 0: return out
+	var r := bacchetta_box(gs, player)
+	var passo := MEEPLE_W + MEEPLE_GAP
+	# Se sono tanti e la bacchetta e' corta si stringono invece di sbordare.
+	if passo * float(quanti) > r.size.x:
+		passo = r.size.x / float(quanti)
+	for i in quanti:
+		out.append(Vector3(r.position.x + MEEPLE_W / 2.0 + i * passo,
+			r.position.y + r.size.y, r.position.z + r.size.z / 2.0))
+	return out
+
+# Quelli sulla strada: uno per colonna attivata. Se il lavoratore abita un
+# edificio sta sulla sua basetta - e' li' che il regolamento lo vuole, e da li'
+# gli da' +2 resistenza; se no sta sul davanti della colonna, dove si vede che
+# la colonna e' presa.
+static func meeple_in_campo(gs: GameState, player: int) -> Array[Dictionary]:
+	var out: Array[Dictionary] = []
+	var p: PlayerState = gs.players[player]
+	for c in p.worker_cols:
+		var col := int(c)
+		var ospite: Building = null
+		for b in gs.grid.buildings:
+			if b.protected_by == player and b.covers(col) and b.is_standing():
+				ospite = b
+				break
+		if ospite != null:
+			var base := standee_base(gs, ospite)
+			out.append({"col": col, "uid": ospite.uid, "pos": Vector3(
+				base.x - span_w(ospite.width()) / 2.0 + MEEPLE_W / 2.0 + 2.0,
+				base.y + BASETTA_Y,
+				base.z + BASETTA_D / 2.0 - MEEPLE_D / 2.0)})
+		else:
+			out.append({"col": col, "uid": -1, "pos": Vector3(
+				col_x(col) + TESSERA_W / 2.0, TESSERA_Y,
+				board_d() - MEEPLE_D)})
+	return out
+
+# ---- la Dinastia, fuori dalle file ----------------------------------
+# "Sempre disponibile fuori dalle file": la carta non si sposta mai. Sta in
+# cima alla fila dei personaggi e ci tiene sopra un pupazzetto per giocatore.
+# Chi la compra non prende la carta: prende il PUPAZZETTO e lo mette insieme
+# agli altri tre che ha gia'.
+static func meeple_dinastia(gs: GameState) -> Array[Dictionary]:
+	var out: Array[Dictionary] = []
+	var carta := carta_dinastia(gs)
+	if carta.is_empty(): return out
+	var r: AABB = carta["aabb"]
+	# Solo chi non l'ha ancora presa, e mai piu' copie di quante ne restano.
+	var chi: Array[int] = []
+	for i in gs.n_players:
+		if not gs.players[i].has_dynasty: chi.append(i)
+	while chi.size() > gs.dynasties_left: chi.pop_back()
+	if chi.is_empty(): return out
+	var passo := MEEPLE_W + MEEPLE_GAP
+	var largo := passo * float(chi.size()) - MEEPLE_GAP
+	var x0 := r.position.x + (r.size.x - largo) / 2.0 + MEEPLE_W / 2.0
+	for j in chi.size():
+		out.append({"player": chi[j], "pos": Vector3(x0 + j * passo,
+			r.position.y + r.size.y, r.position.z + r.size.z / 2.0)})
+	return out
+
+static func carta_dinastia(gs: GameState) -> Dictionary:
+	for c in _fila_destra(gs):
+		if str(c["kind"]) == "dinastia": return c
+	return {}
 
 # La bacchetta del colore: una per giocatore, davanti alla strada.
 static func player_boards(gs: GameState) -> Array[Dictionary]:
 	var out: Array[Dictionary] = []
+	for i in gs.n_players:
+		out.append({"player": i, "aabb": bacchetta_box(gs, i)})
+	return out
+
+static func bacchetta_box(gs: GameState, player: int) -> AABB:
 	var largo := board_w(gs) / float(gs.n_players)
 	var z := board_d() + BORDO      # davanti alla strada, dal lato di chi guarda
-	for i in gs.n_players:
-		out.append({"player": i, "aabb": AABB(
-			Vector3(i * largo + 4.0, 0.0, z),
-			Vector3(largo - 8.0, TESSERA_Y, BACCHETTA_D))})
-	return out
+	return AABB(Vector3(player * largo + 4.0, 0.0, z),
+		Vector3(largo - 8.0, TESSERA_Y, BACCHETTA_D))
 
 # Le carte comprate, stese sotto la bacchetta. NESSUNA COPRE L'ALTRA: si
 # riempie una riga finche' ci sta dentro il posto del giocatore, poi si va a
@@ -548,7 +1096,13 @@ static func player_cards(gs: GameState, umano := -1) -> Array[Dictionary]:
 		var x := x0
 		var z := z0
 		var profonda := 0.0          # la carta piu' profonda della riga in corso
+		var ventaglio: Array = []
 		for j in carte.size():
+			# Le carte degli edifici vanno in fondo, tutte insieme: distese
+			# come le altre allungherebbero il tavolo di mezzo metro.
+			if bool(carte[j].get("ventaglio", false)):
+				ventaglio.append(carte[j])
+				continue
 			var m := misura_carta(str(carte[j]["kind"]))
 			# A capo quando la carta non ci sta piu'. La prima di una riga ci
 			# resta comunque, anche se da sola sborda: e' meglio di una riga
@@ -562,6 +1116,70 @@ static func player_cards(gs: GameState, umano := -1) -> Array[Dictionary]:
 				"aabb": AABB(Vector3(x, 0.0, z), Vector3(m.x, TESSERA_Y, m.y))})
 			x += m.x + CARTE_GIOCATORE_GAP
 			profonda = maxf(profonda, m.y)
+		if not ventaglio.is_empty():
+			var z_v := z + (profonda if profonda > 0.0 else 0.0) \
+				+ (CARTE_GIOCATORE_GAP if profonda > 0.0 else 0.0)
+			out.append_array(_ventaglio(ventaglio, i, x0, spazio, z_v, carte.size()))
+	return out
+
+# Il mazzetto delle carte edificio, in DUE COLONNE CHE VOGLIONO DIRE
+# QUALCOSA: a sinistra quello che sta ancora sulla strada, a destra quello
+# che e' finito sotto - il mazzetto dello Scavo. Dentro ogni colonna le
+# carte si impilano a ventaglio, ognuna copre la precedente lasciandone
+# fuori la fascia del titolo.
+#
+# Ogni carta sta un filo piu' in alto della precedente: due carte complanari
+# si contenderebbero lo stesso pixel e lo schermo sfarfalla.
+#
+# Le colonne restano due anche quando una e' vuota, cosi' il posto di una
+# carta non balla appena la prima viene sotterrata. Su otto partite a tre il
+# massimo misurato e' 8 carte a sinistra e 10 a destra.
+static func _ventaglio(carte: Array, player: int, x0: float, spazio: float,
+		z0: float, ordine0: int) -> Array[Dictionary]:
+	var out: Array[Dictionary] = []
+	if carte.is_empty(): return out
+	var piena := misura_carta(str(carte[0]["kind"]))
+	# Quanto puo' essere larga una carta perche' le due colonne ci stiano.
+	# Non si ingrandisce mai: al massimo resta com'e'.
+	var posto := (spazio - CARTE_GIOCATORE_GAP * (MAZZETTO_COLONNE - 1)) \
+		/ float(MAZZETTO_COLONNE)
+	var scala: float = minf(1.0, posto / piena.x)
+	var m := piena * scala
+	var passo := VENTAGLIO_Z * scala
+	var righe := [0, 0]
+	for j in carte.size():
+		var sepolta := bool(carte[j].get("sepolta", false))
+		var c: int = 1 if sepolta else 0
+		var r: int = int(righe[c])
+		var x := x0 + c * (m.x + CARTE_GIOCATORE_GAP)
+		# LE CARTE INFILATE SOTTO QUESTA vengono PRIMA nel ventaglio - cosi'
+		# quello che sporge e' la loro fascia del titolo, dritta, e si legge
+		# che cosa c'e' infilato li' - ma stanno piu' in BASSO, perche' sono
+		# sotto. Prendono una riga per una, non spazio in larghezza: prima
+		# sporgevano di fianco e per far loro posto le carte dell'edificio si
+		# rimpicciolivano tutte.
+		var infilate: Array = carte[j].get("sotto", [])
+		var quota := float(r + infilate.size() + 1) * VENTAGLIO_Y
+		for k in infilate.size():
+			var sotto: Dictionary = infilate[k]
+			# Ognuna un filo piu' sotto della precedente: sono una pila, non
+			# un mazzo complanare.
+			var giu := quota - VENTAGLIO_Y * 0.5 * float(infilate.size() - k) \
+				/ float(infilate.size())
+			out.append({"kind": str(sotto["kind"]), "id": str(sotto["id"]),
+				"player": player, "ordine": ordine0 + j, "sotto": true,
+				"spenta": bool(sotto.get("spenta", false)),
+				"aabb": AABB(Vector3(x, giu, z0 + r * passo),
+					Vector3(m.x, TESSERA_Y, m.y))})
+			r += 1
+		var box := AABB(Vector3(x, quota, z0 + r * passo),
+			Vector3(m.x, TESSERA_Y, m.y))
+		out.append({"kind": str(carte[j]["kind"]), "id": str(carte[j]["id"]),
+			"player": player, "ordine": ordine0 + j,
+			"sepolta": sepolta, "spenta": bool(carte[j].get("spenta", false)),
+			"aabb": box})
+		r += 1
+		righe[c] = r
 	return out
 
 # Tutto il tavolo: strada, file e plance. E' questo che l'inquadratura deve
@@ -587,7 +1205,7 @@ static func slot_at_ray(gs: GameState, origine: Vector3, direzione: Vector3) -> 
 	# I binari occupano solo la fascia del disegno, ma si clicca tutta la
 	# tessera: fuori dalla fascia vale il binario piu' vicino, altrimenti
 	# meta' tessera sarebbe morta al clic senza che si capisca perche'.
-	var era := RAILS - int(floor((p.z - BANDA_SU) / SLOT_D))
+	var era := 1 + int(floor((p.z - BANDA_SU) / SLOT_D))
 	return {"col": col, "era": clampi(era, 1, RAILS), "punto": p}
 
 # L'ingombro che il raggio incontra: SI CLICCA QUELLO CHE SI VEDE. Chi non ha
@@ -691,9 +1309,16 @@ static func card_at_ray(gs: GameState, origine: Vector3, direzione: Vector3,
 	# `umano` va passato: senza, la vista disegnava l'obiettivo del giocatore
 	# scoperto e il clic rispondeva con la carta coperta - sulla tua stessa
 	# eredita' il riquadro diceva "lo vede solo il suo giocatore".
+	# Nel ventaglio le carte si coprono, quindi non basta la prima che si
+	# trova: vince QUELLA SOPRA, cioe' la piu' alta. Altrimenti si
+	# cliccherebbe una carta e ne risponderebbe un'altra, nascosta sotto.
+	var vinta := {}
+	var quota := -INF
 	for c in side_cards(gs, umano):
 		var r: AABB = c["aabb"]
 		if p.x >= r.position.x and p.x <= r.position.x + r.size.x \
 				and p.z >= r.position.z and p.z <= r.position.z + r.size.z:
-			return c
-	return {}
+			if r.position.y >= quota:
+				quota = r.position.y
+				vinta = c
+	return vinta

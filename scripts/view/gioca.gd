@@ -36,6 +36,10 @@ func _io() -> int:
 # Di chi mostrare risorse e punteggio in alto. Di norma e' chi ha il turno;
 # in una partita di soli bot non c'e' nessun umano e si guarda giocare quello
 # di turno, che e' meglio di una riga vuota.
+# La v2 si riconosce dal file dati caricato, non da una variabile della vista.
+func _v2() -> bool:
+	return str(CardDB.ruleset).begins_with("v2")
+
 func _in_vetrina() -> int:
 	if ctl == null: return -1
 	# A partita finita si mostra il vincitore, non chi ha mosso per ultimo:
@@ -72,6 +76,13 @@ var _bottoni: Array = []             # {"rect", "voce"} per le azioni senza cart
 var _nota: PackedStringArray = PackedStringArray()
 var _nota_dove := Vector2.ZERO
 
+# Il riepilogo finale sta aperto appena la partita finisce; si chiude per
+# guardare il tavolo con le eredita' scoperte, e si riapre col suo tasto.
+var _riepilogo_aperto := true
+
+# Quanto manca al prossimo turno di bot, in secondi.
+var _attesa := 0.0
+
 var _orbita: CameraOrbita = null
 var _premuto := MOUSE_BUTTON_NONE
 var _partenza := Vector2.ZERO
@@ -93,6 +104,7 @@ func _ready() -> void:
 # vista vecchia, stato nuovo, inquadratura nuova.
 func comincia() -> void:
 	inizio.sistema()
+	_riepilogo_aperto = true
 	if vista != null:
 		remove_child(vista)
 		vista.queue_free()
@@ -100,6 +112,10 @@ func comincia() -> void:
 	_messaggio = ""
 	_orbita = null
 	_colonna_sotto_mouse = -1
+	# Il regolamento e' il file dati: si carica prima di cominciare, ogni
+	# volta, cosi' si puo' passare dalla v2 alla v1.5 e tornare senza
+	# riavviare.
+	CardDB.load_db(inizio.percorso_dati())
 	ctl = GameController.new()
 	ctl.new_game(inizio.giocatori, inizio.seme)
 	vista = VISTA.new()
@@ -157,14 +173,38 @@ func _acceso() -> Dictionary:
 			uid.append(int(v.parametri["uid"]))
 	return {"carta": _scelta, "slot": slot, "uid": uid}
 
-# Il bot gioca finche' non tocca a un umano. Se umani non ce ne sono, la
-# partita arriva in fondo tutta in un colpo e resta il tavolo finito: e' il
-# modo piu' rapido per vedere dove va a finire un seme.
+# C'e' un bot che deve muovere? Lo chiedono il motore dei turni, il tasto
+# "Avanza" e il disegno, quindi la risposta e' una sola.
+func bot_da_muovere() -> bool:
+	return ctl != null and ctl.gs.phase != Enums.Phase.FINE_PARTITA \
+		and not inizio.e_umano(ctl.gs.current_index)
+
+# Un turno di bot, e il tavolo si ridisegna. E' il passo che il giocatore
+# vede: prima i bot giocavano tutti i loro turni fra un clic e l'altro e sul
+# tabellone comparivano tre edifici insieme, senza che si capisse chi avesse
+# fatto cosa.
+func muovi_un_bot() -> void:
+	if not bot_da_muovere(): return
+	StrategyBot.play_turn(ctl, inizio.strategia(ctl.gs.current_index))
+	_attesa = maxf(inizio.pausa_bot(), 0.0)
+	_aggiorna()
+
+# Il tempo che passa muove i bot, uno alla volta. A "passo" non li muove
+# nessuno: aspettano il tasto Avanza.
+func _process(delta: float) -> void:
+	if not bot_da_muovere() or inizio.bot_a_mano() or inizio.bot_subito(): return
+	_attesa -= delta
+	if _attesa <= 0.0: muovi_un_bot()
+
+# Il turno passa ai bot. A velocita' "subito" giocano tutti i loro turni in
+# un colpo, com'e' sempre stato; altrimenti si mettono in coda e li muove il
+# tempo, cosi' si vede una mossa per volta.
 func _turni_dei_bot() -> void:
+	_attesa = maxf(inizio.pausa_bot(), 0.0)
+	if not inizio.bot_subito(): return
 	var giri := 0
-	while ctl.gs.phase != Enums.Phase.FINE_PARTITA \
-			and not inizio.e_umano(ctl.gs.current_index) and giri < 500:
-		RandomBot.play_turn(ctl)
+	while bot_da_muovere() and giri < 500:
+		StrategyBot.play_turn(ctl, inizio.strategia(ctl.gs.current_index))
 		giri += 1
 
 # ---- input -----------------------------------------------------------
@@ -277,6 +317,11 @@ func _descrivi_sotto(pixel: Vector2) -> PackedStringArray:
 			Enums.BuildingState.RUDERE: stato = "rudere"
 			Enums.BuildingState.ROVINA: stato = "rovina"
 		if b.is_buried: stato += ", sepolto"
+		# Nella v2 la rovina propria si ristruttura: il riquadro lo dice,
+		# perche' e' l'unica cosa che una rovina in piedi invita a fare.
+		elif b.state == Enums.BuildingState.ROVINA and BoardLayout3D.senza_rudere() \
+				and b.owner == _io():
+			stato += ", si puo' ristrutturare"
 		out.append(str(b.data["name"]))
 		out.append("G%d · %s · res %d · vetusta %d" % [b.owner, stato,
 			b.effective_resistance(), b.vetusta])
@@ -284,18 +329,43 @@ func _descrivi_sotto(pixel: Vector2) -> PackedStringArray:
 			var nomi := PackedStringArray()
 			for u in b.upgrades: nomi.append(str(CardDB.upgrades[u]["name"]))
 			out.append("potenziamenti: " + ", ".join(nomi))
+		var sc := descrivi_scheletro(b)
+		if sc != "": out.append(sc)
 		return out
 	var c := _carta_puntata(pixel)
-	if c.is_empty(): return out
+	if c.is_empty():
+		# Ne' un edificio ne' una carta: se il mouse e' su una colonna, si
+		# descrive la tessera, con quel che produce in quest'era e la regola.
+		var col := _colonna_puntata(pixel)
+		if col >= 0: return descrivi_tessera(col)
+		return out
+	return _descrivi_sotto_carta(c)
+
+# Chi sta sepolto sotto l'edificio e quanto vale: nella v2 il lavoratore del
+# potenziamento, nella v1.5 il Personaggio di fine era. Prima il riquadro
+# non lo diceva, e il gettone sulla basetta restava senza nome.
+func descrivi_scheletro(b: Building) -> String:
+	if b.buried_character == "": return ""
+	var chi := "il lavoratore del potenziamento"
+	if b.buried_character != Building.LAVORATORE:
+		chi = str(CardDB.characters[b.buried_character]["name"]) \
+			if CardDB.characters.has(b.buried_character) else b.buried_character
+	return "scheletro: %s · era %d · vale %d" % [chi, b.buried_character_era,
+		BoardLayout3D.scheletro_valore(b.buried_character_era)]
+
+# Il riquadro di una carta puntata: {"kind": ..., "id": ...}.
+func _descrivi_sotto_carta(c: Dictionary) -> PackedStringArray:
+	var out := PackedStringArray()
 	var id := str(c["id"])
 	match str(c["kind"]):
 		"mercato":
 			var d: Dictionary = CardDB.buildings[id]
 			var co: Dictionary = d["cost"]
 			out.append(str(d["name"]))
-			out.append("%dp %do · res %d · scavo %d · %d slot" % [
-				int(co.get("pietra", 0)), int(co.get("oro", 0)),
-				int(d["resistance"]), int(d["scavo"]), int(d["width"])])
+			var costo := "%dp %do" % [int(co.get("pietra", 0)), int(co.get("oro", 0))]
+			if _v2(): costo = "%d C %d D %d I" % [int(co.get("pietra", 0)), int(co.get("oro", 0)), int(co.get("idee", 0))]
+			out.append("%s · res %d · scavo %d · %d slot" % [
+				costo, int(d["resistance"]), int(d["scavo"]), int(d["width"])])
 			out.append(", ".join(d["classes"]))
 		"personaggio":
 			var pe: Dictionary = CardDB.characters[id]
@@ -307,6 +377,12 @@ func _descrivi_sotto(pixel: Vector2) -> PackedStringArray:
 			out.append(str(po["name"]))
 			out.append("potenziamento · %s" % po["family"])
 			if str(po.get("effect_text", "")) != "": out.append(str(po["effect_text"]))
+		"scheletro":
+			var era := int(id)
+			out.append("Scheletro")
+			out.append("il lavoratore del potenziamento · era %d" % era)
+			out.append("vale %d punti, comunque finisca l'edificio"
+				% BoardLayout3D.scheletro_valore(era))
 		"monumento":
 			if CardDB.monuments.has(id):
 				var mo: Dictionary = CardDB.monuments[id]
@@ -314,6 +390,10 @@ func _descrivi_sotto(pixel: Vector2) -> PackedStringArray:
 				out.append(str(mo.get("effect_text", "")))
 		"dinastia":
 			out.append("Dinastia")
+			# Nella v2 i lavoratori di base sono quattro: la Dinastia e' il quinto.
+			out.append("un lavoratore in piu', permanente: il %s" % ("quinto" if _v2() else "quarto"))
+			var din := AvailableActions.dinastia(ctl.gs, _in_vetrina())
+			out.append("costa " + DescrizioneAzione.prezzo(din) if din.legale else str(din.motivo))
 		"eredita":
 			if CardDB.legacies.has(id):
 				var er: Dictionary = CardDB.legacies[id]
@@ -322,6 +402,30 @@ func _descrivi_sotto(pixel: Vector2) -> PackedStringArray:
 		"eredita_coperta":
 			out.append("Obiettivo segreto")
 			out.append("coperto: lo vede solo il suo giocatore")
+	return out
+
+# La tessera di una colonna, come la vede chi ci passa sopra col mouse: il
+# terreno, la produzione di quest'era, la regola stampata, e nella v2 se
+# l'effetto e' ancora da usare o la tessera e' gia' girata (registro 103).
+func descrivi_tessera(col: int) -> PackedStringArray:
+	var out := PackedStringArray()
+	if ctl == null or col < 0 or col >= ctl.gs.grid.n_cols: return out
+	var gs := ctl.gs
+	var t_id := Enums.terrain_to_string(gs.grid.terrains[col])
+	var tess: Dictionary = CardDB.terrains[t_id]
+	var base: Dictionary = tess["base_production"]
+	var per_era = tess.get("base_production_by_era", null)
+	if per_era != null and per_era.has(str(gs.era)): base = per_era[str(gs.era)]
+	var pezzi := PackedStringArray()
+	if int(base.get("pietra", 0)) > 0: pezzi.append("%d %s" % [int(base["pietra"]), "Costruzione" if _v2() else "pietra"])
+	if int(base.get("oro", 0)) > 0: pezzi.append("%d %s" % [int(base["oro"]), "Denaro" if _v2() else "oro"])
+	if int(base.get("idee", 0)) > 0: pezzi.append("%d Idee" % int(base["idee"]))
+	out.append("Colonna %d · %s" % [col, t_id.capitalize()])
+	out.append("produce " + (", ".join(pezzi) if not pezzi.is_empty() else "niente") + " in quest'era")
+	if str(tess.get("rule", "")) != "": out.append(str(tess["rule"]))
+	if EraRules.tessere_una_volta(gs):
+		out.append("tessera girata: l'effetto torna nell'era prossima" if not EraRules.tessera_disponibile(gs, col)
+			else "effetto ancora da usare in quest'era")
 	return out
 
 # ---- il clic ---------------------------------------------------------
@@ -339,6 +443,24 @@ func _clic(pixel: Vector2) -> void:
 	# gioco non prosegue, quindi il clic serve solo a quella.
 	if not gs.pending_choice.is_empty():
 		if int(gs.pending_choice["player"]) != _io(): return
+		# IL DRAFT (v2, registro 93 e 102): le opzioni sono posizioni nella
+		# fila dei Personaggi, e si sceglie cliccando la carta nella fila.
+		# Le altre scelte (l'edificio dove infilare una carta) si fanno
+		# cliccando l'edificio.
+		if str(gs.pending_choice.get("kind", "")) == "draft":
+			var c := _carta_puntata(pixel)
+			if c.is_empty() or str(c["kind"]) != "personaggio": return
+			var posto := gs.char_row.find(str(c["id"]))
+			if posto < 0 or not posto in (gs.pending_choice["options"] as Array):
+				_messaggio = "Questo Personaggio non si puo' prendere ora."
+				_aggiorna()
+				return
+			var nome := str(CardDB.characters[str(c["id"])]["name"])
+			if ctl.choose(posto):
+				_messaggio = "Hai preso %s." % nome
+				_turni_dei_bot()
+				_aggiorna()
+			return
 		var scelto := _edificio_puntato(pixel)
 		if scelto != null and ctl.choose(scelto.uid):
 			_messaggio = "Scelto."
@@ -367,6 +489,16 @@ func _clic(pixel: Vector2) -> void:
 	var c := _carta_puntata(pixel)
 	if not c.is_empty():
 		_seleziona(c)
+		return
+
+	# CON UNA CARTA SCELTA, un clic fuori dai posti accesi non fa niente. Non
+	# e' pignoleria: prima piazzava un lavoratore di nascosto, e il giocatore
+	# si ritrovava una colonna attivata che non aveva chiesto - e con meno
+	# posti accesi di prima, perche' il lavoratore li aveva ristretti a
+	# quella colonna. Sembrava che la carta non si comprasse mai.
+	if not _scelta.is_empty():
+		_messaggio = "Li' non ci va. Clicca un posto acceso, o Esc per cambiare carta."
+		_aggiorna()
 		return
 
 	# Senza carta scelta, il clic su una colonna mette il lavoratore e basta:
@@ -472,6 +604,13 @@ func _bersagli_di(kind: String, id: String) -> Array:
 	return out
 
 func _seleziona(c: Dictionary) -> void:
+	# Le carte gia' davanti a un giocatore non si scelgono: sono il suo
+	# mazzetto, non il mercato. Senza questo, cliccare una propria carta
+	# accendeva i posti e poi la costruzione veniva rifiutata, perche' quella
+	# carta dal mercato era gia' uscita.
+	if c.has("player"):
+		_deseleziona()
+		return
 	var kind := str(c["kind"])
 	var id := str(c["id"])
 	if str(_scelta.get("kind", "")) == kind and str(_scelta.get("id", "")) == id:
@@ -502,12 +641,14 @@ func _scegli_restauro() -> void:
 	for v in voci:
 		if v.legale: buoni.append(v)
 	if buoni.is_empty():
-		_messaggio = "Nessun rudere da restaurare in questa colonna."
+		_messaggio = "Nessuna tua rovina da ristrutturare in questa colonna." \
+			if BoardLayout3D.senza_rudere() else "Nessun rudere da restaurare in questa colonna."
 		_aggiorna()
 		return
 	_scelta = {"kind": "restauro", "id": "restauro"}
 	_bersagli = buoni
-	_messaggio = "Restauro: scegli il rudere."
+	_messaggio = "Ristrutturazione: scegli la rovina." \
+		if BoardLayout3D.senza_rudere() else "Restauro: scegli il rudere."
 	_aggiorna()
 
 func _deseleziona(ridisegna := true) -> void:
@@ -523,6 +664,7 @@ func _nome_carta(kind: String, id: String) -> String:
 		"potenziamento": return str(CardDB.upgrades[id]["name"])
 		"monumento":
 			return str(CardDB.monuments[id]["name"]) if CardDB.monuments.has(id) else id
+		"scheletro": return "scheletro"
 	return id
 
 func _esegui(v) -> void:
@@ -600,9 +742,11 @@ func _disegna_hud() -> void:
 	var chi := "giocatore %d" % v
 	if _io() >= 0:
 		chi = "tu" if inizio.umani() <= 1 else "tocca a te, giocatore %d" % v
-	var testa := "Era %d · %s · %s: %d PV, %d pietra, %d oro, lavoratori %d/%d" % [
+	var risorse := "%d pietra, %d oro" % [p.pietra, p.oro]
+	if _v2(): risorse = "%d Costruzione, %d Denaro, %d Idee" % [p.pietra, p.oro, p.idee]
+	var testa := "Era %d · %s · %s: %d PV, %s, lavoratori %d/%d" % [
 		gs.era, str(gs.current_event.get("name", "nessun evento")), chi,
-		p.vp, p.pietra, p.oro, p.workers_used, p.workers]
+		p.vp, risorse, p.workers_used, p.workers]
 	_striscia(font, testa, 41.0, 12.0, 18)
 	_hud.draw_rect(Rect2(Vector2(20, 17), Vector2(13, 13)),
 		VISTA.colore_giocatore(v), true)
@@ -625,11 +769,26 @@ func _disegna_hud() -> void:
 		_disegna_bottoni(font, p)
 
 	var schermo := _hud.get_viewport_rect().size
-	# Finita la partita l'unica cosa sensata e' rifarne un'altra: senza
-	# questo tasto bisognava ricaricare la pagina.
+	# Finita la partita si tira la somma. Il tasto per rifarne un'altra sta
+	# li' dentro: senza, bisognava ricaricare la pagina.
 	if gs.phase == Enums.Phase.FINE_PARTITA:
-		_tasto(font, "Nuova partita", Vector2(20.0, schermo.y - 58.0), true,
-			{"che": "menu"}, 150.0)
+		if _riepilogo_aperto:
+			_disegna_riepilogo(font, gs)
+		else:
+			_tasto(font, "Riepilogo", Vector2(20.0, schermo.y - 58.0), true,
+				{"che": "riepilogo"}, 150.0)
+			_tasto(font, "Nuova partita", Vector2(186.0, schermo.y - 58.0), false,
+				{"che": "menu"}, 150.0)
+	# La velocita' dei bot si cambia anche a partita iniziata: un tasto solo
+	# che gira fra i cinque modi, perche' in fondo allo schermo per cinque
+	# nomi non c'e' posto.
+	if inizio.bot > 0 and gs.phase != Enums.Phase.FINE_PARTITA:
+		var t := _tasto(font, "Bot: " + inizio.nome_velocita(),
+			Vector2(schermo.x - 190.0, schermo.y - 58.0), false,
+			{"che": "gira_velocita"}, 170.0)
+		if inizio.bot_a_mano() and bot_da_muovere():
+			_tasto(font, "Avanza", Vector2(t.position.x - 118.0, t.position.y),
+				true, {"che": "avanza"}, 110.0)
 	_hud.draw_string(font, Vector2(20, schermo.y - 16),
 		"Trascina per girare il tabellone · rotella per avvicinare · "
 		+ "tasto destro per spostare · R riporta l'inquadratura",
@@ -669,8 +828,13 @@ func _invito(gs: GameState) -> String:
 		invito = "Partita finita. Vincitore: giocatore %d" % Scoring.winner(gs)
 	elif _io() < 0:
 		invito = "Tocca al giocatore %d" % gs.current_index
+		if inizio.bot_a_mano(): invito += " — premi Avanza per farlo muovere"
 	elif not gs.pending_choice.is_empty():
 		invito = str(gs.pending_choice["prompt"])
+		if str(gs.pending_choice.get("kind", "")) == "draft":
+			invito += " — clicca una carta della fila dei Personaggi: e' gratis"
+		else:
+			invito += " — clicca l'edificio"
 	elif gs.phase == Enums.Phase.PIAZZA:
 		invito = "Scegli una carta e ti mostro dove puoi metterla, "
 		invito += "oppure clicca una colonna per attivarla e basta."
@@ -680,6 +844,95 @@ func _invito(gs: GameState) -> String:
 		invito = "Clicca un posto acceso. Esc per lasciar perdere."
 	if _messaggio != "": invito += "     — " + _messaggio
 	return invito
+
+# ---- il riepilogo finale ---------------------------------------------
+# Alla fine restava un numero solo - "vincitore: giocatore 3" - e non si
+# capiva DOVE fossero andati i punti. Il motore li divide gia' per canale
+# mentre la partita va avanti: qui si mettono in tabella, una riga per
+# giocatore e una colonna per fonte, in ordine di arrivo.
+# Le eredita' segrete a questo punto sono scoperte sul tavolo, quindi sotto
+# ogni riga si dice quale era e quanto ha fruttato.
+# 76 non bastavano: "Monumenti" usciva tagliato a meta'. L'intestazione e'
+# scritta piccola ma i nomi delle voci sono quelli del regolamento, e
+# abbreviarli avrebbe reso la tabella un rebus.
+const RIEP_COL := 86.0        # larghezza di una colonna di punti
+const RIEP_NOME := 176.0      # la prima colonna: posto, colore, giocatore
+
+func _disegna_riepilogo(font: Font, gs: GameState) -> void:
+	var cols := Riepilogo.colonne(gs)
+	var righe := Riepilogo.righe(gs)
+	var schermo := _hud.get_viewport_rect().size
+	var largo: float = minf(RIEP_NOME + (cols.size() + 1) * RIEP_COL + 48.0,
+		schermo.x - 40.0)
+	var alto := 128.0 + righe.size() * 46.0 + 56.0
+	var r := Rect2(Vector2((schermo.x - largo) / 2.0, (schermo.y - alto) / 2.0),
+		Vector2(largo, alto))
+	# Piu' coperto degli altri pannelli: questo e' una tabella di numeri e ci
+	# cadono sotto le carte del tavolo, che la rendevano illeggibile.
+	_hud.draw_rect(r, Color(0.07, 0.08, 0.10, 0.97), true)
+	_hud.draw_rect(r, Color(1, 1, 1, 0.18), false, 1.0)
+	var x := r.position.x + 24.0
+	var y := r.position.y + 46.0
+	_hud.draw_string(font, Vector2(x, y), "Riepilogo finale",
+		HORIZONTAL_ALIGNMENT_LEFT, -1, 24, CHIARO)
+	y += 36.0
+
+	# L'intestazione: i nomi delle fonti, allineati a destra come i numeri
+	# che stanno sotto, cosi' le cifre si leggono in colonna.
+	var cx := x + RIEP_NOME
+	for c in cols:
+		_hud.draw_string(font, Vector2(cx, y), str(c["nome"]),
+			HORIZONTAL_ALIGNMENT_RIGHT, RIEP_COL - 10.0, 12, SPENTO)
+		cx += RIEP_COL
+	_hud.draw_string(font, Vector2(cx, y), "Totale",
+		HORIZONTAL_ALIGNMENT_RIGHT, RIEP_COL - 10.0, 12, CHIARO)
+	y += 12.0
+	_hud.draw_line(Vector2(x, y), Vector2(r.end.x - 24.0, y),
+		Color(1, 1, 1, 0.15), 1.0)
+	y += 28.0
+
+	for riga in righe:
+		var pl := int(riga["player"])
+		_hud.draw_rect(Rect2(Vector2(x, y - 11.0), Vector2(11, 11)),
+			VISTA.colore_giocatore(pl), true)
+		_hud.draw_string(font, Vector2(x + 20.0, y),
+			"%d.  %s" % [int(riga["posto"]), _nome_giocatore(pl)],
+			HORIZONTAL_ALIGNMENT_LEFT, RIEP_NOME - 24.0, 14, CHIARO)
+		cx = x + RIEP_NOME
+		for c in cols:
+			var n := Riepilogo.punti(riga, str(c["id"]))
+			# Lo zero si scrive come un trattino: una colonna di zeri veri
+			# nasconde i numeri che contano.
+			_hud.draw_string(font, Vector2(cx, y), str(n) if n != 0 else "–",
+				HORIZONTAL_ALIGNMENT_RIGHT, RIEP_COL - 10.0, 14,
+				CHIARO if n != 0 else Color("#5b616c"))
+			cx += RIEP_COL
+		_hud.draw_string(font, Vector2(cx, y), str(int(riga["vp"])),
+			HORIZONTAL_ALIGNMENT_RIGHT, RIEP_COL - 10.0, 18, CHIARO)
+
+		# Sotto la riga: l'eredita' segreta, che adesso e' scoperta sul tavolo,
+		# e quel che resta fuori dalle colonne.
+		var sotto := "nessuna eredita'"
+		if str(riga["eredita_nome"]) != "":
+			sotto = "eredita': %s · %d" % [riga["eredita_nome"],
+				int(riga["eredita_punti"])]
+		sotto += " · %d edifici in piedi" % int(riga["edifici"])
+		var resto := Riepilogo.altro(gs, riga)
+		if resto != 0: sotto += " · altro %d" % resto
+		_hud.draw_string(font, Vector2(x + 20.0, y + 17.0), sotto,
+			HORIZONTAL_ALIGNMENT_LEFT, largo - 48.0, 12, SPENTO)
+		y += 46.0
+
+	var t := _tasto(font, "Nuova partita", Vector2(x, r.end.y - 48.0), true,
+		{"che": "menu"}, 150.0)
+	_tasto(font, "Guarda il tavolo", Vector2(t.end.x + 10.0, t.position.y),
+		false, {"che": "tavolo"}, 160.0)
+
+func _nome_giocatore(i: int) -> String:
+	# Il bot dice anche che testa ha: guardarlo giocare senza sapere cosa
+	# insegue e' come guardare qualcuno muovere pezzi a caso.
+	if not inizio.e_umano(i): return "giocatore %d (bot · %s)" % [i, inizio.nome_strategia(i)]
+	return "tu" if inizio.umani() <= 1 else "giocatore %d" % i
 
 # ---- la schermata d'inizio -------------------------------------------
 # Prima la partita cominciava da sola: tre giocatori e seme 7, scritti nel
@@ -691,11 +944,15 @@ func _invito(gs: GameState) -> String:
 # turno sullo stesso schermo; con zero si guarda giocare.
 const SCELTA_LARGO := 560.0
 const SCELTA_ALTO := 296.0
+const RIGA_ALTA := 46.0
 
 func _disegna_scelta(font: Font) -> void:
 	var schermo := _hud.get_viewport_rect().size
+	# Il pannello cresce con la riga della velocita', che c'e' solo se al
+	# tavolo siede almeno un bot.
+	var alto := SCELTA_ALTO + RIGA_ALTA + (RIGA_ALTA if inizio.bot > 0 else 0.0)
 	var r := Rect2(Vector2((schermo.x - SCELTA_LARGO) / 2.0,
-		(schermo.y - SCELTA_ALTO) / 2.0), Vector2(SCELTA_LARGO, SCELTA_ALTO))
+		(schermo.y - alto) / 2.0), Vector2(SCELTA_LARGO, alto))
 	_hud.draw_rect(r, SFONDO, true)
 	_hud.draw_rect(r, Color(1, 1, 1, 0.18), false, 1.0)
 	var x := r.position.x + 28.0
@@ -704,11 +961,25 @@ func _disegna_scelta(font: Font) -> void:
 		HORIZONTAL_ALIGNMENT_LEFT, -1, 26, CHIARO)
 	y += 40.0
 
+	# Il regolamento per primo: e' la scelta che cambia tutto il resto.
+	_hud.draw_string(font, Vector2(x, y + 20.0), "Regolamento",
+		HORIZONTAL_ALIGNMENT_LEFT, -1, 14, SPENTO)
+	var rx := x + 130.0
+	for i in ScelteInizio.REGOLAMENTI.size():
+		var t := _tasto(font, str(ScelteInizio.REGOLAMENTI[i]["nome"]),
+			Vector2(rx, y), i == inizio.regolamento, {"che": "regolamento", "n": i}, 60.0)
+		rx += t.size.x + 8.0
+	_hud.draw_string(font, Vector2(rx + 8.0, y + 20.0),
+		"v2: tre risorse, quattro lavoratori, draft dei Personaggi" if inizio.regolamento == 1
+		else "v1.5: le regole congelate", HORIZONTAL_ALIGNMENT_LEFT, -1, 12, Color("#6f7683"))
+	y += RIGA_ALTA
 	y = _riga_scelta(font, "Giocatori", x, y,
 		range(ScelteInizio.MIN_GIOCATORI, ScelteInizio.MAX_GIOCATORI + 1),
 		inizio.giocatori, "giocatori")
 	y = _riga_scelta(font, "di cui bot", x, y,
 		range(0, inizio.giocatori + 1), inizio.bot, "bot")
+	if inizio.bot > 0:
+		y = _riga_velocita(font, x, y)
 
 	# Il seme resta in vista e si puo' cambiare: tutto il progetto e'
 	# deterministico, quindi con lo stesso numero si rigioca la stessa
@@ -726,9 +997,22 @@ func _disegna_scelta(font: Font) -> void:
 	if inizio.umani() == 0:
 		# Senza nessun umano i bot giocano tutto in un colpo: meglio dirlo
 		# prima, o il tavolo gia' finito sembra un difetto.
-		coda = "Senza umani la partita si gioca da sola: vedrai il tavolo finito."
+		coda = "Senza umani la partita si gioca da sola: "
+		coda += "vedrai il tavolo gia' finito." if inizio.bot_subito() \
+			else "la guardi e basta, alla velocita' che hai scelto."
 	_hud.draw_string(font, Vector2(x, r.end.y - 18.0), coda,
 		HORIZONTAL_ALIGNMENT_LEFT, -1, 12, Color("#6f7683"))
+
+# La velocita' dei bot: i nomi al posto dei numeri, ma e' la stessa riga.
+func _riga_velocita(font: Font, x: float, y: float) -> float:
+	_hud.draw_string(font, Vector2(x, y + 20.0), "che si muovono",
+		HORIZONTAL_ALIGNMENT_LEFT, -1, 14, SPENTO)
+	var bx := x + 130.0
+	for i in ScelteInizio.VELOCITA.size():
+		var t := _tasto(font, str(ScelteInizio.VELOCITA[i]["nome"]),
+			Vector2(bx, y), i == inizio.velocita, {"che": "velocita", "n": i})
+		bx += t.size.x + 8.0
+	return y + RIGA_ALTA
 
 # Una riga di scelta: l'etichetta e i numeri, quello scelto acceso.
 func _riga_scelta(font: Font, etichetta: String, x: float, y: float,
@@ -740,7 +1024,7 @@ func _riga_scelta(font: Font, etichetta: String, x: float, y: float,
 		var t := _tasto(font, str(n), Vector2(bx, y), n == scelto,
 			{"che": che, "n": n}, 40.0)
 		bx += t.size.x + 8.0
-	return y + 46.0
+	return y + RIGA_ALTA
 
 # Un tasto: lo disegna e lo mette fra quelli cliccabili. `dato` e' quello che
 # il clic eseguira', cosi' il disegno e il clic non possono divergere.
@@ -762,6 +1046,14 @@ func _applica_scelta(d: Dictionary) -> void:
 		"giocatori": inizio.con_giocatori(int(d["n"]))
 		"bot": inizio.con_bot(int(d["n"]))
 		"seme": inizio.rimescola()
+		"velocita": inizio.con_velocita(int(d["n"]))
+		"regolamento": inizio.con_regolamento(int(d["n"]))
+		"gira_velocita": inizio.velocita_dopo()
+		"riepilogo": _riepilogo_aperto = true
+		"tavolo": _riepilogo_aperto = false
+		"avanza":
+			muovi_un_bot()
+			return
 		"via":
 			comincia()
 			return
@@ -776,14 +1068,14 @@ func _disegna_bottoni(font: Font, p: PlayerState) -> void:
 	var schermo := _hud.get_viewport_rect().size
 	var voci: Array = []
 	var din := AvailableActions.dinastia(ctl.gs, _io())
-	voci.append({"voce": din, "testo": "Dinastia  %dp %do" % [din.pietra, din.oro],
+	voci.append({"voce": din, "testo": "Dinastia  " + DescrizioneAzione.prezzo(din),
 		"attiva": din.legale and din.pagabile(p)})
 	var restauri := AvailableActions.restauri(ctl.gs, _io(), ctl.colonna_attivata())
 	var quanti := 0
 	for r in restauri:
 		if r.legale: quanti += 1
 	voci.append({"voce": null, "modo": "restauro",
-		"testo": "Restaura  (%d)" % quanti, "attiva": quanti > 0})
+		"testo": "%s  (%d)" % [DescrizioneAzione.verbo_restauro(), quanti], "attiva": quanti > 0})
 	var tutte := AvailableActions.tutte(ctl.gs, _io(), ctl.colonna_attivata())
 	voci.append({"voce": tutte[tutte.size() - 1], "testo": "Passa", "attiva": true})
 

@@ -10,14 +10,20 @@ class BuildQuote:
 	var reason: String = ""
 	var pietra: int = 0
 	var oro: int = 0
+	var idee: int = 0              # la terza risorsa: nessuno sconto la tocca
 	var level: int = 0
 	var bases: Array = []          # Building che finiranno sotterrati
 	var razed: Array = []          # tuoi intatti che verrebbero spianati
-	var terrapieno_cols: int = 0
+	# LE COLONNE, non quante sono: la vista deve sapere DOVE la terra e' stata
+	# riportata, per disegnare il riempimento sotto l'edificio. Prima era un
+	# contatore e il terrapieno non si vedeva: l'edificio restava sospeso
+	# sopra il vuoto in quella colonna.
+	var terrapieno_cols: Array[int] = []
 	var continuity_bonus: int = 0
 	var despoiled: Building = null   # rudere depredato, diventa rovina prima di costruire
 	var terrapieno_free_applied: bool = false
 	var terrapieno_pietra: int = 0   # pietra effettivamente spesa in terrapieni
+	var binario: int = 0             # il binario scelto, quando si costruisce a terra
 
 # ---- requisiti di terreno -----------------------------------------
 # Morbidi per pianura/collina/bosco (colonna o adiacente), stretti per fiume.
@@ -67,9 +73,39 @@ static func despoil_reason(gs: GameState, target: Building, col_from: int, col_t
 static func base_cost(data: Dictionary) -> Vector2i:
 	return Vector2i(int(data["cost"]["pietra"]), int(data["cost"]["oro"]))
 
+# Le Idee (v2) stanno accanto a pietra e oro nel costo; nei dati v1.5 mancano
+# e valgono 0. Nessun effetto le sconta: i `cost_delta` parlano di pietra e oro.
+static func base_idee(data: Dictionary) -> int:
+	return int(data["cost"].get("idee", 0))
+
 static func pianura_discount(gs: GameState, data: Dictionary, col_from: int) -> int:
 	if int(data["width"]) >= 2 and gs.grid.terrains[col_from] == Enums.Terrain.PIANURA:
+		# V2 (registro 100): lo sconto e' l'effetto della tessera, una volta per era.
+		if EraRules.tessere_una_volta(gs) and not EraRules.tessera_disponibile(gs, col_from): return 0
 		return 1
+	return 0
+
+# ---- quale binario -------------------------------------------------
+# NORMALMENTE OGNI ERA HA IL SUO: si costruisce a terra solo nel binario
+# dell'era corrente, e quando e' pieno l'unico modo di continuare e' salire.
+# Sulle 10 000 partite misurate ogni era tranne la quinta chiede piu' caselle
+# di quante il suo binario ne abbia - l'era 2 ne chiede 9,6 su 7 - quindi
+# salire non e' una strategia, e' uno sfratto.
+#
+# CON I BINARI LIBERI (la prova: `binari_liberi` fra le costanti, spento) un
+# edificio puo' finire su qualunque binario ancora libero in quelle colonne, e
+# SI RIEMPIE DAL FONDO: il piu' lontano che ha posto. Nessuna scelta in piu'
+# per chi gioca - la regola sceglie da sola - solo piu' terreno: 35 caselle
+# per tutta la partita invece di 7 per era, contro le 39,7 che servono. Salire
+# torna a essere una scelta con un costo.
+# Il fondo si riempie per primo anche per come scorre il tempo: chi gioca
+# l'era 1 trova i binari in fondo vuoti, l'era 2 prende quel che resta e si
+# sposta avanti. La citta' si stratifica in profondita' da sola.
+static func binario_per(gs: GameState, col_from: int, col_to: int) -> int:
+	if not bool(CardDB.constants.get("binari_liberi", false)):
+		return 0 if gs.grid.rail_occupied(gs.era, col_from, col_to) else gs.era
+	for r in range(1, int(CardDB.constants["rails"]) + 1):
+		if not gs.grid.rail_occupied(r, col_from, col_to): return r
 	return 0
 
 # ---- costruzione nel proprio binario ------------------------------
@@ -81,8 +117,10 @@ static func quote_rail(gs: GameState, player: int, data: Dictionary, col_from: i
 		q.reason = "fuori dalla strada"; return q
 	if int(data["era"]) != gs.era:
 		q.reason = "non è un edificio dell'era corrente"; return q
-	if gs.grid.rail_occupied(gs.era, col_from, col_to):
+	var binario := binario_per(gs, col_from, col_to)
+	if binario == 0:
 		q.reason = "caselle occupate nel binario"; return q
+	q.binario = binario
 	if int(data["level_required"]) > 0:
 		q.reason = "richiede livello %d: va costruito sopra" % data["level_required"]; return q
 	if not terrain_ok(gs, data, col_from, col_to, player):
@@ -97,6 +135,7 @@ static func quote_rail(gs: GameState, player: int, data: Dictionary, col_from: i
 	p = _apply_despoil(q, despoil, p)
 	q.pietra = max(0, p)
 	q.oro = max(0, c.y + sconto.y)
+	q.idee = base_idee(data)
 	q.level = 0
 	q.legal = true
 	return q
@@ -136,7 +175,7 @@ static func quote_above(gs: GameState, player: int, data: Dictionary, col_from: 
 			q.reason = "la colonna %d è già salita di un livello in quest'era" % c; return q
 		var top := g.top_of(c)
 		if top == null:
-			q.terrapieno_cols += 1
+			q.terrapieno_cols.append(c)
 			top_level = max(top_level, 0)
 			continue
 		match top.state:
@@ -151,7 +190,11 @@ static func quote_above(gs: GameState, player: int, data: Dictionary, col_from: 
 				# non offre continuita' di classe.
 				if top != despoil and top.shares_class_with(data): q.continuity_bonus = 1
 			Enums.BuildingState.ROVINA:
-				rubble_discount = true
+				# Manopola `sconto_macerie_solo_altrui` (registro 87): lo
+				# sconto vale solo costruendo sopra le rovine degli altri,
+				# per dare un motivo di non seppellire sempre i propri.
+				if top.owner != player or not bool(CardDB.constants.get("sconto_macerie_solo_altrui", false)):
+					rubble_discount = true
 		if not top in q.bases: q.bases.append(top)
 		real_bases += 1
 		top_level = max(top_level, top.level + 1)
@@ -165,7 +208,7 @@ static func quote_above(gs: GameState, player: int, data: Dictionary, col_from: 
 	var c := base_cost(data)
 	# ev_bonifiche: "Il primo terrapieno di ogni giocatore in quest'era costa 0."
 	# Lettura adottata: il primo SLOT di terrapieno, non l'intera costruzione.
-	var billable := q.terrapieno_cols
+	var billable := q.terrapieno_cols.size()
 	if billable > 0 and Effects.has_override(gs, "first_terrapieno_free") \
 			and not gs.players[player].terrapieno_free_used:
 		billable -= 1
@@ -181,6 +224,7 @@ static func quote_above(gs: GameState, player: int, data: Dictionary, col_from: 
 		Effects.sonda(data, player, col_from, q.level))
 	q.pietra = max(0, p + sconto.x)
 	q.oro = max(0, c.y + sconto.y)
+	q.idee = base_idee(data)
 	q.legal = true
 	return q
 

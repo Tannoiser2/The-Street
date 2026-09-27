@@ -34,6 +34,10 @@ func _ready() -> void:
 	_run("Industriale", _test_industriale)
 	_run("Anni della fame", _test_anni_della_fame)
 	_run("Eruzione: il potenziamento in cambio della perdita", _test_eruzione)
+	_run("senza rudere: chi fallisce di poco resta intatto", _test_senza_rudere)
+	_run("spianare conserva lo Scavo: la manopola", _test_scavo_spianato)
+	_run("lo Scavo a chi scava", _test_scavo_a_chi_scava)
+	_run("il premio di scavo: i tre moltiplicatori", _test_premio_scavo)
 	_run("Mercante di ossidiana", _test_mercante_scambi)
 	_run("Ingegnere militare: uno a tua scelta", _test_designazione)
 	_run("  e la designazione al reclutamento", _test_designazione_reclutamento)
@@ -1146,6 +1150,27 @@ func _test_objectives() -> void:
 	_put(a, civ, 3, 4)
 	_ok("  livello 4 la soddisfa", Conditions.met(a, 0, _cond("mo_acropoli")))
 
+	# count_matching con lo stato — Colosseo: "primo il cui edificio
+	# SOPRAVVIVE esposto a 3 eventi". La Vetusta' resta addosso anche a un
+	# edificio crollato, perche' si azzera solo col restauro e una rovina non
+	# si restaura piu': senza chiedere lo stato, il Colosseo lo prendeva un
+	# giocatore su quattordici per un edificio che non era sopravvissuto per
+	# niente (docs/domande-aperte.md punto 81).
+	var col := _scena()
+	var v := _put(col, civ, 1)
+	v.vetusta = 3
+	_ok("Colosseo: un intatto con Vetusta' 3 la soddisfa",
+		Conditions.met(col, 0, _cond("mo_colosseo")))
+	v.state = Enums.BuildingState.RUDERE
+	_ok("  e anche un rudere: e' in piedi, e ha superato i suoi eventi",
+		Conditions.met(col, 0, _cond("mo_colosseo")))
+	v.state = Enums.BuildingState.ROVINA
+	_ok("  ma una rovina no: non e' sopravvissuta",
+		not Conditions.met(col, 0, _cond("mo_colosseo")))
+	v.state = Enums.BuildingState.INTATTO
+	v.is_buried = true
+	_ok("  e nemmeno un sepolto", not Conditions.met(col, 0, _cond("mo_colosseo")))
+
 	# same_column_count — San Clemente: 3 Religione nella STESSA colonna
 	var b := _scena()
 	for c2 in [1, 1, 5]: _put(b, rel, c2)
@@ -1367,10 +1392,21 @@ func _test_colossal() -> void:
 	_ok("3. crollando e' rovina in ogni colonna", rovina_ovunque)
 
 	# 4. "valgono il proprio Scavo UNA SOLA VOLTA"
+	# Il soggetto e' una ROVINA, non un intatto: "una rovina e' sotterrata
+	# quando l'unione degli strati successivi copre interamente la sua
+	# proiezione". Un intatto non finisce mai sotto - chi costruisce sopra lo
+	# spiana prima, e diventa rovina - e il simulatore di riferimento fa lo
+	# stesso. Prima qui si copriva un intatto, che e' uno stato che al tavolo
+	# non si presenta.
 	var b2 := _scena()
 	var big2 := _put(b2, col_id, 1)
+	big2.state = Enums.BuildingState.ROVINA
 	for c in range(big2.col_from, big2.col_to):
-		_put(b2, _card_of_class("civico"), c, 1)      # coprono l'intera proiezione
+		# Chi copre deve POGGIARCI SOPRA: "gli strati successivi" sono quelli
+		# che hanno questo edificio per base, non tutto quello che nella
+		# colonna sta piu' in alto. Il comando lo registra da se' quando si
+		# costruisce; qui, che si fissa lo stato a mano, va scritto a mano.
+		_put(b2, _card_of_class("civico"), c, 1).basi = [big2.uid]
 	b2.grid.refresh_buried()
 	Scoring.final_scoring(b2)
 	var atteso: int = big2.scavo_value()
@@ -1380,13 +1416,21 @@ func _test_colossal() -> void:
 	# 5. "solo quando l'INTERA proiezione e' coperta"
 	var c2 := _scena()
 	var big3 := _put(c2, col_id, 1)
-	_put(c2, _card_of_class("civico"), big3.col_from, 1)   # copre una colonna sola
+	big3.state = Enums.BuildingState.ROVINA
+	_put(c2, _card_of_class("civico"), big3.col_from, 1).basi = [big3.uid]
 	c2.grid.refresh_buried()
 	_ok("5. coperto in parte: NON e' sotterrato", not big3.is_buried)
 	for c in range(big3.col_from + 1, big3.col_to):
-		_put(c2, _card_of_class("civico"), c, 1)
+		_put(c2, _card_of_class("civico"), c, 1).basi = [big3.uid]
 	c2.grid.refresh_buried()
 	_ok("   coperto per intero: e' sotterrato", big3.is_buried)
+
+	# E UN INTATTO NON SI SOTTERRA MAI, per quanto lo si copra: se ne stava
+	# in piedi nel suo binario, e chi costruisce sopra spiana la cima della
+	# colonna, non i cinque edifici che ci stanno a quota zero.
+	big3.state = Enums.BuildingState.INTATTO
+	c2.grid.refresh_buried()
+	_ok("   ma un intatto coperto resta in piedi", not big3.is_buried)
 
 
 # ---- counts_as_class --------------------------------------------------
@@ -2207,3 +2251,134 @@ func _test_omaggio_sospende() -> void:
 	_eq("  e la carta e' finita dove ho detto", y.upgrades.size(), 1)
 	_ok("  il gioco riparte", gs.pending_choice.is_empty())
 	_ok("  e l'era e' avanzata", gs.era == 2 or gs.phase == Enums.Phase.FINE_PARTITA)
+
+# ---- senza rudere ----------------------------------------------------
+# Manopola `senza_rudere`, spenta nei dati: la prima misura dell'audit della
+# nuova meccanica (D15), che toglie lo stato intermedio. Fallire di meno della
+# soglia lascia l'edificio intatto e senza Vetusta' - non ha superato l'evento,
+# l'ha scampato - e fallire di piu' crolla come oggi. Si prova col Diluvio
+# (forza 2) sulla pianura, dove non ha modificatori: le Capanne (resistenza 1)
+# falliscono di 1.
+func _test_senza_rudere() -> void:
+	var com_era: bool = bool(CardDB.constants.get("senza_rudere", false))
+	var soglia := int(CardDB.constants.get("rovina_gap", 2))
+
+	# Spenta: fallire di 1 fa rudere, come sempre.
+	var a := _scena()
+	_flat(a, Enums.Terrain.PIANURA)
+	_set_event(a, "ev_diluvio")
+	var r := _put(a, "ed_capanne", 1)
+	CardDB.constants["senza_rudere"] = false
+	EraRules.resolve_event(a)
+	_eq("spenta: fallire di 1 fa rudere", r.state, Enums.BuildingState.RUDERE)
+
+	# Accesa: lo stesso edificio resta intatto, senza Vetusta'; chi fallisce
+	# di piu' della soglia crolla lo stesso.
+	var b := _scena()
+	_flat(b, Enums.Terrain.PIANURA)
+	_set_event(b, "ev_diluvio")
+	var salvo := _put(b, "ed_capanne", 1)
+	var crolla := _put(b, "ed_capanne", 3)
+	crolla.bonus_res = -soglia
+	CardDB.constants["senza_rudere"] = true
+	EraRules.resolve_event(b)
+	CardDB.constants["senza_rudere"] = com_era
+	_eq("accesa: fallire di 1 lascia intatto", salvo.state, Enums.BuildingState.INTATTO)
+	_eq("  ma senza Vetusta'", salvo.vetusta, 0)
+	_eq("  e fallire oltre la soglia crolla lo stesso", crolla.state, Enums.BuildingState.ROVINA)
+
+# ---- spianare conserva lo Scavo ---------------------------------------
+# Manopola `spianare_conserva_scavo`, spenta nei dati (registro 87): un proprio
+# intatto spianato vale Scavo 0 oggi, il suo Scavo stampato piu' i bonus con
+# la manopola accesa. Il conteggio finale passa da scavo_value(), quindi basta
+# provare quello.
+func _test_scavo_spianato() -> void:
+	var com_era: bool = bool(CardDB.constants.get("spianare_conserva_scavo", false))
+	var gs := _scena()
+	var sp := _put(gs, "ed_capanne", 1)
+	sp.was_razed = true
+	sp.bonus_scavo = 1
+	CardDB.constants["spianare_conserva_scavo"] = false
+	_eq("spenta: lo spianato vale 0", sp.scavo_value(), 0)
+	CardDB.constants["spianare_conserva_scavo"] = true
+	_eq("accesa: vale lo Scavo stampato piu' i bonus", sp.scavo_value(),
+		int(CardDB.buildings["ed_capanne"]["scavo"]) + 1)
+	CardDB.constants["spianare_conserva_scavo"] = com_era
+
+# ---- lo Scavo a chi scava, e il disturbo -------------------------------
+# Manopole `scavo_a_chi_scava` e `disturbo_vp` (registro 87 e 88), spente nei
+# dati. Due sepolti: uno del giocatore 1 sepolto dal giocatore 0 nell'era 3, e
+# uno del giocatore 0 sepolto da lui stesso nell'era 5. Oggi lo Scavo va ai
+# proprietari e il disturbo non si conta; con `disturbo_vp` 1 chi ha sepolto
+# l'altrui prende 1 in piu'; con `scavo_a_chi_scava` lo Scavo dell'altrui va
+# a chi ha scavato e il proprio sepolto da se' vale 0.
+func _scena_sepolti() -> GameState:
+	var gs := _scena()
+	var altrui := _put(gs, "ed_capanne", 1, 0, Enums.BuildingState.ROVINA)
+	altrui.owner = 1
+	altrui.is_buried = true
+	altrui.buried_by = 0
+	altrui.buried_era = 3
+	var proprio := _put(gs, "ed_capanne", 3, 0, Enums.BuildingState.ROVINA)
+	proprio.is_buried = true
+	proprio.buried_by = 0
+	proprio.buried_era = 5
+	return gs
+
+func _scavo_di(gs: GameState, chi: int) -> int:
+	return int(gs.players[chi].vp_breakdown.get("scavo", 0))
+
+func _test_scavo_a_chi_scava() -> void:
+	var scava_era: bool = bool(CardDB.constants.get("scavo_a_chi_scava", false))
+	var v := int(CardDB.buildings["ed_capanne"]["scavo"])
+
+	CardDB.constants["scavo_a_chi_scava"] = false
+	var a := _scena_sepolti()
+	Scoring._scavo(a)
+	_eq("oggi: lo Scavo dell'altrui va al suo proprietario", _scavo_di(a, 1), v)
+	_eq("  e chi l'ha sepolto prende solo il proprio", _scavo_di(a, 0), v)
+	# Il "+1 per il disturbo" del regolamento non esiste piu' (registro 100).
+	_ok("  e nessun punto per il disturbo", not CardDB.constants.has("disturbo_vp"))
+
+	CardDB.constants["scavo_a_chi_scava"] = true
+	var c := _scena_sepolti()
+	Scoring._scavo(c)
+	_eq("a chi scava: lo Scavo dell'altrui va a chi ha scavato", _scavo_di(c, 0), v)
+	_eq("  il proprietario sepolto non prende nulla", _scavo_di(c, 1), 0)
+	_eq("  il proprio sepolto da se' vale 0 (non e' contato due volte)", int(c.players[0].counters.get("scavo_scavato", 0)), v)
+	_eq("  e l'era 5 conta solo lo scavato altrui", int(c.players[0].counters.get("scavo_e5", 0)), 0)
+
+	CardDB.constants["scavo_a_chi_scava"] = scava_era
+
+# ---- il premio di scavo ----------------------------------------------
+# Manopola `premio_scavo` (registro 89), "nessuno" nei dati: chi costruisce al
+# livello L sopra un edificio con Scavo S lo incassa subito, con uno dei tre
+# moltiplicatori. Lo spianato (S = 0) non paga in nessun modo.
+func _test_premio_scavo() -> void:
+	var com_era: String = str(CardDB.constants.get("premio_scavo", "nessuno"))
+	CardDB.constants["premio_scavo"] = "nessuno"
+	_eq("spenta: niente premio", Scoring.premio_scavo(3, 2), 0)
+	CardDB.constants["premio_scavo"] = "per_livello"
+	_eq("S x L: 3 al livello 2 paga 6", Scoring.premio_scavo(3, 2), 6)
+	_eq("  al livello 1 paga 3", Scoring.premio_scavo(3, 1), 3)
+	_eq("  lo spianato non paga", Scoring.premio_scavo(0, 3), 0)
+	CardDB.constants["premio_scavo"] = "piu_livello"
+	_eq("S + L: 3 al livello 2 paga 5", Scoring.premio_scavo(3, 2), 5)
+	_eq("  lo spianato non paga nemmeno il livello", Scoring.premio_scavo(0, 3), 0)
+	CardDB.constants["premio_scavo"] = "per_livello_meno_uno"
+	_eq("S x (L-1): al livello 1 paga 0", Scoring.premio_scavo(3, 1), 0)
+	_eq("  al livello 3 paga 6", Scoring.premio_scavo(3, 3), 6)
+	# La correzione all'ultima era (registro 91).
+	var era5_com_era: String = str(CardDB.constants.get("premio_era5", "intero"))
+	var ultima := int(CardDB.constants["eras"])
+	CardDB.constants["premio_scavo"] = "per_livello"
+	CardDB.constants["premio_era5"] = "intero"
+	_eq("era 5 intera: 3 al livello 3 paga 9", Scoring.premio_scavo(3, 3, ultima), 9)
+	CardDB.constants["premio_era5"] = "dimezzato"
+	_eq("  dimezzata: paga 4", Scoring.premio_scavo(3, 3, ultima), 4)
+	_eq("  ma nell'era 4 paga 9", Scoring.premio_scavo(3, 3, ultima - 1), 9)
+	CardDB.constants["premio_era5"] = "niente"
+	_eq("  niente: paga 0", Scoring.premio_scavo(3, 3, ultima), 0)
+	CardDB.constants["premio_era5"] = era5_com_era
+	CardDB.constants["premio_scavo"] = com_era
+

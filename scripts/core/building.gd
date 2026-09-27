@@ -6,13 +6,34 @@ extends RefCounted
 var uid: int
 var data: Dictionary          # riga di cards.json (buildings)
 var owner: int
-var era_built: int            # era in cui è stato costruito (= binario se livello 0)
+var era_built: int            # era in cui è stato costruito
+# IL BINARIO SU CUI POGGIA, quando sta a terra. Finche' ogni era ha il suo
+# binario i due numeri coincidono e questo resta 0: si deduce dall'era, com'e'
+# sempre stato. Serve per provare i "binari liberi", dove un edificio di
+# un'era puo' finire sul binario di un'altra e l'era non basta piu' a dire
+# dove sta. Un sopraelevato non ha binario: la sua profondita' viene dalle
+# basi su cui poggia.
+var binario: int = 0
 var col_from: int             # prima colonna occupata (inclusa)
 var col_to: int               # ultima colonna occupata (esclusa)
 var level: int = 0            # 0 = nel binario; >0 = sopraelevato
 var state: int = Enums.BuildingState.INTATTO
 var is_buried: bool = false   # condizione di posizione: qualcosa è stato costruito sopra
 var was_razed: bool = false   # spianato dal proprietario da intatto -> Scavo 0
+# CHI LO HA SEPOLTO, E IN CHE ERA: il giocatore la cui costruzione ha
+# completato la copertura (-1 se nessuno, cioe' mai sepolto o sepolto dal
+# ricalcolo a fine era). Serve al punto per il disturbo del regolamento, alla
+# manopola `scavo_a_chi_scava` (registro 87) e all'audit.
+var buried_by: int = -1
+var buried_era: int = 0
+# Su chi poggia: gli uid degli edifici che gli fanno da base. Si fissano
+# quando lo si costruisce e non cambiano piu', perche' la sagoma non deve
+# muoversi quando qualcun altro costruisce li' vicino.
+var basi: Array[int] = []
+# Le colonne in cui, per poggiare qui, e' stata riportata terra: sotto non
+# c'era niente e si e' pagato un terrapieno. Serve alla vista per riempire
+# il vuoto sotto l'edificio, che altrimenti resta sospeso.
+var terrapieno_cols: Array[int] = []
 var bonus_res: int = 0        # cubetti neri: collina, continuità, potenziamenti Struttura
 var bonus_scavo: int = 0      # Impronte e potenziamenti che alzano lo Scavo
 var bonus_rendita: int = 0    # Stalli mercantili: "l'affitto incassato da questo edificio e' +1"
@@ -27,9 +48,73 @@ var upgrades: Array = []      # id dei potenziamenti infilati sotto
 var patrons: Dictionary = {}
 var extra_classes: Array[String] = []  # classi acquisite (po_merlatura: "conta anche come Militare")
 var imprint: String = ""      # Impronta infilata sotto: "un edificio puo' portarne una sola"
+# Chi sta sepolto qui (meccanica Scheletri): l'id di un Personaggio nella
+# v1.5, oppure LAVORATORE nella v2, dove lo scheletro lo lascia il lavoratore
+# che piazza il potenziamento (registri 95-96). Non e' una carta: la vista
+# non deve cercarlo nel mazzo dei Personaggi.
+const LAVORATORE := "lavoratore"
 var buried_character: String = ""   # personaggio sepolto qui (meccanica Scheletri)
 var buried_character_era: int = 0
 var charges: int = 0          # cubetti carica per edifici Esauribili
+# Quanto ha reso, canale per canale. Il nucleo i punti li divide gia' per
+# canale quando li segna al giocatore (PlayerState.vp_breakdown); qui li
+# divide anche per CARTA, perche' "quanto vale questo edificio in una
+# partita vera" e' una domanda da designer a cui lo stato sapeva rispondere
+# solo a meta'. Non cambia niente di quello che succede: e' un libro mastro.
+var vp_reso: Dictionary = {}      # canale -> punti fruttati al proprietario
+
+func rende(canale: String, quanti: int) -> void:
+	if quanti == 0: return
+	vp_reso[canale] = int(vp_reso.get(canale, 0)) + quanti
+
+func vp_totali() -> int:
+	var t := 0
+	for c in vp_reso: t += int(vp_reso[c])
+	return t
+
+# UNA COPIA SU CUI PROVARE. Serve a chi vuole simulare una mossa senza
+# giocarla: si copia lo stato, ci si gioca sopra e si guarda com'e' andata.
+# `data` NON si copia - e' la riga di cards.json, la stessa per tutte le
+# istanze di quella carta, e va condivisa: duplicarla vorrebbe dire avere
+# sessanta copie della stessa carta per ogni copia dello stato, e soprattutto
+# perdere l'identita' che il resto del codice confronta.
+func duplica() -> Building:
+	var b := Building.new()
+	b.uid = uid
+	b.data = data                  # condivisa di proposito
+	b.owner = owner
+	b.era_built = era_built
+	b.binario = binario
+	b.col_from = col_from
+	b.col_to = col_to
+	b.level = level
+	b.state = state
+	b.is_buried = is_buried
+	b.was_razed = was_razed
+	b.buried_by = buried_by
+	b.buried_era = buried_era
+	b.basi = basi.duplicate()
+	b.terrapieno_cols = terrapieno_cols.duplicate()
+	b.bonus_res = bonus_res
+	b.bonus_scavo = bonus_scavo
+	b.bonus_rendita = bonus_rendita
+	b.vetusta = vetusta
+	b.protection = protection
+	b.protected_by = protected_by
+	b.upgrades = upgrades.duplicate()
+	b.patrons = patrons.duplicate(true)
+	b.extra_classes = extra_classes.duplicate()
+	b.imprint = imprint
+	b.buried_character = buried_character
+	b.buried_character_era = buried_character_era
+	b.charges = charges
+	b.vp_reso = vp_reso.duplicate(true)
+	return b
+
+# Su che binario sta, a terra: quello scelto costruendo, o quello della sua
+# era per tutto il resto del gioco e per le partite salvate prima.
+func binario_effettivo() -> int:
+	return binario if binario > 0 else era_built
 
 func width() -> int:
 	return col_to - col_from
@@ -65,7 +150,11 @@ func effective_resistance() -> int:
 	return r
 
 func scavo_value() -> int:
-	if was_razed: return 0
+	# "Spianare azzera lo Scavo" e' la regola v1.5. La nuova meccanica dice che
+	# lo Scavo non si azzera mai (registro 87): manopola `spianare_conserva_scavo`,
+	# spenta nei dati, per misurare quanto spinge a seppellire i propri.
+	if was_razed and not bool(CardDB.constants.get("spianare_conserva_scavo", false)):
+		return 0
 	return int(data["scavo"]) + bonus_scavo
 
 # La Rendita effettiva: quella stampata piu' i potenziamenti che la alzano.

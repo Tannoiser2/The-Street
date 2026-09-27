@@ -52,11 +52,18 @@
     "vetusta_max": 3,
     "vetusta_max_bosco": 4,
     "rudere_penalty": 2,
+    "rovina_gap": 3,
+    "senza_rudere": false,
+    "spianare_conserva_scavo": false,
+    "scavo_a_chi_scava": false,
+    "sconto_macerie_solo_altrui": false,
+    "premio_scavo": "nessuno",
+    "binari_liberi": true,
     "verticality_vp": {
       "1": 2,
-      "2": 6,
-      "3": 12,
-      "4": 20
+      "2": 5,
+      "3": 9,
+      "4": 14
     },
     "continuity_vp": {
       "2": 2,
@@ -75,7 +82,8 @@
     "prosperity": {
       "min_buildings": 3,
       "min_owners": 2,
-      "gold_per_owner": 1
+      "gold_per_owner": 1,
+      "once_per_era": true
     },
     "level_cap_per_era_per_column": 1,
     "market_size": 6,
@@ -3977,6 +3985,11 @@
         "op": "count_matching",
         "target": {
           "owner": "self",
+          "state": [
+            "intatto",
+            "rudere"
+          ],
+          "buried": false,
           "vetusta": {
             "min": 3
           }
@@ -4385,6 +4398,11 @@
           "terrain": [
             "bosco"
           ],
+          "state": [
+            "intatto",
+            "rudere"
+          ],
+          "buried": false,
           "vetusta": {
             "min": 3
           }

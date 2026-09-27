@@ -56,7 +56,7 @@ static func terrain_rect(gs: GameState, col: int) -> Rect2:
 static func building_rect(gs: GameState, b: Building) -> Rect2:
 	var w := span_w(b.width())
 	if b.level == 0:
-		return Rect2(Vector2(col_x(b.col_from), rail_y(gs, b.era_built)), Vector2(w, CELL.y))
+		return Rect2(Vector2(col_x(b.col_from), rail_y(gs, b.binario_effettivo())), Vector2(w, CELL.y))
 	var y: float = ORIGIN.y + stack_h(gs) - STACK_GAP - b.level * (LEVEL_H + GUTTER)
 	return Rect2(Vector2(col_x(b.col_from), y), Vector2(w, LEVEL_H))
 

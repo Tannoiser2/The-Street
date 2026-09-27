@@ -52,6 +52,14 @@ Produce tre cose, con gradi di affidabilità molto diversi.
    controllato voce per voce: qui, a differenza delle carte edificio, i numeri
    del PDF non sono obsoleti.
 
+4. GLI ORIGINALI DISEGNATI in materiali/*.png — sfondo del cielo, banner dello
+   Scavo, terra del terrapieno, gettoni dello scheletro. Non vengono dai PDF di
+   stampa: sono immagini che il designer manda una per una, disegnate e non
+   impaginate, quindi le strisce e le caselle non sono mai larghe uguali.
+   Qui si ritrovano una per una e si rimettono in atlanti regolari, così la
+   vista prende la riga o la casella che le serve con una divisione e non sa
+   niente di com'era fatta l'immagine di partenza.
+
 Uso:  python3 tools/estrai_grafica.py [cartella_destinazione]
       (default: assets/)
 """
@@ -144,6 +152,227 @@ def senza_fondo(percorso, soglia=232):
         rgba[i * 4 + 2] = s[b + 2]
         rgba[i * 4 + 3] = 0 if fondo[i] else 255
     return pymupdf.Pixmap(pymupdf.csRGB, w, h, bytes(rgba), True)
+
+
+# IL BANNER DELLO SCAVO: una striscia di terra e macerie per valore, dallo 0
+# in su, con il numero in fondo a destra.
+#
+# L'immagine del designer e' DISEGNATA, non impaginata: le strisce sono
+# separate da righe bianche e sono alte una diversa dall'altra (fra 80 e 117
+# pixel nell'originale a dieci valori). Prendendola a fette uguali il numero
+# finirebbe mezzo tagliato, e a valori diversi in modo diverso.
+#
+# Qui si trovano i separatori, si ritaglia striscia per striscia e si
+# ricompone un atlante con righe TUTTE UGUALI. Cosi' la vista prende la riga
+# del valore N con una divisione e non sa niente di come era fatta l'immagine
+# di partenza; e se il designer ne manda una nuova, le strisce si ritrovano
+# da sole.
+SCAVO_RIGHE_ATTESE = 10
+
+def strisce_orizzontali(pix, soglia=235, quota=0.9, minimo=20):
+    """Le fasce di contenuto fra le righe quasi bianche. Restituisce
+    [(y0, y1), ...] dall'alto in basso."""
+    larghezza, altezza, n = pix.width, pix.height, pix.n
+    dati = pix.samples
+    passo = max(1, larghezza // 400)          # non serve guardarli tutti
+    bianca = []
+    for y in range(altezza):
+        chiari = campioni = 0
+        base = y * pix.stride
+        for x in range(0, larghezza, passo):
+            i = base + x * n
+            campioni += 1
+            if dati[i] > soglia and dati[i + 1] > soglia and dati[i + 2] > soglia:
+                chiari += 1
+        bianca.append(chiari / campioni > quota)
+    fasce, inizio = [], None
+    for y in range(altezza):
+        if not bianca[y] and inizio is None:
+            inizio = y
+        elif bianca[y] and inizio is not None:
+            if y - inizio >= minimo:
+                fasce.append((inizio, y))
+            inizio = None
+    if inizio is not None and altezza - inizio >= minimo:
+        fasce.append((inizio, altezza))
+
+    # Si stringe ancora un po' da sopra e da sotto: fra una striscia e l'altra
+    # c'e' una sfumatura di due o tre pixel che non e' bianca abbastanza da
+    # contare come separatore ma sul tavolo si vede eccome - una riga chiara
+    # fra una basetta e quella sopra, che sembra un buco nella costruzione.
+    def chiara(y, quanto=0.22):
+        chiari = campioni = 0
+        base = y * pix.stride
+        for x in range(0, larghezza, passo):
+            i = base + x * n
+            campioni += 1
+            if dati[i] > soglia and dati[i + 1] > soglia and dati[i + 2] > soglia:
+                chiari += 1
+        return chiari / campioni > quanto
+
+    strette = []
+    for y0, y1 in fasce:
+        while y0 < y1 - minimo and chiara(y0):
+            y0 += 1
+        while y1 - 1 > y0 + minimo and chiara(y1 - 1):
+            y1 -= 1
+        # E comunque due pixel per parte: il confine fra la terra e il bianco
+        # non e' netto, e quel che resta della sfumatura da ingrandito torna a
+        # sembrare una riga di luce fra una basetta e l'altra.
+        orlo = 2
+        if y1 - y0 > 2 * orlo + minimo:
+            y0, y1 = y0 + orlo, y1 - orlo
+        strette.append((y0, y1))
+    return strette
+
+
+def normalizza_scavo(fonte, uscita):
+    if not os.path.exists(fonte):
+        print("banner dello Scavo: manca materiali/Scavo.png")
+        return
+    pix = pymupdf.Pixmap(fonte)
+    fasce = strisce_orizzontali(pix)
+    if not fasce:
+        print(f"banner dello Scavo: {pix.width}x{pix.height} px, nessuna "
+              "striscia riconosciuta - copiato tale e quale")
+        with open(fonte, "rb") as a, open(uscita, "wb") as b:
+            b.write(a.read())
+        return
+    # L'altezza della riga e' la MEDIANA delle strisce, non la massima: una
+    # sola striscia un po' piu' alta delle altre - l'ultima, che si porta
+    # dietro il margine del foglio - allargherebbe tutte le righe del 40% e
+    # il disegno uscirebbe stirato in verticale. Con la mediana le strisce
+    # tengono le proporzioni che hanno sul foglio, che sono poi quelle della
+    # basetta da tre slot.
+    altezze = sorted(y1 - y0 for y0, y1 in fasce)
+    alta = altezze[len(altezze) // 2]
+    doc = pymupdf.open()
+    pagina = doc.new_page(width=pix.width, height=alta * len(fasce))
+    for i, (y0, y1) in enumerate(fasce):
+        # La fetta si ritaglia copiando le righe di pixel: il costruttore
+        # che prende un rettangolo non c'e' in tutte le versioni di pymupdf.
+        fetta = pymupdf.Pixmap(pix.colorspace, pix.width, y1 - y0,
+                               pix.samples[y0 * pix.stride:y1 * pix.stride],
+                               pix.alpha)
+        # keep_proportion=False: la fetta deve RIEMPIRE la riga. Lasciandolo
+        # vero, una striscia piu' alta delle altre veniva rimpicciolita e
+        # centrata, e sul tavolo si vedeva un banner piu' corto degli altri.
+        pagina.insert_image(
+            pymupdf.Rect(0, i * alta, pix.width, (i + 1) * alta), pixmap=fetta,
+            keep_proportion=False)
+    pagina.get_pixmap(matrix=pymupdf.Identity).save(uscita)
+    print(f"banner dello Scavo: {len(fasce)} strisce (valori 0-{len(fasce) - 1}) "
+          f"da {pix.width}x{alta} px")
+    if len(fasce) != SCAVO_RIGHE_ATTESE:
+        print(f"  ATTENZIONE: la vista ne aspetta {SCAVO_RIGHE_ATTESE} "
+              f"(BoardLayout3D.SCAVO_RIGHE): aggiorna la costante")
+
+
+# I GETTONI DELLO SCHELETRO: il personaggio sepolto sotto un edificio, uno
+# per era. Valgono 6 meno l'era in cui sono stati sepolti - 5, 4, 3, 2 - e
+# sono quattro perche' quattro sono le ere che seppelliscono: "i personaggi
+# dell'era Moderna si scartano" (EraRules.bury_characters).
+#
+# L'originale del designer e' una fila di quattro tessere su fondo bianco,
+# separate da colonne bianche e ognuna larga e alta a modo suo. Come per il
+# banner dello Scavo si ritrovano una per una e si rimettono in caselle tutte
+# uguali, cosi' la vista prende la casella dell'era N con una divisione. Il
+# bianco attorno agli angoli arrotondati se ne va con lo stesso riempimento
+# dai bordi che pulisce le sagome: il gettone sul tavolo e' fustellato, non
+# un quadrato bianco.
+SCHELETRI_ATTESI = 4
+
+def colonne_verticali(pix, soglia=235, quota=0.9, minimo=20):
+    """Le fasce di contenuto fra le colonne quasi bianche. Restituisce
+    [(x0, x1), ...] da sinistra a destra."""
+    larghezza, altezza, n = pix.width, pix.height, pix.n
+    dati = pix.samples
+    passo = max(1, altezza // 400)
+    def chiara(x, quanto=quota):
+        chiari = campioni = 0
+        for y in range(0, altezza, passo):
+            i = y * pix.stride + x * n
+            campioni += 1
+            if dati[i] > soglia and dati[i + 1] > soglia and dati[i + 2] > soglia:
+                chiari += 1
+        return chiari / campioni > quanto
+    bianca = [chiara(x) for x in range(larghezza)]
+    fasce, inizio = [], None
+    for x in range(larghezza):
+        if not bianca[x] and inizio is None:
+            inizio = x
+        elif bianca[x] and inizio is not None:
+            if x - inizio >= minimo:
+                fasce.append((inizio, x))
+            inizio = None
+    if inizio is not None and larghezza - inizio >= minimo:
+        fasce.append((inizio, larghezza))
+    return fasce
+
+
+def _altezza_utile(pix, x0, x1, soglia=235, quota=0.98, minimo=20):
+    """Dove comincia e dove finisce il disegno dentro una colonna."""
+    n, dati = pix.n, pix.samples
+    passo = max(1, (x1 - x0) // 200)
+    def chiara(y):
+        chiari = campioni = 0
+        base = y * pix.stride
+        for x in range(x0, x1, passo):
+            i = base + x * n
+            campioni += 1
+            if dati[i] > soglia and dati[i + 1] > soglia and dati[i + 2] > soglia:
+                chiari += 1
+        return chiari / campioni > quota
+    y0, y1 = 0, pix.height
+    while y0 < y1 - minimo and chiara(y0):
+        y0 += 1
+    while y1 - 1 > y0 + minimo and chiara(y1 - 1):
+        y1 -= 1
+    return y0, y1
+
+
+def normalizza_scheletri(fonte, uscita):
+    if not os.path.exists(fonte):
+        print("gettoni dello scheletro: manca materiali/Scheletri.png")
+        return
+    pix = pymupdf.Pixmap(fonte)
+    if pix.n > 3:
+        pix = pymupdf.Pixmap(pymupdf.csRGB, pix)
+    colonne = colonne_verticali(pix)
+    if not colonne:
+        print(f"gettoni dello scheletro: {pix.width}x{pix.height} px, nessun "
+              "gettone riconosciuto - copiato tale e quale")
+        with open(fonte, "rb") as a, open(uscita, "wb") as b:
+            b.write(a.read())
+        return
+    tessere = [(x0, x1) + _altezza_utile(pix, x0, x1) for x0, x1 in colonne]
+    # La casella e' la MEDIANA, come per il banner: un gettone un filo piu'
+    # largo degli altri non deve stirare tutta la fila.
+    larga = sorted(x1 - x0 for x0, x1, _, _ in tessere)[len(tessere) // 2]
+    alta = sorted(y1 - y0 for _, _, y0, y1 in tessere)[len(tessere) // 2]
+    doc = pymupdf.open()
+    pagina = doc.new_page(width=larga * len(tessere), height=alta)
+    for i, (x0, x1, y0, y1) in enumerate(tessere):
+        # Si ritaglia riga per riga: il costruttore che prende un rettangolo
+        # non c'e' in tutte le versioni di pymupdf.
+        righe = bytearray()
+        for y in range(y0, y1):
+            base = y * pix.stride
+            righe += pix.samples[base + x0 * pix.n:base + x1 * pix.n]
+        fetta = pymupdf.Pixmap(pix.colorspace, x1 - x0, y1 - y0, bytes(righe),
+                               pix.alpha)
+        pagina.insert_image(
+            pymupdf.Rect(i * larga, 0, (i + 1) * larga, alta), pixmap=fetta,
+            keep_proportion=False)
+    grezzo = uscita + ".tmp.png"
+    pagina.get_pixmap(matrix=pymupdf.Identity).save(grezzo)
+    senza_fondo(grezzo).save(uscita)
+    os.remove(grezzo)
+    print(f"gettoni dello scheletro: {len(tessere)} gettoni (valori "
+          f"{6 - 1}-{6 - len(tessere)}) da {larga}x{alta} px")
+    if len(tessere) != SCHELETRI_ATTESI:
+        print(f"  ATTENZIONE: la vista ne aspetta {SCHELETRI_ATTESI} "
+              f"(BoardLayout3D.SCHELETRI_COLONNE): aggiorna la costante")
 
 
 def estrai_sagome(doc, dest):
@@ -465,9 +694,13 @@ def main(dest):
     if mancanti:
         print("NEI PDF NON CI SONO -> " + "; ".join(mancanti))
 
-    # Lo sfondo del cielo sta in materiali/ come gli altri originali, ma
-    # quella cartella ha un .gdignore: Godot non ci guarda dentro. Va quindi
-    # copiato fra gli asset, dove il resto della grafica gia' vive.
+    # Lo sfondo del cielo e il banner dello Scavo stanno in materiali/ come
+    # gli altri originali, ma quella cartella ha un .gdignore: Godot non ci
+    # guarda dentro. Vanno quindi copiati fra gli asset, dove il resto della
+    # grafica gia' vive. Non si ritagliano qui: il banner e' una striscia
+    # sola con cinque righe, e a prendere la riga giusta ci pensa la vista
+    # con le coordinate della texture - cosi' aggiungerne una domani vuol dire
+    # cambiare l'immagine e basta.
     sfondo = os.path.join(ROOT, "materiali", "Sfondo.png")
     if os.path.exists(sfondo):
         os.makedirs(dest, exist_ok=True)
@@ -478,6 +711,39 @@ def main(dest):
               f"(rapporto {pix.width / pix.height:.3f})")
     else:
         print("sfondo del cielo: manca materiali/Sfondo.png")
+
+    normalizza_scavo(os.path.join(ROOT, "materiali", "Scavo.png"),
+                     os.path.join(dest, "scavo.png"))
+
+    # Il terrapieno ha un disegno suo: una sezione di terra senza macerie e
+    # senza numero, perche' li' non c'e' niente da contare. Una striscia sola,
+    # quindi si copia e basta.
+    terra = os.path.join(ROOT, "materiali", "Terrapieno.png")
+    if os.path.exists(terra):
+        with open(terra, "rb") as a, open(os.path.join(dest, "terrapieno.png"), "wb") as b:
+            b.write(a.read())
+        pix = pymupdf.Pixmap(terra)
+        print(f"terra del terrapieno: {pix.width}x{pix.height} px "
+              f"(rapporto {pix.width / pix.height:.2f})")
+    else:
+        print("terra del terrapieno: manca materiali/Terrapieno.png")
+
+    # Il cartellino della Prosperita' Urbana: si posa sulla fascia in fondo
+    # alla tessera, quella dove la scritta c'e' gia' stampata, e dice che quel
+    # Centro Urbano e' ATTIVO adesso. Un'immagine sola, quindi si copia e
+    # basta - ha gia' il fondo trasparente attorno alla cornice.
+    prosp = os.path.join(ROOT, "materiali", "ProsperitaUrbana.png")
+    if os.path.exists(prosp):
+        with open(prosp, "rb") as a, open(os.path.join(dest, "prosperita.png"), "wb") as b:
+            b.write(a.read())
+        pix = pymupdf.Pixmap(prosp)
+        print(f"cartellino della Prosperita': {pix.width}x{pix.height} px "
+              f"(rapporto {pix.width / pix.height:.2f})")
+    else:
+        print("cartellino della Prosperita': manca materiali/ProsperitaUrbana.png")
+
+    normalizza_scheletri(os.path.join(ROOT, "materiali", "Scheletri.png"),
+                         os.path.join(dest, "scheletri.png"))
 
     sag = estrai_sagome(doc, dest)
     with open(os.path.join(dest, "indice.json"), "w", encoding="utf-8") as f:

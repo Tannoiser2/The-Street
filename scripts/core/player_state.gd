@@ -6,6 +6,11 @@ var index: int
 var name: String = ""
 var pietra: int = 0
 var oro: int = 0
+# LA TERZA RISORSA della nuova meccanica (Idee). Nei dati v1.5 nessuna carta
+# la chiede ne' la produce, quindi resta a zero e il gioco e' identico; con
+# `data/cards-v2.json` entra in gioco. Pietra e oro tengono i nomi vecchi nel
+# codice (Costruzione e Denaro nella v2): rinominarli non cambierebbe niente.
+var idee: int = 0
 var workers: int = 3
 var workers_used: int = 0
 var has_dynasty: bool = false
@@ -40,6 +45,31 @@ var character_targets: Dictionary = {}
 # perche' non sono ricavabili dalla plancia finale.
 var counters: Dictionary = {}
 
+# Una copia su cui provare: vedi Building.duplica.
+func duplica() -> PlayerState:
+	var p := PlayerState.new(index)
+	p.name = name
+	p.pietra = pietra
+	p.oro = oro
+	p.idee = idee
+	p.workers = workers
+	p.workers_used = workers_used
+	p.has_dynasty = has_dynasty
+	p.buildings_built = buildings_built
+	p.vp = vp
+	p.vp_breakdown = vp_breakdown.duplicate(true)
+	p.legacy_id = legacy_id
+	p.monuments_claimed = monuments_claimed.duplicate()
+	p.specialized_characters = specialized_characters.duplicate()
+	p.worker_cols = worker_cols.duplicate()
+	p.terrapieno_free_used = terrapieno_free_used
+	p.recruited_total = recruited_total
+	p.final_characters = final_characters.duplicate()
+	p.effect_used = effect_used.duplicate(true)
+	p.character_targets = character_targets.duplicate(true)
+	p.counters = counters.duplicate(true)
+	return p
+
 func bump(nome: String, quanto: int = 1) -> void:
 	counters[nome] = int(counters.get(nome, 0)) + quanto
 
@@ -54,21 +84,25 @@ func reset_for_era() -> void:
 func _init(i: int) -> void:
 	index = i
 
-func can_pay(p: int, o: int) -> bool:
-	return pietra >= p and oro >= o
+func can_pay(p: int, o: int, i: int = 0) -> bool:
+	return pietra >= p and oro >= o and idee >= i
 
-func pay(p: int, o: int) -> void:
-	assert(can_pay(p, o), "Pagamento non coperto")
+func pay(p: int, o: int, i: int = 0) -> void:
+	assert(can_pay(p, o, i), "Pagamento non coperto")
 	pietra -= p
 	oro -= o
+	idee -= i
+	if i > 0: bump("idee_spese", i)
 
-func gain(p: int, o: int) -> void:
+func gain(p: int, o: int, i: int = 0) -> void:
 	pietra += p
 	oro += o
+	idee += i
+	if i > 0: bump("idee_prodotte", i)
 
 func add_vp(channel: String, amount: int) -> void:
 	vp += amount
 	vp_breakdown[channel] = vp_breakdown.get(channel, 0) + amount
 
 func total_resources() -> int:
-	return pietra + oro
+	return pietra + oro + idee

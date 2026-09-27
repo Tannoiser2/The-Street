@@ -1089,3 +1089,934 @@ dato è stato importato da lì. Ma due confronti fra ciò che è stampato e
     Il PNG del cielo pero' **non e' arrivato**: nel repository non c'e'
     nessuna immagine. Finche' non c'e', il pannello resta a tinta unita.
 
+
+78. **"Intatto e sepolto" era uno stato che al tavolo non esiste.** Il
+    designer l'ha visto nel riquadro di un edificio - *"come fa il condominio
+    a essere intatto e sepolto? E' cosi' per molti edifici, infatti vedo alla
+    fine della partita solo tre sagome"* - e aveva ragione.
+
+    `Grid.refresh_buried` sotterrava **qualsiasi** edificio la cui proiezione
+    fosse coperta da uno strato piu' alto. Ma a quota zero una colonna porta
+    fino a **cinque** edifici, uno per binario d'era: il primo strato
+    costruito sopra ne sotterrava cinque invece di uno. Gli altri quattro
+    restavano INTATTI e sepolti - smettevano di produrre, regalavano lo Scavo
+    al proprietario e sparivano dal tabellone.
+
+    Le due fonti dicono la stessa cosa, e nessuna delle due permette quello
+    stato:
+
+    - il regolamento: *"E' sotterrato qualsiasi edificio su cui e' stata
+      costruita una sopraelevazione"* e *"**una rovina** e' sotterrata quando
+      l'unione degli strati successivi copre interamente la sua proiezione"*.
+      Chi fa da base viene prima spianato o schiacciato, quindi quando viene
+      sotterrato e' gia' rovina;
+    - `reference/simulatore_riferimento.py`, l'oracolo su cui il gioco e'
+      stato bilanciato, sotterra **solo la base** (una per colonna, scelta da
+      `ground_level`) e la marca `spianata` se era intatta, `sotterrata`
+      altrimenti. Nessun altro edificio della colonna viene toccato, e
+      `intact` + sepolto non si presenta mai.
+
+    Correzione adottata: si sotterra **solo una rovina**, e solo quando
+    l'intera proiezione e' coperta. Il ricalcolo gira anche dopo l'evento di
+    fine era, che e' l'unico altro punto in cui uno stato cambia da solo: un
+    edificio gia' coperto restava in piedi finche' era intatto, e crollando
+    diventa archeologia.
+
+    **Ha conseguenze sui punteggi, e vanno riviste in una partita vera**: su
+    otto partite a tre giocatori i sepolti passano da 147 su 225 a 137 su
+    243, e le sagome in piedi a fine partita da 33 a 80. Meno Scavo, piu'
+    rendita e piu' vetusta': e' il conto che il simulatore faceva gia', ma il
+    porting no.
+
+79. **Il banner dello Scavo ha cinque righe, i valori stampati arrivano a 6.**
+    L'immagine `materiali/Scavo.png` porta cinque strisce, una per valore, dallo
+    **0 al 4**. I valori di Scavo in `data/cards.json` sono invece **0, 2, 3, 5,
+    6**: il 4 e l'1 non esistono su nessuna carta, e otto edifici stanno oltre la
+    scala —
+
+    | valore | carte |
+    |---|---|
+    | 5 | Circolo di pietre, Tumulo funerario, Teatro, Foro, Abbazia, Duomo |
+    | 6 | Grotte dipinte, Anfiteatro |
+
+    E non e' solo il valore stampato: l'Impronta dell'Incisore alza lo Scavo di
+    **+3 permanenti**, quindi anche una carta da 3 puo' arrivare a 6.
+
+    Per ora la vista **appiattisce sul 4** quello che va oltre, il che vuol dire
+    un numero SBAGLIATO sul tavolo per quelle otto carte. Il codice non ha
+    bisogno di altro che di un'immagine piu' alta: `SCAVO_RIGHE` dice quante
+    strisce ci sono e la vista prende la riga per valore, non per posizione.
+
+    **RISOLTA dal designer**: l'immagine adesso porta **dieci strisce, dallo 0
+    al 9**. Lo 0-9 copre i valori stampati (0, 2, 3, 5, 6) e anche il caso
+    peggiore con l'Impronta (6 + 3 = 9). L'1 e il 4 restano li' senza una
+    carta che li usi, e va bene: ci arriva l'Incisore.
+
+    L'immagine del designer e' pero' DISEGNATA, non impaginata: le strisce
+    sono separate da righe bianche e alte una diversa dall'altra (fra 79 e
+    117 pixel). `tools/estrai_grafica.py` le ritrova una per una e le
+    ricompone in righe tutte uguali, alte quanto la MEDIANA: cosi' la vista
+    prende la riga del valore N con una divisione, e una striscia piu' alta
+    delle altre non stira tutto il disegno. Un test controlla che nessuna
+    carta abbia uno Scavo oltre le righe disponibili.
+
+80. **"Sepolto" con il vuoto sopra: gli strati successivi non sono tutta la
+    colonna.** Sul tabellone si vedevano basette marcate *sepolto* con sopra
+    niente. Il seme 726 ne dava cinque in una partita sola — Dolmen, Menhir,
+    Ponte, Mulino, Torre civica — tutte a quota zero, tutte all'aria aperta.
+
+    La regola dice: *"una rovina e' Sotterrata quando l'unione degli strati
+    successivi copre interamente la sua proiezione"*. Il codice leggeva
+    "strati successivi" come **tutto quello che nella colonna sta a un livello
+    piu' alto**. Ma a quota zero una colonna porta fino a **cinque** edifici,
+    uno per binario d'era, affiancati in PROFONDITA': chi costruisce sopra ne
+    sceglie uno solo come base — `top_of` — e gli altri quattro restano
+    scoperti, con niente addosso. Un edificio al livello 1 li seppelliva tutti
+    e cinque.
+
+    Correzione adottata: si risale la CATENA di chi poggia su chi (`basi`, che
+    l'edificio si fissa alla costruzione), e si e' sepolti solo se quella
+    catena copre tutte le proprie colonne. E' anche quello che fa il
+    simulatore di riferimento, che sotterra solo la base.
+
+    **Quanto sposta, misurato a parita' di tutto il resto.** Sessanta partite
+    a tre giocatori, stessi semi e stessi bot, cambiando SOLO questa regola:
+
+    | | prima | dopo |
+    |---|--:|--:|
+    | edifici costruiti per partita | 26,9 | 26,9 |
+    | turni per partita | 45,3 | 45,3 |
+    | **sotterrati** | **68%** | **51%** |
+    | PV per giocatore | 73,8 | **69,2** |
+
+    Il tavolo si costruisce **identico** - stessi edifici, stessi turni: la
+    sepoltura non cambia quello che si puo' fare, cambia quello che vale.
+    Costa **4,6 PV a testa, il 6%**, e quasi tutti dallo Scavo. Un sepolto su
+    quattro, prima, era uno di quelli col vuoto sopra.
+
+    Resta da rivedere al tavolo se il 51% di sotterrati sia la quota giusta:
+    e' la stessa domanda del punto 78, ma su un numero diverso.
+
+81. **I cubetti restano sulla rovina: quelli bianchi contano ancora, quelli
+    neri no.** Il Menhir a fine partita porta ancora tre cubetti bianchi di
+    Vetusta' e i suoi cubetti neri di resistenza, pur essendo una rovina.
+    Nessuna regola li toglie: il crollo azzera i potenziamenti
+    (`resolve_event` fa `upgrades.clear()`) e la Vetusta' si azzera **solo col
+    restauro** — che pero' vale sui *ruderi*, non sulle rovine. Una rovina non
+    si restaura piu', quindi quei cubetti restano li' per sempre.
+
+    **I neri sono inerti, e si puo' dimostrare.** Su una rovina la resistenza
+    non serve piu' a niente: gli eventi guardano solo chi e' in piedi
+    (`is_standing`), il restauro non la riguarda, le spolia di chi costruisce
+    sopra si pagano solo spianando un INTATTO (una rovina da' lo sconto
+    macerie, che non dipende dalla resistenza) e nessuna carta seleziona per
+    resistenza. In 300 partite a tre giocatori restano a fine partita 6167
+    rovine, 1851 delle quali con cubetti neri addosso che non fanno piu' nulla.
+
+    **I bianchi no: due carte li contano ancora.** Il **Colosseo**
+    (`{"owner": "self", "vetusta": {"min": 3}}`) e **Il Silvicoltore**
+    (`{"owner": "self", "terrain": ["bosco"], "vetusta": {"min": 3}}`) chiedono
+    "un tuo edificio con Vetusta' almeno 3" **senza dire in che stato**,
+    mentre le altre carte che vogliono edifici sani lo scrivono
+    (`"state": ["intatto"], "buried": false` — Monumenti 3 e 9, Lasciti 7 e 9,
+    personaggi 21 e 25). Cosi' come sono scritti i dati, una rovina — e
+    perfino una rovina sotterrata — soddisfa il Colosseo.
+
+    Misurato su 300 partite a tre giocatori (900 giocatori): a fine partita ci
+    sono 621 edifici con Vetusta' >= 3, di cui **517 intatti, 2 ruderi, 77
+    rovine e 25 sepolti**. Il Colosseo e' soddisfatto dal 55,4% dei giocatori,
+    e il **7,1%** lo soddisfa SOLO grazie a edifici non intatti: circa un
+    giocatore su quattordici prende quel punto per una rovina.
+
+    **Domanda al designer, due cose distinte:**
+    1. il Colosseo e Il Silvicoltore devono contare anche le rovine e i
+       sepolti, o gli manca il `"state": ["intatto"], "buried": false` che
+       hanno le carte sorelle? (regola: cambia il punteggio)
+    2. sul tabellone i cubetti di una rovina si continuano a mostrare, si
+       spengono o si tolgono? Finche' i bianchi contano per due carte,
+       toglierli nasconderebbe un'informazione che serve; i neri invece non
+       dicono piu' niente a nessuno. (solo grafica: non cambia il punteggio)
+
+82. **Il Centro Urbano paga 1,6 volte a partita.** La Prosperita' Urbana e' la
+    sola cosa sul tabellone che paga anche gli avversari: quando si attiva una
+    colonna con almeno tre edifici intatti di almeno due proprietari, ognuno di
+    quei proprietari incassa un oro. La scritta e' stampata su tutte le
+    tessere, quindi sembra una cosa che succede sempre.
+
+    Misurato su 300 partite a tre giocatori coi bot a strategie:
+
+    | | |
+    |---|--:|
+    | volte che paga, per partita | **1,61** |
+    | oro distribuito in tutto, per partita | 3,51 |
+    | partite in cui non paga MAI | **42%** |
+    | colonne diverse che pagano, per partita | 0,89 |
+    | colonne che sono Centro a fine partita | 8,5% |
+
+    E arriva tardi: nell'era 1 mai, nell'era 2 nel 3% delle partite, poi 24%,
+    35% e 13%. Prima dell'era 3 il tabellone non ha abbastanza edifici intatti
+    nella stessa colonna, e dall'era 4 in poi quelli che ci sono cominciano a
+    crollare.
+
+    Con dei bot, per giunta, che il Centro non lo cercano: nessuna delle cinque
+    strategie ha una riga che dica "costruisci dove c'e' gia' roba altrui per
+    accendere la Prosperita'", perche' il regolamento non dice che convenga.
+    Un tavolo di umani che ci puntasse lo farebbe scattare piu' spesso - ma
+    dovrebbe accorgersene, e finora sul tabellone non si vedeva.
+
+    **RISOLTO: il designer ha messo la soglia a 2 edifici.** Rimisurato su
+    10 000 partite per parte, stessi semi e stessi bot, cambiando solo quella
+    riga di `constants.prosperity`:
+
+    | | Centro a 3 | Centro a 2 |
+    |---|--:|--:|
+    | edifici costruiti per partita | 26,3 | **28,7** |
+    | PV per partita (i tre insieme) | 177 | **198** |
+    | in piedi a fine partita | 25% | 25% |
+    | sepolti | 54% | 57% |
+
+    **E ATTENZIONE AL NUMERO DI PARTENZA: non vale piu'.** Il Centro Urbano
+    pagava 1,61 volte a partita quando chiedeva tre edifici e si crollava
+    fallendo di 2. Con la soglia a 2 E la rovina a -3 - piu' edifici intatti
+    sopravvivono, quindi piu' colonne raggiungono la soglia - adesso paga
+    **8,73 volte a partita e distribuisce 17,75 oro, in tutte le partite**,
+    misurato su 400. Da rarita' che quando capita fa piacere e' diventata una
+    rendita costante: e' un effetto combinato delle due decisioni, non di una
+    sola, e va guardato al tavolo prima di considerarlo a posto.
+
+    Due edifici e mezzo in piu' per partita e ventuno punti: l'oro in piu' non
+    resta in tasca, diventa mattoni. A guadagnarci sono le carte care delle
+    ultime ere - Palazzo signorile, Villa, Duomo, Ponte in acciaio, che si
+    costruiscono una volta e mezzo piu' spesso - e i canali che premiano chi
+    costruisce: Verticalita' +11 PV, Lampo +6,5. La Rendita cala di un punto,
+    perche' gli edifici nuovi coprono i vecchi. Il dettaglio carta per carta
+    sta in `docs/vita-degli-edifici.md`.
+
+    Intanto il cartellino sulla fascia della tessera dice quali colonne sono
+    Centro **adesso**: prima bisognava contare gli edifici a mano.
+
+
+83. **La citta' a fine partita e' fatta di rovine: 7,3 edifici in piedi su
+    28,7 costruiti.** Il designer l'ha vista giocando e ha chiesto se le
+    soglie che mandano in rovina non siano troppo severe. Misurato: le tre
+    manopole (la penalita' del rudere, la soglia della rovina, la forza degli
+    eventi) valgono rispettivamente +0,07, +1,0 e +2,0 edifici in piedi a fine
+    partita; tutte e tre insieme portano da 7,3 a 10,3, cioe' da un quarto a
+    un terzo della citta'. Il conto completo, variante per variante, sta in
+    `docs/quanto-punisce-il-gioco.md`.
+
+    Le manopole si girano da riga di comando (`--rudere`, `--gap`, `--forza`)
+    e i dati non cambiano: nel commit c'e' solo `rovina_gap`, la soglia che
+    prima stava scritta nel codice come `gap == 1` e adesso sta nei dati col
+    suo valore di oggi, 2. Non e' un cambio di regola: e' la stessa regola,
+    scritta dove si puo' leggere e provare.
+
+    **Quel che la misura dice, e che non ci si aspettava:** in tutte le
+    varianti la quota di SEPOLTI resta ferma al 57%. Gli eventi decidono chi
+    crolla, non chi sparisce sotto la citta': quello lo decidono i giocatori
+    costruendo sopra. Anche rendendo il gioco molto piu' mite, piu' di meta'
+    degli edifici finirebbe comunque sotto uno strato. Se la citta' deve
+    sembrare piu' viva, la manopola grossa non e' la severita' dell'evento ma
+    quanto paga salire (`docs/quanto-paga-salire.md`).
+
+    **RISOLTO: `rovina_gap` a 3.** Fallire l'evento di 1 o di 2 lascia un
+    rudere; si crolla in rovina solo fallendo di 3 o piu'. Gli edifici in piedi
+    a fine partita passano da 7,3 a 8,3 e la vita media da 1,79 a 1,96 ere, al
+    prezzo di 2 punti a partita su 198. Nessuna carta stampata cambia: la forza
+    degli eventi resta 2/3/4/5 e le resistenze restano quelle.
+
+    La manopola della forza (`--forza -1`, +2 edifici in piedi) resta li' per
+    quando si vorra' riprovare: quella pero' cambia il materiale stampato e va
+    decisa prima della stampa.
+
+    Alzando la soglia e' venuto fuori un difetto vecchio: il libro mastro delle
+    carte non tornava col tabellone sulla Verticalita', perche' la meta' divisa
+    del premio veniva arrotondata carta per carta invece di spezzare la quota
+    del giocatore. Adesso si spezza col resto piu' grande e i due conti sono lo
+    stesso numero - il test e' passato da "tolleranza un punto per colonna" a
+    nessuna tolleranza.
+
+
+84. **I binari liberi: piu' terreno, e salire torna una scelta.** Proposta del
+    designer: i binari non sono piu' vincolati all'era, si riempie DAL FONDO e
+    un edificio di un'era puo' finire sul binario di un'altra se il suo e'
+    pieno. Il motivo, misurato: sulle 10 000 partite ogni era tranne la quinta
+    chiede piu' caselle di quante il suo binario ne abbia - l'era 2 ne chiede
+    9,6 su 7 - quindi oggi salire non e' una strategia, e' uno sfratto. Coi
+    binari liberi il terreno passa da 7 caselle per era a 35 per partita,
+    contro le 39,7 che servono.
+
+    Provato dietro la manopola `binari_liberi` (spenta nei dati), 5 000 partite
+    per parte a parita' di semi:
+
+    | | per era | liberi |
+    |---|--:|--:|
+    | edifici costruiti per partita | 28,70 | **30,50** |
+    | in piedi a fine partita | 8,26 | **9,29** |
+    | sepolti | 57% | 52% |
+    | sopraelevati (per giocatore) | 5,51 | 5,33 |
+    | quota massima raggiunta | 4,02 | 3,95 |
+    | PV per partita | 200 | **212** |
+    | di cui Rendita | 54,0 | **64,0** |
+    | di cui Verticalita' | 79,7 | 79,6 |
+    | di cui Scavo | 21,0 | 21,4 |
+
+    **La citta' NON si appiattisce**, ed e' il risultato che non mi aspettavo:
+    i sopraelevati restano 5,3 per giocatore contro 5,5, la quota massima non
+    si muove e i punti della Verticalita' sono identici. Salire continua a
+    convenire - lo pagano la tabella, le spolia e la continuita' - e i binari
+    liberi aggiungono terreno senza togliere la stratificazione. Quello che
+    cresce e' la Rendita (+10 PV): piu' edifici restano in piedi e pagano il
+    censimento.
+
+    **Il prezzo sta altrove, ed e' la Prosperita'.** Con i binari liberi una
+    colonna porta fino a cinque edifici a terra di proprietari diversi: il
+    Centro Urbano passa da 8,73 a **14,84 pagamenti a partita** e da 17,75 a
+    **31,51 oro**. Trentuno monete distribuite sono tante, e vanno a chi ha
+    gia' costruito di piu'. Se i binari liberi entrano, la soglia della
+    Prosperita' va rivista - probabilmente rimessa a 3 - e rimisurata.
+
+    **ADOTTATI**, insieme alla Prosperita' rimessa a 3 edifici. Misurato dopo,
+    5 000 partite a parita' di semi, contro il mondo di stamattina:
+
+    | | per era, soglia 2 | liberi, soglia 3 |
+    |---|--:|--:|
+    | edifici costruiti per partita | 28,70 | **29,30** |
+    | in piedi a fine partita | 8,26 | **8,92** |
+    | intatti a fine partita | 7,61 | **8,23** |
+    | sepolti | 57% | **51%** |
+    | PV per partita | 200 | 201 |
+    | di cui Rendita | 54,0 | **65,2** |
+    | di cui Verticalita' | 79,7 | **73,7** |
+
+    Il punteggio totale non si muove (200 -> 201) ma cambia da dove viene: undici
+    punti in piu' dalla Rendita, sei in meno dalla Verticalita'. E' esattamente
+    quello che ci si aspetta quando salire smette di essere obbligatorio e piu'
+    edifici restano in piedi a pagare il censimento.
+
+    **La Prosperita' pero' resta frequente: 7,56 pagamenti a partita e 17,03
+    oro, nel 98% delle partite** (400 partite). La soglia a 3 taglia l'eccesso
+    dei binari liberi - erano 14,84 - ma non riporta il Centro Urbano alla
+    rarita' di partenza (1,61), perche' il motivo vero non e' la soglia: e' che
+    da quando si crolla solo fallendo di 3 sopravvivono piu' intatti, e piu'
+    colonne raggiungono comunque il minimo. Se la rarita' e' una cosa a cui
+    tieni, la manopola giusta adesso e' `gold_per_owner` o il richiedere
+    proprietari diversi in numero maggiore, non altri edifici. Va visto al
+    tavolo.
+
+85. **Il canone delle strategie: sei, con Obiettivi.** Deciso dal designer: il
+    torneo rifatto col bot della versione 2 mette Obiettivi sopra la media con
+    tutti e due i bot (34,8% col bot v1, 39,5% col v2, attesa 33,3%), e resta
+    l'unica candidata a farlo. **Entra come sesta**, Scavo resta: e' misurando
+    chi lo insegue che si vede che lo Scavo non si puo' raccogliere.
+
+    Misurato l'effetto sulle batterie, 10 000 partite per parte a parita' di
+    semi e di regole: **edifici costruiti 30,12 -> 29,83, PV per partita
+    211 -> 209**, in piedi e sepolti identici. Le misure fatte con cinque
+    strategie restano confrontabili entro un punto percentuale. Da qui in poi
+    l'intestazione di ogni batteria dice `strategie=6`.
+
+
+86. **Il Centro Urbano piu' raro: tre proprietari, o una volta per era.**
+    Seguito del punto 84. `gold_per_owner` vale gia' 1 e l'oro e' intero:
+    abbassarlo vuol dire 0, cioe' togliere la Prosperita'. Le due vie
+    provate, dietro manopole che non cambiano nulla finche' sono spente
+    (verificato: 120 partite identiche a main):
+
+    - **tre proprietari diversi** (`min_owners` 2 -> 3, solo dato:
+      `--proprietari 3`);
+    - **una volta per era** (`once_per_era`, nuova e spenta nei dati:
+      `--una_per_era`): la prima attivazione di un Centro in un'era paga, le
+      altre nella stessa colonna no fino all'era dopo.
+
+    3 000 partite a 3 giocatori per configurazione, stessi semi, sei
+    strategie (800 a 4 giocatori fra parentesi):
+
+    | | oggi | 3 proprietari | una per era |
+    |---|--:|--:|--:|
+    | pagamenti a partita | 7,30 (8,63) | **2,25** (3,37) | 5,09 (5,87) |
+    | oro distribuito a partita | 16,7 (20,6) | **6,8** (10,2) | 11,4 (13,7) |
+    | partite in cui scatta | 95% (96%) | **57%** (71%) | 95% (96%) |
+    | oro al vincitore | 6,4 | 2,3 | 4,4 |
+    | edifici costruiti a partita | 29,9 | 28,9 | 29,6 |
+    | PV a partita (tutti i canali) | 261 | 248 | 257 |
+    | di cui Verticalita' | 76,7 | 71,0 | 75,1 |
+    | distacco fra primo e secondo | 18,3 | 19,4 | 19,2 |
+
+    **Tre proprietari riporta la Prosperita' vicino alla rarita' di
+    partenza** (1,61 pagamenti a partita): 2,25, e in quattro partite su
+    dieci non scatta mai. Costa 14 PV a partita al tavolo, quasi tutti dal
+    costruire meno (un edificio in meno a partita, Verticalita' -5,7): l'oro
+    del Centro finiva in muri. **Ma a due giocatori la Prosperita'
+    sparisce**: tre proprietari diversi non ci sono. Se si sceglie questa
+    via, la regola va scritta come "tutti i giocatori, massimo tre" o
+    simile, e a due resta a 2.
+
+    **Una per era taglia un terzo** (7,30 -> 5,09) e lascia la Prosperita'
+    in quasi tutte le partite: toglie la colonna-bancomat attivata tre
+    volte di fila, non il Centro. Costa 4 PV a partita.
+
+    **Nessuna delle due sposta chi vince.** Le vittorie per strategia
+    restano dentro l'errore standard (1,2 punti a 3 giocatori): la Rendita
+    fa 37,6 / 39,0 / 38,9%, Obiettivi 37,1 / 36,5 / 35,7%. Il distacco fra
+    primo e secondo cresce di un punto con meno Prosperita': e' l'unico
+    premio che paga anche gli avversari, e un po' livellava.
+
+    **ADOTTATA LA SECONDA**: `once_per_era` e' accesa nei dati. Il mondo di
+    oggi rigioca esattamente le 3 000 partite misurate con `--una_per_era`
+    (verificato sulle prime 300); `--una_per_era 0` rimette il Centro a ogni
+    attivazione. L'intestazione delle batterie dice `centro=una_per_era`, e
+    le misure pubblicate prima (vita degli edifici, strategie) sono fatte col
+    Centro a ogni attivazione: la differenza e' quella della tabella qui
+    sopra, 0,4 edifici e 4 PV a partita.
+
+    **Resta una domanda da tavolo:** al tavolo vero bisogna ricordarsi quali
+    Centri hanno gia' pagato in quest'era. Serve un segno fisico - girare il
+    cartellino della Prosperita' dopo il pagamento, e rigirarli tutti a fine
+    era - e il regolamento va aggiornato di conseguenza. A schermo il
+    cartellino fa gia' cosi': dopo il pagamento resta sulla tessera ma
+    scuro, e a fine era si riaccende.
+
+87. **Senza rudere: la prima misura della nuova meccanica.** Il punto 11 della
+    proposta (`proposte/nuova-meccanica.md`) toglie lo stato di rudere. Misurato
+    da solo sul motore di oggi, manopola `senza_rudere` spenta nei dati
+    (`--senza_rudere 1`), 2 000 partite `--vita` e 750 di torneo per variante a
+    parita' di semi: `docs/senza-rudere.md`.
+
+    Le due letture vanno in direzioni opposte. **Rovina solo a -3** (chi fallisce
+    di 1-2 resta intatto): +2 edifici in piedi a fine partita, Rendita +15 per
+    partita, ma lo Scavo cade da 20,5 a 6,5 con i sepolti fermi al 50%: senza
+    ruderi si sale solo spianando i propri edifici vivi, che valgono Scavo 0
+    (`was_razed`). Il rudere e' la porta dell'archeologia. **Ogni fallimento fa
+    rovina** (`--gap 1`, la lettura letterale del punto 9): canali e vittorie
+    fermi, ma gli edifici che cadono nell'era in cui nascono passano dal 17% al
+    48%.
+
+    **Deciso dal designer:** gli stati sono attivo, rovina e sotterrato, e lo
+    Scavo non si azzera mai; con il dubbio "non si spinge troppo a sotterrare
+    i propri?". Misurato (manopola `spianare_conserva_scavo`, spenta;
+    `--scavo_spianato 1`; il torneo conta basi proprie, altrui e spianati):
+    **il dubbio era fondato.** Con lo Scavo conservato gli edifici spianati
+    dal proprietario passano dal 25% di oggi al 44% (69% nell'era 2), le
+    basi altrui da 2,0 a 1,1 per giocatore, lo Scavo da 20 a 52 punti a
+    partita e il punteggio totale sale di 50: spianare il proprio da' insieme
+    lo sconto della Spolia, il livello e lo Scavo pieno. La soglia (3, 2 o 1)
+    non cambia questo esito, decide solo le morti premature (18/32/48%).
+
+    La variante detta subito dopo dal designer - "gli edifici vivi spianati
+    mettono lo Scavo a zero, diventano terrapieni", cioe' la Spolia di oggi -
+    con la soglia 2 e' la piu' vicina al gioco attuale: in piedi 9,1 contro
+    9,3, punteggio +5, vittorie ferme; costa lo Scavo (20,5 -> 13,9) e il 32%
+    di edifici che cadono nell'era in cui nascono (oggi 17%). Terrapieno o
+    rovina non cambia i numeri, solo chi conta gli strati (Archeologo,
+    Demolitore, Soprintendente, la meta' della Verticalita' fra i
+    proprietari): decisione da regolamento.
+
+    **Terza misura, "perche' costruire sopra gli altri".** Due leve provate
+    sulla base senza rudere a soglia 2: lo Scavo a chi scava
+    (`scavo_a_chi_scava`; il motore ora registra chi ha sepolto chi) e lo
+    sconto macerie solo sulle rovine altrui (`sconto_macerie_solo_altrui`).
+    Nessuna delle due porta a costruire sugli altri: basi altrui 1,6-1,8 per
+    giocatore contro le 2,0 di oggi. Lo Scavo a chi scava smette di far
+    seppellire se stessi (basi proprie 4,6 -> 3,5) ma si costruisce meno
+    sopra: colonne mezzo livello piu' basse, Verticalita' -4 per giocatore,
+    Rendita che vince il 53%. Lo sconto di una pietra non muove nulla. Il
+    kingmaker e' piccolo: togliendo a tutti lo Scavo dell'era 5 il vincitore
+    cambia nel 2% delle partite. **Il motivo e' strutturale:** costruire
+    nella colonna altrui divide la Verticalita' (meta' alla cima, meta' a
+    tutti gli strati), nella propria e' tutta propria. Da provare: il premio
+    della colonna che non si divide con chi sta sotto. Tutto in
+    `docs/senza-rudere.md`.
+
+88. **Il punto per il disturbo non e' mai esistito nel motore.** Il regolamento
+    dice "+1 per ogni edificio altrui che avete sotterrato" (voce Scavo del
+    conteggio finale). Ne' il motore (`Scoring._scavo` aveva un TODO) ne'
+    l'oracolo Python lo contavano: le 80 000 partite del bilanciamento e tutte
+    le misure di questo registro sono senza. Ora il motore sa chi ha sepolto
+    chi e la costante `disturbo_vp` lo paga; sta a **0** perche' il gioco
+    congelato e' senza, e il lotto di riferimento lo prova. Decisione del
+    designer: accenderlo a 1 come da regolamento (e rigenerare il
+    riferimento, dichiarandolo) o togliere la frase dal regolamento.
+
+89. **Via la Verticalita', il premio di scavo al suo posto.** Proposta del
+    designer: togliere la Verticalita' e premiare, con lo Scavo, chi sta
+    nelle pile alte. Formulazione misurata: chi costruisce al livello L sopra
+    un edificio con Scavo S lo incassa subito (manopola `premio_scavo`,
+    "nessuno" nei dati; `--premio per_livello|piu_livello|per_livello_meno_uno`),
+    il proprietario tiene lo Scavo stampato a fine partita; base senza rudere
+    a soglia 2, Verticalita' a zero. Senza rimpiazzo la citta' si appiattisce
+    (-23 punti a giocatore, altezza 3,1, basi altrui 1,0). **S x L** rimette
+    in piedi la citta' (altezza 4,1) e porta le basi altrui a 2,0 come oggi,
+    con il canale Scavo a 19,6 a giocatore, tre quarti della Verticalita'
+    tolta; ma e' neutro fra proprio e altrui, e **il kingmaker e' reale**:
+    meta' del premio arriva nell'era 5 e in una partita su sei il vincitore
+    cambierebbe senza il bottino dell'ultima era. S + L lo dimezza con un
+    canale piu' piccolo; S x (L-1) paga poco e tardi. Da decidere: la scala
+    (S x L) e la correzione all'ultima era (premio dimezzato nell'era 5, o
+    solo fino all'era 4), entrambe da misurare. La strategia Scavo dei bot
+    insegue la regola vecchia: le strategie vanno riscritte per la v2.
+    Tutto in `docs/senza-rudere.md`.
+
+90. **I 60 edifici in tre risorse, le tessere e la prima misura della v2.**
+    Decisioni del designer: le Idee sono la Cultura resa risorsa e
+    **sostituiscono** (il costo totale di ogni carta resta quello di oggi);
+    Cultura, Religione e Ingegneria pagano Idee, il Medioevo ne chiede meno
+    ("un periodo oscuro"), nelle ere 4-5 ogni carta ne paga almeno una
+    ("esplodono"): domanda 5 / 6 / 4 / 15 / 18 per era. Le tessere producono
+    per tipo con la curva dell'audit (fiume e collina Costruzione 2/2/1/1/1,
+    pianura Denaro 0/1/1/2/2 piu' 1 Costruzione nelle ere 1-2, bosco Idee
+    1/2/2/3/3) e il mix garantisce il bosco. Tabella e regole in
+    `carte-v2.md` (le regole dei costi, da `tools/proponi_costi_v2.py`),
+    file dati `data/cards-v2.json` (da `tools/genera_cards_v2.py`), misura in
+    `docs/la-terza-risorsa.md`. Da sola la terza risorsa sposta poco (+2 punti,
+    basi altrui da 2,0 a 2,5); con il pacchetto di regole si comporta come con
+    le carte vecchie, ma il kingmaker dell'ultima era sale al 22%: la
+    correzione all'era 5 del premio di scavo diventa necessaria. Restano il
+    tetto delle risorse (D5) e in che risorsa pagare potenziamenti, Dinastia e
+    ristrutturazione (D2).
+
+91. **L'ultima era, il tetto a tre, e in che risorsa si pagano le azioni.**
+    Decisioni del designer: correggere il premio di scavo nell'ultima era
+    (manopola `premio_era5`: intero, dimezzato, niente); "tetto a tre", letto
+    come 3 per risorsa alla dispersione con il totale di 5 che resta
+    (`resource_cap_per_resource`, 3 nella v2, 0 nella v1.5); i potenziamenti
+    pagano secondo cosa sono (Arte in Idee, Struttura in Costruzione, il resto
+    in Denaro, importi di oggi); la Dinastia in Idee (4/3/3/3); la
+    ristrutturazione in Costruzione e Denaro (la parte in Idee va in Denaro).
+    Misurato a parita' di semi (`docs/la-terza-risorsa.md`): le decisioni sui
+    dati sono neutre (un punto di differenza, stessa forma della citta'); il
+    **premio dimezzato nell'era 5** porta le partite decise dall'ultima era dal
+    21% al 12% senza cambiare la citta' (altezza 4,2, basi altrui 2,4), al
+    costo di 4,5 punti di Scavo a giocatore; senza premio nell'era 5 la citta'
+    smette di salire (altezza 4,0, basi altrui 2,0). Raccomandato: dimezzato.
+
+92. **Il canone delle strategie per la v2.** Con il file v2 caricato il bot
+    gioca Rendita, Lampo, Scavo, Continuita', Bilanciata, Obiettivi: la
+    Verticale esce (senza Verticalita' non insegue niente), la Continuita'
+    entra (senza il premio della colonna e' il quarto canale), la Scavo
+    insegue il premio S x L di chi costruisce sopra invece dello Scavo di chi
+    viene sepolto. Quale canone vale lo dice `CardDB.ruleset`, non una
+    manopola. Misurato sullo stesso lotto v2 con i due canoni
+    (`docs/la-terza-risorsa.md`): la citta' non cambia, e con il canone v2
+    le sei strategie stanno tutte entro l'errore (27,5-36,8% contro 33,3
+    atteso), la Scavo torna nella media, il kingmaker al 10%. E' il lotto di
+    partenza per le prossime domande dell'audit.
+
+93. **Il turno a un'azione, il draft dei Personaggi, e quanti lavoratori.**
+    Il punto 8 della proposta letto alla lettera (`turno_v2` nel file v2):
+    ogni turno UNA cosa, e il lavoratore va dove agisce. Letture adottate
+    dove la proposta tace: si costruisce in qualsiasi colonna e il lavoratore
+    sta sull'edificio nuovo, con +2 per l'era, e attiva solo quello (D9-D11);
+    il lavoratore sul potenziamento resta sotto come scheletro e torna a fine
+    era (D12); la ristrutturazione vale solo sulle proprie rovine e costa meta'
+    del costo, Costruzione e Denaro (D13); passare consuma il lavoratore e
+    incassa 1 Costruzione piu' 1 risorsa a scelta, l'era finisce quando
+    finiscono i lavoratori (D14); la Dinastia resta un acquisto al posto del
+    turno (D8). Decisione del designer: **i lavoratori restano tre** e il
+    Personaggio si prende **in automatico a inizio era, senza lavoratore**
+    (`draft_personaggi`: uno a testa in ordine di turno fra i cinque
+    dell'era, gratis; Reclutare sparisce; i protettori si legano al primo
+    edificio costruito nell'era; le Impronte chiedono l'edificio dopo la
+    carta). Misurato (`docs/la-terza-risorsa.md`, quarta misura): con
+    un'azione per lavoratore la partita si dimezza (7 edifici e 44 punti a
+    giocatore contro 11 e 74), le basi altrui cadono da 2,3 a 0,6 e lo Scavo
+    da 17 a 3: l'archeologia si spegne. Con 5 o 6 lavoratori il ritmo torna,
+    ma i lavoratori restano tre. Il draft regala scheletri (da 1,8 a 9,4
+    punti): la regola degli scheletri va decisa. **Aperto:** il designer ha
+    detto che "una cosa sola per lavoratore" non e' la lettura giusta del
+    punto 8; la lettura vera (il lavoratore sulla colonna attiva E poi si
+    agisce, come oggi? le azioni senza lavoratore?) va scritta e misurata.
+    Il bot v2 sconta l'incasso oltre quello che il mercato assorbe: senza,
+    passava l'era a incassare (15 punti a giocatore).
+
+94. **Quattro lavoratori che attivano e poi agiscono.** Decisione del
+    designer dopo il punto 93: "voglio tre lavoratori come prima che fanno
+    una delle cinque azioni" era la lettura giusta della proposta, ma la
+    misura ha mostrato che nella v1.5 ogni lavoratore faceva DUE cose
+    (attivava e poi agiva) e con una sola la partita si dimezza. Quindi: i
+    lavoratori diventano **quattro**, e ogni lavoratore attiva la colonna e
+    poi fa un'azione (costruire, potenziare, ristrutturare) li' o accanto,
+    come nella v1.5; il Personaggio resta quello del draft (punto 93). Il
+    file v2 spegne `turno_v2`, che resta come manopola (`--turno_v2 1`), e
+    porta `workers_base` a 4; la ristrutturazione della propria rovina
+    dipende da `senza_rudere` e non dal turno; i protettori del draft si
+    legano al primo edificio costruito nell'era con tutti e due i turni.
+    Misurato (`docs/la-terza-risorsa.md`, quinta misura): la v2 torna una
+    partita intera, 13,6 edifici e 97 punti a giocatore, basi altrui 2,2,
+    kingmaker 11%; il draft da solo vale 13 punti (Scheletri e Rendita);
+    la **Rendita vince il 47%** delle partite e il Lampo il 23%: quattro
+    attivazioni pagano piu' censimenti. Aperto: la regola degli scheletri
+    per il Personaggio del draft, e la Vetusta' come prima manopola contro
+    la Rendita. Un documento solo per le carte: `docs/carte-v2.md`
+    (generato da `tools/carte_v2.py`), al posto di `carte-da-rifare.md` e
+    `proposte/costi-tre-risorse.md`.
+
+95. **Niente Personaggi sepolti, niente Vetusta', lo scheletro e' il
+    lavoratore del potenziamento.** Tre decisioni del designer dopo il
+    punto 94: il Personaggio del draft non si seppellisce
+    (`personaggi_sepolti` falso nel file v2, vero dove manca); la Vetusta'
+    non esiste piu' ("non mi e' mai piaciuta, semplifichiamo": tetto
+    `vetusta_max` 0 nel file v2, il motore non cambia; Colosseo, Il
+    Silvicoltore e Speculazione edilizia la contavano e non scattano piu',
+    proposte in `docs/carte-v2.md`; il bosco perde il +4); gli scheletri ci
+    sono e li lascia il lavoratore che piazza un potenziamento
+    (`scheletro_potenziamento`, vero nel file v2: resta sotto l'edificio,
+    uno per edificio, non nell'era Moderna, 6 meno l'era se l'edificio
+    finisce sotterrato; nel turno a un'azione era gia' cosi', D12).
+    Manopole `--sepolti` e `--vetusta` per rigiocare con una decisione
+    sola. Misurato (`docs/la-terza-risorsa.md`, sesta misura): le
+    sepolture del draft erano solo 4,6 punti regalati; la Vetusta' era due
+    terzi della Rendita (27,9 -> 10,6) e senza si costruisce piu' sopra
+    (altezza 4,66, premio 12,2, kingmaker 15%); lo scheletro del
+    potenziamento vale 2,8 punti. La **Rendita vince il 56%** delle
+    partite anche senza Vetusta': il motivo e' la protezione, quattro
+    lavoratori proteggono quattro edifici per era. Prossima manopola:
+    `protection_bonus` o il censimento. Il torneo ora conta le azioni per
+    giocatore anche a quattro lavoratori.
+
+96. **La protezione a +1, e quanto valgono gli scheletri.** Due domande
+    del designer dopo il punto 95. Misurato sulla base W, stessi semi
+    (`docs/la-terza-risorsa.md`, settima misura): la protezione a +1
+    (`--protezione 1`) non cambia niente, stessi punti, stessa citta', la
+    Rendita vince ancora il 54%: la strategia Rendita costruisce meno
+    edifici ma cari e duraturi con la Rendita stampata alta, e con quattro
+    lavoratori le risorse per comprarli ci sono sempre. Prossima manopola:
+    il valore di Rendita delle carte care, o il censimento. Gli scheletri
+    del potenziamento oggi valgono 2,8 punti a giocatore (3%), e pagano
+    solo se l'edificio finisce sotterrato: non sono un motivo per
+    potenziare. Con lo scheletro che **conta sempre** (`--scheletro sempre`,
+    costante `scheletro_conta`, 6 meno l'era comunque finisca l'edificio)
+    valgono 9,6 punti (11%), i potenziamenti salgono da 2,8 a 3,4 a
+    giocatore, la citta' non cambia e il kingmaker scende al 13%.
+    Raccomandato: conta sempre. In attesa della decisione del designer.
+
+97. **La Rendita delle carte care.** Prova chiesta dal designer contro la
+    strategia Rendita che vince il 57%: `--rendita_tetto N` taglia la
+    Rendita stampata di ogni carta a N (a 2 cinque carte: Abbazia,
+    Castello, Fortezza bastionata, Ponte monumentale, Duomo; a 1 otto).
+    Misurato sulla base Z, la v2 di oggi con lo scheletro che conta sempre
+    (`docs/la-terza-risorsa.md`, ottava misura): a 2 la Rendita vince il
+    49%, a 1 il 44%, con il canale Rendita quasi cancellato (5 punti su
+    84). Il resto del vantaggio e' lo stile di quella strategia, meno
+    edifici e piu' potenziamenti (4,9 contro 2,7-3,8), che con lo scheletro
+    che conta sempre valgono 12 punti: con quattro lavoratori costruire
+    poco e bene batte costruire tanto. La Scavo e' la strategia debole
+    (17-22%): da ritarare il bot, non la regola. Da decidere: la Rendita
+    delle cinque carte care a 2 (cinque righe in `carte-v2.md`, forbice
+    piu' stretta di 8 punti senza toccare la citta').
+
+98. **Le strategie rifatte per la v2.** Decisione del designer ("rifai le
+    strategie"). Le spinte delle strategie sono una tabella nel bot
+    (`SPINTE_V1`, `SPINTE_V2`), e `--spinta chiave=valore,...` le sovrascrive
+    lotto per lotto: la taratura si fa misurando, tre giri di quattro
+    tornei sugli stessi semi (`docs/la-terza-risorsa.md`, nona misura).
+    Abbassare la spinta della Rendita la rendeva PIU' forte: il vantaggio
+    era nel valutatore comune, che stimava le rendite future come se
+    l'edificio restasse scoperto, mentre con quattro lavoratori quasi
+    tutto viene protetto (`protezione_attesa`, 2 nella v2). La Scavo
+    costruisce a terra le carte con lo Scavo alto invece di passare
+    (`scavo_terra` -0,5, `scavo_terra_scavo` 0,5). Risultato: Rendita dal
+    57 al 40%, Scavo dal 17 al 32%, le altre fra 27 e 37, citta' e punti
+    invariati; il lotto rigiocato con la tabella scritta nel bot esce
+    identico a quello della manopola. Il Lampo resta il piu' debole (27%)
+    per la natura delle sue carte.
+
+99. **Le tre carte che contavano la Vetusta'.** Decisione del designer
+    ("cambia le tre carte"), sulle proposte di `docs/carte-v2.md`, nel solo
+    file v2: **Colosseo** premia il primo edificio attivo con resistenza 7
+    o piu' (il matcher degli effetti impara l'intervallo `resistance`,
+    sulla resistenza efficace); **Il Silvicoltore** vale per un edificio
+    attivo su bosco costruito nell'era 1 o 2 (il vecchio del bosco);
+    **Speculazione edilizia** toglie 1 res a ogni edificio con 2 o piu'
+    potenziamenti (colpisce chi ha costruito sopra il costruito). I dati
+    v1.5 non cambiano. Il documento delle carte ora mostra come "oggi" il
+    testo della v1.5 e in grassetto quello del file v2 quando differisce.
+    La PR #29 (quattro lavoratori, draft, niente Vetusta', scheletro del
+    potenziamento, carte care a 2, strategie rifatte) e' su main.
+
+100. **Le tessere una volta per era, via il disturbo, piu' Lampo a otto
+    carte.** Tre decisioni del designer. Le tessere (punto 6, D20-D22): la
+    produzione per era resta, l'abilita' permanente diventa un effetto
+    che scatta una volta per era alla prima occasione, poi la tessera si
+    gira (`tessere_una_volta_per_era`, vera nel file v2, `--tessere 0` la
+    spegne; `gs.tessere_usate` colonna per colonna): pianura -1
+    Costruzione a una carta da 2 o 3 caselle, fiume +1 Denaro a chi la
+    attiva, collina +1 resistenza per l'era al primo edificio costruito
+    qui, bosco -1 Costruzione a una ristrutturazione; con i dati v1.5 le
+    regole restano permanenti. Il "+1 per il disturbo" (punto 88) non
+    esiste piu': "cambia poco e aggiunge complessita'", costante e codice
+    tolti da tutti e due i file, il lotto di riferimento v1.5 esce
+    identico. Il Lampo sale di 1 su otto carte a solo Lampo (Insulae,
+    Emporio, Borgo, Torre civica, Loggia, Banco, Condominio, Officina).
+    Misurato (`docs/la-terza-risorsa.md`, decima misura): le tessere una
+    volta per era non cambiano la partita (stessa citta', stessi punti);
+    il Lampo in piu' alza il Lampo di tutti (+2,7 a giocatore) e non la
+    strategia Lampo, che resta ultima (23-24%) perche' costruisce edifici
+    che cadono: se deve vincere di piu', la strada e' il bot, non le carte.
+
+101. **La strategia Lampo potenzia.** Dopo il punto 100 (il Lampo delle
+    carte e' di tutti) il designer ha detto di andare avanti sul bot. Due
+    spinte nuove nella tabella delle strategie, solo per la Lampo:
+    `lampo_potenzia` (ai potenziamenti, punti sicuri con lo scheletro che
+    conta sempre) e `lampo_sopra` (al costruire sopra), misurate con
+    `--spinta` in quattro tornei sugli stessi semi
+    (`docs/la-terza-risorsa.md`, undicesima misura). Vince
+    `lampo_potenzia` 3, `lampo_sopra` resta 0: la Lampo dal 23 al 31%,
+    3,6 potenziamenti a partita invece di 2,5, i suoi 31 punti di Lampo
+    intatti; tutte e sei le strategie fra il 30 e il 38% (atteso 33,
+    errore 5), per la prima volta nessuna fuori; citta' e punti
+    invariati. Il lotto rigiocato con la tabella scritta nel bot esce
+    identico a quello della manopola. Con i dati v1.5 niente cambia.
+
+102. **La v2 nella schermata di gioco: l'interruttore e il draft.** Il
+    designer ("prima l'interruttore e il draft"). Nella schermata di scelta
+    c'e' la riga "Regolamento": v1.5 (`data/cards.json`) o v2
+    (`data/cards-v2.json`); il gioco parte dalla v2, i test della vista
+    dalla v1.5 (`ScelteInizio.predefinito`). `comincia()` carica il file
+    dati scelto ogni volta, cosi' si passa da un regolamento all'altro
+    senza riavviare; il canone dei bot segue il file. Il draft a schermo:
+    la scelta in sospeso di tipo "draft" si risolve cliccando la carta
+    nella fila dei Personaggi (le opzioni sono posizioni nella fila), la
+    riga di stato lo dice; il bersaglio di un'Impronta si clicca
+    sull'edificio come le scelte di sempre. La riga in alto mostra le tre
+    risorse e la carta del mercato il costo in C/D/I quando il file e' v2.
+    Restano da disegnare: le tessere girate, il quarto lavoratore sulla
+    plancia, lo scheletro del potenziamento, la rovina senza rudere.
+
+103. **Le tessere girate a schermo.** Il designer ("vai con le tessere
+    girate"). Nella v2 la tessera usata nell'era si abbuia con un velo
+    scuro e porta la scritta "girata" sulla fascia in fondo, dove sta il
+    cartellino della Prosperita'; a inizio era il motore la rigira e il
+    velo sparisce. Nella v1.5 nessuna tessera si abbuia mai (la lista e'
+    tutta falsa). Il riquadro che segue il mouse ora descrive anche la
+    tessera nuda: colonna, terreno, cosa produce in quest'era, la regola
+    stampata, e nella v2 se l'effetto e' ancora da usare o la tessera e'
+    girata. Test della vista: il velo compare sulla colonna giusta dopo
+    l'attivazione del fiume e il riquadro lo dice.
+
+104. **Il quarto lavoratore a schermo.** Il designer ("vai con il quarto
+    lavoratore"). Il disegno dei pupazzetti legge `p.workers`, quindi con il
+    file v2 i quattro lavoratori stavano gia' sulla bacchetta (scatto con
+    `tools/scatta3d.sh -- --dati data/cards-v2.json`, che ora carica il
+    file v2 e gioca col canone v2); il test lo fissa. Quel che mancava era
+    il resto: la Dinastia e' il quinto lavoratore e il riquadro lo dice, il
+    suo prezzo (e ogni prezzo delle azioni) si scrive anche in Idee, con
+    l'ammanco. Nella v1.5 niente cambia.
+
+105. **Lo scheletro del lavoratore a schermo.** Il designer ("vai"). Nella
+    v2 il sepolto e' il lavoratore del potenziamento (`Building.LAVORATORE`,
+    registri 95-96), non una carta: finiva nel ventaglio del giocatore come
+    "personaggio" di nome "lavoratore", cercato in un mazzo dove non c'e'.
+    Ora nel ventaglio, sotto la carta dell'edificio e in fondo alla pila
+    (sotto il potenziamento), ci va il gettone dello scheletro dell'era, in
+    piedi sulla striscia scoperta; sulla basetta stava gia'. Il riquadro del
+    mouse lo descrive sia sul gettone sia sull'edificio ("scheletro: il
+    lavoratore del potenziamento · era N · vale 6-N"), e nella v1.5 chiama
+    il Personaggio sepolto per nome. Nella v1.5 nient'altro cambia. Test
+    della vista: il gettone c'e', l'id e' l'era, sta sotto edificio e
+    potenziamento, la vista lo disegna, i riquadri lo dicono.
+
+106. **La rovina senza rudere a schermo.** Il designer ("vai"). Nella v2
+    non c'e' il rudere e la propria rovina si ristruttura (registri 88 e
+    seguenti); al tavolo "la sagoma ruotata mostra il lato rovina". A
+    schermo la rovina spariva come nella v1.5, dove e' solo il basamento
+    di chi ci costruisce sopra: cosi' nascondeva proprio la cosa che nella
+    v2 si puo' fare. Ora, con `senza_rudere`, la sagoma della rovina resta
+    in piedi, girata di mezzo giro e scurita (senza il disegno del lato
+    rovina si vede il retro del cartone), non si abbatte, e si clicca per
+    la sagoma; sepolta sparisce come tutte. I testi seguono: il tasto dice
+    "Ristruttura", l'azione "Ristrutturazione", i messaggi parlano di
+    rovina, e il riquadro dell'edificio dice "si puo' ristrutturare" sulle
+    proprie. Nella v1.5 nulla cambia (la costante e' spenta). Test della
+    vista: sagoma in piedi e girata, niente crollo, ingombro del clic,
+    testi; nella v1.5 la rovina resta senza sagoma.
+
+107. **Il regolamento della v2, scritto.** Il designer ("fammi il nuovo
+    regolamento"). `docs/regolamento-v2.md`: la struttura e il testo del
+    regolamento v1.5 dove la v2 non cambia, e le decisioni dei punti 84-106
+    dove cambia: tre risorse, tessere pescate con produzione per era ed
+    effetto una volta per era, draft dei Personaggi, quattro lavoratori che
+    attivano e agiscono, premio di scavo S x L dimezzato nell'era Moderna al
+    posto della Verticalita', niente rudere ne' Vetusta', rovina girata che
+    si ristruttura (propria, meta' costo in C e D), scheletro del
+    potenziamento che conta sempre, Prosperita' una volta per era in Denaro,
+    tetto 3 per risorsa e 5 in tutto, Dinastia in Idee. Ogni numero e' quello
+    che gioca il motore con `data/cards-v2.json`. In fondo le cose che
+    restano da decidere al tavolo (mercato, di chi e' la rovina, misure
+    delle sagome). Le varianti non sono misurate con la v2.
+
+108. **La v2 a 2 e a 4 giocatori.** Il designer ("vai con le misure a 2 e 4
+    giocatori"): tutte le misure erano a tre. Stessi lotti (750 torneo, 2 000
+    vita) a 2, 3 e 4, v2 e v1.5 (`docs/la-terza-risorsa.md`, dodicesima
+    misura). La citta' della v2 ha la stessa forma a ogni numero di
+    giocatori (altezza 4,4-4,6, un terzo cade nell'era in cui nasce, 6-7
+    sopraelevazioni a testa) e le Idee si spendono (90-97%). Due cose da
+    decidere. **A due** le strategie si aprono: Continuita' 58% e Obiettivi
+    40% fuori dall'errore (50 +- 6), nella v1.5 a due tutte fra 46 e 54;
+    Obiettivi ha un Monumento solo (giocatori meno uno) e senza la
+    Verticalita' e' la piu' povera, Continuita' costruisce sopra i propri
+    nelle cinque colonne. **A quattro** le strategie tengono (25 +- 4, meglio
+    della v1.5) ma ognuno passa 5,1 volte a partita: sedici turni per era
+    contro dodici sagome dell'era, 49 sagome costruite su 60, e il draft ha
+    tolto Reclutare, che nella v1.5 era la valvola; kingmaker 18% (10 a
+    due, 13 a tre). Controprova con tre lavoratori: a quattro i passaggi
+    cadono a 1,9 ma la partita perde 9 punti e le strategie non si muovono
+    (il mercato corto e' confermato; se si interviene, meglio un incasso al
+    passaggio o piu' sagome che un lavoratore in meno); a due la forbice si
+    chiude (Continuita' 55, Obiettivi 45) al costo di 13 punti. Resta da
+    fare la controprova del secondo Monumento rivelato a due (serve una
+    costante: oggi "giocatori meno uno" e' nel codice).
+
+109. **L'incasso al passaggio non cambia niente.** Il designer ("vai con
+    l'incasso al passaggio a quattro"). Costante `passa_incasso` (spenta dove
+    manca, `--passa_incasso 1`): nel turno della v1.5 chi non fa l'azione
+    incassa 1 Costruzione piu' 1 risorsa a scelta, e il bot la valuta come
+    una mossa. Misurato a 4, 3 e 2 giocatori, stessi semi
+    (`docs/la-terza-risorsa.md`, tredicesima misura): a quattro i passaggi
+    restano 5 a testa e gli edifici 12,2, perche' il vincolo sono le sagome
+    e le risorse in piu' si perdono alla dispersione; a tre e a due
+    niente. Non entra nel file v2; la manopola resta.
+
+110. **Il secondo Monumento a due, e piu' sagome a quattro.** Il designer
+    ("vai anche con il secondo monumento a due"; per la scarsita' a
+    quattro: raddoppiare chiese o villaggi, o aggiungere abitazioni
+    generiche che costano poco e rendono poco). Costante
+    `monumenti_rivelati_by_players` (`--monumenti N`; assente: giocatori
+    meno uno); `min_players` sulle sagome che entrano nel mazzo solo con
+    abbastanza giocatori; due file di prova in `data/proposte/` da
+    `genera_cards_v2.py --variante doppioni|abitazioni`, dieci sagome in
+    piu', solo a quattro. Misurato (tredicesima misura). Il secondo
+    Monumento a due non risolve: la partita e' identica, Obiettivi da 40 a
+    42% e resta la piu' povera; e' il bot, non i Monumenti. A quattro le
+    dieci sagome in piu' danno un edificio in piu' a testa e tolgono un
+    passaggio (da 5,1 a 4): la leva e' giusta ma dieci non bastano, ne
+    servono circa venti. I doppioni sono meglio delle abitazioni (+6 punti
+    contro +2, kingmaker 15%, niente da disegnare; le abitazioni spostano
+    Rendita a 36 e Continuita' a 18), ma scelti per classe affossano la
+    Lampo (15%). Da decidere: doppioni scelti per Lampo, o quattro per
+    era, poi ricontrollare la Lampo. Il file v2 non cambia.
+
+111. **Le case generiche a quattro: solo Lampo, due taglie.** Il designer
+    (dopo il punto 110): "copie generiche di edifici che costano poco e
+    danno PV Lampo, e altre che costano poco di piu' e danno un po' piu'
+    PV; non fanno consumare risorse e danno un rientro annacquato; poi si
+    possono raddoppiare edifici non enormi ne' speciali, tipo chiese".
+    Due file di prova (`--variante case`, `--variante case_doppioni`):
+    venti case (due taglie per era, due copie, senza produzione, Lampo 1 e
+    2-3), e le stesse piu' dieci doppioni di chiese; solo a quattro.
+    Misurato (`docs/la-terza-risorsa.md`, tredicesima misura): le case
+    risolvono il mercato (13,9 edifici a testa, passaggi da 5,1 a 3,5, +5
+    punti, citta' uguale, kingmaker 16%) e le chiese in piu' non aggiungono
+    niente; ma il Lampo diventa di tutti (+4 a testa) e la strategia Lampo
+    affonda al 14% (13 con le chiese), la Rendita sale al 34-36%. Se il
+    Lampo si compra con una casa da 1, specializzarsi nel Lampo non e' piu'
+    una strategia. Da decidere: case che danno Scavo invece di Lampo, case
+    senza niente (puro suolo), o il bot Lampo ritarato a quattro. Il file
+    v2 non cambia.
+
+112. **"Prova tutto": case con Scavo, case senza niente, bot Lampo
+    ritarato.** Il designer, dopo il punto 111. Misurato a quattro, stessi
+    semi (`docs/la-terza-risorsa.md`, tredicesima misura). Le case senza
+    niente non si costruiscono (passaggi 5,1 come senza case): inutili. Le
+    case con Scavo 2 e 3 sono il compromesso: la Lampo torna al 23% e le
+    strategie stanno nell'errore tranne la Scavo al 18%, ma si costruiscono
+    meno (13,0 edifici, passaggi 4,5): il mercato corto e' mezzo risolto.
+    Ritarare il bot Lampo sulle case con Lampo non serve (lampo 2,5 lo
+    porta al 7%, potenzia 5 al 18%): il problema e' il canale che non
+    distingue piu' nessuno, non il bot. La variante mista (piccola con
+    Lampo 1, grande con Scavo 3) sta in mezzo e non aiuta (Rendita 34,
+    Scavo 18). Ogni casa che si compra volentieri regala qualcosa alla
+    Rendita, che a quattro lavoratori compra sempre: la domanda vera a
+    quattro e' la Rendita, non le case. Le case con Scavo restano il
+    compromesso. Il file v2 non cambia.
+
+113. **Le regole non cambiano col numero di giocatori.** Decisione del
+    designer dopo il punto 112 ("non voglio che le regole cambino al
+    variare dei giocatori"). Niente sagome "da quattro in su" nel file v2,
+    niente Monumenti in piu' a due: le manopole (`min_players`,
+    `monumenti_rivelati_by_players`, `passa_incasso`) restano nel motore,
+    spente, e i file di prova in `data/proposte/` restano come misura. A
+    quattro il mercato resta corto (un turno per era a testa senza azione)
+    e la Rendita al 30%; a due Continuita' 58% e Obiettivi 40%: sono i
+    numeri del gioco a quei tavoli, da riguardare con i bot, non con le
+    regole.
+
+114. **Il calendario del torneo, e i bot a due e a quattro.** Il designer
+    ("i bot a due e quattro"). Cercando le spinte e' venuto fuori che il
+    torneo assegnava le strategie a finestre consecutive della lista: con
+    meno posti che strategie ognuna incontrava solo le vicine, sempre le
+    stesse, e il 58% della Continuita' e il 40% della Obiettivi a due erano
+    accoppiamenti. Il torneo ha ora `--giro tutte` (ogni combinazione di
+    strategie lo stesso numero di volte, posti a rotazione); il giro vecchio
+    resta dove non si chiede. Rimisurato a 2, 3 e 4
+    (`docs/la-terza-risorsa.md`, quattordicesima misura): la partita e'
+    identica, la mappa vera e' Scavo debole a due e a tre (38%, 26%),
+    Rendita forte (36%) e Lampo debole (18%) a quattro. Le spinte sono
+    handicap: spingere di piu' peggiora, la Bilanciata senza spinte e' la
+    piu' forte quasi ovunque. Taratura verso il basso: Scavo a meta' spinta
+    (in `SPINTE_V2`, vale ovunque), a quattro Lampo con meta' peso al Lampo
+    e potenziamenti a 5 (`SPINTE_V2_PER_GIOCATORI`, le regole non cambiano,
+    cambia il bot). Rigiocato senza manopole: tutte entro l'errore a tutti
+    e tre i tavoli (a 2: 44-54; a 3: 30-37; a 4: 21-28). La v1.5 e la
+    partita non cambiano.
+
+115. **Le case per tutti.** Il designer, dopo il punto 113: "volevo introdurre
+    gli edifici generici, che per me risolvono: due o tre tipi diversi, con
+    costi e resistenza bassi e incasso Lampo di PV, magari uno che da'
+    anche Scavo. Nessuna regola diversa per numero di giocatori; magari si
+    puo' decidere il numero di carte del mercato in base ai giocatori."
+    File di prova `--variante case_tutti`: tre case per era, una copia
+    ciascuna, per ogni tavolo (piccola: costa 1, Lampo 1; grande: costa 2,
+    Lampo 2-3; del borgo: costa 1, Scavo 2), 75 sagome; manopola
+    `--mercato N`. Misurato sul torneo corretto coi bot tarati
+    (`docs/la-terza-risorsa.md`, quindicesima misura): reggono a tutti e
+    tre i tavoli (strategie nell'errore a 2 e a 3, a 4 la Rendita al 30
+    contro 29 di bordo), a tre e quattro danno l'edificio in piu' che
+    mancava (13,2 a quattro, passaggi da 5,4 a 4,1), a due tolgono tre
+    punti perche' diluiscono il mercato; kingmaker 8/12/13%. Il mercato a 8
+    non cambia niente: si lascia a 6. Da decidere: tre per era una copia,
+    o due copie della piccola. Il file v2 non cambia finche' non si decide.
+
+116. **Le case nel file v2: in riserva, due copie.** Decisione del designer
+    dopo il punto 115 ("confermo, ma farei due copie di ognuna, poi il
+    giocatore decide cosa comprare; sono sempre disponibili, non vengono
+    pescate"). Le quattordici case (tre per era: piccola, grande e con lo
+    Scavo; nell'era Moderna solo le prime due, perche' "lo scavo nell'era 5
+    non vale") stanno nel file v2 per tutti i tavoli con `riserva` vero e
+    `copie` 2: non entrano nel mazzo
+    dell'era, a inizio era si scoprono tutte accanto al mercato
+    (`gs.riserva`, una voce per copia), si comprano come dal mercato senza
+    rimpiazzo e a fine era le avanzate si scartano. Bot, azioni e vista
+    guardano `gs.in_vendita()`, mercato piu' riserva; nella v1.5 la riserva
+    e' vuota e il riferimento e' identico. Il documento delle carte le
+    porta con la sigla RIS; il regolamento ha la riserva e le case. Misura
+    a 2, 3 e 4 sul torneo corretto (sedicesima misura): la riserva si
+    compra piu' del mazzo (edifici a testa 13,6 / 15,1 / 13,4 contro 12,8 /
+    13,8 / 12,0; passaggi a quattro da 5,4 a 3,9) e a due non toglie piu'
+    niente (84 PV contro 83), perche' il mazzo dell'era non e' diluito;
+    kingmaker 10 / 14 / 15 %. Due strategie sul bordo: Lampo a tre 39 %
+    (bordo 38), Rendita a quattro 33 % (bordo 29). Si tiene cosi'; da
+    rimisurare se si ritoccano i bot. La vita delle carte a tre dice
+    pero' che le case con lo Scavo non le compra nessuno (98 costruzioni
+    su 16 000 copie: alla stessa spesa c'e' la piccola con Lampo 1) e che
+    le case grandi delle ere 4-5 (Lampo 3 a costo 2) finiscono quasi ogni
+    partita (3989 e 3969 copie su 4000); 3,6 case a testa a tre. Deciso
+    al punto 117.
+
+117. **Le case: lo Scavo prende anche il Lampo, la grande non supera 2.**
+    Decisione del designer dopo la sedicesima misura ("le case con lo
+    Scavo le rafforziamo portando anche i PV, e Lampo 3 lo portiamo a 2").
+    La casa con lo Scavo (Ripari, Tuguri, Casupole, Case popolari) ha
+    Lampo 1 come la piccola, oltre allo Scavo 2, allo stesso costo; le
+    case grandi delle ere 4-5 (Palazzetto, Condominio popolare) scendono
+    da Lampo 3 a 2. Nota: a pari costo e resistenza la casa con lo Scavo
+    domina la piccola nelle ere 1-4; la piccola resta la scelta solo
+    quando le due copie dell'altra sono finite. Misurato (diciassettesima
+    misura): il Lampo a testa scende di 1-1,5 punti senza toccare edifici
+    e passaggi; la casa con lo Scavo ha sostituito la piccola nelle ere
+    1-3 (0 / 87 / 4 copie su 4000), le Case popolari sono la casa piu'
+    comprata (3884 su 4000), il Palazzetto scende a 562. Lampo a tre (40 %)
+    e Rendita a quattro (32 %) restano sul bordo: e' la presenza delle
+    case, non il loro Lampo; da ritarare i bot a tre e quattro. La
+    piccola nelle ere 1-3, che non si compra piu', resta: e' la terza e la
+    quarta copia della casa da 1 (deciso dal designer).

@@ -189,6 +189,10 @@ static func matches(gs: GameState, b: Building, t: Dictionary,
 	if not _in_range(b.level, t.get("level", {})): return false
 	if not _in_range(b.width(), t.get("width", {})): return false
 	if not _in_range(b.vetusta, t.get("vetusta", {})): return false
+	# `resistance`: la resistenza efficace (stampata piu' i bonus permanenti e
+	# la protezione). Serve al Colosseo della v2 (registro 99), che senza
+	# Vetusta' premia l'edificio che resiste per costruzione.
+	if not _in_range(b.effective_resistance(), t.get("resistance", {})): return false
 	if not _in_range(int(b.data["scavo"]), t.get("scavo", {})): return false
 	if not _in_range(b.era_built, t.get("era", {})): return false
 
