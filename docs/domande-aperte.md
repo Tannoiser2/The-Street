@@ -945,10 +945,9 @@ dato è stato importato da lì. Ma due confronti fra ciò che è stampato e
     verificato prima confrontando gli hash (che le davano distinte) e poi
     guardandole grandi, perche' il primo confronto mi aveva ingannato.
 
-    Risolto il 27 settembre: il designer ha rifatto la pagina 29 e l'ha
-    consegnata da sola (il PDF intero supera il limite di caricamento dal
-    sito). Innestata in `materiali/Carte.pdf` al posto della vecchia: le
-    altre 53 pagine sono identiche immagine per immagine. Le posizioni 10,
+    Risolto il 27 settembre: il designer ha rifatto la pagina 29 e
+    ricaricato `materiali/Carte.pdf` (e `Sfondo.png`); le altre 53 pagine
+    sono identiche immagine per immagine. Le posizioni 10,
     11 e 12 portano Eruzione, Persecuzioni e Guerra civile; la mappatura
     (`data/carte_pdf.json`) non ha piu' `null` fra gli eventi e
     `tools/estrai_grafica.py` estrae 24 eventi su 24.

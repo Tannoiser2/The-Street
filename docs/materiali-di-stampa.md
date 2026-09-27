@@ -75,9 +75,9 @@ obsoleti.
 Fino al 22 settembre le posizioni 10, 11 e 12 portavano una **seconda stampa** di
 tre carte dell'era 3 (Grande incendio, Scisma, Anni della fame, con l'illustrazione
 rigenerata) al posto dei tre eventi *gravi* dell'era 2. Il designer ha rifatto la
-pagina 29 e l'ha consegnata da sola; è stata innestata nel PDF di stampa al posto
-della vecchia, e le altre 53 pagine sono rimaste identiche immagine per immagine
-(controllato per impronta, posizione per posizione).
+pagina 29 e ricaricato il PDF; le altre 53 pagine sono identiche immagine per
+immagine alla copia del 22 settembre (controllato per impronta, posizione per
+posizione).
 
 | posizione | ora porta |
 |---|---|
