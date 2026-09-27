@@ -123,7 +123,7 @@ su 4 processi.
 - **Il controllo quotidiano dei materiali.** La sessione vecchia aveva una routine che ogni giorno
   confrontava i file in `materiali/` con quelli noti e, se il designer ne ricaricava uno,
   rilanciava `tools/estrai_grafica.py` (che si autoverifica), guardava se i punti 69 e 73 erano
-  stati corretti e apriva una PR. I blob noti su main: `Carte.pdf` 5bbec7e,
+  stati corretti e apriva una PR. I blob noti su main: `Carte.pdf` 3081182 (dal 27 settembre; era 5bbec7e),
   `Potenziamenti.pdf` 7e630f1, `Sfondo.png` cce0456, `Scavo.png` ee29441, `Terrapieno.png`
   4fe4f34, `Scheletri.png` 7eef245, `ProsperitaUrbana.png` 8c42bf1
   (`git ls-tree origin/main materiali/`). Se serve ancora, va ricreata nella sessione nuova.

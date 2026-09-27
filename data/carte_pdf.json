@@ -10,9 +10,9 @@
     "ev_terremoto",
     "ev_pax_imperiale",
     "ev_invasione",
-    null,
-    null,
-    null,
+    "ev_eruzione",
+    "ev_persecuzioni",
+    "ev_guerra_civile",
     "ev_incursioni_fluviali",
     "ev_guerra",
     "ev_peste",
@@ -115,14 +115,10 @@
     "po_memoriale"
   ],
   "_mancanti": {
-    "eventi": [
-      "ev_eruzione",
-      "ev_persecuzioni",
-      "ev_guerra_civile"
-    ],
+    "eventi": [],
     "potenziamenti": []
   },
-  "_note_mancanti": "eventi: le posizioni 10, 11 e 12 dovrebbero portare i tre eventi gravi dell'era 2 (Eruzione, Persecuzioni, Guerra civile) e portano invece una seconda stampa di Grande incendio, Scisma e Anni della fame - stessa carta, stesso testo, illustrazione rigenerata. Verificato di nuovo sul PDF del 22 settembre: non e' cambiato niente. potenziamenti: RISOLTO nel PDF del 22 settembre. Le 25 posizioni portano ora 25 carte distinte, nell'ordine esatto di data/cards.json; le cinque ristampe (2, 7, 12, 17, 22) sono sparite e le cinque carte che mancavano - Fondamenta in pietra, Iscrizione, Reliquia, Cannoniere, Memoriale - ci sono.",
+  "_note_mancanti": "eventi: RISOLTO nel PDF del 27 settembre (pagina 29 rifatta dal designer, innestata nel PDF di stampa; le altre 53 pagine sono identiche immagine per immagine). Le posizioni 10, 11 e 12 portano ora Eruzione, Persecuzioni e Guerra civile, letti sulle carte; le altre nove carte della pagina sono le stesse di prima, riesportate. Fino al 22 settembre portavano una seconda stampa di Grande incendio, Scisma e Anni della fame. potenziamenti: RISOLTO nel PDF del 22 settembre. Le 25 posizioni portano ora 25 carte distinte, nell'ordine esatto di data/cards.json; le cinque ristampe (2, 7, 12, 17, 22) sono sparite e le cinque carte che mancavano - Fondamenta in pietra, Iscrizione, Reliquia, Cannoniere, Memoriale - ci sono.",
   "_copie_byte": {
     "potenziamenti": [],
     "eventi": [],
@@ -132,7 +128,7 @@
     ]
   },
   "_impronte_pdf": {
-    "Carte.pdf": "e7fd8c7d452995b3",
+    "Carte.pdf": "054571fa59a60d1e",
     "Potenziamenti.pdf": "8c73855c172997c6"
   },
   "_nota_controlli": "`_copie_byte`: le posizioni che portano la copia byte per byte di un'altra, riconoscibili a macchina. Gli eventi hanno l'elenco vuoto perche' le loro ristampe hanno l'illustrazione rigenerata e nessuna impronta le tradisce: quelle sono dichiarate a mano fra i `null`. `_impronte_pdf`: se non combaciano, il PDF e' stato rifatto e la mappatura ricavata a vista va ricontrollata. Fra le tessere la 11 e' la seconda copia del segnalino pietra/oro, che non e' una tessera colonna. La 7, invece, e' una seconda Collina delle Cave dove servirebbe una terza tessera FIUME: vedi data/tessere_pdf.json e domande-aperte punto 72."
