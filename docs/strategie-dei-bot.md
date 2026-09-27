@@ -236,4 +236,5 @@ Le percentuali di vittoria a due e a quattro giocatori misurate prima (dodicesim
 precedenti) sono accoppiamenti, non forza. Con `--giro tutte` ogni combinazione di
 strategie si gioca lo stesso numero di volte; i numeri validi sono quelli della
 quattordicesima misura in `la-terza-risorsa.md`. Le spinte della v2 stanno in
-`SPINTE_V2` e, per il tavolo a quattro, in `SPINTE_V2_PER_GIOCATORI`.
+`SPINTE_V2` e, per i tavoli a tre e a quattro, in `SPINTE_V2_PER_GIOCATORI` (ritarate con le
+case della riserva nella diciottesima misura, registro 118).

@@ -2027,3 +2027,14 @@ dato è stato importato da lì. Ma due confronti fra ciò che è stampato e
     case, non il loro Lampo; da ritarare i bot a tre e quattro. La
     piccola nelle ere 1-3, che non si compra piu', resta: e' la terza e la
     quarta copia della casa da 1 (deciso dal designer).
+
+118. **I bot ritarati con le case.** Chiesto dal designer dopo la
+    diciassettesima misura. Con le case della riserva a tre la Lampo
+    vinceva il 40% e a quattro la Rendita il 32% e la Scavo il 19%. Stesso
+    metodo del punto 114 (le spinte sono handicap): a tre `lampo` 2,0
+    (Lampo 40 -> 30); a quattro `rendita_per_era` 1,5 e Scavo a un quarto
+    (`scavo_premio` 0,2, `scavo_terra_scavo` 0,1): Rendita 32 -> 28, Scavo
+    19 -> 23. Le tabelle stanno in `SPINTE_V2_PER_GIOCATORI` per tavolo; a
+    due la base va bene. Tutte le strategie entro l'errore a 2, 3 e 4; la
+    partita (PV, edifici, passaggi) non cambia al decimale. La v1.5 non
+    cambia (diciottesima misura).
