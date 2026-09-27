@@ -1019,6 +1019,10 @@ dato è stato importato da lì. Ma due confronti fra ciò che è stampato e
     A schermo si vede: a quattro giocatori la terza colonna di fiume ripete
     il disegno della prima.
 
+    Chiuso dal designer: "la tessera fiume raddoppia la prima e fine". La
+    terza colonna di fiume a quattro usa il disegno della prima, com'e'
+    gia' a schermo; niente da correggere.
+
 74. **Le "caselle disegnate" sulle tessere non le trovo.** Mi hai detto che
     sul PDF ci sono caselle disegnate nella parte alta della tessera, dove
     vanno le sagome. Nella copia che ho in mano - `materiali/Carte.pdf`,
@@ -1033,6 +1037,9 @@ dato è stato importato da lì. Ma due confronti fra ciò che è stampato e
     Se le caselle stanno nel PDF nuovo, quando arriva rimisuro sulle loro
     posizioni invece che sulla cornice: potrebbero non essere centrate sulla
     fascia che ho scelto.
+
+    Chiuso dal designer: da ignorare. La fascia dei binari resta quella
+    misurata sull'illustrazione.
 
 75. **I binari stretti costano lo scorcio.** Con i binari a 54 mm bastavano
     45 gradi di inclinazione per vedere l'82% di una sagoma dietro quella
