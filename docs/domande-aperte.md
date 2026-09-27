@@ -2045,3 +2045,17 @@ dato è stato importato da lì. Ma due confronti fra ciò che è stampato e
     due la base va bene. Tutte le strategie entro l'errore a 2, 3 e 4; la
     partita (PV, edifici, passaggi) non cambia al decimale. La v1.5 non
     cambia (diciottesima misura).
+
+119. **Il riepilogo finale con i nomi del regolamento v2.** Il designer
+    ("fai tu e poi mergia"). La tabella di fine partita chiamava le
+    colonne con i nomi e l'ordine della v1.5 anche nella v2. Ora i nomi
+    seguono il file dei dati caricato (`Riepilogo.voci()`): nella v2 sono
+    Lampo, PV prodotti, Censimento, Continuita', Scavo+premio (il premio
+    di scavo pagato sul momento e lo Scavo di fine partita stanno nello
+    stesso canale del nucleo, quindi una colonna sola col nome che lo
+    dice), Scheletri, Monumenti, Eredita', Finali; la Verticalita' non c'e'
+    piu'. Trovato per strada: la coda della tabella, che raccoglie i canali
+    che non conosce, mostrava anche quelli a zero (il nucleo segna
+    `verticalita` con 0 nella v2); ora una colonna compare solo se ha dato
+    punti a qualcuno. I nomi stanno in 86 px a corpo 12: il test lo
+    controlla. La v1.5 non cambia.

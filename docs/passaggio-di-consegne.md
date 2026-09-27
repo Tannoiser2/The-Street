@@ -68,7 +68,7 @@ Le tabelle sono in `scripts/ai/strategy_bot.gd`: `SPINTE_V1` (non si tocca), `SP
 `--spinta k=v,...` prova una taratura senza toccare le tabelle.
 
 **I test** (scene headless, sempre con `timeout` e l'output su file): `test_actions` 279,
-`test_effects` 503, `test_schema_validator` 13, `test_view` 467 più **due KO noti** ("il piano
+`test_effects` 503, `test_schema_validator` 13, `test_view` 484 più **due KO noti** ("il piano
 della tessera è profondo quanto la tessera" e "ce n'è uno per colonna"), che ci sono da prima
 della v2 e non vanno contati come regressioni.
 
@@ -161,11 +161,9 @@ container può ripartire.
   testi nuovi (costi in tre risorse, Personaggi del draft, tessere con l'effetto), e le sagome
   con Rendita, Lampo e Scavo stampati. Il capitolato è `docs/carte-v2.md`. A schermo la v2 usa le
   immagini della v1.5 dove esistono e i disegni a runtime altrove.
-- **Il riepilogo finale a schermo** (`scripts/view/riepilogo.gd`) elenca i canali con i nomi e
-  l'ordine della v1.5: nella v2 la colonna "Scavo" contiene il **premio di scavo** (pagato
-  subito a chi costruisce sopra, `game_controller.gd`) sommato allo Scavo di fine partita, e
-  "Verticalità" sparisce solo perché vale zero. I numeri sono giusti; sono i nomi a essere
-  vecchi. Da rifare con i nomi del regolamento v2 quando il designer lo chiede.
+- Il riepilogo finale a schermo usa i nomi del regolamento v2 dal registro 119 (`Riepilogo.voci()`
+  sceglie la tabella dal file dei dati); la colonna "Scavo+premio" tiene insieme il premio di
+  scavo pagato sul momento e lo Scavo di fine partita, che il nucleo segna nello stesso canale.
 - **Le strategie sul bordo**: Rendita 56 a due e 38 a tre (bordo 56 e 38). Si rimisurano se si
   ritoccano i bot o le case; non è un problema di regole.
 - **Registro 86**: al tavolo serve un segno fisico per i Centri Urbani che hanno già pagato
