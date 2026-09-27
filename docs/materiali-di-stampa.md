@@ -70,20 +70,24 @@ Il testo delle 20 presenti **coincide con `data/cards.json`**, controllato voce
 per voce: qui, a differenza delle carte edificio, i numeri del PDF non sono
 obsoleti.
 
-### Tre eventi dell'era 2 non ci sono
+### ~~Tre eventi dell'era 2 non ci sono~~ — risolto il 27 settembre
 
-Le posizioni 10, 11 e 12 dovrebbero portare i tre eventi *gravi* dell'era 2 e
-portano invece una **seconda stampa** di tre carte dell'era 3:
+Fino al 22 settembre le posizioni 10, 11 e 12 portavano una **seconda stampa** di
+tre carte dell'era 3 (Grande incendio, Scisma, Anni della fame, con l'illustrazione
+rigenerata) al posto dei tre eventi *gravi* dell'era 2. Il designer ha rifatto la
+pagina 29 e ricaricato il PDF; le altre 53 pagine sono identiche immagine per
+immagine alla copia del 22 settembre (controllato per impronta, posizione per
+posizione).
 
-| posizione | dovrebbe essere | porta invece |
-|---|---|---|
-| 10 | **Eruzione** | Grande incendio (era 3) |
-| 11 | **Persecuzioni** | Scisma (era 3) |
-| 12 | **Guerra civile** | Anni della fame (era 3) |
+| posizione | ora porta |
+|---|---|
+| 10 | **Eruzione** (Fine Era 2, Grave, Geografico, forza 3) |
+| 11 | **Persecuzioni** (Fine Era 2, Grave, Classe, forza 3) |
+| 12 | **Guerra civile** (Fine Era 2, Grave, Comportamentale, forza 3) |
 
-Non sono copie byte per byte: stessa carta, stesso testo, stessa forza, con
-l'illustrazione **rigenerata**. Da qui la differenza con le sagome, dove i
-duplicati sono identici al byte.
+Le altre nove carte della pagina sono le stesse di prima, riesportate: le immagini
+hanno impronte nuove ma lo stesso disegno, confrontato a vista. Ventiquattro eventi
+distinti per ventiquattro posizioni: nessun `null` nella mappatura.
 
 ### Una tessera fiume in meno, e una collina di troppo
 
