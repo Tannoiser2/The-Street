@@ -2091,6 +2091,20 @@ dato è stato importato da lì. Ma due confronti fra ciò che è stampato e
     Giardino all'italiana, Spoglio delle rovine). Aperto: sostituire le
     quattro, e togliere Lampo alle tessere o ritarare il bot.
 
+122. **Le caselle e le forme nuove delle carte.** Decisioni del designer:
+    le carte quadrate occupano una colonna per due binari; il Colosseo
+    (Anfiteatro) passa da 3 a 2 colonne ed e' 2x2 come Castello e Fortezza
+    bastionata; il Grattacielo e' una colonna per tre binari; Acquedotto e
+    Stazione restano larghi 3. I binari non sono le ere: si costruisce nel
+    binario che si vuole, si parte dal fondo per comodita'. Si attiva ogni
+    edificio che tocca la colonna attivata. I 2x2 e il Grattacielo vanno
+    solo sopra, con le regole di sempre (almeno una base vera, propri
+    attivi spianati, terrapieno sulle caselle vuote), e sopra di loro si
+    costruisce solo quando sono in rovina. Nel motore: costante `caselle`
+    del file v2, campi `depth` e `solo_su_rovine`. Misurato (ventesima
+    misura): piu' Scavo, citta' piu' bassa, la Lampo fuori dall'errore a
+    tutti i tavoli (66/48/41 %). Aperto: riportare la Lampo nell'errore.
+
 123. **I potenziamenti raddoppiati.** Richiesta del designer: altri 25
     potenziamenti, cinque per era, cosi' ogni era ha un mazzo di dieci carte
     diverse. Stessa economia dei primi 25 (costo 1 nelle ere 1-3, 2 nelle
