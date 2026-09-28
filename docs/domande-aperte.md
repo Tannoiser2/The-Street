@@ -2090,3 +2090,11 @@ dato è stato importato da lì. Ma due confronti fra ciò che è stampato e
     quattro tessere non scattano quasi mai (Raccoglitori, Restauratori,
     Giardino all'italiana, Spoglio delle rovine). Aperto: sostituire le
     quattro, e togliere Lampo alle tessere o ritarare il bot.
+
+123. **I potenziamenti raddoppiati.** Richiesta del designer: altri 25
+    potenziamenti, cinque per era, cosi' ogni era ha un mazzo di dieci carte
+    diverse. Stessa economia dei primi 25 (costo 1 nelle ere 1-3, 2 nelle
+    ere 4-5, nella risorsa della famiglia) e forza pari a quelli della
+    stessa era. Nel motore l'unica aggiunta e' che "quando abiti" puo' dare
+    anche Idee. Elenco in `docs/proposte/potenziamenti-v2.md`, dati in
+    `tools/genera_cards_v2.py`. Aperto: stampa delle carte e misura.
