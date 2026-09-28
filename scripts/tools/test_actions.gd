@@ -1740,9 +1740,17 @@ func _test_caselle() -> void:
 	var qa := BuildRules.quote_above(gs, 0, anf, 0, null, 1)
 	_ok("  sopra quattro rovine si'", qa.legal and qa.bases.size() == 4)
 	rov[3].state = Enums.BuildingState.INTATTO
+	var qi := BuildRules.quote_above(gs, 0, anf, 0, null, 1)
+	_ok("  con un attivo altrui sotto no", not qi.legal)
 	rov[3].owner = 0
-	_ok("  con un intatto sotto no, nemmeno proprio", not BuildRules.quote_above(gs, 0, anf, 0, null, 1).legal)
+	qi = BuildRules.quote_above(gs, 0, anf, 0, null, 1)
+	_ok("  un proprio attivo si spiana, come sempre", qi.legal and qi.razed == [rov[3]])
 	rov[3].state = Enums.BuildingState.ROVINA
+	rov[3].owner = 1
+	gs.grid.buildings.erase(rov[2])
+	var qv := BuildRules.quote_above(gs, 0, anf, 0, null, 1)
+	_ok("  una casella vuota si riempie col terrapieno", qv.legal and qv.terrapieno_pietra == 1)
+	gs.grid.buildings.append(rov[2])
 	var col := _put(gs, 0, "ed_anfiteatro", 0, 1)
 	col.binario = 1
 	for x in rov: col.basi.append(x.uid)

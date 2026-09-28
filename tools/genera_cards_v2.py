@@ -432,9 +432,10 @@ def tessere_era(v):
 # (Anfiteatro) passa da 3 a 2 colonne ed e' 2x2 come Castello e Fortezza; il
 # Grattacielo e' una colonna per tre binari. Acquedotto e Stazione restano
 # larghi 3. I binari non sono le ere: si costruisce nel binario che si vuole.
-# `depth` = binari occupati. `solo_su_rovine`: sotto ogni casella deve esserci
-# una rovina (che diventa scavo), e sopra non si costruisce finche' l'edificio
-# non e' a sua volta in rovina.
+# `depth` = binari occupati. `solo_su_rovine`: mai a terra, solo sopra, con le
+# regole di sempre (almeno una base vera: una rovina o un proprio attivo da
+# spianare; terrapieno sulle caselle vuote); e sopra di lui non si costruisce
+# finche' non e' a sua volta in rovina.
 FORME = {
     "ed_circolo_di_pietre": (1, 2), "ed_villaggio_palizzato": (1, 2),
     "ed_castrum": (1, 2), "ed_foro": (1, 2), "ed_abbazia": (1, 2),

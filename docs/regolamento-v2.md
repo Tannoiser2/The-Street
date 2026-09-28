@@ -349,10 +349,11 @@ costruiscono con una sola azione, contano come strato in tutte le caselle che to
 attivano da ciascuna delle loro colonne, e se crollano vanno in rovina ovunque. Valgono il
 proprio Scavo una sola volta, e solo quando l'intera proiezione è coperta.
 
-**I 2x2 e il Grattacielo si costruiscono solo sopra delle rovine**: sotto ognuna delle loro
-caselle deve esserci una rovina, di chiunque, che viene sepolta e diventa scavo. Niente
-terrapieno, niente spianare. E sopra di loro non si costruisce nulla finché non sono a loro
-volta in rovina.
+**I 2x2 e il Grattacielo non si costruiscono mai a terra**, solo sopra, con le regole di
+sempre: almeno una base vera (una rovina di chiunque, o un vostro edificio attivo che spianate
+e diventa rovina), terrapieno sulle caselle vuote, e nessun edificio attivo altrui sotto. Le
+rovine che coprono per intero vengono sepolte e diventano scavo. E sopra di loro non si
+costruisce nulla finché non sono a loro volta in rovina.
 
 ### Costo flessibile ◈
 

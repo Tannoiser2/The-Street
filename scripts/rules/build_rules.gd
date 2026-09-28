@@ -132,8 +132,11 @@ static func quote_rail(gs: GameState, player: int, data: Dictionary, col_from: i
 		q.reason = "fuori dalla strada"; return q
 	if int(data["era"]) != gs.era:
 		q.reason = "non è un edificio dell'era corrente"; return q
+	# I colossali di forma nuova (registro 122) non vanno mai a terra: si
+	# costruiscono solo sopra, con le regole di sempre (rovine, propri attivi
+	# spianati, terrapieno sulle caselle vuote, almeno una base vera).
 	if bool(data.get("solo_su_rovine", false)):
-		q.reason = "va costruito sopra delle rovine"; return q
+		q.reason = "va costruito sopra: rovine o propri edifici da spianare"; return q
 	var binario := binario_per(gs, col_from, col_to, int(data.get("depth", 1)), voluto)
 	if binario == 0:
 		q.reason = "caselle occupate nel binario"; return q
@@ -293,7 +296,6 @@ static func _quote_sopra_binario(gs: GameState, player: int, data: Dictionary, c
 	if dr != "":
 		q.reason = dr; return q
 	q.binario = binario
-	var solo_rovine := bool(data.get("solo_su_rovine", false))
 	var top_level := -1
 	var real_bases := 0
 	var vuote := 0
@@ -305,16 +307,12 @@ static func _quote_sopra_binario(gs: GameState, player: int, data: Dictionary, c
 		for r in range(binario, binario + prof):
 			var top := g.top_of_casella(c, r)
 			if top == null:
-				if solo_rovine:
-					q.reason = "sotto ogni casella ci vuole una rovina"; return q
 				vuote += 1
 				if not c in q.terrapieno_cols: q.terrapieno_cols.append(c)
 				top_level = max(top_level, 0)
 				continue
 			if top.solo_su_rovine() and top.state != Enums.BuildingState.ROVINA:
 				q.reason = "sopra %s si costruisce solo quando e' in rovina" % top.data["name"]; return q
-			if solo_rovine and top.state != Enums.BuildingState.ROVINA:
-				q.reason = "sotto ogni casella ci vuole una rovina"; return q
 			match top.state:
 				Enums.BuildingState.INTATTO:
 					if top.owner != player:
