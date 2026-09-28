@@ -247,12 +247,13 @@ lavoratore del potenziamento.
 | 5 | Veterano | militare | finale | Finale: +1 PV per ogni tuo edificio Militare in piedi (max +4). |  |  |
 | — | Dinastia | civico | permanente | **Sempre disponibile, fuori dal draft, al posto dell'azione. Costo in Idee: era 1 = 4 · era 2 = 3 · era 3 = 3 · era 4 = 3. Nessuna abilità: aggiunge un quinto lavoratore, permanente e attivo da subito. Massimo una a testa.** | 3R | oggi: "Sempre disponibile fuori dalle file, nessuna classe richiesta. Costo a scalare secondo l'era: era 1 = 4 pietra · era 2 = 2 pietra + 1 oro · era 3 = 1 pietra + 2 oro · era 4 = 3 oro. Nessuna abilità: aggiunge un quarto lavoratore, permanente e attivo da subito. Massimo una a testa" — con quattro lavoratori di base (registro 94) è il quinto |
 
-## I 25 potenziamenti
+## I 50 potenziamenti
 
 Si paga nella risorsa della famiglia (registro 91): Arte in Idee, Struttura in Costruzione, il
 resto in Denaro; importi di oggi (1 nelle ere 1-3, 2 nelle ere 4-5). Il lavoratore che lo
 piazza resta sotto l'edificio come scheletro (punto 8, registri 95-96): uno per edificio, non
 nell'era Moderna, vale 6 meno l'era comunque finisca l'edificio. Sulla sagoma serve il posto.
+I secondi 25 (registro 123) raddoppiano il mazzo: dieci potenziamenti diversi per era.
 
 | era | potenziamento | famiglia | costo C/D/I | testo | motivo | nota |
 |--:|---|---|--:|---|---|---|
@@ -261,26 +262,51 @@ nell'era Moderna, vale 6 meno l'era comunque finisca l'edificio. Sulla sagoma se
 | 1 | Idolo | arte | 0/0/1 | Arte: +1 PV (+1 extra su edificio Religione). |  |  |
 | 1 | Granaio comune | altro | 0/1/0 | **Quando attivi questo edificio, +1 Costruzione.** | LAV 3R | oggi: "Quando abiti questo edificio, +1 pietra" |
 | 1 | Fondamenta in pietra | struttura | 1/0/0 | Struttura: +1 res. |  |  |
+| 1 | Totem | arte | 0/0/1 | Arte: +1 PV (+1 extra su edificio Civico). |  |  |
+| 1 | Argine | struttura | 1/0/0 | Struttura: +1 res. |  |  |
+| 1 | Focolare | altro | 0/1/0 | Quando abiti questo edificio, +1 Idea. |  |  |
+| 1 | Recinto per il bestiame | altro | 0/1/0 | Quando abiti questo edificio, +1 Denaro. |  |  |
+| 1 | Ossario | altro | 0/1/0 | Scavo dell'edificio +2. |  |  |
 | 2 | Statua | arte | 0/0/1 | Arte: +2 PV. |  |  |
 | 2 | Altare | arte | 0/0/1 | Arte: +1 PV. Scavo +2. |  |  |
 | 2 | Bastioni | struttura | 1/0/0 | Struttura: +1 res. |  |  |
 | 2 | Banchina | altro | 0/1/0 | **Solo su slot fiume: quando attivi questo edificio, +1 Denaro.** | LAV 3R | oggi: "Solo su slot fiume: quando abiti qui, +1 oro" |
 | 2 | Iscrizione | altro | 0/1/0 | Scavo dell'edificio +2. |  |  |
+| 2 | Mosaico | arte | 0/0/1 | Arte: +2 PV su edificio Cultura, altrimenti +1. |  |  |
+| 2 | Terme private | altro | 0/1/0 | Quando abiti questo edificio, +1 Idea. |  |  |
+| 2 | Mura di cinta | struttura | 1/0/0 | Struttura: +1 res (+1 extra su edificio Militare). |  |  |
+| 2 | Mulino ad acqua | altro | 0/1/0 | Solo su slot fiume: quando abiti qui, +1 Costruzione. |  |  |
+| 2 | Lapide funeraria | altro | 0/1/0 | Finale: +2 Scavo a ogni edificio Sotterrato sotto questo edificio. |  |  |
 | 3 | Contrafforte | struttura | 1/0/0 | Struttura: +1 res. |  |  |
 | 3 | Campanile | altro | 0/1/0 | Ibrido: +1 PV e +1 res. |  |  |
 | 3 | Merlatura | struttura | 1/0/0 | Struttura: +1 res. L'edificio conta anche come Militare. |  |  |
 | 3 | Stalli mercantili | altro | 0/1/0 | L'affitto incassato da questo edificio è +1. |  |  |
 | 3 | Reliquia | arte | 0/0/1 | Arte: +2 PV su edificio Religione, altrimenti +1. |  |  |
+| 3 | Vetrata | arte | 0/0/1 | Arte: +1 PV. Scavo dell'edificio +2. |  |  |
+| 3 | Arco rampante | struttura | 1/0/0 | Struttura: +1 res. L'edificio conta anche come Religione. |  |  |
+| 3 | Portico | altro | 0/1/0 | Quando abiti questo edificio, +1 Denaro (+1 extra su edificio Commercio). |  |  |
+| 3 | Torre di guardia | struttura | 1/0/0 | Struttura: +1 res (+1 extra su edificio Militare). |  |  |
+| 3 | Stemma di famiglia | arte | 0/0/1 | Arte: +2 PV su edificio Civico, altrimenti +1. |  |  |
 | 4 | Opera d'arte | arte | 0/0/2 | Arte: +3 PV. |  |  |
 | 4 | Affreschi | arte | 0/0/2 | Arte: +2 PV. |  |  |
 | 4 | Cupola | altro | 0/2/0 | Ibrido: +2 PV e +1 res. |  |  |
 | 4 | Giardino pensile | arte | 0/0/2 | Arte: +2 PV. |  |  |
 | 4 | Cannoniere | struttura | 2/0/0 | Struttura: +1 res (+2 su edificio Militare). |  |  |
+| 4 | Pala d'altare | arte | 0/0/2 | Arte: +2 PV (+1 extra su edificio Religione). |  |  |
+| 4 | Loggia | altro | 0/2/0 | +1 PV. L'affitto incassato da questo edificio è +1. |  |  |
+| 4 | Bastione a stella | struttura | 2/0/0 | Struttura: +2 res. |  |  |
+| 4 | Fontana monumentale | arte | 0/0/2 | Arte: +2 PV. Scavo dell'edificio +2. |  |  |
+| 4 | Stamperia | altro | 0/2/0 | Quando abiti questo edificio, +2 Idee. |  |  |
 | 5 | Installazione | arte | 0/0/2 | Arte: +3 PV. |  |  |
 | 5 | Targa storica | altro | 0/2/0 | Finale: +2 Scavo a ogni edificio Sotterrato sotto questo edificio. |  |  |
 | 5 | Ascensore panoramico | altro | 0/2/0 | +2 PV. |  |  |
 | 5 | Boutique | altro | 0/2/0 | **Quando attivi questo edificio, +2 Denaro.** | LAV 3R | oggi: "Quando abiti questo edificio, +2 oro" |
 | 5 | Memoriale | altro | 0/2/0 | +2 PV. |  |  |
+| 5 | Murale | arte | 0/0/2 | Arte: +2 PV (+1 extra su edificio Cultura). |  |  |
+| 5 | Pannelli solari | altro | 0/2/0 | Quando abiti questo edificio, +2 Costruzione. |  |  |
+| 5 | Cemento armato | struttura | 2/0/0 | Struttura: +2 res. |  |  |
+| 5 | Terrazza panoramica | altro | 0/2/0 | +2 PV su edificio Civico, altrimenti +1. |  |  |
+| 5 | Archivio storico | altro | 0/2/0 | Scavo dell'edificio +3. |  |  |
 
 ## I 24 eventi
 

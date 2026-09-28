@@ -331,7 +331,8 @@ static func apply_on_activate(gs: GameState, attivatore: int, col: int) -> void:
 			if matches(gs, b, e.get("target", {}), src, own): trovato = true; break
 		if not trovato: continue
 		match str(e["op"]):
-			"resource": _paga(gs, own, e, carta, int(e.get("pietra", 0)), int(e.get("oro", 0)))
+			"resource": _paga(gs, own, e, carta, int(e.get("pietra", 0)), int(e.get("oro", 0)),
+				int(e.get("idee", 0)))
 			"vp": _paga_vp(gs, own, e, carta, int(e.get("value", 0)))
 
 static func _scatta(e: Dictionary, attivatore: int, proprietario: int) -> bool:
@@ -374,12 +375,17 @@ static func _quota(p: PlayerState, e: Dictionary, carta: Dictionary, valore: int
 	return valore
 
 static func _paga(gs: GameState, player: int, e: Dictionary, carta: Dictionary,
-		pietra: int, oro: int) -> void:
+		pietra: int, oro: int, idee := 0) -> void:
+	# Le Idee (registro 123: Focolare, Terme, Stamperia) si pagano come le
+	# altre due; nella v1.5 nessun effetto ne da', e il conto resta quello.
 	var p: PlayerState = gs.players[player]
-	var tot := _quota(p, e, carta, max(pietra, oro))
+	var tot := _quota(p, e, carta, maxi(maxi(pietra, oro), idee))
 	if tot <= 0: return
-	p.gain(pietra if pietra > 0 else 0, oro if oro > 0 else 0)
-	gs.log_line("%s: attivazione, %+d pietra %+d oro a giocatore %d" % [carta["name"], pietra, oro, player])
+	p.gain(maxi(pietra, 0), maxi(oro, 0), maxi(idee, 0))
+	if idee > 0:
+		gs.log_line("%s: attivazione, %+d Idee a giocatore %d" % [carta["name"], idee, player])
+	else:
+		gs.log_line("%s: attivazione, %+d pietra %+d oro a giocatore %d" % [carta["name"], pietra, oro, player])
 
 static func _paga_vp(gs: GameState, player: int, e: Dictionary, carta: Dictionary, v: int) -> void:
 	var p: PlayerState = gs.players[player]

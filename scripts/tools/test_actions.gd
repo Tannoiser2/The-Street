@@ -45,6 +45,7 @@ func _ready() -> void:
 	_run("v2: le case della riserva, sempre disponibili (registro 116)", _test_riserva)
 	_run("v2: le tessere dell'era (registro 121)", _test_tessere_era)
 	_run("v2: le caselle, il binario scelto e le carte profonde (registro 122)", _test_caselle)
+	_run("v2: i potenziamenti raddoppiati (registro 123)", _test_potenziamenti_nuovi)
 	print("\n%d superati, %d falliti" % [_passed, _failed])
 	get_tree().quit(0 if _failed == 0 else 1)
 
@@ -1763,4 +1764,28 @@ func _test_caselle() -> void:
 	_ok("  nemmeno una carta qualsiasi", not BuildRules.quote_above(gs, 0, sopra, 0, null, 1).legal)
 	col.state = Enums.BuildingState.ROVINA
 	_ok("  finche' non va in rovina", BuildRules.quote_above(gs, 0, sopra, 0, null, 1).legal)
+	CardDB.load_db(CardDB.DB_PATH)
+
+# I POTENZIAMENTI RADDOPPIATI (registro 123): dieci diversi per era, e le
+# Idee che il Focolare da' a chi abita l'edificio.
+func _test_potenziamenti_nuovi() -> void:
+	if not FileAccess.file_exists("res://data/cards-v2.json"): return
+	CardDB.load_db("res://data/cards-v2.json")
+	_eq("50 potenziamenti nel file v2", CardDB.upgrades.size(), 50)
+	var per_era := {}
+	for id in CardDB.upgrades:
+		var e := int(CardDB.upgrades[id]["era"])
+		per_era[e] = int(per_era.get(e, 0)) + 1
+	_eq("  dieci per era", per_era.values(), [10, 10, 10, 10, 10])
+	var ctl := _game(3, 51)
+	var gs := ctl.gs
+	while not gs.pending_choice.is_empty():
+		ctl.choose(int((gs.pending_choice["options"] as Array)[0]))
+	gs.grid.buildings.clear()
+	var b := _put(gs, 0, "ed_capanne", 0)
+	b.upgrades.append("po_focolare")
+	var p: PlayerState = gs.players[0]
+	var idee := p.idee
+	Effects.apply_on_activate(gs, 0, 0)
+	_eq("il Focolare da' 1 Idea a chi abita", p.idee, idee + 1)
 	CardDB.load_db(CardDB.DB_PATH)

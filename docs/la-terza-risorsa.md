@@ -1199,6 +1199,27 @@ prima lettura, "una rovina sotto ogni casella", il Colosseo si costruiva 2 volte
 Da decidere: come riportare la Lampo nell'errore (ritarare il bot, togliere Lampo dalle
 tessere, o abbassare i Lampo alti delle carte).
 
+## Ventunesima misura: i potenziamenti raddoppiati
+
+Richiesta del designer (registro 123): altri 25 potenziamenti, dieci diversi per era, con la
+stessa economia e la stessa forza dei primi 25. Torneo `--giro tutte`, 750 partite, seme
+700000, contro la ventesima misura (caselle).
+
+| per giocatore | a 2: caselle | **a 2: potenziamenti** | a 3: caselle | **a 3: potenziamenti** | a 4: caselle | **a 4: potenziamenti** |
+|---|--:|--:|--:|--:|--:|--:|
+| PV | 93,7 | 93,3 | 95,3 | 95,1 | 88,9 | 89,1 |
+| PV dai potenziamenti (cultura) / Idee prodotte | 4,6 / 12,5 | 3,9 / 13,1 | 5,0 / 14,6 | 4,3 / 15,2 | 4,3 / 13,6 | 3,8 / 14,2 |
+| kingmaker (cambia vincitore) | 10 % | 8 % | 13 % | 14 % | 13 % | 15 % |
+| vince: Rendita / Continuità / Bilanciata / Obiettivi / Scavo / Lampo | 42 / 43 / 49 / 50 / 49 / 66 | **36** / 43 / 52 / 52 / 52 / **66** | 30 / 25 / 32 / 35 / 31 / 48 | 31 / 28 / 33 / 32 / 30 / **48** | 23 / 19 / 22 / 23 / 22 / 41 | 27 / **15** / **18** / 24 / 20 / **46** |
+
+**1. Cambia poco.** I punti restano gli stessi (meno di mezzo punto di differenza). I
+potenziamenti nuovi danno qualche PV subito in meno e qualche Idea in più (Focolare, Terme,
+Stamperia).
+
+**2. La Lampo resta fuori dall'errore** a tutti i tavoli, come nella ventesima misura. A due la
+Rendita scende al 36 % (bordo 44); a quattro Continuità e Bilanciata scendono al 15 e 18 %
+(bordo 19). È lo stesso squilibrio della ventesima misura, non viene dai potenziamenti.
+
 ## Come rifare il conto
 
 ```bash

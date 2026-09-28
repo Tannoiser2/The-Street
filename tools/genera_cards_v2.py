@@ -462,6 +462,97 @@ def forme(v):
         per_id[bid]["effect_text"] = testo
     v["constants"]["caselle"] = True
 
+# I POTENZIAMENTI RADDOPPIATI (registro 123): il designer chiede altri 25
+# potenziamenti, cinque per era, per un mazzo di dieci carte diverse per era.
+# Stessa economia dei 25 di prima: costo 1 nelle ere 1-3 e 2 nelle ere 4-5,
+# nella risorsa della famiglia (Arte in Idee, Struttura in Costruzione, il
+# resto in Denaro); forza pari a quella dei potenziamenti della stessa era.
+# Gli effetti usano solo operazioni che il motore gia' conosce.
+def _se_classe(classe):
+    return {"op": "count_matching", "min": 1, "target": {"is_self": True, "class": [classe]}}
+
+def _se_terreno(terreno):
+    return {"op": "count_matching", "min": 1, "target": {"is_self": True, "terrain": [terreno]}}
+
+def _pv(n, se=None):
+    e = {"hook": "on_acquire", "op": "vp", "value": n}
+    if se: e["condition"] = se
+    return e
+
+def _res(n, se=None):
+    e = {"hook": "on_acquire", "op": "resistance", "value": n, "duration": "permanent", "target": {"is_self": True}}
+    if se: e["condition"] = se
+    return e
+
+def _scavo(n):
+    return {"hook": "on_acquire", "op": "scavo_delta", "value": n, "duration": "permanent", "target": {"is_self": True}}
+
+def _abiti(risorsa, n, se=None):
+    e = {"hook": "on_activate", "op": "resource", risorsa: n, "target": {"is_self": True}}
+    if se: e["condition"] = se
+    return e
+
+def _conta_come(classe):
+    return {"hook": "on_acquire", "op": "rule_override", "name": "counts_as_class",
+            "target": {"is_self": True}, "adds_class": [classe]}
+
+POTENZIAMENTI_NUOVI = [
+    # era, id, nome, famiglia, classe, testo, effetti
+    (1, "totem", "Totem", "arte", "religione", "Arte: +1 PV (+1 extra su edificio Civico).",
+     [_pv(1), _pv(1, _se_classe("civico"))]),
+    (1, "argine", "Argine", "struttura", "ingegneria", "Struttura: +1 res.", [_res(1)]),
+    (1, "focolare", "Focolare", "altro", "civico", "Quando abiti questo edificio, +1 Idea.",
+     [_abiti("idee", 1)]),
+    (1, "recinto", "Recinto per il bestiame", "altro", "commercio", "Quando abiti questo edificio, +1 Denaro.",
+     [_abiti("oro", 1)]),
+    (1, "ossario", "Ossario", "altro", "religione", "Scavo dell'edificio +2.", [_scavo(2)]),
+    (2, "mosaico", "Mosaico", "arte", "cultura", "Arte: +2 PV su edificio Cultura, altrimenti +1.",
+     [_pv(1), _pv(1, _se_classe("cultura"))]),
+    (2, "terme", "Terme private", "altro", "civico", "Quando abiti questo edificio, +1 Idea.",
+     [_abiti("idee", 1)]),
+    (2, "mura_di_cinta", "Mura di cinta", "struttura", "militare", "Struttura: +1 res (+1 extra su edificio Militare).",
+     [_res(1), _res(1, _se_classe("militare"))]),
+    (2, "mulino_ad_acqua", "Mulino ad acqua", "altro", "ingegneria", "Solo su slot fiume: quando abiti qui, +1 Costruzione.",
+     [_abiti("pietra", 1, _se_terreno("fiume"))]),
+    (2, "lapide", "Lapide funeraria", "altro", "religione", "Finale: +2 Scavo a ogni edificio Sotterrato sotto questo edificio.",
+     [{"hook": "on_final_scoring", "op": "scavo_delta", "value": 2, "target": {"buried": True, "below_self": True}}]),
+    (3, "vetrata", "Vetrata", "arte", "religione", "Arte: +1 PV. Scavo dell'edificio +2.", [_pv(1), _scavo(2)]),
+    (3, "arco_rampante", "Arco rampante", "struttura", "ingegneria", "Struttura: +1 res. L'edificio conta anche come Religione.",
+     [_res(1), _conta_come("religione")]),
+    (3, "portico", "Portico", "altro", "commercio", "Quando abiti questo edificio, +1 Denaro (+1 extra su edificio Commercio).",
+     [_abiti("oro", 1), _abiti("oro", 1, _se_classe("commercio"))]),
+    (3, "torre_di_guardia", "Torre di guardia", "struttura", "militare", "Struttura: +1 res (+1 extra su edificio Militare).",
+     [_res(1), _res(1, _se_classe("militare"))]),
+    (3, "stemma", "Stemma di famiglia", "arte", "civico", "Arte: +2 PV su edificio Civico, altrimenti +1.",
+     [_pv(1), _pv(1, _se_classe("civico"))]),
+    (4, "pala_d_altare", "Pala d'altare", "arte", "religione", "Arte: +2 PV (+1 extra su edificio Religione).",
+     [_pv(2), _pv(1, _se_classe("religione"))]),
+    (4, "loggia", "Loggia", "altro", "civico", "+1 PV. L'affitto incassato da questo edificio è +1.",
+     [_pv(1), {"hook": "on_acquire", "op": "rendita_delta", "value": 1, "duration": "permanent", "target": {"is_self": True}}]),
+    (4, "bastione_a_stella", "Bastione a stella", "struttura", "militare", "Struttura: +2 res.", [_res(2)]),
+    (4, "fontana", "Fontana monumentale", "arte", "civico", "Arte: +2 PV. Scavo dell'edificio +2.", [_pv(2), _scavo(2)]),
+    (4, "stamperia", "Stamperia", "altro", "cultura", "Quando abiti questo edificio, +2 Idee.", [_abiti("idee", 2)]),
+    (5, "murale", "Murale", "arte", "cultura", "Arte: +2 PV (+1 extra su edificio Cultura).",
+     [_pv(2), _pv(1, _se_classe("cultura"))]),
+    (5, "pannelli_solari", "Pannelli solari", "altro", "ingegneria", "Quando abiti questo edificio, +2 Costruzione.",
+     [_abiti("pietra", 2)]),
+    (5, "cemento_armato", "Cemento armato", "struttura", "ingegneria", "Struttura: +2 res.", [_res(2)]),
+    (5, "terrazza", "Terrazza panoramica", "altro", "civico", "+2 PV su edificio Civico, altrimenti +1.",
+     [_pv(1), _pv(1, _se_classe("civico"))]),
+    (5, "archivio_storico", "Archivio storico", "altro", "cultura", "Scavo dell'edificio +3.", [_scavo(3)]),
+]
+assert len(POTENZIAMENTI_NUOVI) == 25 and all(sum(1 for u in POTENZIAMENTI_NUOVI if u[0] == e) == 5 for e in range(1, 6))
+
+def potenziamenti_nuovi(v):
+    ids = {u["id"] for u in v["upgrades"]}
+    for era, ident, nome, fam, classe, testo, effetti in POTENZIAMENTI_NUOVI:
+        uid = "po_" + ident
+        assert uid not in ids, uid
+        costo = {"pietra": 0, "oro": 0, "idee": 0}
+        costo[RISORSA_FAMIGLIA[fam]] = 1 if era <= 3 else 2
+        v["upgrades"].append({"id": uid, "name": nome, "era": era, "class": classe, "cost": costo,
+                              "family": fam, "effect_text": testo, "effects": effetti})
+
 import sys
 variante = sys.argv[sys.argv.index("--variante") + 1] if "--variante" in sys.argv else ""
 # Le case in riserva stanno nel file v2 di tutti (registro 116); le varianti di
@@ -469,6 +560,7 @@ variante = sys.argv[sys.argv.index("--variante") + 1] if "--variante" in sys.arg
 case_tutti(v2, riserva=True, copie=2)
 tessere_era(v2)
 forme(v2)
+potenziamenti_nuovi(v2)
 if variante:
     {"doppioni": doppioni, "abitazioni": abitazioni, "case": case,
      "case_doppioni": case_doppioni, "case_scavo": case_scavo, "case_nulle": case_nulle,

@@ -4421,6 +4421,757 @@
           "value": 2
         }
       ]
+    },
+    {
+      "id": "po_totem",
+      "name": "Totem",
+      "era": 1,
+      "class": "religione",
+      "cost": {
+        "pietra": 0,
+        "oro": 0,
+        "idee": 1
+      },
+      "family": "arte",
+      "effect_text": "Arte: +1 PV (+1 extra su edificio Civico).",
+      "effects": [
+        {
+          "hook": "on_acquire",
+          "op": "vp",
+          "value": 1
+        },
+        {
+          "hook": "on_acquire",
+          "op": "vp",
+          "value": 1,
+          "condition": {
+            "op": "count_matching",
+            "min": 1,
+            "target": {
+              "is_self": true,
+              "class": [
+                "civico"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "po_argine",
+      "name": "Argine",
+      "era": 1,
+      "class": "ingegneria",
+      "cost": {
+        "pietra": 1,
+        "oro": 0,
+        "idee": 0
+      },
+      "family": "struttura",
+      "effect_text": "Struttura: +1 res.",
+      "effects": [
+        {
+          "hook": "on_acquire",
+          "op": "resistance",
+          "value": 1,
+          "duration": "permanent",
+          "target": {
+            "is_self": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "po_focolare",
+      "name": "Focolare",
+      "era": 1,
+      "class": "civico",
+      "cost": {
+        "pietra": 0,
+        "oro": 1,
+        "idee": 0
+      },
+      "family": "altro",
+      "effect_text": "Quando abiti questo edificio, +1 Idea.",
+      "effects": [
+        {
+          "hook": "on_activate",
+          "op": "resource",
+          "idee": 1,
+          "target": {
+            "is_self": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "po_recinto",
+      "name": "Recinto per il bestiame",
+      "era": 1,
+      "class": "commercio",
+      "cost": {
+        "pietra": 0,
+        "oro": 1,
+        "idee": 0
+      },
+      "family": "altro",
+      "effect_text": "Quando abiti questo edificio, +1 Denaro.",
+      "effects": [
+        {
+          "hook": "on_activate",
+          "op": "resource",
+          "oro": 1,
+          "target": {
+            "is_self": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "po_ossario",
+      "name": "Ossario",
+      "era": 1,
+      "class": "religione",
+      "cost": {
+        "pietra": 0,
+        "oro": 1,
+        "idee": 0
+      },
+      "family": "altro",
+      "effect_text": "Scavo dell'edificio +2.",
+      "effects": [
+        {
+          "hook": "on_acquire",
+          "op": "scavo_delta",
+          "value": 2,
+          "duration": "permanent",
+          "target": {
+            "is_self": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "po_mosaico",
+      "name": "Mosaico",
+      "era": 2,
+      "class": "cultura",
+      "cost": {
+        "pietra": 0,
+        "oro": 0,
+        "idee": 1
+      },
+      "family": "arte",
+      "effect_text": "Arte: +2 PV su edificio Cultura, altrimenti +1.",
+      "effects": [
+        {
+          "hook": "on_acquire",
+          "op": "vp",
+          "value": 1
+        },
+        {
+          "hook": "on_acquire",
+          "op": "vp",
+          "value": 1,
+          "condition": {
+            "op": "count_matching",
+            "min": 1,
+            "target": {
+              "is_self": true,
+              "class": [
+                "cultura"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "po_terme",
+      "name": "Terme private",
+      "era": 2,
+      "class": "civico",
+      "cost": {
+        "pietra": 0,
+        "oro": 1,
+        "idee": 0
+      },
+      "family": "altro",
+      "effect_text": "Quando abiti questo edificio, +1 Idea.",
+      "effects": [
+        {
+          "hook": "on_activate",
+          "op": "resource",
+          "idee": 1,
+          "target": {
+            "is_self": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "po_mura_di_cinta",
+      "name": "Mura di cinta",
+      "era": 2,
+      "class": "militare",
+      "cost": {
+        "pietra": 1,
+        "oro": 0,
+        "idee": 0
+      },
+      "family": "struttura",
+      "effect_text": "Struttura: +1 res (+1 extra su edificio Militare).",
+      "effects": [
+        {
+          "hook": "on_acquire",
+          "op": "resistance",
+          "value": 1,
+          "duration": "permanent",
+          "target": {
+            "is_self": true
+          }
+        },
+        {
+          "hook": "on_acquire",
+          "op": "resistance",
+          "value": 1,
+          "duration": "permanent",
+          "target": {
+            "is_self": true
+          },
+          "condition": {
+            "op": "count_matching",
+            "min": 1,
+            "target": {
+              "is_self": true,
+              "class": [
+                "militare"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "po_mulino_ad_acqua",
+      "name": "Mulino ad acqua",
+      "era": 2,
+      "class": "ingegneria",
+      "cost": {
+        "pietra": 0,
+        "oro": 1,
+        "idee": 0
+      },
+      "family": "altro",
+      "effect_text": "Solo su slot fiume: quando abiti qui, +1 Costruzione.",
+      "effects": [
+        {
+          "hook": "on_activate",
+          "op": "resource",
+          "pietra": 1,
+          "target": {
+            "is_self": true
+          },
+          "condition": {
+            "op": "count_matching",
+            "min": 1,
+            "target": {
+              "is_self": true,
+              "terrain": [
+                "fiume"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "po_lapide",
+      "name": "Lapide funeraria",
+      "era": 2,
+      "class": "religione",
+      "cost": {
+        "pietra": 0,
+        "oro": 1,
+        "idee": 0
+      },
+      "family": "altro",
+      "effect_text": "Finale: +2 Scavo a ogni edificio Sotterrato sotto questo edificio.",
+      "effects": [
+        {
+          "hook": "on_final_scoring",
+          "op": "scavo_delta",
+          "value": 2,
+          "target": {
+            "buried": true,
+            "below_self": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "po_vetrata",
+      "name": "Vetrata",
+      "era": 3,
+      "class": "religione",
+      "cost": {
+        "pietra": 0,
+        "oro": 0,
+        "idee": 1
+      },
+      "family": "arte",
+      "effect_text": "Arte: +1 PV. Scavo dell'edificio +2.",
+      "effects": [
+        {
+          "hook": "on_acquire",
+          "op": "vp",
+          "value": 1
+        },
+        {
+          "hook": "on_acquire",
+          "op": "scavo_delta",
+          "value": 2,
+          "duration": "permanent",
+          "target": {
+            "is_self": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "po_arco_rampante",
+      "name": "Arco rampante",
+      "era": 3,
+      "class": "ingegneria",
+      "cost": {
+        "pietra": 1,
+        "oro": 0,
+        "idee": 0
+      },
+      "family": "struttura",
+      "effect_text": "Struttura: +1 res. L'edificio conta anche come Religione.",
+      "effects": [
+        {
+          "hook": "on_acquire",
+          "op": "resistance",
+          "value": 1,
+          "duration": "permanent",
+          "target": {
+            "is_self": true
+          }
+        },
+        {
+          "hook": "on_acquire",
+          "op": "rule_override",
+          "name": "counts_as_class",
+          "target": {
+            "is_self": true
+          },
+          "adds_class": [
+            "religione"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "po_portico",
+      "name": "Portico",
+      "era": 3,
+      "class": "commercio",
+      "cost": {
+        "pietra": 0,
+        "oro": 1,
+        "idee": 0
+      },
+      "family": "altro",
+      "effect_text": "Quando abiti questo edificio, +1 Denaro (+1 extra su edificio Commercio).",
+      "effects": [
+        {
+          "hook": "on_activate",
+          "op": "resource",
+          "oro": 1,
+          "target": {
+            "is_self": true
+          }
+        },
+        {
+          "hook": "on_activate",
+          "op": "resource",
+          "oro": 1,
+          "target": {
+            "is_self": true
+          },
+          "condition": {
+            "op": "count_matching",
+            "min": 1,
+            "target": {
+              "is_self": true,
+              "class": [
+                "commercio"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "po_torre_di_guardia",
+      "name": "Torre di guardia",
+      "era": 3,
+      "class": "militare",
+      "cost": {
+        "pietra": 1,
+        "oro": 0,
+        "idee": 0
+      },
+      "family": "struttura",
+      "effect_text": "Struttura: +1 res (+1 extra su edificio Militare).",
+      "effects": [
+        {
+          "hook": "on_acquire",
+          "op": "resistance",
+          "value": 1,
+          "duration": "permanent",
+          "target": {
+            "is_self": true
+          }
+        },
+        {
+          "hook": "on_acquire",
+          "op": "resistance",
+          "value": 1,
+          "duration": "permanent",
+          "target": {
+            "is_self": true
+          },
+          "condition": {
+            "op": "count_matching",
+            "min": 1,
+            "target": {
+              "is_self": true,
+              "class": [
+                "militare"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "po_stemma",
+      "name": "Stemma di famiglia",
+      "era": 3,
+      "class": "civico",
+      "cost": {
+        "pietra": 0,
+        "oro": 0,
+        "idee": 1
+      },
+      "family": "arte",
+      "effect_text": "Arte: +2 PV su edificio Civico, altrimenti +1.",
+      "effects": [
+        {
+          "hook": "on_acquire",
+          "op": "vp",
+          "value": 1
+        },
+        {
+          "hook": "on_acquire",
+          "op": "vp",
+          "value": 1,
+          "condition": {
+            "op": "count_matching",
+            "min": 1,
+            "target": {
+              "is_self": true,
+              "class": [
+                "civico"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "po_pala_d_altare",
+      "name": "Pala d'altare",
+      "era": 4,
+      "class": "religione",
+      "cost": {
+        "pietra": 0,
+        "oro": 0,
+        "idee": 2
+      },
+      "family": "arte",
+      "effect_text": "Arte: +2 PV (+1 extra su edificio Religione).",
+      "effects": [
+        {
+          "hook": "on_acquire",
+          "op": "vp",
+          "value": 2
+        },
+        {
+          "hook": "on_acquire",
+          "op": "vp",
+          "value": 1,
+          "condition": {
+            "op": "count_matching",
+            "min": 1,
+            "target": {
+              "is_self": true,
+              "class": [
+                "religione"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "po_loggia",
+      "name": "Loggia",
+      "era": 4,
+      "class": "civico",
+      "cost": {
+        "pietra": 0,
+        "oro": 2,
+        "idee": 0
+      },
+      "family": "altro",
+      "effect_text": "+1 PV. L'affitto incassato da questo edificio è +1.",
+      "effects": [
+        {
+          "hook": "on_acquire",
+          "op": "vp",
+          "value": 1
+        },
+        {
+          "hook": "on_acquire",
+          "op": "rendita_delta",
+          "value": 1,
+          "duration": "permanent",
+          "target": {
+            "is_self": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "po_bastione_a_stella",
+      "name": "Bastione a stella",
+      "era": 4,
+      "class": "militare",
+      "cost": {
+        "pietra": 2,
+        "oro": 0,
+        "idee": 0
+      },
+      "family": "struttura",
+      "effect_text": "Struttura: +2 res.",
+      "effects": [
+        {
+          "hook": "on_acquire",
+          "op": "resistance",
+          "value": 2,
+          "duration": "permanent",
+          "target": {
+            "is_self": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "po_fontana",
+      "name": "Fontana monumentale",
+      "era": 4,
+      "class": "civico",
+      "cost": {
+        "pietra": 0,
+        "oro": 0,
+        "idee": 2
+      },
+      "family": "arte",
+      "effect_text": "Arte: +2 PV. Scavo dell'edificio +2.",
+      "effects": [
+        {
+          "hook": "on_acquire",
+          "op": "vp",
+          "value": 2
+        },
+        {
+          "hook": "on_acquire",
+          "op": "scavo_delta",
+          "value": 2,
+          "duration": "permanent",
+          "target": {
+            "is_self": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "po_stamperia",
+      "name": "Stamperia",
+      "era": 4,
+      "class": "cultura",
+      "cost": {
+        "pietra": 0,
+        "oro": 2,
+        "idee": 0
+      },
+      "family": "altro",
+      "effect_text": "Quando abiti questo edificio, +2 Idee.",
+      "effects": [
+        {
+          "hook": "on_activate",
+          "op": "resource",
+          "idee": 2,
+          "target": {
+            "is_self": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "po_murale",
+      "name": "Murale",
+      "era": 5,
+      "class": "cultura",
+      "cost": {
+        "pietra": 0,
+        "oro": 0,
+        "idee": 2
+      },
+      "family": "arte",
+      "effect_text": "Arte: +2 PV (+1 extra su edificio Cultura).",
+      "effects": [
+        {
+          "hook": "on_acquire",
+          "op": "vp",
+          "value": 2
+        },
+        {
+          "hook": "on_acquire",
+          "op": "vp",
+          "value": 1,
+          "condition": {
+            "op": "count_matching",
+            "min": 1,
+            "target": {
+              "is_self": true,
+              "class": [
+                "cultura"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "po_pannelli_solari",
+      "name": "Pannelli solari",
+      "era": 5,
+      "class": "ingegneria",
+      "cost": {
+        "pietra": 0,
+        "oro": 2,
+        "idee": 0
+      },
+      "family": "altro",
+      "effect_text": "Quando abiti questo edificio, +2 Costruzione.",
+      "effects": [
+        {
+          "hook": "on_activate",
+          "op": "resource",
+          "pietra": 2,
+          "target": {
+            "is_self": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "po_cemento_armato",
+      "name": "Cemento armato",
+      "era": 5,
+      "class": "ingegneria",
+      "cost": {
+        "pietra": 2,
+        "oro": 0,
+        "idee": 0
+      },
+      "family": "struttura",
+      "effect_text": "Struttura: +2 res.",
+      "effects": [
+        {
+          "hook": "on_acquire",
+          "op": "resistance",
+          "value": 2,
+          "duration": "permanent",
+          "target": {
+            "is_self": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "po_terrazza",
+      "name": "Terrazza panoramica",
+      "era": 5,
+      "class": "civico",
+      "cost": {
+        "pietra": 0,
+        "oro": 2,
+        "idee": 0
+      },
+      "family": "altro",
+      "effect_text": "+2 PV su edificio Civico, altrimenti +1.",
+      "effects": [
+        {
+          "hook": "on_acquire",
+          "op": "vp",
+          "value": 1
+        },
+        {
+          "hook": "on_acquire",
+          "op": "vp",
+          "value": 1,
+          "condition": {
+            "op": "count_matching",
+            "min": 1,
+            "target": {
+              "is_self": true,
+              "class": [
+                "civico"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "po_archivio_storico",
+      "name": "Archivio storico",
+      "era": 5,
+      "class": "cultura",
+      "cost": {
+        "pietra": 0,
+        "oro": 2,
+        "idee": 0
+      },
+      "family": "altro",
+      "effect_text": "Scavo dell'edificio +3.",
+      "effects": [
+        {
+          "hook": "on_acquire",
+          "op": "scavo_delta",
+          "value": 3,
+          "duration": "permanent",
+          "target": {
+            "is_self": true
+          }
+        }
+      ]
     }
   ],
   "events": [

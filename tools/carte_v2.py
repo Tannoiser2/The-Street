@@ -284,16 +284,17 @@ for c in V2["characters"]:
 w("")
 
 # ---- potenziamenti -------------------------------------------------------
-w("## I 25 potenziamenti")
+w("## I %d potenziamenti" % len(V2["upgrades"]))
 w("")
 w("Si paga nella risorsa della famiglia (registro 91): Arte in Idee, Struttura in Costruzione, il")
 w("resto in Denaro; importi di oggi (1 nelle ere 1-3, 2 nelle ere 4-5). Il lavoratore che lo")
 w("piazza resta sotto l'edificio come scheletro (punto 8, registri 95-96): uno per edificio, non")
 w("nell'era Moderna, vale 6 meno l'era comunque finisca l'edificio. Sulla sagoma serve il posto.")
+w("I secondi 25 (registro 123) raddoppiano il mazzo: dieci potenziamenti diversi per era.")
 w("")
 w("| era | potenziamento | famiglia | costo C/D/I | testo | motivo | nota |")
 w("|--:|---|---|--:|---|---|---|")
-for u in V2["upgrades"]:
+for u in sorted(V2["upgrades"], key=lambda u: u["era"]):
     testo, sigle, nota = testo_e_nota(u)
     w("| %d | %s | %s | %s | %s | %s | %s |" % (
         u["era"], u["name"], u["family"], costo(u["cost"]), cella(testo), sigle, cella(nota)))
