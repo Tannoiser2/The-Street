@@ -107,7 +107,11 @@ pip install pymupdf
 python3 tools/estrai_grafica.py
 ```
 
-Le carte estratte portano numeri obsoleti (il PDF è a una calibrazione
+Dai cinque PDF `materiali/Edifici_<Era>_Era_A4.pdf` estrae anche le facce
+degli edifici della v2 (in `assets/carte/edifici_v2/`), confrontandole coi
+dati: la vista le usa quando si gioca la v2.
+
+Le carte estratte da `Carte.pdf` portano numeri obsoleti (il PDF è a una calibrazione
 precedente alla v1.5): servono come riferimento grafico, non come contenuto.
 La faccia della carta in gioco va disegnata dai dati. Vedi
 `docs/domande-aperte.md` punti 20 e 23.

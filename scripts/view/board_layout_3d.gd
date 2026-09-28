@@ -471,8 +471,21 @@ const CARTELLE_CARTE := {
 	"dinastia": ["dorsi", "png"],
 }
 
+# Nella v2 gli edifici hanno le loro facce (registro 120: i cinque PDF
+# Edifici_<Era>_Era_A4.pdf, ritagliati da tools/estrai_grafica.py per id),
+# con costi in tre risorse, Rendita e Lampo stampati: la faccia della v1.5
+# porta i numeri di un altro gioco. Se la faccia v2 non c'e' (grafica non
+# estratta) si torna a quella della v1.5, meglio di un riquadro vuoto.
+const CARTELLA_EDIFICI_V2 := "res://assets/carte/edifici_v2/%s.png"
+
+static func e_v2() -> bool:
+	return str(CardDB.ruleset).begins_with("v2")
+
 static func carta_path(tipo: String, id: String) -> String:
 	if not CARTELLE_CARTE.has(tipo): return ""
+	if tipo == "mercato" and e_v2():
+		var v2 := CARTELLA_EDIFICI_V2 % id
+		if ResourceLoader.exists(v2): return v2
 	var d: Array = CARTELLE_CARTE[tipo]
 	return "res://assets/carte/%s/%s.%s" % [d[0], id, d[1]]
 
@@ -796,8 +809,15 @@ const ALTEZZA_CARTA := 72.0
 const CARTE_IN_PIEDI: Array[String] = ["mercato", "personaggio",
 	"potenziamento", "dinastia"]
 
+# La carta edificio della v2 e' orizzontale, 194 x 116 pt sul foglio (le
+# colossali due o tre volte piu' larghe, e si appoggiano contenute nello
+# stesso posto: vedi _carta_stesa). Il posto del mercato nella v2 prende
+# le sue proporzioni, se no la faccia si schiaccerebbe in un quadrato.
+const MISURE_CARTE_V2 := {"mercato": Vector2(194.4, 115.6)}
+
 static func misura_carta(tipo: String) -> Vector2:
 	var m: Vector2 = MISURE_CARTE.get(tipo, Vector2(CARTA, CARTA))
+	if e_v2() and MISURE_CARTE_V2.has(tipo): m = MISURE_CARTE_V2[tipo]
 	if not (tipo in CARTE_IN_PIEDI) or m.y <= 0.0: return m
 	return Vector2(m.x * ALTEZZA_CARTA / m.y, ALTEZZA_CARTA)
 
