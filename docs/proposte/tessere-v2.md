@@ -49,8 +49,8 @@ C = Costruzione, D = Denaro, I = Idee.
 
 **Stampa.** Le cinque pagine della dima, ciascuna con due tessere terreno e le sette tessere di
 un'era, danno 3 Pianure, 3 Colline, 2 Fiumi, 2 Boschi e una copia delle 35 tessere. La seconda copia
-delle tessere dell'era si stampa a parte: cinque pagine con le sole tessere, oppure la stessa
-pagina ristampata lasciando vuote le due colonne dei terreni.
+si stampa a parte, **solo le tessere** (decisione del designer): tre colonne da sette per pagina,
+cioè due pagine A4 (21 + 14 tessere), nello stesso ordine per era.
 
 ## Le 35 tessere
 
@@ -134,8 +134,8 @@ Nell'era Moderna lo Scavo non vale: nessuna tessera dell'era 5 ne parla.
 
    A tre è identico. Se la misura lo conferma come un problema, la correzione più semplice è
    spostare un'icona da Idee a Denaro nelle tessere delle ere 4 e 5.
-3. **I nomi e gli effetti** sono proposte: cambiali, scambiali di era, tienine alcuni.
-4. **Come si stampano le seconde copie** delle tessere dell'era (vedi "Stampa").
+3. ~~I nomi~~: confermati dal designer.
+4. ~~Le seconde copie~~: si ristampano solo le tessere (vedi "Stampa").
 5. **Gli effetti nuovi vanno misurati.** Alcuni danno più di oggi (Via consolare, Fiera, Zona
    industriale, Quartiere alto). Una volta decise, le tessere entrano nel file v2 e si rigioca la
    misura standard a 2, 3 e 4 giocatori.
