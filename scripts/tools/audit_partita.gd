@@ -14,6 +14,11 @@ extends Node
 var _prima_edifici := {}
 var _prima_giocatori := []
 var _muto := false
+# IL RAPPORTO (`--rapporto 1`, registro 125): oltre alle righe del torneo, una
+# riga JSON per partita su stderr ("J {...}") con tutto quello che serve al
+# resoconto: edifici e che fine fanno, potenziamenti, personaggi, eventi,
+# entrate e uscite di risorse per fonte, punti per canale.
+var _rapporto := false
 var _perche := false
 var _piano := false
 var _tutti := ""
@@ -182,6 +187,29 @@ func _ready() -> void:
 			var kv := pezzo.split("=")
 			if kv.size() == 2: StrategyBot.spinte_override[kv[0].strip_edges()] = float(kv[1])
 		print("# spinte = %s" % str(StrategyBot.spinte_override))
+	# IL LAMPO NELLE TESSERE DELL'ERA (`--tessere_lampo 0`, registro 125): a 0
+	# le tessere che danno Lampo (Radura, Eremo, Belvedere, Isolato, Quartiere
+	# alto) non lo danno piu'. Per misurare quanto pesano sulla strategia Lampo.
+	if args.has("tessere_lampo") and str(args["tessere_lampo"]) == "0":
+		var tolte := 0
+		for id in CardDB.tessere_era:
+			var e: Dictionary = CardDB.tessere_era[id]["effetto"]
+			for k in ["lampo", "lampo_per_altrui"]:
+				if e.has(k):
+					e[k] = 0
+					tolte += 1
+		print("# tessere_lampo = 0 (%d effetti azzerati)" % tolte)
+	# IL TETTO AL LAMPO DELLE CARTE (`--lampo_tetto N`, registro 125): nessun
+	# edificio da' piu' di N Lampo.
+	if args.has("lampo_tetto"):
+		var tetto := int(args["lampo_tetto"])
+		var abbassati := 0
+		for id in CardDB.buildings:
+			var bd: Dictionary = CardDB.buildings[id]
+			if int(bd.get("lampo", 0)) > tetto:
+				bd["lampo"] = tetto
+				abbassati += 1
+		print("# lampo_tetto = %d (%d edifici abbassati)" % [tetto, abbassati])
 	# LE TESSERE UNA VOLTA PER ERA (`--tessere 0/1`, `tessere_una_volta_per_era`,
 	# registro 100): a 0 le regole delle tessere tornano permanenti come nella v1.5.
 	if args.has("tessere"):
@@ -241,6 +269,7 @@ func _ready() -> void:
 			ev["force"] = maxi(1, int(ev["force"]) + delta)
 		print("# forza degli eventi scontata di %d" % delta)
 
+	_rapporto = args.has("rapporto") and str(args["rapporto"]) != "0"
 	if args.has("games"):
 		_lotto(seme, players, int(args["games"]))
 		return
@@ -306,9 +335,14 @@ func _lotto(seme: int, players: int, quante: int) -> void:
 		var ctl := GameController.new()
 		ctl.new_game(players, seme + g)
 		var guard := 0
+		var traccia := {"rovina": {}, "sepolto": {}, "upg": {}, "pers": {}, "eventi": {}, "rovine_era": {}}
 		while ctl.gs.phase != Enums.Phase.FINE_PARTITA and guard < 10000:
+			if _rapporto: _osserva(ctl.gs, traccia)
 			_muovi(ctl, g)
 			guard += 1
+		if _rapporto:
+			_osserva(ctl.gs, traccia)
+			printerr("J " + JSON.stringify(_riga_rapporto(ctl.gs, g, traccia)))
 		for id in ctl.gs.tessere_scattate:
 			scattate[id] = int(scattate.get(id, 0)) + int(ctl.gs.tessere_scattate[id])
 		for b in ctl.gs.grid.buildings:
@@ -350,6 +384,53 @@ func _lotto(seme: int, players: int, quante: int) -> void:
 		fid.sort()
 		print("# forme_costruite = " + ", ".join(fid.map(func(i): return "%s:%d" % [i, forme[i]])))
 	get_tree().quit(0)
+
+# ---- il rapporto delle partite (registro 125) -----------------------
+# Si guarda la partita dopo ogni mossa: quando un edificio cade in rovina o
+# finisce sepolto, quali potenziamenti ha portato (in rovina li perde, quindi
+# a fine partita non si vedrebbero), quali personaggi ha avuto ciascuno e che
+# evento c'era in ogni era.
+func _osserva(gs: GameState, t: Dictionary) -> void:
+	t["eventi"][str(gs.era)] = str(gs.current_event.get("id", ""))
+	for b in gs.grid.buildings:
+		if b.state == Enums.BuildingState.ROVINA and not t["rovina"].has(b.uid):
+			t["rovina"][b.uid] = gs.era
+			var k := str(gs.era)
+			t["rovine_era"][k] = int(t["rovine_era"].get(k, 0)) + 1
+		if b.is_buried and not t["sepolto"].has(b.uid):
+			t["sepolto"][b.uid] = gs.era
+		if not b.upgrades.is_empty():
+			var visti: Dictionary = t["upg"].get(b.uid, {})
+			for u in b.upgrades: visti[str(u)] = true
+			t["upg"][b.uid] = visti
+	for p in gs.players:
+		var visti2: Dictionary = t["pers"].get(p.index, {})
+		for c in p.specialized_characters: visti2[str(c)] = gs.era
+		t["pers"][p.index] = visti2
+
+func _riga_rapporto(gs: GameState, g: int, t: Dictionary) -> Dictionary:
+	var giocatori := []
+	for riga in Riepilogo.righe(gs):
+		var i := int(riga["player"])
+		var p: PlayerState = gs.players[i]
+		giocatori.append({"i": i, "strategia": strategia_di(i, g), "vp": p.vp, "posto": int(riga["posto"]),
+			"canali": p.vp_breakdown.duplicate(), "cnt": p.counters.duplicate(),
+			"pers": t["pers"].get(i, {}), "eredita": p.legacy_id,
+			"monumenti": p.monuments_claimed.duplicate(), "lavoratori": p.workers,
+			"dinastia": p.has_dynasty, "finali": [p.pietra, p.oro, p.idee]})
+	var edifici := []
+	for b in gs.grid.buildings:
+		var stato := "intatto"
+		if b.is_buried: stato = "sepolto"
+		elif b.state == Enums.BuildingState.ROVINA: stato = "rovina"
+		edifici.append({"id": str(b.data["id"]), "own": b.owner, "era": b.era_built, "lv": b.level,
+			"col": b.col_from, "stato": stato, "rovina": int(t["rovina"].get(b.uid, 0)),
+			"sepolto": int(t["sepolto"].get(b.uid, 0)), "vp": b.vp_reso.duplicate(),
+			"upg": (t["upg"].get(b.uid, {}) as Dictionary).keys(), "spianato": b.was_razed,
+			"sepolto_da": b.buried_by, "scheletro": b.buried_character != ""})
+	return {"seme": g, "n": gs.n_players, "giocatori": giocatori, "edifici": edifici,
+		"eventi": t["eventi"], "rovine_era": t["rovine_era"], "tessere": gs.tessere_scattate.duplicate(),
+		"terreni": gs.grid.terrains.map(func(x): return Enums.terrain_to_string(x))}
 
 # LA VITA DEGLI EDIFICI. Tante partite, e per ogni CARTA quanto e' durata:
 # quante ere resta intatta, quante resta in piedi, quante volte finisce
