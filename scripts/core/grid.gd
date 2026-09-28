@@ -35,12 +35,27 @@ func standing_in_column(col: int) -> Array:
 func alive_in_column(col: int) -> Array:
 	return in_column(col).filter(func(b): return b.is_alive())
 
-func rail_occupied(binario: int, col_from: int, col_to: int) -> bool:
+func rail_occupied(binario: int, col_from: int, col_to: int, profondita := 1) -> bool:
 	for b in buildings:
-		if b.level == 0 and b.binario_effettivo() == binario \
-			and b.col_from < col_to and b.col_to > col_from:
+		if b.level != 0 or b.col_from >= col_to or b.col_to <= col_from: continue
+		# Binari [binario, binario + profondita) contro quelli dell'edificio:
+		# con profondita' 1 da entrambe le parti e' l'uguaglianza di prima.
+		var da: int = b.binario_effettivo()
+		if da < binario + profondita and da + b.profondita() > binario:
 			return true
 	return false
+
+static func caselle() -> bool:
+	return bool(CardDB.constants.get("caselle", false))
+
+# La cima di UNA casella: l'edificio piu' alto non sotterrato che la copre.
+func top_of_casella(col: int, r: int) -> Building:
+	var best: Building = null
+	for b in buildings:
+		if b.is_buried or not b.copre_casella(col, r): continue
+		if best == null or b.level > best.level or (b.level == best.level and b.era_built > best.era_built):
+			best = b
+	return best
 
 # L'elemento più alto non sotterrato che copre la colonna (la "cima").
 func top_of(col: int) -> Building:
@@ -110,6 +125,12 @@ func refresh_buried() -> void:
 func is_fully_covered(b: Building) -> bool:
 	var sopra := _catena_sopra(b)
 	if sopra.is_empty(): return false
+	if caselle():
+		# Con le caselle la proiezione e' colonne x binari: va coperta tutta.
+		for c in range(b.col_from, b.col_to):
+			for r in range(b.binario_effettivo(), b.binario_effettivo() + b.profondita()):
+				if not sopra.any(func(o): return o.copre_casella(c, r)): return false
+		return true
 	for c in range(b.col_from, b.col_to):
 		var covered := false
 		for o in sopra:

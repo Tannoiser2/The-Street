@@ -105,15 +105,26 @@ static func pianura_discount(gs: GameState, data: Dictionary, col_from: int) -> 
 # Il fondo si riempie per primo anche per come scorre il tempo: chi gioca
 # l'era 1 trova i binari in fondo vuoti, l'era 2 prende quel che resta e si
 # sposta avanti. La citta' si stratifica in profondita' da sola.
-static func binario_per(gs: GameState, col_from: int, col_to: int) -> int:
+#
+# CON LE CASELLE (registro 122) il binario lo sceglie chi costruisce: i binari
+# non sono le ere, si parte dal fondo solo per comodita'. `voluto` e' quella
+# scelta (0 = il piu' in fondo libero), `profondita` i binari che la carta
+# occupa: devono stare tutti dentro la tessera e tutti liberi.
+static func binario_per(gs: GameState, col_from: int, col_to: int,
+		profondita := 1, voluto := 0) -> int:
 	if not bool(CardDB.constants.get("binari_liberi", false)):
 		return 0 if gs.grid.rail_occupied(gs.era, col_from, col_to) else gs.era
-	for r in range(1, int(CardDB.constants["rails"]) + 1):
-		if not gs.grid.rail_occupied(r, col_from, col_to): return r
+	var ultimo := int(CardDB.constants["rails"]) - profondita + 1
+	if voluto > 0:
+		if voluto > ultimo or gs.grid.rail_occupied(voluto, col_from, col_to, profondita): return 0
+		return voluto
+	for r in range(1, ultimo + 1):
+		if not gs.grid.rail_occupied(r, col_from, col_to, profondita): return r
 	return 0
 
 # ---- costruzione nel proprio binario ------------------------------
-static func quote_rail(gs: GameState, player: int, data: Dictionary, col_from: int, despoil: Building = null) -> BuildQuote:
+static func quote_rail(gs: GameState, player: int, data: Dictionary, col_from: int,
+		despoil: Building = null, voluto := 0) -> BuildQuote:
 	var q := BuildQuote.new()
 	var w := int(data["width"])
 	var col_to := col_from + w
@@ -121,7 +132,9 @@ static func quote_rail(gs: GameState, player: int, data: Dictionary, col_from: i
 		q.reason = "fuori dalla strada"; return q
 	if int(data["era"]) != gs.era:
 		q.reason = "non è un edificio dell'era corrente"; return q
-	var binario := binario_per(gs, col_from, col_to)
+	if bool(data.get("solo_su_rovine", false)):
+		q.reason = "va costruito sopra delle rovine"; return q
+	var binario := binario_per(gs, col_from, col_to, int(data.get("depth", 1)), voluto)
 	if binario == 0:
 		q.reason = "caselle occupate nel binario"; return q
 	q.binario = binario
@@ -156,7 +169,9 @@ static func _apply_despoil(q: BuildQuote, despoil: Building, pietra_so_far: int)
 # Ogni colonna dell'impronta offre una base valida (rudere/rovina di chiunque,
 # oppure un proprio intatto da spianare) o richiede terrapieno.
 # Almeno una colonna deve avere una base vera. Cap: +1 livello per colonna per era.
-static func quote_above(gs: GameState, player: int, data: Dictionary, col_from: int, despoil: Building = null) -> BuildQuote:
+static func quote_above(gs: GameState, player: int, data: Dictionary, col_from: int,
+		despoil: Building = null, voluto := 0) -> BuildQuote:
+	if Grid.caselle(): return _quote_above_caselle(gs, player, data, col_from, despoil, voluto)
 	var q := BuildQuote.new()
 	var g := gs.grid
 	var w := int(data["width"])
@@ -183,6 +198,8 @@ static func quote_above(gs: GameState, player: int, data: Dictionary, col_from: 
 			q.terrapieno_cols.append(c)
 			top_level = max(top_level, 0)
 			continue
+		if top.solo_su_rovine() and top.state != Enums.BuildingState.ROVINA:
+			q.reason = "sopra %s si costruisce solo quando e' in rovina" % top.data["name"]; return q
 		match top.state:
 			Enums.BuildingState.INTATTO:
 				if top.owner != player:
@@ -230,6 +247,111 @@ static func quote_above(gs: GameState, player: int, data: Dictionary, col_from: 
 	var te := TessereEra.sconto_costruzione(gs, player, data, col_from, q.level, q.bases)
 	q.pietra = max(0, p + sconto.x - int(te["pietra"]))
 	q.oro = max(0, c.y + sconto.y - int(te["oro"]))
+	q.idee = max(0, base_idee(data) - int(te["idee"]))
+	q.legal = true
+	return q
+
+# ---- costruzione sopra, a caselle (registro 122) ---------------------
+# Come quote_above, ma ogni casella dell'impronta (colonne x binari) ha la sua
+# cima: le basi sono le cime di quelle caselle, non di tutta la colonna. Il
+# terrapieno si paga per casella vuota: e' la terra che si mette sotto la
+# carta. Se il binario non e' scelto si prova ogni binario e si tiene il
+# preventivo legale piu' economico (a parita', il piu' in fondo).
+static func _quote_above_caselle(gs: GameState, player: int, data: Dictionary, col_from: int,
+		despoil: Building, voluto: int) -> BuildQuote:
+	var prof := int(data.get("depth", 1))
+	var ultimo := int(CardDB.constants["rails"]) - prof + 1
+	if voluto > 0:
+		if voluto > ultimo:
+			var q0 := BuildQuote.new()
+			q0.reason = "la carta esce dalla tessera"; return q0
+		return _quote_sopra_binario(gs, player, data, col_from, despoil, voluto)
+	var migliore: BuildQuote = null
+	var primo: BuildQuote = null
+	for r in range(1, ultimo + 1):
+		var q := _quote_sopra_binario(gs, player, data, col_from, despoil, r)
+		if primo == null: primo = q
+		if not q.legal: continue
+		if migliore == null or q.pietra + q.oro + q.idee < migliore.pietra + migliore.oro + migliore.idee:
+			migliore = q
+	return migliore if migliore != null else primo
+
+static func _quote_sopra_binario(gs: GameState, player: int, data: Dictionary, col_from: int,
+		despoil: Building, binario: int) -> BuildQuote:
+	var q := BuildQuote.new()
+	var g := gs.grid
+	var w := int(data["width"])
+	var prof := int(data.get("depth", 1))
+	var col_to := col_from + w
+	if col_from < 0 or col_to > g.n_cols:
+		q.reason = "fuori dalla strada"; return q
+	if int(data["era"]) != gs.era:
+		q.reason = "non è un edificio dell'era corrente"; return q
+	if not terrain_ok(gs, data, col_from, col_to, player):
+		q.reason = "terreno non adatto"; return q
+	var dr := despoil_reason(gs, despoil, col_from, col_to)
+	if dr != "":
+		q.reason = dr; return q
+	q.binario = binario
+	var solo_rovine := bool(data.get("solo_su_rovine", false))
+	var top_level := -1
+	var real_bases := 0
+	var vuote := 0
+	var spolia := 0
+	var rubble_discount := false
+	for c in range(col_from, col_to):
+		if g.risen_this_era.get(c, false):
+			q.reason = "la colonna %d è già salita di un livello in quest'era" % c; return q
+		for r in range(binario, binario + prof):
+			var top := g.top_of_casella(c, r)
+			if top == null:
+				if solo_rovine:
+					q.reason = "sotto ogni casella ci vuole una rovina"; return q
+				vuote += 1
+				if not c in q.terrapieno_cols: q.terrapieno_cols.append(c)
+				top_level = max(top_level, 0)
+				continue
+			if top.solo_su_rovine() and top.state != Enums.BuildingState.ROVINA:
+				q.reason = "sopra %s si costruisce solo quando e' in rovina" % top.data["name"]; return q
+			if solo_rovine and top.state != Enums.BuildingState.ROVINA:
+				q.reason = "sotto ogni casella ci vuole una rovina"; return q
+			match top.state:
+				Enums.BuildingState.INTATTO:
+					if top.owner != player:
+						q.reason = "un edificio intatto altrui blocca la colonna %d" % c; return q
+					if not top in q.razed:
+						q.razed.append(top)
+						spolia += int(ceil(float(top.data["resistance"] + top.bonus_res) / 2.0))
+				Enums.BuildingState.RUDERE:
+					if top != despoil and top.shares_class_with(data): q.continuity_bonus = 1
+				Enums.BuildingState.ROVINA:
+					if top.owner != player or not bool(CardDB.constants.get("sconto_macerie_solo_altrui", false)):
+						rubble_discount = true
+			if not top in q.bases: q.bases.append(top)
+			real_bases += 1
+			top_level = max(top_level, top.level + 1)
+	if real_bases == 0:
+		q.reason = "almeno una casella deve avere una base vera"; return q
+	q.level = max(1, top_level)
+	if int(data["level_required"]) > q.level:
+		q.reason = "richiede livello %d" % data["level_required"]; return q
+	var c0 := base_cost(data)
+	var billable := vuote
+	if billable > 0 and Effects.has_override(gs, "first_terrapieno_free") \
+			and not gs.players[player].terrapieno_free_used:
+		billable -= 1
+		q.terrapieno_free_applied = true
+	q.terrapieno_pietra = billable * int(CardDB.constants["terrapieno_cost_pietra"])
+	var p := c0.x + q.terrapieno_pietra
+	p -= pianura_discount(gs, data, col_from)
+	p -= spolia
+	if rubble_discount and despoil == null: p -= int(CardDB.constants["rubble_discount_pietra"])
+	p = _apply_despoil(q, despoil, p)
+	var sconto := Effects.cost_delta(gs, player, "building",
+		Effects.sonda(data, player, col_from, q.level))
+	var te := TessereEra.sconto_costruzione(gs, player, data, col_from, q.level, q.bases)
+	q.pietra = max(0, p + sconto.x - int(te["pietra"]))
+	q.oro = max(0, c0.y + sconto.y - int(te["oro"]))
 	q.idee = max(0, base_idee(data) - int(te["idee"]))
 	q.legal = true
 	return q

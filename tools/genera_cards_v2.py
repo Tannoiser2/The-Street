@@ -426,12 +426,48 @@ def tessere_era(v):
                                  "copie": 2})
     v["constants"]["tessere_era"] = True
 
+# LE FORME DELLE CARTE STAMPATE (registro 122). Una casella e' una colonna per
+# un binario; le carte nuove ne coprono piu' d'uno in profondita'. Decisioni
+# del designer: le "quadrate" occupano una colonna e due binari; il Colosseo
+# (Anfiteatro) passa da 3 a 2 colonne ed e' 2x2 come Castello e Fortezza; il
+# Grattacielo e' una colonna per tre binari. Acquedotto e Stazione restano
+# larghi 3. I binari non sono le ere: si costruisce nel binario che si vuole.
+# `depth` = binari occupati. `solo_su_rovine`: sotto ogni casella deve esserci
+# una rovina (che diventa scavo), e sopra non si costruisce finche' l'edificio
+# non e' a sua volta in rovina.
+FORME = {
+    "ed_circolo_di_pietre": (1, 2), "ed_villaggio_palizzato": (1, 2),
+    "ed_castrum": (1, 2), "ed_foro": (1, 2), "ed_abbazia": (1, 2),
+    "ed_arsenale": (1, 2), "ed_duomo": (1, 2), "ed_piazza_monumentale": (1, 2),
+    "ed_universita": (1, 2), "ed_parco_archeologico": (1, 2),
+    "ed_anfiteatro": (2, 2), "ed_castello": (2, 2), "ed_fortezza_bastionata": (2, 2),
+    "ed_grattacielo": (1, 3),
+}
+SOLO_SU_ROVINE = {"ed_anfiteatro", "ed_castello", "ed_fortezza_bastionata", "ed_grattacielo"}
+TESTI_FORME = {
+    "ed_acquedotto": "Colossale: 3 slot adiacenti, almeno uno con fiume. Eco: +2 PV (lampo) se ancora in piedi nel Moderno.",
+    "ed_stazione": "Colossale: 3 slot adiacenti, si attiva da tutte le colonne. Produce 2 oro. Richiede livello 1+.",
+}
+
+def forme(v):
+    per_id = {b["id"]: b for b in v["buildings"]}
+    assert set(FORME) <= set(per_id), set(FORME) - set(per_id)
+    for bid, (w, d) in FORME.items():
+        per_id[bid]["width"] = w
+        per_id[bid]["depth"] = d
+    for bid in SOLO_SU_ROVINE:
+        per_id[bid]["solo_su_rovine"] = True
+    for bid, testo in TESTI_FORME.items():
+        per_id[bid]["effect_text"] = testo
+    v["constants"]["caselle"] = True
+
 import sys
 variante = sys.argv[sys.argv.index("--variante") + 1] if "--variante" in sys.argv else ""
 # Le case in riserva stanno nel file v2 di tutti (registro 116); le varianti di
 # prova ci si aggiungono sopra, come misura.
 case_tutti(v2, riserva=True, copie=2)
 tessere_era(v2)
+forme(v2)
 if variante:
     {"doppioni": doppioni, "abitazioni": abitazioni, "case": case,
      "case_doppioni": case_doppioni, "case_scavo": case_scavo, "case_nulle": case_nulle,

@@ -364,7 +364,8 @@ func place_worker(col: int, protect: Building = null) -> bool:
 # ---- fase 3: azioni -------------------------------------------------
 # Costruire: nella colonna attivata o in una adiacente.
 # `despoil` e' il rudere opzionalmente depredato (spoliazione).
-func build(card_id: String, col_from: int, above: bool, pay_option: int = 0, despoil: Building = null) -> bool:
+func build(card_id: String, col_from: int, above: bool, pay_option: int = 0, despoil: Building = null,
+		binario := 0) -> bool:
 	if not _puo_agire(): return false
 	if not gs.pending_choice.is_empty(): return false
 	# V2: si costruisce in qualsiasi colonna legale (D9), non solo vicino alla attivata.
@@ -372,8 +373,11 @@ func build(card_id: String, col_from: int, above: bool, pay_option: int = 0, des
 	if not card_id in gs.market and not card_id in gs.riserva: return false
 	var p := gs.current_player()
 	var data: Dictionary = CardDB.buildings[card_id]
-	var q := BuildRules.quote_above(gs, p.index, data, col_from, despoil) if above \
-		else BuildRules.quote_rail(gs, p.index, data, col_from, despoil)
+	# `binario`: con le caselle (registro 122) chi costruisce sceglie il
+	# binario; 0 lascia scegliere alla regola (il piu' in fondo, o sopra il
+	# piu' economico).
+	var q := BuildRules.quote_above(gs, p.index, data, col_from, despoil, binario) if above \
+		else BuildRules.quote_rail(gs, p.index, data, col_from, despoil, binario)
 	if not q.legal:
 		gs.log_line("Costruzione rifiutata: %s" % q.reason)
 		return false

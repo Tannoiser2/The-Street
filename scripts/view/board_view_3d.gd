@@ -274,7 +274,8 @@ func _acceso_carta(c: Dictionary) -> bool:
 func _posti_liberi() -> void:
 	for pz in evidenze.get("slot", []):
 		var box: AABB = BoardLayout3D.box_piazzamento(gs, int(pz["col_from"]),
-			int(pz["width"]), int(pz.get("level", 0)), gs.era)
+			int(pz["width"]), int(pz.get("level", 0)), gs.era,
+			int(pz.get("binario", 0)), int(pz.get("depth", 1)))
 		# Verde a terra, ambra in alto: due quote e due colori, cosi' si
 		# capisce a colpo d'occhio che sono due cose diverse.
 		var col := Color(0.42, 1.0, 0.52)

@@ -189,6 +189,10 @@ static func standee_base(gs: GameState, b: Building) -> Vector3:
 # binario - per l'era 1 sono 57 mm piu' avanti - e a schermo l'edificio
 # galleggiava in aria a fianco della pila che avrebbe dovuto reggerlo.
 static func z_sagoma(gs: GameState, b: Building, giri := 0) -> float:
+	# Con le caselle (registro 122) ogni edificio, a qualunque quota, ha il suo
+	# binario e la sua profondita': la carta sta al centro delle sue caselle.
+	if cartoni() and Grid.caselle():
+		return rail_z(b.binario_effettivo()) + b.profondita() * slot_d() / 2.0
 	if b.level == 0:
 		# sul davanti dello slot, cioe' dal lato della telecamera
 		if cartoni(): return rail_z(b.binario_effettivo()) + slot_d() / 2.0
@@ -436,8 +440,11 @@ static func facce_basetta(gs: GameState, b: Building) -> Array[Dictionary]:
 # La basetta: ogni sagoma ne ha una. 15 mm di profondita' per 4 mm di cartone.
 static func basetta_box(gs: GameState, b: Building) -> AABB:
 	var c := standee_base(gs, b)
-	return AABB(Vector3(c.x - span_w(b.width()) / 2.0, c.y, c.z - basetta_d() / 2.0),
-		Vector3(span_w(b.width()), basetta_y(), basetta_d()))
+	# Una carta profonda piu' binari copre anche lo spazio fra una casella e
+	# l'altra.
+	var d := basetta_d() + (b.profondita() - 1) * slot_d() if cartoni() else basetta_d()
+	return AABB(Vector3(c.x - span_w(b.width()) / 2.0, c.y, c.z - d / 2.0),
+		Vector3(span_w(b.width()), basetta_y(), d))
 
 static func tile_box(col: int, era: int) -> AABB:
 	return AABB(Vector3(col_x(col), 0.0, rail_z(era)), Vector3(TESSERA_W, TESSERA_Y, slot_d()))
@@ -1353,7 +1360,12 @@ static func _colpisce(box: AABB, o: Vector3, d: Vector3) -> float:
 # edificio" diventa un riquadro sopra quell'edificio, che prima non c'era modo
 # di chiedere.
 static func box_piazzamento(gs: GameState, col_from: int, larghezza: int,
-		livello: int, era: int) -> AABB:
+		livello: int, era: int, binario := 0, profondita := 1) -> AABB:
+	# Con le caselle il posto e' esattamente le caselle scelte, alla quota
+	# a cui la carta andra'.
+	if binario > 0 and Grid.caselle():
+		return AABB(Vector3(col_x(col_from) + 4.0, level_y(livello), rail_z(binario) + 2.0),
+			Vector3(larghezza * TESSERA_W - 8.0, 0.0, profondita * slot_d() - 4.0))
 	if livello == 0:
 		# A terra si va sul binario dell'era in corso: e' li' che la sagoma
 		# andra' a finire.

@@ -41,9 +41,10 @@ città; ma uccide ciò che sta sotto.
 Il tabellone è una griglia di 5 binari per una fila di colonne di terreno: 5 colonne in due
 giocatori, 7 in tre, 9 in quattro. Ogni casella è un posto dove può stare un edificio.
 
-Ogni edificio è **una sagoma sola**, che porta tutto: costo, produzione, resistenza, Rendita,
-Lampo, Scavo, classe, terreno richiesto. Innestata in una basetta del vostro colore va sul
-tabellone; girata mostra il lato rovina, con il valore di Scavo in vista.
+Ogni edificio è **una carta sola**, che porta tutto: costo, produzione, resistenza, Rendita,
+Lampo, Scavo, classe, terreno richiesto. Incollata su un cartone di circa 15 mm del vostro
+colore, si stende sulle caselle che occupa; chi costruisce sopra la impila. Quando va in
+rovina si gira: il retro è la stessa carta in bianco e nero, con il valore di Scavo in vista.
 
 | componente | quantità |
 |---|--:|
@@ -195,26 +196,29 @@ gira: per quell'era il Centro ha già dato. A inizio era si rigirano tutti.
 Costruire significa pagare il costo della sagoma e metterla sul tabellone, nella colonna che avete
 attivato o in una adiacente. Si costruiscono solo edifici dell'era corrente, dal mercato o dalla
 riserva delle case.
-L'edificio occupa 1, 2 o 3 caselle contigue secondo la sua taglia. Ci sono due modi.
+L'edificio occupa le caselle disegnate sulla sua carta: una, due o tre colonne affiancate, e
+uno, due o tre binari in profondità (le carte quadrate sono una colonna per due binari, i 2x2
+due colonne per due binari, il Grattacielo una colonna per tre binari). Ci sono due modi.
 
 ### Costruire a terra
 
-Le caselle libere della strada. I binari non appartengono alle ere: **si riempie dal fondo**, e
-un edificio prende il binario più lontano che ha posto libero in tutte le sue colonne. È la
-costruzione normale, a livello 0, la più economica. Il suolo però è uno solo per tutta la
+Le caselle libere della strada. I binari non appartengono alle ere: **scegliete voi il
+binario**, purché tutte le caselle della carta siano libere e dentro la tessera. Per comodità
+si comincia dal fondo. È la costruzione normale, a livello 0, la più economica. Il suolo però è uno solo per tutta la
 partita: quando è pieno, si sale.
 
 ### Costruire sopra
 
-Invece del suolo, poggiate l'edificio su ciò che esiste già nelle colonne scelte. Ogni colonna
-della vostra impronta deve offrire una base valida, e almeno una deve averla davvero:
+Invece del suolo, poggiate l'edificio su ciò che esiste già nelle caselle scelte. Ogni
+casella ha la sua pila: conta la carta in cima a quella casella. Ogni casella della vostra
+impronta deve offrire una base valida, e almeno una deve averla davvero:
 
 | cosa c'è sotto | cosa succede |
 |---|---|
 | Una rovina, di chiunque | Base gratuita, e vi sconta 1 Costruzione (le macerie sono materiale) |
 | Un vostro edificio in piedi | Lo spianate: vi sconta in Costruzione metà della sua resistenza, arrotondata per eccesso, ma il suo Scavo vale 0 |
 | Un edificio in piedi altrui | Impossibile. Blocca finché è vivo |
-| Terreno nudo | Terrapieno: +1 Costruzione per ogni colonna priva di base, una volta sola qualunque sia la quota |
+| Terreno nudo | Terrapieno: +1 Costruzione per ogni casella priva di base, una volta sola qualunque sia la quota |
 
 Il nuovo edificio sta tutto a un livello solo, pari al più alto delle basi più uno. Una colonna
 può salire di un solo livello per era: un edificio da 2 o 3 caselle si costruisce sopra solo se
@@ -339,10 +343,16 @@ chi ha più risorse residue.
 
 ### Colossali
 
-Tre edifici — Anfiteatro, Acquedotto e Stazione — occupano tre caselle e si costruiscono con una
-sola azione. Contano come strato in tutte le colonne che toccano, si attivano da ciascuna di
-esse, e se crollano vanno in rovina ovunque. Valgono il proprio Scavo una sola volta, e solo
-quando l'intera proiezione è coperta.
+Acquedotto e Stazione occupano tre colonne affiancate; Anfiteatro (il Colosseo), Castello e
+Fortezza bastionata sono 2x2, quattro caselle; il Grattacielo è una colonna per tre binari. Si
+costruiscono con una sola azione, contano come strato in tutte le caselle che toccano, si
+attivano da ciascuna delle loro colonne, e se crollano vanno in rovina ovunque. Valgono il
+proprio Scavo una sola volta, e solo quando l'intera proiezione è coperta.
+
+**I 2x2 e il Grattacielo si costruiscono solo sopra delle rovine**: sotto ognuna delle loro
+caselle deve esserci una rovina, di chiunque, che viene sepolta e diventa scavo. Niente
+terrapieno, niente spianare. E sopra di loro non si costruisce nulla finché non sono a loro
+volta in rovina.
 
 ### Costo flessibile ◈
 

@@ -299,6 +299,9 @@ func _lotto(seme: int, players: int, quante: int) -> void:
 	# Quante volte scatta ogni tessera dell'era, su tutto il lotto: si stampa in
 	# fondo come commento, cosi' i confronti che leggono le righe non la vedono.
 	var scattate := {}
+	# E quante volte si costruisce ogni carta di forma nuova (registro 122):
+	# le profonde e quelle che vanno solo sopra le rovine.
+	var forme := {}
 	for g in quante:
 		var ctl := GameController.new()
 		ctl.new_game(players, seme + g)
@@ -308,6 +311,9 @@ func _lotto(seme: int, players: int, quante: int) -> void:
 			guard += 1
 		for id in ctl.gs.tessere_scattate:
 			scattate[id] = int(scattate.get(id, 0)) + int(ctl.gs.tessere_scattate[id])
+		for b in ctl.gs.grid.buildings:
+			if b.profondita() > 1 or b.solo_su_rovine():
+				forme[b.data["id"]] = int(forme.get(b.data["id"], 0)) + 1
 		for riga in Riepilogo.righe(ctl.gs):
 			var chi := int(riga["player"])
 			var sopra := 0
@@ -339,6 +345,10 @@ func _lotto(seme: int, players: int, quante: int) -> void:
 		var ids := scattate.keys()
 		ids.sort()
 		print("# tessere_scattate = " + ", ".join(ids.map(func(i): return "%s:%d" % [i, scattate[i]])))
+	if not forme.is_empty():
+		var fid := forme.keys()
+		fid.sort()
+		print("# forme_costruite = " + ", ".join(fid.map(func(i): return "%s:%d" % [i, forme[i]])))
 	get_tree().quit(0)
 
 # LA VITA DEGLI EDIFICI. Tante partite, e per ogni CARTA quanto e' durata:

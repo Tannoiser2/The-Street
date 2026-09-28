@@ -171,7 +171,8 @@ func _acceso() -> Dictionary:
 		if v.parametri.has("col_from"):
 			var d: Dictionary = CardDB.buildings[str(v.parametri["card_id"])]
 			slot.append({"col_from": int(v.parametri["col_from"]),
-				"width": int(d["width"]), "level": int(v.parametri.get("level", 0))})
+				"width": int(d["width"]), "level": int(v.parametri.get("level", 0)),
+				"binario": int(v.parametri.get("binario", 0)), "depth": int(d.get("depth", 1))})
 		elif v.parametri.has("uid"):
 			uid.append(int(v.parametri["uid"]))
 	return {"carta": _scelta, "slot": slot, "uid": uid}
@@ -576,7 +577,8 @@ func _bersaglio_sotto(pixel: Vector2) -> AvailableActions.Voce:
 		var d: Dictionary = CardDB.buildings[str(v.parametri["card_id"])]
 		riquadri.append(BoardLayout3D.box_piazzamento(ctl.gs,
 			int(v.parametri["col_from"]), int(d["width"]),
-			int(v.parametri.get("level", 0)), ctl.gs.era))
+			int(v.parametri.get("level", 0)), ctl.gs.era,
+			int(v.parametri.get("binario", 0)), int(d.get("depth", 1))))
 		voci.append(v)
 	var i := BoardLayout3D.riquadro_al_raggio(riquadri, _origine(pixel), _direzione(pixel))
 	return voci[i] if i >= 0 else null
@@ -708,7 +710,7 @@ func _esegui(v) -> void:
 	match v.tipo:
 		"costruisci":
 			fatto = ctl.build(str(v.parametri["card_id"]), int(v.parametri["col_from"]),
-				bool(v.parametri["above"]))
+				bool(v.parametri["above"]), 0, null, int(v.parametri.get("binario", 0)))
 		"potenzia":
 			fatto = ctl.upgrade(str(v.parametri["upg_id"]), _edificio(int(v.parametri.get("uid", -1))))
 		"restaura":
