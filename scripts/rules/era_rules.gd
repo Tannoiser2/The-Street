@@ -98,7 +98,7 @@ static func paga_edificio(gs: GameState, b: Building) -> void:
 	var pp := int(pr.get("pietra", 0)) + int(aura["pietra"])
 	var po := int(pr.get("oro", 0)) + int(aura["oro"])
 	var pc := int(pr.get("cultura", 0)) + int(aura["cultura"])
-	var pi := int(pr.get("idee", 0))      # v2: le Idee prodotte dagli edifici
+	var pi := int(pr.get("idee", 0)) + int(aura["idee"])   # v2: le Idee prodotte dagli edifici
 	var ex := Effects.production_bonus(gs, b.owner, pp, po)
 	ow.gain(pp + ex.x, po + ex.y, pi)
 	if pc > 0:

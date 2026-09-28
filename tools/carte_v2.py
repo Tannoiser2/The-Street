@@ -34,14 +34,7 @@ SIGLE = [
 # Dove la carta non e' qui, il testo di oggi resta valido cosi' com'e'.
 TESTI = {
     # edifici
-    "ed_focolare_comune": ("Quartiere: +1 Costruzione quando lo attivi.", "LAV 3R",
-        "\"quando abiti qui\": il lavoratore sta sulla colonna, quindi \"quando attivi la colonna\""),
-    "ed_acquedotto": ("Colossale: 2 slot adiacenti (3 pagando +1 Costruzione; in 2 giocatori il terzo slot è vietato), almeno uno con fiume. Eco: +2 PV (lampo) se ancora in piedi nel Moderno.", "3R", ""),
-    "ed_ospedale_dei_pellegrini": ("Quando lo attivi, +1 Denaro.", "LAV 3R", ""),
-    "ed_bottega_dartista": ("I tuoi potenziamenti costano 1 in meno, nella loro risorsa.", "3R",
-        "i potenziamenti pagano per famiglia: Arte in Idee, Struttura in Costruzione, il resto in Denaro"),
     "ed_palazzo_signorile": (None, "3R", "produce 1 Idea al posto di 1 cultura (già nel file v2)"),
-    "ed_universita": ("+1 PV per ogni tuo Personaggio preso nel draft. Richiede livello 1+.", "DRA", ""),
     "ed_abbazia": (None, "", "Rendita 3 → 2 (registro 97: le carte care)"),
     "ed_castello": (None, "", "Rendita 3 → 2 (registro 97)"),
     "ed_fortezza_bastionata": (None, "", "Rendita 3 → 2 (registro 97)"),
@@ -83,9 +76,6 @@ TESTI = {
     "pe_dinastia": ("Sempre disponibile, fuori dal draft, al posto dell'azione. Costo in Idee: era 1 = 4 · era 2 = 3 · era 3 = 3 · era 4 = 3. Nessuna abilità: aggiunge un quinto lavoratore, permanente e attivo da subito. Massimo una a testa.", "3R",
         "con quattro lavoratori di base (registro 94) è il quinto"),
     # potenziamenti
-    "po_granaio_comune": ("Quando attivi questo edificio, +1 Costruzione.", "LAV 3R", ""),
-    "po_banchina": ("Solo su slot fiume: quando attivi questo edificio, +1 Denaro.", "LAV 3R", ""),
-    "po_boutique": ("Quando attivi questo edificio, +2 Denaro.", "LAV 3R", ""),
     # eventi
     "ev_inverno_lungo": ("Forza 2. Edifici su bosco e collina: −1 res. Tutti i giocatori perdono 1 Costruzione.", "3R", ""),
     "ev_migrazione": (None, "LAV", "\"non protetti\" resta: protegge il lavoratore messo sopra un proprio edificio in piedi, come oggi"),

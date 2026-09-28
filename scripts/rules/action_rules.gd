@@ -82,9 +82,16 @@ static func quote_upgrade(gs: GameState, player: int, upg_id: String, target: Bu
 	var sconto := Effects.cost_delta(gs, player, "upgrade", target)
 	# Tessera dell'era "Orto botanico" (registro 121).
 	var te := TessereEra.sconto_potenziamento(gs, target)
-	return ActionQuote.yes(max(0, int(cost.get("pietra", 0)) + sconto.x - int(te.get("pietra", 0))),
-						   max(0, int(cost.get("oro", 0)) + sconto.y - int(te.get("oro", 0))), target,
-						   max(0, int(cost.get("idee", 0)) - int(te.get("idee", 0))))
+	var pp := int(cost.get("pietra", 0)) + sconto.x - int(te.get("pietra", 0))
+	var po := int(cost.get("oro", 0)) + sconto.y - int(te.get("oro", 0))
+	var pi := int(cost.get("idee", 0)) - int(te.get("idee", 0))
+	# La Bottega d'artista v2 sconta nella risorsa del potenziamento.
+	var propria := Effects.cost_delta_propria(gs, player, "upgrade", target)
+	if propria != 0:
+		if int(cost.get("idee", 0)) > 0: pi += propria
+		elif int(cost.get("pietra", 0)) > 0: pp += propria
+		else: po += propria
+	return ActionQuote.yes(maxi(0, pp), maxi(0, po), target, maxi(0, pi))
 
 # ---- restaurare ----------------------------------------------------
 # "pagate meta' del costo originale, arrotondato per eccesso, e torna intatto
