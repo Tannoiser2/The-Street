@@ -34,6 +34,8 @@ static func terrain_ok(gs: GameState, data: Dictionary, col_from: int, col_to: i
 	# Mastro costruttore: "puoi costruire in qualsiasi slot".
 	if player >= 0 and Effects.has_active_override(gs, player, "ignore_terrain_requirement"):
 		return true
+	# Tessera dell'era "Terra di nessuno" (registro 121).
+	if TessereEra.ignora_terreno(gs, col_from, col_to): return true
 	var g := gs.grid
 	if req == "fiume":
 		for c in range(col_from, col_to):
@@ -79,6 +81,8 @@ static func base_idee(data: Dictionary) -> int:
 	return int(data["cost"].get("idee", 0))
 
 static func pianura_discount(gs: GameState, data: Dictionary, col_from: int) -> int:
+	# Con le tessere dell'era lo sconto e' la tessera "Campi arati", non la pianura.
+	if TessereEra.attive(): return 0
 	if int(data["width"]) >= 2 and gs.grid.terrains[col_from] == Enums.Terrain.PIANURA:
 		# V2 (registro 100): lo sconto e' l'effetto della tessera, una volta per era.
 		if EraRules.tessere_una_volta(gs) and not EraRules.tessera_disponibile(gs, col_from): return 0
@@ -131,11 +135,12 @@ static func quote_rail(gs: GameState, player: int, data: Dictionary, col_from: i
 	var c := base_cost(data)
 	var sconto := Effects.cost_delta(gs, player, "building",
 		Effects.sonda(data, player, col_from, 0))
-	var p := c.x - pianura_discount(gs, data, col_from) + sconto.x
+	var te := TessereEra.sconto_costruzione(gs, player, data, col_from, 0, [])
+	var p := c.x - pianura_discount(gs, data, col_from) + sconto.x - int(te["pietra"])
 	p = _apply_despoil(q, despoil, p)
 	q.pietra = max(0, p)
-	q.oro = max(0, c.y + sconto.y)
-	q.idee = base_idee(data)
+	q.oro = max(0, c.y + sconto.y - int(te["oro"]))
+	q.idee = max(0, base_idee(data) - int(te["idee"]))
 	q.level = 0
 	q.legal = true
 	return q
@@ -222,9 +227,10 @@ static func quote_above(gs: GameState, player: int, data: Dictionary, col_from: 
 	p = _apply_despoil(q, despoil, p)
 	var sconto := Effects.cost_delta(gs, player, "building",
 		Effects.sonda(data, player, col_from, q.level))
-	q.pietra = max(0, p + sconto.x)
-	q.oro = max(0, c.y + sconto.y)
-	q.idee = base_idee(data)
+	var te := TessereEra.sconto_costruzione(gs, player, data, col_from, q.level, q.bases)
+	q.pietra = max(0, p + sconto.x - int(te["pietra"]))
+	q.oro = max(0, c.y + sconto.y - int(te["oro"]))
+	q.idee = max(0, base_idee(data) - int(te["idee"]))
 	q.legal = true
 	return q
 

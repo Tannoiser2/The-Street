@@ -187,6 +187,12 @@ func _ready() -> void:
 	if args.has("tessere"):
 		CardDB.constants["tessere_una_volta_per_era"] = str(args["tessere"]) != "0"
 		print("# tessere_una_volta_per_era = %s" % str(bool(CardDB.constants["tessere_una_volta_per_era"])))
+	# LE TESSERE DELL'ERA (`--tessere_era 0/1`, costante `tessere_era`, vera nel
+	# file v2, registro 121): a 0 tornano i terreni di prima, con la curva di
+	# produzione per era e la regola del terreno una volta per era.
+	if args.has("tessere_era"):
+		CardDB.constants["tessere_era"] = str(args["tessere_era"]) != "0"
+		print("# tessere_era = %s" % str(bool(CardDB.constants["tessere_era"])))
 	# L'INCASSO AL PASSAGGIO (`--passa_incasso 0/1`, `passa_incasso`, spenta
 	# dove manca, registro 109): nel turno v1 chi passa incassa 1 Costruzione
 	# piu' 1 risorsa a scelta, come nel turno a un'azione.
@@ -290,6 +296,9 @@ func _lotto(seme: int, players: int, quante: int) -> void:
 		+ ";".join(Riepilogo.VOCI.map(func(v): return str(v["id"]))) + ";piano;centro_attivato;oro_centro"
 		+ ";sopra_propri;sopra_altrui;spianati;scavo_scavato;scavo_e5;idee_prodotte;idee_spese"
 		+ ";az_colonna;az_costruisci;az_potenzia;az_ristruttura;az_recluta;az_dinastia;az_passa")
+	# Quante volte scatta ogni tessera dell'era, su tutto il lotto: si stampa in
+	# fondo come commento, cosi' i confronti che leggono le righe non la vedono.
+	var scattate := {}
 	for g in quante:
 		var ctl := GameController.new()
 		ctl.new_game(players, seme + g)
@@ -297,6 +306,8 @@ func _lotto(seme: int, players: int, quante: int) -> void:
 		while ctl.gs.phase != Enums.Phase.FINE_PARTITA and guard < 10000:
 			_muovi(ctl, g)
 			guard += 1
+		for id in ctl.gs.tessere_scattate:
+			scattate[id] = int(scattate.get(id, 0)) + int(ctl.gs.tessere_scattate[id])
 		for riga in Riepilogo.righe(ctl.gs):
 			var chi := int(riga["player"])
 			var sopra := 0
@@ -324,6 +335,10 @@ func _lotto(seme: int, players: int, quante: int) -> void:
 					"az_ristruttura", "az_recluta", "az_dinastia", "az_passa"]:
 				campi.append("%d" % int(cnt.get(k, 0)))
 			print(";".join(campi))
+	if not scattate.is_empty():
+		var ids := scattate.keys()
+		ids.sort()
+		print("# tessere_scattate = " + ", ".join(ids.map(func(i): return "%s:%d" % [i, scattate[i]])))
 	get_tree().quit(0)
 
 # LA VITA DEGLI EDIFICI. Tante partite, e per ogni CARTA quanto e' durata:
