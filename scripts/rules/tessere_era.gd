@@ -12,6 +12,14 @@
 # Accese dalla costante `tessere_era` (vera nel file v2). Spente, niente di
 # questo file tocca la partita, e la v1.5 resta identica al riferimento.
 #
+# QUALE TESSERA SCATTA: solo quella della colonna che il giocatore ha scelto,
+# cioe' dove ha messo il lavoratore in questo turno (`gs.colonna_attivata`).
+# Un edificio largo che copre altre colonne non fa scattare le loro tessere:
+# conta la colonna scelta, e la tessera scatta se l'edificio (costruito,
+# ristrutturato, potenziato, sepolto) copre quella colonna. Decisione del
+# designer: "l'effetto si attiva solo della colonna scelta dal giocatore, non
+# importa se un edificio copre piu' colonne".
+#
 # LE SCELTE. Alcune tessere dicono "puo' cambiare" o "a scelta". Qui la scelta
 # e' automatica e prudente, uguale per bot e persone: si cambia solo se la
 # risorsa d'arrivo manca piu' di quella di partenza, si prende la risorsa di
@@ -154,11 +162,12 @@ static func _in_costruzione(gs: GameState, player: int, data: Dictionary, col_fr
 	var out := []
 	if not attive(): return out
 	var col_to := col_from + int(data["width"])
-	for c in range(col_from, col_to):
-		var e := effetto(gs, c, "costruisci")
-		if e.is_empty(): continue
-		if not _condizioni(gs, player, data, level, bases, b, e.get("se", {})): continue
-		out.append([c, e])
+	var c := gs.colonna_attivata
+	if c < col_from or c >= col_to: return out
+	var e := effetto(gs, c, "costruisci")
+	if e.is_empty(): return out
+	if not _condizioni(gs, player, data, level, bases, b, e.get("se", {})): return out
+	out.append([c, e])
 	return out
 
 static func _condizioni(gs: GameState, player: int, data: Dictionary, level: int,
@@ -193,9 +202,9 @@ static func sconto_costruzione(gs: GameState, player: int, data: Dictionary, col
 
 # "Il primo edificio costruito qui ignora il requisito di terreno."
 static func ignora_terreno(gs: GameState, col_from: int, col_to: int) -> bool:
-	for c in range(col_from, col_to):
-		if bool(effetto(gs, c, "costruisci").get("ignora_terreno", false)): return true
-	return false
+	var c := gs.colonna_attivata
+	if c < col_from or c >= col_to: return false
+	return bool(effetto(gs, c, "costruisci").get("ignora_terreno", false))
 
 # A edificio posato: le tessere si girano e danno quel che danno. Lo sconto e'
 # gia' stato pagato nel preventivo.
@@ -240,10 +249,10 @@ static func dopo_costruzione(gs: GameState, player: int, b: Building, bases: Arr
 
 # ---- ristrutturare, potenziare, scheletro, seppellire ---------------------------
 static func _prima_su(gs: GameState, b: Building, quando: String) -> Array:
-	for c in range(b.col_from, b.col_to):
-		var e := effetto(gs, c, quando)
-		if not e.is_empty(): return [c, e]
-	return []
+	var c := gs.colonna_attivata
+	if not b.covers(c): return []
+	var e := effetto(gs, c, quando)
+	return [] if e.is_empty() else [c, e]
 
 static func sconto_ristrutturazione(gs: GameState, target: Building) -> Dictionary:
 	var ce := _prima_su(gs, target, "ristruttura")

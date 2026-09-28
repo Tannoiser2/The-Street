@@ -1642,15 +1642,28 @@ func _test_tessere_era() -> void:
 	EraRules.activate(gs, 0, col)
 	_eq("  la seconda attivazione non lo da' piu'", p.oro, dopo + int(TessereEra.produzione(gs, col)["oro"]))
 
-	# Uno sconto alla costruzione: "Luogo sacro", -1 Idea al primo Religione.
+	# Uno sconto alla costruzione: "Luogo sacro", -1 Idea al primo Religione,
+	# se il giocatore ha scelto questa colonna.
 	gs.tessere_colonna[col] = "te_luogo_sacro"
 	gs.tessere_usate[col] = false
+	gs.colonna_attivata = col + 1
+	_eq("Luogo sacro non sconta se la colonna scelta e' un'altra",
+		int(TessereEra.sconto_costruzione(gs, 0, CardDB.buildings["ed_dolmen"], col, 0, [])["idee"]), 0)
+	gs.colonna_attivata = col
 	var dolmen: Dictionary = CardDB.buildings["ed_dolmen"]
 	var s := TessereEra.sconto_costruzione(gs, 0, dolmen, col, 0, [])
 	_eq("Luogo sacro sconta 1 Idea al Dolmen", int(s["idee"]), 1)
 	var s2 := TessereEra.sconto_costruzione(gs, 0, CardDB.buildings["ed_capanne"], col, 0, [])
 	_eq("  e niente alle Capanne, che non sono Religione", int(s2["idee"]), 0)
 
+	# Un edificio largo fa scattare solo la tessera della colonna scelta.
+	gs.tessere_colonna[col] = "te_campi_arati"
+	gs.tessere_colonna[col + 1] = "te_campi_arati"
+	gs.tessere_usate[col] = false
+	gs.tessere_usate[col + 1] = false
+	var largo: Dictionary = CardDB.buildings["ed_circolo_di_pietre"]
+	_eq("un edificio su due colonne con due Campi arati sconta 1, non 2",
+		int(TessereEra.sconto_costruzione(gs, 0, largo, col, 0, [])["pietra"]), 1)
 	# I terreni non hanno piu' la loro regola: niente sconto della pianura.
 	_eq("con le tessere dell'era la pianura non sconta piu'",
 		BuildRules.pianura_discount(gs, CardDB.buildings["ed_circolo_di_pietre"], col), 0)
