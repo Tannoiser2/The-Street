@@ -99,7 +99,9 @@
     "personaggi_sepolti": false,
     "scheletro_potenziamento": true,
     "scheletro_conta": "sempre",
-    "tessere_una_volta_per_era": true
+    "tessere_una_volta_per_era": true,
+    "tessere_era": true,
+    "caselle": true
   },
   "terrains": [
     {
@@ -136,6 +138,11 @@
           "oro": 2,
           "idee": 0
         }
+      },
+      "produzione_base": {
+        "pietra": 1,
+        "oro": 0,
+        "idee": 0
       }
     },
     {
@@ -172,6 +179,11 @@
           "oro": 0,
           "idee": 0
         }
+      },
+      "produzione_base": {
+        "pietra": 0,
+        "oro": 1,
+        "idee": 0
       }
     },
     {
@@ -208,6 +220,11 @@
           "oro": 0,
           "idee": 0
         }
+      },
+      "produzione_base": {
+        "pietra": 1,
+        "oro": 0,
+        "idee": 0
       }
     },
     {
@@ -244,6 +261,11 @@
           "oro": 0,
           "idee": 3
         }
+      },
+      "produzione_base": {
+        "pietra": 0,
+        "oro": 0,
+        "idee": 1
       }
     }
   ],
@@ -521,7 +543,7 @@
         "religione"
       ],
       "terrain": null,
-      "width": 2,
+      "width": 1,
       "cost": {
         "pietra": 2,
         "oro": 0,
@@ -540,7 +562,8 @@
         "idee": 0
       },
       "exhaustible": 0,
-      "effect_text": "Lo Stonehenge della strada."
+      "effect_text": "Lo Stonehenge della strada.",
+      "depth": 2
     },
     {
       "id": "ed_villaggio_palizzato",
@@ -550,7 +573,7 @@
         "militare"
       ],
       "terrain": "pianura",
-      "width": 2,
+      "width": 1,
       "cost": {
         "pietra": 2,
         "oro": 0,
@@ -580,7 +603,8 @@
             "adjacent_to_self": true
           }
         }
-      ]
+      ],
+      "depth": 2
     },
     {
       "id": "ed_tumulo_funerario",
@@ -667,7 +691,7 @@
         "idee": 0
       },
       "exhaustible": 0,
-      "effect_text": "Colossale: 2 slot adiacenti (3 pagando +1 pietra; in 2 giocatori il terzo slot è vietato), almeno uno con fiume. Eco: +2 PV (lampo) se ancora in piedi nel Moderno.",
+      "effect_text": "Colossale: 3 slot adiacenti, almeno uno con fiume. Eco: +2 PV (lampo) se ancora in piedi nel Moderno.",
       "effects": [
         {
           "hook": "on_final_scoring",
@@ -924,7 +948,7 @@
         "civico"
       ],
       "terrain": "pianura",
-      "width": 2,
+      "width": 1,
       "cost": {
         "pietra": 3,
         "oro": 0,
@@ -942,7 +966,8 @@
         "cultura": 0,
         "idee": 0
       },
-      "exhaustible": 0
+      "exhaustible": 0,
+      "depth": 2
     },
     {
       "id": "ed_anfiteatro",
@@ -952,7 +977,7 @@
         "cultura"
       ],
       "terrain": null,
-      "width": 3,
+      "width": 2,
       "cost": {
         "pietra": 4,
         "oro": 0,
@@ -978,7 +1003,9 @@
           "op": "rule_override",
           "name": "colossal"
         }
-      ]
+      ],
+      "depth": 2,
+      "solo_su_rovine": true
     },
     {
       "id": "ed_castrum",
@@ -988,7 +1015,7 @@
         "militare"
       ],
       "terrain": "pianura",
-      "width": 2,
+      "width": 1,
       "cost": {
         "pietra": 3,
         "oro": 0,
@@ -1018,7 +1045,8 @@
             "same_column_as_self": true
           }
         }
-      ]
+      ],
+      "depth": 2
     },
     {
       "id": "ed_borgo",
@@ -1327,7 +1355,9 @@
         "cultura": 0,
         "idee": 0
       },
-      "exhaustible": 0
+      "exhaustible": 0,
+      "depth": 2,
+      "solo_su_rovine": true
     },
     {
       "id": "ed_abbazia",
@@ -1338,7 +1368,7 @@
         "commercio"
       ],
       "terrain": "bosco",
-      "width": 2,
+      "width": 1,
       "cost": {
         "pietra": 2,
         "oro": 1,
@@ -1357,7 +1387,8 @@
         "idee": 0
       },
       "exhaustible": 0,
-      "upgrade_slots": 2
+      "upgrade_slots": 2,
+      "depth": 2
     },
     {
       "id": "ed_arsenale",
@@ -1367,7 +1398,7 @@
         "militare"
       ],
       "terrain": "fiume",
-      "width": 2,
+      "width": 1,
       "cost": {
         "pietra": 3,
         "oro": 1,
@@ -1400,7 +1431,8 @@
             "adjacent_to_self": true
           }
         }
-      ]
+      ],
+      "depth": 2
     },
     {
       "id": "ed_bottega_dartista",
@@ -1699,7 +1731,7 @@
         "cultura"
       ],
       "terrain": null,
-      "width": 2,
+      "width": 1,
       "cost": {
         "pietra": 3,
         "oro": 1,
@@ -1718,7 +1750,8 @@
         "idee": 0
       },
       "exhaustible": 0,
-      "upgrade_slots": 3
+      "upgrade_slots": 3,
+      "depth": 2
     },
     {
       "id": "ed_fortezza_bastionata",
@@ -1747,7 +1780,9 @@
         "cultura": 0,
         "idee": 0
       },
-      "exhaustible": 0
+      "exhaustible": 0,
+      "depth": 2,
+      "solo_su_rovine": true
     },
     {
       "id": "ed_piazza_monumentale",
@@ -1757,7 +1792,7 @@
         "civico"
       ],
       "terrain": "pianura",
-      "width": 2,
+      "width": 1,
       "cost": {
         "pietra": 2,
         "oro": 1,
@@ -1788,7 +1823,8 @@
             "is_top": true
           }
         }
-      ]
+      ],
+      "depth": 2
     },
     {
       "id": "ed_fondazione_darte",
@@ -2066,7 +2102,9 @@
             "is_top": true
           }
         }
-      ]
+      ],
+      "depth": 3,
+      "solo_su_rovine": true
     },
     {
       "id": "ed_biblioteca",
@@ -2166,7 +2204,7 @@
         "idee": 0
       },
       "exhaustible": 0,
-      "effect_text": "Colossale: 2 slot adiacenti, si attiva da entrambe le colonne. Produce 2 oro. Richiede livello 1+.",
+      "effect_text": "Colossale: 3 slot adiacenti, si attiva da tutte le colonne. Produce 2 oro. Richiede livello 1+.",
       "effects": [
         {
           "hook": "on_build",
@@ -2183,7 +2221,7 @@
         "cultura"
       ],
       "terrain": null,
-      "width": 2,
+      "width": 1,
       "cost": {
         "pietra": 1,
         "oro": 0,
@@ -2215,7 +2253,8 @@
           },
           "times": 2
         }
-      ]
+      ],
+      "depth": 2
     },
     {
       "id": "ed_universita",
@@ -2226,7 +2265,7 @@
         "civico"
       ],
       "terrain": null,
-      "width": 2,
+      "width": 1,
       "cost": {
         "pietra": 2,
         "oro": 1,
@@ -2256,7 +2295,8 @@
             "owner": "self"
           }
         }
-      ]
+      ],
+      "depth": 2
     },
     {
       "id": "ed_casa_e1_p",
@@ -5541,6 +5581,680 @@
         },
         "min": 1
       }
+    }
+  ],
+  "tessere_era": [
+    {
+      "id": "te_campi_arati",
+      "name": "Campi arati",
+      "era": 1,
+      "produzione": {
+        "pietra": 1,
+        "oro": 0,
+        "idee": 0
+      },
+      "testo": "Il primo edificio da 2 o 3 caselle costruito qui costa 1 Costruzione in meno.",
+      "effetto": {
+        "quando": "costruisci",
+        "se": {
+          "larghezza_min": 2
+        },
+        "sconto": {
+          "pietra": 1
+        }
+      },
+      "copie": 2
+    },
+    {
+      "id": "te_radura",
+      "name": "Radura",
+      "era": 1,
+      "produzione": {
+        "pietra": 0,
+        "oro": 0,
+        "idee": 0
+      },
+      "testo": "Il primo edificio Civico costruito qui dà +1 Lampo.",
+      "effetto": {
+        "quando": "costruisci",
+        "se": {
+          "classi": [
+            "civico"
+          ]
+        },
+        "lampo": 1
+      },
+      "copie": 2
+    },
+    {
+      "id": "te_sentiero_dei_pastori",
+      "name": "Sentiero dei pastori",
+      "era": 1,
+      "produzione": {
+        "pietra": 0,
+        "oro": 0,
+        "idee": 0
+      },
+      "testo": "Chi attiva per primo prende +1 Denaro.",
+      "effetto": {
+        "quando": "attiva",
+        "guadagno": {
+          "oro": 1
+        }
+      },
+      "copie": 2
+    },
+    {
+      "id": "te_terra_di_nessuno",
+      "name": "Terra di nessuno",
+      "era": 1,
+      "produzione": {
+        "pietra": 0,
+        "oro": 0,
+        "idee": 0
+      },
+      "testo": "Il primo edificio costruito qui ignora il requisito di terreno.",
+      "effetto": {
+        "quando": "costruisci",
+        "ignora_terreno": true
+      },
+      "copie": 2
+    },
+    {
+      "id": "te_recinto_di_pietre",
+      "name": "Recinto di pietre",
+      "era": 1,
+      "produzione": {
+        "pietra": 1,
+        "oro": 0,
+        "idee": 0
+      },
+      "testo": "Il primo edificio costruito qui ha +1 resistenza fino a fine era.",
+      "effetto": {
+        "quando": "costruisci",
+        "resistenza_era": 1
+      },
+      "copie": 2
+    },
+    {
+      "id": "te_luogo_sacro",
+      "name": "Luogo sacro",
+      "era": 1,
+      "produzione": {
+        "pietra": 0,
+        "oro": 0,
+        "idee": 0
+      },
+      "testo": "Il primo edificio Religione costruito qui costa 1 Idea in meno.",
+      "effetto": {
+        "quando": "costruisci",
+        "se": {
+          "classi": [
+            "religione"
+          ]
+        },
+        "sconto": {
+          "idee": 1
+        }
+      },
+      "copie": 2
+    },
+    {
+      "id": "te_raccoglitori",
+      "name": "Raccoglitori",
+      "era": 1,
+      "produzione": {
+        "pietra": 1,
+        "oro": 0,
+        "idee": 0
+      },
+      "testo": "Chi attiva per primo può cambiare 1 Idea in 1 Costruzione.",
+      "effetto": {
+        "quando": "attiva",
+        "cambio": [
+          "idee",
+          "pietra"
+        ]
+      },
+      "copie": 2
+    },
+    {
+      "id": "te_centuriazione",
+      "name": "Centuriazione",
+      "era": 2,
+      "produzione": {
+        "pietra": 1,
+        "oro": 0,
+        "idee": 0
+      },
+      "testo": "Il primo edificio Ingegneria costruito qui costa 1 Costruzione in meno.",
+      "effetto": {
+        "quando": "costruisci",
+        "se": {
+          "classi": [
+            "ingegneria"
+          ]
+        },
+        "sconto": {
+          "pietra": 1
+        }
+      },
+      "copie": 2
+    },
+    {
+      "id": "te_via_consolare",
+      "name": "Via consolare",
+      "era": 2,
+      "produzione": {
+        "pietra": 1,
+        "oro": 0,
+        "idee": 0
+      },
+      "testo": "Chi attiva per primo prende anche la produzione di una colonna adiacente a scelta.",
+      "effetto": {
+        "quando": "attiva",
+        "produzione_adiacente": true
+      },
+      "copie": 2
+    },
+    {
+      "id": "te_statio",
+      "name": "Statio",
+      "era": 2,
+      "produzione": {
+        "pietra": 1,
+        "oro": 0,
+        "idee": 0
+      },
+      "testo": "Il primo edificio Commercio costruito qui dà +1 Denaro a chi lo costruisce.",
+      "effetto": {
+        "quando": "costruisci",
+        "se": {
+          "classi": [
+            "commercio"
+          ]
+        },
+        "guadagno": {
+          "oro": 1
+        }
+      },
+      "copie": 2
+    },
+    {
+      "id": "te_cambiavalute",
+      "name": "Cambiavalute",
+      "era": 2,
+      "produzione": {
+        "pietra": 1,
+        "oro": 0,
+        "idee": 0
+      },
+      "testo": "Chi attiva per primo può cambiare 1 Costruzione in 1 Denaro.",
+      "effetto": {
+        "quando": "attiva",
+        "cambio": [
+          "pietra",
+          "oro"
+        ]
+      },
+      "copie": 2
+    },
+    {
+      "id": "te_cantiere",
+      "name": "Cantiere",
+      "era": 2,
+      "produzione": {
+        "pietra": 1,
+        "oro": 0,
+        "idee": 0
+      },
+      "testo": "Il primo edificio costruito qui sopra un altro edificio costa 1 Costruzione in meno.",
+      "effetto": {
+        "quando": "costruisci",
+        "se": {
+          "sopra": true
+        },
+        "sconto": {
+          "pietra": 1
+        }
+      },
+      "copie": 2
+    },
+    {
+      "id": "te_restauratori",
+      "name": "Restauratori",
+      "era": 2,
+      "produzione": {
+        "pietra": 0,
+        "oro": 0,
+        "idee": 1
+      },
+      "testo": "Una ristrutturazione di un edificio qui costa 1 Costruzione in meno.",
+      "effetto": {
+        "quando": "ristruttura",
+        "sconto": {
+          "pietra": 1
+        }
+      },
+      "copie": 2
+    },
+    {
+      "id": "te_necropoli",
+      "name": "Necropoli",
+      "era": 2,
+      "produzione": {
+        "pietra": 0,
+        "oro": 0,
+        "idee": 1
+      },
+      "testo": "Il primo edificio costruito qui ha Scavo +1, per sempre.",
+      "effetto": {
+        "quando": "costruisci",
+        "scavo": 1
+      },
+      "copie": 2
+    },
+    {
+      "id": "te_fiera",
+      "name": "Fiera",
+      "era": 3,
+      "produzione": {
+        "pietra": 0,
+        "oro": 0,
+        "idee": 0
+      },
+      "testo": "Chi attiva per primo prende +1 Denaro per ogni altro giocatore con un edificio intatto qui.",
+      "effetto": {
+        "quando": "attiva",
+        "per_altrui_intatti": "oro"
+      },
+      "copie": 2
+    },
+    {
+      "id": "te_borgo_franco",
+      "name": "Borgo franco",
+      "era": 3,
+      "produzione": {
+        "pietra": 0,
+        "oro": 0,
+        "idee": 0
+      },
+      "testo": "Il primo edificio costruito qui sopra una rovina altrui costa 1 Costruzione in meno.",
+      "effetto": {
+        "quando": "costruisci",
+        "se": {
+          "su_rovina_altrui": true
+        },
+        "sconto": {
+          "pietra": 1
+        }
+      },
+      "copie": 2
+    },
+    {
+      "id": "te_scuola_dei_mastri",
+      "name": "Scuola dei mastri",
+      "era": 3,
+      "produzione": {
+        "pietra": 0,
+        "oro": 0,
+        "idee": 1
+      },
+      "testo": "Chi attiva per primo prende +1 Idea per ogni edificio Ingegneria intatto qui.",
+      "effetto": {
+        "quando": "attiva",
+        "per_classe_intatti": {
+          "classi": [
+            "ingegneria"
+          ],
+          "risorsa": "idee"
+        }
+      },
+      "copie": 2
+    },
+    {
+      "id": "te_mura",
+      "name": "Mura",
+      "era": 3,
+      "produzione": {
+        "pietra": 0,
+        "oro": 0,
+        "idee": 0
+      },
+      "testo": "Il primo edificio Militare costruito qui ha +2 resistenza fino a fine era.",
+      "effetto": {
+        "quando": "costruisci",
+        "se": {
+          "classi": [
+            "militare"
+          ]
+        },
+        "resistenza_era": 2
+      },
+      "copie": 2
+    },
+    {
+      "id": "te_rocca",
+      "name": "Rocca",
+      "era": 3,
+      "produzione": {
+        "pietra": 0,
+        "oro": 0,
+        "idee": 0
+      },
+      "testo": "Il primo edificio costruito qui è protetto all'evento di fine era.",
+      "effetto": {
+        "quando": "costruisci",
+        "immune_evento": true
+      },
+      "copie": 2
+    },
+    {
+      "id": "te_eremo",
+      "name": "Eremo",
+      "era": 3,
+      "produzione": {
+        "pietra": 0,
+        "oro": 0,
+        "idee": 1
+      },
+      "testo": "Il primo edificio Religione o Cultura costruito qui dà +2 Lampo.",
+      "effetto": {
+        "quando": "costruisci",
+        "se": {
+          "classi": [
+            "religione",
+            "cultura"
+          ]
+        },
+        "lampo": 2
+      },
+      "copie": 2
+    },
+    {
+      "id": "te_spoglio_delle_rovine",
+      "name": "Spoglio delle rovine",
+      "era": 3,
+      "produzione": {
+        "pietra": 0,
+        "oro": 0,
+        "idee": 0
+      },
+      "testo": "Chi seppellisce per primo un edificio qui prende +1 al premio di scavo.",
+      "effetto": {
+        "quando": "seppellisci",
+        "premio": 1
+      },
+      "copie": 2
+    },
+    {
+      "id": "te_villa_di_campagna",
+      "name": "Villa di campagna",
+      "era": 4,
+      "produzione": {
+        "pietra": 0,
+        "oro": 1,
+        "idee": 0
+      },
+      "testo": "Il primo edificio Cultura costruito qui costa 1 Denaro in meno.",
+      "effetto": {
+        "quando": "costruisci",
+        "se": {
+          "classi": [
+            "cultura"
+          ]
+        },
+        "sconto": {
+          "oro": 1
+        }
+      },
+      "copie": 2
+    },
+    {
+      "id": "te_piazza_del_mercato",
+      "name": "Piazza del mercato",
+      "era": 4,
+      "produzione": {
+        "pietra": 0,
+        "oro": 0,
+        "idee": 0
+      },
+      "testo": "Chi attiva per primo, se ha meno punti di tutti, prende +2 Denaro.",
+      "effetto": {
+        "quando": "attiva",
+        "se": {
+          "ultimo_in_punti": true
+        },
+        "guadagno": {
+          "oro": 2
+        }
+      },
+      "copie": 2
+    },
+    {
+      "id": "te_bottega",
+      "name": "Bottega",
+      "era": 4,
+      "produzione": {
+        "pietra": 0,
+        "oro": 0,
+        "idee": 1
+      },
+      "testo": "Chi attiva per primo prende 1 risorsa a scelta.",
+      "effetto": {
+        "quando": "attiva",
+        "a_scelta": 1
+      },
+      "copie": 2
+    },
+    {
+      "id": "te_fondaco",
+      "name": "Fondaco",
+      "era": 4,
+      "produzione": {
+        "pietra": 0,
+        "oro": 1,
+        "idee": 0
+      },
+      "testo": "Il primo edificio Commercio costruito qui produce subito, una volta.",
+      "effetto": {
+        "quando": "costruisci",
+        "se": {
+          "classi": [
+            "commercio"
+          ]
+        },
+        "produce_subito": true
+      },
+      "copie": 2
+    },
+    {
+      "id": "te_belvedere",
+      "name": "Belvedere",
+      "era": 4,
+      "produzione": {
+        "pietra": 0,
+        "oro": 0,
+        "idee": 1
+      },
+      "testo": "Il primo edificio costruito qui al livello 3 o più dà +2 Lampo.",
+      "effetto": {
+        "quando": "costruisci",
+        "se": {
+          "livello_min": 3
+        },
+        "lampo": 2
+      },
+      "copie": 2
+    },
+    {
+      "id": "te_giardino_all_italiana",
+      "name": "Giardino all'italiana",
+      "era": 4,
+      "produzione": {
+        "pietra": 0,
+        "oro": 0,
+        "idee": 1
+      },
+      "testo": "Il primo edificio ristrutturato qui torna in piedi con +1 resistenza.",
+      "effetto": {
+        "quando": "ristruttura",
+        "resistenza": 1
+      },
+      "copie": 2
+    },
+    {
+      "id": "te_cappella_di_famiglia",
+      "name": "Cappella di famiglia",
+      "era": 4,
+      "produzione": {
+        "pietra": 0,
+        "oro": 0,
+        "idee": 1
+      },
+      "testo": "Il primo scheletro lasciato qui vale +1 punto a fine partita.",
+      "effetto": {
+        "quando": "scheletro",
+        "punti": 1
+      },
+      "copie": 2
+    },
+    {
+      "id": "te_periferia",
+      "name": "Periferia",
+      "era": 5,
+      "produzione": {
+        "pietra": 0,
+        "oro": 1,
+        "idee": 0
+      },
+      "testo": "Il primo edificio Civico costruito qui costa 1 Idea in meno.",
+      "effetto": {
+        "quando": "costruisci",
+        "se": {
+          "classi": [
+            "civico"
+          ]
+        },
+        "sconto": {
+          "idee": 1
+        }
+      },
+      "copie": 2
+    },
+    {
+      "id": "te_zona_industriale",
+      "name": "Zona industriale",
+      "era": 5,
+      "produzione": {
+        "pietra": 0,
+        "oro": 0,
+        "idee": 0
+      },
+      "testo": "Chi attiva per primo prende +1 Denaro per ogni edificio Ingegneria o Commercio intatto qui.",
+      "effetto": {
+        "quando": "attiva",
+        "per_classe_intatti": {
+          "classi": [
+            "ingegneria",
+            "commercio"
+          ],
+          "risorsa": "oro"
+        }
+      },
+      "copie": 2
+    },
+    {
+      "id": "te_isolato",
+      "name": "Isolato",
+      "era": 5,
+      "produzione": {
+        "pietra": 0,
+        "oro": 0,
+        "idee": 1
+      },
+      "testo": "Il primo edificio costruito qui dà +1 Lampo per ogni edificio altrui intatto qui.",
+      "effetto": {
+        "quando": "costruisci",
+        "lampo_per_altrui": 1
+      },
+      "copie": 2
+    },
+    {
+      "id": "te_scuola_politecnica",
+      "name": "Scuola politecnica",
+      "era": 5,
+      "produzione": {
+        "pietra": 0,
+        "oro": 1,
+        "idee": 0
+      },
+      "testo": "Il primo edificio Ingegneria costruito qui costa 1 Denaro in meno.",
+      "effetto": {
+        "quando": "costruisci",
+        "se": {
+          "classi": [
+            "ingegneria"
+          ]
+        },
+        "sconto": {
+          "oro": 1
+        }
+      },
+      "copie": 2
+    },
+    {
+      "id": "te_quartiere_alto",
+      "name": "Quartiere alto",
+      "era": 5,
+      "produzione": {
+        "pietra": 0,
+        "oro": 0,
+        "idee": 1
+      },
+      "testo": "Il primo edificio costruito qui, se diventa il più alto della strada, dà +3 Lampo.",
+      "effetto": {
+        "quando": "costruisci",
+        "se": {
+          "il_piu_alto": true
+        },
+        "lampo": 3
+      },
+      "copie": 2
+    },
+    {
+      "id": "te_parco_pubblico",
+      "name": "Parco pubblico",
+      "era": 5,
+      "produzione": {
+        "pietra": 0,
+        "oro": 0,
+        "idee": 1
+      },
+      "testo": "A fine partita chi ha l'edificio in cima a questa colonna prende +2 punti.",
+      "effetto": {
+        "quando": "fine_partita",
+        "cima_punti": 2
+      },
+      "copie": 2
+    },
+    {
+      "id": "te_orto_botanico",
+      "name": "Orto botanico",
+      "era": 5,
+      "produzione": {
+        "pietra": 0,
+        "oro": 0,
+        "idee": 1
+      },
+      "testo": "Il primo potenziamento messo su un edificio qui costa 1 Idea in meno.",
+      "effetto": {
+        "quando": "potenzia",
+        "sconto": {
+          "idee": 1
+        }
+      },
+      "copie": 2
     }
   ]
 }

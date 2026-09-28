@@ -119,6 +119,24 @@ func binario_effettivo() -> int:
 func width() -> int:
 	return col_to - col_from
 
+# LE CASELLE (registro 122): con la costante `caselle` la strada e' una griglia
+# colonna x binario, e ogni casella ha la sua pila. Un edificio occupa
+# `depth` binari a partire da `binario`, a qualunque quota: anche chi sta
+# sopra ha un binario, quello delle caselle su cui poggia. Senza la costante
+# (la v1.5) la profondita' e' sempre 1 e nulla cambia.
+func profondita() -> int:
+	return int(data.get("depth", 1))
+
+func copre_binario(r: int) -> bool:
+	var da := binario_effettivo()
+	return r >= da and r < da + profondita()
+
+func copre_casella(col: int, r: int) -> bool:
+	return covers(col) and copre_binario(r)
+
+func solo_su_rovine() -> bool:
+	return bool(data.get("solo_su_rovine", false))
+
 func covers(col: int) -> bool:
 	return col >= col_from and col < col_to
 

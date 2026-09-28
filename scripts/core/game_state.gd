@@ -41,6 +41,11 @@ var draft_pending: Array[int] = []
 # LE TESSERE USATE NELL'ERA (v2, registro 100): l'effetto di ogni tessera vale
 # una volta per era; qui, colonna per colonna, se e' gia' scattato.
 var tessere_usate: Array[bool] = []
+# LE TESSERE DELL'ERA (v2, registro 121): l'id della tessera posata su ogni
+# colonna in quest'era, "" se le tessere dell'era sono spente. E quante volte
+# ciascuna e' scattata in partita: serve solo alle misure.
+var tessere_colonna: Array[String] = []
+var tessere_scattate: Dictionary = {}
 var next_uid: int = 1
 # LA COLONNA ATTIVATA IN QUESTO TURNO e l'edificio che il lavoratore abita.
 # Stavano nel controller, e sembravano dettagli del comando; invece decidono
@@ -89,6 +94,8 @@ func duplica() -> GameState:
 	g.pending_choice = pending_choice.duplicate(true)
 	g.draft_pending = draft_pending.duplicate()
 	g.tessere_usate = tessere_usate.duplicate()
+	g.tessere_colonna = tessere_colonna.duplicate()
+	g.tessere_scattate = tessere_scattate.duplicate()
 	g.next_uid = next_uid
 	g.colonna_attivata = colonna_attivata
 	g.protetto_uid = protetto_uid

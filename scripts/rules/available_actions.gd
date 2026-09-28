@@ -157,9 +157,10 @@ static func piazzamenti(gs: GameState, player: int, col: int,
 	if not CardDB.buildings.has(card_id): return out
 	var d: Dictionary = CardDB.buildings[card_id]
 	for c in _partenze(gs, col, int(d["width"])):
-		for sopra in [false, true]:
-			var q = BuildRules.quote_above(gs, player, d, c) if sopra \
-				else BuildRules.quote_rail(gs, player, d, c)
+		for pr in _prove(d):
+			var sopra: bool = pr[0]
+			var q = BuildRules.quote_above(gs, player, d, c, null, pr[1]) if sopra \
+				else BuildRules.quote_rail(gs, player, d, c, null, pr[1])
 			if not q.legal: continue
 			# Il livello viene dal preventivo: serve a disegnare il posto
 			# acceso ALLA SUA QUOTA, cosi' "costruire sopra" e' un riquadro
@@ -175,7 +176,18 @@ static func piazzamenti(gs: GameState, player: int, col: int,
 			# suo i conti delle regole.
 			out.append(_voce("costruisci", "Costruisci %s %s" % [d["name"], dove], q,
 				{"card_id": card_id, "col_from": c, "above": sopra, "level": q.level,
-				"spiana": spianati, "terrapieni": q.terrapieno_cols.size()}))
+				"binario": q.binario, "spiana": spianati, "terrapieni": q.terrapieno_cols.size()}))
+	return out
+
+# Le prove da fare per accendere i posti: [sopra?, binario]. Senza caselle il
+# binario lo sceglie la regola (0); con le caselle (registro 122) si accende
+# ogni binario in cui la carta sta, a terra e sopra.
+static func _prove(d: Dictionary) -> Array:
+	if not Grid.caselle(): return [[false, 0], [true, 0]]
+	var out := []
+	for r in range(1, int(CardDB.constants["rails"]) - int(d.get("depth", 1)) + 2):
+		out.append([false, r])
+		out.append([true, r])
 	return out
 
 # Gli edifici che possono ricevere un potenziamento: uno per bersaglio.
@@ -226,12 +238,13 @@ static func piazzamenti_ovunque(gs: GameState, player: int, card_id: String) -> 
 	var d: Dictionary = CardDB.buildings[card_id]
 	var w := int(d["width"])
 	for c in range(0, gs.grid.n_cols - w + 1):
-		for sopra in [false, true]:
-			var q = BuildRules.quote_above(gs, player, d, c) if sopra \
-				else BuildRules.quote_rail(gs, player, d, c)
+		for pr in _prove(d):
+			var sopra: bool = pr[0]
+			var q = BuildRules.quote_above(gs, player, d, c, null, pr[1]) if sopra \
+				else BuildRules.quote_rail(gs, player, d, c, null, pr[1])
 			if not q.legal: continue
 			out.append(_voce("costruisci", "Costruisci %s in colonna %d%s" % [d["name"], c, " sopra" if sopra else ""],
-				q, {"card_id": card_id, "col_from": c, "above": sopra, "level": q.level}))
+				q, {"card_id": card_id, "col_from": c, "above": sopra, "level": q.level, "binario": q.binario}))
 	return out
 
 static func potenziamenti_ovunque(gs: GameState, player: int) -> Array[Voce]:

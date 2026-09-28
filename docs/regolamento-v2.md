@@ -41,13 +41,15 @@ città; ma uccide ciò che sta sotto.
 Il tabellone è una griglia di 5 binari per una fila di colonne di terreno: 5 colonne in due
 giocatori, 7 in tre, 9 in quattro. Ogni casella è un posto dove può stare un edificio.
 
-Ogni edificio è **una sagoma sola**, che porta tutto: costo, produzione, resistenza, Rendita,
-Lampo, Scavo, classe, terreno richiesto. Innestata in una basetta del vostro colore va sul
-tabellone; girata mostra il lato rovina, con il valore di Scavo in vista.
+Ogni edificio è **una carta sola**, che porta tutto: costo, produzione, resistenza, Rendita,
+Lampo, Scavo, classe, terreno richiesto. Incollata su un cartone di circa 15 mm del vostro
+colore, si stende sulle caselle che occupa; chi costruisce sopra la impila. Quando va in
+rovina si gira: il retro è la stessa carta in bianco e nero, con il valore di Scavo in vista.
 
 | componente | quantità |
 |---|--:|
-| Tessere terreno | 11 (4 pianura, 2 fiume, 2 collina, 3 bosco) |
+| Tessere terreno | 10 (3 pianura, 2 fiume, 3 collina, 2 bosco) |
+| Tessere dell'era | 70 (7 per era, in due copie) |
 | Sagome edificio | 60 (12 per era) |
 | Case della riserva | 28 (3 tipi per era, 2 nell'era Moderna, 2 copie ciascuno) |
 | Personaggi | 25 (5 per era) + 4 Dinastia |
@@ -85,7 +87,8 @@ una per carta. I costi stanno su ogni sagoma e in `carte-v2.md`.
 Mescolate le tessere terreno e pescatene a caso, in questa misura: in due giocatori 2 pianura,
 1 fiume, 1 collina, 1 bosco; in tre 2 pianura, 2 fiume, 1 collina, 2 bosco; in quattro 3
 pianura, 2 fiume, 2 collina, 2 bosco. Disponetele in fila, nell'ordine in cui escono: quella è
-la strada. Ogni colonna ha un solo terreno, valido per tutte le ere.
+la strada. Ogni colonna ha un solo terreno, valido per tutte le ere. Separate le tessere
+dell'era per era: a inizio di ogni era mescolate le 14 dell'era e posatene una su ogni colonna.
 
 Ogni giocatore prende 4 lavoratori, le basette e i gettoni del proprio colore e 2 Costruzione. In
 due giocatori, il secondo riceve anche 1 Denaro.
@@ -112,22 +115,33 @@ Mescolate i sei eventi di ciascuna era e rivelate quello dell'Era 1: tutti devon
 anticipo cosa arriverà alla fine. Rivelate tanti Monumenti celebri quanti sono i giocatori meno
 uno, e distribuite 2 carte Eredità a testa: ognuno ne tiene una segreta e scarta l'altra.
 
-## Le tessere — Quattro paesaggi, una produzione per era, un effetto per era
+## Le tessere — Quattro paesaggi e una tessera per era
 
-Ogni tessera produce per chi la attiva, e quanto dipende dall'era: la Costruzione è tanta
-all'inizio e cala, il Denaro è poco all'inizio e cresce, le Idee crescono sempre.
+Ogni colonna ha **due tessere**. La **tessera terreno** è lunga quanto la colonna, porta i
+binari e non cambia mai: dà a chi attiva la colonna la sua **produzione di base**.
 
-| tessera | era 1 | era 2 | era 3 | era 4 | era 5 | una volta per era |
-|---|:-:|:-:|:-:|:-:|:-:|---|
-| Pianura | 1 C | 1 C + 1 D | 1 D | 2 D | 2 D | un edificio da 2 o 3 caselle costruito qui costa 1 Costruzione in meno |
-| Fiume | 2 C | 2 C | 1 C | 1 C | 1 C | +1 Denaro a chi la attiva |
-| Collina | 2 C | 2 C | 1 C | 1 C | 1 C | il primo edificio costruito qui ha +1 resistenza fino a fine era |
-| Bosco | 1 I | 2 I | 2 I | 3 I | 3 I | una ristrutturazione di un edificio qui costa 1 Costruzione in meno |
+| terreno | produzione di base |
+|---|---|
+| Pianura | 1 Costruzione |
+| Fiume | 1 Denaro |
+| Collina | 1 Costruzione |
+| Bosco | 1 Idea |
 
-**L'effetto scatta alla prima occasione dell'era, poi la tessera si gira** e per quell'era non
-vale più. A inizio era si rigirano tutte. Per la pianura e il bosco l'occasione è la prima
-costruzione o ristrutturazione che ne ha diritto; per il fiume la prima attivazione; per la
-collina il primo edificio costruito nella colonna.
+Sopra, nella casella in fondo alla tessera terreno, si posa ogni era una **tessera dell'era**.
+Ogni era ne ha 14 (7 diverse, in due copie); a inizio era si mescolano e se ne posa una su ogni
+colonna, sopra quella dell'era prima. Le tessere dell'era non sono legate al terreno: qualunque
+tessera può finire su qualunque colonna. Ognuna aggiunge da zero a una icona di **produzione**,
+che vale a ogni attivazione per tutta l'era, e un **effetto**.
+
+**L'effetto scatta una volta per era, alla prima occasione, poi la tessera si gira** e per
+quell'era non vale più. Scatta **solo per la colonna che avete scelto**, cioè dove avete messo il
+lavoratore: "chi attiva per primo" è il primo che piazza un lavoratore qui; "il primo edificio
+costruito qui" è il primo costruito, ristrutturato o potenziato scegliendo questa colonna, e un
+edificio largo che copre anche altre colonne fa scattare solo la tessera della colonna scelta.
+Un effetto che non darebbe niente (per esempio la Fiera quando nella colonna ci siete solo voi)
+non fa girare la tessera.
+
+Le 35 tessere dell'era, con la produzione e l'effetto di ciascuna, sono in `docs/carte-v2.md`.
 
 I requisiti di terreno stampati sulle sagome sono morbidi per pianura, collina e bosco: basta che
 il terreno richiesto sia nella colonna dove costruite o in una adiacente. Il requisito fiume è
@@ -160,7 +174,8 @@ potete prenderle. I Personaggi dell'era Moderna hanno abilità che si pagano all
 sulla colonna nuda. Quell'edificio riceve **+2 resistenza fino alla fine dell'era**: un edificio
 abitato resiste, uno abbandonato no. Al massimo un vostro lavoratore per colonna.
 
-**2. Attiva la colonna.** La tessera produce per voi quanto dice la sua riga dell'era. Poi ogni
+**2. Attiva la colonna.** Incassate la produzione di base del terreno più quella della tessera
+dell'era, e se la tessera dell'era ha un effetto all'attivazione ancora da usare, scatta. Poi ogni
 edificio in piedi in quella colonna — a qualsiasi binario e livello, di chiunque sia — paga la
 propria produzione al proprio proprietario: Costruzione, Denaro, Idee, o PV subito. Attivare una
 colonna trafficata arricchisce anche gli avversari: è il prezzo di andare dove la città è viva.
@@ -181,26 +196,29 @@ gira: per quell'era il Centro ha già dato. A inizio era si rigirano tutti.
 Costruire significa pagare il costo della sagoma e metterla sul tabellone, nella colonna che avete
 attivato o in una adiacente. Si costruiscono solo edifici dell'era corrente, dal mercato o dalla
 riserva delle case.
-L'edificio occupa 1, 2 o 3 caselle contigue secondo la sua taglia. Ci sono due modi.
+L'edificio occupa le caselle disegnate sulla sua carta: una, due o tre colonne affiancate, e
+uno, due o tre binari in profondità (le carte quadrate sono una colonna per due binari, i 2x2
+due colonne per due binari, il Grattacielo una colonna per tre binari). Ci sono due modi.
 
 ### Costruire a terra
 
-Le caselle libere della strada. I binari non appartengono alle ere: **si riempie dal fondo**, e
-un edificio prende il binario più lontano che ha posto libero in tutte le sue colonne. È la
-costruzione normale, a livello 0, la più economica. Il suolo però è uno solo per tutta la
+Le caselle libere della strada. I binari non appartengono alle ere: **scegliete voi il
+binario**, purché tutte le caselle della carta siano libere e dentro la tessera. Per comodità
+si comincia dal fondo. È la costruzione normale, a livello 0, la più economica. Il suolo però è uno solo per tutta la
 partita: quando è pieno, si sale.
 
 ### Costruire sopra
 
-Invece del suolo, poggiate l'edificio su ciò che esiste già nelle colonne scelte. Ogni colonna
-della vostra impronta deve offrire una base valida, e almeno una deve averla davvero:
+Invece del suolo, poggiate l'edificio su ciò che esiste già nelle caselle scelte. Ogni
+casella ha la sua pila: conta la carta in cima a quella casella. Ogni casella della vostra
+impronta deve offrire una base valida, e almeno una deve averla davvero:
 
 | cosa c'è sotto | cosa succede |
 |---|---|
 | Una rovina, di chiunque | Base gratuita, e vi sconta 1 Costruzione (le macerie sono materiale) |
 | Un vostro edificio in piedi | Lo spianate: vi sconta in Costruzione metà della sua resistenza, arrotondata per eccesso, ma il suo Scavo vale 0 |
 | Un edificio in piedi altrui | Impossibile. Blocca finché è vivo |
-| Terreno nudo | Terrapieno: +1 Costruzione per ogni colonna priva di base, una volta sola qualunque sia la quota |
+| Terreno nudo | Terrapieno: +1 Costruzione per ogni casella priva di base, una volta sola qualunque sia la quota |
 
 Il nuovo edificio sta tutto a un livello solo, pari al più alto delle basi più uno. Una colonna
 può salire di un solo livello per era: un edificio da 2 o 3 caselle si costruisce sopra solo se
@@ -297,7 +315,8 @@ attraversano i secoli.
 
 **Il ricambio**: i lavoratori tornano ai proprietari, i Personaggi dell'era e le case avanzate
 si scartano, le
-tessere e i cartellini della Prosperità si rigirano, si scartano le file vecchie, si aprono
+tessere dell'era nuova si posano sulle colonne (una per colonna, dalle 14 dell'era), i
+cartellini della Prosperità si rigirano, si scartano le file vecchie, si aprono
 quelle dell'era nuova e si rivela il nuovo evento.
 
 ## Fine partita — Come si contano i punti
@@ -324,10 +343,17 @@ chi ha più risorse residue.
 
 ### Colossali
 
-Tre edifici — Anfiteatro, Acquedotto e Stazione — occupano tre caselle e si costruiscono con una
-sola azione. Contano come strato in tutte le colonne che toccano, si attivano da ciascuna di
-esse, e se crollano vanno in rovina ovunque. Valgono il proprio Scavo una sola volta, e solo
-quando l'intera proiezione è coperta.
+Acquedotto e Stazione occupano tre colonne affiancate; Anfiteatro (il Colosseo), Castello e
+Fortezza bastionata sono 2x2, quattro caselle; il Grattacielo è una colonna per tre binari. Si
+costruiscono con una sola azione, contano come strato in tutte le caselle che toccano, si
+attivano da ciascuna delle loro colonne, e se crollano vanno in rovina ovunque. Valgono il
+proprio Scavo una sola volta, e solo quando l'intera proiezione è coperta.
+
+**I 2x2 e il Grattacielo non si costruiscono mai a terra**, solo sopra, con le regole di
+sempre: almeno una base vera (una rovina di chiunque, o un vostro edificio attivo che spianate
+e diventa rovina), terrapieno sulle caselle vuote, e nessun edificio attivo altrui sotto. Le
+rovine che coprono per intero vengono sepolte e diventano scavo. E sopra di loro non si
+costruisce nulla finché non sono a loro volta in rovina.
 
 ### Costo flessibile ◈
 
@@ -379,7 +405,8 @@ comunque finisca l'edificio. Perdete lo Scavo dell'edificio, non il gettone.
 altri. Quello che resta sotto l'edificio è il gettone scheletro.
 
 **Posso attivare una colonna dove non ho nulla?** Sì, e talvolta conviene: incassate la
-produzione della tessera e, se il fiume non è ancora girato, il suo Denaro. La Prosperità la
+produzione di base e quella della tessera dell'era, e il suo effetto se è "chi attiva per
+primo" e non è ancora girato. La Prosperità la
 prendete solo se avete un edificio lì.
 
 **Cosa succede se nessuno può più costruire?** Nulla di speciale: si continua a piazzare

@@ -43,6 +43,8 @@ func _ready() -> void:
 	_run("l'incasso al passaggio nel turno v1 (registro 109)", _test_passa_incasso)
 	_run("i Monumenti rivelati e le sagome da quattro giocatori (registro 110)", _test_monumenti_e_sagome_in_piu)
 	_run("v2: le case della riserva, sempre disponibili (registro 116)", _test_riserva)
+	_run("v2: le tessere dell'era (registro 121)", _test_tessere_era)
+	_run("v2: le caselle, il binario scelto e le carte profonde (registro 122)", _test_caselle)
 	print("\n%d superati, %d falliti" % [_passed, _failed])
 	get_tree().quit(0 if _failed == 0 else 1)
 
@@ -1416,6 +1418,9 @@ func _test_tre_carte_v2() -> void:
 func _test_tessere_v2() -> void:
 	if not FileAccess.file_exists("res://data/cards-v2.json"): return
 	CardDB.load_db("res://data/cards-v2.json")
+	# Le regole dei terreni una volta per era (registro 100) valgono con le
+	# tessere dell'era spente (registro 121): si provano cosi'.
+	CardDB.constants["tessere_era"] = false
 	_ok("il file v2 accende le tessere una volta per era", bool(CardDB.constants.get("tessere_una_volta_per_era", false)))
 	_ok("  e il disturbo non c'e' piu'", not CardDB.constants.has("disturbo_vp"))
 	var ctl := _game(3, 990)
@@ -1443,7 +1448,7 @@ func _test_tessere_v2() -> void:
 	_eq("  e incassa solo la base", p2.oro, oro2 + int(base["oro"]))
 	ctl.pass_action()
 	# La pianura: lo sconto alla carta larga vale finche' la tessera e' da usare.
-	var larga: Dictionary = CardDB.buildings["ed_villaggio_palizzato"]
+	var larga: Dictionary = CardDB.buildings["ed_tumulo_funerario"]
 	_eq("una carta larga in pianura sconta 1", BuildRules.pianura_discount(gs, larga, pianura), 1)
 	gs.tessere_usate[pianura] = true
 	_eq("  con la tessera girata non sconta", BuildRules.pianura_discount(gs, larga, pianura), 0)
@@ -1588,4 +1593,174 @@ func _test_riserva() -> void:
 	if gs.era == 2:
 		_eq("nell'era 2 la riserva e' di nuovo piena", gs.riserva.size(), 6)
 		_ok("  con le case dell'era 2", gs.riserva.all(func(id): return int(CardDB.buildings[id]["era"]) == 2))
+	CardDB.load_db(CardDB.DB_PATH)
+
+
+# Registro 121: il terreno ha una produzione di base fissa; a inizio era su
+# ogni colonna si posa una tessera dell'era, dalle 14 copie dell'era, che
+# aggiunge la sua produzione e un effetto una volta per era. Nella v1.5 non
+# c'e' niente di tutto questo.
+func _test_tessere_era() -> void:
+	var g1 := _game(3, 51).gs
+	_ok("nella v1.5 nessuna tessera dell'era", g1.tessere_colonna.is_empty())
+	if not FileAccess.file_exists("res://data/cards-v2.json"): return
+	CardDB.load_db("res://data/cards-v2.json")
+	_eq("35 tessere dell'era nel file v2", CardDB.tessere_era.size(), 35)
+	var ctl := _game(4, 51)
+	var gs := ctl.gs
+	while not gs.pending_choice.is_empty():
+		ctl.choose(int((gs.pending_choice["options"] as Array)[0]))
+	_eq("a quattro, una tessera per ognuna delle 9 colonne", gs.tessere_colonna.size(), gs.grid.n_cols)
+	var dell_era := true
+	var copie := {}
+	for id in gs.tessere_colonna:
+		if int(CardDB.tessere_era[id]["era"]) != 1: dell_era = false
+		copie[id] = int(copie.get(id, 0)) + 1
+	_ok("  tutte dell'era 1", dell_era)
+	_ok("  nessuna piu' di due volte", copie.values().all(func(n): return int(n) <= 2))
+
+	# La produzione: base del terreno + tessera.
+	var col := 0
+	var terr: String = ["pianura", "fiume", "collina", "bosco"][gs.grid.terrains[col]]
+	var base: Dictionary = CardDB.terrains[terr]["produzione_base"]
+	var extra: Dictionary = CardDB.tessere_era[gs.tessere_colonna[col]]["produzione"]
+	var pr := TessereEra.produzione(gs, col)
+	_eq("la colonna produce la base del terreno piu' la tessera",
+		[pr["pietra"], pr["oro"], pr["idee"]],
+		[int(base["pietra"]) + int(extra["pietra"]), int(base["oro"]) + int(extra["oro"]),
+			int(base["idee"]) + int(extra["idee"])])
+
+	# Un effetto all'attivazione: "Sentiero dei pastori", +1 Denaro, una volta.
+	gs.tessere_colonna[col] = "te_sentiero_dei_pastori"
+	gs.tessere_usate[col] = false
+	var p: PlayerState = gs.players[0]
+	var prima := p.oro
+	EraRules.activate(gs, 0, col)
+	var atteso := prima + int(TessereEra.produzione(gs, col)["oro"]) + 1
+	_eq("Sentiero dei pastori: +1 Denaro a chi attiva per primo", p.oro, atteso)
+	_ok("  e la tessera si gira", not EraRules.tessera_disponibile(gs, col))
+	var dopo := p.oro
+	EraRules.activate(gs, 0, col)
+	_eq("  la seconda attivazione non lo da' piu'", p.oro, dopo + int(TessereEra.produzione(gs, col)["oro"]))
+
+	# Uno sconto alla costruzione: "Luogo sacro", -1 Idea al primo Religione,
+	# se il giocatore ha scelto questa colonna.
+	gs.tessere_colonna[col] = "te_luogo_sacro"
+	gs.tessere_usate[col] = false
+	gs.colonna_attivata = col + 1
+	_eq("Luogo sacro non sconta se la colonna scelta e' un'altra",
+		int(TessereEra.sconto_costruzione(gs, 0, CardDB.buildings["ed_dolmen"], col, 0, [])["idee"]), 0)
+	gs.colonna_attivata = col
+	var dolmen: Dictionary = CardDB.buildings["ed_dolmen"]
+	var s := TessereEra.sconto_costruzione(gs, 0, dolmen, col, 0, [])
+	_eq("Luogo sacro sconta 1 Idea al Dolmen", int(s["idee"]), 1)
+	var s2 := TessereEra.sconto_costruzione(gs, 0, CardDB.buildings["ed_capanne"], col, 0, [])
+	_eq("  e niente alle Capanne, che non sono Religione", int(s2["idee"]), 0)
+
+	# Un edificio largo fa scattare solo la tessera della colonna scelta.
+	gs.tessere_colonna[col] = "te_campi_arati"
+	gs.tessere_colonna[col + 1] = "te_campi_arati"
+	gs.tessere_usate[col] = false
+	gs.tessere_usate[col + 1] = false
+	var largo: Dictionary = CardDB.buildings["ed_tumulo_funerario"]
+	_eq("un edificio su due colonne con due Campi arati sconta 1, non 2",
+		int(TessereEra.sconto_costruzione(gs, 0, largo, col, 0, [])["pietra"]), 1)
+	# I terreni non hanno piu' la loro regola: niente sconto della pianura.
+	_eq("con le tessere dell'era la pianura non sconta piu'",
+		BuildRules.pianura_discount(gs, CardDB.buildings["ed_tumulo_funerario"], col), 0)
+
+	# Per un umano la tessera "a scelta" diventa una domanda a schermo.
+	var ctl2 := GameController.new()
+	ctl2.umani = {0: true}
+	ctl2.new_game(3, 51)
+	var g2 := ctl2.gs
+	while not g2.pending_choice.is_empty():
+		ctl2.choose(int((g2.pending_choice["options"] as Array)[0]))
+	g2.current_index = 0
+	g2.tessere_colonna[0] = "te_bottega"
+	g2.tessere_usate[0] = false
+	var p0: PlayerState = g2.players[0]
+	_ok("la Bottega per un umano chiede", ctl2.place_worker(0)
+		and str(g2.pending_choice.get("kind", "")) == "tessera")
+	_eq("  tre risposte, una per risorsa", (g2.pending_choice.get("options", []) as Array).size(), 3)
+	_ok("  e prima di scegliere la tessera non e' girata", not g2.tessere_usate[0])
+	var idee_dopo := p0.idee
+	ctl2.choose(2)
+	_ok("  scegliere le Idee le da' e gira la tessera",
+		p0.idee >= idee_dopo + 1 and g2.tessere_usate[0] and g2.pending_choice.is_empty())
+	CardDB.load_db(CardDB.DB_PATH)
+
+
+# LE CASELLE (registro 122): la strada e' colonne x binari, il binario lo
+# sceglie chi costruisce, una carta puo' occupare piu' binari, e i 2x2 e il
+# Grattacielo vanno solo sopra delle rovine e si coprono solo in rovina.
+func _test_caselle() -> void:
+	if not FileAccess.file_exists("res://data/cards-v2.json"): return
+	CardDB.load_db("res://data/cards-v2.json")
+	_ok("nella v2 le caselle sono accese", Grid.caselle())
+	var ctl := _game(3, 51)
+	var gs := ctl.gs
+	while not gs.pending_choice.is_empty():
+		ctl.choose(int((gs.pending_choice["options"] as Array)[0]))
+	gs.grid.buildings.clear()
+	gs.era = 1
+	var circolo: Dictionary = CardDB.buildings["ed_circolo_di_pietre"]
+	_eq("il Circolo di pietre e' una colonna per due binari",
+		[int(circolo["width"]), int(circolo.get("depth", 1))], [1, 2])
+	var q := BuildRules.quote_rail(gs, 0, circolo, 0, null, 2)
+	_ok("si costruisce nel binario scelto", q.legal and q.binario == 2)
+	_ok("  ma non se esce dalla tessera", not BuildRules.quote_rail(gs, 0, circolo, 0, null, 5).legal)
+	var b := _put(gs, 0, "ed_circolo_di_pietre", 0)
+	b.binario = 2
+	var uno := circolo.duplicate()
+	uno["depth"] = 1
+	_ok("  e occupa anche il binario 3", not BuildRules.quote_rail(gs, 0, uno, 0, null, 3).legal)
+	_ok("  lasciando libero il 4", BuildRules.quote_rail(gs, 0, uno, 0, null, 4).legal)
+	_eq("  senza scelta si prende il binario piu' in fondo", BuildRules.quote_rail(gs, 0, uno, 0).binario, 1)
+	b.state = Enums.BuildingState.ROVINA
+	var s1 := BuildRules.quote_above(gs, 0, uno, 0, null, 3)
+	_ok("sopra si costruisce sulla cima della casella scelta",
+		s1.legal and s1.level == 1 and s1.bases == [b])
+	_ok("  e dove la casella e' vuota non c'e' base",
+		not BuildRules.quote_above(gs, 0, uno, 0, null, 4).legal)
+
+	# I 2x2: solo sopra rovine, in tutte e quattro le caselle.
+	gs.grid.buildings.clear()
+	gs.era = 2
+	var anf: Dictionary = CardDB.buildings["ed_anfiteatro"]
+	_eq("il Colosseo e' 2x2", [int(anf["width"]), int(anf.get("depth", 1))], [2, 2])
+	_ok("  e a terra non si costruisce", not BuildRules.quote_rail(gs, 0, anf, 0, null, 1).legal)
+	var rov: Array[Building] = []
+	for c in 2:
+		for r in [1, 2]:
+			var x := _put(gs, 1, "ed_capanne", c, 0, Enums.BuildingState.ROVINA)
+			x.binario = r
+			x.era_built = 1
+			rov.append(x)
+	var qa := BuildRules.quote_above(gs, 0, anf, 0, null, 1)
+	_ok("  sopra quattro rovine si'", qa.legal and qa.bases.size() == 4)
+	rov[3].state = Enums.BuildingState.INTATTO
+	var qi := BuildRules.quote_above(gs, 0, anf, 0, null, 1)
+	_ok("  con un attivo altrui sotto no", not qi.legal)
+	rov[3].owner = 0
+	qi = BuildRules.quote_above(gs, 0, anf, 0, null, 1)
+	_ok("  un proprio attivo si spiana, come sempre", qi.legal and qi.razed == [rov[3]])
+	rov[3].state = Enums.BuildingState.ROVINA
+	rov[3].owner = 1
+	gs.grid.buildings.erase(rov[2])
+	var qv := BuildRules.quote_above(gs, 0, anf, 0, null, 1)
+	_ok("  una casella vuota si riempie col terrapieno", qv.legal and qv.terrapieno_pietra == 1)
+	gs.grid.buildings.append(rov[2])
+	var col := _put(gs, 0, "ed_anfiteatro", 0, 1)
+	col.binario = 1
+	for x in rov: col.basi.append(x.uid)
+	gs.grid.refresh_buried()
+	_ok("  e le quattro rovine sotto diventano scavo", rov.all(func(x): return x.is_buried))
+	_ok("sopra il Colosseo intatto non si costruisce",
+		not BuildRules.quote_above(gs, 0, anf.duplicate(), 0, null, 1).legal)
+	var sopra := circolo.duplicate()
+	sopra["era"] = 2
+	_ok("  nemmeno una carta qualsiasi", not BuildRules.quote_above(gs, 0, sopra, 0, null, 1).legal)
+	col.state = Enums.BuildingState.ROVINA
+	_ok("  finche' non va in rovina", BuildRules.quote_above(gs, 0, sopra, 0, null, 1).legal)
 	CardDB.load_db(CardDB.DB_PATH)

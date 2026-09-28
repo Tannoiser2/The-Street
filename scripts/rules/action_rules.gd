@@ -80,9 +80,11 @@ static func quote_upgrade(gs: GameState, player: int, upg_id: String, target: Bu
 		return ActionQuote.yes(0, 0, target)
 	# Sconti sui potenziamenti: Bottega d'artista, e il Cardinale sui Religione.
 	var sconto := Effects.cost_delta(gs, player, "upgrade", target)
-	return ActionQuote.yes(max(0, int(cost.get("pietra", 0)) + sconto.x),
-						   max(0, int(cost.get("oro", 0)) + sconto.y), target,
-						   int(cost.get("idee", 0)))
+	# Tessera dell'era "Orto botanico" (registro 121).
+	var te := TessereEra.sconto_potenziamento(gs, target)
+	return ActionQuote.yes(max(0, int(cost.get("pietra", 0)) + sconto.x - int(te.get("pietra", 0))),
+						   max(0, int(cost.get("oro", 0)) + sconto.y - int(te.get("oro", 0))), target,
+						   max(0, int(cost.get("idee", 0)) - int(te.get("idee", 0))))
 
 # ---- restaurare ----------------------------------------------------
 # "pagate meta' del costo originale, arrotondato per eccesso, e torna intatto
@@ -116,12 +118,17 @@ static func quote_restore(gs: GameState, player: int, target: Building) -> Actio
 	var o := int(ceil(float(int(c["oro"]) + int(c.get("idee", 0))) / 2.0))
 	if tessera_bosco(gs, target) >= 0:
 		p = max(0, p - 1)
+	# Tessera dell'era "Restauratori" (registro 121).
+	var te := TessereEra.sconto_ristrutturazione(gs, target)
+	p = max(0, p - int(te.get("pietra", 0)))
+	o = max(0, o - int(te.get("oro", 0)))
 	return ActionQuote.yes(p, o, target)
 
 # La colonna di bosco che sconta la ristrutturazione, o -1: nella v1.5 basta
 # toccare il bosco, nella v2 (registro 100) la tessera deve essere ancora da
 # usare in quest'era.
 static func tessera_bosco(gs: GameState, target: Building) -> int:
+	if TessereEra.attive(): return -1     # lo sconto e' la tessera "Restauratori"
 	for c in range(target.col_from, target.col_to):
 		if gs.grid.terrains[c] != Enums.Terrain.BOSCO: continue
 		if not EraRules.tessere_una_volta(gs) or EraRules.tessera_disponibile(gs, c): return c
