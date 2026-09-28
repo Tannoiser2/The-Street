@@ -65,6 +65,7 @@ func _ready() -> void:
 	_run("il quarto lavoratore sulla bacchetta (v2)", _test_quarto_lavoratore)
 	_run("lo scheletro del lavoratore sotto il potenziamento (v2)", _test_scheletro_lavoratore)
 	_run("la rovina senza rudere resta in piedi, girata (v2)", _test_rovina_senza_rudere)
+	_run("il riepilogo finale con i nomi del regolamento v2", _test_riepilogo_v2)
 	print("\n%d superati, %d falliti" % [_passed, _failed])
 	get_tree().quit(0 if _failed == 0 else 1)
 
@@ -2774,3 +2775,47 @@ func _test_rovina_senza_rudere() -> void:
 	b1.state = Enums.BuildingState.ROVINA
 	_ok("  e la rovina non ha sagoma", not BoardLayout3D.ha_sagoma(b1) and not BoardLayout3D.sagoma_girata(b1))
 	_eq("  e il tasto dice Restaura", DescrizioneAzione.verbo_restauro(), "Restaura")
+
+
+
+# Registro 119: il riepilogo finale chiamava le colonne con i nomi della
+# v1.5 anche nella v2, dove la Verticalita' non esiste e lo Scavo tiene
+# insieme il premio pagato sul momento e quello di fine partita. I nomi
+# seguono il file dei dati caricato, e nessun canale del nucleo resta fuori.
+func _test_riepilogo_v2() -> void:
+	var nomi_v1 := {}
+	for v in Riepilogo.voci(): nomi_v1[str(v["id"])] = str(v["nome"])
+	_eq("nella v1.5 lo Scavo si chiama Scavo", str(nomi_v1.get("scavo", "")), "Scavo")
+	_ok("  e la Verticalita' e' fra le voci", nomi_v1.has("verticalita"))
+	if not FileAccess.file_exists("res://data/cards-v2.json"): return
+	CardDB.load_db("res://data/cards-v2.json")
+	var nomi_v2 := {}
+	for v in Riepilogo.voci(): nomi_v2[str(v["id"])] = str(v["nome"])
+	_eq("nella v2 lo Scavo dice anche del premio", str(nomi_v2.get("scavo", "")), "Scavo+premio")
+	_eq("  la Rendita e' il Censimento", str(nomi_v2.get("rendita", "")), "Censimento")
+	_ok("  e la Verticalita' non c'e' piu'", not nomi_v2.has("verticalita"))
+	for v in Riepilogo.voci():
+		_ok("  '%s' sta in una colonna" % v["nome"], str(v["nome"]).length() <= 12)
+	# Una partita v2 intera: ogni canale che ha dato punti ha la sua colonna,
+	# e la Verticalita', che vale zero, non compare.
+	var ctl := GameController.new()
+	ctl.new_game(3, 19)
+	var gs := ctl.gs
+	var giri := 0
+	while gs.phase != Enums.Phase.FINE_PARTITA and giri < 4000:
+		while not gs.pending_choice.is_empty():
+			ctl.choose(int((gs.pending_choice["options"] as Array)[0]))
+		RandomBot.play_turn(ctl)
+		giri += 1
+	_eq("la partita v2 e' arrivata in fondo", gs.phase, Enums.Phase.FINE_PARTITA)
+	var cols := Riepilogo.colonne(gs)
+	var noti := {}
+	for c in cols: noti[str(c["id"])] = true
+	var fuori := PackedStringArray()
+	for pl in gs.players:
+		for canale in pl.vp_breakdown:
+			if int(pl.vp_breakdown[canale]) != 0 and not noti.has(str(canale)):
+				fuori.append(str(canale))
+	_eq("nessun canale della v2 resta fuori dalla tabella (%s)" % ", ".join(fuori), fuori.size(), 0)
+	_ok("  e la Verticalita' non e' una colonna", not noti.has("verticalita"))
+	CardDB.load_db(CardDB.DB_PATH)

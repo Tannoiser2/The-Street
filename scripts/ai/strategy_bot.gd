@@ -491,7 +491,14 @@ const SPINTE_V2 := {"rendita_per_era": 0.9, "rendita_zero": -1.5, "lampo": 1.6, 
 # dalla partita. Vuota dove la tabella base va bene.
 # A quattro la Lampo vinceva il 18%: con meta' peso al Lampo delle carte e
 # piu' ai potenziamenti (5) sale al 26%, e la Rendita scende da 36 a 32.
-const SPINTE_V2_PER_GIOCATORI := {2: {}, 4: {"lampo": 0.8, "lampo_potenzia": 5.0}}
+# Registro 118, con le case della riserva (che danno Lampo a tutti e un
+# edificio in piu' a testa): a tre la Lampo vinceva il 40%, e la spinta a 2
+# (piu' handicap) la riporta al 30; a quattro la Rendita vinceva il 32% e la
+# Scavo il 19: Rendita per era a 1,5 e Scavo a un quarto le riportano a 28
+# e 23. Tarato sul torneo `--giro tutte`, 750 partite, seme 700000.
+const SPINTE_V2_PER_GIOCATORI := {2: {}, 3: {"lampo": 2.0},
+	4: {"lampo": 0.8, "lampo_potenzia": 5.0, "rendita_per_era": 1.5,
+		"scavo_premio": 0.2, "scavo_terra_scavo": 0.1}}
 static var giocatori := 0
 static var spinte_override := {}
 

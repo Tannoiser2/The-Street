@@ -945,6 +945,13 @@ dato è stato importato da lì. Ma due confronti fra ciò che è stampato e
     verificato prima confrontando gli hash (che le davano distinte) e poi
     guardandole grandi, perche' il primo confronto mi aveva ingannato.
 
+    Risolto il 27 settembre: il designer ha rifatto la pagina 29 e
+    ricaricato `materiali/Carte.pdf` (e `Sfondo.png`); le altre 53 pagine
+    sono identiche immagine per immagine. Le posizioni 10,
+    11 e 12 portano Eruzione, Persecuzioni e Guerra civile; la mappatura
+    (`data/carte_pdf.json`) non ha piu' `null` fra gli eventi e
+    `tools/estrai_grafica.py` estrae 24 eventi su 24.
+
 70. **Il lato rovina dell'era 5 non manca: non serve.** La pagina 28 porta il
     dorso del mazzo invece delle dodici rovine dell'era 5. Sembra una lacuna e
     non lo e': l'era Moderna non ha evento, quindi un edificio dell'era 5 non
@@ -1019,6 +1026,10 @@ dato è stato importato da lì. Ma due confronti fra ciò che è stampato e
     A schermo si vede: a quattro giocatori la terza colonna di fiume ripete
     il disegno della prima.
 
+    Chiuso dal designer: "la tessera fiume raddoppia la prima e fine". La
+    terza colonna di fiume a quattro usa il disegno della prima, com'e'
+    gia' a schermo; niente da correggere.
+
 74. **Le "caselle disegnate" sulle tessere non le trovo.** Mi hai detto che
     sul PDF ci sono caselle disegnate nella parte alta della tessera, dove
     vanno le sagome. Nella copia che ho in mano - `materiali/Carte.pdf`,
@@ -1033,6 +1044,9 @@ dato è stato importato da lì. Ma due confronti fra ciò che è stampato e
     Se le caselle stanno nel PDF nuovo, quando arriva rimisuro sulle loro
     posizioni invece che sulla cornice: potrebbero non essere centrate sulla
     fascia che ho scelto.
+
+    Chiuso dal designer: da ignorare. La fascia dei binari resta quella
+    misurata sull'illustrazione.
 
 75. **I binari stretti costano lo scorcio.** Con i binari a 54 mm bastavano
     45 gradi di inclinazione per vedere l'82% di una sagoma dietro quella
@@ -2020,3 +2034,28 @@ dato è stato importato da lì. Ma due confronti fra ciò che è stampato e
     case, non il loro Lampo; da ritarare i bot a tre e quattro. La
     piccola nelle ere 1-3, che non si compra piu', resta: e' la terza e la
     quarta copia della casa da 1 (deciso dal designer).
+
+118. **I bot ritarati con le case.** Chiesto dal designer dopo la
+    diciassettesima misura. Con le case della riserva a tre la Lampo
+    vinceva il 40% e a quattro la Rendita il 32% e la Scavo il 19%. Stesso
+    metodo del punto 114 (le spinte sono handicap): a tre `lampo` 2,0
+    (Lampo 40 -> 30); a quattro `rendita_per_era` 1,5 e Scavo a un quarto
+    (`scavo_premio` 0,2, `scavo_terra_scavo` 0,1): Rendita 32 -> 28, Scavo
+    19 -> 23. Le tabelle stanno in `SPINTE_V2_PER_GIOCATORI` per tavolo; a
+    due la base va bene. Tutte le strategie entro l'errore a 2, 3 e 4; la
+    partita (PV, edifici, passaggi) non cambia al decimale. La v1.5 non
+    cambia (diciottesima misura).
+
+119. **Il riepilogo finale con i nomi del regolamento v2.** Il designer
+    ("fai tu e poi mergia"). La tabella di fine partita chiamava le
+    colonne con i nomi e l'ordine della v1.5 anche nella v2. Ora i nomi
+    seguono il file dei dati caricato (`Riepilogo.voci()`): nella v2 sono
+    Lampo, PV prodotti, Censimento, Continuita', Scavo+premio (il premio
+    di scavo pagato sul momento e lo Scavo di fine partita stanno nello
+    stesso canale del nucleo, quindi una colonna sola col nome che lo
+    dice), Scheletri, Monumenti, Eredita', Finali; la Verticalita' non c'e'
+    piu'. Trovato per strada: la coda della tabella, che raccoglie i canali
+    che non conosce, mostrava anche quelli a zero (il nucleo segna
+    `verticalita` con 0 nella v2); ora una colonna compare solo se ha dato
+    punti a qualcuno. I nomi stanno in 86 px a corpo 12: il test lo
+    controlla. La v1.5 non cambia.

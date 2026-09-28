@@ -29,6 +29,30 @@ const VOCI: Array[Dictionary] = [
 	{"id": "eredita", "nome": "Eredità"},
 	{"id": "effetti_finali", "nome": "Carte"},
 ]
+# Le stesse voci con i nomi del regolamento v2 (registro 119), nell'ordine
+# del suo "Fine partita": il Lampo e i PV prodotti si segnano subito, poi il
+# Censimento (la Rendita), la Continuita', lo Scavo - che nella v2 tiene
+# insieme il premio di scavo pagato sul momento a chi costruisce sopra e lo
+# Scavo stampato di fine partita: stesso canale nel nucleo, quindi una
+# colonna sola, col nome che lo dice - gli Scheletri, gli Obiettivi
+# (Monumenti ed Eredita') e gli Effetti finali. La Verticalita' non c'e':
+# nella v2 non esiste piu' e restava in tabella solo come nome vecchio.
+# I nomi stanno in una colonna da 86 px a corpo 12: piu' lunghi si tagliano.
+const VOCI_V2: Array[Dictionary] = [
+	{"id": "lampo", "nome": "Lampo"},
+	{"id": "cultura", "nome": "PV prodotti"},
+	{"id": "rendita", "nome": "Censimento"},
+	{"id": "continuita", "nome": "Continuità"},
+	{"id": "scavo", "nome": "Scavo+premio"},
+	{"id": "scheletri", "nome": "Scheletri"},
+	{"id": "monumenti", "nome": "Monumenti"},
+	{"id": "eredita", "nome": "Eredità"},
+	{"id": "effetti_finali", "nome": "Finali"},
+]
+
+# Le voci del regolamento in gioco: il file dei dati dice quale e'.
+static func voci() -> Array[Dictionary]:
+	return VOCI_V2 if str(CardDB.ruleset).begins_with("v2") else VOCI
 
 # Le colonne da mostrare: le voci che hanno dato punti a qualcuno. Una colonna
 # di zeri per tutti non dice niente e ruba spazio alle altre.
@@ -37,15 +61,20 @@ const VOCI: Array[Dictionary] = [
 static func colonne(gs: GameState) -> Array[Dictionary]:
 	var out: Array[Dictionary] = []
 	var noti := {}
-	for v in VOCI:
+	for v in voci():
 		noti[str(v["id"])] = true
 		if _qualcuno_ha(gs, str(v["id"])): out.append(v)
+	# Anche qui solo se ha dato punti: il nucleo segna un canale anche con
+	# zero (`add_vp("verticalita", 0)` nella v2, dove la tabella vale 0), e
+	# una colonna di trattini con un nome vecchio e' proprio quel che non
+	# si vuole.
 	for p in gs.players:
 		for canale in p.vp_breakdown:
 			var id := str(canale)
 			if noti.has(id): continue
 			noti[id] = true
-			out.append({"id": id, "nome": id.capitalize()})
+			if _qualcuno_ha(gs, id):
+				out.append({"id": id, "nome": id.capitalize()})
 	return out
 
 static func _qualcuno_ha(gs: GameState, id: String) -> bool:

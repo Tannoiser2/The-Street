@@ -1053,6 +1053,57 @@ vuole rientrare nell'errore, è ritararle, non toccare le case.
 Deciso dal designer: la piccola nelle ere 1–3, che oggi non si compra, resta come terza e
 quarta copia della casa da 1.
 
+## Diciottesima misura: i bot con le case
+
+Il designer ha chiesto di ritarare i bot a tre e a quattro (registro 118): con le case della
+riserva la Lampo vinceva il 40 % a tre (bordo 38) e a quattro la Rendita il 32 % (bordo 29) e
+la Scavo il 19 (bordo 21). Stesso metodo della quattordicesima misura: le spinte sono handicap
+rispetto al valutatore comune, quindi si spinge di più chi vince troppo e di meno chi vince
+poco. Torneo `--giro tutte`, 750 partite, seme 700000, file v2 con le case ritoccate.
+
+| vince a tre (atteso 33, errore 28–38) | base | Lampo 2,0 | Lampo 2,5 | pot. Lampo 2 | Lampo 2,0 + pot. 2 | Lampo 2,0 + Rendita 1,2 |
+|---|--:|--:|--:|--:|--:|--:|
+| Lampo | **40** | 30 | 22 | 35 | 22 | 30 |
+| Rendita | 35 | 38 | 37 | 38 | 38 | 37 |
+| Bilanciata / Obiettivi / Scavo / Continuità | 33 / 32 / 31 / 29 | 35 / 35 / 32 / 30 | 39 / 35 / 34 / 33 | 35 / 33 / 31 / 29 | 36 / 38 / 35 / 32 | 35 / 34 / 33 / 30 |
+
+| vince a quattro (atteso 25, errore 21–29) | base | Rendita 1,2 | Rendita 1,5 | Scavo ¼ | Rendita 1,2 + Scavo ¼ | **Rendita 1,5 + Scavo ¼** | + Lampo 1,0 |
+|---|--:|--:|--:|--:|--:|--:|--:|
+| Rendita | **32** | 29 | 28 | 31 | 30 | 28 | 32 |
+| Scavo | **19** | 19 | 19 | 23 | 23 | 23 | 23 |
+| Lampo | 26 | 27 | 29 | 25 | 26 | 28 | 28 |
+| Bilanciata / Obiettivi / Continuità | 26 / 26 / 21 | 26 / 25 / 23 | 25 / 25 / 24 | 26 / 25 / 20 | 25 / 24 / 22 | 25 / 23 / 23 | 24 / 23 / 20 |
+
+**1. A tre basta la spinta Lampo a 2,0.** Da 1,6 a 2,0 la Lampo scende da 40 a 30 e tutte le
+altre restano dentro (Rendita 38 sul bordo); a 2,5 crolla a 22 e la Bilanciata sale a 39. I
+potenziamenti a 2 da soli non bastano (35). Aggiungere la Rendita a 1,2 non sposta niente
+(37): si lascia la spinta sola.
+
+**2. A quattro servono due cose.** La Rendita si abbassa solo a 1,5 (32 → 28), lo Scavo si
+rialza solo con le spinte a un quarto (premio 0,2, Scavo a terra 0,1: 19 → 23); insieme tutte
+e sei le strategie stanno fra 23 e 28. Riportare il Lampo a 1,0 rialza la Rendita a 32 senza
+toccare il Lampo: non si fa.
+
+**3. La partita non cambia.** PV, edifici, passaggi, altezza e basi altrui sono gli stessi
+al decimale in tutti i lotti (a 3: 90,2–91,2 PV; a 4: 81,5–81,8): le spinte spostano solo chi
+vince, non come si gioca. Kingmaker 14 % a tre e 17 % a quattro.
+
+Le tabelle del bot: `SPINTE_V2_PER_GIOCATORI[3]` con `lampo` 2,0; `[4]` con `lampo` 0,8,
+`lampo_potenzia` 5, `rendita_per_era` 1,5, `scavo_premio` 0,2, `scavo_terra_scavo` 0,1. A due
+la tabella base va bene (46–56, tutte dentro). Rigiocato senza manopole:
+
+| vince (atteso 50 / 33 / 25, errore 6 / 5 / 4) | a 2 | a 3 | a 4 |
+|---|--:|--:|--:|
+| Rendita | 56 | 38 | 28 |
+| Bilanciata | 47 | 35 | 25 |
+| Obiettivi | 52 | 35 | 23 |
+| Continuità | 46 | 30 | 23 |
+| Lampo | 46 | 30 | 28 |
+| Scavo | 52 | 32 | 23 |
+
+**Tutte entro l'errore a tutti e tre i tavoli**, con la Rendita a due e a tre sul bordo alto.
+La v1.5 non cambia (`SPINTE_V1` uguale, riferimento identico).
+
 ## Come rifare il conto
 
 ```bash
@@ -1124,4 +1175,8 @@ for p in 2 3 4; do godot --headless res://scenes/audit_partita.tscn -- --players
 python3 tools/confronta_torneo.py tutte_p4.csv case_p4.csv riserva_p4.csv
 godot --headless res://scenes/audit_partita.tscn -- --players 3 --vita 2000 --seed 200000 --dati data/cards-v2.json > vita_riserva.csv
 # diciassettesima misura: le case ritoccate stanno nel file v2 (oggi gli stessi comandi producono ritocco_p$p e vita_ritocco)
+# diciottesima misura: la griglia delle spinte con le case; la taratura scelta sta nelle tabelle del bot
+godot --headless res://scenes/audit_partita.tscn -- --players 3 --games 750 --seed 700000 --dati data/cards-v2.json --giro tutte --spinta lampo=2.0 > p3_L20.csv
+godot --headless res://scenes/audit_partita.tscn -- --players 4 --games 750 --seed 700000 --dati data/cards-v2.json --giro tutte --spinta rendita_per_era=1.5,scavo_premio=0.2,scavo_terra_scavo=0.1 > p4_R15S.csv
+python3 tools/confronta_torneo.py ritocco_p4.csv p4_R15S.csv
 ```
