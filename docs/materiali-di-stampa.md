@@ -159,3 +159,49 @@ tessera del suo terreno, dove k conta quante colonne dello stesso terreno
 vengono prima. Deterministico, quindi due pianure vicine non portano lo stesso
 disegno — e quando le tessere di un terreno finiscono si ricomincia da capo,
 che è come il difetto del punto 73 si vede a schermo.
+
+## Le carte degli edifici della v2 (registro 120)
+
+Il 28 settembre il designer ha caricato cinque PDF, uno per era:
+`materiali/Edifici_Prima_Era_A4.pdf`, `…_Seconda_…`, `…_Terza_…`, `…_Quarta_…`,
+`…_Quinta_Era_A4.pdf`. Sono le facce delle carte edificio della v2: costo in tre
+risorse (Pietra, Denaro, Idee), resistenza, Scavo, e in basso la produzione, la
+Rendita e il Lampo. A differenza di `Carte.pdf` non sono immagini incorporate:
+ogni carta è **composta sulla pagina** (cornice, testo vero, icone vettoriali,
+un'illustrazione), quindi `tools/estrai_grafica.py` la ritaglia sul suo bordo,
+un rettangolo tracciato spesso 4 pt, e la salva per id in
+`assets/carte/edifici_v2/<id>.png` (250 dpi, circa 690 x 418 px; le colossali
+larghe due o tre volte).
+
+Il testo stampato si legge, quindi la mappatura è **per nome ed era**, senza
+ordine presunto, e ogni carta si confronta con `data/cards-v2.json` campo per
+campo: classi, terreno, RIS, esaurimento, costo, resistenza, Scavo, produzione
+(mattone), Denaro prodotto e Rendita (moneta), Lampo (moneta con il fulmine, un
+disegno giallo 7 x 11 pt subito dopo il numero). I dati restano la fonte; il
+confronto dice solo dove la stampa è rimasta indietro.
+
+| | |
+|---|---|
+| carte stampate | 90 (18 per era) |
+| edifici del file v2 con la loro faccia | 74 su 74 |
+| case della riserva | stampate in due copie ciascuna, come nel gioco |
+| carte identiche ai dati | 71 edifici su 74 |
+
+Le differenze, tutte sulle case della riserva e tutte nate dopo la stampa
+(registro 117):
+
+| carta | stampa | dati |
+|---|---|---|
+| Case popolari (era 4, casa con lo Scavo) | Lampo 0 | Lampo 2 |
+| Palazzetto (era 4, casa grande) | Lampo 3 | Lampo 2 |
+| Condominio popolare (era 5, casa grande) | Lampo 3 | Lampo 2 |
+| Case operaie (era 5, casa con lo Scavo) | stampata in due copie | tolta (registro 116: lo Scavo nell'era 5 non vale) |
+
+Le Case operaie non vengono estratte. Le altre tre sì, e a schermo portano il
+Lampo stampato; il riquadro del mouse prende i numeri dai dati.
+
+A schermo la v2 usa queste facce per il mercato, la riserva e i ventagli dei
+giocatori, con il posto del mercato alle proporzioni della carta nuova
+(orizzontale, 194 x 116 pt); le colossali si appoggiano contenute nello stesso
+posto. Se la grafica v2 non è stata estratta, torna la faccia della v1.5.
+
