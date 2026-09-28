@@ -159,15 +159,56 @@ Domanda per era (C / D / I): era 1: 17 / 0 / 5 · era 2: 29 / 0 / 6 · era 3: 25
 ## Le tessere terreno
 
 Si pescano a caso (punto 6); il mix garantisce il bosco: 2 giocatori 2 pianura, 1 fiume, 1 collina, 1 bosco; 3 giocatori 2 pianura, 2 fiume, 1 collina, 2 bosco; 4 giocatori 3 pianura, 2 fiume, 2 collina, 2 bosco.
-Ogni tessera produce per tipo, con una curva per era, a chi la attiva, e ha un effetto che
-scatta **una volta per era** alla prima occasione, poi la tessera si gira (registro 100).
+Ogni terreno produce una **produzione di base** fissa a chi lo attiva; sopra, ogni era, si
+posa una **tessera dell'era** che aggiunge la sua produzione e un effetto che scatta una volta
+per era, solo per la colonna scelta dal giocatore (registro 121).
 
-| tessera | era 1 | era 2 | era 3 | era 4 | era 5 | regola (nel file v2) | oggi |
-|---|---|---|---|---|---|---|---|
-| Pianura | 1 C | 1 C + 1 D | 1 D | 2 D | 2 D | Denaro, poco all'inizio e molto dopo. Una volta per era: un edificio da 2 o 3 caselle costa 1 Costruzione in meno. | −1 pietra permanente agli edifici da 2 o 3 caselle |
-| Fiume | 2 C | 2 C | 1 C | 1 C | 1 C | Costruzione, tanta all'inizio e poco dopo. Una volta per era: +1 Denaro a chi la attiva. Requisito 'fiume' stretto. | "unico terreno che produce oro" (1 pietra 1 oro) |
-| Collina | 2 C | 2 C | 1 C | 1 C | 1 C | Costruzione come il fiume. Una volta per era: il primo edificio costruito qui ha +1 resistenza per l'era. | +1 res permanente a ogni edificio costruito qui |
-| Bosco | 1 I | 2 I | 2 I | 3 I | 3 I | Idee, in aumento con le ere. Una volta per era: una ristrutturazione costa 1 Costruzione in meno. | Vetustà massima +4 (la Vetustà non c'è più) e restauro −1 pietra |
+| terreno | produzione di base | oggi (v1.5) |
+|---|---|---|
+| Pianura | 1 C | −1 pietra permanente agli edifici da 2 o 3 caselle |
+| Fiume | 1 D | "unico terreno che produce oro" (1 pietra 1 oro) |
+| Collina | 1 C | +1 res permanente a ogni edificio costruito qui |
+| Bosco | 1 I | Vetustà massima +4 (la Vetustà non c'è più) e restauro −1 pietra |
+
+### Le 35 tessere dell'era (2 copie ciascuna)
+
+| era | tessera | in più | effetto, una volta per era |
+|--:|---|---|---|
+| 1 | Campi arati | 1 C | Il primo edificio da 2 o 3 caselle costruito qui costa 1 Costruzione in meno. |
+| 1 | Radura | — | Il primo edificio Civico costruito qui dà +1 Lampo. |
+| 1 | Sentiero dei pastori | — | Chi attiva per primo prende +1 Denaro. |
+| 1 | Terra di nessuno | — | Il primo edificio costruito qui ignora il requisito di terreno. |
+| 1 | Recinto di pietre | 1 C | Il primo edificio costruito qui ha +1 resistenza fino a fine era. |
+| 1 | Luogo sacro | — | Il primo edificio Religione costruito qui costa 1 Idea in meno. |
+| 1 | Raccoglitori | 1 C | Chi attiva per primo può cambiare 1 Idea in 1 Costruzione. |
+| 2 | Centuriazione | 1 C | Il primo edificio Ingegneria costruito qui costa 1 Costruzione in meno. |
+| 2 | Via consolare | 1 C | Chi attiva per primo prende anche la produzione di una colonna adiacente a scelta. |
+| 2 | Statio | 1 C | Il primo edificio Commercio costruito qui dà +1 Denaro a chi lo costruisce. |
+| 2 | Cambiavalute | 1 C | Chi attiva per primo può cambiare 1 Costruzione in 1 Denaro. |
+| 2 | Cantiere | 1 C | Il primo edificio costruito qui sopra un altro edificio costa 1 Costruzione in meno. |
+| 2 | Restauratori | 1 I | Una ristrutturazione di un edificio qui costa 1 Costruzione in meno. |
+| 2 | Necropoli | 1 I | Il primo edificio costruito qui ha Scavo +1, per sempre. |
+| 3 | Fiera | — | Chi attiva per primo prende +1 Denaro per ogni altro giocatore con un edificio intatto qui. |
+| 3 | Borgo franco | — | Il primo edificio costruito qui sopra una rovina altrui costa 1 Costruzione in meno. |
+| 3 | Scuola dei mastri | 1 I | Chi attiva per primo prende +1 Idea per ogni edificio Ingegneria intatto qui. |
+| 3 | Mura | — | Il primo edificio Militare costruito qui ha +2 resistenza fino a fine era. |
+| 3 | Rocca | — | Il primo edificio costruito qui è protetto all'evento di fine era. |
+| 3 | Eremo | 1 I | Il primo edificio Religione o Cultura costruito qui dà +2 Lampo. |
+| 3 | Spoglio delle rovine | — | Chi seppellisce per primo un edificio qui prende +1 al premio di scavo. |
+| 4 | Villa di campagna | 1 D | Il primo edificio Cultura costruito qui costa 1 Denaro in meno. |
+| 4 | Piazza del mercato | — | Chi attiva per primo, se ha meno punti di tutti, prende +2 Denaro. |
+| 4 | Bottega | 1 I | Chi attiva per primo prende 1 risorsa a scelta. |
+| 4 | Fondaco | 1 D | Il primo edificio Commercio costruito qui produce subito, una volta. |
+| 4 | Belvedere | 1 I | Il primo edificio costruito qui al livello 3 o più dà +2 Lampo. |
+| 4 | Giardino all'italiana | 1 I | Il primo edificio ristrutturato qui torna in piedi con +1 resistenza. |
+| 4 | Cappella di famiglia | 1 I | Il primo scheletro lasciato qui vale +1 punto a fine partita. |
+| 5 | Periferia | 1 D | Il primo edificio Civico costruito qui costa 1 Idea in meno. |
+| 5 | Zona industriale | — | Chi attiva per primo prende +1 Denaro per ogni edificio Ingegneria o Commercio intatto qui. |
+| 5 | Isolato | 1 I | Il primo edificio costruito qui dà +1 Lampo per ogni edificio altrui intatto qui. |
+| 5 | Scuola politecnica | 1 D | Il primo edificio Ingegneria costruito qui costa 1 Denaro in meno. |
+| 5 | Quartiere alto | 1 I | Il primo edificio costruito qui, se diventa il più alto della strada, dà +3 Lampo. |
+| 5 | Parco pubblico | 1 I | A fine partita chi ha l'edificio in cima a questa colonna prende +2 punti. |
+| 5 | Orto botanico | 1 I | Il primo potenziamento messo su un edificio qui costa 1 Idea in meno. |
 
 ## I 26 Personaggi
 

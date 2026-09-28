@@ -1104,6 +1104,68 @@ la tabella base va bene (46–56, tutte dentro). Rigiocato senza manopole:
 **Tutte entro l'errore a tutti e tre i tavoli**, con la Rendita a due e a tre sul bordo alto.
 La v1.5 non cambia (`SPINTE_V1` uguale, riferimento identico).
 
+## Diciannovesima misura: le tessere dell'era
+
+Decisione del designer (registro 121, `docs/proposte/tessere-v2.md`): il terreno ha una
+produzione di base fissa (Pianura e Collina 1 Costruzione, Fiume 1 Denaro, Bosco 1 Idea) e ogni
+era su ogni colonna si posa una tessera dell'era, pescata fra le 14 dell'era (7 diverse in due
+copie), che aggiunge da zero a una icona di produzione e un effetto una volta per era, solo per
+la colonna scelta dal giocatore. A tre giocatori la produzione totale è tarata per restare
+quella di prima, era per era. Le scelte delle tessere ("può cambiare", "a scelta") sono
+automatiche e prudenti. Torneo `--giro tutte`, 750 partite, seme 700000, bot tarati della
+diciottesima misura; "senza" è il file v2 di prima (`--tessere_era 0` lo rigioca identico).
+
+| per giocatore | a 2: senza | **a 2: tessere** | a 3: senza | **a 3: tessere** | a 4: senza | **a 4: tessere** |
+|---|--:|--:|--:|--:|--:|--:|
+| PV | 83,4 | **91,1** | 90,6 | 93,0 | 81,6 | 86,2 |
+| Lampo / Rendita / Scavo / Continuità | 20,5 / 10,4 / 14,2 / 14,1 | 24,9 / 10,1 / 16,0 / 15,5 | 24,4 / 9,0 / 16,5 / 15,4 | 25,8 / 8,7 / 17,6 / 15,4 | 21,0 / 8,2 / 15,1 / 13,5 | 23,6 / 7,7 / 16,6 / 14,0 |
+| costruiti / passa | 13,6 / 2,4 | 15,1 / 1,7 | 15,2 / 2,0 | 15,4 / 1,8 | 13,6 / 3,8 | 14,3 / 3,0 |
+| altezza / basi altrui | 4,58 / 1,6 | 4,65 / 1,9 | 4,55 / 2,4 | 4,58 / 2,5 | 4,39 / 2,3 | 4,57 / 2,6 |
+| kingmaker (cambia vincitore) | 10 % | 10 % | 15 % | 14 % | 17 % | **18 %** |
+| vince: Rendita / Continuità / Bilanciata / Obiettivi / Scavo / Lampo | 56 / 46 / 47 / 52 / 52 / 46 | 50 / 42 / 46 / 53 / 48 / **61** | 38 / 30 / 35 / 35 / 32 / 30 | 36 / 29 / 38 / **28** / 30 / **41** | 28 / 23 / 25 / 23 / 23 / 28 | 27 / 20 / 23 / 26 / 25 / 30 |
+
+**1. La partita si arricchisce, soprattutto a due.** Più punti a tutti i tavoli (+7,8 a testa a
+due, +2,4 a tre, +4,6 a quattro), più edifici e meno passaggi. A due i Fiumi sono uno solo e le
+Pianure due, quindi nelle ultime ere arriva più Costruzione e meno Denaro di prima (la stima
+del documento delle tessere), e sopra ci sono gli effetti: un edificio e mezzo in più a testa.
+La città cresce di più in altezza e sopra gli altri (basi altrui +0,3 a due e a quattro).
+
+**2. La Lampo ne approfitta.** Cinque tessere danno Lampo (Radura, Eremo, Belvedere, Isolato,
+Quartiere alto) e gli sconti fanno costruire di più: la strategia Lampo vince il **61 %** a due
+(bordo 56) e il **41 %** a tre (bordo 38); a quattro sta al 30, sul bordo. A tre la Obiettivi
+scende al **28 %** (bordo 28). Le altre stanno nell'errore.
+
+**3. Il kingmaker non cambia** a due e a tre (10 e 14 %); a quattro sale da 17 a 18 %, e il bottino
+dell'ultima era copre il distacco in una partita su tre (34 % contro 30).
+
+**4. Quante volte scatta ogni tessera (a partita).**
+
+| era | tessera | a 2 | a 3 | a 4 |
+|--:|---|--:|--:|--:|
+| 1 | Sentiero dei pastori / Terra di nessuno / Recinto di pietre / Luogo sacro | 0,6–0,7 | 0,9–1,0 | 1,1–1,3 |
+| 1 | Campi arati / Radura | 0,3 | 0,4–0,5 | 0,4–0,7 |
+| 1 | **Raccoglitori** | **0** | **0** | **0** |
+| 2 | Via consolare / Cambiavalute / Necropoli / Cantiere | 0,5–0,7 | 0,7–1,0 | 0,8–1,3 |
+| 2 | Centuriazione / Statio | 0,1 | 0,2 | 0,2–0,4 |
+| 2 | **Restauratori** | **0,01** | **0,02** | **0,03** |
+| 3 | Rocca / Fiera | 0,5–0,6 | 0,8–0,9 | 1,0–1,1 |
+| 3 | Eremo / Scuola dei mastri / Borgo franco / Mura | 0,1–0,4 | 0,1–0,5 | 0,2–0,6 |
+| 3 | **Spoglio delle rovine** | **0,02** | **0,03** | **0,06** |
+| 4 | Bottega / Piazza del mercato / Belvedere | 0,5–0,7 | 0,7–1,0 | 0,7–1,2 |
+| 4 | Cappella di famiglia / Villa di campagna / Fondaco | 0,1 | 0,1–0,2 | 0,1–0,3 |
+| 4 | **Giardino all'italiana** | **0,01** | **0,01** | **0,02** |
+| 5 | Parco pubblico / Isolato / Periferia / Zona industriale | 0,4–0,7 | 0,6–1,0 | 0,8–1,3 |
+| 5 | Scuola politecnica / Quartiere alto / Orto botanico | 0,1–0,2 | 0,1–0,3 | 0,2–0,3 |
+
+Quattro tessere **non scattano quasi mai**. Raccoglitori mai: la scelta automatica cambia l'Idea
+in Costruzione solo se le Idee sono più della Costruzione, e non succede. Restauratori e
+Giardino all'italiana chiedono una ristrutturazione nella colonna scelta, e nella v2 se ne fanno
+0,4 a partita. Spoglio delle rovine chiede una sepoltura con premio nella colonna scelta.
+
+Da decidere: se sostituire le quattro tessere che non scattano; se togliere Lampo dalle tessere
+(o ritarare il bot Lampo a due e a tre); se il più di punti a due giocatori va bene o si
+riduce la produzione delle tessere.
+
 ## Come rifare il conto
 
 ```bash
@@ -1179,4 +1241,7 @@ godot --headless res://scenes/audit_partita.tscn -- --players 3 --vita 2000 --se
 godot --headless res://scenes/audit_partita.tscn -- --players 3 --games 750 --seed 700000 --dati data/cards-v2.json --giro tutte --spinta lampo=2.0 > p3_L20.csv
 godot --headless res://scenes/audit_partita.tscn -- --players 4 --games 750 --seed 700000 --dati data/cards-v2.json --giro tutte --spinta rendita_per_era=1.5,scavo_premio=0.2,scavo_terra_scavo=0.1 > p4_R15S.csv
 python3 tools/confronta_torneo.py ritocco_p4.csv p4_R15S.csv
+# diciannovesima misura: le tessere dell'era stanno nel file v2; `--tessere_era 0` rigioca il file di prima
+for p in 2 3 4; do godot --headless res://scenes/audit_partita.tscn -- --players $p --games 750 --seed 700000 --dati data/cards-v2.json --giro tutte > tessere_p$p.csv; done
+grep "^# tessere_scattate" tessere_p3.csv     # quante volte scatta ogni tessera nel lotto
 ```

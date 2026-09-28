@@ -2073,3 +2073,20 @@ dato è stato importato da lì. Ma due confronti fra ciò che è stampato e
     (`tools/estrai_grafica.py`, che ripete il confronto a ogni estrazione) e
     la vista v2 le usa per mercato, riserva e ventagli; le Case operaie non
     si estraggono. Vedi `docs/materiali-di-stampa.md`.
+
+121. **Le tessere dell'era.** Decisione del designer, dalla sua dima: il
+    terreno ha una produzione di base fissa (Pianura e Collina 1
+    Costruzione, Fiume 1 Denaro, Bosco 1 Idea) e ogni era su ogni colonna
+    si posa una tessera dell'era, pescata fra le 14 dell'era (7 diverse in
+    due copie), non legata al terreno, con da zero a una icona di
+    produzione in piu' e un effetto una volta per era. Scatta solo la
+    tessera della colonna scelta dal giocatore ("non importa se un
+    edificio copre piu' colonne"). Nomi confermati; seconde copie stampate
+    a parte. Nel motore: modulo `TessereEra`, costante `tessere_era` nel
+    file v2, manopola `--tessere_era`. Le regole vecchie dei terreni si
+    spengono. Misurato (diciannovesima misura): piu' punti (+7,8 a testa a
+    due, +2,4 a tre, +4,6 a quattro), la Lampo fuori dall'errore a due
+    (61 %) e a tre (41 %), la Obiettivi sul bordo basso a tre (28 %);
+    quattro tessere non scattano quasi mai (Raccoglitori, Restauratori,
+    Giardino all'italiana, Spoglio delle rovine). Aperto: sostituire le
+    quattro, e togliere Lampo alle tessere o ritarare il bot.

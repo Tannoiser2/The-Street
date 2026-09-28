@@ -236,15 +236,35 @@ w("## Le tessere terreno")
 w("")
 w("Si pescano a caso (punto 6); il mix garantisce il bosco: " + "; ".join(
     f"{n} giocatori " + ", ".join(f"{v} {k}" for k, v in m.items()) for n, m in K["terrain_mix_by_players"].items()) + ".")
-w("Ogni tessera produce per tipo, con una curva per era, a chi la attiva, e ha un effetto che")
-w("scatta **una volta per era** alla prima occasione, poi la tessera si gira (registro 100).")
-w("")
-w("| tessera | era 1 | era 2 | era 3 | era 4 | era 5 | regola (nel file v2) | oggi |")
-w("|---|---|---|---|---|---|---|---|")
-for t in V2["terrains"]:
-    curva = [produzione(t["base_production_by_era"][str(e)]) for e in range(1, 6)]
-    w(f"| {NOME_TER[t['id']]} | " + " | ".join(curva) + f" | {t['rule']} | {TESSERE_OGGI[t['id']]} |")
-w("")
+if V2.get("tessere_era"):
+    # Registro 121: il terreno ha una produzione di base fissa, la curva per era
+    # e la regola stanno nelle tessere dell'era.
+    w("Ogni terreno produce una **produzione di base** fissa a chi lo attiva; sopra, ogni era, si")
+    w("posa una **tessera dell'era** che aggiunge la sua produzione e un effetto che scatta una volta")
+    w("per era, solo per la colonna scelta dal giocatore (registro 121).")
+    w("")
+    w("| terreno | produzione di base | oggi (v1.5) |")
+    w("|---|---|---|")
+    for t in V2["terrains"]:
+        w(f"| {NOME_TER[t['id']]} | {produzione(t['produzione_base'])} | {TESSERE_OGGI[t['id']]} |")
+    w("")
+    w("### Le %d tessere dell'era (%d copie ciascuna)" % (len(V2["tessere_era"]), V2["tessere_era"][0]["copie"]))
+    w("")
+    w("| era | tessera | in più | effetto, una volta per era |")
+    w("|--:|---|---|---|")
+    for t in V2["tessere_era"]:
+        w(f"| {t['era']} | {t['name']} | {produzione(t['produzione'])} | {t['testo']} |")
+    w("")
+else:
+    w("Ogni tessera produce per tipo, con una curva per era, a chi la attiva, e ha un effetto che")
+    w("scatta **una volta per era** alla prima occasione, poi la tessera si gira (registro 100).")
+    w("")
+    w("| tessera | era 1 | era 2 | era 3 | era 4 | era 5 | regola (nel file v2) | oggi |")
+    w("|---|---|---|---|---|---|---|---|")
+    for t in V2["terrains"]:
+        curva = [produzione(t["base_production_by_era"][str(e)]) for e in range(1, 6)]
+        w(f"| {NOME_TER[t['id']]} | " + " | ".join(curva) + f" | {t['rule']} | {TESSERE_OGGI[t['id']]} |")
+    w("")
 
 # ---- personaggi ----------------------------------------------------------
 w("## I 26 Personaggi")

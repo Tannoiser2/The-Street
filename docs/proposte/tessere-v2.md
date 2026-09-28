@@ -2,8 +2,8 @@
 
 Proposta del 28 settembre, dalla dima del designer (`Dima_terreni.pdf`) e dalla sua correzione:
 "raddoppiamo le 7 tessere; non sono collegate al tipo di terreno; il terreno ha una produzione di
-base, le tessere aggiungono altre icone di produzione e l'effetto". Non è ancora nel motore né in
-`data/cards-v2.json`: si scrive qui, il designer la corregge, poi si implementa e si misura.
+base, le tessere aggiungono altre icone di produzione e l'effetto". Nel motore e nel file v2 dal
+registro 121; misurata nella diciannovesima misura (`docs/la-terza-risorsa.md`).
 
 ## Come sono fatte
 
