@@ -290,14 +290,26 @@ func _posti_liberi() -> void:
 # Senza immagine resta il rettangolo colorato: assets/ si rigenera dai PDF e
 # non e' versionata, quindi la plancia deve reggere anche senza.
 func _carta_stesa(box: AABB, percorso: String, tinta: Color,
-		giu := false, stampa := Color.WHITE) -> void:
+		giu := false, stampa := Color.WHITE, contieni := false) -> void:
 	var m := _scatola(box.size, tinta)
 	m.position = box.position + box.size / 2.0
 	add_child(m)
 	if percorso == "" or not ResourceLoader.exists(percorso): return
 	var tex := load(percorso) as Texture2D
 	if tex == null: return
-	var piano := _quad(Vector2(box.size.x, box.size.z), stampa, true)
+	# Le carte delle file (`contieni`) si appoggiano CONTENUTE nel posto
+	# quando le proporzioni sono molto diverse: le colossali della v2 sono
+	# larghe due o tre carte e, tirate nel posto di una, diventavano
+	# illeggibili. Sotto il 20% di scarto (le carte della v1.5, 0,92 contro
+	# 1,01) si riempie come prima. Le tessere colonna no: il loro disegno va
+	# steso sull'intera tessera, 63 x 271, qualunque sia l'immagine.
+	var dim := Vector2(box.size.x, box.size.z)
+	if contieni:
+		var rt := float(tex.get_width()) / maxf(1.0, float(tex.get_height()))
+		var rb := dim.x / maxf(0.001, dim.y)
+		if rt > rb * 1.2: dim.y = dim.x / rt
+		elif rt < rb / 1.2: dim.x = dim.y * rt
+	var piano := _quad(dim, stampa, true)
 	piano.rotate_x(-PI / 2.0)
 	# Il titolo della carta va dalla parte opposta a chi guarda, come una
 	# carta vera appoggiata sul tavolo davanti a se'.
@@ -728,7 +740,7 @@ func _file_laterali() -> void:
 		var stampa := Color.WHITE
 		if bool(c.get("sepolta", false)): stampa = CARTA_SEPOLTA
 		elif bool(c.get("spenta", false)): stampa = CARTA_SPENTA
-		_carta_stesa(r, percorso, sfondo * stampa, false, stampa)
+		_carta_stesa(r, percorso, sfondo * stampa, false, stampa, true)
 		# Niente scritte sopra: il nome e i numeri escono nel riquadro che
 		# segue il mouse. I numeri li' vengono dai DATI e non dal disegno,
 		# perche' quelli stampati sono vecchi - su 44 edifici su 60 lo Scavo

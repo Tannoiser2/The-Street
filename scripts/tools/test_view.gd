@@ -66,6 +66,7 @@ func _ready() -> void:
 	_run("lo scheletro del lavoratore sotto il potenziamento (v2)", _test_scheletro_lavoratore)
 	_run("la rovina senza rudere resta in piedi, girata (v2)", _test_rovina_senza_rudere)
 	_run("il riepilogo finale con i nomi del regolamento v2", _test_riepilogo_v2)
+	_run("le facce degli edifici della v2", _test_facce_v2)
 	print("\n%d superati, %d falliti" % [_passed, _failed])
 	get_tree().quit(0 if _failed == 0 else 1)
 
@@ -2819,3 +2820,30 @@ func _test_riepilogo_v2() -> void:
 	_eq("nessun canale della v2 resta fuori dalla tabella (%s)" % ", ".join(fuori), fuori.size(), 0)
 	_ok("  e la Verticalita' non e' una colonna", not noti.has("verticalita"))
 	CardDB.load_db(CardDB.DB_PATH)
+
+
+# Registro 120: nella v2 il mercato mostra le facce della v2, ritagliate dai
+# PDF Edifici_<Era>_Era_A4.pdf, con le proporzioni della carta nuova
+# (orizzontale); la v1.5 resta com'era. La grafica non e' versionata: se non
+# e' stata estratta, la v2 torna alla faccia della v1.5.
+func _test_facce_v2() -> void:
+	var m1 := BoardLayout3D.misura_carta("mercato")
+	_ok("nella v1.5 il posto del mercato e' quasi quadrato", absf(m1.x / m1.y - 1.0) < 0.1)
+	_ok("  e la faccia e' quella della v1.5",
+		BoardLayout3D.carta_path("mercato", "ed_dolmen").contains("/edifici/"))
+	if not FileAccess.file_exists("res://data/cards-v2.json"): return
+	CardDB.load_db("res://data/cards-v2.json")
+	var m2 := BoardLayout3D.misura_carta("mercato")
+	_ok("nella v2 il posto del mercato e' orizzontale come la carta (%.2f)" % (m2.x / m2.y),
+		absf(m2.x / m2.y - 194.4 / 115.6) < 0.01)
+	_eq("  alla stessa altezza delle altre carte", m2.y, BoardLayout3D.ALTEZZA_CARTA)
+	var v2 := BoardLayout3D.CARTELLA_EDIFICI_V2 % "ed_dolmen"
+	if ResourceLoader.exists(v2):
+		_eq("  e la faccia e' quella della v2", BoardLayout3D.carta_path("mercato", "ed_dolmen"), v2)
+		_ok("  anche per le case della riserva",
+			BoardLayout3D.carta_path("mercato", "ed_casa_e1_s").contains("/edifici_v2/"))
+	else:
+		_ok("  senza grafica estratta torna alla faccia della v1.5",
+			BoardLayout3D.carta_path("mercato", "ed_dolmen").contains("/edifici/"))
+	CardDB.load_db(CardDB.DB_PATH)
+

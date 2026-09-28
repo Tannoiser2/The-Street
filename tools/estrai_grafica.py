@@ -746,8 +746,10 @@ def main(dest):
                          os.path.join(dest, "scheletri.png"))
 
     sag = estrai_sagome(doc, dest)
+    v2 = estrai_edifici_v2(dest)
     with open(os.path.join(dest, "indice.json"), "w", encoding="utf-8") as f:
         json.dump({"carte_edifici": indice,
+                   "carte_edifici_v2": v2,
                    "sagome": sag,
                    "conteggi": conteggi,
                    "per_id": per_id,
@@ -756,6 +758,160 @@ def main(dest):
                                   "data/sagome.json"},
                   f, ensure_ascii=False, indent=2)
     print("indice.json scritto")
+
+
+# ---- le facce degli edifici della v2 (registro 120) ------------------------
+# Il designer ha consegnato le carte della v2 in cinque PDF, uno per era
+# (materiali/Edifici_<Era>_Era_A4.pdf). A differenza di Carte.pdf non sono
+# illustrazioni incorporate: ogni carta e' COMPOSTA sulla pagina (cornice,
+# testo, icone vettoriali, un'illustrazione), quindi la faccia si ottiene
+# ritagliando la pagina sul bordo della carta, che e' un rettangolo tracciato
+# spesso 4 pt. Le carte da due o tre caselle sono larghe il doppio o il triplo.
+#
+# Il testo stampato e' vero testo: nome, "Era N", classi, terreno, costo
+# (Pietra, Denaro, Idee), RIS per le case, resistenza, Scavo, e in basso la
+# produzione (mattone), il Denaro prodotto e la Rendita (moneta) e il Lampo
+# (moneta con il fulmine, un disegno giallo 7x11 subito dopo il numero). Lo si
+# legge per mappare ogni carta sul suo id SENZA ordine presunto, e per
+# confrontarla con data/cards-v2.json: i dati restano la fonte (vincolo del
+# designer), il PDF e' solo grafica, ma se i numeri stampati divergono lo si
+# dice qui, carta per carta, invece di mostrare a schermo una carta sbagliata
+# senza saperlo.
+ERE_V2 = {"Prima": 1, "Seconda": 2, "Terza": 3, "Quarta": 4, "Quinta": 5}
+TERRENI_V2 = {"fiume": "fiume", "pianura": "pianura", "collina": "collina",
+              "bosco": "bosco", "qualsiasi": None}
+DPI_V2 = 250
+
+
+def _righe_v2(pg):
+    fulmini = [g["rect"] for g in pg.get_drawings()
+               if g.get("fill") and abs(g["rect"].width - 7.2) < 0.3
+               and abs(g["rect"].height - 10.8) < 0.3]
+    out = []
+    for b in pg.get_text("dict")["blocks"]:
+        if b.get("type") != 0:
+            continue
+        for l in b["lines"]:
+            t = " ".join(sp["text"] for sp in l["spans"]).strip()
+            if not t:
+                continue
+            x0, y0, x1, y1 = l["bbox"]
+            f = l["spans"][0]
+            out.append({"t": t, "x0": x0, "y0": y0, "x1": x1, "y1": y1,
+                        "font": f["font"], "size": round(f["size"], 1),
+                        "fulmine": any(abs(r.y0 - y0 - 1.7) < 2 and 0 <= r.x0 - x1 < 4
+                                       for r in fulmini)})
+    return out
+
+
+def _leggi_carta_v2(righe):
+    ordinate = sorted(righe, key=lambda l: (round(l["y0"]), l["x0"]))
+    etich = [l["t"] for l in ordinate if l["font"].startswith("Helvetica")]
+    costo = [int(l["t"]) for l in ordinate if l["size"] == 10.0 and l["t"].isdigit()]
+    res_scavo = [int(l["t"]) for l in ordinate if l["size"] == 11.0 and l["t"].isdigit()]
+    mattoni = sorted(int(l["t"]) for l in righe if l["size"] == 8.6 and l["t"].isdigit())
+    lampo, monete = 0, []
+    for l in righe:
+        parti = l["t"].split()
+        if len(parti) == 2 and parti[0] == "D" and parti[1].isdigit():
+            if l["fulmine"]:
+                lampo = int(parti[1])
+            else:
+                monete.append(int(parti[1]))
+    return {"etich": etich, "costo": costo[:3], "res_scavo": res_scavo[:2],
+            "mattoni": mattoni, "monete": sorted(monete), "lampo": lampo}
+
+
+def _differenze_v2(letta, b):
+    d = []
+    et = letta["etich"]
+    classi = [c.strip().lower() for c in et[0].split("/")] if et else []
+    if classi != b["classes"]:
+        d.append(f"classi {classi}, dati {b['classes']}")
+    terr = et[1].lower() if len(et) > 1 else "?"
+    if TERRENI_V2.get(terr, "?") != b["terrain"]:
+        d.append(f"terreno {terr}, dati {b['terrain']}")
+    if ("RIS" in et) != bool(b.get("riserva")):
+        d.append("RIS stampato" if "RIS" in et else "manca RIS")
+    esa = [x for x in et if x.startswith("Esaur")]
+    if (int(esa[0].split()[-1]) if esa else 0) != int(b.get("exhaustible", 0)):
+        d.append(f"esaurimento {esa}, dati {b.get('exhaustible')}")
+    c = b["cost"]
+    if letta["costo"] != [c["pietra"], c["oro"], c["idee"]]:
+        d.append(f"costo {letta['costo']}, dati {[c['pietra'], c['oro'], c['idee']]}")
+    if letta["res_scavo"] != [b["resistance"], b["scavo"]]:
+        d.append(f"resistenza/Scavo {letta['res_scavo']}, dati {[b['resistance'], b['scavo']]}")
+    pr = b["production"]
+    if letta["mattoni"] != sorted(v for v in (pr["pietra"], pr.get("idee", 0), pr.get("cultura", 0)) if v):
+        d.append(f"produzione {letta['mattoni']}, dati {dict((k, v) for k, v in pr.items() if v)}")
+    if letta["monete"] != sorted(v for v in (pr["oro"], b["rendita"]) if v):
+        d.append(f"Denaro/Rendita {letta['monete']}, dati Denaro {pr['oro']} Rendita {b['rendita']}")
+    if letta["lampo"] != b["lampo"]:
+        d.append(f"Lampo {letta['lampo']}, dati {b['lampo']}")
+    return d
+
+
+def estrai_edifici_v2(dest):
+    pdfs = sorted(
+        (f for f in os.listdir(os.path.join(ROOT, "materiali"))
+         if f.startswith("Edifici_") and f.endswith("_Era_A4.pdf")),
+        key=lambda f: ERE_V2.get(f.split("_")[1], 9))
+    if not pdfs:
+        print("edifici v2: nessun PDF in materiali/")
+        return {}
+    v2 = json.load(open(os.path.join(ROOT, "data", "cards-v2.json"), encoding="utf-8"))
+    per_nome = {}
+    for b in v2["buildings"]:
+        per_nome.setdefault((b["name"].lower(), b["era"]), b)
+    out_dir = os.path.join(dest, "carte", "edifici_v2")
+    os.makedirs(out_dir, exist_ok=True)
+    indice, stampate, estranee, diverse = {}, 0, [], []
+    for nome_pdf in pdfs:
+        era = ERE_V2[nome_pdf.split("_")[1]]
+        doc = pymupdf.open(os.path.join(ROOT, "materiali", nome_pdf))
+        for pn, pg in enumerate(doc):
+            righe = _righe_v2(pg)
+            # I bordi delle carte: rettangoli tracciati sulla pagina (quelli
+            # con x negativa stanno fuori foglio e non sono carte).
+            bordi = [g["rect"] for g in pg.get_drawings()
+                     if g.get("type") == "s" and g["rect"].width > 150
+                     and g["rect"].height > 100 and g["rect"].x0 >= 0]
+            titoli = [l for l in righe if l["size"] == 12.0 and l["font"] == "Times-Bold"]
+            for t in titoli:
+                cx, cy = (t["x0"] + t["x1"]) / 2, (t["y0"] + t["y1"]) / 2
+                dentro = [r for r in bordi if r.contains(pymupdf.Point(cx, cy))]
+                if not dentro:
+                    continue
+                r = min(dentro, key=lambda r: r.width * r.height)
+                sue = [l for l in righe if l is not t and r.contains(pymupdf.Point(l["x0"] + 1, l["y0"] + 1))
+                       and not l["t"].startswith("Era ")]
+                stampate += 1
+                b = per_nome.get((t["t"].lower(), era))
+                if b is None:
+                    estranee.append(f"{t['t']} (era {era}, {nome_pdf} p.{pn + 1})")
+                    continue
+                d = _differenze_v2(_leggi_carta_v2(sue), b)
+                if d and b["id"] not in {x[0] for x in diverse}:
+                    diverse.append((b["id"], b["name"], d))
+                if b["id"] in indice:
+                    continue  # le case sono stampate in due copie: ne basta una
+                clip = pymupdf.Rect(r.x0 - 2, r.y0 - 2, r.x1 + 2, r.y1 + 2)
+                pix = pg.get_pixmap(dpi=DPI_V2, clip=clip)
+                nome = f"{b['id']}.png"
+                pix.save(os.path.join(out_dir, nome))
+                indice[b["id"]] = {"file": nome, "pdf": nome_pdf, "pagina": pn + 1,
+                                   "px": [pix.width, pix.height],
+                                   "differenze": d}
+    mancanti = [b["name"] for b in v2["buildings"] if b["id"] not in indice]
+    print(f"edifici v2: {stampate} carte stampate, {len(indice)} facce per id "
+          f"su {len(v2['buildings'])} edifici del file v2")
+    if mancanti:
+        print(f"  ATTENZIONE: senza faccia {mancanti}")
+    if estranee:
+        print(f"  stampate ma assenti dal file v2 (non estratte): {estranee}")
+    for id_, nome, d in diverse:
+        print(f"  DIVERSA dai dati: {nome} ({id_}): " + "; ".join(d))
+    return indice
 
 
 if __name__ == "__main__":
