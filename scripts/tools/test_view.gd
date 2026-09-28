@@ -2564,6 +2564,9 @@ func _test_tessera_girata() -> void:
 	var fiume := g2.grid.terrains.find(Enums.Terrain.FIUME)
 	_ok("c'e' un fiume", fiume >= 0)
 	if fiume >= 0:
+		# Una tessera che da' sempre qualcosa: quella pescata puo' non dare
+		# niente a chi attiva, e allora non si gira (registro 121).
+		if not g2.tessere_colonna.is_empty(): g2.tessere_colonna[fiume] = "te_sentiero_dei_pastori"
 		_ok("attivare il fiume lo gira", ctl.place_worker(fiume) and g2.tessere_usate[fiume])
 		vista.mostra(g2)
 		_eq("  e sul tavolo c'e' un velo", girate.call(), 1)
