@@ -825,10 +825,16 @@ def _leggi_carta_v2(righe):
 def _differenze_v2(letta, b):
     d = []
     et = letta["etich"]
-    classi = [c.strip().lower() for c in et[0].split("/")] if et else []
-    if classi != b["classes"]:
+    # Classe e luogo si riconoscono dal nome, non dalla posizione: nelle carte
+    # grandi (1 x 2, 2 x 2, 1 x 3) l'etichetta del luogo puo' stare prima.
+    luoghi = [x for x in et if x.lower() in TERRENI_V2]
+    altre = [x for x in et if x.lower() not in TERRENI_V2 and x != "RIS" and not x.startswith("Esaur")]
+    # Le carte a due classi hanno il box diviso in due meta' (due etichette);
+    # quelle vecchie avevano "Religione / Cultura" in un box solo.
+    classi = [c.strip().lower() for x in altre for c in x.split("/")]
+    if sorted(classi) != sorted(b["classes"]):
         d.append(f"classi {classi}, dati {b['classes']}")
-    terr = et[1].lower() if len(et) > 1 else "?"
+    terr = luoghi[0].lower() if luoghi else "?"
     if TERRENI_V2.get(terr, "?") != b["terrain"]:
         d.append(f"terreno {terr}, dati {b['terrain']}")
     if ("RIS" in et) != bool(b.get("riserva")):
