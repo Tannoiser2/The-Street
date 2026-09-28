@@ -1166,6 +1166,39 @@ Da decidere: se sostituire le quattro tessere che non scattano; se togliere Lamp
 (o ritarare il bot Lampo a due e a tre); se il più di punti a due giocatori va bene o si
 riduce la produzione delle tessere.
 
+## Ventesima misura: le caselle
+
+Decisioni del designer (registro 122): la strada diventa una griglia di caselle (colonna per
+binario) e ogni casella ha la sua pila. Il binario lo sceglie chi costruisce. Le carte quadrate
+occupano una colonna per due binari. Colosseo, Castello e Fortezza sono 2x2, il Grattacielo è
+1x3; questi quattro vanno solo sopra, con le regole di sempre, e si coprono solo in rovina. Il
+terrapieno si paga per casella vuota. Torneo `--giro tutte`, 750 partite, seme 700000, contro la
+diciannovesima misura (tessere dell'era).
+
+| per giocatore | a 2: tessere | **a 2: caselle** | a 3: tessere | **a 3: caselle** | a 4: tessere | **a 4: caselle** |
+|---|--:|--:|--:|--:|--:|--:|
+| PV | 91,1 | 93,7 | 93,0 | 95,3 | 86,2 | 88,9 |
+| Lampo / Rendita / Scavo / Continuità | 24,9 / 10,1 / 16,0 / 15,5 | 25,7 / 9,9 / 21,1 / 14,6 | 25,8 / 8,7 / 17,6 / 15,4 | 26,7 / 8,8 / 21,7 / 14,8 | 23,6 / 7,7 / 16,6 / 14,0 | 24,1 / 8,0 / 21,6 / 13,2 |
+| altezza massima / basi altrui | 4,65 / 1,9 | 3,51 / 2,2 | 4,58 / 2,5 | 3,65 / 2,8 | 4,57 / 2,6 | 3,52 / 3,0 |
+| kingmaker (cambia vincitore) | 10 % | 10 % | 14 % | 13 % | 18 % | 13 % |
+| vince: Rendita / Continuità / Bilanciata / Obiettivi / Scavo / Lampo | 50 / 42 / 46 / 53 / 48 / 61 | 42 / 43 / 49 / 50 / 49 / **66** | 36 / 29 / 38 / 28 / 30 / 41 | 30 / **25** / 32 / 35 / 31 / **48** | 27 / 20 / 23 / 26 / 25 / 30 | 23 / 19 / 22 / 23 / 22 / **41** |
+
+**1. Più Scavo, città più bassa.** Ogni casella ha la sua pila, quindi si costruisce sopra più
+spesso e più in basso: lo Scavo sale di 4-5 punti a testa, l'altezza massima scende di un
+livello. I punti crescono di 2,3-2,7 a testa.
+
+**2. La Lampo esce dall'errore a tutti i tavoli**: 66 % a due (bordo 56), 48 % a tre (bordo 38),
+41 % a quattro (bordo 31). A tre la Continuità scende al 25 % (bordo 28). Il kingmaker scende a
+quattro (da 18 a 13 %).
+
+**3. Le carte grandi si costruiscono.** In 750 partite a tre: Colosseo 387, Castello 333,
+Fortezza 221, Grattacielo 336; le quadrate da 12 (Castrum) a 749 (Circolo di pietre). Con la
+prima lettura, "una rovina sotto ogni casella", il Colosseo si costruiva 2 volte e il Castello
+12: la regola è diventata "solo sopra, con le regole di sempre".
+
+Da decidere: come riportare la Lampo nell'errore (ritarare il bot, togliere Lampo dalle
+tessere, o abbassare i Lampo alti delle carte).
+
 ## Come rifare il conto
 
 ```bash
