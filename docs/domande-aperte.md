@@ -2059,3 +2059,17 @@ dato è stato importato da lì. Ma due confronti fra ciò che è stampato e
     `verticalita` con 0 nella v2); ora una colonna compare solo se ha dato
     punti a qualcuno. I nomi stanno in 86 px a corpo 12: il test lo
     controlla. La v1.5 non cambia.
+
+120. **Le carte degli edifici della v2, stampate.** Il designer ha caricato
+    i cinque PDF `materiali/Edifici_<Era>_Era_A4.pdf`: 90 carte, cioe' i 60
+    edifici e le case della riserva in due copie. Letti a macchina (il
+    testo e' vero testo) e confrontati campo per campo con
+    `data/cards-v2.json`: 71 edifici su 74 coincidono in tutto. Restano
+    indietro tre case, stampate prima del punto 117: **Case popolari**
+    Lampo 0 (dati 2), **Palazzetto** e **Condominio popolare** Lampo 3
+    (dati 2). E sono stampate due copie di **Case operaie**, la casa con lo
+    Scavo dell'era 5 tolta al punto 116. Da correggere nel PDF: le tre case
+    a Lampo 2 e via le Case operaie. Intanto le facce si estraggono per id
+    (`tools/estrai_grafica.py`, che ripete il confronto a ogni estrazione) e
+    la vista v2 le usa per mercato, riserva e ventagli; le Case operaie non
+    si estraggono. Vedi `docs/materiali-di-stampa.md`.

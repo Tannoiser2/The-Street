@@ -68,9 +68,10 @@ Le tabelle sono in `scripts/ai/strategy_bot.gd`: `SPINTE_V1` (non si tocca), `SP
 `--spinta k=v,...` prova una taratura senza toccare le tabelle.
 
 **I test** (scene headless, sempre con `timeout` e l'output su file): `test_actions` 279,
-`test_effects` 503, `test_schema_validator` 13, `test_view` 484 più **due KO noti** ("il piano
-della tessera è profondo quanto la tessera" e "ce n'è uno per colonna"), che ci sono da prima
-della v2 e non vanno contati come regressioni.
+`test_effects` 503, `test_schema_validator` 13, `test_view` 492. `test_view` ha bisogno della
+grafica importata (`python3 tools/estrai_grafica.py` e poi `godot --headless --import`): senza,
+due test sul piano della tessera falliscono ("profondo quanto la tessera", "uno per colonna")
+e non sono regressioni.
 
 **I documenti.** `la-terza-risorsa.md` (le diciotto misure, con "Come rifare il conto" in fondo),
 `domande-aperte.md` (il registro), `regolamento-v2.md`, `carte-v2.md` (la distinta delle carte v2,
@@ -157,10 +158,10 @@ container può ripartire.
 
 ## Cosa resta aperto
 
-- **La grafica della v2.** I PDF coprono la v1.5: mancano le 14 case della riserva, le carte con i
-  testi nuovi (costi in tre risorse, Personaggi del draft, tessere con l'effetto), e le sagome
-  con Rendita, Lampo e Scavo stampati. Il capitolato è `docs/carte-v2.md`. A schermo la v2 usa le
-  immagini della v1.5 dove esistono e i disegni a runtime altrove.
+- **La grafica della v2.** Le carte degli edifici v2 ci sono (registro 120, cinque PDF per era):
+  a schermo la v2 le usa. Da correggere nel PDF tre case col Lampo vecchio e le Case operaie da
+  togliere. Mancano ancora le sagome v2, i Personaggi del draft e le tessere con l'effetto: il
+  capitolato è `docs/carte-v2.md`.
 - Il riepilogo finale a schermo usa i nomi del regolamento v2 dal registro 119 (`Riepilogo.voci()`
   sceglie la tabella dal file dei dati); la colonna "Scavo+premio" tiene insieme il premio di
   scavo pagato sul momento e lo Scavo di fine partita, che il nucleo segna nello stesso canale.
@@ -169,7 +170,8 @@ container può ripartire.
 - **Registro 86**: al tavolo serve un segno fisico per i Centri Urbani che hanno già pagato
   nell'era; il regolamento v1.5 non lo dice.
 - I difetti dei materiali di stampa (69, 73, 74) sono **chiusi** il 27 settembre. I blob noti su
-  main: `Carte.pdf` 008a6c4, `Potenziamenti.pdf` 7e630f1, `Sfondo.png` 6dbe9a9, `Scavo.png`
+  main: `Carte.pdf` 008a6c4, i cinque `Edifici_<Era>_Era_A4.pdf` (dal 28 settembre: a8f7b79,
+  a1efd25, f2fcaf4, cfd6790, c799604), `Potenziamenti.pdf` 7e630f1, `Sfondo.png` 6dbe9a9, `Scavo.png`
   ee29441, `Terrapieno.png` 4fe4f34, `Scheletri.png` 7eef245, `ProsperitaUrbana.png` 8c42bf1
   (`git ls-tree origin/main materiali/`); se uno cambia, `tools/estrai_grafica.py` lo dice.
 
