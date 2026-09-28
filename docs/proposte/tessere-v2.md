@@ -14,8 +14,8 @@ base, le tessere aggiungono altre icone di produzione e l'effetto". Non è ancor
 
 | terreno | produzione di base | quante |
 |---|---|--:|
-| Pianura | 1 Denaro | 3 |
-| Fiume | 1 Costruzione | 2 |
+| Pianura | 1 Costruzione | 3 |
+| Fiume | 1 Denaro | 2 |
 | Collina | 1 Costruzione | 3 |
 | Bosco | 1 Idea | 2 |
 
@@ -32,7 +32,9 @@ scatta **una volta per era, alla prima occasione**, poi la tessera si gira, come
 
 **Perché questi numeri.** A tre giocatori (2 Pianure, 2 Fiumi, 1 Collina, 2 Boschi) la produzione
 totale di base più tessere è **la stessa di oggi** in ogni era, risorsa per risorsa. L'unica
-differenza è l'era 1: la Pianura dà Denaro fin da subito, quindi 2 Denaro al posto di 2 Costruzione.
+differenza è l'era 1: il Fiume dà Denaro fin da subito, quindi 2 Denaro al posto di 2 Costruzione.
+Il Fiume diventa la fonte del Denaro, come era la sua regola di oggi (+1 Denaro a chi lo attiva);
+la Pianura, Costruzione (decisione del designer).
 A due e a quattro giocatori le tessere si pescano, quindi il conto è uguale in media.
 
 | era | oggi a tre giocatori | base + tessere |
@@ -121,11 +123,19 @@ Nell'era Moderna lo Scavo non vale: nessuna tessera dell'era 5 ne parla.
 
 ## Da decidere
 
-1. **La Pianura dà Denaro dall'era 1.** Oggi la Pianura dà Costruzione nell'era 1 e Denaro dopo;
-   con una produzione di base fissa deve scegliere. Proposta: Denaro, il suo carattere di sempre
-   ("sviluppo"). In alternativa Costruzione, e il Denaro tardo arriva solo dalle tessere.
-2. **I nomi e gli effetti** sono proposte: cambiali, scambiali di era, tienine alcuni.
-3. **Come si stampano le seconde copie** delle tessere dell'era (vedi "Stampa").
-4. **Gli effetti nuovi vanno misurati.** Alcuni danno più di oggi (Via consolare, Fiera, Zona
+1. ~~La produzione di base~~: deciso dal designer, Pianura 1 Costruzione e Fiume 1 Denaro.
+2. **Il Denaro tardo a due e a quattro giocatori.** Con il Denaro sul Fiume, e i Fiumi meno delle
+   Pianure, a due e a quattro giocatori le ere 3–5 hanno meno Denaro di oggi (media per era):
+
+   | | era 3 | era 4 | era 5 |
+   |---|:-:|:-:|:-:|
+   | a due: oggi / nuovo | 2 / 1 | 4 / 2,4 | 4 / 2,4 |
+   | a quattro: oggi / nuovo | 3 / 2 | 6 / 4,6 | 6 / 4,6 |
+
+   A tre è identico. Se la misura lo conferma come un problema, la correzione più semplice è
+   spostare un'icona da Idee a Denaro nelle tessere delle ere 4 e 5.
+3. **I nomi e gli effetti** sono proposte: cambiali, scambiali di era, tienine alcuni.
+4. **Come si stampano le seconde copie** delle tessere dell'era (vedi "Stampa").
+5. **Gli effetti nuovi vanno misurati.** Alcuni danno più di oggi (Via consolare, Fiera, Zona
    industriale, Quartiere alto). Una volta decise, le tessere entrano nel file v2 e si rigioca la
    misura standard a 2, 3 e 4 giocatori.
