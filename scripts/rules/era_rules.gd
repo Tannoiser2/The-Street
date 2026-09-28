@@ -25,7 +25,9 @@ static func usa_tessera(gs: GameState, col: int, cosa: String) -> void:
 	gs.tessere_usate[col] = true
 	gs.log_line("La tessera della colonna %d si gira: %s" % [col, cosa])
 
-static func activate(gs: GameState, player: int, col: int) -> void:
+# `tessera_a_mano`: la tessera dell'era chiede una scelta al giocatore, e la
+# risolve il controller con una domanda invece della scelta automatica.
+static func activate(gs: GameState, player: int, col: int, tessera_a_mano := false) -> void:
 	var g := gs.grid
 	var t_id: String = ["pianura", "fiume", "collina", "bosco"][g.terrains[col]]
 	# Fiume, una volta per era: +1 Denaro a chi attiva. Con le tessere
@@ -59,7 +61,7 @@ static func activate(gs: GameState, player: int, col: int) -> void:
 		paga_edificio(gs, b)
 
 	Effects.apply_on_activate(gs, player, col)
-	TessereEra.all_attivazione(gs, player, col)
+	if not tessera_a_mano: TessereEra.all_attivazione(gs, player, col)
 
 	# UNA VOLTA PER ERA (manopola `once_per_era`, spenta nei dati): la prima
 	# attivazione di un Centro Urbano in un'era paga, le altre nella stessa

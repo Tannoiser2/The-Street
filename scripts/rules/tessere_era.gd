@@ -92,6 +92,52 @@ static func _somma(p: Dictionary) -> int:
 	return int(p["pietra"]) + int(p["oro"]) + int(p["idee"])
 
 # ---- all'attivazione ----------------------------------------------------
+# LE SCELTE A SCHERMO: per un giocatore umano le tessere "puo' cambiare", "a
+# scelta" e "una colonna adiacente a scelta" diventano una domanda. Qui le
+# opzioni, ciascuna col suo testo e quel che da'; vuoto se la tessera non
+# chiede niente (o non ha niente da offrire: senza la risorsa da cedere non si
+# cambia, e la tessera aspetta).
+static func opzioni_scelta(gs: GameState, player: int, col: int) -> Array:
+	var e := effetto(gs, col, "attiva")
+	var out := []
+	if e.is_empty(): return out
+	var p: PlayerState = gs.players[player]
+	var nomi := {"pietra": "Costruzione", "oro": "Denaro", "idee": "Idee"}
+	if e.has("cambio"):
+		var da := str(e["cambio"][0]); var a := str(e["cambio"][1])
+		if _quanto(p, da) < 1: return out
+		var g := {"pietra": 0, "oro": 0, "idee": 0}
+		g[da] -= 1; g[a] += 1
+		out.append({"testo": "Cambia 1 %s in 1 %s" % [nomi[da], nomi[a]], "g": g})
+		out.append({"testo": "Non cambiare (la tessera resta da usare)", "g": {}})
+	elif e.has("a_scelta"):
+		for r in RISORSE:
+			var g2 := {"pietra": 0, "oro": 0, "idee": 0}
+			g2[r] += int(e["a_scelta"])
+			out.append({"testo": "+%d %s" % [int(e["a_scelta"]), nomi[r]], "g": g2})
+	elif bool(e.get("produzione_adiacente", false)):
+		for c in [col - 1, col + 1]:
+			if c < 0 or c >= gs.grid.n_cols: continue
+			var pr := produzione(gs, c)
+			if _somma(pr) == 0: continue
+			var pezzi := PackedStringArray()
+			for r in RISORSE:
+				if int(pr[r]) > 0: pezzi.append("%d %s" % [int(pr[r]), nomi[r]])
+			out.append({"testo": "Colonna %d: %s" % [c, ", ".join(pezzi)], "g": pr})
+	return out
+
+# La scelta fatta a schermo: si applica l'opzione, e la tessera si gira se
+# ha dato qualcosa ("non cambiare" la lascia per un'altra occasione).
+static func applica_scelta(gs: GameState, player: int, col: int, indice: int) -> void:
+	var ops := opzioni_scelta(gs, player, col)
+	if indice < 0 or indice >= ops.size(): return
+	var g: Dictionary = ops[indice]["g"]
+	if g.is_empty(): return
+	var p: PlayerState = gs.players[player]
+	p.pay(maxi(0, -int(g["pietra"])), maxi(0, -int(g["oro"])), maxi(0, -int(g["idee"])))
+	p.gain(maxi(0, int(g["pietra"])), maxi(0, int(g["oro"])), maxi(0, int(g["idee"])))
+	gira(gs, col, "%s, scelto da giocatore %d" % [ops[indice]["testo"], player])
+
 static func all_attivazione(gs: GameState, player: int, col: int) -> void:
 	var e := effetto(gs, col, "attiva")
 	if e.is_empty(): return

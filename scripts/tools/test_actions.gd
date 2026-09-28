@@ -1667,5 +1667,25 @@ func _test_tessere_era() -> void:
 	# I terreni non hanno piu' la loro regola: niente sconto della pianura.
 	_eq("con le tessere dell'era la pianura non sconta piu'",
 		BuildRules.pianura_discount(gs, CardDB.buildings["ed_circolo_di_pietre"], col), 0)
+
+	# Per un umano la tessera "a scelta" diventa una domanda a schermo.
+	var ctl2 := GameController.new()
+	ctl2.umani = {0: true}
+	ctl2.new_game(3, 51)
+	var g2 := ctl2.gs
+	while not g2.pending_choice.is_empty():
+		ctl2.choose(int((g2.pending_choice["options"] as Array)[0]))
+	g2.current_index = 0
+	g2.tessere_colonna[0] = "te_bottega"
+	g2.tessere_usate[0] = false
+	var p0: PlayerState = g2.players[0]
+	_ok("la Bottega per un umano chiede", ctl2.place_worker(0)
+		and str(g2.pending_choice.get("kind", "")) == "tessera")
+	_eq("  tre risposte, una per risorsa", (g2.pending_choice.get("options", []) as Array).size(), 3)
+	_ok("  e prima di scegliere la tessera non e' girata", not g2.tessere_usate[0])
+	var idee_dopo := p0.idee
+	ctl2.choose(2)
+	_ok("  scegliere le Idee le da' e gira la tessera",
+		p0.idee >= idee_dopo + 1 and g2.tessere_usate[0] and g2.pending_choice.is_empty())
 	CardDB.load_db(CardDB.DB_PATH)
 

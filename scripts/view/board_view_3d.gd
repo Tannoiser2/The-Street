@@ -79,6 +79,8 @@ func _nuovi_crolli(prima: GameState) -> void:
 			if int(_stato_prima[b.uid]) == Enums.BuildingState.ROVINA: continue
 			# Nella v2 la rovina non si abbatte: si gira, e resta in piedi.
 			if BoardLayout3D.sagoma_girata(b): continue
+			# Con le carte distese la rovina e' la carta capovolta: niente crollo.
+			if BoardLayout3D.cartoni(): continue
 			_avvia_crollo(b)
 	_stato_prima = adesso
 
@@ -350,7 +352,13 @@ func _tessere() -> void:
 		# capovolge; qui si abbuia e ci si scrive sopra, cosi' il disegno del
 		# terreno resta leggibile e si vede da lontano che per quest'era non
 		# da' piu' niente. A inizio era il motore la rigira e il velo sparisce.
-		if tessera_girata(c): _tessera_girata(c, box)
+		# LA TESSERA DELL'ERA (v2, registro 121): nella casella davanti alla
+		# colonna. Girata, si vede in bianco e nero.
+		if BoardLayout3D.cartoni() and TessereEra.attive():
+			var te := BoardLayout3D.casella_era_box(c)
+			_carta_stesa(te, BoardLayout3D.tessera_era_path(gs, c, tessera_girata(c)), Color("#e9dfc4"))
+			if tessera_girata(c): _tessera_girata(c, te)
+		elif tessera_girata(c): _tessera_girata(c, box)
 		if c == _evidenziata:
 			var velo := _quad(Vector2(box.size.x, box.size.z),
 				Color(1, 1, 1, 0.22), true)
@@ -381,6 +389,8 @@ func _tessera_girata(col: int, box: AABB) -> void:
 	# La scritta sta sulla fascia in fondo, dove sta il cartellino della
 	# Prosperita', e come lui si legge da ogni lato.
 	var dove := BoardLayout3D.prosperita_box(col)
+	# Nella v2 si gira la tessera dell'era, e la scritta sta su di lei.
+	if BoardLayout3D.cartoni(): dove = box
 	_scritta(Vector3(dove.position.x + dove.size.x / 2.0, box.end.y + 6.0,
 		dove.position.z + dove.size.z / 2.0), "girata", 0.28, Color("#d9d2c5"))
 
@@ -413,6 +423,8 @@ func _edifici() -> void:
 		# partite a tre giocatori - ma sullo schermo restavano in piedi.
 		if BoardLayout3D.ha_sagoma(b):
 			_sagoma(b)
+			_linguette(b)
+		elif BoardLayout3D.cartoni() and not b.is_buried:
 			_linguette(b)
 		_cubetti(b)
 		_segnalini(b)
@@ -456,6 +468,14 @@ func _faccia_di_terra(box: AABB, variante: int) -> void:
 
 func _basetta(b: Building) -> void:
 	var box := BoardLayout3D.basetta_box(gs, b)
+	# NELLA V2 LA BASETTA E' LA CARTA (registro 122): un cartone di 15 mm
+	# disteso sulle caselle, con la faccia della carta sopra - in bianco e
+	# nero se e' in rovina, cioe' capovolta - e i fianchi del colore del
+	# giocatore, perche' le carte sono uguali per tutti.
+	if BoardLayout3D.cartoni():
+		var tinta: Color = COLORI_GIOCATORE[b.owner % COLORI_GIOCATORE.size()].darkened(0.15)
+		_carta_stesa(box, BoardLayout3D.carta_edificio_path(b), tinta, false, Color.WHITE, true)
+		return
 	# Col disegno sopra, il colore del giocatore non ha piu' dove stare: va
 	# sulla basetta, che e' esattamente cio' che sul tavolo vero distingue
 	# due copie della stessa sagoma.

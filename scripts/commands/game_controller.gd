@@ -306,6 +306,11 @@ func _lavoratore_su(b: Building, p: PlayerState) -> void:
 	b.protected_by = p.index
 
 # ---- fase 1+2: piazza e attiva --------------------------------------
+# I giocatori che scelgono a schermo (le persone): per loro le tessere
+# dell'era "a scelta" diventano una domanda. I bot e le misure scelgono da
+# soli (TessereEra). Lo imposta la schermata di gioco.
+var umani: Dictionary = {}
+
 func place_worker(col: int, protect: Building = null) -> bool:
 	if not gs.pending_choice.is_empty(): return false
 	if gs.phase != Enums.Phase.PIAZZA: return false
@@ -324,9 +329,30 @@ func place_worker(col: int, protect: Building = null) -> bool:
 		protect.protection += int(CardDB.constants["protection_bonus"])
 		protect.protected_by = p.index
 		gs.protetto_uid = protect.uid
-	EraRules.activate(gs, p.index, col)
+	var a_mano := umani.has(p.index) and not turno_v2() \
+		and not TessereEra.opzioni_scelta(gs, p.index, col).is_empty()
+	EraRules.activate(gs, p.index, col, a_mano)
 	gs.colonna_attivata = col
 	p.bump("az_colonna")
+	if a_mano:
+		var te := TessereEra.tessera(gs, col)
+		var ops := TessereEra.opzioni_scelta(gs, p.index, col)
+		var idx: Array[int] = []
+		var testi: Array[String] = []
+		for i in ops.size():
+			idx.append(i)
+			testi.append(str(ops[i]["testo"]))
+		gs.phase = Enums.Phase.AZIONE
+		gs.pending_choice = {
+			"player": p.index,
+			"kind": "tessera",
+			"col": col,
+			"prompt": "%s: %s" % [te["name"], te["testo"]],
+			"options": idx,
+			"etichette": testi,
+		}
+		choice_required.emit(gs.pending_choice)
+		return true
 	if turno_v2():
 		# Attivare la colonna e' l'azione intera del turno.
 		_end_turn()
@@ -779,6 +805,12 @@ func choose(uid: int) -> bool:
 			return true
 		"draft_bersaglio":
 			_draft_prendi(int(gs.pending_choice["player"]), str(gs.pending_choice["char_id"]), _per_uid(uid))
+			return true
+		"tessera":
+			TessereEra.applica_scelta(gs, int(gs.pending_choice["player"]),
+				int(gs.pending_choice["col"]), uid)
+			gs.pending_choice = {}
+			state_changed.emit()
 			return true
 	var o: Dictionary = _omaggi_da_piazzare.pop_front()
 	EraRules.place_gift(gs, o, _per_uid(uid))
