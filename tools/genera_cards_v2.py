@@ -445,10 +445,6 @@ FORME = {
     "ed_grattacielo": (1, 3),
 }
 SOLO_SU_ROVINE = {"ed_anfiteatro", "ed_castello", "ed_fortezza_bastionata", "ed_grattacielo"}
-TESTI_FORME = {
-    "ed_acquedotto": "Colossale: 3 slot adiacenti, almeno uno con fiume. Eco: +2 PV (lampo) se ancora in piedi nel Moderno.",
-    "ed_stazione": "Colossale: 3 slot adiacenti, si attiva da tutte le colonne. Produce 2 oro. Richiede livello 1+.",
-}
 
 def forme(v):
     per_id = {b["id"]: b for b in v["buildings"]}
@@ -458,8 +454,6 @@ def forme(v):
         per_id[bid]["depth"] = d
     for bid in SOLO_SU_ROVINE:
         per_id[bid]["solo_su_rovine"] = True
-    for bid, testo in TESTI_FORME.items():
-        per_id[bid]["effect_text"] = testo
     v["constants"]["caselle"] = True
 
 # I POTENZIAMENTI RADDOPPIATI (registro 123): il designer chiede altri 25
@@ -553,6 +547,115 @@ def potenziamenti_nuovi(v):
         v["upgrades"].append({"id": uid, "name": nome, "era": era, "class": classe, "cost": costo,
                               "family": fam, "effect_text": testo, "effects": effetti})
 
+# I TESTI DA STAMPARE (registro 124). Il designer: "correggi tutti i testi";
+# tre tempi e basta. Il Lampo (punti subito, una volta) e la Rendita (punti a
+# fine di ogni era, se in piedi) stanno nelle icone, non nel testo; nel testo
+# restano gli effetti permanenti e quelli "A fine partita". Niente frasi di
+# colore, niente parole della v1.5 (pietra, oro, res, lampo per un finale,
+# "abiti qui"), niente ripetizioni di quello che dice gia' un'icona o la forma
+# della carta. Ogni testo dice quello che fa il motore, parola per parola.
+SOLO_SOPRA = "Solo sopra: mai a terra. Sopra di lui si costruisce solo quando è in rovina."
+TESTI_V2 = {
+    # edifici: "" = nessun testo sulla carta
+    "ed_circolo_di_pietre": "",
+    "ed_menhir": "",
+    "ed_focolare_comune": "Quando lo attivi: +1 Costruzione.",
+    "ed_villaggio_palizzato": "Negli eventi, i tuoi edifici adiacenti hanno +1 Resistenza.",
+    "ed_acquedotto": "A fine partita, se è in piedi: +2 PV.",
+    "ed_anfiteatro": SOLO_SOPRA,
+    "ed_castrum": "Negli eventi, i tuoi edifici nelle sue colonne hanno +1 Resistenza.",
+    "ed_ponte": "Gli edifici adiacenti producono 1 in più di ogni risorsa che già producono.",
+    "ed_torre_di_vedetta": "Negli eventi, i tuoi edifici adiacenti hanno +1 Resistenza.",
+    "ed_arsenale": "Negli eventi, i tuoi edifici Militari adiacenti hanno +1 Resistenza.",
+    "ed_castello": SOLO_SOPRA,
+    "ed_mura": "Negli eventi, tutti gli edifici adiacenti, anche altrui, hanno +1 Resistenza.",
+    "ed_ospedale_dei_pellegrini": "Quando lo attivi: +1 Denaro.",
+    "ed_bottega_dartista": "I tuoi potenziamenti costano 1 in meno, nella loro risorsa.",
+    "ed_duomo": "Solo sopra: al livello 2 o più.",
+    "ed_fortezza_bastionata": SOLO_SOPRA,
+    "ed_giardino_allitaliana": "",
+    "ed_osservatorio": "A fine partita, se è in piedi: +2 PV.",
+    "ed_piazza_monumentale": "Solo sopra: al livello 1 o più. A fine partita: +1 PV per ogni tuo edificio in cima a una colonna adiacente.",
+    "ed_biblioteca": "A fine partita: +1 PV per ogni classe diversa fra i tuoi edifici nelle sue colonne, sotterrati compresi.",
+    "ed_caffe_letterario": "A fine partita: +1 PV se è adiacente a un edificio Cultura.",
+    "ed_condominio": "",
+    "ed_fondazione_darte": "A fine partita: +1 PV per ogni tuo potenziamento.",
+    "ed_grattacielo": "Solo sopra: al livello 2 o più, mai a terra. A fine partita: +1 PV per ogni livello a cui è costruito; ogni edificio altrui in cima a una colonna adiacente toglie 1 PV al suo proprietario.",
+    "ed_monumento_ai_caduti": "A fine partita: +1 PV per ogni altro tuo edificio Militare, in piedi o sotterrato.",
+    "ed_museo": "Solo sopra: al livello 1 o più. A fine partita: +2 PV per ogni edificio sotterrato sotto di lui.",
+    "ed_parco_archeologico": "A fine partita: fino a 2 tuoi edifici non sotterrati nelle colonne adiacenti valgono il loro Scavo come se fossero sotterrati.",
+    "ed_stazione": "Solo sopra: al livello 1 o più.",
+    "ed_universita": "Solo sopra: al livello 1 o più. A fine partita: +1 PV per ogni tuo Personaggio.",
+    # potenziamenti: la famiglia (Arte, Struttura, Altro) e' l'etichetta della
+    # carta, non si ripete nel testo. I PV dei potenziamenti arrivano subito.
+    "po_pittura_rupestre": "Subito: +1 PV. L'edificio ha +2 Scavo.",
+    "po_palizzata": "L'edificio ha +1 Resistenza.",
+    "po_idolo": "Subito: +1 PV, +2 PV se l'edificio è Religione.",
+    "po_granaio_comune": "Quando attivi l'edificio: +1 Costruzione.",
+    "po_fondamenta_in_pietra": "L'edificio ha +1 Resistenza.",
+    "po_statua": "Subito: +2 PV.",
+    "po_altare": "Subito: +1 PV. L'edificio ha +2 Scavo.",
+    "po_bastioni": "L'edificio ha +1 Resistenza.",
+    "po_banchina": "Quando attivi l'edificio, se tocca il Fiume: +1 Denaro.",
+    "po_iscrizione": "L'edificio ha +2 Scavo.",
+    "po_contrafforte": "L'edificio ha +1 Resistenza.",
+    "po_campanile": "Subito: +1 PV. L'edificio ha +1 Resistenza.",
+    "po_merlatura": "L'edificio ha +1 Resistenza e conta anche come Militare.",
+    "po_stalli_mercantili": "L'edificio ha +1 Rendita.",
+    "po_reliquia": "Subito: +1 PV, +2 PV se l'edificio è Religione.",
+    "po_opera_darte": "Subito: +3 PV.",
+    "po_affreschi": "Subito: +2 PV.",
+    "po_cupola": "Subito: +2 PV. L'edificio ha +1 Resistenza.",
+    "po_giardino_pensile": "Subito: +2 PV.",
+    "po_cannoniere": "L'edificio ha +1 Resistenza, +2 se è Militare.",
+    "po_installazione": "Subito: +3 PV.",
+    "po_targa_storica": "A fine partita: +2 Scavo a ogni edificio sotterrato sotto l'edificio.",
+    "po_ascensore_panoramico": "Subito: +2 PV.",
+    "po_boutique": "Quando attivi l'edificio: +2 Denaro.",
+    "po_memoriale": "Subito: +2 PV.",
+    "po_totem": "Subito: +1 PV, +2 PV se l'edificio è Civico.",
+    "po_argine": "L'edificio ha +1 Resistenza.",
+    "po_focolare": "Quando attivi l'edificio: +1 Idea.",
+    "po_recinto": "Quando attivi l'edificio: +1 Denaro.",
+    "po_ossario": "L'edificio ha +2 Scavo.",
+    "po_mosaico": "Subito: +1 PV, +2 PV se l'edificio è Cultura.",
+    "po_terme": "Quando attivi l'edificio: +1 Idea.",
+    "po_mura_di_cinta": "L'edificio ha +1 Resistenza, +2 se è Militare.",
+    "po_mulino_ad_acqua": "Quando attivi l'edificio, se tocca il Fiume: +1 Costruzione.",
+    "po_lapide": "A fine partita: +2 Scavo a ogni edificio sotterrato sotto l'edificio.",
+    "po_vetrata": "Subito: +1 PV. L'edificio ha +2 Scavo.",
+    "po_arco_rampante": "L'edificio ha +1 Resistenza e conta anche come Religione.",
+    "po_portico": "Quando attivi l'edificio: +1 Denaro, +2 se è Commercio.",
+    "po_torre_di_guardia": "L'edificio ha +1 Resistenza, +2 se è Militare.",
+    "po_stemma": "Subito: +1 PV, +2 PV se l'edificio è Civico.",
+    "po_pala_d_altare": "Subito: +2 PV, +3 PV se l'edificio è Religione.",
+    "po_loggia": "Subito: +1 PV. L'edificio ha +1 Rendita.",
+    "po_bastione_a_stella": "L'edificio ha +2 Resistenza.",
+    "po_fontana": "Subito: +2 PV. L'edificio ha +2 Scavo.",
+    "po_stamperia": "Quando attivi l'edificio: +2 Idee.",
+    "po_murale": "Subito: +2 PV, +3 PV se l'edificio è Cultura.",
+    "po_pannelli_solari": "Quando attivi l'edificio: +2 Costruzione.",
+    "po_cemento_armato": "L'edificio ha +2 Resistenza.",
+    "po_terrazza": "Subito: +1 PV, +2 PV se l'edificio è Civico.",
+    "po_archivio_storico": "L'edificio ha +3 Scavo.",
+}
+
+def testi_v2(v):
+    carte = {c["id"]: c for c in v["buildings"] + v["upgrades"]}
+    # La Bottega d'artista sconta nella risorsa del potenziamento, come dice
+    # la carta stampata, non piu' sempre in oro.
+    for e in carte["ed_bottega_dartista"]["effects"]:
+        if e["op"] == "cost_delta" and e.get("what") == "upgrade":
+            e.pop("oro", None)
+            e["propria"] = -1
+    assert set(TESTI_V2) <= set(carte), set(TESTI_V2) - set(carte)
+    for cid, testo in TESTI_V2.items():
+        carte[cid]["effect_text"] = testo
+    # Ogni potenziamento ha il suo testo scritto qui: nessuno resta con
+    # quello della v1.5.
+    senza = [u["id"] for u in v["upgrades"] if u["id"] not in TESTI_V2]
+    assert not senza, senza
+
 import sys
 variante = sys.argv[sys.argv.index("--variante") + 1] if "--variante" in sys.argv else ""
 # Le case in riserva stanno nel file v2 di tutti (registro 116); le varianti di
@@ -561,6 +664,7 @@ case_tutti(v2, riserva=True, copie=2)
 tessere_era(v2)
 forme(v2)
 potenziamenti_nuovi(v2)
+testi_v2(v2)
 if variante:
     {"doppioni": doppioni, "abitazioni": abitazioni, "case": case,
      "case_doppioni": case_doppioni, "case_scavo": case_scavo, "case_nulle": case_nulle,

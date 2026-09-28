@@ -2112,3 +2112,19 @@ dato è stato importato da lì. Ma due confronti fra ciò che è stampato e
     stessa era. Nel motore l'unica aggiunta e' che "quando abiti" puo' dare
     anche Idee. Elenco in `docs/proposte/potenziamenti-v2.md`, dati in
     `tools/genera_cards_v2.py`. Aperto: stampa delle carte e misura.
+
+124. **I testi delle carte e le icone dei punti.** Il designer: "correggi
+    tutti i testi"; il Lampo fa l'effetto una volta e basta, poi ci sono gli
+    effetti permanenti e quelli di fine partita. Sulle carte stampate
+    Rendita (PV a fine di ogni era) e Lampo (PV subito, una volta) usavano
+    la moneta del Denaro, e sembrava un doppio incasso: nel motore non lo
+    era. Proposta: corona d'alloro per i punti, con clessidra (Rendita) o
+    fulmine (Lampo); la moneta solo per il Denaro. I testi sono riscritti
+    tutti in `tools/genera_cards_v2.py` (`TESTI_V2`): tre tempi, niente
+    frasi di colore, niente parole della v1.5, niente ripetizioni di cio'
+    che dice un'icona. Due correzioni al motore per far dire alla carta il
+    vero: la Bottega d'artista sconta nella risorsa del potenziamento
+    (com'e' stampata), e il Ponte da' +1 anche alle Idee. Documento unico
+    per la stampa: `docs/carte-v2-da-stampare.md`
+    (`tools/stampa_carte_v2.py`); prompt per rifare le carte:
+    `docs/proposte/prompt-chatgpt-correzioni-carte-v2.md`.

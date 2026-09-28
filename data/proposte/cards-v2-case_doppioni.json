@@ -410,7 +410,7 @@
         "idee": 0
       },
       "exhaustible": 0,
-      "effect_text": "Piccolo ma quasi indistruttibile."
+      "effect_text": ""
     },
     {
       "id": "ed_palafitte",
@@ -495,7 +495,7 @@
         "idee": 0
       },
       "exhaustible": 0,
-      "effect_text": "Quartiere: +1 pietra quando abiti qui.",
+      "effect_text": "Quando lo attivi: +1 Costruzione.",
       "effects": [
         {
           "hook": "on_activate",
@@ -562,7 +562,7 @@
         "idee": 0
       },
       "exhaustible": 0,
-      "effect_text": "Lo Stonehenge della strada.",
+      "effect_text": "",
       "depth": 2
     },
     {
@@ -592,7 +592,7 @@
         "idee": 0
       },
       "exhaustible": 0,
-      "effect_text": "Quartiere: +1 res ai tuoi edifici adiacenti.",
+      "effect_text": "Negli eventi, i tuoi edifici adiacenti hanno +1 Resistenza.",
       "effects": [
         {
           "hook": "on_event",
@@ -691,7 +691,7 @@
         "idee": 0
       },
       "exhaustible": 0,
-      "effect_text": "Colossale: 3 slot adiacenti, almeno uno con fiume. Eco: +2 PV (lampo) se ancora in piedi nel Moderno.",
+      "effect_text": "A fine partita, se è in piedi: +2 PV.",
       "effects": [
         {
           "hook": "on_final_scoring",
@@ -801,7 +801,7 @@
         "idee": 0
       },
       "exhaustible": 0,
-      "effect_text": "Quartiere: +1 res ai tuoi edifici adiacenti.",
+      "effect_text": "Negli eventi, i tuoi edifici adiacenti hanno +1 Resistenza.",
       "effects": [
         {
           "hook": "on_event",
@@ -870,7 +870,7 @@
         "idee": 0
       },
       "exhaustible": 0,
-      "effect_text": "Quartiere: +1 produzione agli edifici adiacenti.",
+      "effect_text": "Gli edifici adiacenti producono 1 in più di ogni risorsa che già producono.",
       "effects": [
         {
           "hook": "on_activate",
@@ -996,7 +996,7 @@
         "idee": 0
       },
       "exhaustible": 0,
-      "effect_text": "Colossale: occupa 2 slot adiacenti, si attiva da entrambe le colonne e conta come strato in entrambe. Produce 1 oro a ogni attivazione — il Colosseo vende i biglietti.",
+      "effect_text": "Solo sopra: mai a terra. Sopra di lui si costruisce solo quando è in rovina.",
       "effects": [
         {
           "hook": "on_build",
@@ -1034,7 +1034,7 @@
         "idee": 0
       },
       "exhaustible": 0,
-      "effect_text": "+1 res ai tuoi edifici in questa colonna.",
+      "effect_text": "Negli eventi, i tuoi edifici nelle sue colonne hanno +1 Resistenza.",
       "effects": [
         {
           "hook": "on_event",
@@ -1103,7 +1103,7 @@
         "idee": 0
       },
       "exhaustible": 0,
-      "effect_text": "Quartiere: +1 res agli edifici adiacenti (anche altrui).",
+      "effect_text": "Negli eventi, tutti gli edifici adiacenti, anche altrui, hanno +1 Resistenza.",
       "effects": [
         {
           "hook": "on_event",
@@ -1317,7 +1317,7 @@
         "idee": 0
       },
       "exhaustible": 0,
-      "effect_text": "Quando abiti qui, +1 oro.",
+      "effect_text": "Quando lo attivi: +1 Denaro.",
       "effects": [
         {
           "hook": "on_activate",
@@ -1357,7 +1357,8 @@
       },
       "exhaustible": 0,
       "depth": 2,
-      "solo_su_rovine": true
+      "solo_su_rovine": true,
+      "effect_text": "Solo sopra: mai a terra. Sopra di lui si costruisce solo quando è in rovina."
     },
     {
       "id": "ed_abbazia",
@@ -1417,7 +1418,7 @@
         "idee": 0
       },
       "exhaustible": 0,
-      "effect_text": "Quartiere: i tuoi edifici Militari adiacenti +1 res.",
+      "effect_text": "Negli eventi, i tuoi edifici Militari adiacenti hanno +1 Resistenza.",
       "effects": [
         {
           "hook": "on_event",
@@ -1461,16 +1462,16 @@
         "idee": 0
       },
       "exhaustible": 0,
-      "effect_text": "I tuoi potenziamenti costano 1 oro in meno.",
+      "effect_text": "I tuoi potenziamenti costano 1 in meno, nella loro risorsa.",
       "effects": [
         {
           "hook": "on_build",
           "op": "cost_delta",
-          "oro": -1,
           "what": "upgrade",
           "target": {
             "owner": "self"
-          }
+          },
+          "propria": -1
         }
       ]
     },
@@ -1501,7 +1502,7 @@
         "idee": 0
       },
       "exhaustible": 0,
-      "effect_text": "Effimero per eccellenza: PV subito, difficilmente sopravvivrà."
+      "effect_text": ""
     },
     {
       "id": "ed_loggia",
@@ -1559,7 +1560,7 @@
         "idee": 0
       },
       "exhaustible": 0,
-      "effect_text": "Eco: +2 PV (lampo) se ancora in piedi a fine partita.",
+      "effect_text": "A fine partita, se è in piedi: +2 PV.",
       "effects": [
         {
           "hook": "on_final_scoring",
@@ -1751,7 +1752,8 @@
       },
       "exhaustible": 0,
       "upgrade_slots": 3,
-      "depth": 2
+      "depth": 2,
+      "effect_text": "Solo sopra: al livello 2 o più."
     },
     {
       "id": "ed_fortezza_bastionata",
@@ -1782,7 +1784,8 @@
       },
       "exhaustible": 0,
       "depth": 2,
-      "solo_su_rovine": true
+      "solo_su_rovine": true,
+      "effect_text": "Solo sopra: mai a terra. Sopra di lui si costruisce solo quando è in rovina."
     },
     {
       "id": "ed_piazza_monumentale",
@@ -1811,7 +1814,7 @@
         "idee": 0
       },
       "exhaustible": 0,
-      "effect_text": "A fine partita: +1 PV per tuo edificio in cima adiacente. Richiede livello 1+.",
+      "effect_text": "Solo sopra: al livello 1 o più. A fine partita: +1 PV per ogni tuo edificio in cima a una colonna adiacente.",
       "effects": [
         {
           "hook": "on_final_scoring",
@@ -1853,7 +1856,7 @@
         "idee": 0
       },
       "exhaustible": 0,
-      "effect_text": "I tuoi potenziamenti valgono +1 PV.",
+      "effect_text": "A fine partita: +1 PV per ogni tuo potenziamento.",
       "effects": [
         {
           "hook": "on_final_scoring",
@@ -1893,7 +1896,7 @@
         "idee": 0
       },
       "exhaustible": 0,
-      "effect_text": "Economico: costruire il presente sopra il passato non è mai stato così facile."
+      "effect_text": ""
     },
     {
       "id": "ed_caffe_letterario",
@@ -1922,7 +1925,7 @@
         "idee": 0
       },
       "exhaustible": 0,
-      "effect_text": "Quartiere: +1 PV se adiacente a un edificio Cultura.",
+      "effect_text": "A fine partita: +1 PV se è adiacente a un edificio Cultura.",
       "effects": [
         {
           "hook": "on_final_scoring",
@@ -1997,7 +2000,7 @@
         "idee": 0
       },
       "exhaustible": 0,
-      "effect_text": "Sacrario: +1 PV per ogni altro tuo edificio Militare, in piedi o Sotterrato.",
+      "effect_text": "A fine partita: +1 PV per ogni altro tuo edificio Militare, in piedi o sotterrato.",
       "effects": [
         {
           "hook": "on_final_scoring",
@@ -2040,7 +2043,7 @@
         "idee": 0
       },
       "exhaustible": 0,
-      "effect_text": "+2 PV per ogni edificio Sotterrato sotto di sé. Richiede livello 1+.",
+      "effect_text": "Solo sopra: al livello 1 o più. A fine partita: +2 PV per ogni edificio sotterrato sotto di lui.",
       "effects": [
         {
           "hook": "on_final_scoring",
@@ -2080,7 +2083,7 @@
         "idee": 0
       },
       "exhaustible": 0,
-      "effect_text": "Svettante: +1 PV per livello a cui è costruito. Quartiere: −1 PV agli edifici in cima adiacenti altrui, valutato a fine partita. Richiede livello 2+.",
+      "effect_text": "Solo sopra: al livello 2 o più, mai a terra. A fine partita: +1 PV per ogni livello a cui è costruito; ogni edificio altrui in cima a una colonna adiacente toglie 1 PV al suo proprietario.",
       "effects": [
         {
           "hook": "on_final_scoring",
@@ -2133,7 +2136,7 @@
         "idee": 0
       },
       "exhaustible": 0,
-      "effect_text": "+1 PV per classe diversa fra i tuoi edifici in questa colonna, Sotterrati inclusi.",
+      "effect_text": "A fine partita: +1 PV per ogni classe diversa fra i tuoi edifici nelle sue colonne, sotterrati compresi.",
       "effects": [
         {
           "hook": "on_final_scoring",
@@ -2204,7 +2207,7 @@
         "idee": 0
       },
       "exhaustible": 0,
-      "effect_text": "Colossale: 3 slot adiacenti, si attiva da tutte le colonne. Produce 2 oro. Richiede livello 1+.",
+      "effect_text": "Solo sopra: al livello 1 o più.",
       "effects": [
         {
           "hook": "on_build",
@@ -2240,7 +2243,7 @@
         "idee": 0
       },
       "exhaustible": 0,
-      "effect_text": "Finale: fino a 2 tuoi edifici non Sotterrati nelle colonne adiacenti valgono il loro Scavo come se lo fossero.",
+      "effect_text": "A fine partita: fino a 2 tuoi edifici non sotterrati nelle colonne adiacenti valgono il loro Scavo come se fossero sotterrati.",
       "effects": [
         {
           "hook": "on_final_scoring",
@@ -2284,7 +2287,7 @@
         "idee": 0
       },
       "exhaustible": 0,
-      "effect_text": "+1 PV per ogni tuo personaggio reclutato. Richiede livello 1+.",
+      "effect_text": "Solo sopra: al livello 1 o più. A fine partita: +1 PV per ogni tuo Personaggio.",
       "effects": [
         {
           "hook": "on_final_scoring",
@@ -3356,7 +3359,7 @@
         "idee": 0
       },
       "exhaustible": 0,
-      "effect_text": "Piccolo ma quasi indistruttibile.",
+      "effect_text": "",
       "min_players": 4,
       "sagoma_di": "ed_menhir"
     },
@@ -3515,6 +3518,7 @@
       "exhaustible": 0,
       "upgrade_slots": 3,
       "depth": 2,
+      "effect_text": "Solo sopra: al livello 2 o più.",
       "min_players": 4,
       "sagoma_di": "ed_duomo"
     },
@@ -3545,16 +3549,16 @@
         "idee": 0
       },
       "exhaustible": 0,
-      "effect_text": "I tuoi potenziamenti costano 1 oro in meno.",
+      "effect_text": "I tuoi potenziamenti costano 1 in meno, nella loro risorsa.",
       "effects": [
         {
           "hook": "on_build",
           "op": "cost_delta",
-          "oro": -1,
           "what": "upgrade",
           "target": {
             "owner": "self"
-          }
+          },
+          "propria": -1
         }
       ],
       "min_players": 4,
@@ -3588,7 +3592,7 @@
         "idee": 0
       },
       "exhaustible": 0,
-      "effect_text": "Sacrario: +1 PV per ogni altro tuo edificio Militare, in piedi o Sotterrato.",
+      "effect_text": "A fine partita: +1 PV per ogni altro tuo edificio Militare, in piedi o sotterrato.",
       "effects": [
         {
           "hook": "on_final_scoring",
@@ -3633,7 +3637,7 @@
         "idee": 0
       },
       "exhaustible": 0,
-      "effect_text": "Quartiere: +1 PV se adiacente a un edificio Cultura.",
+      "effect_text": "A fine partita: +1 PV se è adiacente a un edificio Cultura.",
       "effects": [
         {
           "hook": "on_final_scoring",
@@ -4388,7 +4392,7 @@
         "idee": 1
       },
       "family": "arte",
-      "effect_text": "Arte: +1 PV. Scavo dell'edificio +2.",
+      "effect_text": "Subito: +1 PV. L'edificio ha +2 Scavo.",
       "effects": [
         {
           "hook": "on_acquire",
@@ -4417,7 +4421,7 @@
         "idee": 0
       },
       "family": "struttura",
-      "effect_text": "Struttura: +1 res.",
+      "effect_text": "L'edificio ha +1 Resistenza.",
       "effects": [
         {
           "hook": "on_acquire",
@@ -4441,7 +4445,7 @@
         "idee": 1
       },
       "family": "arte",
-      "effect_text": "Arte: +1 PV (+1 extra su edificio Religione).",
+      "effect_text": "Subito: +1 PV, +2 PV se l'edificio è Religione.",
       "effects": [
         {
           "hook": "on_acquire",
@@ -4476,7 +4480,7 @@
         "idee": 0
       },
       "family": "altro",
-      "effect_text": "Quando abiti questo edificio, +1 pietra.",
+      "effect_text": "Quando attivi l'edificio: +1 Costruzione.",
       "effects": [
         {
           "hook": "on_activate",
@@ -4499,7 +4503,7 @@
         "idee": 0
       },
       "family": "struttura",
-      "effect_text": "Struttura: +1 res.",
+      "effect_text": "L'edificio ha +1 Resistenza.",
       "effects": [
         {
           "hook": "on_acquire",
@@ -4523,7 +4527,7 @@
         "idee": 1
       },
       "family": "arte",
-      "effect_text": "Arte: +2 PV.",
+      "effect_text": "Subito: +2 PV.",
       "effects": [
         {
           "hook": "on_acquire",
@@ -4543,7 +4547,7 @@
         "idee": 1
       },
       "family": "arte",
-      "effect_text": "Arte: +1 PV. Scavo +2.",
+      "effect_text": "Subito: +1 PV. L'edificio ha +2 Scavo.",
       "effects": [
         {
           "hook": "on_acquire",
@@ -4572,7 +4576,7 @@
         "idee": 0
       },
       "family": "struttura",
-      "effect_text": "Struttura: +1 res.",
+      "effect_text": "L'edificio ha +1 Resistenza.",
       "effects": [
         {
           "hook": "on_acquire",
@@ -4596,7 +4600,7 @@
         "idee": 0
       },
       "family": "altro",
-      "effect_text": "Solo su slot fiume: quando abiti qui, +1 oro.",
+      "effect_text": "Quando attivi l'edificio, se tocca il Fiume: +1 Denaro.",
       "effects": [
         {
           "hook": "on_activate",
@@ -4629,7 +4633,7 @@
         "idee": 0
       },
       "family": "altro",
-      "effect_text": "Scavo dell'edificio +2.",
+      "effect_text": "L'edificio ha +2 Scavo.",
       "effects": [
         {
           "hook": "on_acquire",
@@ -4653,7 +4657,7 @@
         "idee": 0
       },
       "family": "struttura",
-      "effect_text": "Struttura: +1 res.",
+      "effect_text": "L'edificio ha +1 Resistenza.",
       "effects": [
         {
           "hook": "on_acquire",
@@ -4677,7 +4681,7 @@
         "idee": 0
       },
       "family": "altro",
-      "effect_text": "Ibrido: +1 PV e +1 res.",
+      "effect_text": "Subito: +1 PV. L'edificio ha +1 Resistenza.",
       "effects": [
         {
           "hook": "on_acquire",
@@ -4706,7 +4710,7 @@
         "idee": 0
       },
       "family": "struttura",
-      "effect_text": "Struttura: +1 res. L'edificio conta anche come Militare.",
+      "effect_text": "L'edificio ha +1 Resistenza e conta anche come Militare.",
       "effects": [
         {
           "hook": "on_acquire",
@@ -4741,7 +4745,7 @@
         "idee": 0
       },
       "family": "altro",
-      "effect_text": "L'affitto incassato da questo edificio è +1.",
+      "effect_text": "L'edificio ha +1 Rendita.",
       "effects": [
         {
           "hook": "on_acquire",
@@ -4765,7 +4769,7 @@
         "idee": 1
       },
       "family": "arte",
-      "effect_text": "Arte: +2 PV su edificio Religione, altrimenti +1.",
+      "effect_text": "Subito: +1 PV, +2 PV se l'edificio è Religione.",
       "effects": [
         {
           "hook": "on_acquire",
@@ -4800,7 +4804,7 @@
         "idee": 2
       },
       "family": "arte",
-      "effect_text": "Arte: +3 PV.",
+      "effect_text": "Subito: +3 PV.",
       "effects": [
         {
           "hook": "on_acquire",
@@ -4820,7 +4824,7 @@
         "idee": 2
       },
       "family": "arte",
-      "effect_text": "Arte: +2 PV.",
+      "effect_text": "Subito: +2 PV.",
       "effects": [
         {
           "hook": "on_acquire",
@@ -4840,7 +4844,7 @@
         "idee": 0
       },
       "family": "altro",
-      "effect_text": "Ibrido: +2 PV e +1 res.",
+      "effect_text": "Subito: +2 PV. L'edificio ha +1 Resistenza.",
       "effects": [
         {
           "hook": "on_acquire",
@@ -4869,7 +4873,7 @@
         "idee": 2
       },
       "family": "arte",
-      "effect_text": "Arte: +2 PV.",
+      "effect_text": "Subito: +2 PV.",
       "effects": [
         {
           "hook": "on_acquire",
@@ -4889,7 +4893,7 @@
         "idee": 0
       },
       "family": "struttura",
-      "effect_text": "Struttura: +1 res (+2 su edificio Militare).",
+      "effect_text": "L'edificio ha +1 Resistenza, +2 se è Militare.",
       "effects": [
         {
           "hook": "on_acquire",
@@ -4932,7 +4936,7 @@
         "idee": 2
       },
       "family": "arte",
-      "effect_text": "Arte: +3 PV.",
+      "effect_text": "Subito: +3 PV.",
       "effects": [
         {
           "hook": "on_acquire",
@@ -4952,7 +4956,7 @@
         "idee": 0
       },
       "family": "altro",
-      "effect_text": "Finale: +2 Scavo a ogni edificio Sotterrato sotto questo edificio.",
+      "effect_text": "A fine partita: +2 Scavo a ogni edificio sotterrato sotto l'edificio.",
       "effects": [
         {
           "hook": "on_final_scoring",
@@ -4976,7 +4980,7 @@
         "idee": 0
       },
       "family": "altro",
-      "effect_text": "+2 PV.",
+      "effect_text": "Subito: +2 PV.",
       "effects": [
         {
           "hook": "on_acquire",
@@ -4996,7 +5000,7 @@
         "idee": 0
       },
       "family": "altro",
-      "effect_text": "Quando abiti questo edificio, +2 oro.",
+      "effect_text": "Quando attivi l'edificio: +2 Denaro.",
       "effects": [
         {
           "hook": "on_activate",
@@ -5019,7 +5023,7 @@
         "idee": 0
       },
       "family": "altro",
-      "effect_text": "+2 PV.",
+      "effect_text": "Subito: +2 PV.",
       "effects": [
         {
           "hook": "on_acquire",
@@ -5039,7 +5043,7 @@
         "idee": 1
       },
       "family": "arte",
-      "effect_text": "Arte: +1 PV (+1 extra su edificio Civico).",
+      "effect_text": "Subito: +1 PV, +2 PV se l'edificio è Civico.",
       "effects": [
         {
           "hook": "on_acquire",
@@ -5074,7 +5078,7 @@
         "idee": 0
       },
       "family": "struttura",
-      "effect_text": "Struttura: +1 res.",
+      "effect_text": "L'edificio ha +1 Resistenza.",
       "effects": [
         {
           "hook": "on_acquire",
@@ -5098,7 +5102,7 @@
         "idee": 0
       },
       "family": "altro",
-      "effect_text": "Quando abiti questo edificio, +1 Idea.",
+      "effect_text": "Quando attivi l'edificio: +1 Idea.",
       "effects": [
         {
           "hook": "on_activate",
@@ -5121,7 +5125,7 @@
         "idee": 0
       },
       "family": "altro",
-      "effect_text": "Quando abiti questo edificio, +1 Denaro.",
+      "effect_text": "Quando attivi l'edificio: +1 Denaro.",
       "effects": [
         {
           "hook": "on_activate",
@@ -5144,7 +5148,7 @@
         "idee": 0
       },
       "family": "altro",
-      "effect_text": "Scavo dell'edificio +2.",
+      "effect_text": "L'edificio ha +2 Scavo.",
       "effects": [
         {
           "hook": "on_acquire",
@@ -5168,7 +5172,7 @@
         "idee": 1
       },
       "family": "arte",
-      "effect_text": "Arte: +2 PV su edificio Cultura, altrimenti +1.",
+      "effect_text": "Subito: +1 PV, +2 PV se l'edificio è Cultura.",
       "effects": [
         {
           "hook": "on_acquire",
@@ -5203,7 +5207,7 @@
         "idee": 0
       },
       "family": "altro",
-      "effect_text": "Quando abiti questo edificio, +1 Idea.",
+      "effect_text": "Quando attivi l'edificio: +1 Idea.",
       "effects": [
         {
           "hook": "on_activate",
@@ -5226,7 +5230,7 @@
         "idee": 0
       },
       "family": "struttura",
-      "effect_text": "Struttura: +1 res (+1 extra su edificio Militare).",
+      "effect_text": "L'edificio ha +1 Resistenza, +2 se è Militare.",
       "effects": [
         {
           "hook": "on_acquire",
@@ -5269,7 +5273,7 @@
         "idee": 0
       },
       "family": "altro",
-      "effect_text": "Solo su slot fiume: quando abiti qui, +1 Costruzione.",
+      "effect_text": "Quando attivi l'edificio, se tocca il Fiume: +1 Costruzione.",
       "effects": [
         {
           "hook": "on_activate",
@@ -5302,7 +5306,7 @@
         "idee": 0
       },
       "family": "altro",
-      "effect_text": "Finale: +2 Scavo a ogni edificio Sotterrato sotto questo edificio.",
+      "effect_text": "A fine partita: +2 Scavo a ogni edificio sotterrato sotto l'edificio.",
       "effects": [
         {
           "hook": "on_final_scoring",
@@ -5326,7 +5330,7 @@
         "idee": 1
       },
       "family": "arte",
-      "effect_text": "Arte: +1 PV. Scavo dell'edificio +2.",
+      "effect_text": "Subito: +1 PV. L'edificio ha +2 Scavo.",
       "effects": [
         {
           "hook": "on_acquire",
@@ -5355,7 +5359,7 @@
         "idee": 0
       },
       "family": "struttura",
-      "effect_text": "Struttura: +1 res. L'edificio conta anche come Religione.",
+      "effect_text": "L'edificio ha +1 Resistenza e conta anche come Religione.",
       "effects": [
         {
           "hook": "on_acquire",
@@ -5390,7 +5394,7 @@
         "idee": 0
       },
       "family": "altro",
-      "effect_text": "Quando abiti questo edificio, +1 Denaro (+1 extra su edificio Commercio).",
+      "effect_text": "Quando attivi l'edificio: +1 Denaro, +2 se è Commercio.",
       "effects": [
         {
           "hook": "on_activate",
@@ -5431,7 +5435,7 @@
         "idee": 0
       },
       "family": "struttura",
-      "effect_text": "Struttura: +1 res (+1 extra su edificio Militare).",
+      "effect_text": "L'edificio ha +1 Resistenza, +2 se è Militare.",
       "effects": [
         {
           "hook": "on_acquire",
@@ -5474,7 +5478,7 @@
         "idee": 1
       },
       "family": "arte",
-      "effect_text": "Arte: +2 PV su edificio Civico, altrimenti +1.",
+      "effect_text": "Subito: +1 PV, +2 PV se l'edificio è Civico.",
       "effects": [
         {
           "hook": "on_acquire",
@@ -5509,7 +5513,7 @@
         "idee": 2
       },
       "family": "arte",
-      "effect_text": "Arte: +2 PV (+1 extra su edificio Religione).",
+      "effect_text": "Subito: +2 PV, +3 PV se l'edificio è Religione.",
       "effects": [
         {
           "hook": "on_acquire",
@@ -5544,7 +5548,7 @@
         "idee": 0
       },
       "family": "altro",
-      "effect_text": "+1 PV. L'affitto incassato da questo edificio è +1.",
+      "effect_text": "Subito: +1 PV. L'edificio ha +1 Rendita.",
       "effects": [
         {
           "hook": "on_acquire",
@@ -5573,7 +5577,7 @@
         "idee": 0
       },
       "family": "struttura",
-      "effect_text": "Struttura: +2 res.",
+      "effect_text": "L'edificio ha +2 Resistenza.",
       "effects": [
         {
           "hook": "on_acquire",
@@ -5597,7 +5601,7 @@
         "idee": 2
       },
       "family": "arte",
-      "effect_text": "Arte: +2 PV. Scavo dell'edificio +2.",
+      "effect_text": "Subito: +2 PV. L'edificio ha +2 Scavo.",
       "effects": [
         {
           "hook": "on_acquire",
@@ -5626,7 +5630,7 @@
         "idee": 0
       },
       "family": "altro",
-      "effect_text": "Quando abiti questo edificio, +2 Idee.",
+      "effect_text": "Quando attivi l'edificio: +2 Idee.",
       "effects": [
         {
           "hook": "on_activate",
@@ -5649,7 +5653,7 @@
         "idee": 2
       },
       "family": "arte",
-      "effect_text": "Arte: +2 PV (+1 extra su edificio Cultura).",
+      "effect_text": "Subito: +2 PV, +3 PV se l'edificio è Cultura.",
       "effects": [
         {
           "hook": "on_acquire",
@@ -5684,7 +5688,7 @@
         "idee": 0
       },
       "family": "altro",
-      "effect_text": "Quando abiti questo edificio, +2 Costruzione.",
+      "effect_text": "Quando attivi l'edificio: +2 Costruzione.",
       "effects": [
         {
           "hook": "on_activate",
@@ -5707,7 +5711,7 @@
         "idee": 0
       },
       "family": "struttura",
-      "effect_text": "Struttura: +2 res.",
+      "effect_text": "L'edificio ha +2 Resistenza.",
       "effects": [
         {
           "hook": "on_acquire",
@@ -5731,7 +5735,7 @@
         "idee": 0
       },
       "family": "altro",
-      "effect_text": "+2 PV su edificio Civico, altrimenti +1.",
+      "effect_text": "Subito: +1 PV, +2 PV se l'edificio è Civico.",
       "effects": [
         {
           "hook": "on_acquire",
@@ -5766,7 +5770,7 @@
         "idee": 0
       },
       "family": "altro",
-      "effect_text": "Scavo dell'edificio +3.",
+      "effect_text": "L'edificio ha +3 Scavo.",
       "effects": [
         {
           "hook": "on_acquire",
