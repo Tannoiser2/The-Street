@@ -92,6 +92,7 @@ ul.punti { padding-left: 1.1rem; max-width: 72ch } ul.punti li { margin: .3rem 0
   <p class="tesi" id="tesi"></p>
 </header>
 <div class="scheda" id="lampo"></div>
+<div class="scheda" id="scoperte"></div>
 <div class="tavoli" role="group" aria-label="Numero di giocatori">
   <button type="button" id="t2" data-n="2">2 giocatori</button>
   <button type="button" id="t3" data-n="3">3 giocatori</button>
@@ -228,8 +229,8 @@ function disegna(n) {
   h.push(barre(meno.map(b => ({nome: b.nome, v: b.costruiti, testo: f2(b.costruiti), colore: 'var(--neutro)'})), top(B, 'costruiti')[0].costruiti));
   h.push('</div><div><h3>Crollano prima (quota crollata per un evento)</h3>');
   h.push(barre(top(soglia(B), 'crollato').map(b => ({nome: b.nome, v: b.crollato, testo: pc(b.crollato), colore: 'var(--male)'})), 1));
-  h.push('<h3>Resistono (intatti a fine partita)</h3>');
-  h.push(barre(top(soglia(B), 'intatto_fine').map(b => ({nome: b.nome, v: b.intatto_fine, testo: pc(b.intatto_fine), colore: 'var(--bene)'})), 1));
+  h.push('<h3>Resistono (intatti a fine partita, ere 1-4: l\'era 5 non ha evento)</h3>');
+  h.push(barre(top(soglia(B).filter(b => b.era <= 4), 'intatto_fine').map(b => ({nome: b.nome, v: b.intatto_fine, testo: pc(b.intatto_fine), colore: 'var(--bene)'})), 1));
   h.push('</div></div><h3>Rendono di più (PV al proprietario per edificio costruito)</h3>');
   h.push(barre(top(soglia(B), 'pv', 10).map(b => ({nome: b.nome, v: b.pv, testo: f1(b.pv), colore: 'var(--ocra)'})), top(soglia(B), 'pv')[0].pv));
   h.push('<h3>Tutti gli edifici</h3><p class="nota">"Del vincitore" è la quota di copie costruite da chi poi vince: sopra ' + pc(1/n) + ' la carta accompagna le vittorie. Clic sulle intestazioni per ordinare.</p>');
@@ -286,6 +287,8 @@ function disegna(n) {
 }
 document.getElementById('tesi').textContent = NOTE.tesi || '';
 document.getElementById('lampo').innerHTML = NOTE.lampo_html || '';
+document.getElementById('scoperte').innerHTML = NOTE.scoperte_html || '';
+document.getElementById('scoperte').hidden = !NOTE.scoperte_html;
 document.getElementById('metodo-testo').innerHTML = NOTE.metodo_html || '';
 document.querySelectorAll('.tavoli button').forEach(b => b.addEventListener('click', () => disegna(+b.dataset.n)));
 let iniziale = 3; try { iniziale = +(localStorage.getItem('tavolo') || 3) } catch (e) {}
