@@ -23,6 +23,7 @@ var _perche := false
 var _piano := false
 var _tutti := ""
 var _giro := "vicini"        # --giro vicini|tutte
+var _da := 0                  # --da N: il lotto parte dalla partita N
 var _posti := 3               # quanti posti al tavolo, per il giro "tutte"
 # Chi muove i bot: le sei strategie vere o il tira-a-caso di RandomBot.
 # Il caso serve ancora come metro di paragone - "quanto pesa la testa di chi
@@ -313,6 +314,9 @@ func _ready() -> void:
 		print("# fila_potenziamenti_resta = %s" % str(CardDB.constants["fila_potenziamenti_resta"]))
 
 	_rapporto = args.has("rapporto") and str(args["rapporto"]) != "0"
+	# `--da N` riprende un lotto interrotto dalla partita N: stesso seme
+	# (seme + N) e stesso giro delle strategie, come se non si fosse fermato.
+	_da = int(args.get("da", "0"))
 	if args.has("games"):
 		_lotto(seme, players, int(args["games"]))
 		return
@@ -374,7 +378,7 @@ func _lotto(seme: int, players: int, quante: int) -> void:
 	# E quante volte si costruisce ogni carta di forma nuova (registro 122):
 	# le profonde e quelle che vanno solo sopra le rovine.
 	var forme := {}
-	for g in quante:
+	for g in range(_da, _da + quante):
 		var ctl := GameController.new()
 		ctl.new_game(players, seme + g)
 		var guard := 0
