@@ -500,9 +500,14 @@ const SPINTE_V2 := {"rendita_per_era": 0.9, "rendita_zero": -1.5, "lampo": 1.6, 
 # vinceva ancora il 56/45/39 %. Con la spinta a 2,6 (a quattro 3,2, dove
 # resta piu' forte) torna nell'errore: a tre le sei strategie stanno fra 30 e
 # 38 %. Tarato sul torneo `--giro tutte`, 300 partite, seme 700000.
-const SPINTE_V2_PER_GIOCATORI := {2: {"lampo": 2.6}, 3: {"lampo": 2.6},
-	4: {"lampo": 3.2, "lampo_potenzia": 5.0, "rendita_per_era": 1.5,
-		"scavo_premio": 0.2, "scavo_terra_scavo": 0.1}}
+# Registro 127, dopo l'era 4 a forza 3, l'avanzo in Idee e le carte vive: a
+# due la Obiettivi vinceva il 59 % e la Lampo il 38 %, a tre la Obiettivi il
+# 38 %, a quattro il 32 %. Il peso della Obiettivi va GIU' per indebolirla (a
+# differenza del Lampo, dove la spinta alta e' un handicap).
+const SPINTE_V2_PER_GIOCATORI := {2: {"lampo": 2.0, "obiettivi_peso": 0.6},
+	3: {"lampo": 2.6, "obiettivi_peso": 0.7},
+	4: {"lampo": 2.8, "lampo_potenzia": 5.0, "rendita_per_era": 1.5,
+		"scavo_premio": 0.2, "scavo_terra_scavo": 0.1, "obiettivi_peso": 0.6}}
 static var giocatori := 0
 static var spinte_override := {}
 

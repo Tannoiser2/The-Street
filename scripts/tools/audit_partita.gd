@@ -269,6 +269,49 @@ func _ready() -> void:
 			ev["force"] = maxi(1, int(ev["force"]) + delta)
 		print("# forza degli eventi scontata di %d" % delta)
 
+	# LA FORZA PER ERA (`--forza_era 4=4,3=4`, registro 126): la forza degli
+	# eventi di un'era scelta, per provare un'era 4 meno distruttiva.
+	if args.has("forza_era"):
+		for pezzo in str(args["forza_era"]).split(","):
+			var kv := pezzo.split("=")
+			if kv.size() != 2: continue
+			for id in CardDB.events:
+				var ev: Dictionary = CardDB.events[id]
+				if ev.has("force") and int(ev.get("era", 0)) == int(kv[0]):
+					ev["force"] = int(kv[1])
+		print("# forza per era = %s" % str(args["forza_era"]))
+	# IL TETTO TOTALE (`--tetto_totale N`, registro 126): quante risorse in
+	# tutto si tengono a fine era; il tetto per risorsa e' `--tetto`.
+	if args.has("tetto_totale"):
+		CardDB.constants["resource_cap"] = int(args["tetto_totale"])
+		print("# resource_cap = %d" % int(args["tetto_totale"]))
+
+	# LA BASE DEI TERRENI (`--base collina=idee`, registro 126): cambia la
+	# risorsa che un terreno produce di base (sempre 1).
+	if args.has("base"):
+		for pezzo in str(args["base"]).split(","):
+			var kv := pezzo.split("=")
+			if kv.size() == 2 and CardDB.terrains.has(kv[0]):
+				var pb := {"pietra": 0, "oro": 0, "idee": 0}
+				pb[kv[1]] = 1
+				CardDB.terrains[kv[0]]["produzione_base"] = pb
+		print("# base = %s" % str(args["base"]))
+	# L'AVANZO IN IDEE (`--avanzo_idee 1`, registro 126): a fine era ogni 2
+	# risorse sopra il tetto diventano 1 Idea invece di buttarsi.
+	if args.has("avanzo_idee"):
+		CardDB.constants["avanzo_idee"] = str(args["avanzo_idee"]) != "0"
+		print("# avanzo_idee = %s" % str(CardDB.constants["avanzo_idee"]))
+
+	# I POTENZIAMENTI (`--potenzia_adiacente 0/1`, `--fila_resta 0/1`,
+	# registro 126): potenziare anche nella colonna adiacente, e la fila dei
+	# potenziamenti che resta un'era in piu'.
+	if args.has("potenzia_adiacente"):
+		CardDB.constants["potenzia_adiacente"] = str(args["potenzia_adiacente"]) != "0"
+		print("# potenzia_adiacente = %s" % str(CardDB.constants["potenzia_adiacente"]))
+	if args.has("fila_resta"):
+		CardDB.constants["fila_potenziamenti_resta"] = str(args["fila_resta"]) != "0"
+		print("# fila_potenziamenti_resta = %s" % str(CardDB.constants["fila_potenziamenti_resta"]))
+
 	_rapporto = args.has("rapporto") and str(args["rapporto"]) != "0"
 	if args.has("games"):
 		_lotto(seme, players, int(args["games"]))

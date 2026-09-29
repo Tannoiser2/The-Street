@@ -2147,3 +2147,27 @@ dato è stato importato da lì. Ma due confronti fra ciò che è stampato e
     10-12 Costruzione e 6-9 Denaro a testa per partita; i Monumenti si
     prendono di rado; tre Eredita' (Condottiero, Antiquario, Restauratore)
     quasi non riescono.
+
+126. **L'era 4, le risorse e le carte morte.** Decisioni del designer dopo il
+    rapporto delle partite: rivedere gli eventi dell'era 4 (nell'era 5 far
+    crollare non ha senso: resta senza evento), rivedere il tetto delle
+    risorse ("il problema piu' serio di bilanciamento") e sistemare le carte
+    morte ("le proposte sulle carte vanno bene, procedi"). Applicato nel file
+    v2 (`tools/genera_cards_v2.py`, `carte_vive` ed `eventi_e_avanzo`): i
+    sei eventi dell'era 4 a forza 3; a fine era ogni 2 risorse oltre il
+    tetto diventano 1 Idea (`avanzo_idee`); la fila dei potenziamenti resta
+    un'era (`fila_potenziamenti_resta`; `potenzia_adiacente` provato e
+    scartato); case piccole, Militari, Museo, Cemento armato, tre tessere
+    dell'era e tre Eredita' corretti (anche nel prompt per ChatGPT).
+    Misurato (ventitreesima misura): l'era 4 crolla nel 16-17 % invece
+    dell'87 %, si buttano 7 Costruzione invece di 11-12, il kingmaker scende
+    a 6/6/10 %. Aperto: piccoli scarti fra le strategie (ritaratura dei bot),
+    i tre 2x2 che non crollano mai, il Denaro che avanza ancora, cinque carte
+    ancora ferme.
+
+127. **I bot ritarati.** Il designer: "ritara i bot". Pesi del bot per
+    tavolo (`SPINTE_V2_PER_GIOCATORI`): a due Lampo 2,0 e Obiettivi 0,6, a
+    tre Obiettivi 0,7, a quattro Lampo 2,8 e Obiettivi 0,6. Il peso della
+    Obiettivi va giu' per indebolirla, al contrario del Lampo. Misurato
+    (ventiquattresima misura): scarto massimo fra le strategie 10/10/9 punti,
+    tre strategie a un punto dal bordo. Le regole non cambiano.
