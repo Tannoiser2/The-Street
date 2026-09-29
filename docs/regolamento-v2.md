@@ -245,7 +245,9 @@ quella sagoma vale Scavo 0 e non paga premio a nessuno: chi demolisce non lascia
 
 **Potenziare** costa 1 nelle prime tre ere e 2 nelle ultime due, nella risorsa della famiglia:
 i potenziamenti **Arte** in Idee, quelli **Struttura** in Costruzione, tutti gli altri in
-Denaro. Infilate la carta sotto un vostro edificio in piedi della colonna attivata, lasciandone
+Denaro. Infilate la carta sotto un vostro edificio in piedi della colonna attivata **della
+stessa classe del potenziamento** (vale anche una classe acquisita, come con la Merlatura),
+lasciandone
 sporgere la linguetta. I potenziamenti Arte danno PV subito; quelli Struttura danno resistenza
 permanente, segnata con un cubetto nero. La capienza base è un potenziamento per edificio, salvo
 le carte che ne dichiarano di più.

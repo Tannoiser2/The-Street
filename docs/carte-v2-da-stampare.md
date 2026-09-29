@@ -42,12 +42,12 @@ Come si leggono le colonne:
 | **Focolare** | Altro | Civico | 1 Denaro | Quando attivi l'edificio: +1 Idea. |
 | **Fondamenta in pietra** | Struttura | Ingegneria | 1 Costruzione | L'edificio ha +1 Resistenza. |
 | **Granaio comune** | Altro | Civico | 1 Denaro | Quando attivi l'edificio: +1 Costruzione. |
-| **Idolo** | Arte | Religione | 1 Idea | Subito: +1 PV, +2 PV se l'edificio è Religione. |
+| **Idolo** | Arte | Religione | 1 Idea | Subito: +1 PV. |
 | **Ossario** | Altro | Religione | 1 Denaro | L'edificio ha +2 Scavo. |
 | **Palizzata** | Struttura | Militare | 1 Costruzione | L'edificio ha +1 Resistenza. |
 | **Pittura rupestre** | Arte | Cultura | 1 Idea | Subito: +1 PV. L'edificio ha +2 Scavo. |
 | **Recinto per il bestiame** | Altro | Commercio | 1 Denaro | Quando attivi l'edificio: +1 Denaro. |
-| **Totem** | Arte | Religione | 1 Idea | Subito: +1 PV, +2 PV se l'edificio è Civico. |
+| **Totem** | Arte | Religione | 1 Idea | Subito: +1 PV. |
 
 ## Seconda era
 
@@ -80,9 +80,9 @@ Come si leggono le colonne:
 | **Bastioni** | Struttura | Militare | 1 Costruzione | L'edificio ha +1 Resistenza. |
 | **Iscrizione** | Altro | Cultura | 1 Denaro | L'edificio ha +2 Scavo. |
 | **Lapide funeraria** | Altro | Religione | 1 Denaro | A fine partita: +2 Scavo a ogni edificio sotterrato sotto l'edificio. |
-| **Mosaico** | Arte | Cultura | 1 Idea | Subito: +1 PV, +2 PV se l'edificio è Cultura. |
+| **Mosaico** | Arte | Cultura | 1 Idea | Subito: +1 PV. |
 | **Mulino ad acqua** | Altro | Ingegneria | 1 Denaro | Quando attivi l'edificio, se tocca il Fiume: +1 Costruzione. |
-| **Mura di cinta** | Struttura | Militare | 1 Costruzione | L'edificio ha +1 Resistenza, +2 se è Militare. |
+| **Mura di cinta** | Struttura | Militare | 1 Costruzione | L'edificio ha +1 Resistenza. |
 | **Statua** | Arte | Cultura | 1 Idea | Subito: +2 PV. |
 | **Terme private** | Altro | Civico | 1 Denaro | Quando attivi l'edificio: +1 Idea. |
 
@@ -116,11 +116,11 @@ Come si leggono le colonne:
 | **Campanile** | Altro | Religione | 1 Denaro | Subito: +1 PV. L'edificio ha +1 Resistenza. |
 | **Contrafforte** | Struttura | Ingegneria | 1 Costruzione | L'edificio ha +1 Resistenza. |
 | **Merlatura** | Struttura | Militare | 1 Costruzione | L'edificio ha +1 Resistenza e conta anche come Militare. |
-| **Portico** | Altro | Commercio | 1 Denaro | Quando attivi l'edificio: +1 Denaro, +2 se è Commercio. |
-| **Reliquia** | Arte | Religione | 1 Idea | Subito: +1 PV, +2 PV se l'edificio è Religione. |
+| **Portico** | Altro | Commercio | 1 Denaro | Quando attivi l'edificio: +1 Denaro. |
+| **Reliquia** | Arte | Religione | 1 Idea | Subito: +1 PV. |
 | **Stalli mercantili** | Altro | Commercio | 1 Denaro | L'edificio ha +1 Rendita. |
-| **Stemma di famiglia** | Arte | Civico | 1 Idea | Subito: +1 PV, +2 PV se l'edificio è Civico. |
-| **Torre di guardia** | Struttura | Militare | 1 Costruzione | L'edificio ha +1 Resistenza, +2 se è Militare. |
+| **Stemma di famiglia** | Arte | Civico | 1 Idea | Subito: +1 PV. |
+| **Torre di guardia** | Struttura | Militare | 1 Costruzione | L'edificio ha +1 Resistenza. |
 | **Vetrata** | Arte | Religione | 1 Idea | Subito: +1 PV. L'edificio ha +2 Scavo. |
 
 ## Quarta era
@@ -151,13 +151,13 @@ Come si leggono le colonne:
 |---|---|---|---|---|
 | **Affreschi** | Arte | Cultura | 2 Idee | Subito: +2 PV. |
 | **Bastione a stella** | Struttura | Militare | 2 Costruzione | L'edificio ha +2 Resistenza. |
-| **Cannoniere** | Struttura | Militare | 2 Costruzione | L'edificio ha +1 Resistenza, +2 se è Militare. |
+| **Cannoniere** | Struttura | Militare | 2 Costruzione | L'edificio ha +1 Resistenza. |
 | **Cupola** | Altro | Ingegneria | 2 Denaro | Subito: +2 PV. L'edificio ha +1 Resistenza. |
 | **Fontana monumentale** | Arte | Civico | 2 Idee | Subito: +2 PV. L'edificio ha +2 Scavo. |
 | **Giardino pensile** | Arte | Civico | 2 Idee | Subito: +2 PV. |
 | **Loggia** | Altro | Civico | 2 Denaro | Subito: +1 PV. L'edificio ha +1 Rendita. |
 | **Opera d'arte** | Arte | Cultura | 2 Idee | Subito: +3 PV. |
-| **Pala d'altare** | Arte | Religione | 2 Idee | Subito: +2 PV, +3 PV se l'edificio è Religione. |
+| **Pala d'altare** | Arte | Religione | 2 Idee | Subito: +2 PV. |
 | **Stamperia** | Altro | Cultura | 2 Denaro | Quando attivi l'edificio: +2 Idee. |
 
 ## Quinta era
@@ -188,10 +188,10 @@ Come si leggono le colonne:
 | **Archivio storico** | Altro | Cultura | 2 Denaro | L'edificio ha +3 Scavo. |
 | **Ascensore panoramico** | Altro | Ingegneria | 2 Denaro | Subito: +2 PV. |
 | **Boutique** | Altro | Commercio | 2 Denaro | Quando attivi l'edificio: +2 Denaro. |
-| **Cemento armato** | Struttura | Ingegneria | 2 Costruzione | Subito: +2 PV. |
+| **Cemento armato** | Struttura | Ingegneria | 2 Costruzione | L'edificio ha +2 Resistenza. |
 | **Installazione** | Arte | Cultura | 2 Idee | Subito: +3 PV. |
 | **Memoriale** | Altro | Religione | 2 Denaro | Subito: +2 PV. |
-| **Murale** | Arte | Cultura | 2 Idee | Subito: +2 PV, +3 PV se l'edificio è Cultura. |
+| **Murale** | Arte | Cultura | 2 Idee | Subito: +2 PV. |
 | **Pannelli solari** | Altro | Ingegneria | 2 Denaro | Quando attivi l'edificio: +2 Costruzione. |
 | **Targa storica** | Altro | Civico | 2 Denaro | A fine partita: +2 Scavo a ogni edificio sotterrato sotto l'edificio. |
-| **Terrazza panoramica** | Altro | Civico | 2 Denaro | Subito: +1 PV, +2 PV se l'edificio è Civico. |
+| **Terrazza panoramica** | Altro | Civico | 2 Denaro | Subito: +1 PV. |

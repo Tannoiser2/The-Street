@@ -2189,3 +2189,13 @@ dato è stato importato da lì. Ma due confronti fra ciò che è stampato e
       un'icona della classe sulla carta, o si tolgono dai dati.
     - **Cemento armato** e' stampato con lo scudo "+2" (la versione di prima):
       nei dati, dal registro 126, e' "Subito: +2 PV".
+
+129. **I potenziamenti di classe.** Il designer, sul confronto del punto
+    128: "valgono i dati, togli i bonus di classe, i potenziamenti si possono
+    mettere solo su edifici della stessa classe, cemento armato +2". Nel file
+    v2: via i dodici bonus "+1 se l'edificio e' ..." (resta la condizione del
+    fiume), costante `potenziamento_stessa_classe` (controllata in
+    `ActionRules.quote_upgrade`, conta anche la classe acquisita), Cemento
+    armato "+2 Resistenza" come stampato. Le cinque classi stampate sbagliate
+    (Cupola, Giardino pensile, Targa storica, Ascensore panoramico,
+    Memoriale) vanno nel prompt per ChatGPT. Misura: venticinquesima.

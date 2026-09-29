@@ -698,10 +698,9 @@ def carte_vive(v):
     per_id["ed_torre_di_vedetta"]["cost"] = {"pietra": 1, "oro": 0, "idee": 0}
     # Il Cemento armato dava Resistenza nell'era 5, che non ha evento.
     ca = per_id["po_cemento_armato"]
-    # (+2 Rendita non lo prendeva nessuno: ora PV subito, pagati nella
-    # Costruzione che avanza.)
-    ca["effects"] = [{"hook": "on_acquire", "op": "vp", "value": 2}]
-    ca["effect_text"] = "Subito: +2 PV."
+    # Il designer (registro 129): +2 Resistenza, come e' stampato.
+    ca["effects"] = [{"hook": "on_acquire", "op": "resistance", "value": 2, "duration": "permanent", "target": {"is_self": True}}]
+    ca["effect_text"] = "L'edificio ha +2 Resistenza."
     # Le tessere dell'era che non scattavano.
     per_t = {t["id"]: t for t in v["tessere_era"]}
     r = per_t["te_raccoglitori"]
@@ -748,6 +747,32 @@ def eventi_e_avanzo(v):
                     e[k] = e[k].replace("Forza 5.", "Forza 3.")
     v["constants"]["avanzo_idee"] = True
 
+# I POTENZIAMENTI DI CLASSE (registro 129). Il designer, dopo il confronto
+# con le carte stampate: "valgono i dati, togli i bonus di classe, i
+# potenziamenti si possono mettere solo su edifici della stessa classe".
+# Il bonus "+1 in piu' se l'edificio e' ..." sparisce (sulle carte non c'e'),
+# resta la condizione del fiume (stampata come icona dell'acqua).
+TESTI_SENZA_BONUS = {
+    "po_idolo": "Subito: +1 PV.", "po_reliquia": "Subito: +1 PV.",
+    "po_totem": "Subito: +1 PV.", "po_mosaico": "Subito: +1 PV.",
+    "po_stemma": "Subito: +1 PV.", "po_terrazza": "Subito: +1 PV.",
+    "po_pala_d_altare": "Subito: +2 PV.", "po_murale": "Subito: +2 PV.",
+    "po_cannoniere": "L'edificio ha +1 Resistenza.",
+    "po_mura_di_cinta": "L'edificio ha +1 Resistenza.",
+    "po_torre_di_guardia": "L'edificio ha +1 Resistenza.",
+    "po_portico": "Quando attivi l'edificio: +1 Denaro.",
+}
+
+def potenziamenti_di_classe(v):
+    for u in v["upgrades"]:
+        prima = len(u["effects"])
+        u["effects"] = [e for e in u["effects"]
+                        if "class" not in e.get("condition", {}).get("target", {})]
+        if len(u["effects"]) != prima:
+            u["effect_text"] = TESTI_SENZA_BONUS[u["id"]]
+    assert all(uid in {u["id"] for u in v["upgrades"]} for uid in TESTI_SENZA_BONUS)
+    v["constants"]["potenziamento_stessa_classe"] = True
+
 import sys
 variante = sys.argv[sys.argv.index("--variante") + 1] if "--variante" in sys.argv else ""
 # Le case in riserva stanno nel file v2 di tutti (registro 116); le varianti di
@@ -760,6 +785,7 @@ testi_v2(v2)
 lampo_tetto(v2)
 carte_vive(v2)
 eventi_e_avanzo(v2)
+potenziamenti_di_classe(v2)
 if variante:
     {"doppioni": doppioni, "abitazioni": abitazioni, "case": case,
      "case_doppioni": case_doppioni, "case_scavo": case_scavo, "case_nulle": case_nulle,
