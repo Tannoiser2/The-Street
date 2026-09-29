@@ -269,6 +269,23 @@ func _ready() -> void:
 			ev["force"] = maxi(1, int(ev["force"]) + delta)
 		print("# forza degli eventi scontata di %d" % delta)
 
+	# LA FORZA PER ERA (`--forza_era 4=4,3=4`, registro 126): la forza degli
+	# eventi di un'era scelta, per provare un'era 4 meno distruttiva.
+	if args.has("forza_era"):
+		for pezzo in str(args["forza_era"]).split(","):
+			var kv := pezzo.split("=")
+			if kv.size() != 2: continue
+			for id in CardDB.events:
+				var ev: Dictionary = CardDB.events[id]
+				if ev.has("force") and int(ev.get("era", 0)) == int(kv[0]):
+					ev["force"] = int(kv[1])
+		print("# forza per era = %s" % str(args["forza_era"]))
+	# IL TETTO TOTALE (`--tetto_totale N`, registro 126): quante risorse in
+	# tutto si tengono a fine era; il tetto per risorsa e' `--tetto`.
+	if args.has("tetto_totale"):
+		CardDB.constants["resource_cap"] = int(args["tetto_totale"])
+		print("# resource_cap = %d" % int(args["tetto_totale"]))
+
 	_rapporto = args.has("rapporto") and str(args["rapporto"]) != "0"
 	if args.has("games"):
 		_lotto(seme, players, int(args["games"]))

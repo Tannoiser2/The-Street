@@ -667,6 +667,53 @@ def lampo_tetto(v):
     for b in v["buildings"]:
         b["lampo"] = min(int(b["lampo"]), LAMPO_TETTO)
 
+# LE CARTE MORTE (registro 126). Il rapporto delle partite (registro 125) ha
+# trovato carte che non si giocano mai; qui la proposta per ognuna, provata
+# come variante `carte_vive` prima di entrare nel file v2.
+def carte_vive(v):
+    per_id = {c["id"]: c for c in v["buildings"] + v["upgrades"]}
+    # Le case piccole erano identiche alle case dello Scavo della stessa era,
+    # con meno Scavo: nessuno le prendeva. Ora si pagano in Denaro, che
+    # avanza, invece che in Costruzione.
+    for bid in ("ed_casa_e1_p", "ed_casa_e2_p", "ed_casa_e3_p"):
+        per_id[bid]["cost"] = {"pietra": 0, "oro": 1, "idee": 0}
+    # Gli edifici Militari che proteggono costavano troppo per quello che danno.
+    per_id["ed_villaggio_palizzato"]["cost"] = {"pietra": 1, "oro": 0, "idee": 0}
+    per_id["ed_villaggio_palizzato"]["scavo"] = 3
+    per_id["ed_castrum"]["cost"] = {"pietra": 2, "oro": 0, "idee": 0}
+    per_id["ed_torre_di_vedetta"]["lampo"] = 2
+    per_id["ed_mura"]["lampo"] = 2
+    # Il Museo chiedeva 2 Idee, la risorsa che manca.
+    per_id["ed_museo"]["cost"] = {"pietra": 1, "oro": 1, "idee": 1}
+    # Il Cemento armato dava Resistenza nell'era 5, che non ha evento.
+    ca = per_id["po_cemento_armato"]
+    ca["effects"] = [{"hook": "on_acquire", "op": "rendita_delta", "value": 2, "duration": "permanent", "target": {"is_self": True}}]
+    ca["effect_text"] = "L'edificio ha +2 Rendita."
+    # Le tessere dell'era che non scattavano.
+    per_t = {t["id"]: t for t in v["tessere_era"]}
+    r = per_t["te_raccoglitori"]
+    r["testo"] = "Chi attiva per primo può cambiare 1 Costruzione in 1 Idea."
+    r["effetto"] = {"quando": "attiva", "cambio": ["pietra", "idee"]}
+    r = per_t["te_restauratori"]
+    r["testo"] = "Il primo edificio costruito qui sopra un altro costa 1 Idea in meno."
+    r["effetto"] = {"quando": "costruisci", "se": {"sopra": True}, "sconto": {"idee": 1}}
+    r = per_t["te_giardino_all_italiana"]
+    r["testo"] = "Il primo edificio costruito qui ha +2 resistenza fino a fine era."
+    r["effetto"] = {"quando": "costruisci", "resistenza_era": 2}
+    # Le Eredita' quasi impossibili.
+    per_l = {l["id"]: l for l in (v["legacies"] if isinstance(v["legacies"], list) else v["legacies"].values())}
+    c = per_l["er_il_condottiero"]
+    c["condition"] = {"op": "count_matching", "target": {"owner": "self", "class": ["militare"]}, "min": 3}
+    c["condition_text"] = "3+ tuoi edifici Militari, in qualsiasi stato."
+    c = per_l["er_lantiquario"]
+    c["condition"]["target"]["scavo"] = {"min": 5}
+    c["condition_text"] = "un tuo edificio Sotterrato con Scavo 5 o più."
+    c = per_l["er_il_restauratore"]
+    c["condition"]["min"] = 1
+    c["condition_text"] = "hai ristrutturato una tua rovina."
+    # Si potenzia anche un edificio della colonna adiacente, come si costruisce.
+    v["constants"]["potenzia_adiacente"] = True
+
 import sys
 variante = sys.argv[sys.argv.index("--variante") + 1] if "--variante" in sys.argv else ""
 # Le case in riserva stanno nel file v2 di tutti (registro 116); le varianti di
@@ -680,7 +727,7 @@ lampo_tetto(v2)
 if variante:
     {"doppioni": doppioni, "abitazioni": abitazioni, "case": case,
      "case_doppioni": case_doppioni, "case_scavo": case_scavo, "case_nulle": case_nulle,
-     "case_mista": case_mista, "case_tutti": case_tutti}[variante](v2)
+     "case_mista": case_mista, "case_tutti": case_tutti, "carte_vive": carte_vive}[variante](v2)
     v2["meta"]["ruleset"] = "v2-" + variante
     v2["meta"]["origine"] = "generato da tools/genera_cards_v2.py --variante %s: non modificare a mano" % variante
     out = os.path.join(RADICE, "data/proposte/cards-v2-%s.json" % variante)

@@ -500,11 +500,18 @@ func build(card_id: String, col_from: int, above: bool, pay_option: int = 0, des
 	return true
 
 # Potenziare: carta dalla fila, sotto un tuo edificio in piedi della colonna attivata.
+# Nella colonna attivata; con `potenzia_adiacente` (registro 126) anche in una
+# adiacente, come si costruisce.
+func _potenziabile_da(b: Building, col: int) -> bool:
+	if b.covers(col): return true
+	if not bool(CardDB.constants.get("potenzia_adiacente", false)): return false
+	return b.covers(col - 1) or b.covers(col + 1)
+
 func upgrade(upg_id: String, target: Building) -> bool:
 	if not gs.pending_choice.is_empty(): return false
 	if not _puo_agire(): return false
 	if target == null: return false
-	if not turno_v2() and not target.covers(gs.colonna_attivata): return false
+	if not turno_v2() and not _potenziabile_da(target, gs.colonna_attivata): return false
 	var p := gs.current_player()
 	var q := ActionRules.quote_upgrade(gs, p.index, upg_id, target)
 	if not q.legal:
