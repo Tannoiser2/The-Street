@@ -91,7 +91,7 @@ static func conta(gs: GameState) -> void:
 				if not b.scavata: continue
 				if bool(t.get("s", false)) and not personaggi.is_empty(): extra += int(personaggi.pop_back())
 				if bool(t.get("p", false)) and not opere.is_empty(): extra += int(opere.pop_back())
-			var v := (somma if b.scavata else somma / 2) + b.bonus_scavo + extra
+			var v: int = (somma if b.scavata else somma / 2) + b.bonus_scavo + extra
 			if v <= 0: continue
 			p.add_vp("scavo", v)
 			b.rende("scavo", v)
