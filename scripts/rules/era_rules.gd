@@ -271,7 +271,21 @@ static func disperse(gs: GameState) -> void:
 	# V2 (registro 91): un tetto PER RISORSA, "tetto a tre"; 0 nei dati v1.5,
 	# cioe' spento. Si applica prima del tetto totale, che resta com'e'.
 	var per_risorsa := int(CardDB.constants.get("resource_cap_per_resource", 0))
+	var in_idee := bool(CardDB.constants.get("avanzo_idee", false))
 	for p in gs.players:
+		# L'avanzo in Idee (registro 126): ogni 2 risorse oltre il tetto
+		# diventano 1 Idea, prima di buttare. Le Idee restano sotto i tetti.
+		if in_idee:
+			var sopra := maxi(0, p.pietra - per_risorsa) + maxi(0, p.oro - per_risorsa) if per_risorsa > 0 else 0
+			sopra = maxi(sopra, p.pietra + p.oro + p.idee - cap)
+			var nuove := mini(sopra / 2, maxi(0, (per_risorsa if per_risorsa > 0 else cap) - p.idee))
+			if nuove > 0:
+				p.gain(0, 0, nuove, "avanzo")
+				# le risorse cambiate si tolgono: prima la Costruzione, poi il Denaro
+				var da_togliere := nuove * 2
+				var tp := mini(da_togliere, p.pietra); p.pietra -= tp
+				p.oro -= mini(da_togliere - tp, p.oro)
+				p._conta("out_avanzo", tp, da_togliere - tp, 0)
 		if per_risorsa > 0:
 			p._conta("out_dispersione", maxi(0, p.pietra - per_risorsa), maxi(0, p.oro - per_risorsa), maxi(0, p.idee - per_risorsa))
 			p.pietra = mini(p.pietra, per_risorsa)

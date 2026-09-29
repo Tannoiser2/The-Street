@@ -286,6 +286,22 @@ func _ready() -> void:
 		CardDB.constants["resource_cap"] = int(args["tetto_totale"])
 		print("# resource_cap = %d" % int(args["tetto_totale"]))
 
+	# LA BASE DEI TERRENI (`--base collina=idee`, registro 126): cambia la
+	# risorsa che un terreno produce di base (sempre 1).
+	if args.has("base"):
+		for pezzo in str(args["base"]).split(","):
+			var kv := pezzo.split("=")
+			if kv.size() == 2 and CardDB.terrains.has(kv[0]):
+				var pb := {"pietra": 0, "oro": 0, "idee": 0}
+				pb[kv[1]] = 1
+				CardDB.terrains[kv[0]]["produzione_base"] = pb
+		print("# base = %s" % str(args["base"]))
+	# L'AVANZO IN IDEE (`--avanzo_idee 1`, registro 126): a fine era ogni 2
+	# risorse sopra il tetto diventano 1 Idea invece di buttarsi.
+	if args.has("avanzo_idee"):
+		CardDB.constants["avanzo_idee"] = str(args["avanzo_idee"]) != "0"
+		print("# avanzo_idee = %s" % str(CardDB.constants["avanzo_idee"]))
+
 	_rapporto = args.has("rapporto") and str(args["rapporto"]) != "0"
 	if args.has("games"):
 		_lotto(seme, players, int(args["games"]))
