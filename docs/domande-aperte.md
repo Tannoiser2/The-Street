@@ -2201,3 +2201,15 @@ dato è stato importato da lì. Ma due confronti fra ciò che è stampato e
     Memoriale) vanno nel prompt per ChatGPT. Misura: venticinquesima: tutte
     le strategie nell'errore a 2, 3 e 4 (scarto massimo 9 / 9 / 7), un quarto
     di potenziamenti in meno, i potenziamenti "struttura" tornano vivi.
+130. **Le tessere scavo.** Il designer: quando un edificio va in rovina si
+    toglie la carta e il giocatore pesca una tessera scavo coperta per ogni
+    casella che occupava; si rivelano a fine partita quando ci si costruisce
+    sopra un edificio dell'era 5; alcune hanno uno scheletro o un
+    potenziamento. "Il valore di scavo va a chi era proprietario
+    dell'edificio ... ogni giocatore ha un mazzetto rovine del suo colore."
+    Nel motore (`TessereScavo`, costante `tessere_scavo`), oggi solo nella
+    variante `tessere_scavo`; regole in `docs/proposte/tessere-scavo.md`.
+    Ventiseiesima misura: stessi punti dello Scavo stampato, un po' piu'
+    dispersi, strategie ferme, il vincitore cambia nelle partite chiuse
+    (7 / 12 / 12 %). Da decidere: il mazzetto (20 e' largo, se ne pescano
+    meno di 4), il premio di chi costruisce sopra, le icone sulle coperte.

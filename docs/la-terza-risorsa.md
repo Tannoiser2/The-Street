@@ -1364,6 +1364,37 @@ facevano vincere gli altri; ora Fondamenta 0,20, Argine 0,15, Cemento armato 0,0
 delle partite restano 5 / 3 / 1 potenziamenti su 50 (prima 4 / 4 / 4); il piu' raro e' la
 Palizzata (0,01 a quattro). Il kingmaker a quattro sale di due punti, dentro il rumore.
 
+## Ventiseiesima misura: le tessere scavo
+
+La proposta del designer (registro 130, `docs/proposte/tessere-scavo.md`): la rovina pesca dal
+mazzetto del proprietario una tessera coperta per casella, un edificio dell'era 5 costruito
+sopra le scopre, a fine partita il proprietario incassa le scoperte per intero e le coperte a
+metà, più scheletri e potenziamenti delle tessere scoperte. Variante
+`data/proposte/cards-v2-tessere_scavo.json`, stessi semi della venticinquesima. I bot non
+guardano le tessere, quindi le partite sono le stesse e cambia solo il conto finale: il
+confronto è a coppie, partita per partita.
+
+| a 2 / 3 / 4 | Scavo stampato | **tessere** |
+|---|--:|--:|
+| PV di fine partita dal proprio Scavo | 5,2 / 5,2 / 5,2 | 5,0 / 5,7 / 5,5 |
+| la loro dispersione (dev. std.) | 3,3 / 3,6 / 3,6 | 3,9 / 4,4 / 4,3 |
+| di cui da tessere scoperte | – | 84 / 82 / 80 % |
+| tessere pescate per giocatore | – | 3,6 / 3,8 / 3,8 (max 12) |
+| vince la Scavo | 53 / 36 / 24 | 52 / 34 / 24 |
+| scarto massimo fra strategie | 9 / 9 / 7 | 8 / 9 / 6 |
+| kingmaker | 4 / 7 / 11 % | 3 / 7 / 12 % |
+| vincitore diverso dallo Scavo stampato | – | 7 / 12 / 12 % |
+
+I punti restano gli stessi in media: le tessere valgono quanto lo Scavo stampato che
+sostituiscono, con un po' più di dispersione (+0,6–0,8 PV di deviazione). Un giocatore guadagna
+o perde fino a 12–15 PV rispetto allo Scavo stampato, ma la differenza tipica è di 3 PV. Il
+vincitore cambia nel 7 / 12 / 12 % delle partite: sono quelle chiuse, perché il distacco fra
+primo e secondo è di 2 PV o meno nell'8 / 14 / 17 % delle partite. L'equilibrio fra le
+strategie non si muove. Quattro quinti dei punti vengono da tessere scoperte: l'era 5 scava
+quasi tutto, quindi la metà delle coperte pesa poco. Il mazzetto da 20 è largo: se ne pescano
+meno di 4. Non misurato: un giocatore umano che costruisce apposta sulle proprie rovine per
+scoprirle, cosa che i bot non fanno.
+
 ## Come rifare il conto
 
 ```bash
@@ -1445,4 +1476,8 @@ grep "^# tessere_scattate" tessere_p3.csv     # quante volte scatta ogni tessera
 # venticinquesima misura: i potenziamenti di classe stanno nel file v2; `--da N` riprende un lotto interrotto dalla partita N
 for p in 2 3; do godot --headless res://scenes/audit_partita.tscn -- --players $p --games 750 --seed 700000 --dati data/cards-v2.json --giro tutte --rapporto 1 > classe_p$p.csv 2> classe_p$p.err; done
 python3 tools/confronta_torneo.py tutte_p2.csv classe_p2.csv
+# ventiseiesima misura: le tessere scavo, proposta
+python3 tools/genera_cards_v2.py --variante tessere_scavo
+for p in 2 3; do godot --headless res://scenes/audit_partita.tscn -- --players $p --games 750 --seed 700000 --dati data/proposte/cards-v2-tessere_scavo.json --giro tutte --rapporto 1 > scavo_p$p.csv 2> scavo_p$p.err; done
+python3 tools/confronta_torneo.py classe_p3.csv scavo_p3.csv
 ```
