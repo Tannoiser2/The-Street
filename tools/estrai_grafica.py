@@ -749,10 +749,12 @@ def main(dest):
     v2 = estrai_edifici_v2(dest)
     edifici_v2_bn(dest)
     tess_v2 = estrai_tessere_v2(dest)
+    pot_v2 = estrai_potenziamenti_v2(dest)
     with open(os.path.join(dest, "indice.json"), "w", encoding="utf-8") as f:
         json.dump({"carte_edifici": indice,
                    "carte_edifici_v2": v2,
                    "tessere_v2": tess_v2,
+                   "potenziamenti_v2": pot_v2,
                    "sagome": sag,
                    "conteggi": conteggi,
                    "per_id": per_id,
@@ -1027,6 +1029,108 @@ def edifici_v2_bn(dest):
         n += 1
     print(f"edifici v2 in bianco e nero (lato rovina): {n}")
     return n
+
+
+# ---- i potenziamenti della v2, stampati (registro 128) ----------------------
+# materiali/Potenziamenti_Completi_A4.pdf: i 50 potenziamenti, 135 x 70 pt,
+# quattro per riga. Le carte sono a icone: nome (vero testo), classe, il costo
+# (icona della risorsa e numero) e gli effetti come icona e numero (stella =
+# PV, scudo = resistenza, piccone = Scavo, lavoratore -> risorsa = quando si
+# attiva). Il numero si legge dal testo; la risorsa del costo dalla "D" della
+# moneta, altrimenti dal colore dell'icona (mattone rosso = Costruzione,
+# lampadina gialla = Idee). Si confrontano coi dati i numeri degli effetti
+# SENZA condizione; quelli con una condizione ("+2 se l'edificio e'
+# Religione") si segnalano se non stampati.
+def _numeri_attesi(u):
+    fissi, condizionati = [], []
+    for e in u.get("effects", []):
+        v = None
+        if e["op"] in ("vp", "resistance", "scavo_delta", "rendita_delta"):
+            v = int(e.get("value", 0))
+        elif e["op"] == "resource":
+            v = sum(int(e.get(k, 0)) for k in ("pietra", "oro", "idee"))
+        if v is None:
+            continue
+        # La condizione di terreno (il fiume) e' stampata come icona dell'acqua.
+        terreno = "terrain" in e.get("condition", {}).get("target", {})
+        (condizionati if "condition" in e and not terreno else fissi).append(v)
+    return sorted(fissi), condizionati
+
+
+def estrai_potenziamenti_v2(dest):
+    pdf = os.path.join(ROOT, "materiali", "Potenziamenti_Completi_A4.pdf")
+    if not os.path.isfile(pdf):
+        print("potenziamenti v2: manca il PDF")
+        return {}
+    v2 = json.load(open(os.path.join(ROOT, "data", "cards-v2.json"), encoding="utf-8"))
+    per_nome = {u["name"].upper().replace("'", "’"): u for u in v2["upgrades"]}
+    out_dir = os.path.join(dest, "carte", "potenziamenti_v2")
+    os.makedirs(out_dir, exist_ok=True)
+    indice, diverse, estranee = {}, [], []
+    doc = pymupdf.open(pdf)
+    for pn, pg in enumerate(doc):
+        righe = _righe_v2(pg)
+        bordi = []
+        for g in pg.get_drawings():
+            r = g["rect"]
+            if g.get("type") == "s" and r.width > 100 and r.height > 50 and \
+                    not any(abs(r.x0 - b.x0) < 1 and abs(r.y0 - b.y0) < 1 for b in bordi):
+                bordi.append(r)
+        for r in bordi:
+            sue = sorted([l for l in righe if r.contains(pymupdf.Point(l["x0"] + 1, l["y0"] + 1))],
+                         key=lambda l: (round(l["y0"]), l["x0"]))
+            nomi = [l for l in sue if l["font"] == "Times-Bold" and l["size"] >= 9.1 and not l["t"][0].isdigit()]
+            if not nomi:
+                continue
+            nome = nomi[0]["t"].replace("'", "’")
+            u = per_nome.get(nome)
+            if u is None:
+                estranee.append(nome)
+                continue
+            d = []
+            classe = [l["t"].lower() for l in sue if l["font"].startswith("Helvetica")]
+            if classe[:1] != [u["class"]]:
+                d.append(f"classe {classe}, dati {u['class']}")
+            costo = [l for l in sue if l["size"] == 9.0 and l["t"].isdigit()]
+            num = int(costo[0]["t"]) if costo else 0
+            riga_costo = costo[0]["y0"] if costo else 0
+            moneta = any(l["t"] == "D" and abs(l["y0"] - riga_costo) < 5 for l in sue)
+            if moneta:
+                ris = "oro"
+            else:
+                pix = pg.get_pixmap(dpi=150, clip=r)
+                rossi = sum(1 for y in range(int(pix.height * 0.40), int(pix.height * 0.62))
+                            for x in range(int(pix.width * 0.03), int(pix.width * 0.14))
+                            if pix.pixel(x, y)[0] > 170 and pix.pixel(x, y)[1] < 90 and pix.pixel(x, y)[2] < 90)
+                ris = "pietra" if rossi > 100 else "idee"
+            atteso = {k: v for k, v in u["cost"].items() if v}
+            if {ris: num} != atteso:
+                d.append(f"costo {num} {ris}, dati {atteso}")
+            letti = sorted(int(x) for l in sue for x in l["t"].replace("D", " ").split()
+                           if x.startswith("+") and x[1:].isdigit())
+            fissi, cond = _numeri_attesi(u)
+            if letti != fissi:
+                if cond and sorted(letti) == sorted(fissi):
+                    pass
+                else:
+                    d.append(f"effetti stampati {letti}, dati {fissi}" + (f" (+ condizionati {cond})" if cond else ""))
+            if cond:
+                d.append(f"non stampato: {u['effect_text']}")
+            if u["id"] not in indice:
+                pix = pg.get_pixmap(dpi=DPI_V2, clip=pymupdf.Rect(r.x0 - 2, r.y0 - 2, r.x1 + 2, r.y1 + 2))
+                pix.save(os.path.join(out_dir, u["id"] + ".png"))
+                indice[u["id"]] = {"file": u["id"] + ".png", "pagina": pn + 1, "differenze": d}
+            if d:
+                diverse.append((u["name"], d))
+    mancanti = [u["name"] for u in v2["upgrades"] if u["id"] not in indice]
+    print(f"potenziamenti v2: {len(indice)} su {len(v2['upgrades'])} stampati")
+    if mancanti:
+        print(f"  non stampati: {mancanti}")
+    if estranee:
+        print(f"  stampati ma non nei dati: {estranee}")
+    for nome, d in diverse:
+        print(f"  DIVERSO: {nome}: " + "; ".join(d))
+    return indice
 
 
 if __name__ == "__main__":

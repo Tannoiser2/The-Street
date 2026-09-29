@@ -2171,3 +2171,21 @@ dato è stato importato da lì. Ma due confronti fra ciò che è stampato e
     Obiettivi va giu' per indebolirla, al contrario del Lampo. Misurato
     (ventiquattresima misura): scarto massimo fra le strategie 10/10/9 punti,
     tre strategie a un punto dal bordo. Le regole non cambiano.
+
+128. **I potenziamenti stampati.** Il designer ha caricato
+    `materiali/Potenziamenti_Completi_A4.pdf`, i 50 potenziamenti a icone.
+    `tools/estrai_grafica.py` (`estrai_potenziamenti_v2`) li ritaglia in
+    `assets/carte/potenziamenti_v2/` e li confronta coi dati: nomi, costi e
+    numeri degli effetti senza condizione coincidono tutti. Da decidere:
+    - **Classe diversa** su cinque carte: Cupola (stampata Religione, dati
+      Ingegneria), Giardino pensile (Cultura / Civico), Targa storica
+      (Cultura / Civico), Ascensore panoramico (Civico / Ingegneria),
+      Memoriale (Militare / Religione).
+    - **Il bonus di classe non e' stampato** su dodici carte: Idolo, Totem,
+      Mosaico, Reliquia, Stemma di famiglia, Terrazza panoramica, Pala
+      d'altare, Murale ("+1 PV in piu' se l'edificio e' ..."), Mura di cinta,
+      Torre di guardia, Cannoniere ("+1 Resistenza in piu' se Militare"),
+      Portico ("+1 Denaro in piu' se Commercio"). O si aggiunge
+      un'icona della classe sulla carta, o si tolgono dai dati.
+    - **Cemento armato** e' stampato con lo scudo "+2" (la versione di prima):
+      nei dati, dal registro 126, e' "Subito: +2 PV".
