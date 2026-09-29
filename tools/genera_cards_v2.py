@@ -656,6 +656,17 @@ def testi_v2(v):
     senza = [u["id"] for u in v["upgrades"] if u["id"] not in TESTI_V2]
     assert not senza, senza
 
+# IL TETTO AL LAMPO (registro 125): nessun edificio da' piu' di 2 Lampo. Dopo
+# le caselle la strategia Lampo vinceva il 66/48/46 % a 2/3/4 giocatori;
+# fra le tre strade provate (bot, Lampo tolto alle tessere, tetto sulle carte)
+# la migliore e' il tetto a 2 insieme al bot ritarato. Le carte si ristampano
+# comunque per le icone nuove, quindi i 16 numeri cambiano senza costo.
+LAMPO_TETTO = 2
+
+def lampo_tetto(v):
+    for b in v["buildings"]:
+        b["lampo"] = min(int(b["lampo"]), LAMPO_TETTO)
+
 import sys
 variante = sys.argv[sys.argv.index("--variante") + 1] if "--variante" in sys.argv else ""
 # Le case in riserva stanno nel file v2 di tutti (registro 116); le varianti di
@@ -665,6 +676,7 @@ tessere_era(v2)
 forme(v2)
 potenziamenti_nuovi(v2)
 testi_v2(v2)
+lampo_tetto(v2)
 if variante:
     {"doppioni": doppioni, "abitazioni": abitazioni, "case": case,
      "case_doppioni": case_doppioni, "case_scavo": case_scavo, "case_nulle": case_nulle,

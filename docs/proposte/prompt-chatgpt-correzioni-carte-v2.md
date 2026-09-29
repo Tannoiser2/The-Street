@@ -1,6 +1,6 @@
 Ti allego i cinque PDF delle carte edificio del mio gioco da tavolo "La Strada delle Ere", versione 2.0 (Edifici_Prima_Era_A4.pdf, Edifici_Seconda_Era_A4.pdf, Edifici_Terza_Era_A4.pdf, Edifici_Quarta_Era_A4.pdf, Edifici_Quinta_Era_A4.pdf), e il file carte-v2-da-stampare.md. Il file .md è la fonte: contiene, per ogni edificio e ogni potenziamento, tutto e solo quello che va scritto sulla carta. Se un PDF e il .md non coincidono, vale il .md.
 
-Ti chiedo tre cose: correggere le icone dei punti su tutti gli edifici, correggere i testi di alcuni edifici e creare le carte dei 50 potenziamenti. Tutto il resto resta identico: formato A4, impaginazione, dimensioni e forme delle carte, illustrazioni, font, colori di barre, classi e luoghi, nomi, costi, resistenza, Scavo e produzione. Il testo delle carte deve restare testo vero (selezionabile), non immagine, come adesso.
+Ti chiedo quattro cose: correggere le icone dei punti su tutti gli edifici, correggere i testi di alcuni edifici, abbassare il Lampo di 16 edifici e creare le carte dei 50 potenziamenti. Tutto il resto resta identico: formato A4, impaginazione, dimensioni e forme delle carte, illustrazioni, font, colori di barre, classi e luoghi, nomi, costi, resistenza, Scavo e produzione. Il testo delle carte deve restare testo vero (selezionabile), non immagine, come adesso.
 
 ## 1. Le icone in basso: i punti non sono Denaro
 
@@ -58,7 +58,30 @@ Sostituisci il testo nel riquadro in basso con questo, parola per parola:
 
 Tutti gli altri edifici non cambiano testo. Su ogni carta, le parole "Costruzione", "Denaro", "Idee", "Resistenza", "PV" e le classi hanno sempre l'iniziale maiuscola, come nel .md.
 
-## 3. Le carte dei potenziamenti (nuove, 50)
+## 3. Il Lampo di 16 edifici scende a 2
+
+Nessun edificio dà più di 2 Lampo. Su queste carte cambia solo il numero del Lampo; tutto il resto resta com'è:
+
+| era | edificio | Lampo adesso | Lampo nuovo |
+|---|---|--:|--:|
+| Era 3 | Borgo | 3 | **2** |
+| Era 3 | Torre civica | 3 | **2** |
+| Era 4 | Giardino all'italiana | 3 | **2** |
+| Era 4 | Loggia | 3 | **2** |
+| Era 4 | Banco | 3 | **2** |
+| Era 4 | Villa | 4 | **2** |
+| Era 4 | Palazzo signorile | 3 | **2** |
+| Era 5 | Fondazione d'arte | 3 | **2** |
+| Era 5 | Condominio | 3 | **2** |
+| Era 5 | Officina | 3 | **2** |
+| Era 5 | Museo | 4 | **2** |
+| Era 5 | Grattacielo | 4 | **2** |
+| Era 5 | Biblioteca | 4 | **2** |
+| Era 5 | Ponte in acciaio | 4 | **2** |
+| Era 5 | Stazione | 4 | **2** |
+| Era 5 | Università | 4 | **2** |
+
+## 4. Le carte dei potenziamenti (nuove, 50)
 
 Crea le carte di tutti i 50 potenziamenti del .md, dieci per era, in cinque PDF nuovi: Potenziamenti_Prima_Era_A4.pdf … Potenziamenti_Quinta_Era_A4.pdf.
 
@@ -70,7 +93,7 @@ Crea le carte di tutti i 50 potenziamenti del .md, dieci per era, in cinque PDF 
 - **Illustrazione**: il soggetto del nome (un totem, una palizzata, un mosaico…), nello stesso stile isometrico degli edifici e dell'epoca giusta.
 - Il potenziamento non ha resistenza, Scavo, Rendita né Lampo: non mettere quelle icone.
 
-## 4. Cosa mi restituisci
+## 5. Cosa mi restituisci
 
 1. I cinque PDF degli edifici corretti, con gli stessi nomi di file.
 2. I cinque PDF nuovi dei potenziamenti.
