@@ -331,7 +331,8 @@ static func apply_on_activate(gs: GameState, attivatore: int, col: int) -> void:
 			if matches(gs, b, e.get("target", {}), src, own): trovato = true; break
 		if not trovato: continue
 		match str(e["op"]):
-			"resource": _paga(gs, own, e, carta, int(e.get("pietra", 0)), int(e.get("oro", 0)))
+			"resource": _paga(gs, own, e, carta, int(e.get("pietra", 0)), int(e.get("oro", 0)),
+				int(e.get("idee", 0)))
 			"vp": _paga_vp(gs, own, e, carta, int(e.get("value", 0)))
 
 static func _scatta(e: Dictionary, attivatore: int, proprietario: int) -> bool:
@@ -374,12 +375,17 @@ static func _quota(p: PlayerState, e: Dictionary, carta: Dictionary, valore: int
 	return valore
 
 static func _paga(gs: GameState, player: int, e: Dictionary, carta: Dictionary,
-		pietra: int, oro: int) -> void:
+		pietra: int, oro: int, idee := 0) -> void:
+	# Le Idee (registro 123: Focolare, Terme, Stamperia) si pagano come le
+	# altre due; nella v1.5 nessun effetto ne da', e il conto resta quello.
 	var p: PlayerState = gs.players[player]
-	var tot := _quota(p, e, carta, max(pietra, oro))
+	var tot := _quota(p, e, carta, maxi(maxi(pietra, oro), idee))
 	if tot <= 0: return
-	p.gain(pietra if pietra > 0 else 0, oro if oro > 0 else 0)
-	gs.log_line("%s: attivazione, %+d pietra %+d oro a giocatore %d" % [carta["name"], pietra, oro, player])
+	p.gain(maxi(pietra, 0), maxi(oro, 0), maxi(idee, 0))
+	if idee > 0:
+		gs.log_line("%s: attivazione, %+d Idee a giocatore %d" % [carta["name"], idee, player])
+	else:
+		gs.log_line("%s: attivazione, %+d pietra %+d oro a giocatore %d" % [carta["name"], pietra, oro, player])
 
 static func _paga_vp(gs: GameState, player: int, e: Dictionary, carta: Dictionary, v: int) -> void:
 	var p: PlayerState = gs.players[player]
@@ -448,6 +454,20 @@ static func cost_delta(gs: GameState, player: int, what: String, probe: Building
 		d += Vector2i(int(eff.get("pietra", 0)), int(eff.get("oro", 0)))
 	return d
 
+# Lo sconto "nella sua risorsa" (registro 124): la Bottega d'artista della v2
+# sconta il potenziamento di 1 in quella che il potenziamento chiede (Idee,
+# Costruzione o Denaro secondo la famiglia), non sempre in oro. Si somma a
+# parte perche' cost_delta parla solo di pietra e oro.
+static func cost_delta_propria(gs: GameState, player: int, what: String, probe: Building) -> int:
+	var n := 0
+	for e in _sorgenti_attive(gs, player):
+		var eff: Dictionary = e[0]
+		if eff["hook"] != "on_build" or eff["op"] != "cost_delta": continue
+		if str(eff.get("what", "building")) != what: continue
+		if not matches(gs, probe, eff.get("target", {}), e[1], e[2]): continue
+		n += int(eff.get("propria", 0))
+	return n
+
 # Capienza extra dei potenziamenti (il Vescovo: "capienza dei tuoi Religione +1").
 static func upgrade_slots_bonus(gs: GameState, player: int, host: Building) -> int:
 	var n := 0
@@ -485,7 +505,9 @@ static func _terrain_name(t: int) -> String:
 # finisce a chi incassa, cioe' al proprietario dell'edificio beneficiato.
 # La sorgente deve essere viva: un ponte crollato non serve piu' il quartiere.
 static func aura_production_bonus(gs: GameState, b: Building) -> Dictionary:
-	var out := {"pietra": 0, "oro": 0, "cultura": 0}
+	# Le Idee (v2) contano come le altre: il Ponte da' +1 di ogni risorsa che
+	# l'edificio gia' produce (registro 124). Nella v1.5 nessuno produce Idee.
+	var out := {"pietra": 0, "oro": 0, "cultura": 0, "idee": 0}
 	if not b.is_alive(): return out
 	var pr: Dictionary = b.data["production"]
 	for src in gs.grid.buildings:

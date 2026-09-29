@@ -117,6 +117,9 @@ func comincia() -> void:
 	# riavviare.
 	CardDB.load_db(inizio.percorso_dati())
 	ctl = GameController.new()
+	# Le persone scelgono a schermo le tessere dell'era "a scelta".
+	for i in inizio.giocatori:
+		if inizio.e_umano(i): ctl.umani[i] = true
 	ctl.new_game(inizio.giocatori, inizio.seme)
 	vista = VISTA.new()
 	add_child(vista)
@@ -168,7 +171,8 @@ func _acceso() -> Dictionary:
 		if v.parametri.has("col_from"):
 			var d: Dictionary = CardDB.buildings[str(v.parametri["card_id"])]
 			slot.append({"col_from": int(v.parametri["col_from"]),
-				"width": int(d["width"]), "level": int(v.parametri.get("level", 0))})
+				"width": int(d["width"]), "level": int(v.parametri.get("level", 0)),
+				"binario": int(v.parametri.get("binario", 0)), "depth": int(d.get("depth", 1))})
 		elif v.parametri.has("uid"):
 			uid.append(int(v.parametri["uid"]))
 	return {"carta": _scelta, "slot": slot, "uid": uid}
@@ -413,6 +417,19 @@ func descrivi_tessera(col: int) -> PackedStringArray:
 	var gs := ctl.gs
 	var t_id := Enums.terrain_to_string(gs.grid.terrains[col])
 	var tess: Dictionary = CardDB.terrains[t_id]
+	# Le tessere dell'era (registro 121): la base del terreno, la tessera
+	# posata in quest'era, il suo effetto e se si e' gia' girata.
+	if TessereEra.attive():
+		var pr := TessereEra.produzione(gs, col)
+		out.append("Colonna %d · %s" % [col, t_id.capitalize()])
+		out.append("produce " + _risorse_testo(pr) + " in quest'era (base %s)"
+			% _risorse_testo(tess.get("produzione_base", {})))
+		var te := TessereEra.tessera(gs, col)
+		if not te.is_empty():
+			out.append("%s: %s" % [te["name"], te["testo"]])
+			out.append("tessera girata: l'effetto torna nell'era prossima" if not EraRules.tessera_disponibile(gs, col)
+				else "effetto ancora da usare in quest'era")
+		return out
 	var base: Dictionary = tess["base_production"]
 	var per_era = tess.get("base_production_by_era", null)
 	if per_era != null and per_era.has(str(gs.era)): base = per_era[str(gs.era)]
@@ -427,6 +444,13 @@ func descrivi_tessera(col: int) -> PackedStringArray:
 		out.append("tessera girata: l'effetto torna nell'era prossima" if not EraRules.tessera_disponibile(gs, col)
 			else "effetto ancora da usare in quest'era")
 	return out
+
+func _risorse_testo(pr: Dictionary) -> String:
+	var pezzi := PackedStringArray()
+	if int(pr.get("pietra", 0)) > 0: pezzi.append("%d Costruzione" % int(pr["pietra"]))
+	if int(pr.get("oro", 0)) > 0: pezzi.append("%d Denaro" % int(pr["oro"]))
+	if int(pr.get("idee", 0)) > 0: pezzi.append("%d Idee" % int(pr["idee"]))
+	return ", ".join(pezzi) if not pezzi.is_empty() else "niente"
 
 # ---- il clic ---------------------------------------------------------
 func _clic(pixel: Vector2) -> void:
@@ -553,7 +577,8 @@ func _bersaglio_sotto(pixel: Vector2) -> AvailableActions.Voce:
 		var d: Dictionary = CardDB.buildings[str(v.parametri["card_id"])]
 		riquadri.append(BoardLayout3D.box_piazzamento(ctl.gs,
 			int(v.parametri["col_from"]), int(d["width"]),
-			int(v.parametri.get("level", 0)), ctl.gs.era))
+			int(v.parametri.get("level", 0)), ctl.gs.era,
+			int(v.parametri.get("binario", 0)), int(d.get("depth", 1))))
 		voci.append(v)
 	var i := BoardLayout3D.riquadro_al_raggio(riquadri, _origine(pixel), _direzione(pixel))
 	return voci[i] if i >= 0 else null
@@ -685,7 +710,7 @@ func _esegui(v) -> void:
 	match v.tipo:
 		"costruisci":
 			fatto = ctl.build(str(v.parametri["card_id"]), int(v.parametri["col_from"]),
-				bool(v.parametri["above"]))
+				bool(v.parametri["above"]), 0, null, int(v.parametri.get("binario", 0)))
 		"potenzia":
 			fatto = ctl.upgrade(str(v.parametri["upg_id"]), _edificio(int(v.parametri.get("uid", -1))))
 		"restaura":
@@ -767,6 +792,15 @@ func _disegna_hud() -> void:
 	if gs.phase == Enums.Phase.AZIONE and _io() >= 0 \
 			and gs.pending_choice.is_empty():
 		_disegna_bottoni(font, p)
+	# La scelta di una tessera dell'era: un tasto per opzione, sotto l'invito.
+	if str(gs.pending_choice.get("kind", "")) == "tessera" \
+			and int(gs.pending_choice["player"]) == _io():
+		var tx := 20.0
+		var etichette: Array = gs.pending_choice.get("etichette", [])
+		for i in etichette.size():
+			var r := _tasto(font, str(etichette[i]), Vector2(tx, 72.0), i == 0,
+				{"che": "scelta_tessera", "n": i})
+			tx = r.end.x + 10.0
 
 	var schermo := _hud.get_viewport_rect().size
 	# Finita la partita si tira la somma. Il tasto per rifarne un'altra sta
@@ -833,6 +867,8 @@ func _invito(gs: GameState) -> String:
 		invito = str(gs.pending_choice["prompt"])
 		if str(gs.pending_choice.get("kind", "")) == "draft":
 			invito += " — clicca una carta della fila dei Personaggi: e' gratis"
+		elif str(gs.pending_choice.get("kind", "")) == "tessera":
+			invito += " — scegli qui sotto"
 		else:
 			invito += " — clicca l'edificio"
 	elif gs.phase == Enums.Phase.PIAZZA:
@@ -1053,6 +1089,11 @@ func _applica_scelta(d: Dictionary) -> void:
 		"tavolo": _riepilogo_aperto = false
 		"avanza":
 			muovi_un_bot()
+			return
+		"scelta_tessera":
+			if ctl != null and ctl.choose(int(d["n"])):
+				_messaggio = "Fatto."
+				_aggiorna()
 			return
 		"via":
 			comincia()

@@ -518,7 +518,7 @@ static func _valore_costruzione(gs: GameState, p: PlayerState, v, strategia: Str
 	var col_from := int(par["col_from"])
 	var sopra: bool = par["above"]
 	var res := int(d["resistance"])
-	if gs.grid.terrains[col_from] == Enums.Terrain.COLLINA \
+	if not TessereEra.attive() and gs.grid.terrains[col_from] == Enums.Terrain.COLLINA \
 			and (not EraRules.tessere_una_volta(gs) or EraRules.tessera_disponibile(gs, col_from)): res += 1
 	var rimaste := _ere_rimaste(gs)
 

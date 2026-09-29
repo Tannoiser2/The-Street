@@ -14,6 +14,7 @@ static func final_scoring(gs: GameState) -> void:
 	_scavo(gs)
 	_skeletons(gs)
 	Conditions.score_legacies(gs)     # voce 6: Eredita' segrete
+	TessereEra.fine_partita(gs)       # tessera dell'era "Parco pubblico"
 	Effects.apply_final_scoring(gs)   # voce 7: effetti finali delle carte
 
 static func _census_final(gs: GameState) -> void:

@@ -64,7 +64,7 @@ func _ready() -> void:
 	_run("la tessera girata (v2)", _test_tessera_girata)
 	_run("il quarto lavoratore sulla bacchetta (v2)", _test_quarto_lavoratore)
 	_run("lo scheletro del lavoratore sotto il potenziamento (v2)", _test_scheletro_lavoratore)
-	_run("la rovina senza rudere resta in piedi, girata (v2)", _test_rovina_senza_rudere)
+	_run("la rovina senza rudere: la carta si capovolge (v2)", _test_rovina_senza_rudere)
 	_run("il riepilogo finale con i nomi del regolamento v2", _test_riepilogo_v2)
 	_run("le facce degli edifici della v2", _test_facce_v2)
 	print("\n%d superati, %d falliti" % [_passed, _failed])
@@ -2564,6 +2564,9 @@ func _test_tessera_girata() -> void:
 	var fiume := g2.grid.terrains.find(Enums.Terrain.FIUME)
 	_ok("c'e' un fiume", fiume >= 0)
 	if fiume >= 0:
+		# Una tessera che da' sempre qualcosa: quella pescata puo' non dare
+		# niente a chi attiva, e allora non si gira (registro 121).
+		if not g2.tessere_colonna.is_empty(): g2.tessere_colonna[fiume] = "te_sentiero_dei_pastori"
 		_ok("attivare il fiume lo gira", ctl.place_worker(fiume) and g2.tessere_usate[fiume])
 		vista.mostra(g2)
 		_eq("  e sul tavolo c'e' un velo", girate.call(), 1)
@@ -2710,14 +2713,16 @@ func _test_scheletro_lavoratore() -> void:
 	remove_child(s2)
 	s2.queue_free()
 
-# Registro 106: nella v2 non c'e' il rudere e la rovina si ristruttura. Al
-# tavolo "la sagoma ruotata mostra il lato rovina": a schermo resta in piedi,
-# girata e scura, invece di sparire come nella v1.5; non si abbatte; si
-# clicca per la sua sagoma; e i testi dicono "ristruttura la rovina".
+# Registri 106 e 122: nella v2 non c'e' il rudere e la rovina si ristruttura.
+# Dal registro 122 carte e sagome sono una cosa sola: l'edificio e' la sua
+# carta, un cartone di 15 mm disteso sulla casella; in rovina si capovolge e
+# mostra la stessa carta in bianco e nero. Non si abbatte, si clicca per la
+# carta, e i testi dicono "ristruttura la rovina".
 func _test_rovina_senza_rudere() -> void:
 	if not FileAccess.file_exists("res://data/cards-v2.json"): return
 	CardDB.load_db("res://data/cards-v2.json")
 	_ok("nella v2 non c'e' il rudere", BoardLayout3D.senza_rudere())
+	_ok("  e gli edifici sono carte distese", BoardLayout3D.cartoni())
 	var ctl := GameController.new()
 	ctl.new_game(3, 11)
 	var gs := ctl.gs
@@ -2727,26 +2732,22 @@ func _test_rovina_senza_rudere() -> void:
 	var vista: Node3D = preload("res://scripts/view/board_view_3d.gd").new()
 	add_child(vista)
 	vista.scale = Vector3.ONE * BoardLayout3D.U
-	var girate := func() -> int:
-		var q := 0
-		for f in vista.get_children():
-			if f.has_meta("girata") and f is Node3D and not is_zero_approx((f as Node3D).rotation.y): q += 1
-		return q
 	vista.mostra(gs)
-	_ok("intatto: la sagoma c'e'", BoardLayout3D.ha_sagoma(b) and not BoardLayout3D.sagoma_girata(b))
-	_eq("  e niente e' girato", girate.call(), 0)
+	_ok("nessuna sagoma in piedi", not BoardLayout3D.ha_sagoma(b))
+	var carta := BoardLayout3D.basetta_box(gs, b)
+	_eq("la carta e' un cartone di 15 mm", carta.size.y, BoardLayout3D.CARTONE_Y)
+	_ok("  che sta dentro la sua casella", carta.size.z <= BoardLayout3D.slot_d()
+		and carta.position.z >= BoardLayout3D.rail_z(b.binario_effettivo()) - 0.01)
+	_ok("  intatta, la faccia e' a colori", BoardLayout3D.carta_edificio_path(b).contains("/edifici_v2/"))
 	b.state = Enums.BuildingState.ROVINA
-	_ok("in rovina la sagoma resta in piedi", BoardLayout3D.ha_sagoma(b))
-	_ok("  girata", BoardLayout3D.sagoma_girata(b))
-	var ingombro := BoardLayout3D.ingombro(gs, b)
-	_ok("  e si clicca per la sagoma, non per il solo piede",
-		ingombro.size.y > BoardLayout3D.basetta_box(gs, b).size.y + 1.0)
+	_ok("in rovina si capovolge: la faccia e' in bianco e nero",
+		BoardLayout3D.carta_edificio_path(b).contains("/edifici_v2_bn/"))
+	_eq("  e si clicca per la carta", BoardLayout3D.ingombro(gs, b), BoardLayout3D.basetta_box(gs, b))
 	vista.mostra(gs)
-	_eq("  sul tavolo c'e' una sagoma girata", girate.call(), 1)
 	_ok("  e non si abbatte", vista._crolli.is_empty())
-	b.is_buried = true
-	_ok("  sepolta, sparisce come tutte", not BoardLayout3D.ha_sagoma(b))
-	b.is_buried = false
+	var sopra := _metti(gs, "ed_capanne", 1, 3, 1)
+	_ok("chi ci costruisce sopra sta un cartone piu' in alto",
+		absf(BoardLayout3D.basetta_box(gs, sopra).position.y - carta.end.y) < 0.01)
 	vista.queue_free()
 
 	_eq("il tasto dice Ristruttura", DescrizioneAzione.verbo_restauro(), "Ristruttura")

@@ -319,11 +319,352 @@ def case_doppioni(v):
     case(v)
     doppioni_chiese(v)
 
+
+# LE TESSERE DELL'ERA (registro 121, docs/proposte/tessere-v2.md). Il terreno
+# ha una produzione di base fissa; ogni era ha 7 tessere, in due copie, non
+# legate al terreno: a inizio era se ne mette una per colonna, e aggiunge la
+# sua produzione (da zero a una icona) e un effetto che scatta una volta per
+# era, alla prima occasione. Base e icone sono tarate perche' a tre
+# giocatori la produzione totale di ogni era resti quella della curva di prima
+# (solo l'era 1 cambia: il Fiume da' Denaro da subito).
+# L'effetto e' un dizionario letto da scripts/rules/tessere_era.gd:
+# "quando" dice l'innesco (attiva, costruisci, ristruttura, potenzia,
+# scheletro, seppellisci, fine_partita), "se" le condizioni, il resto cosa da'.
+PRODUZIONE_BASE = {"pianura": {"pietra": 1, "oro": 0, "idee": 0},
+                   "fiume": {"pietra": 0, "oro": 1, "idee": 0},
+                   "collina": {"pietra": 1, "oro": 0, "idee": 0},
+                   "bosco": {"pietra": 0, "oro": 0, "idee": 1}}
+C, D, I, N = {"pietra": 1}, {"oro": 1}, {"idee": 1}, {}
+TESSERE_ERA = [
+    # era 1 - la fondazione
+    (1, "campi_arati", "Campi arati", C, "Il primo edificio da 2 o 3 caselle costruito qui costa 1 Costruzione in meno.",
+     {"quando": "costruisci", "se": {"larghezza_min": 2}, "sconto": {"pietra": 1}}),
+    (1, "radura", "Radura", N, "Il primo edificio Civico costruito qui dà +1 Lampo.",
+     {"quando": "costruisci", "se": {"classi": ["civico"]}, "lampo": 1}),
+    (1, "sentiero_dei_pastori", "Sentiero dei pastori", N, "Chi attiva per primo prende +1 Denaro.",
+     {"quando": "attiva", "guadagno": {"oro": 1}}),
+    (1, "terra_di_nessuno", "Terra di nessuno", N, "Il primo edificio costruito qui ignora il requisito di terreno.",
+     {"quando": "costruisci", "ignora_terreno": True}),
+    (1, "recinto_di_pietre", "Recinto di pietre", C, "Il primo edificio costruito qui ha +1 resistenza fino a fine era.",
+     {"quando": "costruisci", "resistenza_era": 1}),
+    (1, "luogo_sacro", "Luogo sacro", N, "Il primo edificio Religione costruito qui costa 1 Idea in meno.",
+     {"quando": "costruisci", "se": {"classi": ["religione"]}, "sconto": {"idee": 1}}),
+    (1, "raccoglitori", "Raccoglitori", C, "Chi attiva per primo può cambiare 1 Idea in 1 Costruzione.",
+     {"quando": "attiva", "cambio": ["idee", "pietra"]}),
+    # era 2 - l'impero
+    (2, "centuriazione", "Centuriazione", C, "Il primo edificio Ingegneria costruito qui costa 1 Costruzione in meno.",
+     {"quando": "costruisci", "se": {"classi": ["ingegneria"]}, "sconto": {"pietra": 1}}),
+    (2, "via_consolare", "Via consolare", C, "Chi attiva per primo prende anche la produzione di una colonna adiacente a scelta.",
+     {"quando": "attiva", "produzione_adiacente": True}),
+    (2, "statio", "Statio", C, "Il primo edificio Commercio costruito qui dà +1 Denaro a chi lo costruisce.",
+     {"quando": "costruisci", "se": {"classi": ["commercio"]}, "guadagno": {"oro": 1}}),
+    (2, "cambiavalute", "Cambiavalute", C, "Chi attiva per primo può cambiare 1 Costruzione in 1 Denaro.",
+     {"quando": "attiva", "cambio": ["pietra", "oro"]}),
+    (2, "cantiere", "Cantiere", C, "Il primo edificio costruito qui sopra un altro edificio costa 1 Costruzione in meno.",
+     {"quando": "costruisci", "se": {"sopra": True}, "sconto": {"pietra": 1}}),
+    (2, "restauratori", "Restauratori", I, "Una ristrutturazione di un edificio qui costa 1 Costruzione in meno.",
+     {"quando": "ristruttura", "sconto": {"pietra": 1}}),
+    (2, "necropoli", "Necropoli", I, "Il primo edificio costruito qui ha Scavo +1, per sempre.",
+     {"quando": "costruisci", "scavo": 1}),
+    # era 3 - i castelli
+    (3, "fiera", "Fiera", N, "Chi attiva per primo prende +1 Denaro per ogni altro giocatore con un edificio intatto qui.",
+     {"quando": "attiva", "per_altrui_intatti": "oro"}),
+    (3, "borgo_franco", "Borgo franco", N, "Il primo edificio costruito qui sopra una rovina altrui costa 1 Costruzione in meno.",
+     {"quando": "costruisci", "se": {"su_rovina_altrui": True}, "sconto": {"pietra": 1}}),
+    (3, "scuola_dei_mastri", "Scuola dei mastri", I, "Chi attiva per primo prende +1 Idea per ogni edificio Ingegneria intatto qui.",
+     {"quando": "attiva", "per_classe_intatti": {"classi": ["ingegneria"], "risorsa": "idee"}}),
+    (3, "mura", "Mura", N, "Il primo edificio Militare costruito qui ha +2 resistenza fino a fine era.",
+     {"quando": "costruisci", "se": {"classi": ["militare"]}, "resistenza_era": 2}),
+    (3, "rocca", "Rocca", N, "Il primo edificio costruito qui è protetto all'evento di fine era.",
+     {"quando": "costruisci", "immune_evento": True}),
+    (3, "eremo", "Eremo", I, "Il primo edificio Religione o Cultura costruito qui dà +2 Lampo.",
+     {"quando": "costruisci", "se": {"classi": ["religione", "cultura"]}, "lampo": 2}),
+    (3, "spoglio_delle_rovine", "Spoglio delle rovine", N, "Chi seppellisce per primo un edificio qui prende +1 al premio di scavo.",
+     {"quando": "seppellisci", "premio": 1}),
+    # era 4 - le signorie
+    (4, "villa_di_campagna", "Villa di campagna", D, "Il primo edificio Cultura costruito qui costa 1 Denaro in meno.",
+     {"quando": "costruisci", "se": {"classi": ["cultura"]}, "sconto": {"oro": 1}}),
+    (4, "piazza_del_mercato", "Piazza del mercato", N, "Chi attiva per primo, se ha meno punti di tutti, prende +2 Denaro.",
+     {"quando": "attiva", "se": {"ultimo_in_punti": True}, "guadagno": {"oro": 2}}),
+    (4, "bottega", "Bottega", I, "Chi attiva per primo prende 1 risorsa a scelta.",
+     {"quando": "attiva", "a_scelta": 1}),
+    (4, "fondaco", "Fondaco", D, "Il primo edificio Commercio costruito qui produce subito, una volta.",
+     {"quando": "costruisci", "se": {"classi": ["commercio"]}, "produce_subito": True}),
+    (4, "belvedere", "Belvedere", I, "Il primo edificio costruito qui al livello 3 o più dà +2 Lampo.",
+     {"quando": "costruisci", "se": {"livello_min": 3}, "lampo": 2}),
+    (4, "giardino_all_italiana", "Giardino all'italiana", I, "Il primo edificio ristrutturato qui torna in piedi con +1 resistenza.",
+     {"quando": "ristruttura", "resistenza": 1}),
+    (4, "cappella_di_famiglia", "Cappella di famiglia", I, "Il primo scheletro lasciato qui vale +1 punto a fine partita.",
+     {"quando": "scheletro", "punti": 1}),
+    # era 5 - la citta' moderna (niente Scavo: nell'era 5 non vale)
+    (5, "periferia", "Periferia", D, "Il primo edificio Civico costruito qui costa 1 Idea in meno.",
+     {"quando": "costruisci", "se": {"classi": ["civico"]}, "sconto": {"idee": 1}}),
+    (5, "zona_industriale", "Zona industriale", N, "Chi attiva per primo prende +1 Denaro per ogni edificio Ingegneria o Commercio intatto qui.",
+     {"quando": "attiva", "per_classe_intatti": {"classi": ["ingegneria", "commercio"], "risorsa": "oro"}}),
+    (5, "isolato", "Isolato", I, "Il primo edificio costruito qui dà +1 Lampo per ogni edificio altrui intatto qui.",
+     {"quando": "costruisci", "lampo_per_altrui": 1}),
+    (5, "scuola_politecnica", "Scuola politecnica", D, "Il primo edificio Ingegneria costruito qui costa 1 Denaro in meno.",
+     {"quando": "costruisci", "se": {"classi": ["ingegneria"]}, "sconto": {"oro": 1}}),
+    (5, "quartiere_alto", "Quartiere alto", I, "Il primo edificio costruito qui, se diventa il più alto della strada, dà +3 Lampo.",
+     {"quando": "costruisci", "se": {"il_piu_alto": True}, "lampo": 3}),
+    (5, "parco_pubblico", "Parco pubblico", I, "A fine partita chi ha l'edificio in cima a questa colonna prende +2 punti.",
+     {"quando": "fine_partita", "cima_punti": 2}),
+    (5, "orto_botanico", "Orto botanico", I, "Il primo potenziamento messo su un edificio qui costa 1 Idea in meno.",
+     {"quando": "potenzia", "sconto": {"idee": 1}}),
+]
+assert len(TESSERE_ERA) == 35 and all(sum(1 for t in TESSERE_ERA if t[0] == e) == 7 for e in range(1, 6))
+
+def tessere_era(v):
+    for t in v["terrains"]:
+        t["produzione_base"] = dict(PRODUZIONE_BASE[t["id"]])
+    v["tessere_era"] = []
+    for era, ident, nome, prod, testo, eff in TESSERE_ERA:
+        p = {"pietra": 0, "oro": 0, "idee": 0}
+        p.update(prod)
+        v["tessere_era"].append({"id": "te_" + ident, "name": nome, "era": era,
+                                 "produzione": p, "testo": testo, "effetto": eff,
+                                 "copie": 2})
+    v["constants"]["tessere_era"] = True
+
+# LE FORME DELLE CARTE STAMPATE (registro 122). Una casella e' una colonna per
+# un binario; le carte nuove ne coprono piu' d'uno in profondita'. Decisioni
+# del designer: le "quadrate" occupano una colonna e due binari; il Colosseo
+# (Anfiteatro) passa da 3 a 2 colonne ed e' 2x2 come Castello e Fortezza; il
+# Grattacielo e' una colonna per tre binari. Acquedotto e Stazione restano
+# larghi 3. I binari non sono le ere: si costruisce nel binario che si vuole.
+# `depth` = binari occupati. `solo_su_rovine`: mai a terra, solo sopra, con le
+# regole di sempre (almeno una base vera: una rovina o un proprio attivo da
+# spianare; terrapieno sulle caselle vuote); e sopra di lui non si costruisce
+# finche' non e' a sua volta in rovina.
+FORME = {
+    "ed_circolo_di_pietre": (1, 2), "ed_villaggio_palizzato": (1, 2),
+    "ed_castrum": (1, 2), "ed_foro": (1, 2), "ed_abbazia": (1, 2),
+    "ed_arsenale": (1, 2), "ed_duomo": (1, 2), "ed_piazza_monumentale": (1, 2),
+    "ed_universita": (1, 2), "ed_parco_archeologico": (1, 2),
+    "ed_anfiteatro": (2, 2), "ed_castello": (2, 2), "ed_fortezza_bastionata": (2, 2),
+    "ed_grattacielo": (1, 3),
+}
+SOLO_SU_ROVINE = {"ed_anfiteatro", "ed_castello", "ed_fortezza_bastionata", "ed_grattacielo"}
+
+def forme(v):
+    per_id = {b["id"]: b for b in v["buildings"]}
+    assert set(FORME) <= set(per_id), set(FORME) - set(per_id)
+    for bid, (w, d) in FORME.items():
+        per_id[bid]["width"] = w
+        per_id[bid]["depth"] = d
+    for bid in SOLO_SU_ROVINE:
+        per_id[bid]["solo_su_rovine"] = True
+    v["constants"]["caselle"] = True
+
+# I POTENZIAMENTI RADDOPPIATI (registro 123): il designer chiede altri 25
+# potenziamenti, cinque per era, per un mazzo di dieci carte diverse per era.
+# Stessa economia dei 25 di prima: costo 1 nelle ere 1-3 e 2 nelle ere 4-5,
+# nella risorsa della famiglia (Arte in Idee, Struttura in Costruzione, il
+# resto in Denaro); forza pari a quella dei potenziamenti della stessa era.
+# Gli effetti usano solo operazioni che il motore gia' conosce.
+def _se_classe(classe):
+    return {"op": "count_matching", "min": 1, "target": {"is_self": True, "class": [classe]}}
+
+def _se_terreno(terreno):
+    return {"op": "count_matching", "min": 1, "target": {"is_self": True, "terrain": [terreno]}}
+
+def _pv(n, se=None):
+    e = {"hook": "on_acquire", "op": "vp", "value": n}
+    if se: e["condition"] = se
+    return e
+
+def _res(n, se=None):
+    e = {"hook": "on_acquire", "op": "resistance", "value": n, "duration": "permanent", "target": {"is_self": True}}
+    if se: e["condition"] = se
+    return e
+
+def _scavo(n):
+    return {"hook": "on_acquire", "op": "scavo_delta", "value": n, "duration": "permanent", "target": {"is_self": True}}
+
+def _abiti(risorsa, n, se=None):
+    e = {"hook": "on_activate", "op": "resource", risorsa: n, "target": {"is_self": True}}
+    if se: e["condition"] = se
+    return e
+
+def _conta_come(classe):
+    return {"hook": "on_acquire", "op": "rule_override", "name": "counts_as_class",
+            "target": {"is_self": True}, "adds_class": [classe]}
+
+POTENZIAMENTI_NUOVI = [
+    # era, id, nome, famiglia, classe, testo, effetti
+    (1, "totem", "Totem", "arte", "religione", "Arte: +1 PV (+1 extra su edificio Civico).",
+     [_pv(1), _pv(1, _se_classe("civico"))]),
+    (1, "argine", "Argine", "struttura", "ingegneria", "Struttura: +1 res.", [_res(1)]),
+    (1, "focolare", "Focolare", "altro", "civico", "Quando abiti questo edificio, +1 Idea.",
+     [_abiti("idee", 1)]),
+    (1, "recinto", "Recinto per il bestiame", "altro", "commercio", "Quando abiti questo edificio, +1 Denaro.",
+     [_abiti("oro", 1)]),
+    (1, "ossario", "Ossario", "altro", "religione", "Scavo dell'edificio +2.", [_scavo(2)]),
+    (2, "mosaico", "Mosaico", "arte", "cultura", "Arte: +2 PV su edificio Cultura, altrimenti +1.",
+     [_pv(1), _pv(1, _se_classe("cultura"))]),
+    (2, "terme", "Terme private", "altro", "civico", "Quando abiti questo edificio, +1 Idea.",
+     [_abiti("idee", 1)]),
+    (2, "mura_di_cinta", "Mura di cinta", "struttura", "militare", "Struttura: +1 res (+1 extra su edificio Militare).",
+     [_res(1), _res(1, _se_classe("militare"))]),
+    (2, "mulino_ad_acqua", "Mulino ad acqua", "altro", "ingegneria", "Solo su slot fiume: quando abiti qui, +1 Costruzione.",
+     [_abiti("pietra", 1, _se_terreno("fiume"))]),
+    (2, "lapide", "Lapide funeraria", "altro", "religione", "Finale: +2 Scavo a ogni edificio Sotterrato sotto questo edificio.",
+     [{"hook": "on_final_scoring", "op": "scavo_delta", "value": 2, "target": {"buried": True, "below_self": True}}]),
+    (3, "vetrata", "Vetrata", "arte", "religione", "Arte: +1 PV. Scavo dell'edificio +2.", [_pv(1), _scavo(2)]),
+    (3, "arco_rampante", "Arco rampante", "struttura", "ingegneria", "Struttura: +1 res. L'edificio conta anche come Religione.",
+     [_res(1), _conta_come("religione")]),
+    (3, "portico", "Portico", "altro", "commercio", "Quando abiti questo edificio, +1 Denaro (+1 extra su edificio Commercio).",
+     [_abiti("oro", 1), _abiti("oro", 1, _se_classe("commercio"))]),
+    (3, "torre_di_guardia", "Torre di guardia", "struttura", "militare", "Struttura: +1 res (+1 extra su edificio Militare).",
+     [_res(1), _res(1, _se_classe("militare"))]),
+    (3, "stemma", "Stemma di famiglia", "arte", "civico", "Arte: +2 PV su edificio Civico, altrimenti +1.",
+     [_pv(1), _pv(1, _se_classe("civico"))]),
+    (4, "pala_d_altare", "Pala d'altare", "arte", "religione", "Arte: +2 PV (+1 extra su edificio Religione).",
+     [_pv(2), _pv(1, _se_classe("religione"))]),
+    (4, "loggia", "Loggia", "altro", "civico", "+1 PV. L'affitto incassato da questo edificio è +1.",
+     [_pv(1), {"hook": "on_acquire", "op": "rendita_delta", "value": 1, "duration": "permanent", "target": {"is_self": True}}]),
+    (4, "bastione_a_stella", "Bastione a stella", "struttura", "militare", "Struttura: +2 res.", [_res(2)]),
+    (4, "fontana", "Fontana monumentale", "arte", "civico", "Arte: +2 PV. Scavo dell'edificio +2.", [_pv(2), _scavo(2)]),
+    (4, "stamperia", "Stamperia", "altro", "cultura", "Quando abiti questo edificio, +2 Idee.", [_abiti("idee", 2)]),
+    (5, "murale", "Murale", "arte", "cultura", "Arte: +2 PV (+1 extra su edificio Cultura).",
+     [_pv(2), _pv(1, _se_classe("cultura"))]),
+    (5, "pannelli_solari", "Pannelli solari", "altro", "ingegneria", "Quando abiti questo edificio, +2 Costruzione.",
+     [_abiti("pietra", 2)]),
+    (5, "cemento_armato", "Cemento armato", "struttura", "ingegneria", "Struttura: +2 res.", [_res(2)]),
+    (5, "terrazza", "Terrazza panoramica", "altro", "civico", "+2 PV su edificio Civico, altrimenti +1.",
+     [_pv(1), _pv(1, _se_classe("civico"))]),
+    (5, "archivio_storico", "Archivio storico", "altro", "cultura", "Scavo dell'edificio +3.", [_scavo(3)]),
+]
+assert len(POTENZIAMENTI_NUOVI) == 25 and all(sum(1 for u in POTENZIAMENTI_NUOVI if u[0] == e) == 5 for e in range(1, 6))
+
+def potenziamenti_nuovi(v):
+    ids = {u["id"] for u in v["upgrades"]}
+    for era, ident, nome, fam, classe, testo, effetti in POTENZIAMENTI_NUOVI:
+        uid = "po_" + ident
+        assert uid not in ids, uid
+        costo = {"pietra": 0, "oro": 0, "idee": 0}
+        costo[RISORSA_FAMIGLIA[fam]] = 1 if era <= 3 else 2
+        v["upgrades"].append({"id": uid, "name": nome, "era": era, "class": classe, "cost": costo,
+                              "family": fam, "effect_text": testo, "effects": effetti})
+
+# I TESTI DA STAMPARE (registro 124). Il designer: "correggi tutti i testi";
+# tre tempi e basta. Il Lampo (punti subito, una volta) e la Rendita (punti a
+# fine di ogni era, se in piedi) stanno nelle icone, non nel testo; nel testo
+# restano gli effetti permanenti e quelli "A fine partita". Niente frasi di
+# colore, niente parole della v1.5 (pietra, oro, res, lampo per un finale,
+# "abiti qui"), niente ripetizioni di quello che dice gia' un'icona o la forma
+# della carta. Ogni testo dice quello che fa il motore, parola per parola.
+SOLO_SOPRA = "Solo sopra: mai a terra. Sopra di lui si costruisce solo quando è in rovina."
+TESTI_V2 = {
+    # edifici: "" = nessun testo sulla carta
+    "ed_circolo_di_pietre": "",
+    "ed_menhir": "",
+    "ed_focolare_comune": "Quando lo attivi: +1 Costruzione.",
+    "ed_villaggio_palizzato": "Negli eventi, i tuoi edifici adiacenti hanno +1 Resistenza.",
+    "ed_acquedotto": "A fine partita, se è in piedi: +2 PV.",
+    "ed_anfiteatro": SOLO_SOPRA,
+    "ed_castrum": "Negli eventi, i tuoi edifici nelle sue colonne hanno +1 Resistenza.",
+    "ed_ponte": "Gli edifici adiacenti producono 1 in più di ogni risorsa che già producono.",
+    "ed_torre_di_vedetta": "Negli eventi, i tuoi edifici adiacenti hanno +1 Resistenza.",
+    "ed_arsenale": "Negli eventi, i tuoi edifici Militari adiacenti hanno +1 Resistenza.",
+    "ed_castello": SOLO_SOPRA,
+    "ed_mura": "Negli eventi, tutti gli edifici adiacenti, anche altrui, hanno +1 Resistenza.",
+    "ed_ospedale_dei_pellegrini": "Quando lo attivi: +1 Denaro.",
+    "ed_bottega_dartista": "I tuoi potenziamenti costano 1 in meno, nella loro risorsa.",
+    "ed_duomo": "Solo sopra: al livello 2 o più.",
+    "ed_fortezza_bastionata": SOLO_SOPRA,
+    "ed_giardino_allitaliana": "",
+    "ed_osservatorio": "A fine partita, se è in piedi: +2 PV.",
+    "ed_piazza_monumentale": "Solo sopra: al livello 1 o più. A fine partita: +1 PV per ogni tuo edificio in cima a una colonna adiacente.",
+    "ed_biblioteca": "A fine partita: +1 PV per ogni classe diversa fra i tuoi edifici nelle sue colonne, sotterrati compresi.",
+    "ed_caffe_letterario": "A fine partita: +1 PV se è adiacente a un edificio Cultura.",
+    "ed_condominio": "",
+    "ed_fondazione_darte": "A fine partita: +1 PV per ogni tuo potenziamento.",
+    "ed_grattacielo": "Solo sopra: al livello 2 o più, mai a terra. A fine partita: +1 PV per ogni livello a cui è costruito; ogni edificio altrui in cima a una colonna adiacente toglie 1 PV al suo proprietario.",
+    "ed_monumento_ai_caduti": "A fine partita: +1 PV per ogni altro tuo edificio Militare, in piedi o sotterrato.",
+    "ed_museo": "Solo sopra: al livello 1 o più. A fine partita: +2 PV per ogni edificio sotterrato sotto di lui.",
+    "ed_parco_archeologico": "A fine partita: fino a 2 tuoi edifici non sotterrati nelle colonne adiacenti valgono il loro Scavo come se fossero sotterrati.",
+    "ed_stazione": "Solo sopra: al livello 1 o più.",
+    "ed_universita": "Solo sopra: al livello 1 o più. A fine partita: +1 PV per ogni tuo Personaggio.",
+    # potenziamenti: la famiglia (Arte, Struttura, Altro) e' l'etichetta della
+    # carta, non si ripete nel testo. I PV dei potenziamenti arrivano subito.
+    "po_pittura_rupestre": "Subito: +1 PV. L'edificio ha +2 Scavo.",
+    "po_palizzata": "L'edificio ha +1 Resistenza.",
+    "po_idolo": "Subito: +1 PV, +2 PV se l'edificio è Religione.",
+    "po_granaio_comune": "Quando attivi l'edificio: +1 Costruzione.",
+    "po_fondamenta_in_pietra": "L'edificio ha +1 Resistenza.",
+    "po_statua": "Subito: +2 PV.",
+    "po_altare": "Subito: +1 PV. L'edificio ha +2 Scavo.",
+    "po_bastioni": "L'edificio ha +1 Resistenza.",
+    "po_banchina": "Quando attivi l'edificio, se tocca il Fiume: +1 Denaro.",
+    "po_iscrizione": "L'edificio ha +2 Scavo.",
+    "po_contrafforte": "L'edificio ha +1 Resistenza.",
+    "po_campanile": "Subito: +1 PV. L'edificio ha +1 Resistenza.",
+    "po_merlatura": "L'edificio ha +1 Resistenza e conta anche come Militare.",
+    "po_stalli_mercantili": "L'edificio ha +1 Rendita.",
+    "po_reliquia": "Subito: +1 PV, +2 PV se l'edificio è Religione.",
+    "po_opera_darte": "Subito: +3 PV.",
+    "po_affreschi": "Subito: +2 PV.",
+    "po_cupola": "Subito: +2 PV. L'edificio ha +1 Resistenza.",
+    "po_giardino_pensile": "Subito: +2 PV.",
+    "po_cannoniere": "L'edificio ha +1 Resistenza, +2 se è Militare.",
+    "po_installazione": "Subito: +3 PV.",
+    "po_targa_storica": "A fine partita: +2 Scavo a ogni edificio sotterrato sotto l'edificio.",
+    "po_ascensore_panoramico": "Subito: +2 PV.",
+    "po_boutique": "Quando attivi l'edificio: +2 Denaro.",
+    "po_memoriale": "Subito: +2 PV.",
+    "po_totem": "Subito: +1 PV, +2 PV se l'edificio è Civico.",
+    "po_argine": "L'edificio ha +1 Resistenza.",
+    "po_focolare": "Quando attivi l'edificio: +1 Idea.",
+    "po_recinto": "Quando attivi l'edificio: +1 Denaro.",
+    "po_ossario": "L'edificio ha +2 Scavo.",
+    "po_mosaico": "Subito: +1 PV, +2 PV se l'edificio è Cultura.",
+    "po_terme": "Quando attivi l'edificio: +1 Idea.",
+    "po_mura_di_cinta": "L'edificio ha +1 Resistenza, +2 se è Militare.",
+    "po_mulino_ad_acqua": "Quando attivi l'edificio, se tocca il Fiume: +1 Costruzione.",
+    "po_lapide": "A fine partita: +2 Scavo a ogni edificio sotterrato sotto l'edificio.",
+    "po_vetrata": "Subito: +1 PV. L'edificio ha +2 Scavo.",
+    "po_arco_rampante": "L'edificio ha +1 Resistenza e conta anche come Religione.",
+    "po_portico": "Quando attivi l'edificio: +1 Denaro, +2 se è Commercio.",
+    "po_torre_di_guardia": "L'edificio ha +1 Resistenza, +2 se è Militare.",
+    "po_stemma": "Subito: +1 PV, +2 PV se l'edificio è Civico.",
+    "po_pala_d_altare": "Subito: +2 PV, +3 PV se l'edificio è Religione.",
+    "po_loggia": "Subito: +1 PV. L'edificio ha +1 Rendita.",
+    "po_bastione_a_stella": "L'edificio ha +2 Resistenza.",
+    "po_fontana": "Subito: +2 PV. L'edificio ha +2 Scavo.",
+    "po_stamperia": "Quando attivi l'edificio: +2 Idee.",
+    "po_murale": "Subito: +2 PV, +3 PV se l'edificio è Cultura.",
+    "po_pannelli_solari": "Quando attivi l'edificio: +2 Costruzione.",
+    "po_cemento_armato": "L'edificio ha +2 Resistenza.",
+    "po_terrazza": "Subito: +1 PV, +2 PV se l'edificio è Civico.",
+    "po_archivio_storico": "L'edificio ha +3 Scavo.",
+}
+
+def testi_v2(v):
+    carte = {c["id"]: c for c in v["buildings"] + v["upgrades"]}
+    # La Bottega d'artista sconta nella risorsa del potenziamento, come dice
+    # la carta stampata, non piu' sempre in oro.
+    for e in carte["ed_bottega_dartista"]["effects"]:
+        if e["op"] == "cost_delta" and e.get("what") == "upgrade":
+            e.pop("oro", None)
+            e["propria"] = -1
+    assert set(TESTI_V2) <= set(carte), set(TESTI_V2) - set(carte)
+    for cid, testo in TESTI_V2.items():
+        carte[cid]["effect_text"] = testo
+    # Ogni potenziamento ha il suo testo scritto qui: nessuno resta con
+    # quello della v1.5.
+    senza = [u["id"] for u in v["upgrades"] if u["id"] not in TESTI_V2]
+    assert not senza, senza
+
 import sys
 variante = sys.argv[sys.argv.index("--variante") + 1] if "--variante" in sys.argv else ""
 # Le case in riserva stanno nel file v2 di tutti (registro 116); le varianti di
 # prova ci si aggiungono sopra, come misura.
 case_tutti(v2, riserva=True, copie=2)
+tessere_era(v2)
+forme(v2)
+potenziamenti_nuovi(v2)
+testi_v2(v2)
 if variante:
     {"doppioni": doppioni, "abitazioni": abitazioni, "case": case,
      "case_doppioni": case_doppioni, "case_scavo": case_scavo, "case_nulle": case_nulle,

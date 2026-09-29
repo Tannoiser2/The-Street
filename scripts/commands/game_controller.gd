@@ -115,6 +115,8 @@ func _start_era(era: int) -> void:
 	# Le tessere si rigirano: ogni effetto vale di nuovo (registro 100).
 	gs.tessere_usate.clear()
 	for _c in gs.grid.n_cols: gs.tessere_usate.append(false)
+	# Le tessere dell'era (registro 121): una per colonna dal mazzo dell'era.
+	TessereEra.distribuisci(gs)
 	gs.phase = Enums.Phase.PIAZZA
 	Conditions.claim_monuments(gs)      # il Pantheon guarda l'inizio dell'era Moderna
 	gs.log_line("Inizia l'era %d. Evento: %s" % [era, gs.current_event.get("name", "nessuno")])
@@ -304,6 +306,11 @@ func _lavoratore_su(b: Building, p: PlayerState) -> void:
 	b.protected_by = p.index
 
 # ---- fase 1+2: piazza e attiva --------------------------------------
+# I giocatori che scelgono a schermo (le persone): per loro le tessere
+# dell'era "a scelta" diventano una domanda. I bot e le misure scelgono da
+# soli (TessereEra). Lo imposta la schermata di gioco.
+var umani: Dictionary = {}
+
 func place_worker(col: int, protect: Building = null) -> bool:
 	if not gs.pending_choice.is_empty(): return false
 	if gs.phase != Enums.Phase.PIAZZA: return false
@@ -322,9 +329,30 @@ func place_worker(col: int, protect: Building = null) -> bool:
 		protect.protection += int(CardDB.constants["protection_bonus"])
 		protect.protected_by = p.index
 		gs.protetto_uid = protect.uid
-	EraRules.activate(gs, p.index, col)
+	var a_mano := umani.has(p.index) and not turno_v2() \
+		and not TessereEra.opzioni_scelta(gs, p.index, col).is_empty()
+	EraRules.activate(gs, p.index, col, a_mano)
 	gs.colonna_attivata = col
 	p.bump("az_colonna")
+	if a_mano:
+		var te := TessereEra.tessera(gs, col)
+		var ops := TessereEra.opzioni_scelta(gs, p.index, col)
+		var idx: Array[int] = []
+		var testi: Array[String] = []
+		for i in ops.size():
+			idx.append(i)
+			testi.append(str(ops[i]["testo"]))
+		gs.phase = Enums.Phase.AZIONE
+		gs.pending_choice = {
+			"player": p.index,
+			"kind": "tessera",
+			"col": col,
+			"prompt": "%s: %s" % [te["name"], te["testo"]],
+			"options": idx,
+			"etichette": testi,
+		}
+		choice_required.emit(gs.pending_choice)
+		return true
 	if turno_v2():
 		# Attivare la colonna e' l'azione intera del turno.
 		_end_turn()
@@ -336,7 +364,8 @@ func place_worker(col: int, protect: Building = null) -> bool:
 # ---- fase 3: azioni -------------------------------------------------
 # Costruire: nella colonna attivata o in una adiacente.
 # `despoil` e' il rudere opzionalmente depredato (spoliazione).
-func build(card_id: String, col_from: int, above: bool, pay_option: int = 0, despoil: Building = null) -> bool:
+func build(card_id: String, col_from: int, above: bool, pay_option: int = 0, despoil: Building = null,
+		binario := 0) -> bool:
 	if not _puo_agire(): return false
 	if not gs.pending_choice.is_empty(): return false
 	# V2: si costruisce in qualsiasi colonna legale (D9), non solo vicino alla attivata.
@@ -344,8 +373,11 @@ func build(card_id: String, col_from: int, above: bool, pay_option: int = 0, des
 	if not card_id in gs.market and not card_id in gs.riserva: return false
 	var p := gs.current_player()
 	var data: Dictionary = CardDB.buildings[card_id]
-	var q := BuildRules.quote_above(gs, p.index, data, col_from, despoil) if above \
-		else BuildRules.quote_rail(gs, p.index, data, col_from, despoil)
+	# `binario`: con le caselle (registro 122) chi costruisce sceglie il
+	# binario; 0 lascia scegliere alla regola (il piu' in fondo, o sopra il
+	# piu' economico).
+	var q := BuildRules.quote_above(gs, p.index, data, col_from, despoil, binario) if above \
+		else BuildRules.quote_rail(gs, p.index, data, col_from, despoil, binario)
 	if not q.legal:
 		gs.log_line("Costruzione rifiutata: %s" % q.reason)
 		return false
@@ -405,7 +437,9 @@ func build(card_id: String, col_from: int, above: bool, pay_option: int = 0, des
 	# quota zero in un altro binario gliela sposterebbe sotto i piedi.
 	for base in q.bases: b.basi.append(base.uid)
 	b.bonus_res = q.continuity_bonus
-	if EraRules.tessere_una_volta(gs):
+	if TessereEra.attive():
+		pass                          # le regole del terreno sono delle tessere dell'era
+	elif EraRules.tessere_una_volta(gs):
 		# V2 (registro 100): la collina da' +1 per l'era al primo edificio
 		# costruito qui, la pianura ha scontato la carta larga: le tessere si girano.
 		if gs.grid.terrains[col_from] == Enums.Terrain.COLLINA and EraRules.tessera_disponibile(gs, col_from):
@@ -430,6 +464,8 @@ func build(card_id: String, col_from: int, above: bool, pay_option: int = 0, des
 			# Il premio di scavo si paga qui, sul momento, come il Lampo: il
 			# livello e' quello dell'edificio appena costruito.
 			var premio := Scoring.premio_scavo(altro.scavo_value(), b.level, gs.era)
+			# Tessera dell'era "Spoglio delle rovine" (registro 121).
+			premio += TessereEra.premio_in_piu(gs, p.index, altro, premio)
 			if premio > 0:
 				p.add_vp("scavo", premio)
 				altro.rende("scavo", premio)
@@ -438,6 +474,7 @@ func build(card_id: String, col_from: int, above: bool, pay_option: int = 0, des
 				gs.log_line("%s seppellisce %s al livello %d: premio di scavo %d" % [
 					p.name, altro.data["name"], b.level, premio])
 	Effects.apply_on_build(gs, p.index, b)
+	TessereEra.dopo_costruzione(gs, p.index, b, q.bases)
 	if above:
 		for c in range(b.col_from, b.col_to): gs.grid.risen_this_era[c] = true
 	p.buildings_built += 1
@@ -495,6 +532,7 @@ func upgrade(upg_id: String, target: Building) -> bool:
 			gs.log_line("%s: giocatore %d firma %s e ne incassa %d oro a ogni attivazione" % [
 				artista[1]["name"], p.index, target.data["name"], rendita])
 	p.pay(q.pietra, q.oro, q.idee)
+	TessereEra.dopo_potenziamento(gs, target)
 	target.upgrades.append(upg_id)
 	# Gli effetti vengono dai dati della carta, con l'edificio ospite come
 	# sorgente dei selettori. Prima il cubetto nero dei Struttura era un caso
@@ -515,6 +553,7 @@ func upgrade(upg_id: String, target: Building) -> bool:
 		if gs.era < int(CardDB.constants["eras"]) and target.buried_character == "":
 			target.buried_character = Building.LAVORATORE
 			target.buried_character_era = gs.era
+			TessereEra.dopo_scheletro(gs, p.index, target)
 			gs.log_line("il lavoratore resta sotto %s come scheletro" % target.data["name"])
 	building_changed.emit(target)
 	_end_turn()
@@ -537,6 +576,7 @@ func restore(target: Building) -> bool:
 	p.pay(q.pietra, q.oro, q.idee)
 	if EraRules.tessere_una_volta(gs) and bosco >= 0 and int(target.data["cost"]["pietra"]) > 0:
 		EraRules.usa_tessera(gs, bosco, "-1 Costruzione alla ristrutturazione di %s" % target.data["name"])
+	TessereEra.dopo_ristrutturazione(gs, target)
 	target.state = Enums.BuildingState.INTATTO
 	target.vetusta = 0
 	p.bump("restauri")
@@ -769,6 +809,12 @@ func choose(uid: int) -> bool:
 			return true
 		"draft_bersaglio":
 			_draft_prendi(int(gs.pending_choice["player"]), str(gs.pending_choice["char_id"]), _per_uid(uid))
+			return true
+		"tessera":
+			TessereEra.applica_scelta(gs, int(gs.pending_choice["player"]),
+				int(gs.pending_choice["col"]), uid)
+			gs.pending_choice = {}
+			state_changed.emit()
 			return true
 	var o: Dictionary = _omaggi_da_piazzare.pop_front()
 	EraRules.place_gift(gs, o, _per_uid(uid))

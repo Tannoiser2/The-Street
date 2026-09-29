@@ -11,6 +11,8 @@ var upgrades: Dictionary = {}
 var events: Dictionary = {}
 var monuments: Dictionary = {}
 var legacies: Dictionary = {}
+# Le tessere dell'era della v2 (registro 121): id -> dati. Vuoto nella v1.5.
+var tessere_era: Dictionary = {}
 var ruleset: String = ""
 # Numero e misura reale della sagoma di ciascun edificio. NON e' un dato di
 # gioco - non entra in nessuna regola - ma serve alla plancia per disegnare le
@@ -70,6 +72,8 @@ func load_db(path: String) -> bool:
 	# lasciavano le loro carte nel mazzo di chi caricava dopo.
 	terrains.clear(); buildings.clear(); characters.clear()
 	upgrades.clear(); events.clear(); monuments.clear(); legacies.clear()
+	tessere_era.clear()
+	for t in parsed.get("tessere_era", []): tessere_era[t["id"]] = t
 	for t in parsed["terrains"]: terrains[t["id"]] = t
 	for b in parsed["buildings"]: buildings[b["id"]] = b
 	for c in parsed["characters"]: characters[c["id"]] = c

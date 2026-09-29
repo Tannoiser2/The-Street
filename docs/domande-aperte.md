@@ -2073,3 +2073,58 @@ dato è stato importato da lì. Ma due confronti fra ciò che è stampato e
     (`tools/estrai_grafica.py`, che ripete il confronto a ogni estrazione) e
     la vista v2 le usa per mercato, riserva e ventagli; le Case operaie non
     si estraggono. Vedi `docs/materiali-di-stampa.md`.
+
+121. **Le tessere dell'era.** Decisione del designer, dalla sua dima: il
+    terreno ha una produzione di base fissa (Pianura e Collina 1
+    Costruzione, Fiume 1 Denaro, Bosco 1 Idea) e ogni era su ogni colonna
+    si posa una tessera dell'era, pescata fra le 14 dell'era (7 diverse in
+    due copie), non legata al terreno, con da zero a una icona di
+    produzione in piu' e un effetto una volta per era. Scatta solo la
+    tessera della colonna scelta dal giocatore ("non importa se un
+    edificio copre piu' colonne"). Nomi confermati; seconde copie stampate
+    a parte. Nel motore: modulo `TessereEra`, costante `tessere_era` nel
+    file v2, manopola `--tessere_era`. Le regole vecchie dei terreni si
+    spengono. Misurato (diciannovesima misura): piu' punti (+7,8 a testa a
+    due, +2,4 a tre, +4,6 a quattro), la Lampo fuori dall'errore a due
+    (61 %) e a tre (41 %), la Obiettivi sul bordo basso a tre (28 %);
+    quattro tessere non scattano quasi mai (Raccoglitori, Restauratori,
+    Giardino all'italiana, Spoglio delle rovine). Aperto: sostituire le
+    quattro, e togliere Lampo alle tessere o ritarare il bot.
+
+122. **Le caselle e le forme nuove delle carte.** Decisioni del designer:
+    le carte quadrate occupano una colonna per due binari; il Colosseo
+    (Anfiteatro) passa da 3 a 2 colonne ed e' 2x2 come Castello e Fortezza
+    bastionata; il Grattacielo e' una colonna per tre binari; Acquedotto e
+    Stazione restano larghi 3. I binari non sono le ere: si costruisce nel
+    binario che si vuole, si parte dal fondo per comodita'. Si attiva ogni
+    edificio che tocca la colonna attivata. I 2x2 e il Grattacielo vanno
+    solo sopra, con le regole di sempre (almeno una base vera, propri
+    attivi spianati, terrapieno sulle caselle vuote), e sopra di loro si
+    costruisce solo quando sono in rovina. Nel motore: costante `caselle`
+    del file v2, campi `depth` e `solo_su_rovine`. Misurato (ventesima
+    misura): piu' Scavo, citta' piu' bassa, la Lampo fuori dall'errore a
+    tutti i tavoli (66/48/41 %). Aperto: riportare la Lampo nell'errore.
+
+123. **I potenziamenti raddoppiati.** Richiesta del designer: altri 25
+    potenziamenti, cinque per era, cosi' ogni era ha un mazzo di dieci carte
+    diverse. Stessa economia dei primi 25 (costo 1 nelle ere 1-3, 2 nelle
+    ere 4-5, nella risorsa della famiglia) e forza pari a quelli della
+    stessa era. Nel motore l'unica aggiunta e' che "quando abiti" puo' dare
+    anche Idee. Elenco in `docs/proposte/potenziamenti-v2.md`, dati in
+    `tools/genera_cards_v2.py`. Aperto: stampa delle carte e misura.
+
+124. **I testi delle carte e le icone dei punti.** Il designer: "correggi
+    tutti i testi"; il Lampo fa l'effetto una volta e basta, poi ci sono gli
+    effetti permanenti e quelli di fine partita. Sulle carte stampate
+    Rendita (PV a fine di ogni era) e Lampo (PV subito, una volta) usavano
+    la moneta del Denaro, e sembrava un doppio incasso: nel motore non lo
+    era. Proposta: corona d'alloro per i punti, con clessidra (Rendita) o
+    fulmine (Lampo); la moneta solo per il Denaro. I testi sono riscritti
+    tutti in `tools/genera_cards_v2.py` (`TESTI_V2`): tre tempi, niente
+    frasi di colore, niente parole della v1.5, niente ripetizioni di cio'
+    che dice un'icona. Due correzioni al motore per far dire alla carta il
+    vero: la Bottega d'artista sconta nella risorsa del potenziamento
+    (com'e' stampata), e il Ponte da' +1 anche alle Idee. Documento unico
+    per la stampa: `docs/carte-v2-da-stampare.md`
+    (`tools/stampa_carte_v2.py`); prompt per rifare le carte:
+    `docs/proposte/prompt-chatgpt-correzioni-carte-v2.md`.

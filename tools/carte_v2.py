@@ -34,14 +34,7 @@ SIGLE = [
 # Dove la carta non e' qui, il testo di oggi resta valido cosi' com'e'.
 TESTI = {
     # edifici
-    "ed_focolare_comune": ("Quartiere: +1 Costruzione quando lo attivi.", "LAV 3R",
-        "\"quando abiti qui\": il lavoratore sta sulla colonna, quindi \"quando attivi la colonna\""),
-    "ed_acquedotto": ("Colossale: 2 slot adiacenti (3 pagando +1 Costruzione; in 2 giocatori il terzo slot è vietato), almeno uno con fiume. Eco: +2 PV (lampo) se ancora in piedi nel Moderno.", "3R", ""),
-    "ed_ospedale_dei_pellegrini": ("Quando lo attivi, +1 Denaro.", "LAV 3R", ""),
-    "ed_bottega_dartista": ("I tuoi potenziamenti costano 1 in meno, nella loro risorsa.", "3R",
-        "i potenziamenti pagano per famiglia: Arte in Idee, Struttura in Costruzione, il resto in Denaro"),
     "ed_palazzo_signorile": (None, "3R", "produce 1 Idea al posto di 1 cultura (già nel file v2)"),
-    "ed_universita": ("+1 PV per ogni tuo Personaggio preso nel draft. Richiede livello 1+.", "DRA", ""),
     "ed_abbazia": (None, "", "Rendita 3 → 2 (registro 97: le carte care)"),
     "ed_castello": (None, "", "Rendita 3 → 2 (registro 97)"),
     "ed_fortezza_bastionata": (None, "", "Rendita 3 → 2 (registro 97)"),
@@ -83,9 +76,6 @@ TESTI = {
     "pe_dinastia": ("Sempre disponibile, fuori dal draft, al posto dell'azione. Costo in Idee: era 1 = 4 · era 2 = 3 · era 3 = 3 · era 4 = 3. Nessuna abilità: aggiunge un quinto lavoratore, permanente e attivo da subito. Massimo una a testa.", "3R",
         "con quattro lavoratori di base (registro 94) è il quinto"),
     # potenziamenti
-    "po_granaio_comune": ("Quando attivi questo edificio, +1 Costruzione.", "LAV 3R", ""),
-    "po_banchina": ("Solo su slot fiume: quando attivi questo edificio, +1 Denaro.", "LAV 3R", ""),
-    "po_boutique": ("Quando attivi questo edificio, +2 Denaro.", "LAV 3R", ""),
     # eventi
     "ev_inverno_lungo": ("Forza 2. Edifici su bosco e collina: −1 res. Tutti i giocatori perdono 1 Costruzione.", "3R", ""),
     "ev_migrazione": (None, "LAV", "\"non protetti\" resta: protegge il lavoratore messo sopra un proprio edificio in piedi, come oggi"),
@@ -236,15 +226,35 @@ w("## Le tessere terreno")
 w("")
 w("Si pescano a caso (punto 6); il mix garantisce il bosco: " + "; ".join(
     f"{n} giocatori " + ", ".join(f"{v} {k}" for k, v in m.items()) for n, m in K["terrain_mix_by_players"].items()) + ".")
-w("Ogni tessera produce per tipo, con una curva per era, a chi la attiva, e ha un effetto che")
-w("scatta **una volta per era** alla prima occasione, poi la tessera si gira (registro 100).")
-w("")
-w("| tessera | era 1 | era 2 | era 3 | era 4 | era 5 | regola (nel file v2) | oggi |")
-w("|---|---|---|---|---|---|---|---|")
-for t in V2["terrains"]:
-    curva = [produzione(t["base_production_by_era"][str(e)]) for e in range(1, 6)]
-    w(f"| {NOME_TER[t['id']]} | " + " | ".join(curva) + f" | {t['rule']} | {TESSERE_OGGI[t['id']]} |")
-w("")
+if V2.get("tessere_era"):
+    # Registro 121: il terreno ha una produzione di base fissa, la curva per era
+    # e la regola stanno nelle tessere dell'era.
+    w("Ogni terreno produce una **produzione di base** fissa a chi lo attiva; sopra, ogni era, si")
+    w("posa una **tessera dell'era** che aggiunge la sua produzione e un effetto che scatta una volta")
+    w("per era, solo per la colonna scelta dal giocatore (registro 121).")
+    w("")
+    w("| terreno | produzione di base | oggi (v1.5) |")
+    w("|---|---|---|")
+    for t in V2["terrains"]:
+        w(f"| {NOME_TER[t['id']]} | {produzione(t['produzione_base'])} | {TESSERE_OGGI[t['id']]} |")
+    w("")
+    w("### Le %d tessere dell'era (%d copie ciascuna)" % (len(V2["tessere_era"]), V2["tessere_era"][0]["copie"]))
+    w("")
+    w("| era | tessera | in più | effetto, una volta per era |")
+    w("|--:|---|---|---|")
+    for t in V2["tessere_era"]:
+        w(f"| {t['era']} | {t['name']} | {produzione(t['produzione'])} | {t['testo']} |")
+    w("")
+else:
+    w("Ogni tessera produce per tipo, con una curva per era, a chi la attiva, e ha un effetto che")
+    w("scatta **una volta per era** alla prima occasione, poi la tessera si gira (registro 100).")
+    w("")
+    w("| tessera | era 1 | era 2 | era 3 | era 4 | era 5 | regola (nel file v2) | oggi |")
+    w("|---|---|---|---|---|---|---|---|")
+    for t in V2["terrains"]:
+        curva = [produzione(t["base_production_by_era"][str(e)]) for e in range(1, 6)]
+        w(f"| {NOME_TER[t['id']]} | " + " | ".join(curva) + f" | {t['rule']} | {TESSERE_OGGI[t['id']]} |")
+    w("")
 
 # ---- personaggi ----------------------------------------------------------
 w("## I 26 Personaggi")
@@ -264,16 +274,17 @@ for c in V2["characters"]:
 w("")
 
 # ---- potenziamenti -------------------------------------------------------
-w("## I 25 potenziamenti")
+w("## I %d potenziamenti" % len(V2["upgrades"]))
 w("")
 w("Si paga nella risorsa della famiglia (registro 91): Arte in Idee, Struttura in Costruzione, il")
 w("resto in Denaro; importi di oggi (1 nelle ere 1-3, 2 nelle ere 4-5). Il lavoratore che lo")
 w("piazza resta sotto l'edificio come scheletro (punto 8, registri 95-96): uno per edificio, non")
 w("nell'era Moderna, vale 6 meno l'era comunque finisca l'edificio. Sulla sagoma serve il posto.")
+w("I secondi 25 (registro 123) raddoppiano il mazzo: dieci potenziamenti diversi per era.")
 w("")
 w("| era | potenziamento | famiglia | costo C/D/I | testo | motivo | nota |")
 w("|--:|---|---|--:|---|---|---|")
-for u in V2["upgrades"]:
+for u in sorted(V2["upgrades"], key=lambda u: u["era"]):
     testo, sigle, nota = testo_e_nota(u)
     w("| %d | %s | %s | %s | %s | %s | %s |" % (
         u["era"], u["name"], u["family"], costo(u["cost"]), cella(testo), sigle, cella(nota)))

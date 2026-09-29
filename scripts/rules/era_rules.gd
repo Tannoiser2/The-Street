@@ -25,11 +25,15 @@ static func usa_tessera(gs: GameState, col: int, cosa: String) -> void:
 	gs.tessere_usate[col] = true
 	gs.log_line("La tessera della colonna %d si gira: %s" % [col, cosa])
 
-static func activate(gs: GameState, player: int, col: int) -> void:
+# `tessera_a_mano`: la tessera dell'era chiede una scelta al giocatore, e la
+# risolve il controller con una domanda invece della scelta automatica.
+static func activate(gs: GameState, player: int, col: int, tessera_a_mano := false) -> void:
 	var g := gs.grid
 	var t_id: String = ["pianura", "fiume", "collina", "bosco"][g.terrains[col]]
-	# Fiume, una volta per era: +1 Denaro a chi attiva.
-	if tessere_una_volta(gs) and g.terrains[col] == Enums.Terrain.FIUME and tessera_disponibile(gs, col):
+	# Fiume, una volta per era: +1 Denaro a chi attiva. Con le tessere
+	# dell'era (registro 121) il terreno non ha piu' regola: l'effetto e'
+	# della tessera posata sulla colonna.
+	if tessere_una_volta(gs) and not TessereEra.attive() and g.terrains[col] == Enums.Terrain.FIUME and tessera_disponibile(gs, col):
 		gs.players[player].gain(0, 1)
 		usa_tessera(gs, col, "+1 Denaro a giocatore %d" % player)
 	var base = CardDB.terrains[t_id]["base_production"]
@@ -37,6 +41,8 @@ static func activate(gs: GameState, player: int, col: int) -> void:
 	# punto 7 della proposta). Nei dati v1.5 la chiave non c'e' e vale la base fissa.
 	var per_era = CardDB.terrains[t_id].get("base_production_by_era", null)
 	if per_era != null and per_era.has(str(gs.era)): base = per_era[str(gs.era)]
+	# Tessere dell'era: base fissa del terreno piu' la tessera della colonna.
+	if TessereEra.attive(): base = TessereEra.produzione(gs, col)
 	# "Anni della fame: nessuna produzione durante l'ultimo round dell'era."
 	# Decisione del designer: salta la sola produzione BASE, e solo sull'ultimo
 	# lavoratore che ciascuno piazza. Gli edifici pagano comunque. "Ultimo" si
@@ -55,6 +61,7 @@ static func activate(gs: GameState, player: int, col: int) -> void:
 		paga_edificio(gs, b)
 
 	Effects.apply_on_activate(gs, player, col)
+	if not tessera_a_mano: TessereEra.all_attivazione(gs, player, col)
 
 	# UNA VOLTA PER ERA (manopola `once_per_era`, spenta nei dati): la prima
 	# attivazione di un Centro Urbano in un'era paga, le altre nella stessa
@@ -91,7 +98,7 @@ static func paga_edificio(gs: GameState, b: Building) -> void:
 	var pp := int(pr.get("pietra", 0)) + int(aura["pietra"])
 	var po := int(pr.get("oro", 0)) + int(aura["oro"])
 	var pc := int(pr.get("cultura", 0)) + int(aura["cultura"])
-	var pi := int(pr.get("idee", 0))      # v2: le Idee prodotte dagli edifici
+	var pi := int(pr.get("idee", 0)) + int(aura["idee"])   # v2: le Idee prodotte dagli edifici
 	var ex := Effects.production_bonus(gs, b.owner, pp, po)
 	ow.gain(pp + ex.x, po + ex.y, pi)
 	if pc > 0:

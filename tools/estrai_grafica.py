@@ -747,9 +747,12 @@ def main(dest):
 
     sag = estrai_sagome(doc, dest)
     v2 = estrai_edifici_v2(dest)
+    edifici_v2_bn(dest)
+    tess_v2 = estrai_tessere_v2(dest)
     with open(os.path.join(dest, "indice.json"), "w", encoding="utf-8") as f:
         json.dump({"carte_edifici": indice,
                    "carte_edifici_v2": v2,
+                   "tessere_v2": tess_v2,
                    "sagome": sag,
                    "conteggi": conteggi,
                    "per_id": per_id,
@@ -825,10 +828,16 @@ def _leggi_carta_v2(righe):
 def _differenze_v2(letta, b):
     d = []
     et = letta["etich"]
-    classi = [c.strip().lower() for c in et[0].split("/")] if et else []
-    if classi != b["classes"]:
+    # Classe e luogo si riconoscono dal nome, non dalla posizione: nelle carte
+    # grandi (1 x 2, 2 x 2, 1 x 3) l'etichetta del luogo puo' stare prima.
+    luoghi = [x for x in et if x.lower() in TERRENI_V2]
+    altre = [x for x in et if x.lower() not in TERRENI_V2 and x != "RIS" and not x.startswith("Esaur")]
+    # Le carte a due classi hanno il box diviso in due meta' (due etichette);
+    # quelle vecchie avevano "Religione / Cultura" in un box solo.
+    classi = [c.strip().lower() for x in altre for c in x.split("/")]
+    if sorted(classi) != sorted(b["classes"]):
         d.append(f"classi {classi}, dati {b['classes']}")
-    terr = et[1].lower() if len(et) > 1 else "?"
+    terr = luoghi[0].lower() if luoghi else "?"
     if TERRENI_V2.get(terr, "?") != b["terrain"]:
         d.append(f"terreno {terr}, dati {b['terrain']}")
     if ("RIS" in et) != bool(b.get("riserva")):
@@ -912,6 +921,112 @@ def estrai_edifici_v2(dest):
     for id_, nome, d in diverse:
         print(f"  DIVERSA dai dati: {nome} ({id_}): " + "; ".join(d))
     return indice
+
+
+# ---- le tessere della v2: terreni e tessere dell'era (registro 121) ----------
+# materiali/Tessere_Terreno_v2_A4.pdf: pagine 1-5 con due tessere terreno
+# (lunghe quanto la colonna, 194 x 838 pt) e le sette tessere dell'era di
+# un'era; pagine 6-7 con le seconde copie, identiche, che qui non servono.
+# Terreno e tessera si riconoscono dal testo stampato (nome in maiuscolo),
+# come le carte degli edifici: niente ordine presunto. Ogni tessera dell'era
+# si confronta coi dati (produzione in piu' e testo dell'effetto). Della
+# tessera dell'era si salva anche la versione in bianco e nero: e' quella che
+# la vista mostra quando la tessera si e' girata.
+PDF_TESSERE_V2 = os.path.join(ROOT, "materiali", "Tessere_Terreno_v2_A4.pdf")
+TERRENI_NOMI = {"PIANURA": "pianura", "FIUME": "fiume", "COLLINA": "collina", "BOSCO": "bosco"}
+DPI_TESSERE = 200
+
+
+def _bn(pix):
+    return pymupdf.Pixmap(pymupdf.csGRAY, pix)
+
+
+def _spazi(t):
+    return " ".join(t.replace("’", "'").split())
+
+
+def estrai_tessere_v2(dest):
+    if not os.path.exists(PDF_TESSERE_V2):
+        print("tessere v2: manca materiali/Tessere_Terreno_v2_A4.pdf")
+        return {}
+    v2 = json.load(open(os.path.join(ROOT, "data", "cards-v2.json"), encoding="utf-8"))
+    per_nome = {t["name"].upper(): t for t in v2.get("tessere_era", [])}
+    doc = pymupdf.open(PDF_TESSERE_V2)
+    d_ter = os.path.join(dest, "carte", "terreni_v2")
+    d_era = os.path.join(dest, "carte", "tessere_era")
+    d_bn = os.path.join(dest, "carte", "tessere_era_bn")
+    for d in (d_ter, d_era, d_bn):
+        os.makedirs(d, exist_ok=True)
+    terreni, tessere, diverse = {}, {}, []
+    for pn, pg in enumerate(doc):
+        if pn >= 5:
+            break                                   # le pagine delle seconde copie
+        bordi = [g["rect"] for g in pg.get_drawings()
+                 if g["rect"].width > 150 and g["rect"].height > 100 and g["rect"].x0 >= 0
+                 and g.get("type") in ("s", "fs")]
+        # Le tessere terreno: i due bordi lunghi quanto la pagina.
+        lunghi = sorted([r for r in bordi if r.height > 700], key=lambda r: r.x0)
+        for r in lunghi:
+            testo = pg.get_text("text", clip=r)
+            nome = next((TERRENI_NOMI[w] for w in testo.split() if w in TERRENI_NOMI), None)
+            if nome is None:
+                continue
+            k = sum(1 for x in terreni.values() if x["terreno"] == nome) + 1
+            chiave = f"{nome}_{k}"
+            pix = pg.get_pixmap(dpi=DPI_TESSERE, clip=pymupdf.Rect(r.x0 - 1.5, r.y0 - 1.5, r.x1 + 1.5, r.y1 + 1.5))
+            pix.save(os.path.join(d_ter, chiave + ".png"))
+            terreni[chiave] = {"terreno": nome, "pagina": pn + 1, "px": [pix.width, pix.height]}
+        # Le tessere dell'era: i bordi da una casella nella terza colonna.
+        corte = [r for r in bordi if r.height < 130 and r.x0 > 390]
+        for r in corte:
+            righe = [_spazi(l) for l in pg.get_text("text", clip=r).split("\n") if l.strip()]
+            nome = next((l for l in righe if l.upper() in per_nome), None)
+            if nome is None:
+                diverse.append(f"pagina {pn + 1}: tessera senza nome riconosciuto ({righe[:3]})")
+                continue
+            t = per_nome[nome.upper()]
+            if t["id"] in tessere:
+                continue
+            testo = _spazi(" ".join(righe))
+            if _spazi(t["testo"]) not in testo:
+                diverse.append(f"{t['name']}: il testo stampato non e' quello dei dati")
+            pr = [v for v in t["produzione"].values() if v]
+            # Il Denaro si stampa con la moneta, che nel testo e' una "D": "D 1".
+            if pr and not any(l.split()[-1] == str(pr[0]) for l in righe if l.split()):
+                diverse.append(f"{t['name']}: produzione in piu' non trovata")
+            pix = pg.get_pixmap(dpi=DPI_TESSERE, clip=pymupdf.Rect(r.x0 - 1.5, r.y0 - 1.5, r.x1 + 1.5, r.y1 + 1.5))
+            pix.save(os.path.join(d_era, t["id"] + ".png"))
+            _bn(pix).save(os.path.join(d_bn, t["id"] + ".png"))
+            tessere[t["id"]] = {"nome": t["name"], "pagina": pn + 1, "px": [pix.width, pix.height]}
+    conta = {}
+    for x in terreni.values():
+        conta[x["terreno"]] = conta.get(x["terreno"], 0) + 1
+    print(f"tessere v2: {len(terreni)} terreni {conta}, {len(tessere)} tessere dell'era su "
+          f"{len(per_nome)}")
+    mancanti = [t["name"] for t in v2.get("tessere_era", []) if t["id"] not in tessere]
+    if mancanti:
+        print(f"  ATTENZIONE: tessere dell'era senza faccia {mancanti}")
+    for d in diverse:
+        print("  DIVERSA: " + d)
+    return {"terreni": terreni, "tessere_era": tessere}
+
+
+# Il lato rovina delle carte v2 non e' stampato: il designer ha chiesto la
+# stessa carta in bianco e nero. Si ricava dalle facce gia' estratte.
+def edifici_v2_bn(dest):
+    da = os.path.join(dest, "carte", "edifici_v2")
+    a = os.path.join(dest, "carte", "edifici_v2_bn")
+    if not os.path.isdir(da):
+        return 0
+    os.makedirs(a, exist_ok=True)
+    n = 0
+    for f in sorted(os.listdir(da)):
+        if not f.endswith(".png"):
+            continue
+        _bn(pymupdf.Pixmap(os.path.join(da, f))).save(os.path.join(a, f))
+        n += 1
+    print(f"edifici v2 in bianco e nero (lato rovina): {n}")
+    return n
 
 
 if __name__ == "__main__":

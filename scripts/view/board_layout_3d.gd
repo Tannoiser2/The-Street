@@ -75,6 +75,66 @@ const CIELO_RAPPORTO := 1672.0 / 941.0
 const CIELO_QUOTA := 0.5
 const SFONDO_PATH := "res://assets/sfondo.png"
 
+# ---- la v2: CARTE DISTESE AL POSTO DELLE SAGOME (registro 122) ---------
+# Nella v2 carte e sagome sono una cosa sola: l'edificio e' la sua carta,
+# un cartone spesso 15 mm (come la basetta della v1.5) disteso sulle caselle
+# della tessera terreno che occupa. Chi costruisce sopra ci impila la sua
+# carta: una quota e' uno spessore di cartone. In rovina la carta si capovolge
+# e mostra il lato rovina, che il designer non ha stampato: e' la stessa carta
+# in bianco e nero.
+# La tessera terreno della v2 (materiali/Tessere_Terreno_v2_A4.pdf) ha le
+# stesse proporzioni di quella della v1.5 (194 x 838 pt contro 63 x 271 mm),
+# quindi si tiene la stessa misura; cambia come e' divisa, misurata sul PDF:
+# in fondo (verso il cielo) l'intestazione col nome e la produzione di base,
+# 116,2 pt; poi cinque binari da 121,1 pt; davanti, verso chi gioca, la
+# casella della tessera dell'era, 116,2 pt. Una carta normale (194 x 116 pt)
+# sta in una casella con 0,8 mm per parte.
+const V2_SCALA := TESSERA_D / 837.9
+const V2_BANDA_SU := 116.2 * V2_SCALA          # 37,6 mm
+const V2_SLOT_D := 121.1 * V2_SCALA            # 39,2 mm per binario
+const V2_CASELLA_ERA := 116.2 * V2_SCALA       # la casella della tessera dell'era
+const CARTONE_Y := 15.0                        # lo spessore del cartone
+const CARTA_V2_D := 116.2 * V2_SCALA           # 37,6 mm: la carta, di profondita'
+const CARTA_MARGINE := 0.8
+
+# Le carte distese valgono con il file v2; la v1.5 resta con le sagome.
+static func cartoni() -> bool:
+	return e_v2()
+
+static func banda_su() -> float:
+	return V2_BANDA_SU if cartoni() else BANDA_SU
+
+static func slot_d() -> float:
+	return V2_SLOT_D if cartoni() else SLOT_D
+
+static func banda_giu() -> float:
+	return banda_su() + RAILS * slot_d()
+
+static func level_h() -> float:
+	return CARTONE_Y if cartoni() else LEVEL_H
+
+# Nella v2 "la basetta" e' la carta intera: tutta la casella, 15 mm.
+static func basetta_d() -> float:
+	return CARTA_V2_D - 2.0 * CARTA_MARGINE if cartoni() else BASETTA_D
+
+static func basetta_y() -> float:
+	return CARTONE_Y if cartoni() else BASETTA_Y
+
+# La casella della tessera dell'era, davanti alla colonna.
+static func casella_era_box(col: int) -> AABB:
+	var t := tessera_box(col)
+	return AABB(Vector3(t.position.x + CARTA_MARGINE, t.end.y, TESSERA_D - V2_CASELLA_ERA + CARTA_MARGINE),
+		Vector3(TESSERA_W - 2.0 * CARTA_MARGINE, 1.0, V2_CASELLA_ERA - 2.0 * CARTA_MARGINE))
+
+static func tessera_era_path(gs: GameState, col: int, bn := false) -> String:
+	if col < 0 or col >= gs.tessere_colonna.size() or gs.tessere_colonna[col] == "": return ""
+	return "res://assets/carte/%s/%s.png" % ["tessere_era_bn" if bn else "tessere_era", gs.tessere_colonna[col]]
+
+# La faccia della carta distesa: a colori, o in bianco e nero se e' in rovina.
+static func carta_edificio_path(b: Building) -> String:
+	var bn := b.state != Enums.BuildingState.INTATTO
+	return "res://assets/carte/%s/%s.png" % ["edifici_v2_bn" if bn else "edifici_v2", str(b.data["id"])]
+
 static func col_x(col: int) -> float:
 	return col * TESSERA_W
 
@@ -92,7 +152,7 @@ static func col_x(col: int) -> float:
 # La X non si tocca: la telecamera resta da questo lato, e la colonna 0 resta
 # a sinistra come la legge chi gioca.
 static func rail_z(era: int) -> float:
-	return BANDA_SU + (era - 1) * SLOT_D
+	return banda_su() + (era - 1) * slot_d()
 
 # La tessera intera, che e' piu' lunga della fascia dei binari.
 static func tessera_box(col: int) -> AABB:
@@ -100,6 +160,7 @@ static func tessera_box(col: int) -> AABB:
 		Vector3(TESSERA_W, TESSERA_Y, TESSERA_D))
 
 static func span_w(n_col: int) -> float:
+	if cartoni(): return n_col * TESSERA_W - 2.0 * CARTA_MARGINE
 	return n_col * SAGOMA_MODULO
 
 static func board_w(gs: GameState) -> float:
@@ -109,11 +170,11 @@ static func board_d() -> float:
 	return TESSERA_D
 
 static func level_y(level: int) -> float:
-	return TESSERA_Y + level * LEVEL_H
+	return TESSERA_Y + level * level_h()
 
 # Il centro dello slot (colonna, binario) sul piano del tavolo.
 static func slot_center(col: int, era: int) -> Vector3:
-	return Vector3(col_x(col) + TESSERA_W / 2.0, TESSERA_Y, rail_z(era) + SLOT_D / 2.0)
+	return Vector3(col_x(col) + TESSERA_W / 2.0, TESSERA_Y, rail_z(era) + slot_d() / 2.0)
 
 # Dove poggia la sagoma. La basetta sta sul DAVANTI dello slot: i 39 mm dietro
 # restano scoperti, ed e' cosi' che si vedono le file in fondo.
@@ -128,9 +189,14 @@ static func standee_base(gs: GameState, b: Building) -> Vector3:
 # binario - per l'era 1 sono 57 mm piu' avanti - e a schermo l'edificio
 # galleggiava in aria a fianco della pila che avrebbe dovuto reggerlo.
 static func z_sagoma(gs: GameState, b: Building, giri := 0) -> float:
+	# Con le caselle (registro 122) ogni edificio, a qualunque quota, ha il suo
+	# binario e la sua profondita': la carta sta al centro delle sue caselle.
+	if cartoni() and Grid.caselle():
+		return rail_z(b.binario_effettivo()) + b.profondita() * slot_d() / 2.0
 	if b.level == 0:
 		# sul davanti dello slot, cioe' dal lato della telecamera
-		return rail_z(b.binario_effettivo()) + SLOT_D - BASETTA_D / 2.0
+		if cartoni(): return rail_z(b.binario_effettivo()) + slot_d() / 2.0
+		return rail_z(b.binario_effettivo()) + slot_d() - basetta_d() / 2.0
 	# LE BASI SONO QUELLE DI QUANDO LO SI E' COSTRUITO, non quelle che si
 	# trovano adesso nelle sue colonne. A quota zero una colonna porta fino
 	# a cinque edifici, uno per binario d'era: chiedendolo alla colonna, un
@@ -160,7 +226,7 @@ static func _z_di_uid(gs: GameState, uid: Array, giri: int) -> float:
 			if s.level > alto or (s.level == alto and z > avanti):
 				alto = s.level
 				avanti = z
-	return avanti if avanti > -INF else (BANDA_SU + BANDA_GIU) / 2.0
+	return avanti if avanti > -INF else (banda_su() + banda_giu()) / 2.0
 
 # La z di cio' che regge una pila alla quota `livello` fra due colonne: la
 # base PIU' AVANTI, dalla parte di chi guarda.
@@ -181,7 +247,7 @@ static func z_basi(gs: GameState, col_from: int, col_to: int, livello: int,
 			if s.level != livello - 1: continue
 			if s.col_to <= col_from or s.col_from >= col_to: continue
 			avanti = maxf(avanti, z_sagoma(gs, s, giri + 1))
-	return avanti if avanti > -INF else (BANDA_SU + BANDA_GIU) / 2.0
+	return avanti if avanti > -INF else (banda_su() + banda_giu()) / 2.0
 
 # IL TERRAPIENO: la terra riportata sotto una colonna dell'impronta che non
 # arriva da sola alla quota del piede. E' un blocco che parte da cio' che c'e'
@@ -374,11 +440,14 @@ static func facce_basetta(gs: GameState, b: Building) -> Array[Dictionary]:
 # La basetta: ogni sagoma ne ha una. 15 mm di profondita' per 4 mm di cartone.
 static func basetta_box(gs: GameState, b: Building) -> AABB:
 	var c := standee_base(gs, b)
-	return AABB(Vector3(c.x - span_w(b.width()) / 2.0, c.y, c.z - BASETTA_D / 2.0),
-		Vector3(span_w(b.width()), BASETTA_Y, BASETTA_D))
+	# Una carta profonda piu' binari copre anche lo spazio fra una casella e
+	# l'altra.
+	var d := basetta_d() + (b.profondita() - 1) * slot_d() if cartoni() else basetta_d()
+	return AABB(Vector3(c.x - span_w(b.width()) / 2.0, c.y, c.z - d / 2.0),
+		Vector3(span_w(b.width()), basetta_y(), d))
 
 static func tile_box(col: int, era: int) -> AABB:
-	return AABB(Vector3(col_x(col), 0.0, rail_z(era)), Vector3(TESSERA_W, TESSERA_Y, SLOT_D))
+	return AABB(Vector3(col_x(col), 0.0, rail_z(era)), Vector3(TESSERA_W, TESSERA_Y, slot_d()))
 
 # Le misure della sagoma vera, da data/sagome.json. Se mancano - il file non
 # c'e', o l'edificio non e' mappato - si ripiega sulla mediana misurata per
@@ -416,6 +485,7 @@ static func standee_size(b: Building) -> Vector2:
 # GIRATA. Toglierla dal tabellone, come nella v1.5, nascondeva proprio la
 # cosa che nella v2 si puo' fare: ristrutturarla.
 static func ha_sagoma(b: Building) -> bool:
+	if cartoni(): return false         # la v2 non ha sagome: c'e' la carta distesa
 	if b.is_buried: return false
 	if b.state == Enums.BuildingState.ROVINA: return senza_rudere()
 	return true
@@ -455,6 +525,14 @@ static func tessera_id(gs: GameState, col: int) -> String:
 	return str(quali[k % quali.size()])
 
 static func tessera_path(gs: GameState, col: int) -> String:
+	if cartoni() and TessereEra.attive():
+		# La k-esima tessera terreno di quel tipo, come nella v1.5.
+		var terr := Enums.terrain_to_string(gs.grid.terrains[col])
+		var quante := {"pianura": 3, "collina": 3, "fiume": 2, "bosco": 2}
+		var k := 0
+		for c in col:
+			if gs.grid.terrains[c] == gs.grid.terrains[col]: k += 1
+		return "res://assets/carte/terreni_v2/%s_%d.png" % [terr, k % int(quante.get(terr, 1)) + 1]
 	var id := tessera_id(gs, col)
 	return "" if id == "" else "res://assets/carte/tessere/%s.png" % id
 
@@ -525,7 +603,7 @@ static func altezza_scena(gs: GameState) -> float:
 	var m := 0
 	for b in gs.grid.buildings:
 		m = maxi(m, b.level)
-	return level_y(m) + ALTEZZA_MEDIANA[0] + BASETTA_Y
+	return level_y(m) + ALTEZZA_MEDIANA[0] + basetta_y()
 
 static func camera_target(gs: GameState) -> Vector3:
 	var t := table_aabb_piatto(gs)
@@ -594,7 +672,7 @@ static func riempimento(gs: GameState) -> float:
 # da 0 a 1. E' la meta' del compromesso dell'inclinazione; l'altra meta' e'
 # lo scorcio, che vale semplicemente cos(inclinazione).
 static func quota_visibile(altezza := 66.0) -> float:
-	var nascosto: float = maxf(0.0, altezza - SLOT_D * tan(deg_to_rad(INCLINAZIONE)))
+	var nascosto: float = maxf(0.0, altezza - slot_d() * tan(deg_to_rad(INCLINAZIONE)))
 	return (altezza - nascosto) / altezza
 
 static func scorcio() -> float:
@@ -645,10 +723,10 @@ static func cubetti(gs: GameState, b: Building) -> Array[Dictionary]:
 	var disponibile := span_w(b.width()) - 4.0 - riservato
 	var scala: float = minf(1.0, disponibile / maxf(larghezza, 0.001))
 	var x0 := base.x - riservato / 2.0 - larghezza * scala / 2.0
-	var z := base.z + BASETTA_D / 2.0 - CUBETTO / 2.0 - 1.0
+	var z := base.z + basetta_d() / 2.0 - CUBETTO / 2.0 - 1.0
 	for i in quanti:
 		out.append({
-			"pos": Vector3(x0 + (i * passo + CUBETTO / 2.0) * scala, base.y + BASETTA_Y, z),
+			"pos": Vector3(x0 + (i * passo + CUBETTO / 2.0) * scala, base.y + basetta_y(), z),
 			"lato": CUBETTO * scala,
 			"tipo": "vetusta" if i < b.vetusta else "resistenza",
 		})
@@ -693,6 +771,9 @@ static func prosperita_box(col: int) -> AABB:
 	var largo := TESSERA_W - 2.0 * PROSPERITA_MARGINE
 	var alto := largo / PROSPERITA_RAPPORTO
 	var centro_z := TESSERA_D * (PROSPERITA_FASCIA_SU + PROSPERITA_FASCIA_GIU) / 2.0
+	# Nella v2 la tessera non ha la fascia della Prosperita': il cartellino
+	# va sull'intestazione, dove non copre binari ne' tessera dell'era.
+	if cartoni(): centro_z = V2_BANDA_SU / 2.0
 	return AABB(Vector3(t.position.x + PROSPERITA_MARGINE, t.end.y,
 			t.position.z + centro_z - alto / 2.0),
 		Vector3(largo, 0.0, alto))
@@ -733,7 +814,7 @@ static func scheletro_piede(gs: GameState, b: Building) -> Vector3:
 	var base := standee_base(gs, b)
 	var largo := scheletro_size().x
 	return Vector3(base.x + span_w(b.width()) / 2.0 - largo / 2.0 - 1.5,
-		base.y + BASETTA_Y, base.z + BASETTA_D / 2.0 - 1.5)
+		base.y + basetta_y(), base.z + basetta_d() / 2.0 - 1.5)
 
 # Quanto vale: 6 meno l'era in cui e' stato sepolto (Scoring._skeletons).
 static func scheletro_valore(era: int) -> int:
@@ -763,7 +844,7 @@ static func linguette(gs: GameState, b: Building) -> Array[Vector3]:
 		# Davanti alla basetta, non dietro la sagoma: una linguetta che spunta
 		# si deve vedere, e da questa parte del tavolo c'e' chi guarda.
 		out.append(Vector3(base.x + dx, base.y + 1.0,
-			base.z + BASETTA_D / 2.0 + LINGUETTA_D / 2.0 + 1.0))
+			base.z + basetta_d() / 2.0 + LINGUETTA_D / 2.0 + 1.0))
 	return out
 
 # ---- le file e le plance, sul tavolo --------------------------------
@@ -1045,8 +1126,8 @@ static func meeple_in_campo(gs: GameState, player: int) -> Array[Dictionary]:
 			var base := standee_base(gs, ospite)
 			out.append({"col": col, "uid": ospite.uid, "pos": Vector3(
 				base.x - span_w(ospite.width()) / 2.0 + MEEPLE_W / 2.0 + 2.0,
-				base.y + BASETTA_Y,
-				base.z + BASETTA_D / 2.0 - MEEPLE_D / 2.0)})
+				base.y + basetta_y(),
+				base.z + basetta_d() / 2.0 - MEEPLE_D / 2.0)})
 		else:
 			out.append({"col": col, "uid": -1, "pos": Vector3(
 				col_x(col) + TESSERA_W / 2.0, TESSERA_Y,
@@ -1225,7 +1306,7 @@ static func slot_at_ray(gs: GameState, origine: Vector3, direzione: Vector3) -> 
 	# I binari occupano solo la fascia del disegno, ma si clicca tutta la
 	# tessera: fuori dalla fascia vale il binario piu' vicino, altrimenti
 	# meta' tessera sarebbe morta al clic senza che si capisca perche'.
-	var era := 1 + int(floor((p.z - BANDA_SU) / SLOT_D))
+	var era := 1 + int(floor((p.z - banda_su()) / slot_d()))
 	return {"col": col, "era": clampi(era, 1, RAILS), "punto": p}
 
 # L'ingombro che il raggio incontra: SI CLICCA QUELLO CHE SI VEDE. Chi non ha
@@ -1238,7 +1319,7 @@ static func ingombro(gs: GameState, b: Building) -> AABB:
 	var dim := standee_size(b)
 	return AABB(
 		Vector3(base.x - dim.x / 2.0, base.y, base.z - SAGOMA_SPESSORE * 2.0),
-		Vector3(dim.x, dim.y + BASETTA_Y, SAGOMA_SPESSORE * 4.0))
+		Vector3(dim.x, dim.y + basetta_y(), SAGOMA_SPESSORE * 4.0))
 
 # L'edificio colpito da un raggio: la sagoma sta IN PIEDI, quindi non basta
 # intersecare il piano del tavolo come per gli slot e le carte. Si prova
@@ -1279,19 +1360,24 @@ static func _colpisce(box: AABB, o: Vector3, d: Vector3) -> float:
 # edificio" diventa un riquadro sopra quell'edificio, che prima non c'era modo
 # di chiedere.
 static func box_piazzamento(gs: GameState, col_from: int, larghezza: int,
-		livello: int, era: int) -> AABB:
+		livello: int, era: int, binario := 0, profondita := 1) -> AABB:
+	# Con le caselle il posto e' esattamente le caselle scelte, alla quota
+	# a cui la carta andra'.
+	if binario > 0 and Grid.caselle():
+		return AABB(Vector3(col_x(col_from) + 4.0, level_y(livello), rail_z(binario) + 2.0),
+			Vector3(larghezza * TESSERA_W - 8.0, 0.0, profondita * slot_d() - 4.0))
 	if livello == 0:
 		# A terra si va sul binario dell'era in corso: e' li' che la sagoma
 		# andra' a finire.
 		return AABB(Vector3(col_x(col_from), level_y(0), rail_z(era)),
-			Vector3(larghezza * TESSERA_W, 0.0, SLOT_D))
+			Vector3(larghezza * TESSERA_W, 0.0, slot_d()))
 	# Sopra non c'e' un binario: il riquadro va DOVE FINIRA' LA SAGOMA, cioe'
 	# sopra le basi, con lo stesso conto che usa standee_base. Se qui e la
 	# sagoma rispondessero due z diverse, il giocatore accenderebbe un posto e
 	# l'edificio comparirebbe altrove.
 	# Si tira un po' dentro, cosi' quando un binario ci finisce sotto restano
 	# due rettangoli distinti e cliccabili invece di uno sopra l'altro.
-	var profondo := SLOT_D - 12.0
+	var profondo := slot_d() - 12.0
 	var z := z_basi(gs, col_from, col_from + larghezza, livello) - profondo / 2.0
 	return AABB(Vector3(col_x(col_from) + 9.0, level_y(livello), z),
 		Vector3(larghezza * TESSERA_W - 18.0, 0.0, profondo))
