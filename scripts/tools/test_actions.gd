@@ -46,6 +46,7 @@ func _ready() -> void:
 	_run("v2: le tessere dell'era (registro 121)", _test_tessere_era)
 	_run("v2: le caselle, il binario scelto e le carte profonde (registro 122)", _test_caselle)
 	_run("v2: i potenziamenti raddoppiati (registro 123)", _test_potenziamenti_nuovi)
+	_run("v2: si potenzia anche nella colonna adiacente (registro 126)", _test_potenzia_adiacente)
 	print("\n%d superati, %d falliti" % [_passed, _failed])
 	get_tree().quit(0 if _failed == 0 else 1)
 
@@ -1800,4 +1801,24 @@ func _test_potenziamenti_nuovi() -> void:
 	_ok("la Bottega sconta la Statua di 1 Idea", statua.legal and statua2.idee == statua.idee - 1,
 		"%s %s %d -> %d" % [statua.legal, statua.reason, statua.idee, statua2.idee])
 	_ok("  e i Bastioni di 1 Costruzione", bastioni.legal and bastioni2.pietra == bastioni.pietra - 1)
+	CardDB.load_db(CardDB.DB_PATH)
+
+# POTENZIARE NELLA COLONNA ADIACENTE (registro 126): come si costruisce. Senza,
+# i potenziamenti dell'era 1 non si usavano mai.
+func _test_potenzia_adiacente() -> void:
+	if not FileAccess.file_exists("res://data/cards-v2.json"): return
+	CardDB.load_db("res://data/cards-v2.json")
+	_ok("nel file v2 si potenzia anche nell'adiacente", bool(CardDB.constants.get("potenzia_adiacente", false)))
+	var ctl := _game(3, 51)
+	var gs := ctl.gs
+	while not gs.pending_choice.is_empty():
+		ctl.choose(int((gs.pending_choice["options"] as Array)[0]))
+	gs.grid.buildings.clear()
+	var chi := gs.current_index
+	var b := _put(gs, chi, "ed_capanne", 1)
+	var voci := AvailableActions.potenziamenti(gs, chi, 2)
+	_ok("  attivando la colonna 2 si puo' potenziare l'edificio in colonna 1",
+		voci.any(func(v): return v.legale and int(v.parametri.get("uid", -1)) == b.uid))
+	var lontane := AvailableActions.potenziamenti(gs, chi, 3)
+	_ok("  ma non dalla colonna 3", not lontane.any(func(v): return v.legale and int(v.parametri.get("uid", -1)) == b.uid))
 	CardDB.load_db(CardDB.DB_PATH)
