@@ -101,7 +101,8 @@
     "scheletro_conta": "sempre",
     "tessere_una_volta_per_era": true,
     "tessere_era": true,
-    "caselle": true
+    "caselle": true,
+    "potenzia_adiacente": true
   },
   "terrains": [
     {
@@ -575,7 +576,7 @@
       "terrain": "pianura",
       "width": 1,
       "cost": {
-        "pietra": 2,
+        "pietra": 1,
         "oro": 0,
         "idee": 0
       },
@@ -583,7 +584,7 @@
       "resistance": 2,
       "rendita": 0,
       "lampo": 1,
-      "scavo": 2,
+      "scavo": 3,
       "level_required": 0,
       "production": {
         "pietra": 0,
@@ -791,7 +792,7 @@
       "flexible": false,
       "resistance": 3,
       "rendita": 0,
-      "lampo": 1,
+      "lampo": 2,
       "scavo": 2,
       "level_required": 0,
       "production": {
@@ -1017,7 +1018,7 @@
       "terrain": "pianura",
       "width": 1,
       "cost": {
-        "pietra": 3,
+        "pietra": 2,
         "oro": 0,
         "idee": 0
       },
@@ -1093,7 +1094,7 @@
       "flexible": false,
       "resistance": 4,
       "rendita": 0,
-      "lampo": 1,
+      "lampo": 2,
       "scavo": 2,
       "level_required": 0,
       "production": {
@@ -2028,7 +2029,7 @@
       "cost": {
         "pietra": 1,
         "oro": 1,
-        "idee": 2
+        "idee": 1
       },
       "flexible": false,
       "resistance": 3,
@@ -2311,8 +2312,8 @@
       "terrain": null,
       "width": 1,
       "cost": {
-        "pietra": 1,
-        "oro": 0,
+        "pietra": 0,
+        "oro": 1,
         "idee": 0
       },
       "flexible": false,
@@ -2401,8 +2402,8 @@
       "terrain": null,
       "width": 1,
       "cost": {
-        "pietra": 1,
-        "oro": 0,
+        "pietra": 0,
+        "oro": 1,
         "idee": 0
       },
       "flexible": false,
@@ -2491,8 +2492,8 @@
       "terrain": null,
       "width": 1,
       "cost": {
-        "pietra": 1,
-        "oro": 0,
+        "pietra": 0,
+        "oro": 1,
         "idee": 0
       },
       "flexible": false,
@@ -4774,11 +4775,11 @@
         "idee": 0
       },
       "family": "struttura",
-      "effect_text": "L'edificio ha +2 Resistenza.",
+      "effect_text": "L'edificio ha +2 Rendita.",
       "effects": [
         {
           "hook": "on_acquire",
-          "op": "resistance",
+          "op": "rendita_delta",
           "value": 2,
           "duration": "permanent",
           "target": {
@@ -5785,18 +5786,14 @@
       "id": "er_il_condottiero",
       "name": "Il Condottiero",
       "vp": 4,
-      "condition_text": "3+ tuoi edifici Militari in piedi.",
+      "condition_text": "3+ tuoi edifici Militari, in qualsiasi stato.",
       "condition": {
         "op": "count_matching",
         "target": {
           "owner": "self",
           "class": [
             "militare"
-          ],
-          "state": [
-            "intatto"
-          ],
-          "buried": false
+          ]
         },
         "min": 3
       }
@@ -5920,25 +5917,25 @@
       "id": "er_il_restauratore",
       "name": "Il Restauratore",
       "vp": 4,
-      "condition_text": "hai restaurato 2+ ruderi.",
+      "condition_text": "hai ristrutturato una tua rovina.",
       "condition": {
         "op": "counter",
         "name": "restauri",
-        "min": 2
+        "min": 1
       }
     },
     {
       "id": "er_lantiquario",
       "name": "L’Antiquario",
       "vp": 5,
-      "condition_text": "un tuo edificio Sotterrato con Scavo 6 o più.",
+      "condition_text": "un tuo edificio Sotterrato con Scavo 5 o più.",
       "condition": {
         "op": "count_matching",
         "target": {
           "owner": "self",
           "buried": true,
           "scavo": {
-            "min": 6
+            "min": 5
           }
         },
         "min": 1
@@ -6070,12 +6067,12 @@
         "oro": 0,
         "idee": 0
       },
-      "testo": "Chi attiva per primo può cambiare 1 Idea in 1 Costruzione.",
+      "testo": "Chi attiva per primo può cambiare 1 Costruzione in 1 Idea.",
       "effetto": {
         "quando": "attiva",
         "cambio": [
-          "idee",
-          "pietra"
+          "pietra",
+          "idee"
         ]
       },
       "copie": 2
@@ -6191,11 +6188,14 @@
         "oro": 0,
         "idee": 1
       },
-      "testo": "Una ristrutturazione di un edificio qui costa 1 Costruzione in meno.",
+      "testo": "Il primo edificio costruito qui sopra un altro costa 1 Idea in meno.",
       "effetto": {
-        "quando": "ristruttura",
+        "quando": "costruisci",
+        "se": {
+          "sopra": true
+        },
         "sconto": {
-          "pietra": 1
+          "idee": 1
         }
       },
       "copie": 2
@@ -6458,10 +6458,10 @@
         "oro": 0,
         "idee": 1
       },
-      "testo": "Il primo edificio ristrutturato qui torna in piedi con +1 resistenza.",
+      "testo": "Il primo edificio costruito qui ha +2 resistenza fino a fine era.",
       "effetto": {
-        "quando": "ristruttura",
-        "resistenza": 1
+        "quando": "costruisci",
+        "resistenza_era": 2
       },
       "copie": 2
     },
