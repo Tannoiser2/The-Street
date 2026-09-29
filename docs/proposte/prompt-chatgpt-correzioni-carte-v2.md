@@ -1,6 +1,6 @@
 Ti allego i cinque PDF delle carte edificio del mio gioco da tavolo "La Strada delle Ere", versione 2.0 (Edifici_Prima_Era_A4.pdf, Edifici_Seconda_Era_A4.pdf, Edifici_Terza_Era_A4.pdf, Edifici_Quarta_Era_A4.pdf, Edifici_Quinta_Era_A4.pdf), e il file carte-v2-da-stampare.md. Il file .md è la fonte: contiene, per ogni edificio e ogni potenziamento, tutto e solo quello che va scritto sulla carta. Se un PDF e il .md non coincidono, vale il .md.
 
-Ti chiedo quattro cose: correggere le icone dei punti su tutti gli edifici, correggere i testi di alcuni edifici, abbassare il Lampo di 16 edifici e creare le carte dei 50 potenziamenti. Tutto il resto resta identico: formato A4, impaginazione, dimensioni e forme delle carte, illustrazioni, font, colori di barre, classi e luoghi, nomi, costi, resistenza, Scavo e produzione. Il testo delle carte deve restare testo vero (selezionabile), non immagine, come adesso.
+Ti chiedo di: correggere le icone dei punti su tutti gli edifici, correggere i testi di alcuni edifici, abbassare il Lampo di 16 edifici, cambiare alcuni numeri su altri otto, creare le carte dei 50 potenziamenti e correggere tre tessere dell'era e tre Eredità. Tutto il resto resta identico: formato A4, impaginazione, dimensioni e forme delle carte, illustrazioni, font, colori di barre, classi e luoghi, nomi, costi, resistenza, Scavo e produzione. Il testo delle carte deve restare testo vero (selezionabile), non immagine, come adesso.
 
 ## 1. Le icone in basso: i punti non sono Denaro
 
@@ -81,7 +81,22 @@ Nessun edificio dà più di 2 Lampo. Su queste carte cambia solo il numero del L
 | Era 5 | Stazione | 4 | **2** |
 | Era 5 | Università | 4 | **2** |
 
-## 4. Le carte dei potenziamenti (nuove, 50)
+## 4. Altri numeri che cambiano su otto edifici
+
+Su queste carte cambia solo quanto scritto qui; tutto il resto resta com'è:
+
+| era | edificio | cosa cambia |
+|---|---|---|
+| Era 1 | Capanne di fango (due copie, RIS) | costo: da 1 Costruzione a **1 Denaro** |
+| Era 2 | Case a schiera (due copie, RIS) | costo: da 1 Costruzione a **1 Denaro** |
+| Era 3 | Case di legno (due copie, RIS) | costo: da 1 Costruzione a **1 Denaro** |
+| Era 1 | Villaggio palizzato | costo: da 2 a **1** Costruzione; Scavo: da 2 a **3** |
+| Era 2 | Castrum | costo: da 3 a **2** Costruzione |
+| Era 2 | Torre di vedetta | Lampo: da 1 a **2** |
+| Era 3 | Mura | Lampo: da 1 a **2** |
+| Era 5 | Museo | costo: da 1 Costruzione, 1 Denaro, 2 Idee a **1 Costruzione, 1 Denaro, 1 Idea** |
+
+## 5. Le carte dei potenziamenti (nuove, 50)
 
 Crea le carte di tutti i 50 potenziamenti del .md, dieci per era, in cinque PDF nuovi: Potenziamenti_Prima_Era_A4.pdf … Potenziamenti_Quinta_Era_A4.pdf.
 
@@ -93,9 +108,27 @@ Crea le carte di tutti i 50 potenziamenti del .md, dieci per era, in cinque PDF 
 - **Illustrazione**: il soggetto del nome (un totem, una palizzata, un mosaico…), nello stesso stile isometrico degli edifici e dell'epoca giusta.
 - Il potenziamento non ha resistenza, Scavo, Rendita né Lampo: non mettere quelle icone.
 
-## 5. Cosa mi restituisci
+## 6. Tessere dell'era ed Eredità (altri PDF)
 
-1. I cinque PDF degli edifici corretti, con gli stessi nomi di file.
+Nel PDF Tessere_Terreno_v2_A4.pdf cambia il testo di tre tessere dell'era, in tutte e due le copie; produzione e resto invariati:
+
+| era | tessera | testo nuovo |
+|---|---|---|
+| Era 1 | Raccoglitori | Chi attiva per primo può cambiare 1 Costruzione in 1 Idea. |
+| Era 2 | Restauratori | Il primo edificio costruito qui sopra un altro costa 1 Idea in meno. |
+| Era 4 | Giardino all'italiana | Il primo edificio costruito qui ha +2 resistenza fino a fine era. |
+
+Nel PDF Carte.pdf cambia la condizione di tre carte Eredità; nome e punti invariati:
+
+| Eredità | condizione nuova |
+|---|---|
+| Il Condottiero | 3+ tuoi edifici Militari, in qualsiasi stato. |
+| L'Antiquario | un tuo edificio Sotterrato con Scavo 5 o più. |
+| Il Restauratore | hai ristrutturato una tua rovina. |
+
+## 7. Cosa mi restituisci
+
+1. I cinque PDF degli edifici corretti, con gli stessi nomi di file, e i PDF delle tessere e delle carte corretti.
 2. I cinque PDF nuovi dei potenziamenti.
 3. Un elenco breve delle carte che hai modificato, pagina per pagina.
 4. Una piccola legenda con le icone nuove (corona d'alloro, clessidra, fulmine) e i colori delle famiglie dei potenziamenti, così la riporto nel regolamento.
