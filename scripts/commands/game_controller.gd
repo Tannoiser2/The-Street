@@ -214,6 +214,7 @@ func _draft_prendi(chi: int, char_id: String, bersaglio: Building) -> void:
 	var p: PlayerState = gs.players[chi]
 	var data: Dictionary = CardDB.characters[char_id]
 	p.specialized_characters.append(char_id)
+	p.personaggi_storia.append([char_id, gs.era])
 	p.recruited_total += 1
 	p.bump("draftati")
 	if Effects.requires_designation(data) and bersaglio != null:
@@ -460,6 +461,7 @@ func build(card_id: String, col_from: int, above: bool, pay_option: int = 0, des
 		b.bonus_res += 1
 	b.charges = int(data.get("exhaustible", 0))
 	gs.grid.buildings.append(b)
+	TessereScavo.scava(gs, b)
 	# Chi finisce sepolto ADESSO lo ha sepolto questo giocatore: si guarda
 	# prima e dopo il ricalcolo, perche' una costruzione puo' completare la
 	# copertura anche di un edificio piu' in basso della sua base.
@@ -550,6 +552,7 @@ func upgrade(upg_id: String, target: Building) -> bool:
 	p.pay(q.pietra, q.oro, q.idee, "potenziare")
 	TessereEra.dopo_potenziamento(gs, target)
 	target.upgrades.append(upg_id)
+	target.upgrades_storia.append(upg_id)
 	# Gli effetti vengono dai dati della carta, con l'edificio ospite come
 	# sorgente dei selettori. Prima il cubetto nero dei Struttura era un caso
 	# speciale sulla famiglia: ora e' un effetto `resistance` come gli altri.
@@ -627,6 +630,7 @@ func recruit(char_id: String, imprint_target: Building = null) -> bool:
 	if not p.can_pay(q.pietra, q.oro, q.idee): return false
 	p.pay(q.pietra, q.oro, q.idee, "reclutare")
 	p.specialized_characters.append(char_id)
+	p.personaggi_storia.append([char_id, gs.era])
 	p.recruited_total += 1
 	# Il lavoratore appena piazzato si specializza: l'edificio che abita e' il
 	# bersaglio degli effetti che parlano di "questo lavoratore".

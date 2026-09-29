@@ -109,6 +109,11 @@ static func _continuity(gs: GameState) -> void:
 # `scavo_scavato` e `scavo_e5` servono all'audit ("l'ultimo che costruisce
 # prende tutto il bottino?"): quanto si incassa scavando, e quanto nell'era 5.
 static func _scavo(gs: GameState) -> void:
+	# Le tessere scavo (registro 130) prendono il posto dello Scavo stampato
+	# nel conto del proprietario.
+	if TessereScavo.attive():
+		TessereScavo.conta(gs)
+		return
 	var a_chi_scava := bool(CardDB.constants.get("scavo_a_chi_scava", false))
 	for b in gs.grid.buildings:
 		if not b.is_buried: continue

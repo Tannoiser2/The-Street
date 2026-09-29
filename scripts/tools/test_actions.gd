@@ -47,6 +47,7 @@ func _ready() -> void:
 	_run("v2: le caselle, il binario scelto e le carte profonde (registro 122)", _test_caselle)
 	_run("v2: i potenziamenti raddoppiati (registro 123)", _test_potenziamenti_nuovi)
 	_run("v2: la fila dei potenziamenti resta un'era (registro 126)", _test_potenzia_adiacente)
+	_run("v2: le tessere scavo (registro 130)", _test_tessere_scavo)
 	print("\n%d superati, %d falliti" % [_passed, _failed])
 	get_tree().quit(0 if _failed == 0 else 1)
 
@@ -1838,4 +1839,43 @@ func _test_potenzia_adiacente() -> void:
 	var b := _put(gs, chi, "ed_capanne", 1)
 	_ok("con la manopola accesa si potenzia dalla colonna accanto",
 		AvailableActions.potenziamenti(gs, chi, 2).any(func(v): return v.legale and int(v.parametri.get("uid", -1)) == b.uid))
+	CardDB.load_db(CardDB.DB_PATH)
+
+# LE TESSERE SCAVO (registro 130): una rovina pesca una tessera per casella dal
+# mazzetto del proprietario; a fine partita le scoperte valgono per intero,
+# le coperte la meta'; un edificio dell'era 5 scopre la pila sotto di se'.
+func _test_tessere_scavo() -> void:
+	if not FileAccess.file_exists("res://data/cards-v2.json"): return
+	CardDB.load_db("res://data/cards-v2.json")
+	_ok("nel file v2 le tessere scavo sono spente", not TessereScavo.attive())
+	CardDB.constants["tessere_scavo"] = {"mazzo": [{"v": 3}, {"v": 2, "s": true}, {"v": 1}, {"v": 0}]}
+	var ctl := _game(2, 51)
+	var gs := ctl.gs
+	gs.grid.buildings.clear()
+	var r := _put(gs, 0, "ed_tumulo_funerario", 0, 0, Enums.BuildingState.ROVINA)
+	_eq("una rovina larga 2 ha due tessere", TessereScavo.quante(r), 2)
+	var spianata := _put(gs, 0, "ed_capanne", 3, 0, Enums.BuildingState.ROVINA)
+	spianata.was_razed = true
+	_eq("  uno spianato nessuna", TessereScavo.quante(spianata), 0)
+	var viva := _put(gs, 0, "ed_capanne", 4)
+	_eq("  un edificio in piedi nessuna", TessereScavo.quante(viva), 0)
+	var t := TessereScavo.tessere(gs, r)
+	var somma := int(t[0]["v"]) + int(t[1]["v"])
+	var p: PlayerState = gs.players[0]
+	var prima := p.vp
+	TessereScavo.conta(gs)
+	_eq("coperte valgono la meta'", p.vp - prima, somma / 2)
+	r.scavata = true
+	p.personaggi_storia = [["pe_capotribu", 1]]
+	prima = p.vp
+	TessereScavo.conta(gs)
+	var atteso := somma
+	for x in t:
+		if bool(x.get("s", false)): atteso += 5
+	_eq("  scoperte per intero, con lo scheletro di un Personaggio dell'era 1", p.vp - prima, atteso)
+	var sopra := _put(gs, 1, "ed_grattacielo", 0, 1)
+	sopra.basi.append(r.uid)
+	r.scavata = false
+	TessereScavo.scava(gs, sopra)
+	_ok("un edificio dell'era 5 costruito sopra la scopre", r.scavata)
 	CardDB.load_db(CardDB.DB_PATH)

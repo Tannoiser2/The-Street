@@ -773,6 +773,19 @@ def potenziamenti_di_classe(v):
     assert all(uid in {u["id"] for u in v["upgrades"]} for uid in TESTI_SENZA_BONUS)
     v["constants"]["potenziamento_stessa_classe"] = True
 
+# LE TESSERE SCAVO (registro 130), proposta da misurare: ogni giocatore ha
+# un mazzetto di 20 tessere del suo colore, da 0 a 3 (media 1,4). Tre hanno
+# lo scheletro ("s"), tre il potenziamento ("p").
+MAZZO_SCAVO = (
+    [{"v": 0}] * 3 + [{"v": 0, "s": True}, {"v": 0, "p": True}]
+    + [{"v": 1}] * 4 + [{"v": 1, "s": True}, {"v": 1, "p": True}]
+    + [{"v": 2}] * 3 + [{"v": 2, "s": True}, {"v": 2, "p": True}]
+    + [{"v": 3}] * 4)
+assert len(MAZZO_SCAVO) == 20
+
+def tessere_scavo(v):
+    v["constants"]["tessere_scavo"] = {"mazzo": [dict(t) for t in MAZZO_SCAVO]}
+
 import sys
 variante = sys.argv[sys.argv.index("--variante") + 1] if "--variante" in sys.argv else ""
 # Le case in riserva stanno nel file v2 di tutti (registro 116); le varianti di
@@ -789,7 +802,7 @@ potenziamenti_di_classe(v2)
 if variante:
     {"doppioni": doppioni, "abitazioni": abitazioni, "case": case,
      "case_doppioni": case_doppioni, "case_scavo": case_scavo, "case_nulle": case_nulle,
-     "case_mista": case_mista, "case_tutti": case_tutti}[variante](v2)
+     "case_mista": case_mista, "case_tutti": case_tutti, "tessere_scavo": tessere_scavo}[variante](v2)
     v2["meta"]["ruleset"] = "v2-" + variante
     v2["meta"]["origine"] = "generato da tools/genera_cards_v2.py --variante %s: non modificare a mano" % variante
     out = os.path.join(RADICE, "data/proposte/cards-v2-%s.json" % variante)

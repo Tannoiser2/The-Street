@@ -215,6 +215,7 @@ static func place_gift(gs: GameState, omaggio: Dictionary, host: Building) -> vo
 	var giocatore := int(omaggio["player"])
 	var upg_id := str(omaggio["upg_id"])
 	host.upgrades.append(upg_id)
+	host.upgrades_storia.append(upg_id)
 	Effects.apply_on_acquire(gs, giocatore, CardDB.upgrades[upg_id], host)
 	gs.log_line("%s: giocatore %d pesca %s e la infila sotto %s" % [
 		gs.current_event["name"], giocatore, CardDB.upgrades[upg_id]["name"], host.data["name"]])

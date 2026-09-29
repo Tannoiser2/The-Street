@@ -44,6 +44,9 @@ var character_targets: Dictionary = {}
 # ruderi restaurati, potenziamenti piazzati. Non si azzerano a fine era,
 # perche' non sono ricavabili dalla plancia finale.
 var counters: Dictionary = {}
+# I Personaggi avuti nella partita, con la loro era: [id, era] (registro 130,
+# per gli scheletri delle tessere scavo).
+var personaggi_storia: Array = []
 
 # Una copia su cui provare: vedi Building.duplica.
 func duplica() -> PlayerState:
@@ -65,6 +68,7 @@ func duplica() -> PlayerState:
 	p.terrapieno_free_used = terrapieno_free_used
 	p.recruited_total = recruited_total
 	p.final_characters = final_characters.duplicate()
+	p.personaggi_storia = personaggi_storia.duplicate(true)
 	p.effect_used = effect_used.duplicate(true)
 	p.character_targets = character_targets.duplicate(true)
 	p.counters = counters.duplicate(true)
