@@ -668,8 +668,8 @@ def lampo_tetto(v):
         b["lampo"] = min(int(b["lampo"]), LAMPO_TETTO)
 
 # LE CARTE MORTE (registro 126). Il rapporto delle partite (registro 125) ha
-# trovato carte che non si giocano mai; qui la proposta per ognuna, provata
-# come variante `carte_vive` prima di entrare nel file v2.
+# trovato carte che non si giocano mai; qui la correzione per ognuna, approvata
+# dal designer ("le proposte sulle carte vanno bene, procedi").
 def carte_vive(v):
     per_id = {c["id"]: c for c in v["buildings"] + v["upgrades"]}
     # Le case piccole erano identiche alle case dello Scavo della stessa era,
@@ -724,10 +724,11 @@ forme(v2)
 potenziamenti_nuovi(v2)
 testi_v2(v2)
 lampo_tetto(v2)
+carte_vive(v2)
 if variante:
     {"doppioni": doppioni, "abitazioni": abitazioni, "case": case,
      "case_doppioni": case_doppioni, "case_scavo": case_scavo, "case_nulle": case_nulle,
-     "case_mista": case_mista, "case_tutti": case_tutti, "carte_vive": carte_vive}[variante](v2)
+     "case_mista": case_mista, "case_tutti": case_tutti}[variante](v2)
     v2["meta"]["ruleset"] = "v2-" + variante
     v2["meta"]["origine"] = "generato da tools/genera_cards_v2.py --variante %s: non modificare a mano" % variante
     out = os.path.join(RADICE, "data/proposte/cards-v2-%s.json" % variante)
