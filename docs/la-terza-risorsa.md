@@ -1333,6 +1333,37 @@ A due tutte nell'errore; a tre la Rendita (27, bordo 28) e a quattro Lampo (30, 
 Scavo (20, bordo 21) stanno a un punto dal bordo, dentro il rumore della misura. Le regole non
 cambiano: sono pesi del bot.
 
+## Venticinquesima misura: i potenziamenti solo sulla stessa classe
+
+Il designer, sul confronto con i potenziamenti stampati (registro 129): valgono i dati, via i
+dodici bonus di classe, ogni potenziamento va solo su un edificio della sua classe, Cemento
+armato +2 Resistenza. Stessi semi e stessi bot della ventiquattresima, 750 partite per tavolo
+(a tre e a quattro ripresi con `--da` dopo un'interruzione: la partita 700554 rigiocata e'
+identica):
+
+| a 2 / 3 / 4 | prima | **dopo** |
+|---|--:|--:|
+| vince Lampo | 54 / 31 / 30 | 48 / 28 / 22 |
+| vince Rendita | 46 / 27 / 28 | 46 / 29 / 24 |
+| vince Continuità | 44 / 36 / 24 | 50 / 37 / 25 |
+| vince Bilanciata | 52 / 33 / 21 | 49 / 35 / 26 |
+| vince Obiettivi | 54 / 36 / 27 | 55 / 35 / 29 |
+| vince Scavo | 51 / 38 / 20 | 53 / 36 / 24 |
+| scarto massimo | 10 / 10 / 9 | 9 / 9 / 7 |
+| kingmaker | 5 / 5 / 9 % | 4 / 7 / 11 % |
+| potenziamenti per giocatore | 2,9 / 2,9 / 2,9 | 2,3 / 2,2 / 2,0 |
+| PV dagli Scheletri | 8,5 / 8,3 / 8,0 | 6,3 / 6,0 / 5,3 |
+| PV medi | 87 / 85 / 82 | 86 / 84 / 79 |
+
+Tutte le strategie dentro l'errore a ogni tavolo, per la prima volta anche a quattro senza
+nessuna al bordo. Si potenzia un quarto in meno (il bersaglio giusto non c'e' sempre), e con
+meno potenziamenti calano gli Scheletri, che nascono da li'. Quello che cambia di piu' e'
+*quali* potenziamenti si prendono: prima i "struttura" erano quasi morti (Fondamenta in
+pietra 0,02 a partita a quattro, Argine 0,03, Cemento armato 0,01) perche' i bonus di classe
+facevano vincere gli altri; ora Fondamenta 0,20, Argine 0,15, Cemento armato 0,04. Sotto il 3%
+delle partite restano 5 / 3 / 1 potenziamenti su 50 (prima 4 / 4 / 4); il piu' raro e' la
+Palizzata (0,01 a quattro). Il kingmaker a quattro sale di due punti, dentro il rumore.
+
 ## Come rifare il conto
 
 ```bash
@@ -1411,4 +1442,7 @@ python3 tools/confronta_torneo.py ritocco_p4.csv p4_R15S.csv
 # diciannovesima misura: le tessere dell'era stanno nel file v2; `--tessere_era 0` rigioca il file di prima
 for p in 2 3 4; do godot --headless res://scenes/audit_partita.tscn -- --players $p --games 750 --seed 700000 --dati data/cards-v2.json --giro tutte > tessere_p$p.csv; done
 grep "^# tessere_scattate" tessere_p3.csv     # quante volte scatta ogni tessera nel lotto
+# venticinquesima misura: i potenziamenti di classe stanno nel file v2; `--da N` riprende un lotto interrotto dalla partita N
+for p in 2 3; do godot --headless res://scenes/audit_partita.tscn -- --players $p --games 750 --seed 700000 --dati data/cards-v2.json --giro tutte --rapporto 1 > classe_p$p.csv 2> classe_p$p.err; done
+python3 tools/confronta_torneo.py tutte_p2.csv classe_p2.csv
 ```

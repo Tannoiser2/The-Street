@@ -2198,4 +2198,6 @@ dato è stato importato da lì. Ma due confronti fra ciò che è stampato e
     `ActionRules.quote_upgrade`, conta anche la classe acquisita), Cemento
     armato "+2 Resistenza" come stampato. Le cinque classi stampate sbagliate
     (Cupola, Giardino pensile, Targa storica, Ascensore panoramico,
-    Memoriale) vanno nel prompt per ChatGPT. Misura: venticinquesima.
+    Memoriale) vanno nel prompt per ChatGPT. Misura: venticinquesima: tutte
+    le strategie nell'errore a 2, 3 e 4 (scarto massimo 9 / 9 / 7), un quarto
+    di potenziamenti in meno, i potenziamenti "struttura" tornano vivi.
