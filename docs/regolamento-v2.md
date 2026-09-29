@@ -302,7 +302,7 @@ Quando tutti hanno esaurito i lavoratori, l'era si chiude in quattro passi.
 **L'evento**, rivelato a inizio era, si risolve adesso. Ogni edificio in piedi somma la
 resistenza stampata, i potenziamenti Struttura, il +2 di ogni lavoratore che lo protegge, il +1
 della collina se l'ha preso e i modificatori dell'evento, e confronta il totale con la forza
-dell'epoca: 2 nella Preistoria, 3 nell'Antichità, 4 nel Medioevo, 5 nel Rinascimento. **Chi
+dell'epoca: 2 nella Preistoria, 3 nell'Antichità, 4 nel Medioevo, 3 nel Rinascimento. **Chi
 fallisce di un solo punto regge per un soffio e resta attivo; chi fallisce di due o più crolla in
 rovina.** Non c'è più il rudere e non c'è più la Vetustà: reggere non dà cubetti. L'era Moderna
 non ha evento.
@@ -310,9 +310,9 @@ non ha evento.
 **Il censimento** segue il crollo, mai il contrario: si conta solo ciò che è sopravvissuto. Ogni
 vostro edificio in piedi paga la sua Rendita stampata.
 
-**La dispersione dei secoli**: ciascuno conserva al massimo **3 unità per risorsa e 5 in tutto**,
-e scarta il resto a sua scelta. Fra un'era e l'altra passano generazioni, e i granai non
-attraversano i secoli.
+**La dispersione dei secoli**: ciascuno conserva al massimo **3 unità per risorsa e 5 in tutto**.
+Prima di scartare, **ogni 2 risorse oltre il tetto diventano 1 Idea** (senza superare il tetto
+delle Idee): i granai non attraversano i secoli, il sapere sì. Il resto si scarta a scelta.
 
 **Il ricambio**: i lavoratori tornano ai proprietari, i Personaggi dell'era e le case avanzate
 si scartano, le
@@ -433,7 +433,7 @@ voi (domande 1–3 di `proposte/nuova-meccanica.md`):
   basetta neutra, serve un segnalino.
 - **Le misure**: 15 mm di altezza e 20 di larghezza stanno nello slot da 26 mm; quanto è alta
   una sagoma girata, cioè quanto alza chi ci costruisce sopra.
-- **Il tetto delle risorse** (3 per risorsa, 5 in tutto): misurato, ma se in gioco risulta
-  stretto la manopola è `resource_cap_per_resource`.
+- **Il tetto delle risorse** (3 per risorsa, 5 in tutto, con l'avanzo in Idee): misurato
+  (registro 126); alzarlo da solo non bastava, perché la Costruzione entra più di quanto si spende.
 
 *La Strada delle Ere — regolamento v2. Si costruisce dove qualcosa è morto.*

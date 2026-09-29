@@ -87,12 +87,12 @@ Su queste carte cambia solo quanto scritto qui; tutto il resto resta com'è:
 
 | era | edificio | cosa cambia |
 |---|---|---|
-| Era 1 | Capanne di fango (due copie, RIS) | costo: da 1 Costruzione a **1 Denaro** |
-| Era 2 | Case a schiera (due copie, RIS) | costo: da 1 Costruzione a **1 Denaro** |
+| Era 1 | Capanne di fango (due copie, RIS) | resistenza: da 1 a **2** |
+| Era 2 | Case a schiera (due copie, RIS) | resistenza: da 2 a **3** |
 | Era 3 | Case di legno (due copie, RIS) | costo: da 1 Costruzione a **1 Denaro** |
-| Era 1 | Villaggio palizzato | costo: da 2 a **1** Costruzione; Scavo: da 2 a **3** |
-| Era 2 | Castrum | costo: da 3 a **2** Costruzione |
-| Era 2 | Torre di vedetta | Lampo: da 1 a **2** |
+| Era 1 | Villaggio palizzato | costo: da 2 a **1** Costruzione; Scavo: da 2 a **3**; Lampo: da 1 a **2** |
+| Era 2 | Castrum | costo: da 3 a **2** Costruzione; Lampo: da 1 a **2** |
+| Era 2 | Torre di vedetta | costo: da 2 a **1** Costruzione; Lampo: da 1 a **2** |
 | Era 3 | Mura | Lampo: da 1 a **2** |
 | Era 5 | Museo | costo: da 1 Costruzione, 1 Denaro, 2 Idee a **1 Costruzione, 1 Denaro, 1 Idea** |
 
@@ -122,9 +122,11 @@ Nel PDF Carte.pdf cambia la condizione di tre carte Eredità; nome e punti invar
 
 | Eredità | condizione nuova |
 |---|---|
-| Il Condottiero | 3+ tuoi edifici Militari, in qualsiasi stato. |
+| Il Condottiero | 2+ tuoi edifici Militari, in qualsiasi stato. |
 | L'Antiquario | un tuo edificio Sotterrato con Scavo 5 o più. |
 | Il Restauratore | hai ristrutturato una tua rovina. |
+
+Sempre in Carte.pdf, i sei eventi dell'era 4 (Alluvione, Bonifiche, Controriforma, Rivoluzione industriale, Secolarizzazioni, Speculazione edilizia) passano da **Forza 5** a **Forza 3**: cambia solo il numero della forza, il resto del testo resta.
 
 ## 7. Cosa mi restituisci
 
