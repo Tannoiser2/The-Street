@@ -34,7 +34,7 @@ static func activate(gs: GameState, player: int, col: int, tessera_a_mano := fal
 	# dell'era (registro 121) il terreno non ha piu' regola: l'effetto e'
 	# della tessera posata sulla colonna.
 	if tessere_una_volta(gs) and not TessereEra.attive() and g.terrains[col] == Enums.Terrain.FIUME and tessera_disponibile(gs, col):
-		gs.players[player].gain(0, 1)
+		gs.players[player].gain(0, 1, 0, "tessera")
 		usa_tessera(gs, col, "+1 Denaro a giocatore %d" % player)
 	var base = CardDB.terrains[t_id]["base_production"]
 	# V2: la tessera produce secondo una curva per era (`base_production_by_era`,
@@ -53,7 +53,15 @@ static func activate(gs: GameState, player: int, col: int, tessera_a_mano := fal
 		var bo := int(base.get("oro", 0))
 		var bi := int(base.get("idee", 0))
 		var be := Effects.production_bonus(gs, player, bp, bo)
-		gs.players[player].gain(bp + be.x, bo + be.y, bi)
+		# Per il rapporto si separa la base del terreno da quel che aggiunge la
+		# tessera dell'era: lo stato finale e' lo stesso di un'entrata sola.
+		var tb: Dictionary = CardDB.terrains[t_id].get("produzione_base", base) if TessereEra.attive() else base
+		var tp: int = mini(bp, int(tb.get("pietra", 0)))
+		var to: int = mini(bo, int(tb.get("oro", 0)))
+		var ti: int = mini(bi, int(tb.get("idee", 0)))
+		gs.players[player].gain(tp + be.x, to + be.y, ti, "terreno")
+		if bp - tp + bo - to + bi - ti > 0:
+			gs.players[player].gain(bp - tp, bo - to, bi - ti, "tessera")
 	else:
 		gs.log_line("Anni della fame: giocatore %d non incassa la produzione base" % player)
 
@@ -77,7 +85,7 @@ static func activate(gs: GameState, player: int, col: int, tessera_a_mano := fal
 		# attiva) e quanto oro porta a ciascuno.
 		gs.players[player].bump("centro_attivato")
 		for ow in chi:
-			gs.players[ow].gain(0, gold)
+			gs.players[ow].gain(0, gold, 0, "centro")
 			gs.players[ow].bump("oro_centro", gold)
 		# A registro come gli altri incassi: il Centro Urbano paga tutti quelli
 		# che hanno un edificio intatto li', non solo chi ha attivato, ed e'
@@ -100,7 +108,7 @@ static func paga_edificio(gs: GameState, b: Building) -> void:
 	var pc := int(pr.get("cultura", 0)) + int(aura["cultura"])
 	var pi := int(pr.get("idee", 0)) + int(aura["idee"])   # v2: le Idee prodotte dagli edifici
 	var ex := Effects.production_bonus(gs, b.owner, pp, po)
-	ow.gain(pp + ex.x, po + ex.y, pi)
+	ow.gain(pp + ex.x, po + ex.y, pi, "edifici")
 	if pc > 0:
 		ow.add_vp("cultura", pc)
 	# Artista di corte: chi ha firmato l'edificio altrui incassa la sua
@@ -109,7 +117,7 @@ static func paga_edificio(gs: GameState, b: Building) -> void:
 	for chi in b.patrons:
 		var quota := int(b.patrons[chi])
 		if quota <= 0: continue
-		gs.players[int(chi)].gain(0, quota)
+		gs.players[int(chi)].gain(0, quota, 0, "personaggi")
 		gs.log_line("%s: giocatore %d incassa %d oro come firmatario" % [b.data["name"], int(chi), quota])
 	if int(b.data.get("exhaustible", 0)) > 0:
 		b.charges -= 1
@@ -265,6 +273,7 @@ static func disperse(gs: GameState) -> void:
 	var per_risorsa := int(CardDB.constants.get("resource_cap_per_resource", 0))
 	for p in gs.players:
 		if per_risorsa > 0:
+			p._conta("out_dispersione", maxi(0, p.pietra - per_risorsa), maxi(0, p.oro - per_risorsa), maxi(0, p.idee - per_risorsa))
 			p.pietra = mini(p.pietra, per_risorsa)
 			p.oro = mini(p.oro, per_risorsa)
 			p.idee = mini(p.idee, per_risorsa)
@@ -277,6 +286,7 @@ static func disperse(gs: GameState) -> void:
 		var from_o: int = min(excess - from_p, p.oro)
 		p.oro -= from_o
 		p.idee -= excess - from_p - from_o
+		p._conta("out_dispersione", from_p, from_o, excess - from_p - from_o)
 
 # ---- scheletri: sepoltura dei personaggi ---------------------------
 # "Nelle ere 1-4, a fine era il personaggio non si scarta: infilatelo sotto la

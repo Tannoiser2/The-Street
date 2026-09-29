@@ -1220,6 +1220,44 @@ Stamperia).
 Rendita scende al 36 % (bordo 44); a quattro Continuità e Bilanciata scendono al 15 e 18 %
 (bordo 19). È lo stesso squilibrio della ventesima misura, non viene dai potenziamenti.
 
+## Ventiduesima misura: il Lampo al massimo 2
+
+Dopo le caselle la strategia Lampo vinceva il 66/48/46 % a 2/3/4 giocatori (ventesima e
+ventunesima misura). Il designer: "prova le tre strade e applica quella migliore o la
+combinazione migliore" (registro 125). Prima uno screening a 300 partite per tavolo (torneo
+`--giro tutte`, seme 700000), poi la scelta a 750.
+
+| vince la Lampo (a 2 / 3 / 4) | PV a testa a 3 |
+|---|--:|
+| oggi: 67 / 44 / 48 % | 95,4 |
+| bot ritarato (`--spinta lampo=2.6`): 46 / 38 / 36 % | 95,4 |
+| niente Lampo dalle tessere dell'era (`--tessere_lampo 0`): 67 / 41 / 48 % | 94,4 |
+| Lampo delle carte al massimo 3 (`--lampo_tetto 3`): 68 / 49 / 46 % | 92,2 |
+| Lampo delle carte al massimo 2 (`--lampo_tetto 2`): 56 / 45 / 39 % | 86,8 |
+| **tetto 2 e bot ritarato**: 48 / 30 / 32 % | 87,2 |
+
+Le tessere e il tetto a 3 non cambiano niente. Il tetto a 2 è l'unica correzione del gioco che
+morde, ma da sola non basta; con il bot ritarato a 3 giocatori tutte e sei le strategie stanno
+fra il 30 e il 38 %. Applicato: nessun edificio dà più di 2 Lampo (16 carte, da ristampare
+comunque per le icone), spinta del bot Lampo 2,6 a 2 e 3 giocatori e 3,2 a 4.
+
+Controllo a 750 partite:
+
+| vince (a 2 / 3 / 4) | prima | **dopo** |
+|---|--:|--:|
+| Lampo | 66 / 48 / 46 | **49 / 30 / 25** |
+| Rendita | 36 / 31 / 27 | 40 / 35 / 29 |
+| Continuità | 43 / 28 / 15 | 52 / 35 / 19 |
+| Bilanciata | 52 / 33 / 18 | 50 / 33 / 24 |
+| Obiettivi | 52 / 32 / 24 | 54 / 34 / 31 |
+| Scavo | 52 / 30 / 20 | 55 / 32 / 22 |
+| PV a testa | 93,3 / 95,1 / 89,1 | 86,2 / 87,2 / 82,6 |
+| kingmaker | 8 / 14 / 15 % | 9 / 15 / 17 % |
+
+A tre giocatori tutte nell'errore. A due la Rendita resta sotto (40 %, bordo 44), a quattro la
+Continuità sotto (19 %, bordo 21) e la Obiettivi sopra (31 %, bordo 29): di poco, e sono
+aggiustamenti del bot. I punti scendono di 6-8 a testa: è il Lampo tolto alle 16 carte.
+
 ## Come rifare il conto
 
 ```bash

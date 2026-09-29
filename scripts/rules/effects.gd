@@ -381,7 +381,7 @@ static func _paga(gs: GameState, player: int, e: Dictionary, carta: Dictionary,
 	var p: PlayerState = gs.players[player]
 	var tot := _quota(p, e, carta, maxi(maxi(pietra, oro), idee))
 	if tot <= 0: return
-	p.gain(maxi(pietra, 0), maxi(oro, 0), maxi(idee, 0))
+	p.gain(maxi(pietra, 0), maxi(oro, 0), maxi(idee, 0), "effetti")
 	if idee > 0:
 		gs.log_line("%s: attivazione, %+d Idee a giocatore %d" % [carta["name"], idee, player])
 	else:
@@ -413,7 +413,7 @@ static func apply_on_build(gs: GameState, player: int, built: Building) -> void:
 			"resource":
 				var quanto := _quota(gs.players[player], ef, carta, max(int(ef.get("pietra", 0)), int(ef.get("oro", 0))))
 				if quanto <= 0: continue
-				gs.players[player].gain(int(ef.get("pietra", 0)), int(ef.get("oro", 0)))
+				gs.players[player].gain(int(ef.get("pietra", 0)), int(ef.get("oro", 0)), 0, "personaggi")
 				gs.log_line("%s: rimborso di %+d pietra %+d oro" % [carta["name"], int(ef.get("pietra", 0)), int(ef.get("oro", 0))])
 			"resistance":
 				if _quota(gs.players[player], ef, carta, int(ef["value"])) <= 0: continue
@@ -592,7 +592,7 @@ static func apply_on_acquire(gs: GameState, player: int, card: Dictionary,
 		if not _condition_met(gs, host, e.get("condition", {})): continue
 		match str(e["op"]):
 			"resource":
-				p.gain(int(e.get("pietra", 0)), int(e.get("oro", 0)))
+				p.gain(int(e.get("pietra", 0)), int(e.get("oro", 0)), 0, "personaggi")
 				gs.log_line("%s: %+d pietra %+d oro" % [card["name"], int(e.get("pietra", 0)), int(e.get("oro", 0))])
 			"vp":
 				p.add_vp("cultura", int(e["value"]))
