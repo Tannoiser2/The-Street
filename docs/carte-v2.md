@@ -55,7 +55,7 @@ Dalle regole di `tools/proponi_costi_v2.py` (registro 90), che scrive `data/prop
 - Chi oggi produce Cultura produce Idee.
 - Nelle ere 4-5 ogni carta paga almeno un'Idea (l'esplosione delle Idee: "15 e 18"); l'era 3 è il periodo oscuro, le Idee calano.
 
-Domanda per era (C / D / I): era 1: 15 / 1 / 5 · era 2: 27 / 1 / 6 · era 3: 24 / 6 / 4 · era 4: 19 / 8 / 18 · era 5: 14 / 13 / 19.
+Domanda per era (C / D / I): era 1: 16 / 0 / 5 · era 2: 27 / 0 / 6 · era 3: 24 / 6 / 4 · era 4: 19 / 8 / 18 · era 5: 14 / 13 / 19.
 
 ### Era 1
 
@@ -63,7 +63,7 @@ Domanda per era (C / D / I): era 1: 15 / 1 / 5 · era 2: 27 / 1 / 6 · era 3: 24
 |---|---|---|--:|--:|--:|--:|--:|--:|---|--:|--:|---|---|---|
 | Approdo | commercio | Fiume | 1 | 1/0/0 | 1 | 0 | 0 | 2 | 1 C | 0 | — | — |  |  |
 | Capanne | civico | Pianura | 1 | 1/0/0 | 1 | 0 | 1 | 2 | 1 C | 0 | — | — |  |  |
-| Capanne di fango | civico | qualsiasi | 1 | 0/1/0 | 1 | 0 | 1 | 1 | — | 0 | — | — | RIS x2 | nuova: in riserva, sempre disponibile; niente lato di oggi |
+| Capanne di fango | civico | qualsiasi | 1 | 1/0/0 | 2 | 0 | 1 | 1 | — | 0 | — | — | RIS x2 | nuova: in riserva, sempre disponibile; niente lato di oggi |
 | Case di pietra | civico | qualsiasi | 1 | 2/0/0 | 2 | 0 | 2 | 1 | — | 0 | — | — | RIS x2 | nuova: in riserva, sempre disponibile; niente lato di oggi |
 | Cava | commercio | Pianura | 1 | 1/0/0 | 1 | 0 | 0 | 2 | 2 C | 0 | 4 | — |  |  |
 | Circolo di pietre | religione | qualsiasi | 1 | 2/0/1 | 4 | 1 | 0 | 5 | — | 0 | — | Lo Stonehenge della strada. |  |  |
@@ -75,7 +75,7 @@ Domanda per era (C / D / I): era 1: 15 / 1 / 5 · era 2: 27 / 1 / 6 · era 3: 24
 | Ripari | civico | qualsiasi | 1 | 1/0/0 | 1 | 0 | 1 | 2 | — | 0 | — | — | RIS x2 | nuova: in riserva, sempre disponibile; niente lato di oggi |
 | Trappole da pesca | ingegneria | Fiume | 1 | 1/0/0 | 1 | 0 | 0 | 0 | 1 C | 0 | — | — |  |  |
 | Tumulo funerario | religione, cultura | Collina | 2 | 1/0/1 | 3 | 0 | 1 | 5 | — | 0 | — | — |  |  |
-| Villaggio palizzato | militare | Pianura | 1 | 1/0/0 | 2 | 0 | 1 | 3 | — | 0 | — | **Negli eventi, i tuoi edifici adiacenti hanno +1 Resistenza.** |  | oggi: "Quartiere: +1 res ai tuoi edifici adiacenti" |
+| Villaggio palizzato | militare | Pianura | 1 | 1/0/0 | 2 | 0 | 2 | 3 | — | 0 | — | **Negli eventi, i tuoi edifici adiacenti hanno +1 Resistenza.** |  | oggi: "Quartiere: +1 res ai tuoi edifici adiacenti" |
 
 ### Era 2
 
@@ -83,8 +83,8 @@ Domanda per era (C / D / I): era 1: 15 / 1 / 5 · era 2: 27 / 1 / 6 · era 3: 24
 |---|---|---|--:|--:|--:|--:|--:|--:|---|--:|--:|---|---|---|
 | Acquedotto | ingegneria | Fiume | 3 | 2/0/1 | 4 | 1 | 0 | 3 | — | 0 | — | **A fine partita, se è in piedi: +2 PV.** |  | oggi: "Colossale: 2 slot adiacenti (3 pagando +1 pietra; in 2 giocatori il terzo slot è vietato), almeno uno con fiume. Eco: +2 PV (lampo) se ancora in piedi nel Moderno" |
 | Anfiteatro | cultura | qualsiasi | 2 | 4/0/1 | 5 | 2 | 0 | 6 | 1 D | 0 | — | **Solo sopra: mai a terra. Sopra di lui si costruisce solo quando è in rovina.** |  | oggi: "Colossale: occupa 2 slot adiacenti, si attiva da entrambe le colonne e conta come strato in entrambe. Produce 1 oro a ogni attivazione — il Colosseo vende i biglietti" |
-| Case a schiera | civico | qualsiasi | 1 | 0/1/0 | 2 | 0 | 1 | 1 | — | 0 | — | — | RIS x2 | nuova: in riserva, sempre disponibile; niente lato di oggi |
-| Castrum | militare | Pianura | 1 | 2/0/0 | 4 | 0 | 1 | 3 | — | 0 | — | **Negli eventi, i tuoi edifici nelle sue colonne hanno +1 Resistenza.** |  | oggi: "+1 res ai tuoi edifici in questa colonna" |
+| Case a schiera | civico | qualsiasi | 1 | 1/0/0 | 3 | 0 | 1 | 1 | — | 0 | — | — | RIS x2 | nuova: in riserva, sempre disponibile; niente lato di oggi |
+| Castrum | militare | Pianura | 1 | 2/0/0 | 4 | 0 | 2 | 3 | — | 0 | — | **Negli eventi, i tuoi edifici nelle sue colonne hanno +1 Resistenza.** |  | oggi: "+1 res ai tuoi edifici in questa colonna" |
 | Domus | civico | qualsiasi | 1 | 2/0/0 | 3 | 0 | 2 | 1 | — | 0 | — | — | RIS x2 | nuova: in riserva, sempre disponibile; niente lato di oggi |
 | Emporio | commercio | Fiume | 1 | 2/0/0 | 2 | 0 | 2 | 2 | 1 D | 0 | — | — |  | Lampo 1 → 2 (registro 100) |
 | Foro | commercio, civico | Pianura | 1 | 3/0/0 | 3 | 1 | 0 | 5 | 1 D | 0 | — | — |  |  |
@@ -94,7 +94,7 @@ Domanda per era (C / D / I): era 1: 15 / 1 / 5 · era 2: 27 / 1 / 6 · era 3: 24
 | Teatro | cultura | qualsiasi | 1 | 1/0/1 | 3 | 0 | 2 | 5 | — | 0 | — | — |  |  |
 | Tempio | religione | Collina | 1 | 2/0/1 | 3 | 1 | 0 | 3 | — | 0 | — | — |  |  |
 | Terme | civico | qualsiasi | 1 | 2/0/0 | 2 | 0 | 2 | 3 | — | 0 | — | — |  |  |
-| Torre di vedetta | militare | Collina | 1 | 2/0/0 | 3 | 0 | 2 | 2 | — | 0 | — | **Negli eventi, i tuoi edifici adiacenti hanno +1 Resistenza.** |  | oggi: "Quartiere: +1 res ai tuoi edifici adiacenti" |
+| Torre di vedetta | militare | Collina | 1 | 1/0/0 | 3 | 0 | 2 | 2 | — | 0 | — | **Negli eventi, i tuoi edifici adiacenti hanno +1 Resistenza.** |  | oggi: "Quartiere: +1 res ai tuoi edifici adiacenti" |
 | Tuguri | civico | qualsiasi | 1 | 1/0/0 | 2 | 0 | 1 | 2 | — | 0 | — | — | RIS x2 | nuova: in riserva, sempre disponibile; niente lato di oggi |
 
 ### Era 3
@@ -304,7 +304,7 @@ I secondi 25 (registro 123) raddoppiano il mazzo: dieci potenziamenti diversi pe
 | 5 | Memoriale | altro | 0/2/0 | **Subito: +2 PV.** |  | oggi: "+2 PV" |
 | 5 | Murale | arte | 0/0/2 | Subito: +2 PV, +3 PV se l'edificio è Cultura. |  |  |
 | 5 | Pannelli solari | altro | 0/2/0 | Quando attivi l'edificio: +2 Costruzione. |  |  |
-| 5 | Cemento armato | struttura | 2/0/0 | L'edificio ha +2 Rendita. |  |  |
+| 5 | Cemento armato | struttura | 2/0/0 | Subito: +2 PV. |  |  |
 | 5 | Terrazza panoramica | altro | 0/2/0 | Subito: +1 PV, +2 PV se l'edificio è Civico. |  |  |
 | 5 | Archivio storico | altro | 0/2/0 | L'edificio ha +3 Scavo. |  |  |
 
@@ -333,12 +333,12 @@ Uno per era nelle ere 1-4, forza 2/3/4/5; chi non regge cade in rovina con un pa
 | 3 | Grande incendio | 4 | Forza 4. Edifici a livello 0 o 1: −1 res; a livello 2+: −2 res. |  |  |
 | 3 | Scisma | 4 | Forza 4. Religione −2 res · Cultura −1 res · Commercio +1 res. |  |  |
 | 3 | Anni della fame | 4 | Forza 4. Nessuna produzione durante l’ultimo round dell’era. |  | resta: i round ci sono ancora (quattro lavoratori, quattro giri) |
-| 4 | Alluvione | 5 | Forza 5. Edifici su colonne fiume: −1 res. |  |  |
-| 4 | Controriforma | 5 | Forza 5. Religione +1 res · Cultura −1 res. |  |  |
-| 4 | Rivoluzione industriale | 5 | Forza 5. Edifici con Scavo 2+: −1 res. |  |  |
-| 4 | Bonifiche | 5 | Forza 5. Edifici su pianura: −2 res. Il primo terrapieno di ogni giocatore in quest’era costa 0. |  |  |
-| 4 | Secolarizzazioni | 5 | **Forza 5. Religione −2 res · durante l'era, ristrutturare una propria rovina Religione non costa risorse (richiede comunque l'azione).** | RUD | oggi: "Forza 5. Religione −2 res · durante l’era, restaurare un rudere Religione non costa risorse (richiede comunque l’azione) e vale sui ruderi già presenti" |
-| 4 | Speculazione edilizia | 5 | **Forza 5. Ogni edificio con 2+ potenziamenti: −1 res.** | RUD | oggi: "Forza 5. Ogni edificio con Vetustà 2+: −1 res" — registro 99: senza Vetustà non colpiva nessuno, ora colpisce chi ha costruito sopra il costruito (nel file v2) |
+| 4 | Alluvione | 3 | **Forza 3. Edifici su colonne fiume: −1 res.** |  | oggi: "Forza 5. Edifici su colonne fiume: −1 res" |
+| 4 | Controriforma | 3 | **Forza 3. Religione +1 res · Cultura −1 res.** |  | oggi: "Forza 5. Religione +1 res · Cultura −1 res" |
+| 4 | Rivoluzione industriale | 3 | **Forza 3. Edifici con Scavo 2+: −1 res.** |  | oggi: "Forza 5. Edifici con Scavo 2+: −1 res" |
+| 4 | Bonifiche | 3 | **Forza 3. Edifici su pianura: −2 res. Il primo terrapieno di ogni giocatore in quest’era costa 0.** |  | oggi: "Forza 5. Edifici su pianura: −2 res. Il primo terrapieno di ogni giocatore in quest’era costa 0" |
+| 4 | Secolarizzazioni | 3 | **Forza 5. Religione −2 res · durante l'era, ristrutturare una propria rovina Religione non costa risorse (richiede comunque l'azione).** | RUD | oggi: "Forza 5. Religione −2 res · durante l’era, restaurare un rudere Religione non costa risorse (richiede comunque l’azione) e vale sui ruderi già presenti" |
+| 4 | Speculazione edilizia | 3 | **Forza 3. Ogni edificio con 2+ potenziamenti: −1 res.** | RUD | oggi: "Forza 5. Ogni edificio con Vetustà 2+: −1 res" — registro 99: senza Vetustà non colpiva nessuno, ora colpisce chi ha costruito sopra il costruito (nel file v2) |
 
 ## I 14 Monumenti
 
@@ -373,7 +373,7 @@ Due a testa, se ne tiene una segreta; si conta a fine partita.
 | Il Geografo | 4 | tuoi edifici su tutti e quattro i terreni. |  |  |
 | Il Colonizzatore | 4 | tuoi edifici in 5+ colonne diverse. |  |  |
 | Il Mecenate | 4 | 4+ potenziamenti collocati sui tuoi edifici, inclusi quelli poi Sotterrati. |  |  |
-| Il Condottiero | 4 | **3+ tuoi edifici Militari, in qualsiasi stato.** |  | oggi: "3+ tuoi edifici Militari in piedi" |
+| Il Condottiero | 4 | **2+ tuoi edifici Militari, in qualsiasi stato.** |  | oggi: "3+ tuoi edifici Militari in piedi" |
 | Il Cronista | 5 | tuoi edifici di tutte e cinque le ere. |  |  |
 | Il Guardiano | 5 | **un tuo edificio attivo costruito nell'era 1 o 2.** | RUD | oggi: "un tuo edificio in piedi costruito nell’era 1 o 2" |
 | Il Lastricatore | 4 | tuoi edifici in 3 colonne consecutive. |  |  |

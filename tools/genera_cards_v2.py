@@ -685,10 +685,23 @@ def carte_vive(v):
     per_id["ed_mura"]["lampo"] = 2
     # Il Museo chiedeva 2 Idee, la risorsa che manca.
     per_id["ed_museo"]["cost"] = {"pietra": 1, "oro": 1, "idee": 1}
+    # Secondo ritocco (misura a 200 partite): chi restava quasi morto.
+    # Nell'era 1 il Denaro non c'e': le Capanne di fango tornano in
+    # Costruzione, ma piu' solide dei Ripari (resistenza 2 contro 1, Scavo 1
+    # contro 2); cosi' le Case a schiera rispetto ai Tuguri.
+    per_id["ed_casa_e1_p"]["cost"] = {"pietra": 1, "oro": 0, "idee": 0}
+    per_id["ed_casa_e1_p"]["resistance"] = 2
+    per_id["ed_casa_e2_p"]["cost"] = {"pietra": 1, "oro": 0, "idee": 0}
+    per_id["ed_casa_e2_p"]["resistance"] = 3
+    per_id["ed_castrum"]["lampo"] = 2
+    per_id["ed_villaggio_palizzato"]["lampo"] = 2
+    per_id["ed_torre_di_vedetta"]["cost"] = {"pietra": 1, "oro": 0, "idee": 0}
     # Il Cemento armato dava Resistenza nell'era 5, che non ha evento.
     ca = per_id["po_cemento_armato"]
-    ca["effects"] = [{"hook": "on_acquire", "op": "rendita_delta", "value": 2, "duration": "permanent", "target": {"is_self": True}}]
-    ca["effect_text"] = "L'edificio ha +2 Rendita."
+    # (+2 Rendita non lo prendeva nessuno: ora PV subito, pagati nella
+    # Costruzione che avanza.)
+    ca["effects"] = [{"hook": "on_acquire", "op": "vp", "value": 2}]
+    ca["effect_text"] = "Subito: +2 PV."
     # Le tessere dell'era che non scattavano.
     per_t = {t["id"]: t for t in v["tessere_era"]}
     r = per_t["te_raccoglitori"]
@@ -703,8 +716,8 @@ def carte_vive(v):
     # Le Eredita' quasi impossibili.
     per_l = {l["id"]: l for l in (v["legacies"] if isinstance(v["legacies"], list) else v["legacies"].values())}
     c = per_l["er_il_condottiero"]
-    c["condition"] = {"op": "count_matching", "target": {"owner": "self", "class": ["militare"]}, "min": 3}
-    c["condition_text"] = "3+ tuoi edifici Militari, in qualsiasi stato."
+    c["condition"] = {"op": "count_matching", "target": {"owner": "self", "class": ["militare"]}, "min": 2}
+    c["condition_text"] = "2+ tuoi edifici Militari, in qualsiasi stato."
     c = per_l["er_lantiquario"]
     c["condition"]["target"]["scavo"] = {"min": 5}
     c["condition_text"] = "un tuo edificio Sotterrato con Scavo 5 o più."
@@ -713,6 +726,23 @@ def carte_vive(v):
     c["condition_text"] = "hai ristrutturato una tua rovina."
     # Si potenzia anche un edificio della colonna adiacente, come si costruisce.
     v["constants"]["potenzia_adiacente"] = True
+
+# GLI EVENTI DELL'ERA 4 E L'AVANZO IN IDEE (registro 126). Nell'era 4 la
+# forza 5 faceva crollare l'87 % degli edifici costruiti in quell'era: a
+# forza 3 ne crolla uno su cinque, e l'era 3 (forza 4) resta la piu' dura.
+# L'era 5 resta senza evento. Il tetto a fine era buttava meta' della
+# Costruzione: ora ogni 2 risorse sopra il tetto diventano 1 Idea, la
+# risorsa che manca, e solo il resto si butta.
+def eventi_e_avanzo(v):
+    v["constants"]["event_force_by_era"]["4"] = 3
+    evs = v["events"] if isinstance(v["events"], list) else list(v["events"].values())
+    for e in evs:
+        if int(e.get("era", 0)) == 4 and "force" in e:
+            e["force"] = 3
+            for k in ("effect_text", "text"):
+                if isinstance(e.get(k), str):
+                    e[k] = e[k].replace("Forza 5.", "Forza 3.")
+    v["constants"]["avanzo_idee"] = True
 
 import sys
 variante = sys.argv[sys.argv.index("--variante") + 1] if "--variante" in sys.argv else ""
@@ -725,6 +755,7 @@ potenziamenti_nuovi(v2)
 testi_v2(v2)
 lampo_tetto(v2)
 carte_vive(v2)
+eventi_e_avanzo(v2)
 if variante:
     {"doppioni": doppioni, "abitazioni": abitazioni, "case": case,
      "case_doppioni": case_doppioni, "case_scavo": case_scavo, "case_nulle": case_nulle,

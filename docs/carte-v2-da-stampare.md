@@ -20,7 +20,7 @@ Come si leggono le colonne:
 |---|---|---|---|--:|---|--:|--:|--:|--:|---|---|
 | **Approdo** | Commercio | Fiume | 1×1 | 1 / 0 / 0 | 1 Costruzione | 1 | 2 | — | — | — | 1 |
 | **Capanne** | Civico | Pianura | 1×1 | 1 / 0 / 0 | 1 Costruzione | 1 | 2 | — | 1 | — | 1 |
-| **Capanne di fango** | Civico | Qualsiasi | 1×1 | 0 / 1 / 0 | — | 1 | 1 | — | 1 | — | 2 (RIS) |
+| **Capanne di fango** | Civico | Qualsiasi | 1×1 | 1 / 0 / 0 | — | 2 | 1 | — | 1 | — | 2 (RIS) |
 | **Case di pietra** | Civico | Qualsiasi | 1×1 | 2 / 0 / 0 | — | 2 | 1 | — | 2 | — | 2 (RIS) |
 | **Cava** | Commercio | Pianura | 1×1 | 1 / 0 / 0 | 2 Costruzione | 1 | 2 | — | — | — | 1 (Esaur. 4) |
 | **Circolo di pietre** | Religione | Qualsiasi | 1×2 | 2 / 0 / 1 | — | 4 | 5 | 1 | — | — | 1 |
@@ -32,7 +32,7 @@ Come si leggono le colonne:
 | **Ripari** | Civico | Qualsiasi | 1×1 | 1 / 0 / 0 | — | 1 | 2 | — | 1 | — | 2 (RIS) |
 | **Trappole da pesca** | Ingegneria | Fiume | 1×1 | 1 / 0 / 0 | 1 Costruzione | 1 | 0 | — | — | — | 1 |
 | **Tumulo funerario** | Religione / Cultura | Collina | 2×1 | 1 / 0 / 1 | — | 3 | 5 | — | 1 | — | 1 |
-| **Villaggio palizzato** | Militare | Pianura | 1×2 | 1 / 0 / 0 | — | 2 | 3 | — | 1 | Negli eventi, i tuoi edifici adiacenti hanno +1 Resistenza. | 1 |
+| **Villaggio palizzato** | Militare | Pianura | 1×2 | 1 / 0 / 0 | — | 2 | 3 | — | 2 | Negli eventi, i tuoi edifici adiacenti hanno +1 Resistenza. | 1 |
 
 ### Potenziamenti
 
@@ -57,8 +57,8 @@ Come si leggono le colonne:
 |---|---|---|---|--:|---|--:|--:|--:|--:|---|---|
 | **Acquedotto** | Ingegneria | Fiume | 3×1 | 2 / 0 / 1 | — | 4 | 3 | 1 | — | A fine partita, se è in piedi: +2 PV. | 1 |
 | **Anfiteatro** | Cultura | Qualsiasi | 2×2 | 4 / 0 / 1 | 1 Denaro | 5 | 6 | 2 | — | Solo sopra: mai a terra. Sopra di lui si costruisce solo quando è in rovina. | 1 |
-| **Case a schiera** | Civico | Qualsiasi | 1×1 | 0 / 1 / 0 | — | 2 | 1 | — | 1 | — | 2 (RIS) |
-| **Castrum** | Militare | Pianura | 1×2 | 2 / 0 / 0 | — | 4 | 3 | — | 1 | Negli eventi, i tuoi edifici nelle sue colonne hanno +1 Resistenza. | 1 |
+| **Case a schiera** | Civico | Qualsiasi | 1×1 | 1 / 0 / 0 | — | 3 | 1 | — | 1 | — | 2 (RIS) |
+| **Castrum** | Militare | Pianura | 1×2 | 2 / 0 / 0 | — | 4 | 3 | — | 2 | Negli eventi, i tuoi edifici nelle sue colonne hanno +1 Resistenza. | 1 |
 | **Domus** | Civico | Qualsiasi | 1×1 | 2 / 0 / 0 | — | 3 | 1 | — | 2 | — | 2 (RIS) |
 | **Emporio** | Commercio | Fiume | 1×1 | 2 / 0 / 0 | 1 Denaro | 2 | 2 | — | 2 | — | 1 |
 | **Foro** | Commercio / Civico | Pianura | 1×2 | 3 / 0 / 0 | 1 Denaro | 3 | 5 | 1 | — | — | 1 |
@@ -68,7 +68,7 @@ Come si leggono le colonne:
 | **Teatro** | Cultura | Qualsiasi | 1×1 | 1 / 0 / 1 | — | 3 | 5 | — | 2 | — | 1 |
 | **Tempio** | Religione | Collina | 1×1 | 2 / 0 / 1 | — | 3 | 3 | 1 | — | — | 1 |
 | **Terme** | Civico | Qualsiasi | 1×1 | 2 / 0 / 0 | — | 2 | 3 | — | 2 | — | 1 |
-| **Torre di vedetta** | Militare | Collina | 1×1 | 2 / 0 / 0 | — | 3 | 2 | — | 2 | Negli eventi, i tuoi edifici adiacenti hanno +1 Resistenza. | 1 |
+| **Torre di vedetta** | Militare | Collina | 1×1 | 1 / 0 / 0 | — | 3 | 2 | — | 2 | Negli eventi, i tuoi edifici adiacenti hanno +1 Resistenza. | 1 |
 | **Tuguri** | Civico | Qualsiasi | 1×1 | 1 / 0 / 0 | — | 2 | 2 | — | 1 | — | 2 (RIS) |
 
 ### Potenziamenti
@@ -188,7 +188,7 @@ Come si leggono le colonne:
 | **Archivio storico** | Altro | Cultura | 2 Denaro | L'edificio ha +3 Scavo. |
 | **Ascensore panoramico** | Altro | Ingegneria | 2 Denaro | Subito: +2 PV. |
 | **Boutique** | Altro | Commercio | 2 Denaro | Quando attivi l'edificio: +2 Denaro. |
-| **Cemento armato** | Struttura | Ingegneria | 2 Costruzione | L'edificio ha +2 Rendita. |
+| **Cemento armato** | Struttura | Ingegneria | 2 Costruzione | Subito: +2 PV. |
 | **Installazione** | Arte | Cultura | 2 Idee | Subito: +3 PV. |
 | **Memoriale** | Altro | Religione | 2 Denaro | Subito: +2 PV. |
 | **Murale** | Arte | Cultura | 2 Idee | Subito: +2 PV, +3 PV se l'edificio è Cultura. |

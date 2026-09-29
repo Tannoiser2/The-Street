@@ -47,7 +47,7 @@
       "1": 2,
       "2": 3,
       "3": 4,
-      "4": 5
+      "4": 3
     },
     "resource_cap": 5,
     "protection_bonus": 2,
@@ -102,7 +102,8 @@
     "tessere_una_volta_per_era": true,
     "tessere_era": true,
     "caselle": true,
-    "potenzia_adiacente": true
+    "potenzia_adiacente": true,
+    "avanzo_idee": true
   },
   "terrains": [
     {
@@ -583,7 +584,7 @@
       "flexible": false,
       "resistance": 2,
       "rendita": 0,
-      "lampo": 1,
+      "lampo": 2,
       "scavo": 3,
       "level_required": 0,
       "production": {
@@ -785,7 +786,7 @@
       "terrain": "collina",
       "width": 1,
       "cost": {
-        "pietra": 2,
+        "pietra": 1,
         "oro": 0,
         "idee": 0
       },
@@ -1025,7 +1026,7 @@
       "flexible": false,
       "resistance": 4,
       "rendita": 0,
-      "lampo": 1,
+      "lampo": 2,
       "scavo": 3,
       "level_required": 0,
       "production": {
@@ -2312,12 +2313,12 @@
       "terrain": null,
       "width": 1,
       "cost": {
-        "pietra": 0,
-        "oro": 1,
+        "pietra": 1,
+        "oro": 0,
         "idee": 0
       },
       "flexible": false,
-      "resistance": 1,
+      "resistance": 2,
       "rendita": 0,
       "lampo": 1,
       "scavo": 1,
@@ -2402,12 +2403,12 @@
       "terrain": null,
       "width": 1,
       "cost": {
-        "pietra": 0,
-        "oro": 1,
+        "pietra": 1,
+        "oro": 0,
         "idee": 0
       },
       "flexible": false,
-      "resistance": 2,
+      "resistance": 3,
       "rendita": 0,
       "lampo": 1,
       "scavo": 1,
@@ -5712,16 +5713,12 @@
         "idee": 0
       },
       "family": "struttura",
-      "effect_text": "L'edificio ha +2 Rendita.",
+      "effect_text": "Subito: +2 PV.",
       "effects": [
         {
           "hook": "on_acquire",
-          "op": "rendita_delta",
-          "value": 2,
-          "duration": "permanent",
-          "target": {
-            "is_self": true
-          }
+          "op": "vp",
+          "value": 2
         }
       ]
     },
@@ -6256,10 +6253,10 @@
       "id": "ev_alluvione",
       "name": "Alluvione",
       "era": 4,
-      "force": 5,
+      "force": 3,
       "severity": "lieve",
       "kind": "geografico",
-      "effect_text": "Forza 5. Edifici su colonne fiume: −1 res.",
+      "effect_text": "Forza 3. Edifici su colonne fiume: −1 res.",
       "effects": [
         {
           "hook": "on_event",
@@ -6277,10 +6274,10 @@
       "id": "ev_controriforma",
       "name": "Controriforma",
       "era": 4,
-      "force": 5,
+      "force": 3,
       "severity": "lieve",
       "kind": "classe",
-      "effect_text": "Forza 5. Religione +1 res · Cultura −1 res.",
+      "effect_text": "Forza 3. Religione +1 res · Cultura −1 res.",
       "effects": [
         {
           "hook": "on_event",
@@ -6308,10 +6305,10 @@
       "id": "ev_rivoluzione_industriale",
       "name": "Rivoluzione industriale",
       "era": 4,
-      "force": 5,
+      "force": 3,
       "severity": "lieve",
       "kind": "comportamentale",
-      "effect_text": "Forza 5. Edifici con Scavo 2+: −1 res.",
+      "effect_text": "Forza 3. Edifici con Scavo 2+: −1 res.",
       "effects": [
         {
           "hook": "on_event",
@@ -6329,10 +6326,10 @@
       "id": "ev_bonifiche",
       "name": "Bonifiche",
       "era": 4,
-      "force": 5,
+      "force": 3,
       "severity": "grave",
       "kind": "geografico",
-      "effect_text": "Forza 5. Edifici su pianura: −2 res. Il primo terrapieno di ogni giocatore in quest’era costa 0.",
+      "effect_text": "Forza 3. Edifici su pianura: −2 res. Il primo terrapieno di ogni giocatore in quest’era costa 0.",
       "effects": [
         {
           "hook": "on_event",
@@ -6356,10 +6353,10 @@
       "id": "ev_secolarizzazioni",
       "name": "Secolarizzazioni",
       "era": 4,
-      "force": 5,
+      "force": 3,
       "severity": "grave",
       "kind": "classe",
-      "effect_text": "Forza 5. Religione −2 res · durante l’era, restaurare un rudere Religione non costa risorse (richiede comunque l’azione) e vale sui ruderi già presenti.",
+      "effect_text": "Forza 3. Religione −2 res · durante l’era, restaurare un rudere Religione non costa risorse (richiede comunque l’azione) e vale sui ruderi già presenti.",
       "effects": [
         {
           "hook": "on_event",
@@ -6387,10 +6384,10 @@
       "id": "ev_speculazione_edilizia",
       "name": "Speculazione edilizia",
       "era": 4,
-      "force": 5,
+      "force": 3,
       "severity": "grave",
       "kind": "comportamentale",
-      "effect_text": "Forza 5. Ogni edificio con 2+ potenziamenti: −1 res.",
+      "effect_text": "Forza 3. Ogni edificio con 2+ potenziamenti: −1 res.",
       "effects": [
         {
           "hook": "on_event",
@@ -6723,7 +6720,7 @@
       "id": "er_il_condottiero",
       "name": "Il Condottiero",
       "vp": 4,
-      "condition_text": "3+ tuoi edifici Militari, in qualsiasi stato.",
+      "condition_text": "2+ tuoi edifici Militari, in qualsiasi stato.",
       "condition": {
         "op": "count_matching",
         "target": {
@@ -6732,7 +6729,7 @@
             "militare"
           ]
         },
-        "min": 3
+        "min": 2
       }
     },
     {
