@@ -94,12 +94,21 @@ func _start_era(era: int) -> void:
 		for k in int(b.get("copie", 1)): gs.riserva.append(str(b["id"]))
 	# "quando un'era finisce, le file non usate si scartano": si riparte da zero.
 	gs.char_row.clear()
+	# LA FILA DEI POTENZIAMENTI RESTA (`fila_potenziamenti_resta`, registro
+	# 126): quelli dell'era appena finita non si scartano e restano accanto ai
+	# nuovi per un'era. Nell'era 1 i propri edifici stanno sulle colonne gia'
+	# attivate e i potenziamenti dell'era 1 non si usavano mai; cosi' si
+	# possono prendere nell'era 2.
+	var restano: Array = []
+	if bool(CardDB.constants.get("fila_potenziamenti_resta", false)):
+		restano = gs.upg_row.filter(func(u): return int(CardDB.upgrades[u]["era"]) == era - 1)
 	gs.upg_row.clear()
 	var side := int(CardDB.constants["side_rows"])
 	# Con il draft (v2) in fila ci sono TUTTI i Personaggi dell'era: si
 	# sceglie fra quelli, gli avanzi si scartano a fine era (D7).
 	_refill(gs.char_row, gs.char_decks[era], gs.char_decks[era].size() if draft_v2() else side)
 	_refill(gs.upg_row, gs.upg_decks[era], side)
+	gs.upg_row.append_array(restano)
 
 	if era <= 4:
 		var evs := CardDB.events_of_era(era)

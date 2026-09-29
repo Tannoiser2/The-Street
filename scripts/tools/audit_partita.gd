@@ -302,6 +302,16 @@ func _ready() -> void:
 		CardDB.constants["avanzo_idee"] = str(args["avanzo_idee"]) != "0"
 		print("# avanzo_idee = %s" % str(CardDB.constants["avanzo_idee"]))
 
+	# I POTENZIAMENTI (`--potenzia_adiacente 0/1`, `--fila_resta 0/1`,
+	# registro 126): potenziare anche nella colonna adiacente, e la fila dei
+	# potenziamenti che resta un'era in piu'.
+	if args.has("potenzia_adiacente"):
+		CardDB.constants["potenzia_adiacente"] = str(args["potenzia_adiacente"]) != "0"
+		print("# potenzia_adiacente = %s" % str(CardDB.constants["potenzia_adiacente"]))
+	if args.has("fila_resta"):
+		CardDB.constants["fila_potenziamenti_resta"] = str(args["fila_resta"]) != "0"
+		print("# fila_potenziamenti_resta = %s" % str(CardDB.constants["fila_potenziamenti_resta"]))
+
 	_rapporto = args.has("rapporto") and str(args["rapporto"]) != "0"
 	if args.has("games"):
 		_lotto(seme, players, int(args["games"]))
