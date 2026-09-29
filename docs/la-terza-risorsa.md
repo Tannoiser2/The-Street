@@ -1310,6 +1310,29 @@ Fuori di poco: a due Obiettivi (59, bordo 56) e Lampo (38, bordo 44); a tre Rend
 Case a schiera, i tre potenziamenti Struttura dell'era 1 e il Cemento armato; il Restauratore
 riesce una volta su cinque. Resoconto completo nell'artifact del rapporto delle partite.
 
+## Ventiquattresima misura: i bot ritarati
+
+Dopo la ventitreesima misura restavano piccoli scarti fra le strategie; il designer: "ritara i
+bot" (registro 127). Screening a 300 partite per tavolo: il peso della Obiettivi va abbassato
+per indebolirla (0,6 a quattro la porta da 32 a 29 %), il Lampo a due va abbassato (2,0 la
+riporta da 38 a 51 %). Scelti: a due Lampo 2,0 e Obiettivi 0,6; a tre Obiettivi 0,7; a
+quattro Lampo 2,8 e Obiettivi 0,6. Controllo a 750 partite (a quattro, due metà di 375 semi):
+
+| vince (a 2 / 3 / 4) | prima | **dopo** |
+|---|--:|--:|
+| Lampo | 38 / 30 / 25 | 54 / 31 / 30 |
+| Rendita | 50 / 27 / 25 | 46 / 27 / 28 |
+| Continuità | 46 / 36 / 24 | 44 / 36 / 24 |
+| Bilanciata | 54 / 33 / 23 | 52 / 33 / 21 |
+| Obiettivi | 59 / 38 / 32 | 54 / 36 / 27 |
+| Scavo | 53 / 36 / 21 | 51 / 38 / 20 |
+| scarto massimo | 21 / 11 / 11 | 10 / 10 / 9 |
+| kingmaker | 6 / 6 / 10 % | 5 / 5 / 9 % |
+
+A due tutte nell'errore; a tre la Rendita (27, bordo 28) e a quattro Lampo (30, bordo 29) e
+Scavo (20, bordo 21) stanno a un punto dal bordo, dentro il rumore della misura. Le regole non
+cambiano: sono pesi del bot.
+
 ## Come rifare il conto
 
 ```bash

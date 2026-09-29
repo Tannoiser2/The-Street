@@ -2164,3 +2164,10 @@ dato è stato importato da lì. Ma due confronti fra ciò che è stampato e
     a 6/6/10 %. Aperto: piccoli scarti fra le strategie (ritaratura dei bot),
     i tre 2x2 che non crollano mai, il Denaro che avanza ancora, cinque carte
     ancora ferme.
+
+127. **I bot ritarati.** Il designer: "ritara i bot". Pesi del bot per
+    tavolo (`SPINTE_V2_PER_GIOCATORI`): a due Lampo 2,0 e Obiettivi 0,6, a
+    tre Obiettivi 0,7, a quattro Lampo 2,8 e Obiettivi 0,6. Il peso della
+    Obiettivi va giu' per indebolirla, al contrario del Lampo. Misurato
+    (ventiquattresima misura): scarto massimo fra le strategie 10/10/9 punti,
+    tre strategie a un punto dal bordo. Le regole non cambiano.
