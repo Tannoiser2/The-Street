@@ -2128,3 +2128,22 @@ dato è stato importato da lì. Ma due confronti fra ciò che è stampato e
     per la stampa: `docs/carte-v2-da-stampare.md`
     (`tools/stampa_carte_v2.py`); prompt per rifare le carte:
     `docs/proposte/prompt-chatgpt-correzioni-carte-v2.md`.
+
+125. **La Lampo troppo forte, e il rapporto delle partite.** Il designer:
+    "prova le tre strade e applica quella migliore o la combinazione". Fra
+    bot ritarato, Lampo tolto alle tessere dell'era e tetto al Lampo delle
+    carte, le tessere e il tetto a 3 non servono; il tetto a 2 insieme al
+    bot ritarato riporta la Lampo nell'errore a tutti i tavoli (49/30/25 %,
+    ventiduesima misura). Applicato: `LAMPO_TETTO = 2` in
+    `tools/genera_cards_v2.py` (16 carte, nel prompt per ChatGPT) e spinta
+    Lampo 2,6/2,6/3,2 nel bot. Poi il rapporto completo delle partite
+    (`audit_partita --rapporto 1`, `tools/rapporto_partite.py`,
+    `tools/rapporto_html.py`): i contatori di entrate e uscite per fonte
+    non cambiano il gioco. Quel che il rapporto mostra e resta da decidere:
+    i dieci potenziamenti dell'era 1 non si usano mai (per potenziare serve
+    attivare la colonna dell'edificio, e nell'era 1 i propri edifici stanno
+    sulle colonne gia' attivate); gli edifici dell'era 4 crollano quasi
+    tutti all'evento della loro era; col tetto a tre per risorsa si buttano
+    10-12 Costruzione e 6-9 Denaro a testa per partita; i Monumenti si
+    prendono di rado; tre Eredita' (Condottiero, Antiquario, Restauratore)
+    quasi non riescono.

@@ -337,11 +337,15 @@ func _lotto(seme: int, players: int, quante: int) -> void:
 		var guard := 0
 		var traccia := {"rovina": {}, "sepolto": {}, "upg": {}, "pers": {}, "eventi": {}, "rovine_era": {}}
 		while ctl.gs.phase != Enums.Phase.FINE_PARTITA and guard < 10000:
-			if _rapporto: _osserva(ctl.gs, traccia)
+			# L'era si prende PRIMA della mossa, come nella vita degli edifici:
+			# l'evento di fine era scatta dentro l'ultima mossa dell'era, e
+			# dopo la mossa il contatore e' gia' avanzato.
+			var era_prima: int = ctl.gs.era
+			if _rapporto: _osserva(ctl.gs, traccia, era_prima)
 			_muovi(ctl, g)
+			if _rapporto: _osserva(ctl.gs, traccia, era_prima)
 			guard += 1
 		if _rapporto:
-			_osserva(ctl.gs, traccia)
 			printerr("J " + JSON.stringify(_riga_rapporto(ctl.gs, g, traccia)))
 		for id in ctl.gs.tessere_scattate:
 			scattate[id] = int(scattate.get(id, 0)) + int(ctl.gs.tessere_scattate[id])
@@ -390,15 +394,15 @@ func _lotto(seme: int, players: int, quante: int) -> void:
 # finisce sepolto, quali potenziamenti ha portato (in rovina li perde, quindi
 # a fine partita non si vedrebbero), quali personaggi ha avuto ciascuno e che
 # evento c'era in ogni era.
-func _osserva(gs: GameState, t: Dictionary) -> void:
-	t["eventi"][str(gs.era)] = str(gs.current_event.get("id", ""))
+func _osserva(gs: GameState, t: Dictionary, era: int) -> void:
+	if not t["eventi"].has(str(era)): t["eventi"][str(era)] = str(gs.current_event.get("id", ""))
 	for b in gs.grid.buildings:
 		if b.state == Enums.BuildingState.ROVINA and not t["rovina"].has(b.uid):
-			t["rovina"][b.uid] = gs.era
-			var k := str(gs.era)
+			t["rovina"][b.uid] = era
+			var k := str(era)
 			t["rovine_era"][k] = int(t["rovine_era"].get(k, 0)) + 1
 		if b.is_buried and not t["sepolto"].has(b.uid):
-			t["sepolto"][b.uid] = gs.era
+			t["sepolto"][b.uid] = era
 		if not b.upgrades.is_empty():
 			var visti: Dictionary = t["upg"].get(b.uid, {})
 			for u in b.upgrades: visti[str(u)] = true
