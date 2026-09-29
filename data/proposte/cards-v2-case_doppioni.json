@@ -102,7 +102,7 @@
     "tessere_una_volta_per_era": true,
     "tessere_era": true,
     "caselle": true,
-    "potenzia_adiacente": true,
+    "fila_potenziamenti_resta": true,
     "avanzo_idee": true
   },
   "terrains": [

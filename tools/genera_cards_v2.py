@@ -724,8 +724,12 @@ def carte_vive(v):
     c = per_l["er_il_restauratore"]
     c["condition"]["min"] = 1
     c["condition_text"] = "hai ristrutturato una tua rovina."
-    # Si potenzia anche un edificio della colonna adiacente, come si costruisce.
-    v["constants"]["potenzia_adiacente"] = True
+    # I potenziamenti dell'era 1 non si usavano mai (nell'era 1 i propri
+    # edifici stanno sulle colonne gia' attivate): la fila dei potenziamenti
+    # non si scarta a fine era e resta accanto alla nuova per un'era. La prima
+    # prova, potenziare anche nella colonna adiacente, faceva salire gli
+    # Scheletri da 8 a 22 PV a testa e affondava la Rendita.
+    v["constants"]["fila_potenziamenti_resta"] = True
 
 # GLI EVENTI DELL'ERA 4 E L'AVANZO IN IDEE (registro 126). Nell'era 4 la
 # forza 5 faceva crollare l'87 % degli edifici costruiti in quell'era: a

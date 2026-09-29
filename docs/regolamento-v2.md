@@ -181,7 +181,7 @@ propria produzione al proprio proprietario: Costruzione, Denaro, Idee, o PV subi
 colonna trafficata arricchisce anche gli avversari: è il prezzo di andare dove la città è viva.
 
 **3. Compi un'azione (facoltativa).** Una sola, legata alla colonna che avete attivato:
-costruire o potenziare lì o in una colonna adiacente; ristrutturare un vostro edificio lì; oppure
+costruire lì o in una colonna adiacente; potenziare o ristrutturare un vostro edificio lì; oppure
 comprare la Dinastia. Passare è non fare niente dopo l'attivazione.
 
 #### Prosperità urbana
@@ -245,11 +245,14 @@ quella sagoma vale Scavo 0 e non paga premio a nessuno: chi demolisce non lascia
 
 **Potenziare** costa 1 nelle prime tre ere e 2 nelle ultime due, nella risorsa della famiglia:
 i potenziamenti **Arte** in Idee, quelli **Struttura** in Costruzione, tutti gli altri in
-Denaro. Infilate la carta sotto un vostro edificio in piedi della colonna attivata o di una
-adiacente, come per costruire, lasciandone
+Denaro. Infilate la carta sotto un vostro edificio in piedi della colonna attivata, lasciandone
 sporgere la linguetta. I potenziamenti Arte danno PV subito; quelli Struttura danno resistenza
 permanente, segnata con un cubetto nero. La capienza base è un potenziamento per edificio, salvo
 le carte che ne dichiarano di più.
+
+**La fila dei potenziamenti resta un'era.** A fine era i potenziamenti non presi non si scartano:
+restano accanto alla fila nuova per tutta l'era successiva, poi si scartano. Così quelli dell'era 1,
+che nell'era 1 non trovano quasi mai un vostro edificio da potenziare, si possono prendere nell'era 2.
 
 #### Scheletri
 
