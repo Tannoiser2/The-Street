@@ -42,6 +42,10 @@ class ActionQuote:
 const UPGRADE_CAPACITY_BASE := 1
 
 static func upgrade_capacity(data: Dictionary) -> int:
+	# UN POTENZIAMENTO PER CASELLA (registro 133): i token stanno sopra la
+	# tessera dell'edificio, uno per casella; il Colosseo, 2x2, ne porta 4.
+	if bool(CardDB.constants.get("potenziamenti_per_casella", false)):
+		return int(data.get("width", 1)) * int(data.get("depth", 1))
 	return int(data.get("upgrade_slots", UPGRADE_CAPACITY_BASE))
 
 # La capienza puo' crescere per un effetto attivo (il Vescovo: "capienza dei

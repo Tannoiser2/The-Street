@@ -2867,6 +2867,7 @@ func _test_tessere_scavo_vista() -> void:
 	r.col_to = r.col_from + int(r.data["width"])
 	r.state = Enums.BuildingState.ROVINA
 	gs.grid.buildings.append(r)
+	CardDB.constants.erase("tessere_scavo")
 	_ok("senza la regola la rovina resta una carta", BoardLayout3D.tessere_scavo_box(gs, r).is_empty())
 	CardDB.constants["tessere_scavo"] = {"mazzo": [{"v": 1}], "carte_restituite": true}
 	var scatole := BoardLayout3D.tessere_scavo_box(gs, r)

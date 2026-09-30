@@ -8,8 +8,8 @@
 # che stava sui propri edifici crollati: un'opera d'arte ritrovata).
 # L'era moderna riporta alla luce la storia: le tessere sotto un edificio
 # dell'era 5 si scoprono e valgono per intero al proprietario; quelle mai
-# scoperte a fine partita valgono la meta'. Il premio di scavo di chi
-# costruisce sopra resta quello di sempre (Scavo stampato x livello).
+# scoperte a fine partita valgono la meta'. Il premio di chi costruisce
+# sopra conta le tessere sotto (`premio: "tessere"`, `per_tessera` PV l'una).
 #
 # Le tessere si pescano quando servono (a fine partita, o allo scavo
 # dell'era 5), dal mazzetto del proprietario mescolato alla prima pesca:
@@ -39,8 +39,9 @@ static func fuori(b: Building) -> bool:
 
 # I POTENZIAMENTI COME TOKEN (registro 131): quando l'edificio va in rovina il
 # proprietario riscatta i token che portava. L'effetto sull'edificio finisce
-# (si tolgono i bonus che il token gli dava) e il token, tenuto davanti a se',
-# vale a fine partita il suo costo in PV.
+# (si tolgono i bonus che il token gli dava); i token ARTE, tenuti davanti a
+# se', valgono il loro Scavo se un'icona arte scoperta li "ritrova"
+# (registro 133). Gli altri non valgono niente.
 static func riscatta(gs: GameState, b: Building) -> void:
 	if not carte_restituite() or b.upgrades.is_empty(): return
 	var p: PlayerState = gs.players[b.owner]
@@ -113,16 +114,26 @@ static func scava(gs: GameState, costruito: Building) -> void:
 # scoperte, a meta' se ancora coperte; le icone valgono solo se scoperte.
 static func conta(gs: GameState) -> void:
 	for p in gs.players:
+		# Lo scheletro vale lo Scavo stampato sul Personaggio (registro 133);
+		# senza valore stampato, 6 meno l'era, per i Personaggi delle ere 1-4.
 		var personaggi: Array = []
 		for voce in p.personaggi_storia:
-			if int(voce[1]) < int(CardDB.constants["eras"]): personaggi.append(6 - int(voce[1]))
+			var carta: Dictionary = CardDB.characters.get(str(voce[0]), {})
+			if carta.has("scavo"): personaggi.append(int(carta["scavo"]))
+			elif int(voce[1]) < int(CardDB.constants["eras"]): personaggi.append(6 - int(voce[1]))
 		personaggi.sort()
+		# L'arte ritrovata: con le carte restituite, lo Scavo stampato dei
+		# token ARTE riscattati (registro 133); prima, il costo dei
+		# potenziamenti che stavano sulle proprie rovine.
 		var opere: Array = []
-		for b in gs.grid.buildings:
-			if b.owner != p.index or b.state != Enums.BuildingState.ROVINA: continue
-			for u in b.upgrades_storia:
-				var c: Dictionary = CardDB.upgrades[u]["cost"]
-				opere.append(int(c.get("pietra", 0)) + int(c.get("oro", 0)) + int(c.get("idee", 0)))
+		if carte_restituite():
+			for u in p.potenziamenti_riscattati:
+				if CardDB.upgrades.has(u) and str(CardDB.upgrades[u].get("family", "")) == "arte":
+					opere.append(int(CardDB.upgrades[u].get("scavo", 0)))
+		else:
+			for b in gs.grid.buildings:
+				if b.owner != p.index or b.state != Enums.BuildingState.ROVINA: continue
+				for u in b.upgrades_storia: opere.append(costo(u))
 		opere.sort()
 		for b in gs.grid.buildings:
 			if b.owner != p.index or quante(b) == 0: continue
@@ -132,17 +143,14 @@ static func conta(gs: GameState) -> void:
 				somma += int(t.get("v", 0))
 				if not b.scavata: continue
 				if bool(t.get("s", false)) and not personaggi.is_empty(): extra += int(personaggi.pop_back())
-				if bool(t.get("p", false)) and not opere.is_empty(): extra += int(opere.pop_back())
+				if bool(t.get("p", false)) and not opere.is_empty():
+					var arte := int(opere.pop_back())
+					extra += arte
+					p.bump("scavo_arte", arte)
 			var v: int = (somma if b.scavata else somma / 2) + b.bonus_scavo + extra
 			if v <= 0: continue
 			p.add_vp("scavo", v)
 			b.rende("scavo", v)
 			p.bump("scavo_tessere", v)
 			if b.scavata: p.bump("scavo_scoperto", v)
-		# I token riscattati: ognuno vale il suo costo.
-		var riscatto := 0
-		for uid in p.potenziamenti_riscattati:
-			if CardDB.upgrades.has(uid): riscatto += costo(uid)
-		if riscatto > 0:
-			p.add_vp("scavo", riscatto)
-			p.bump("riscattati_pv", riscatto)
+

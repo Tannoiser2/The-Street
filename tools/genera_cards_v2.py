@@ -773,71 +773,53 @@ def potenziamenti_di_classe(v):
     assert all(uid in {u["id"] for u in v["upgrades"]} for uid in TESTI_SENZA_BONUS)
     v["constants"]["potenziamento_stessa_classe"] = True
 
-# LE TESSERE SCAVO (registro 130), proposta da misurare: ogni giocatore ha
-# un mazzetto di 12 tessere del suo colore, da 0 a 3 (media 1,33). Due hanno
-# lo scheletro ("s"), due il potenziamento ("p"). Erano 20, ma un giocatore
-# ne pesca in media meno di 4 e al massimo 12 (ventiseiesima misura): il
-# designer le ha ridotte a 12 con le stesse proporzioni.
+# LE ROVINE E I FLUSSI (registri 130-133), decisioni del designer:
+# - TESSERE SCAVO: ogni giocatore ha un mazzetto di 12 tessere del suo colore,
+#   da 0 a 3 (media 1,33); due con lo scheletro ("s"), due con l'arte ("p").
+#   Quando un edificio va in rovina il proprietario ne pesca una per casella
+#   e le mette coperte; un edificio dell'era 5 costruito sopra le scopre; a
+#   fine partita le scoperte valgono per intero, le coperte a meta', e le
+#   icone solo sulle scoperte.
+# - PREMIO DI CHI COSTRUISCE SOPRA: la carta della rovina se ne va, quindi si
+#   contano le tessere sotto: 2 PV a tessera x livello, meta' nell'era 5 (con
+#   1 PV il premio scendeva da 9 a 4 PV e la Lampo crollava).
+# - CARTE RESTITUITE: la carta della rovina torna al proprietario; per le
+#   regole di mappa le rovine non contano; niente ristrutturare; i
+#   potenziamenti sono token che il proprietario riscatta al crollo.
+# - IL VALORE DI SCAVO sui Personaggi e sui potenziamenti arte, per l'era (5
+#   l'era 1, 1 l'era 5): lo scheletro scoperto fa incassare il miglior
+#   Personaggio avuto, l'arte scoperta il miglior token arte riscattato. Gli
+#   altri token riscattati non valgono niente.
+# - UN POTENZIAMENTO PER CASELLA: la capienza e' larghezza x profondita'.
+# - I FLUSSI DI PV: Lampo, Rendita, Scavo e Continuita' devono pesare piu' o
+#   meno uguale; il Lampo faceva il doppio della Rendita (22 contro 11 PV).
+#   Il Lampo delle ere 4 e 5 (tutte carte da 2) scende a 1; la Rendita 1 sale
+#   a 2 (con +1 su tutte la Rendita arrivava a 24 PV); la Continuita' diventa
+#   una collezione: per ogni classe, i tuoi edifici in piedi piu' le carte
+#   restituite, a soglie.
 MAZZO_SCAVO = (
     [{"v": 0}, {"v": 0, "s": True}, {"v": 0, "p": True}]
     + [{"v": 1}] * 3 + [{"v": 1, "s": True}]
     + [{"v": 2}] * 2 + [{"v": 2, "p": True}]
     + [{"v": 3}] * 2)
 assert len(MAZZO_SCAVO) == 12
+CONTINUITA_COLLEZIONE = {"3": 3, "5": 5, "7": 8, "9": 12}
 
-def tessere_scavo(v):
-    v["constants"]["tessere_scavo"] = {"mazzo": [dict(t) for t in MAZZO_SCAVO]}
+def scavo_per_era(era):
+    return 6 - int(era) if era else 0
 
-# Il premio di chi costruisce sopra con le tessere (proposta): la carta della
-# rovina se ne va, quindi il suo Scavo stampato non si vede piu'. Si contano
-# le tessere coperte sotto: 1 per tessera x livello, meta' nell'era 5.
-def tessere_scavo_premio(v):
-    tessere_scavo(v)
-    v["constants"]["tessere_scavo"]["premio"] = "tessere"
-
-# Con 1 PV a tessera il premio scendeva da 9 a 4 PV a partita e la Lampo
-# crollava (ventiseiesima misura): la prova con 2 PV a tessera.
-def tessere_scavo_premio2(v):
-    tessere_scavo_premio(v)
-    v["constants"]["tessere_scavo"]["per_tessera"] = 2
-
-# LE CARTE RESTITUITE (registro 131). Il designer: niente piu' carte edificio
-# sulla mappa; la rovina torna al proprietario e sulla mappa restano le sue
-# tessere scavo; le rovine non contano per le regole di mappa; niente
-# ristrutturare; i potenziamenti sono token, riscattati dal proprietario
-# quando l'edificio crolla, e valgono il loro costo a fine partita. L'icona
-# potenziamento sulle tessere diventa un doppione del riscatto: le due
-# tessere che la portavano restano, senza icona.
-# I FLUSSI DI PV (registro 132). Il designer: Lampo, Rendita, Scavo e
-# Continuita' sono i quattro flussi principali e devono pesare piu' o meno
-# uguale; il Lampo faceva il doppio della Rendita (22 contro 11 PV). Il Lampo
-# delle ere 4 e 5 (tutte carte da 2, 13 PV sui 22) scende a 1; ogni carta con
-# Rendita guadagna 1. La Continuita' diventa una collezione a soglie.
-CONTINUITA_COLLEZIONE = {"3": 3, "5": 6, "7": 10, "9": 15}
-
-def flussi(v, rendita_piu=(1, 2)):
+def rovine_e_flussi(v):
+    v["constants"]["tessere_scavo"] = {"mazzo": [dict(t) for t in MAZZO_SCAVO],
+        "premio": "tessere", "per_tessera": 2, "carte_restituite": True}
+    v["constants"]["potenziamenti_per_casella"] = True
+    for c in v["characters"]:
+        c["scavo"] = scavo_per_era(c.get("era"))
+    for u in v["upgrades"]:
+        if u.get("family") == "arte": u["scavo"] = scavo_per_era(u["era"])
     for b in v["buildings"]:
         if b["era"] >= 4 and b["lampo"] >= 2: b["lampo"] = 1
-        if b["rendita"] in rendita_piu: b["rendita"] += 1
+        if b["rendita"] == 1: b["rendita"] = 2
     v["constants"]["continuita_collezione"] = dict(CONTINUITA_COLLEZIONE)
-
-def tessere_carte(v):
-    tessere_scavo_premio2(v)
-    t = v["constants"]["tessere_scavo"]
-    t["carte_restituite"] = True
-    t["mazzo"] = [{k: x for k, x in m.items() if k != "p"} for m in t["mazzo"]]
-
-def tessere_flussi(v):
-    tessere_carte(v)
-    flussi(v)
-
-def tessere_flussi_r1(v):
-    tessere_carte(v)
-    flussi(v, rendita_piu=(1,))
-
-def tessere_flussi_r0(v):
-    tessere_carte(v)
-    flussi(v, rendita_piu=())
 
 import sys
 variante = sys.argv[sys.argv.index("--variante") + 1] if "--variante" in sys.argv else ""
@@ -852,10 +834,11 @@ lampo_tetto(v2)
 carte_vive(v2)
 eventi_e_avanzo(v2)
 potenziamenti_di_classe(v2)
+rovine_e_flussi(v2)
 if variante:
     {"doppioni": doppioni, "abitazioni": abitazioni, "case": case,
      "case_doppioni": case_doppioni, "case_scavo": case_scavo, "case_nulle": case_nulle,
-     "case_mista": case_mista, "case_tutti": case_tutti, "tessere_scavo": tessere_scavo, "tessere_scavo_premio": tessere_scavo_premio, "tessere_scavo_premio2": tessere_scavo_premio2, "tessere_carte": tessere_carte, "tessere_flussi": tessere_flussi, "tessere_flussi_r1": tessere_flussi_r1, "tessere_flussi_r0": tessere_flussi_r0}[variante](v2)
+     "case_mista": case_mista, "case_tutti": case_tutti}[variante](v2)
     v2["meta"]["ruleset"] = "v2-" + variante
     v2["meta"]["origine"] = "generato da tools/genera_cards_v2.py --variante %s: non modificare a mano" % variante
     out = os.path.join(RADICE, "data/proposte/cards-v2-%s.json" % variante)

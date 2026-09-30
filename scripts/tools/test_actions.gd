@@ -1848,7 +1848,7 @@ func _test_potenzia_adiacente() -> void:
 func _test_tessere_scavo() -> void:
 	if not FileAccess.file_exists("res://data/cards-v2.json"): return
 	CardDB.load_db("res://data/cards-v2.json")
-	_ok("nel file v2 le tessere scavo sono spente", not TessereScavo.attive())
+	_ok("nel file v2 le tessere scavo sono accese", TessereScavo.attive())
 	CardDB.constants["tessere_scavo"] = {"mazzo": [{"v": 3}, {"v": 2, "s": true}, {"v": 1}, {"v": 0}]}
 	var ctl := _game(2, 51)
 	var gs := ctl.gs
@@ -1891,7 +1891,7 @@ func _test_tessere_scavo() -> void:
 func _test_carte_restituite() -> void:
 	if not FileAccess.file_exists("res://data/cards-v2.json"): return
 	CardDB.load_db("res://data/cards-v2.json")
-	_ok("nel file v2 le carte restano sulla mappa", not TessereScavo.carte_restituite())
+	_ok("nel file v2 le carte tornano al proprietario", TessereScavo.carte_restituite())
 	CardDB.constants["tessere_scavo"] = {"mazzo": [{"v": 1}], "carte_restituite": true}
 	var ctl := _game(2, 52)
 	var gs := ctl.gs
@@ -1921,9 +1921,23 @@ func _test_carte_restituite() -> void:
 	_eq("  in rovina il token torna al proprietario", gs.players[0].potenziamenti_riscattati, [upg])
 	_eq("  e l'edificio perde il bonus", viva.bonus_res, 0)
 	_ok("  e non lo porta piu'", viva.upgrades.is_empty())
+	# L'arte ritrovata (registro 133): il token arte riscattato vale il suo
+	# Scavo solo se un'icona arte scoperta lo ritrova; gli altri niente.
 	var p: PlayerState = gs.players[0]
-	p.bump("riscattati_pv", 0)
-	var prima := int(p.counters.get("riscattati_pv", 0))
+	var arte := ""
+	for id in CardDB.upgrades:
+		if str(CardDB.upgrades[id].get("family", "")) == "arte" and CardDB.upgrades[id].has("scavo"):
+			arte = id
+			break
+	_ok("i potenziamenti arte hanno uno Scavo stampato", arte != "")
+	p.potenziamenti_riscattati.append(arte)
+	var ss := _put(gs, 0, "ed_capanne", 3, 0, Enums.BuildingState.ROVINA)
+	ss.tessere = [{"v": 0, "p": true}]
+	var prima := p.vp
 	TessereScavo.conta(gs)
-	_eq("a fine partita il token vale il suo costo", int(p.counters.get("riscattati_pv", 0)) - prima, TessereScavo.costo(upg))
+	_eq("  coperta, l'icona arte non ritrova niente", p.vp - prima, 0)
+	ss.scavata = true
+	prima = p.vp
+	TessereScavo.conta(gs)
+	_eq("  scoperta ritrova il token arte", p.vp - prima, int(CardDB.upgrades[arte]["scavo"]))
 	CardDB.load_db(CardDB.DB_PATH)
