@@ -273,10 +273,39 @@ static func terrapieno_box(gs: GameState, b: Building, col: int) -> AABB:
 static func terrapieni(gs: GameState, b: Building) -> Array[AABB]:
 	var out: Array[AABB] = []
 	if b.level == 0: return out
+	# CASELLA PER CASELLA (registro 134). Una carta profonda due binari puo'
+	# poggiare su un binario al livello 1 e sull'altro al livello 0: la terra
+	# per colonna partiva dalla quota piu' alta e sotto l'altro binario
+	# restava il vuoto (l'edificio "fluttuava"). Con le carte ogni casella ha
+	# la sua quota.
+	if cartoni() and b.profondita() > 1:
+		var base := basetta_box(gs, b)
+		var fetta := base.size.x / float(b.width())
+		var passo := base.size.z / float(b.profondita())
+		for col in range(b.col_from, b.col_to):
+			for j in b.profondita():
+				var z0 := base.position.z + j * passo
+				var q := _quota_sotto_striscia(gs, b, col, z0, z0 + passo)
+				var da := level_y(q + 1)
+				if base.position.y - da > 0.0:
+					out.append(AABB(Vector3(base.position.x + (col - b.col_from) * fetta, da, z0),
+						Vector3(fetta, base.position.y - da, passo)))
+		return out
 	for col in range(b.col_from, b.col_to):
 		var box := terrapieno_box(gs, b, col)
 		if box.size.y > 0.0: out.append(box)
 	return out
+
+# Il livello piu' alto sotto `b` nella colonna e nella striscia di profondita'
+# [z0, z1): -1 se non c'e' niente.
+static func _quota_sotto_striscia(gs: GameState, b: Building, col: int, z0: float, z1: float) -> int:
+	var q := -1
+	for s in gs.grid.buildings:
+		if s == b or not s.covers(col) or s.level >= b.level: continue
+		var r := basetta_box(gs, s)
+		if r.end.z <= z0 + 0.01 or r.position.z >= z1 - 0.01: continue
+		q = maxi(q, s.level)
+	return q
 
 # Il livello di cio' che regge questa colonna, -1 se sotto non c'e' niente.
 # Si guardano le basi fissate alla costruzione - come per la z, quello che

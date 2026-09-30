@@ -2984,20 +2984,23 @@ func _test_niente_sospesi() -> void:
 			guardia += 1
 		var gs := ctl.gs
 		var appoggi: Array[AABB] = []
+		var nomi: Array[String] = []
 		for b in gs.grid.buildings:
-			if not TessereScavo.fuori(b): appoggi.append(BoardLayout3D.basetta_box(gs, b))
-			appoggi.append_array(BoardLayout3D.tessere_scavo_box(gs, b))
-			appoggi.append_array(BoardLayout3D.terrapieni_spianato_box(gs, b))
-			appoggi.append_array(BoardLayout3D.terrapieni(gs, b))
+			var tipo := "%s L%d %s%s" % [b.data["name"], b.level, ["intatto", "rudere", "rovina"][b.state], " sepolto" if b.is_buried else ""]
+			if not TessereScavo.fuori(b):
+				appoggi.append(BoardLayout3D.basetta_box(gs, b)); nomi.append("carta " + tipo)
+			for t in BoardLayout3D.tessere_scavo_box(gs, b): appoggi.append(t); nomi.append("tessere " + tipo)
+			for t in BoardLayout3D.terrapieni_spianato_box(gs, b): appoggi.append(t); nomi.append("spianato " + tipo)
+			for t in BoardLayout3D.terrapieni(gs, b): appoggi.append(t); nomi.append("terra " + tipo)
 		for b in gs.grid.buildings:
 			if b.level == 0: continue
-			var piede := BoardLayout3D.basetta_box(gs, b)
-			var w := b.width()
-			var d := b.profondita()
+			var piede: AABB = BoardLayout3D.basetta_box(gs, b)
+			var w: int = b.width()
+			var d: int = b.profondita()
 			for i in w:
 				for j in d:
-					var x := piede.position.x + (i + 0.5) * piede.size.x / w
-					var z := piede.position.z + (j + 0.5) * piede.size.z / d
+					var x: float = piede.position.x + (i + 0.5) * piede.size.x / w
+					var z: float = piede.position.z + (j + 0.5) * piede.size.z / d
 					controllate += 1
 					var retta := false
 					for a in appoggi:
@@ -3006,6 +3009,12 @@ func _test_niente_sospesi() -> void:
 							retta = true
 							break
 					if not retta:
+						if sospese < 3:
+							print("SOSPESO %s L%d col %d x=%.1f z=%.1f y=%.1f basi=%s" % [b.data["name"], b.level, b.col_from + i, x, z, piede.position.y, str(b.basi)])
+							for k in appoggi.size():
+								var a2: AABB = appoggi[k]
+								if x >= a2.position.x - 1.0 and x <= a2.end.x + 1.0:
+									print("   %s  y %.1f-%.1f z %.1f-%.1f" % [nomi[k], a2.position.y, a2.end.y, a2.position.z, a2.end.z])
 						sospese += 1
 						if esempio == "": esempio = "%s livello %d, colonna %d" % [b.data["name"], b.level, b.col_from + i]
 	_eq("caselle sospese nel vuoto su %d controllate%s" % [controllate, (" (es. " + esempio + ")") if esempio != "" else ""], sospese, 0)
