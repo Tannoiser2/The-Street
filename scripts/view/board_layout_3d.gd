@@ -509,8 +509,9 @@ static func token_box(gs: GameState, b: Building) -> Array[AABB]:
 	for i in b.upgrades.size():
 		var cx := box.position.x + (i % w) * cw + cw / 2.0
 		var cz := box.position.z + ((i / w) % d) * cd + cd / 2.0
-		out.append(AABB(Vector3(cx - TOKEN / 2.0, box.end.y, cz - TOKEN / 2.0),
-			Vector3(TOKEN, TOKEN_Y, TOKEN)))
+		var t := misura_token()
+		out.append(AABB(Vector3(cx - t.x / 2.0, box.end.y, cz - t.y / 2.0),
+			Vector3(t.x, TOKEN_Y, t.y)))
 	return out
 
 static func tile_box(col: int, era: int) -> AABB:
@@ -983,14 +984,20 @@ static func misura_edificio(id: String) -> Vector2:
 	var p := int(d.get("depth", 1))
 	return Vector2(span_w(w), basetta_d() + (p - 1) * slot_d())
 
-# I POTENZIAMENTI COME TOKEN (registro 133): un quadrotto che sta sopra una
-# casella dell'edificio, uno per casella. Stessa misura nella fila, sulla
-# mappa e davanti al giocatore che li riscatta.
-const TOKEN := 36.0
+# I POTENZIAMENTI COME TOKEN (registro 133): la tessera del potenziamento,
+# stampata dal designer a 135 x 70 pt (Potenziamenti_Completi_A4.pdf), sta
+# sopra una casella dell'edificio, uno per casella. La misura e' in scala con
+# la tessera dell'edificio da una casella (194 x 116 pt), ed e' la stessa
+# nella fila, sulla mappa e davanti al giocatore che li riscatta.
+const TOKEN_PT := Vector2(135.0, 70.0)
+const EDIFICIO_PT := Vector2(194.4, 115.6)
 const TOKEN_Y := 3.0
 
+static func misura_token() -> Vector2:
+	return Vector2(span_w(1) * TOKEN_PT.x / EDIFICIO_PT.x, basetta_d() * TOKEN_PT.y / EDIFICIO_PT.y)
+
 static func misura_carta(tipo: String) -> Vector2:
-	if grandezza_vera() and tipo in ["potenziamento", "token"]: return Vector2(TOKEN, TOKEN)
+	if grandezza_vera() and tipo in ["potenziamento", "token"]: return misura_token()
 	var m: Vector2 = MISURE_CARTE.get(tipo, Vector2(CARTA, CARTA))
 	if e_v2() and MISURE_CARTE_V2.has(tipo): m = MISURE_CARTE_V2[tipo]
 	if not (tipo in CARTE_IN_PIEDI) or m.y <= 0.0: return m

@@ -2957,8 +2957,10 @@ func _test_token_e_restituite() -> void:
 	for c in BoardLayout3D.side_cards(gs):
 		if str(c["kind"]) == "potenziamento" and not c.has("player"):
 			var a: AABB = c["aabb"]
-			if absf(a.size.x - BoardLayout3D.TOKEN) > 0.01: fila_ok = false
+			if absf(a.size.x - BoardLayout3D.misura_token().x) > 0.01: fila_ok = false
 	_ok("la fila dei potenziamenti e' fatta di token", fila_ok)
+	var tk := BoardLayout3D.misura_token()
+	_ok("il token ha le proporzioni della tessera stampata (135 x 70)", absf(tk.x / tk.y - 135.0 / 70.0 * (BoardLayout3D.span_w(1) / BoardLayout3D.basetta_d()) / (194.4 / 115.6)) < 0.01)
 	CardDB.load_db(CardDB.DB_PATH)
 
 # Nessun edificio sospeso (registro 134): in una partita vera, ogni casella di
