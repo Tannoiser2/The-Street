@@ -425,6 +425,8 @@ func _edifici() -> void:
 		if BoardLayout3D.ha_sagoma(b):
 			_sagoma(b)
 			_linguette(b)
+		elif BoardLayout3D.grandezza_vera():
+			_token(b)
 		elif BoardLayout3D.cartoni() and not b.is_buried:
 			_linguette(b)
 		_cubetti(b)
@@ -773,6 +775,14 @@ const PLANCIA_SFONDO := Color("#2d323c")
 const CARTA_SPENTA := Color(0.45, 0.45, 0.47)
 const CARTA_SEPOLTA := Color(0.30, 0.28, 0.26)
 
+# I token dei potenziamenti sopra l'edificio (registro 133): un quadrotto con
+# la faccia del potenziamento, uno per casella.
+func _token(b: Building) -> void:
+	var scatole := BoardLayout3D.token_box(gs, b)
+	for i in scatole.size():
+		_carta_stesa(scatole[i], BoardLayout3D.carta_path("token", str(b.upgrades[i])),
+			Color(0.79, 0.64, 0.16), false, Color.WHITE, true)
+
 func _file_laterali() -> void:
 	for c in BoardLayout3D.side_cards(gs, umano):
 		var r: AABB = c["aabb"]
@@ -799,7 +809,7 @@ func _titolo_carta(c: Dictionary) -> String:
 	match str(c["kind"]):
 		"mercato": return str(CardDB.buildings[id]["name"])
 		"personaggio": return str(CardDB.characters[id]["name"])
-		"potenziamento": return str(CardDB.upgrades[id]["name"])
+		"potenziamento", "token": return str(CardDB.upgrades[id]["name"])
 		"monumento": return str(CardDB.monuments[id]["name"]) if CardDB.monuments.has(id) else id
 		"scheletro": return "scheletro"
 	return id
@@ -818,6 +828,9 @@ func _dettaglio_carta(c: Dictionary) -> String:
 			return "personaggio · %s" % CardDB.characters[id]["class"]
 		"potenziamento":
 			return "potenziamento · %s" % CardDB.upgrades[id]["family"]
+		"token":
+			var u: Dictionary = CardDB.upgrades[id]
+			return "token riscattato · %s" % u["family"] + (" · Scavo %d" % int(u["scavo"]) if u.has("scavo") else "")
 		"monumento":
 			return "monumento"
 		"scheletro":

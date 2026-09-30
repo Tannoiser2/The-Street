@@ -485,6 +485,23 @@ static func tessere_scavo_box(gs: GameState, b: Building) -> Array[AABB]:
 				box.position.z + j * cd + margine), Vector3(cw - 2.0 * margine, box.size.y, cd - 2.0 * margine)))
 	return out
 
+# I token sull'edificio in piedi: uno per casella, nell'ordine in cui sono
+# stati messi, al centro della casella e appoggiati sopra la tessera.
+static func token_box(gs: GameState, b: Building) -> Array[AABB]:
+	var out: Array[AABB] = []
+	if not grandezza_vera() or b.upgrades.is_empty() or TessereScavo.fuori(b): return out
+	var box := basetta_box(gs, b)
+	var w := b.width()
+	var d := b.profondita()
+	var cw := box.size.x / w
+	var cd := box.size.z / d
+	for i in b.upgrades.size():
+		var cx := box.position.x + (i % w) * cw + cw / 2.0
+		var cz := box.position.z + ((i / w) % d) * cd + cd / 2.0
+		out.append(AABB(Vector3(cx - TOKEN / 2.0, box.end.y, cz - TOKEN / 2.0),
+			Vector3(TOKEN, TOKEN_Y, TOKEN)))
+	return out
+
 static func tile_box(col: int, era: int) -> AABB:
 	return AABB(Vector3(col_x(col), 0.0, rail_z(era)), Vector3(TESSERA_W, TESSERA_Y, slot_d()))
 
@@ -586,6 +603,7 @@ const CARTELLE_CARTE := {
 	"eredita": ["eredita", "png"],
 	"eredita_coperta": ["dorsi", "png"],
 	"dinastia": ["dorsi", "png"],
+	"token": ["potenziamenti_v2", "png"],
 }
 
 # Nella v2 gli edifici hanno le loro facce (registro 120: i cinque PDF
@@ -600,6 +618,11 @@ static func e_v2() -> bool:
 
 static func carta_path(tipo: String, id: String) -> String:
 	if not CARTELLE_CARTE.has(tipo): return ""
+	# Nella v2 i potenziamenti hanno le facce del loro PDF (registro 128), e
+	# sono le stesse per il token (registro 133).
+	if tipo in ["potenziamento", "token"] and e_v2():
+		var pv2 := "res://assets/carte/potenziamenti_v2/%s.png" % id
+		if ResourceLoader.exists(pv2) or tipo == "token": return pv2
 	if tipo == "mercato" and e_v2():
 		var v2 := CARTELLA_EDIFICI_V2 % id
 		if ResourceLoader.exists(v2): return v2
@@ -949,7 +972,14 @@ static func misura_edificio(id: String) -> Vector2:
 	var p := int(d.get("depth", 1))
 	return Vector2(span_w(w), basetta_d() + (p - 1) * slot_d())
 
+# I POTENZIAMENTI COME TOKEN (registro 133): un quadrotto che sta sopra una
+# casella dell'edificio, uno per casella. Stessa misura nella fila, sulla
+# mappa e davanti al giocatore che li riscatta.
+const TOKEN := 36.0
+const TOKEN_Y := 3.0
+
 static func misura_carta(tipo: String) -> Vector2:
+	if grandezza_vera() and tipo in ["potenziamento", "token"]: return Vector2(TOKEN, TOKEN)
 	var m: Vector2 = MISURE_CARTE.get(tipo, Vector2(CARTA, CARTA))
 	if e_v2() and MISURE_CARTE_V2.has(tipo): m = MISURE_CARTE_V2[tipo]
 	if not (tipo in CARTE_IN_PIEDI) or m.y <= 0.0: return m
@@ -1129,6 +1159,17 @@ static func carte_giocatore(gs: GameState, player: int, umano := -1) -> Array[Di
 		visti[str(c)] = true
 		out.append({"kind": "personaggio", "id": str(c)})
 	for m in p.monuments_claimed: out.append({"kind": "monumento", "id": str(m)})
+	# CON LE CARTE RESTITUITE (registri 131-133) davanti al giocatore non c'e'
+	# il mazzetto degli edifici: quelli in piedi stanno sulla mappa, e
+	# davanti a lui tornano solo le carte degli edifici crollati, a colori e
+	# a grandezza vera, piu' i token che ha riscattato.
+	if grandezza_vera():
+		for b in gs.grid.buildings:
+			if b.owner == player and TessereScavo.fuori(b):
+				out.append({"kind": "mercato", "id": str(b.data["id"]), "restituita": true})
+		for u in p.potenziamenti_riscattati:
+			out.append({"kind": "token", "id": str(u)})
+		return out
 	# LE CARTE DEGLI EDIFICI COSTRUITI. "Costruire significa pagare il costo
 	# della carta e mettere la sagoma sul tabellone": la carta resta davanti
 	# a chi l'ha presa - il regolamento ci fa infilare sotto i personaggi a
@@ -1292,6 +1333,7 @@ static func player_cards(gs: GameState, umano := -1) -> Array[Dictionary]:
 				ventaglio.append(carte[j])
 				continue
 			var m := misura_carta(str(carte[j]["kind"]))
+			if bool(carte[j].get("restituita", false)): m = misura_edificio(str(carte[j]["id"]))
 			# A capo quando la carta non ci sta piu'. La prima di una riga ci
 			# resta comunque, anche se da sola sborda: e' meglio di una riga
 			# vuota e di un giro infinito.

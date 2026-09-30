@@ -67,6 +67,7 @@ func _ready() -> void:
 	_run("la rovina senza rudere: la carta si capovolge (v2)", _test_rovina_senza_rudere)
 	_run("v2: le tessere scavo al posto della carta crollata (registro 131)", _test_tessere_scavo_vista)
 	_run("v2: il mercato a grandezza vera (registro 133)", _test_mercato_vero)
+	_run("v2: token sugli edifici e carte restituite davanti al giocatore (registro 133)", _test_token_e_restituite)
 	_run("il riepilogo finale con i nomi del regolamento v2", _test_riepilogo_v2)
 	_run("le facce degli edifici della v2", _test_facce_v2)
 	print("\n%d superati, %d falliti" % [_passed, _failed])
@@ -2634,6 +2635,10 @@ func _test_quarto_lavoratore() -> void:
 func _test_scheletro_lavoratore() -> void:
 	if not FileAccess.file_exists("res://data/cards-v2.json"): return
 	CardDB.load_db("res://data/cards-v2.json")
+	# Il ventaglio degli edifici c'e' solo senza le carte restituite: con
+	# quelle (registro 133) lo scheletro sta sulla mappa. Qui si prova il
+	# ventaglio.
+	CardDB.constants.erase("tessere_scavo")
 	var ctl := GameController.new()
 	ctl.new_game(3, 11)
 	var gs := ctl.gs
@@ -2903,4 +2908,52 @@ func _test_mercato_vero() -> void:
 	var uno := BoardLayout3D.misura_edificio("ed_capanne")
 	var due := BoardLayout3D.misura_edificio("ed_tumulo_funerario")
 	_ok("  una larga due e' larga il doppio di una colonna, piu' lo spazio fra le due", due.x > uno.x * 1.9)
+	CardDB.load_db(CardDB.DB_PATH)
+
+# Con le carte restituite (registro 133): i potenziamenti sono token, uno per
+# casella sopra l'edificio e della stessa misura nella fila; davanti al
+# giocatore non ci sono gli edifici in piedi, solo le carte restituite (a
+# colori, a grandezza vera) e i token riscattati.
+func _test_token_e_restituite() -> void:
+	if not FileAccess.file_exists("res://data/cards-v2.json"): return
+	CardDB.load_db("res://data/cards-v2.json")
+	var ctl := GameController.new()
+	ctl.new_game(3, 134)
+	var gs := ctl.gs
+	while not gs.pending_choice.is_empty():
+		ctl.choose(int((gs.pending_choice["options"] as Array)[0]))
+	gs.grid.buildings.clear()
+	var viva := _metti(gs, "ed_tumulo_funerario", 0, 2, 0, 0)
+	var upg := str(CardDB.upgrades.keys()[0])
+	viva.upgrades.append(upg)
+	viva.upgrades.append(str(CardDB.upgrades.keys()[1]))
+	var t := BoardLayout3D.token_box(gs, viva)
+	_eq("un token per potenziamento sull'edificio", t.size(), 2)
+	var posto := BoardLayout3D.basetta_box(gs, viva)
+	_ok("  in caselle diverse, sopra la tessera", t[0].position.x != t[1].position.x
+		and is_equal_approx(t[0].position.y, posto.end.y))
+	var morta := _metti(gs, "ed_capanne", 4, 1, 0, 0)
+	morta.state = Enums.BuildingState.ROVINA
+	gs.players[0].potenziamenti_riscattati.append(upg)
+	var mie := BoardLayout3D.carte_giocatore(gs, 0, 0)
+	var edifici := []
+	var token := []
+	for c in mie:
+		if str(c["kind"]) == "mercato": edifici.append(str(c["id"]))
+		if str(c["kind"]) == "token": token.append(str(c["id"]))
+	_eq("davanti al giocatore solo la carta restituita", edifici, ["ed_capanne"])
+	_eq("  e il token riscattato", token, [upg])
+	var misura_giusta := false
+	for c in BoardLayout3D.player_cards(gs, 0):
+		if int(c.get("player", -1)) == 0 and str(c["kind"]) == "mercato":
+			var a: AABB = c["aabb"]
+			var m := BoardLayout3D.misura_edificio("ed_capanne")
+			misura_giusta = absf(a.size.x - m.x) < 0.01 and absf(a.size.z - m.y) < 0.01
+	_ok("  a grandezza vera", misura_giusta)
+	var fila_ok := true
+	for c in BoardLayout3D.side_cards(gs):
+		if str(c["kind"]) == "potenziamento" and not c.has("player"):
+			var a: AABB = c["aabb"]
+			if absf(a.size.x - BoardLayout3D.TOKEN) > 0.01: fila_ok = false
+	_ok("la fila dei potenziamenti e' fatta di token", fila_ok)
 	CardDB.load_db(CardDB.DB_PATH)
