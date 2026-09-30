@@ -14,6 +14,11 @@ extends Node
 var _prima_edifici := {}
 var _prima_giocatori := []
 var _muto := false
+# IL RAPPORTO (`--rapporto 1`, registro 125): oltre alle righe del torneo, una
+# riga JSON per partita su stderr ("J {...}") con tutto quello che serve al
+# resoconto: edifici e che fine fanno, potenziamenti, personaggi, eventi,
+# entrate e uscite di risorse per fonte, punti per canale.
+var _rapporto := false
 var _perche := false
 var _piano := false
 var _tutti := ""
@@ -182,6 +187,29 @@ func _ready() -> void:
 			var kv := pezzo.split("=")
 			if kv.size() == 2: StrategyBot.spinte_override[kv[0].strip_edges()] = float(kv[1])
 		print("# spinte = %s" % str(StrategyBot.spinte_override))
+	# IL LAMPO NELLE TESSERE DELL'ERA (`--tessere_lampo 0`, registro 125): a 0
+	# le tessere che danno Lampo (Radura, Eremo, Belvedere, Isolato, Quartiere
+	# alto) non lo danno piu'. Per misurare quanto pesano sulla strategia Lampo.
+	if args.has("tessere_lampo") and str(args["tessere_lampo"]) == "0":
+		var tolte := 0
+		for id in CardDB.tessere_era:
+			var e: Dictionary = CardDB.tessere_era[id]["effetto"]
+			for k in ["lampo", "lampo_per_altrui"]:
+				if e.has(k):
+					e[k] = 0
+					tolte += 1
+		print("# tessere_lampo = 0 (%d effetti azzerati)" % tolte)
+	# IL TETTO AL LAMPO DELLE CARTE (`--lampo_tetto N`, registro 125): nessun
+	# edificio da' piu' di N Lampo.
+	if args.has("lampo_tetto"):
+		var tetto := int(args["lampo_tetto"])
+		var abbassati := 0
+		for id in CardDB.buildings:
+			var bd: Dictionary = CardDB.buildings[id]
+			if int(bd.get("lampo", 0)) > tetto:
+				bd["lampo"] = tetto
+				abbassati += 1
+		print("# lampo_tetto = %d (%d edifici abbassati)" % [tetto, abbassati])
 	# LE TESSERE UNA VOLTA PER ERA (`--tessere 0/1`, `tessere_una_volta_per_era`,
 	# registro 100): a 0 le regole delle tessere tornano permanenti come nella v1.5.
 	if args.has("tessere"):
@@ -241,6 +269,50 @@ func _ready() -> void:
 			ev["force"] = maxi(1, int(ev["force"]) + delta)
 		print("# forza degli eventi scontata di %d" % delta)
 
+	# LA FORZA PER ERA (`--forza_era 4=4,3=4`, registro 126): la forza degli
+	# eventi di un'era scelta, per provare un'era 4 meno distruttiva.
+	if args.has("forza_era"):
+		for pezzo in str(args["forza_era"]).split(","):
+			var kv := pezzo.split("=")
+			if kv.size() != 2: continue
+			for id in CardDB.events:
+				var ev: Dictionary = CardDB.events[id]
+				if ev.has("force") and int(ev.get("era", 0)) == int(kv[0]):
+					ev["force"] = int(kv[1])
+		print("# forza per era = %s" % str(args["forza_era"]))
+	# IL TETTO TOTALE (`--tetto_totale N`, registro 126): quante risorse in
+	# tutto si tengono a fine era; il tetto per risorsa e' `--tetto`.
+	if args.has("tetto_totale"):
+		CardDB.constants["resource_cap"] = int(args["tetto_totale"])
+		print("# resource_cap = %d" % int(args["tetto_totale"]))
+
+	# LA BASE DEI TERRENI (`--base collina=idee`, registro 126): cambia la
+	# risorsa che un terreno produce di base (sempre 1).
+	if args.has("base"):
+		for pezzo in str(args["base"]).split(","):
+			var kv := pezzo.split("=")
+			if kv.size() == 2 and CardDB.terrains.has(kv[0]):
+				var pb := {"pietra": 0, "oro": 0, "idee": 0}
+				pb[kv[1]] = 1
+				CardDB.terrains[kv[0]]["produzione_base"] = pb
+		print("# base = %s" % str(args["base"]))
+	# L'AVANZO IN IDEE (`--avanzo_idee 1`, registro 126): a fine era ogni 2
+	# risorse sopra il tetto diventano 1 Idea invece di buttarsi.
+	if args.has("avanzo_idee"):
+		CardDB.constants["avanzo_idee"] = str(args["avanzo_idee"]) != "0"
+		print("# avanzo_idee = %s" % str(CardDB.constants["avanzo_idee"]))
+
+	# I POTENZIAMENTI (`--potenzia_adiacente 0/1`, `--fila_resta 0/1`,
+	# registro 126): potenziare anche nella colonna adiacente, e la fila dei
+	# potenziamenti che resta un'era in piu'.
+	if args.has("potenzia_adiacente"):
+		CardDB.constants["potenzia_adiacente"] = str(args["potenzia_adiacente"]) != "0"
+		print("# potenzia_adiacente = %s" % str(CardDB.constants["potenzia_adiacente"]))
+	if args.has("fila_resta"):
+		CardDB.constants["fila_potenziamenti_resta"] = str(args["fila_resta"]) != "0"
+		print("# fila_potenziamenti_resta = %s" % str(CardDB.constants["fila_potenziamenti_resta"]))
+
+	_rapporto = args.has("rapporto") and str(args["rapporto"]) != "0"
 	if args.has("games"):
 		_lotto(seme, players, int(args["games"]))
 		return
@@ -306,9 +378,18 @@ func _lotto(seme: int, players: int, quante: int) -> void:
 		var ctl := GameController.new()
 		ctl.new_game(players, seme + g)
 		var guard := 0
+		var traccia := {"rovina": {}, "sepolto": {}, "upg": {}, "pers": {}, "eventi": {}, "rovine_era": {}}
 		while ctl.gs.phase != Enums.Phase.FINE_PARTITA and guard < 10000:
+			# L'era si prende PRIMA della mossa, come nella vita degli edifici:
+			# l'evento di fine era scatta dentro l'ultima mossa dell'era, e
+			# dopo la mossa il contatore e' gia' avanzato.
+			var era_prima: int = ctl.gs.era
+			if _rapporto: _osserva(ctl.gs, traccia, era_prima)
 			_muovi(ctl, g)
+			if _rapporto: _osserva(ctl.gs, traccia, era_prima)
 			guard += 1
+		if _rapporto:
+			printerr("J " + JSON.stringify(_riga_rapporto(ctl.gs, g, traccia)))
 		for id in ctl.gs.tessere_scattate:
 			scattate[id] = int(scattate.get(id, 0)) + int(ctl.gs.tessere_scattate[id])
 		for b in ctl.gs.grid.buildings:
@@ -350,6 +431,53 @@ func _lotto(seme: int, players: int, quante: int) -> void:
 		fid.sort()
 		print("# forme_costruite = " + ", ".join(fid.map(func(i): return "%s:%d" % [i, forme[i]])))
 	get_tree().quit(0)
+
+# ---- il rapporto delle partite (registro 125) -----------------------
+# Si guarda la partita dopo ogni mossa: quando un edificio cade in rovina o
+# finisce sepolto, quali potenziamenti ha portato (in rovina li perde, quindi
+# a fine partita non si vedrebbero), quali personaggi ha avuto ciascuno e che
+# evento c'era in ogni era.
+func _osserva(gs: GameState, t: Dictionary, era: int) -> void:
+	if not t["eventi"].has(str(era)): t["eventi"][str(era)] = str(gs.current_event.get("id", ""))
+	for b in gs.grid.buildings:
+		if b.state == Enums.BuildingState.ROVINA and not t["rovina"].has(b.uid):
+			t["rovina"][b.uid] = era
+			var k := str(era)
+			t["rovine_era"][k] = int(t["rovine_era"].get(k, 0)) + 1
+		if b.is_buried and not t["sepolto"].has(b.uid):
+			t["sepolto"][b.uid] = era
+		if not b.upgrades.is_empty():
+			var visti: Dictionary = t["upg"].get(b.uid, {})
+			for u in b.upgrades: visti[str(u)] = true
+			t["upg"][b.uid] = visti
+	for p in gs.players:
+		var visti2: Dictionary = t["pers"].get(p.index, {})
+		for c in p.specialized_characters: visti2[str(c)] = gs.era
+		t["pers"][p.index] = visti2
+
+func _riga_rapporto(gs: GameState, g: int, t: Dictionary) -> Dictionary:
+	var giocatori := []
+	for riga in Riepilogo.righe(gs):
+		var i := int(riga["player"])
+		var p: PlayerState = gs.players[i]
+		giocatori.append({"i": i, "strategia": strategia_di(i, g), "vp": p.vp, "posto": int(riga["posto"]),
+			"canali": p.vp_breakdown.duplicate(), "cnt": p.counters.duplicate(),
+			"pers": t["pers"].get(i, {}), "eredita": p.legacy_id,
+			"monumenti": p.monuments_claimed.duplicate(), "lavoratori": p.workers,
+			"dinastia": p.has_dynasty, "finali": [p.pietra, p.oro, p.idee]})
+	var edifici := []
+	for b in gs.grid.buildings:
+		var stato := "intatto"
+		if b.is_buried: stato = "sepolto"
+		elif b.state == Enums.BuildingState.ROVINA: stato = "rovina"
+		edifici.append({"id": str(b.data["id"]), "own": b.owner, "era": b.era_built, "lv": b.level,
+			"col": b.col_from, "stato": stato, "rovina": int(t["rovina"].get(b.uid, 0)),
+			"sepolto": int(t["sepolto"].get(b.uid, 0)), "vp": b.vp_reso.duplicate(),
+			"upg": (t["upg"].get(b.uid, {}) as Dictionary).keys(), "spianato": b.was_razed,
+			"sepolto_da": b.buried_by, "scheletro": b.buried_character != ""})
+	return {"seme": g, "n": gs.n_players, "giocatori": giocatori, "edifici": edifici,
+		"eventi": t["eventi"], "rovine_era": t["rovine_era"], "tessere": gs.tessere_scattate.duplicate(),
+		"terreni": gs.grid.terrains.map(func(x): return Enums.terrain_to_string(x))}
 
 # LA VITA DEGLI EDIFICI. Tante partite, e per ogni CARTA quanto e' durata:
 # quante ere resta intatta, quante resta in piedi, quante volte finisce

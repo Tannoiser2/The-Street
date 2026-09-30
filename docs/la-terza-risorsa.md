@@ -1220,6 +1220,119 @@ Stamperia).
 Rendita scende al 36 % (bordo 44); a quattro Continuità e Bilanciata scendono al 15 e 18 %
 (bordo 19). È lo stesso squilibrio della ventesima misura, non viene dai potenziamenti.
 
+## Ventiduesima misura: il Lampo al massimo 2
+
+Dopo le caselle la strategia Lampo vinceva il 66/48/46 % a 2/3/4 giocatori (ventesima e
+ventunesima misura). Il designer: "prova le tre strade e applica quella migliore o la
+combinazione migliore" (registro 125). Prima uno screening a 300 partite per tavolo (torneo
+`--giro tutte`, seme 700000), poi la scelta a 750.
+
+| vince la Lampo (a 2 / 3 / 4) | PV a testa a 3 |
+|---|--:|
+| oggi: 67 / 44 / 48 % | 95,4 |
+| bot ritarato (`--spinta lampo=2.6`): 46 / 38 / 36 % | 95,4 |
+| niente Lampo dalle tessere dell'era (`--tessere_lampo 0`): 67 / 41 / 48 % | 94,4 |
+| Lampo delle carte al massimo 3 (`--lampo_tetto 3`): 68 / 49 / 46 % | 92,2 |
+| Lampo delle carte al massimo 2 (`--lampo_tetto 2`): 56 / 45 / 39 % | 86,8 |
+| **tetto 2 e bot ritarato**: 48 / 30 / 32 % | 87,2 |
+
+Le tessere e il tetto a 3 non cambiano niente. Il tetto a 2 è l'unica correzione del gioco che
+morde, ma da sola non basta; con il bot ritarato a 3 giocatori tutte e sei le strategie stanno
+fra il 30 e il 38 %. Applicato: nessun edificio dà più di 2 Lampo (16 carte, da ristampare
+comunque per le icone), spinta del bot Lampo 2,6 a 2 e 3 giocatori e 3,2 a 4.
+
+Controllo a 750 partite:
+
+| vince (a 2 / 3 / 4) | prima | **dopo** |
+|---|--:|--:|
+| Lampo | 66 / 48 / 46 | **49 / 30 / 25** |
+| Rendita | 36 / 31 / 27 | 40 / 35 / 29 |
+| Continuità | 43 / 28 / 15 | 52 / 35 / 19 |
+| Bilanciata | 52 / 33 / 18 | 50 / 33 / 24 |
+| Obiettivi | 52 / 32 / 24 | 54 / 34 / 31 |
+| Scavo | 52 / 30 / 20 | 55 / 32 / 22 |
+| PV a testa | 93,3 / 95,1 / 89,1 | 86,2 / 87,2 / 82,6 |
+| kingmaker | 8 / 14 / 15 % | 9 / 15 / 17 % |
+
+A tre giocatori tutte nell'errore. A due la Rendita resta sotto (40 %, bordo 44), a quattro la
+Continuità sotto (19 %, bordo 21) e la Obiettivi sopra (31 %, bordo 29): di poco, e sono
+aggiustamenti del bot. I punti scendono di 6-8 a testa: è il Lampo tolto alle 16 carte.
+
+## Ventitreesima misura: l'era 4, le risorse e le carte morte
+
+Il rapporto delle partite (registro 125) ha trovato tre problemi; il designer: "rivediamo gli
+eventi dell'era 4 [...] per il tetto delle risorse sì, è il problema più serio [...] e poi le
+carte morte bisogna sistemarle" (registro 126). Screening a 200-300 partite per tavolo col
+rapporto acceso, poi la scelta a 750.
+
+**Gli eventi dell'era 4.** Un edificio crolla se la forza supera la sua resistenza di 2; la
+forza sale di 1 a ogni era (2, 3, 4, 5), la resistenza media degli edifici resta fra 2,5 e 2,9.
+A forza 5 crollava l'87 % degli edifici dell'era 4 nell'evento della loro era.
+
+| forza degli eventi | crollano gli edifici dell'era 3 / dell'era 4 |
+|---|--:|
+| 4 e 5 (prima) | 45-56 % / 87 % |
+| 4 e 4 | 45-56 % / 66-74 % |
+| 3 e 4 | 14-22 % / 66-75 % |
+| 3 e 3 | 13-14 % / 17-20 % |
+| **4 e 3 (scelta)** | 42-51 % / 16-17 % |
+
+**Il tetto delle risorse.** Si buttavano a fine era 11-12 Costruzione e 6-9 Denaro a testa; le
+Idee mai. Alzare il tetto (4 e 8, 5 e 10) toglieva poco (8-10 buttate), perché la Costruzione
+entra più di quanto si spende; la Collina a Idee spostava produzione senza fermare lo spreco.
+**L'avanzo in Idee** (ogni 2 risorse oltre il tetto diventano 1 Idea) le dimezza: 7 buttate,
+4 Idee in più a testa.
+
+**Le carte morte.** Correzioni approvate dal designer, più un secondo ritocco su quelle che
+restavano ferme. Le case piccole delle ere 1-3 erano identiche alle case dello Scavo con meno
+Scavo. Per i potenziamenti dell'era 1 la prima prova (potenziare anche nella colonna adiacente)
+faceva salire gli Scheletri da 8 a 22 PV a testa e affondava la Rendita (36/21/14 %): scartata;
+la scelta è la fila dei potenziamenti che resta un'era.
+
+Controllo a 750 partite (a quattro, due metà di 375 semi):
+
+| a 2 / 3 / 4 giocatori | prima (ventiduesima) | **dopo** |
+|---|--:|--:|
+| vince Obiettivi | 54 / 34 / 31 | 59 / 38 / 32 |
+| vince Continuità | 52 / 35 / 17 | 46 / 36 / 24 |
+| vince Scavo | 55 / 32 / 21 | 53 / 36 / 21 |
+| vince Bilanciata | 50 / 33 / 26 | 54 / 33 / 23 |
+| vince Rendita | 40 / 35 / 29 | 50 / 27 / 25 |
+| vince Lampo | 49 / 30 / 26 | 38 / 30 / 25 |
+| PV a testa | 86,1 / 87,2 / 82,6 | 87,5 / 85,3 / 81,6 |
+| edifici costruiti a testa | 15,7 / 15,8 / 14,6 | 17,0 / 16,6 / 15,7 |
+| Costruzione / Denaro buttati | 12,5 / 6,0 · 10,9 / 9,3 · 11,4 / 8,4 | 8,0 / 7,0 · 7,0 / 9,3 · 6,9 / 8,4 |
+| Scavo / Lampo (PV a testa) | 20,6 / 21,2 · 21,4 / 21,3 · 21,0 / 19,9 | 14,5 / 23,2 · 14,3 / 22,7 · 14,3 / 21,8 |
+| kingmaker (cambia vincitore) | 9 / 15 / 17 % | **6 / 6 / 10 %** |
+
+Fuori di poco: a due Obiettivi (59, bordo 56) e Lampo (38, bordo 44); a tre Rendita (27, bordo
+28); a quattro Obiettivi (32, bordo 29). Aggiustamenti da bot. Restano ferme Capanne di fango e
+Case a schiera, i tre potenziamenti Struttura dell'era 1 e il Cemento armato; il Restauratore
+riesce una volta su cinque. Resoconto completo nell'artifact del rapporto delle partite.
+
+## Ventiquattresima misura: i bot ritarati
+
+Dopo la ventitreesima misura restavano piccoli scarti fra le strategie; il designer: "ritara i
+bot" (registro 127). Screening a 300 partite per tavolo: il peso della Obiettivi va abbassato
+per indebolirla (0,6 a quattro la porta da 32 a 29 %), il Lampo a due va abbassato (2,0 la
+riporta da 38 a 51 %). Scelti: a due Lampo 2,0 e Obiettivi 0,6; a tre Obiettivi 0,7; a
+quattro Lampo 2,8 e Obiettivi 0,6. Controllo a 750 partite (a quattro, due metà di 375 semi):
+
+| vince (a 2 / 3 / 4) | prima | **dopo** |
+|---|--:|--:|
+| Lampo | 38 / 30 / 25 | 54 / 31 / 30 |
+| Rendita | 50 / 27 / 25 | 46 / 27 / 28 |
+| Continuità | 46 / 36 / 24 | 44 / 36 / 24 |
+| Bilanciata | 54 / 33 / 23 | 52 / 33 / 21 |
+| Obiettivi | 59 / 38 / 32 | 54 / 36 / 27 |
+| Scavo | 53 / 36 / 21 | 51 / 38 / 20 |
+| scarto massimo | 21 / 11 / 11 | 10 / 10 / 9 |
+| kingmaker | 6 / 6 / 10 % | 5 / 5 / 9 % |
+
+A due tutte nell'errore; a tre la Rendita (27, bordo 28) e a quattro Lampo (30, bordo 29) e
+Scavo (20, bordo 21) stanno a un punto dal bordo, dentro il rumore della misura. Le regole non
+cambiano: sono pesi del bot.
+
 ## Come rifare il conto
 
 ```bash

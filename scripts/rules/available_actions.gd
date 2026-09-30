@@ -74,6 +74,17 @@ static func costruzioni(gs: GameState, player: int, col: int) -> Array[Voce]:
 				{"card_id": card_id, "col_from": col, "above": false}))
 	return out
 
+# Gli edifici che si possono potenziare attivando `col`: quelli della colonna,
+# e con `potenzia_adiacente` (registro 126) anche quelli delle colonne
+# adiacenti, come per costruire. Senza, nell'era 1 i potenziamenti non si
+# usavano mai: i propri edifici stanno sulle colonne gia' attivate.
+static func _da_potenziare(gs: GameState, col: int) -> Array:
+	if not bool(CardDB.constants.get("potenzia_adiacente", false)): return gs.grid.in_column(col)
+	var out := []
+	for b in gs.grid.buildings:
+		if b.col_from <= col + 1 and b.col_to > col - 1 and not b in out: out.append(b)
+	return out
+
 static func potenziamenti(gs: GameState, player: int, col: int) -> Array[Voce]:
 	var out: Array[Voce] = []
 	for upg_id in gs.upg_row:
@@ -81,7 +92,7 @@ static func potenziamenti(gs: GameState, player: int, col: int) -> Array[Voce]:
 		var migliore = null
 		var par := {}
 		var ripiego = null
-		for b in gs.grid.in_column(col):
+		for b in _da_potenziare(gs, col):
 			var q := ActionRules.quote_upgrade(gs, player, upg_id, b)
 			if q.legal:
 				if migliore == null or q.pietra + q.oro + q.idee < migliore.pietra + migliore.oro + migliore.idee:
@@ -196,7 +207,7 @@ static func bersagli_potenziamento(gs: GameState, player: int, col: int,
 	var out: Array[Voce] = []
 	if not CardDB.upgrades.has(upg_id): return out
 	var d: Dictionary = CardDB.upgrades[upg_id]
-	for b in gs.grid.in_column(col):
+	for b in _da_potenziare(gs, col):
 		var q := ActionRules.quote_upgrade(gs, player, upg_id, b)
 		if not q.legal: continue
 		out.append(_voce("potenzia", "Potenzia %s con %s" % [b.data["name"], d["name"]],

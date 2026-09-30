@@ -2128,3 +2128,64 @@ dato è stato importato da lì. Ma due confronti fra ciò che è stampato e
     per la stampa: `docs/carte-v2-da-stampare.md`
     (`tools/stampa_carte_v2.py`); prompt per rifare le carte:
     `docs/proposte/prompt-chatgpt-correzioni-carte-v2.md`.
+
+125. **La Lampo troppo forte, e il rapporto delle partite.** Il designer:
+    "prova le tre strade e applica quella migliore o la combinazione". Fra
+    bot ritarato, Lampo tolto alle tessere dell'era e tetto al Lampo delle
+    carte, le tessere e il tetto a 3 non servono; il tetto a 2 insieme al
+    bot ritarato riporta la Lampo nell'errore a tutti i tavoli (49/30/25 %,
+    ventiduesima misura). Applicato: `LAMPO_TETTO = 2` in
+    `tools/genera_cards_v2.py` (16 carte, nel prompt per ChatGPT) e spinta
+    Lampo 2,6/2,6/3,2 nel bot. Poi il rapporto completo delle partite
+    (`audit_partita --rapporto 1`, `tools/rapporto_partite.py`,
+    `tools/rapporto_html.py`): i contatori di entrate e uscite per fonte
+    non cambiano il gioco. Quel che il rapporto mostra e resta da decidere:
+    i dieci potenziamenti dell'era 1 non si usano mai (per potenziare serve
+    attivare la colonna dell'edificio, e nell'era 1 i propri edifici stanno
+    sulle colonne gia' attivate); gli edifici dell'era 4 crollano quasi
+    tutti all'evento della loro era; col tetto a tre per risorsa si buttano
+    10-12 Costruzione e 6-9 Denaro a testa per partita; i Monumenti si
+    prendono di rado; tre Eredita' (Condottiero, Antiquario, Restauratore)
+    quasi non riescono.
+
+126. **L'era 4, le risorse e le carte morte.** Decisioni del designer dopo il
+    rapporto delle partite: rivedere gli eventi dell'era 4 (nell'era 5 far
+    crollare non ha senso: resta senza evento), rivedere il tetto delle
+    risorse ("il problema piu' serio di bilanciamento") e sistemare le carte
+    morte ("le proposte sulle carte vanno bene, procedi"). Applicato nel file
+    v2 (`tools/genera_cards_v2.py`, `carte_vive` ed `eventi_e_avanzo`): i
+    sei eventi dell'era 4 a forza 3; a fine era ogni 2 risorse oltre il
+    tetto diventano 1 Idea (`avanzo_idee`); la fila dei potenziamenti resta
+    un'era (`fila_potenziamenti_resta`; `potenzia_adiacente` provato e
+    scartato); case piccole, Militari, Museo, Cemento armato, tre tessere
+    dell'era e tre Eredita' corretti (anche nel prompt per ChatGPT).
+    Misurato (ventitreesima misura): l'era 4 crolla nel 16-17 % invece
+    dell'87 %, si buttano 7 Costruzione invece di 11-12, il kingmaker scende
+    a 6/6/10 %. Aperto: piccoli scarti fra le strategie (ritaratura dei bot),
+    i tre 2x2 che non crollano mai, il Denaro che avanza ancora, cinque carte
+    ancora ferme.
+
+127. **I bot ritarati.** Il designer: "ritara i bot". Pesi del bot per
+    tavolo (`SPINTE_V2_PER_GIOCATORI`): a due Lampo 2,0 e Obiettivi 0,6, a
+    tre Obiettivi 0,7, a quattro Lampo 2,8 e Obiettivi 0,6. Il peso della
+    Obiettivi va giu' per indebolirla, al contrario del Lampo. Misurato
+    (ventiquattresima misura): scarto massimo fra le strategie 10/10/9 punti,
+    tre strategie a un punto dal bordo. Le regole non cambiano.
+
+128. **I potenziamenti stampati.** Il designer ha caricato
+    `materiali/Potenziamenti_Completi_A4.pdf`, i 50 potenziamenti a icone.
+    `tools/estrai_grafica.py` (`estrai_potenziamenti_v2`) li ritaglia in
+    `assets/carte/potenziamenti_v2/` e li confronta coi dati: nomi, costi e
+    numeri degli effetti senza condizione coincidono tutti. Da decidere:
+    - **Classe diversa** su cinque carte: Cupola (stampata Religione, dati
+      Ingegneria), Giardino pensile (Cultura / Civico), Targa storica
+      (Cultura / Civico), Ascensore panoramico (Civico / Ingegneria),
+      Memoriale (Militare / Religione).
+    - **Il bonus di classe non e' stampato** su dodici carte: Idolo, Totem,
+      Mosaico, Reliquia, Stemma di famiglia, Terrazza panoramica, Pala
+      d'altare, Murale ("+1 PV in piu' se l'edificio e' ..."), Mura di cinta,
+      Torre di guardia, Cannoniere ("+1 Resistenza in piu' se Militare"),
+      Portico ("+1 Denaro in piu' se Commercio"). O si aggiunge
+      un'icona della classe sulla carta, o si tolgono dai dati.
+    - **Cemento armato** e' stampato con lo scudo "+2" (la versione di prima):
+      nei dati, dal registro 126, e' "Subito: +2 PV".

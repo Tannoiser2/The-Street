@@ -20,7 +20,7 @@ Come si leggono le colonne:
 |---|---|---|---|--:|---|--:|--:|--:|--:|---|---|
 | **Approdo** | Commercio | Fiume | 1×1 | 1 / 0 / 0 | 1 Costruzione | 1 | 2 | — | — | — | 1 |
 | **Capanne** | Civico | Pianura | 1×1 | 1 / 0 / 0 | 1 Costruzione | 1 | 2 | — | 1 | — | 1 |
-| **Capanne di fango** | Civico | Qualsiasi | 1×1 | 1 / 0 / 0 | — | 1 | 1 | — | 1 | — | 2 (RIS) |
+| **Capanne di fango** | Civico | Qualsiasi | 1×1 | 1 / 0 / 0 | — | 2 | 1 | — | 1 | — | 2 (RIS) |
 | **Case di pietra** | Civico | Qualsiasi | 1×1 | 2 / 0 / 0 | — | 2 | 1 | — | 2 | — | 2 (RIS) |
 | **Cava** | Commercio | Pianura | 1×1 | 1 / 0 / 0 | 2 Costruzione | 1 | 2 | — | — | — | 1 (Esaur. 4) |
 | **Circolo di pietre** | Religione | Qualsiasi | 1×2 | 2 / 0 / 1 | — | 4 | 5 | 1 | — | — | 1 |
@@ -32,7 +32,7 @@ Come si leggono le colonne:
 | **Ripari** | Civico | Qualsiasi | 1×1 | 1 / 0 / 0 | — | 1 | 2 | — | 1 | — | 2 (RIS) |
 | **Trappole da pesca** | Ingegneria | Fiume | 1×1 | 1 / 0 / 0 | 1 Costruzione | 1 | 0 | — | — | — | 1 |
 | **Tumulo funerario** | Religione / Cultura | Collina | 2×1 | 1 / 0 / 1 | — | 3 | 5 | — | 1 | — | 1 |
-| **Villaggio palizzato** | Militare | Pianura | 1×2 | 2 / 0 / 0 | — | 2 | 2 | — | 1 | Negli eventi, i tuoi edifici adiacenti hanno +1 Resistenza. | 1 |
+| **Villaggio palizzato** | Militare | Pianura | 1×2 | 1 / 0 / 0 | — | 2 | 3 | — | 2 | Negli eventi, i tuoi edifici adiacenti hanno +1 Resistenza. | 1 |
 
 ### Potenziamenti
 
@@ -57,8 +57,8 @@ Come si leggono le colonne:
 |---|---|---|---|--:|---|--:|--:|--:|--:|---|---|
 | **Acquedotto** | Ingegneria | Fiume | 3×1 | 2 / 0 / 1 | — | 4 | 3 | 1 | — | A fine partita, se è in piedi: +2 PV. | 1 |
 | **Anfiteatro** | Cultura | Qualsiasi | 2×2 | 4 / 0 / 1 | 1 Denaro | 5 | 6 | 2 | — | Solo sopra: mai a terra. Sopra di lui si costruisce solo quando è in rovina. | 1 |
-| **Case a schiera** | Civico | Qualsiasi | 1×1 | 1 / 0 / 0 | — | 2 | 1 | — | 1 | — | 2 (RIS) |
-| **Castrum** | Militare | Pianura | 1×2 | 3 / 0 / 0 | — | 4 | 3 | — | 1 | Negli eventi, i tuoi edifici nelle sue colonne hanno +1 Resistenza. | 1 |
+| **Case a schiera** | Civico | Qualsiasi | 1×1 | 1 / 0 / 0 | — | 3 | 1 | — | 1 | — | 2 (RIS) |
+| **Castrum** | Militare | Pianura | 1×2 | 2 / 0 / 0 | — | 4 | 3 | — | 2 | Negli eventi, i tuoi edifici nelle sue colonne hanno +1 Resistenza. | 1 |
 | **Domus** | Civico | Qualsiasi | 1×1 | 2 / 0 / 0 | — | 3 | 1 | — | 2 | — | 2 (RIS) |
 | **Emporio** | Commercio | Fiume | 1×1 | 2 / 0 / 0 | 1 Denaro | 2 | 2 | — | 2 | — | 1 |
 | **Foro** | Commercio / Civico | Pianura | 1×2 | 3 / 0 / 0 | 1 Denaro | 3 | 5 | 1 | — | — | 1 |
@@ -68,7 +68,7 @@ Come si leggono le colonne:
 | **Teatro** | Cultura | Qualsiasi | 1×1 | 1 / 0 / 1 | — | 3 | 5 | — | 2 | — | 1 |
 | **Tempio** | Religione | Collina | 1×1 | 2 / 0 / 1 | — | 3 | 3 | 1 | — | — | 1 |
 | **Terme** | Civico | Qualsiasi | 1×1 | 2 / 0 / 0 | — | 2 | 3 | — | 2 | — | 1 |
-| **Torre di vedetta** | Militare | Collina | 1×1 | 2 / 0 / 0 | — | 3 | 2 | — | 1 | Negli eventi, i tuoi edifici adiacenti hanno +1 Resistenza. | 1 |
+| **Torre di vedetta** | Militare | Collina | 1×1 | 1 / 0 / 0 | — | 3 | 2 | — | 2 | Negli eventi, i tuoi edifici adiacenti hanno +1 Resistenza. | 1 |
 | **Tuguri** | Civico | Qualsiasi | 1×1 | 1 / 0 / 0 | — | 2 | 2 | — | 1 | — | 2 (RIS) |
 
 ### Potenziamenti
@@ -94,19 +94,19 @@ Come si leggono le colonne:
 |---|---|---|---|--:|---|--:|--:|--:|--:|---|---|
 | **Abbazia** | Religione / Commercio | Bosco | 1×2 | 2 / 1 / 1 | — | 3 | 5 | 2 | — | — | 1 |
 | **Arsenale** | Militare | Fiume | 1×2 | 3 / 1 / 0 | — | 3 | 2 | — | 2 | Negli eventi, i tuoi edifici Militari adiacenti hanno +1 Resistenza. | 1 |
-| **Borgo** | Civico | Pianura | 1×1 | 2 / 0 / 0 | 1 Denaro | 2 | 2 | — | 3 | — | 1 |
+| **Borgo** | Civico | Pianura | 1×1 | 2 / 0 / 0 | 1 Denaro | 2 | 2 | — | 2 | — | 1 |
 | **Cappella** | Religione | Qualsiasi | 1×1 | 1 / 0 / 1 | — | 2 | 3 | — | 2 | — | 1 |
 | **Casa torre** | Civico | Qualsiasi | 1×1 | 1 / 1 / 0 | — | 3 | 1 | — | 2 | — | 2 (RIS) |
-| **Case di legno** | Civico | Qualsiasi | 1×1 | 1 / 0 / 0 | — | 2 | 1 | — | 1 | — | 2 (RIS) |
+| **Case di legno** | Civico | Qualsiasi | 1×1 | 0 / 1 / 0 | — | 2 | 1 | — | 1 | — | 2 (RIS) |
 | **Castello** | Militare | Collina | 2×2 | 2 / 1 / 0 | — | 4 | 3 | 2 | — | Solo sopra: mai a terra. Sopra di lui si costruisce solo quando è in rovina. | 1 |
 | **Casupole** | Civico | Qualsiasi | 1×1 | 1 / 0 / 0 | — | 2 | 2 | — | 1 | — | 2 (RIS) |
 | **Chiesa** | Religione / Cultura | Qualsiasi | 1×1 | 2 / 0 / 1 | — | 3 | 3 | 2 | — | — | 1 |
 | **Conceria** | Commercio | Fiume | 1×1 | 1 / 0 / 0 | 1 Denaro | 1 | 0 | — | 1 | — | 1 |
 | **Mercato** | Commercio | Fiume | 1×1 | 2 / 0 / 0 | 1 Costruzione, 1 Denaro | 2 | 2 | — | 1 | — | 1 |
 | **Mulino** | Ingegneria / Commercio | Pianura | 1×1 | 1 / 0 / 1 | 2 Denaro | 2 | 2 | — | 1 | — | 1 |
-| **Mura** | Militare | Qualsiasi | 1×1 | 2 / 0 / 0 | — | 4 | 2 | — | 1 | Negli eventi, tutti gli edifici adiacenti, anche altrui, hanno +1 Resistenza. | 1 |
+| **Mura** | Militare | Qualsiasi | 1×1 | 2 / 0 / 0 | — | 4 | 2 | — | 2 | Negli eventi, tutti gli edifici adiacenti, anche altrui, hanno +1 Resistenza. | 1 |
 | **Ospedale dei pellegrini** | Civico | Qualsiasi | 1×1 | 2 / 1 / 0 | — | 2 | 2 | — | 2 | Quando lo attivi: +1 Denaro. | 1 |
-| **Torre civica** | Civico | Qualsiasi | 1×1 | 2 / 0 / 0 | — | 3 | 2 | — | 3 | — | 1 |
+| **Torre civica** | Civico | Qualsiasi | 1×1 | 2 / 0 / 0 | — | 3 | 2 | — | 2 | — | 1 |
 
 ### Potenziamenti
 
@@ -130,20 +130,20 @@ Come si leggono le colonne:
 | nome | classi | luogo | forma | costo C/D/I | produzione | resistenza | Scavo | Rendita | Lampo | testo | copie |
 |---|---|---|---|--:|---|--:|--:|--:|--:|---|---|
 | **Accademia** | Cultura | Qualsiasi | 1×1 | 1 / 0 / 2 | — | 2 | 3 | — | 2 | — | 1 |
-| **Banco** | Commercio | Qualsiasi | 1×1 | 1 / 0 / 1 | 1 Denaro | 2 | 0 | — | 3 | — | 1 |
+| **Banco** | Commercio | Qualsiasi | 1×1 | 1 / 0 / 1 | 1 Denaro | 2 | 0 | — | 2 | — | 1 |
 | **Bottega d'artista** | Cultura | Qualsiasi | 1×1 | 1 / 0 / 1 | — | 2 | 2 | — | 2 | I tuoi potenziamenti costano 1 in meno, nella loro risorsa. | 1 |
 | **Casa borghese** | Civico | Qualsiasi | 1×1 | 0 / 0 / 1 | — | 2 | 1 | — | 2 | — | 2 (RIS) |
 | **Case popolari** | Civico | Qualsiasi | 1×1 | 0 / 0 / 1 | — | 2 | 2 | — | 2 | — | 2 (RIS) |
 | **Duomo** | Religione / Cultura | Qualsiasi | 1×2 | 3 / 1 / 2 | — | 4 | 5 | 2 | — | Solo sopra: al livello 2 o più. | 1 |
 | **Fortezza bastionata** | Militare / Ingegneria | Collina | 2×2 | 3 / 1 / 1 | — | 5 | 2 | 2 | — | Solo sopra: mai a terra. Sopra di lui si costruisce solo quando è in rovina. | 1 |
-| **Giardino all'italiana** | Cultura | Collina | 1×1 | 0 / 0 / 2 | — | 1 | 0 | — | 3 | — | 1 |
-| **Loggia** | Civico | Qualsiasi | 1×1 | 1 / 0 / 1 | — | 2 | 2 | — | 3 | — | 1 |
+| **Giardino all'italiana** | Cultura | Collina | 1×1 | 0 / 0 / 2 | — | 1 | 0 | — | 2 | — | 1 |
+| **Loggia** | Civico | Qualsiasi | 1×1 | 1 / 0 / 1 | — | 2 | 2 | — | 2 | — | 1 |
 | **Osservatorio** | Ingegneria | Collina | 1×1 | 1 / 1 / 1 | — | 2 | 2 | — | 2 | A fine partita, se è in piedi: +2 PV. | 1 |
 | **Palazzetto** | Civico | Qualsiasi | 1×1 | 0 / 1 / 1 | — | 3 | 1 | — | 2 | — | 2 (RIS) |
-| **Palazzo signorile** | Civico | Pianura | 1×1 | 2 / 1 / 1 | 1 Idea | 3 | 3 | — | 3 | — | 1 |
+| **Palazzo signorile** | Civico | Pianura | 1×1 | 2 / 1 / 1 | 1 Idea | 3 | 3 | — | 2 | — | 1 |
 | **Piazza monumentale** | Civico | Pianura | 1×2 | 2 / 1 / 1 | — | 3 | 3 | 2 | — | Solo sopra: al livello 1 o più. A fine partita: +1 PV per ogni tuo edificio in cima a una colonna adiacente. | 1 |
 | **Ponte monumentale** | Ingegneria | Fiume | 2×1 | 2 / 1 / 1 | — | 4 | 3 | 2 | — | — | 1 |
-| **Villa** | Civico | Collina | 1×1 | 2 / 1 / 1 | — | 3 | 3 | — | 4 | — | 1 |
+| **Villa** | Civico | Collina | 1×1 | 2 / 1 / 1 | — | 3 | 3 | — | 2 | — | 1 |
 
 ### Potenziamenti
 
@@ -166,20 +166,20 @@ Come si leggono le colonne:
 
 | nome | classi | luogo | forma | costo C/D/I | produzione | resistenza | Scavo | Rendita | Lampo | testo | copie |
 |---|---|---|---|--:|---|--:|--:|--:|--:|---|---|
-| **Biblioteca** | Cultura | Qualsiasi | 1×1 | 1 / 1 / 2 | — | 3 | 0 | — | 4 | A fine partita: +1 PV per ogni classe diversa fra i tuoi edifici nelle sue colonne, sotterrati compresi. | 1 |
+| **Biblioteca** | Cultura | Qualsiasi | 1×1 | 1 / 1 / 2 | — | 3 | 0 | — | 2 | A fine partita: +1 PV per ogni classe diversa fra i tuoi edifici nelle sue colonne, sotterrati compresi. | 1 |
 | **Caffè letterario** | Cultura | Qualsiasi | 1×1 | 0 / 0 / 2 | — | 1 | 0 | — | 2 | A fine partita: +1 PV se è adiacente a un edificio Cultura. | 1 |
-| **Condominio** | Civico | Qualsiasi | 1×1 | 1 / 0 / 1 | — | 2 | 0 | — | 3 | — | 1 |
+| **Condominio** | Civico | Qualsiasi | 1×1 | 1 / 0 / 1 | — | 2 | 0 | — | 2 | — | 1 |
 | **Condominio popolare** | Civico | Qualsiasi | 1×1 | 0 / 1 / 1 | — | 4 | 1 | — | 2 | — | 2 (RIS) |
-| **Fondazione d'arte** | Cultura | Qualsiasi | 1×1 | 1 / 0 / 2 | — | 2 | 0 | — | 3 | A fine partita: +1 PV per ogni tuo potenziamento. | 1 |
-| **Grattacielo** | Commercio | Pianura | 1×3 | 2 / 3 / 1 | — | 3 | 0 | — | 4 | Solo sopra: al livello 2 o più, mai a terra. A fine partita: +1 PV per ogni livello a cui è costruito; ogni edificio altrui in cima a una colonna adiacente toglie 1 PV al suo proprietario. | 1 |
+| **Fondazione d'arte** | Cultura | Qualsiasi | 1×1 | 1 / 0 / 2 | — | 2 | 0 | — | 2 | A fine partita: +1 PV per ogni tuo potenziamento. | 1 |
+| **Grattacielo** | Commercio | Pianura | 1×3 | 2 / 3 / 1 | — | 3 | 0 | — | 2 | Solo sopra: al livello 2 o più, mai a terra. A fine partita: +1 PV per ogni livello a cui è costruito; ogni edificio altrui in cima a una colonna adiacente toglie 1 PV al suo proprietario. | 1 |
 | **Monumento ai caduti** | Militare / Religione | Qualsiasi | 1×1 | 1 / 1 / 1 | — | 3 | 0 | — | 2 | A fine partita: +1 PV per ogni altro tuo edificio Militare, in piedi o sotterrato. | 1 |
-| **Museo** | Cultura | Qualsiasi | 1×1 | 1 / 1 / 2 | — | 3 | 0 | — | 4 | Solo sopra: al livello 1 o più. A fine partita: +2 PV per ogni edificio sotterrato sotto di lui. | 1 |
-| **Officina** | Ingegneria | Qualsiasi | 1×1 | 1 / 0 / 1 | 2 Denaro | 2 | 0 | — | 3 | — | 1 |
+| **Museo** | Cultura | Qualsiasi | 1×1 | 1 / 1 / 1 | — | 3 | 0 | — | 2 | Solo sopra: al livello 1 o più. A fine partita: +2 PV per ogni edificio sotterrato sotto di lui. | 1 |
+| **Officina** | Ingegneria | Qualsiasi | 1×1 | 1 / 0 / 1 | 2 Denaro | 2 | 0 | — | 2 | — | 1 |
 | **Palazzina** | Civico | Qualsiasi | 1×1 | 0 / 0 / 1 | — | 3 | 1 | — | 2 | — | 2 (RIS) |
 | **Parco archeologico** | Cultura | Qualsiasi | 1×2 | 1 / 0 / 2 | — | 2 | 0 | — | 2 | A fine partita: fino a 2 tuoi edifici non sotterrati nelle colonne adiacenti valgono il loro Scavo come se fossero sotterrati. | 1 |
-| **Ponte in acciaio** | Ingegneria | Fiume | 2×1 | 1 / 2 / 1 | — | 4 | 0 | — | 4 | — | 1 |
-| **Stazione** | Commercio / Ingegneria | Pianura | 3×1 | 2 / 3 / 1 | 2 Denaro | 4 | 0 | — | 4 | Solo sopra: al livello 1 o più. | 1 |
-| **Università** | Cultura / Civico | Qualsiasi | 1×2 | 2 / 1 / 2 | — | 3 | 0 | — | 4 | Solo sopra: al livello 1 o più. A fine partita: +1 PV per ogni tuo Personaggio. | 1 |
+| **Ponte in acciaio** | Ingegneria | Fiume | 2×1 | 1 / 2 / 1 | — | 4 | 0 | — | 2 | — | 1 |
+| **Stazione** | Commercio / Ingegneria | Pianura | 3×1 | 2 / 3 / 1 | 2 Denaro | 4 | 0 | — | 2 | Solo sopra: al livello 1 o più. | 1 |
+| **Università** | Cultura / Civico | Qualsiasi | 1×2 | 2 / 1 / 2 | — | 3 | 0 | — | 2 | Solo sopra: al livello 1 o più. A fine partita: +1 PV per ogni tuo Personaggio. | 1 |
 
 ### Potenziamenti
 
@@ -188,7 +188,7 @@ Come si leggono le colonne:
 | **Archivio storico** | Altro | Cultura | 2 Denaro | L'edificio ha +3 Scavo. |
 | **Ascensore panoramico** | Altro | Ingegneria | 2 Denaro | Subito: +2 PV. |
 | **Boutique** | Altro | Commercio | 2 Denaro | Quando attivi l'edificio: +2 Denaro. |
-| **Cemento armato** | Struttura | Ingegneria | 2 Costruzione | L'edificio ha +2 Resistenza. |
+| **Cemento armato** | Struttura | Ingegneria | 2 Costruzione | Subito: +2 PV. |
 | **Installazione** | Arte | Cultura | 2 Idee | Subito: +3 PV. |
 | **Memoriale** | Altro | Religione | 2 Denaro | Subito: +2 PV. |
 | **Murale** | Arte | Cultura | 2 Idee | Subito: +2 PV, +3 PV se l'edificio è Cultura. |

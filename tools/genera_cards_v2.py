@@ -656,6 +656,98 @@ def testi_v2(v):
     senza = [u["id"] for u in v["upgrades"] if u["id"] not in TESTI_V2]
     assert not senza, senza
 
+# IL TETTO AL LAMPO (registro 125): nessun edificio da' piu' di 2 Lampo. Dopo
+# le caselle la strategia Lampo vinceva il 66/48/46 % a 2/3/4 giocatori;
+# fra le tre strade provate (bot, Lampo tolto alle tessere, tetto sulle carte)
+# la migliore e' il tetto a 2 insieme al bot ritarato. Le carte si ristampano
+# comunque per le icone nuove, quindi i 16 numeri cambiano senza costo.
+LAMPO_TETTO = 2
+
+def lampo_tetto(v):
+    for b in v["buildings"]:
+        b["lampo"] = min(int(b["lampo"]), LAMPO_TETTO)
+
+# LE CARTE MORTE (registro 126). Il rapporto delle partite (registro 125) ha
+# trovato carte che non si giocano mai; qui la correzione per ognuna, approvata
+# dal designer ("le proposte sulle carte vanno bene, procedi").
+def carte_vive(v):
+    per_id = {c["id"]: c for c in v["buildings"] + v["upgrades"]}
+    # Le case piccole erano identiche alle case dello Scavo della stessa era,
+    # con meno Scavo: nessuno le prendeva. Ora si pagano in Denaro, che
+    # avanza, invece che in Costruzione.
+    for bid in ("ed_casa_e1_p", "ed_casa_e2_p", "ed_casa_e3_p"):
+        per_id[bid]["cost"] = {"pietra": 0, "oro": 1, "idee": 0}
+    # Gli edifici Militari che proteggono costavano troppo per quello che danno.
+    per_id["ed_villaggio_palizzato"]["cost"] = {"pietra": 1, "oro": 0, "idee": 0}
+    per_id["ed_villaggio_palizzato"]["scavo"] = 3
+    per_id["ed_castrum"]["cost"] = {"pietra": 2, "oro": 0, "idee": 0}
+    per_id["ed_torre_di_vedetta"]["lampo"] = 2
+    per_id["ed_mura"]["lampo"] = 2
+    # Il Museo chiedeva 2 Idee, la risorsa che manca.
+    per_id["ed_museo"]["cost"] = {"pietra": 1, "oro": 1, "idee": 1}
+    # Secondo ritocco (misura a 200 partite): chi restava quasi morto.
+    # Nell'era 1 il Denaro non c'e': le Capanne di fango tornano in
+    # Costruzione, ma piu' solide dei Ripari (resistenza 2 contro 1, Scavo 1
+    # contro 2); cosi' le Case a schiera rispetto ai Tuguri.
+    per_id["ed_casa_e1_p"]["cost"] = {"pietra": 1, "oro": 0, "idee": 0}
+    per_id["ed_casa_e1_p"]["resistance"] = 2
+    per_id["ed_casa_e2_p"]["cost"] = {"pietra": 1, "oro": 0, "idee": 0}
+    per_id["ed_casa_e2_p"]["resistance"] = 3
+    per_id["ed_castrum"]["lampo"] = 2
+    per_id["ed_villaggio_palizzato"]["lampo"] = 2
+    per_id["ed_torre_di_vedetta"]["cost"] = {"pietra": 1, "oro": 0, "idee": 0}
+    # Il Cemento armato dava Resistenza nell'era 5, che non ha evento.
+    ca = per_id["po_cemento_armato"]
+    # (+2 Rendita non lo prendeva nessuno: ora PV subito, pagati nella
+    # Costruzione che avanza.)
+    ca["effects"] = [{"hook": "on_acquire", "op": "vp", "value": 2}]
+    ca["effect_text"] = "Subito: +2 PV."
+    # Le tessere dell'era che non scattavano.
+    per_t = {t["id"]: t for t in v["tessere_era"]}
+    r = per_t["te_raccoglitori"]
+    r["testo"] = "Chi attiva per primo può cambiare 1 Costruzione in 1 Idea."
+    r["effetto"] = {"quando": "attiva", "cambio": ["pietra", "idee"]}
+    r = per_t["te_restauratori"]
+    r["testo"] = "Il primo edificio costruito qui sopra un altro costa 1 Idea in meno."
+    r["effetto"] = {"quando": "costruisci", "se": {"sopra": True}, "sconto": {"idee": 1}}
+    r = per_t["te_giardino_all_italiana"]
+    r["testo"] = "Il primo edificio costruito qui ha +2 resistenza fino a fine era."
+    r["effetto"] = {"quando": "costruisci", "resistenza_era": 2}
+    # Le Eredita' quasi impossibili.
+    per_l = {l["id"]: l for l in (v["legacies"] if isinstance(v["legacies"], list) else v["legacies"].values())}
+    c = per_l["er_il_condottiero"]
+    c["condition"] = {"op": "count_matching", "target": {"owner": "self", "class": ["militare"]}, "min": 2}
+    c["condition_text"] = "2+ tuoi edifici Militari, in qualsiasi stato."
+    c = per_l["er_lantiquario"]
+    c["condition"]["target"]["scavo"] = {"min": 5}
+    c["condition_text"] = "un tuo edificio Sotterrato con Scavo 5 o più."
+    c = per_l["er_il_restauratore"]
+    c["condition"]["min"] = 1
+    c["condition_text"] = "hai ristrutturato una tua rovina."
+    # I potenziamenti dell'era 1 non si usavano mai (nell'era 1 i propri
+    # edifici stanno sulle colonne gia' attivate): la fila dei potenziamenti
+    # non si scarta a fine era e resta accanto alla nuova per un'era. La prima
+    # prova, potenziare anche nella colonna adiacente, faceva salire gli
+    # Scheletri da 8 a 22 PV a testa e affondava la Rendita.
+    v["constants"]["fila_potenziamenti_resta"] = True
+
+# GLI EVENTI DELL'ERA 4 E L'AVANZO IN IDEE (registro 126). Nell'era 4 la
+# forza 5 faceva crollare l'87 % degli edifici costruiti in quell'era: a
+# forza 3 ne crolla uno su cinque, e l'era 3 (forza 4) resta la piu' dura.
+# L'era 5 resta senza evento. Il tetto a fine era buttava meta' della
+# Costruzione: ora ogni 2 risorse sopra il tetto diventano 1 Idea, la
+# risorsa che manca, e solo il resto si butta.
+def eventi_e_avanzo(v):
+    v["constants"]["event_force_by_era"]["4"] = 3
+    evs = v["events"] if isinstance(v["events"], list) else list(v["events"].values())
+    for e in evs:
+        if int(e.get("era", 0)) == 4 and "force" in e:
+            e["force"] = 3
+            for k in ("effect_text", "text"):
+                if isinstance(e.get(k), str):
+                    e[k] = e[k].replace("Forza 5.", "Forza 3.")
+    v["constants"]["avanzo_idee"] = True
+
 import sys
 variante = sys.argv[sys.argv.index("--variante") + 1] if "--variante" in sys.argv else ""
 # Le case in riserva stanno nel file v2 di tutti (registro 116); le varianti di
@@ -665,6 +757,9 @@ tessere_era(v2)
 forme(v2)
 potenziamenti_nuovi(v2)
 testi_v2(v2)
+lampo_tetto(v2)
+carte_vive(v2)
+eventi_e_avanzo(v2)
 if variante:
     {"doppioni": doppioni, "abitazioni": abitazioni, "case": case,
      "case_doppioni": case_doppioni, "case_scavo": case_scavo, "case_nulle": case_nulle,

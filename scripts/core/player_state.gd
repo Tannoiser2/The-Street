@@ -87,18 +87,28 @@ func _init(i: int) -> void:
 func can_pay(p: int, o: int, i: int = 0) -> bool:
 	return pietra >= p and oro >= o and idee >= i
 
-func pay(p: int, o: int, i: int = 0) -> void:
+# `uso` e `fonte` dicono A COSA serve la spesa e DA DOVE viene l'entrata: sono
+# solo contatori (out_<uso>_<risorsa>, in_<fonte>_<risorsa>) per il rapporto
+# delle partite (registro 125). Il gioco non li legge.
+func pay(p: int, o: int, i: int = 0, uso := "altro") -> void:
 	assert(can_pay(p, o, i), "Pagamento non coperto")
 	pietra -= p
 	oro -= o
 	idee -= i
 	if i > 0: bump("idee_spese", i)
+	_conta("out_" + uso, p, o, i)
 
-func gain(p: int, o: int, i: int = 0) -> void:
+func gain(p: int, o: int, i: int = 0, fonte := "altro") -> void:
 	pietra += p
 	oro += o
 	idee += i
 	if i > 0: bump("idee_prodotte", i)
+	_conta("in_" + fonte, p, o, i)
+
+func _conta(chiave: String, p: int, o: int, i: int) -> void:
+	if p > 0: bump(chiave + "_pietra", p)
+	if o > 0: bump(chiave + "_oro", o)
+	if i > 0: bump(chiave + "_idee", i)
 
 func add_vp(channel: String, amount: int) -> void:
 	vp += amount

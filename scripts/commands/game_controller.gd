@@ -94,12 +94,21 @@ func _start_era(era: int) -> void:
 		for k in int(b.get("copie", 1)): gs.riserva.append(str(b["id"]))
 	# "quando un'era finisce, le file non usate si scartano": si riparte da zero.
 	gs.char_row.clear()
+	# LA FILA DEI POTENZIAMENTI RESTA (`fila_potenziamenti_resta`, registro
+	# 126): quelli dell'era appena finita non si scartano e restano accanto ai
+	# nuovi per un'era. Nell'era 1 i propri edifici stanno sulle colonne gia'
+	# attivate e i potenziamenti dell'era 1 non si usavano mai; cosi' si
+	# possono prendere nell'era 2.
+	var restano: Array = []
+	if bool(CardDB.constants.get("fila_potenziamenti_resta", false)):
+		restano = gs.upg_row.filter(func(u): return int(CardDB.upgrades[u]["era"]) == era - 1)
 	gs.upg_row.clear()
 	var side := int(CardDB.constants["side_rows"])
 	# Con il draft (v2) in fila ci sono TUTTI i Personaggi dell'era: si
 	# sceglie fra quelli, gli avanzi si scartano a fine era (D7).
 	_refill(gs.char_row, gs.char_decks[era], gs.char_decks[era].size() if draft_v2() else side)
 	_refill(gs.upg_row, gs.upg_decks[era], side)
+	gs.upg_row.append_array(restano)
 
 	if era <= 4:
 		var evs := CardDB.events_of_era(era)
@@ -384,7 +393,7 @@ func build(card_id: String, col_from: int, above: bool, pay_option: int = 0, des
 	var opts := BuildRules.flexible_options(data, q.pietra, q.oro)
 	var cost: Vector2i = opts[clamp(pay_option, 0, opts.size() - 1)]
 	if not p.can_pay(cost.x, cost.y, q.idee): return false
-	p.pay(cost.x, cost.y, q.idee)
+	p.pay(cost.x, cost.y, q.idee, "costruire")
 	if q.terrapieno_free_applied:
 		p.terrapieno_free_used = true
 	if q.terrapieno_pietra > 0:
@@ -500,11 +509,18 @@ func build(card_id: String, col_from: int, above: bool, pay_option: int = 0, des
 	return true
 
 # Potenziare: carta dalla fila, sotto un tuo edificio in piedi della colonna attivata.
+# Nella colonna attivata; con `potenzia_adiacente` (registro 126) anche in una
+# adiacente, come si costruisce.
+func _potenziabile_da(b: Building, col: int) -> bool:
+	if b.covers(col): return true
+	if not bool(CardDB.constants.get("potenzia_adiacente", false)): return false
+	return b.covers(col - 1) or b.covers(col + 1)
+
 func upgrade(upg_id: String, target: Building) -> bool:
 	if not gs.pending_choice.is_empty(): return false
 	if not _puo_agire(): return false
 	if target == null: return false
-	if not turno_v2() and not target.covers(gs.colonna_attivata): return false
+	if not turno_v2() and not _potenziabile_da(target, gs.colonna_attivata): return false
 	var p := gs.current_player()
 	var q := ActionRules.quote_upgrade(gs, p.index, upg_id, target)
 	if not q.legal:
@@ -531,7 +547,7 @@ func upgrade(upg_id: String, target: Building) -> bool:
 				target.patrons[p.index] = int(target.patrons.get(p.index, 0)) + rendita
 			gs.log_line("%s: giocatore %d firma %s e ne incassa %d oro a ogni attivazione" % [
 				artista[1]["name"], p.index, target.data["name"], rendita])
-	p.pay(q.pietra, q.oro, q.idee)
+	p.pay(q.pietra, q.oro, q.idee, "potenziare")
 	TessereEra.dopo_potenziamento(gs, target)
 	target.upgrades.append(upg_id)
 	# Gli effetti vengono dai dati della carta, con l'edificio ospite come
@@ -573,7 +589,7 @@ func restore(target: Building) -> bool:
 		return false
 	if not p.can_pay(q.pietra, q.oro, q.idee): return false
 	var bosco := ActionRules.tessera_bosco(gs, target)
-	p.pay(q.pietra, q.oro, q.idee)
+	p.pay(q.pietra, q.oro, q.idee, "ristrutturare")
 	if EraRules.tessere_una_volta(gs) and bosco >= 0 and int(target.data["cost"]["pietra"]) > 0:
 		EraRules.usa_tessera(gs, bosco, "-1 Costruzione alla ristrutturazione di %s" % target.data["name"])
 	TessereEra.dopo_ristrutturazione(gs, target)
@@ -609,7 +625,7 @@ func recruit(char_id: String, imprint_target: Building = null) -> bool:
 		gs.log_line("Reclutamento rifiutato: %s" % q.reason)
 		return false
 	if not p.can_pay(q.pietra, q.oro, q.idee): return false
-	p.pay(q.pietra, q.oro, q.idee)
+	p.pay(q.pietra, q.oro, q.idee, "reclutare")
 	p.specialized_characters.append(char_id)
 	p.recruited_total += 1
 	# Il lavoratore appena piazzato si specializza: l'edificio che abita e' il
@@ -649,7 +665,7 @@ func buy_dynasty() -> bool:
 		gs.log_line("Dinastia rifiutata: %s" % q.reason)
 		return false
 	if not p.can_pay(q.pietra, q.oro, q.idee): return false
-	p.pay(q.pietra, q.oro, q.idee)
+	p.pay(q.pietra, q.oro, q.idee, "dinastia")
 	p.has_dynasty = true
 	p.workers += 1          # "attivo da subito e per tutte le ere che restano"
 	gs.dynasties_left -= 1
@@ -698,9 +714,9 @@ func passa(scelta := "oro") -> bool:
 	var base := int(CardDB.constants.get("passa_incasso_pietra", 1))
 	var extra := int(CardDB.constants.get("passa_incasso_scelta", 1))
 	match scelta:
-		"oro": p.gain(base, extra)
-		"idee": p.gain(base, 0, extra)
-		_: p.gain(base + extra, 0)
+		"oro": p.gain(base, extra, 0, "passa")
+		"idee": p.gain(base, 0, extra, "passa")
+		_: p.gain(base + extra, 0, 0, "passa")
 	_spendi_lavoratore("passa")
 	gs.log_line("Giocatore %d passa e incassa %d pietra e %d %s" % [p.index, base, extra, scelta])
 	_end_turn()

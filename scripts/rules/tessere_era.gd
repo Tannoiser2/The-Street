@@ -134,8 +134,8 @@ static func applica_scelta(gs: GameState, player: int, col: int, indice: int) ->
 	var g: Dictionary = ops[indice]["g"]
 	if g.is_empty(): return
 	var p: PlayerState = gs.players[player]
-	p.pay(maxi(0, -int(g["pietra"])), maxi(0, -int(g["oro"])), maxi(0, -int(g["idee"])))
-	p.gain(maxi(0, int(g["pietra"])), maxi(0, int(g["oro"])), maxi(0, int(g["idee"])))
+	p.pay(maxi(0, -int(g["pietra"])), maxi(0, -int(g["oro"])), maxi(0, -int(g["idee"])), "tessera")
+	p.gain(maxi(0, int(g["pietra"])), maxi(0, int(g["oro"])), maxi(0, int(g["idee"])), "tessera")
 	gira(gs, col, "%s, scelto da giocatore %d" % [ops[indice]["testo"], player])
 
 static func all_attivazione(gs: GameState, player: int, col: int) -> void:
@@ -188,8 +188,8 @@ static func all_attivazione(gs: GameState, player: int, col: int) -> void:
 	if g["pietra"] == 0 and g["oro"] == 0 and g["idee"] == 0: return
 	# Si paga cio' che si cede prima di prendere, perche' `gain` non accetta
 	# negativi e il tetto per risorsa vale solo a fine era.
-	p.pay(maxi(0, -g["pietra"]), maxi(0, -g["oro"]), maxi(0, -g["idee"]))
-	p.gain(maxi(0, g["pietra"]), maxi(0, g["oro"]), maxi(0, g["idee"]))
+	p.pay(maxi(0, -g["pietra"]), maxi(0, -g["oro"]), maxi(0, -g["idee"]), "tessera")
+	p.gain(maxi(0, g["pietra"]), maxi(0, g["oro"]), maxi(0, g["idee"]), "tessera")
 	cosa = "%+d C %+d D %+d I a giocatore %d" % [g["pietra"], g["oro"], g["idee"], player]
 	gira(gs, col, cosa)
 
@@ -285,7 +285,7 @@ static func dopo_costruzione(gs: GameState, player: int, b: Building, bases: Arr
 			cosa.append("Scavo +%d" % int(e["scavo"]))
 		if e.has("guadagno"):
 			var gg: Dictionary = e["guadagno"]
-			p.gain(int(gg.get("pietra", 0)), int(gg.get("oro", 0)), int(gg.get("idee", 0)))
+			p.gain(int(gg.get("pietra", 0)), int(gg.get("oro", 0)), int(gg.get("idee", 0)), "tessera")
 			cosa.append("guadagno")
 		if bool(e.get("produce_subito", false)):
 			EraRules.paga_edificio(gs, b)
