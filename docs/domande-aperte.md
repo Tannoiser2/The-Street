@@ -2266,4 +2266,11 @@ dato è stato importato da lì. Ma due confronti fra ciò che è stampato e
     arte), 2 ×5 (quattro semplici, scheletro era 4 + arte), 3 ×4; media 1,4.
     Lo scheletro con l'era vale lo Scavo del Personaggio preso in
     quell'era (`TessereScavo.scavo_personaggio_di_era`).
+136. **I bot ritarati per le rovine a tessere.** Con le regole dei registri
+    130-135 la Lampo vinceva il 22 / 10 % a tre e quattro e la Rendita il
+    20 % a ogni tavolo. La Rendita del bot scartava le carte senza Rendita
+    (`rendita_zero`), l'80 % del mazzo: a zero torna in media. Il premio di
+    scavo del bot rafforzava la Scavo: a zero a tre e quattro. La Lampo con
+    meno peso (1,4 a tre, 1,0 a quattro). Ventisettesima misura. Le regole
+    non cambiano: sono pesi del bot.
 

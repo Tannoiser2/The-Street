@@ -1395,6 +1395,52 @@ quasi tutto, quindi la metà delle coperte pesa poco. Il mazzetto da 20 è largo
 meno di 4. Non misurato: un giocatore umano che costruisce apposta sulle proprie rovine per
 scoprirle, cosa che i bot non fanno.
 
+## Ventisettesima misura: le rovine a tessere, i flussi e i bot ritarati
+
+Il pacchetto dei registri 130-136 nel file v2: la rovina lascia le tessere scavo del proprietario
+(mazzetto di 20, scheletri per era e arte) e la sua carta torna al proprietario; il premio di chi
+costruisce sopra conta 2 PV per tessera x livello; i potenziamenti sono token, uno per casella, e
+quelli arte riscattati si ritrovano con le icone; niente ristrutturare; le rovine non contano per
+le regole di mappa; la Continuita' e' una collezione a soglie (3/5/7/9 edifici della stessa classe:
+3/5/8/12 PV); il Lampo delle ere 4-5 scende a 1 e la Rendita 1 sale a 2.
+
+Prima misura con i bot di prima (circa 300 partite per tavolo): la Continuita' di colonna crollava
+da 16 a 3 PV (registro 131, da cui la collezione), la Lampo vinceva il 22 / 10 % a tre e quattro, la
+Rendita il 20 % a ogni tavolo. Ritaratura in tre giri da 300 partite: la Rendita scartava le carte
+senza Rendita (l'80 % del mazzo) e restava al 20 % qualunque peso avesse; senza quella penalita'
+torna in media. Il premio di scavo nel bot rafforzava la Scavo (34-39 % a quattro con peso 0,6):
+a zero la riporta al 26 %. La Lampo torna in media con meno peso. Conferma a 750 partite:
+
+| PV medi per giocatore (a 2 / 3 / 4) | |
+|---|--:|
+| Lampo | 13,5 / 14,5 / 15,2 |
+| Rendita | 24,3 / 20,2 / 16,9 |
+| Scavo (premio + tessere) | 13,2 / 15,4 / 16,0 |
+| Continuita' | 15,9 / 16,1 / 15,6 |
+| Scheletri | 9,0 / 8,7 / 8,7 |
+| Personaggi e potenziamenti (cultura) | 5,4 / 5,7 / 5,0 |
+| effetti finali | 5,1 / 4,9 / 4,9 |
+| Eredita' | 2,8 / 2,9 / 2,7 |
+| Monumenti | 1,4 / 1,9 / 2,4 |
+| di cui arte ritrovata | 0,5 / 0,5 / 0,4 |
+| totale | 90 / 90 / 87 |
+
+| vince (a 2 / 3 / 4) | |
+|---|--:|
+| Lampo | 52 / 27 / 18 |
+| Rendita | 51 / 32 / 27 |
+| Continuita' | 44 / 34 / 27 |
+| Bilanciata | 45 / 33 / 25 |
+| Obiettivi | 55 / 35 / 30 |
+| Scavo | 52 / 38 / 24 |
+| kingmaker | 3 / 6 / 7 % |
+
+I quattro flussi principali stanno fra 13 e 17 PV a tre e quattro giocatori; a due la Rendita
+arriva a 24, perche' crollano meno edifici e restano in piedi piu' a lungo (le regole non cambiano
+col numero di giocatori). A due tutte le strategie dentro l'errore; a tre e a quattro la Lampo sta
+appena sotto la banda e gli Obiettivi appena sopra a quattro. Il kingmaker scende (era 4 / 7 / 11 %).
+Un giocatore riscatta in media 0,5-0,7 token arte e pesca 3,5-3,9 tessere (al massimo 12).
+
 ## Come rifare il conto
 
 ```bash
@@ -1480,4 +1526,7 @@ python3 tools/confronta_torneo.py tutte_p2.csv classe_p2.csv
 python3 tools/genera_cards_v2.py --variante tessere_scavo
 for p in 2 3; do godot --headless res://scenes/audit_partita.tscn -- --players $p --games 750 --seed 700000 --dati data/proposte/cards-v2-tessere_scavo.json --giro tutte --rapporto 1 > scavo_p$p.csv 2> scavo_p$p.err; done
 python3 tools/confronta_torneo.py classe_p3.csv scavo_p3.csv
+# ventisettesima misura: le rovine a tessere e i flussi stanno nel file v2, i pesi dei bot nella tabella per tavolo
+for p in 2 3; do godot --headless res://scenes/audit_partita.tscn -- --players $p --games 750 --seed 700000 --dati data/cards-v2.json --giro tutte --rapporto 1 > rovine_p$p.csv 2> rovine_p$p.err; done
+python3 tools/rapporto_partite.py rovine_p2.err rovine_p3.err > rapporto.json
 ```
