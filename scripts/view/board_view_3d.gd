@@ -501,6 +501,9 @@ func _basetta(b: Building) -> void:
 # dall'era moderna, mostrano il loro valore.
 func _tessere_scavo(b: Building) -> void:
 	var tinta: Color = COLORI_GIOCATORE[b.owner % COLORI_GIOCATORE.size()].darkened(0.5)
+	# Lo spianato: il terrapieno generico al posto della carta.
+	for t in BoardLayout3D.terrapieni_spianato_box(gs, b):
+		_carta_stesa(t, BoardLayout3D.terrapiano_path(), TERRAPIENO, false, Color.WHITE, false)
 	var scatole := BoardLayout3D.tessere_scavo_box(gs, b)
 	for i in scatole.size():
 		var t: AABB = scatole[i]

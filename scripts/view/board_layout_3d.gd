@@ -471,8 +471,19 @@ static func terrapiano_path() -> String:
 	return ROVINA_DIR + "terrapiano.png"
 
 static func tessere_scavo_box(gs: GameState, b: Building) -> Array[AABB]:
+	if not TessereScavo.fuori(b) or TessereScavo.quante(b) == 0: return []
+	return _caselle_della_carta(gs, b)
+
+# LO SPIANATO (registro 134): la carta torna al proprietario e non lascia
+# tessere scavo, ma chi ci ha costruito sopra poggia su qualcosa. Al suo
+# posto va il terrapieno, una tessera generica per casella. Senza, l'edificio
+# costruito sopra restava sospeso nel vuoto per un livello.
+static func terrapieni_spianato_box(gs: GameState, b: Building) -> Array[AABB]:
+	if not TessereScavo.fuori(b) or TessereScavo.quante(b) > 0: return []
+	return _caselle_della_carta(gs, b)
+
+static func _caselle_della_carta(gs: GameState, b: Building) -> Array[AABB]:
 	var out: Array[AABB] = []
-	if not TessereScavo.fuori(b) or TessereScavo.quante(b) == 0: return out
 	var box := basetta_box(gs, b)
 	var w := b.width()
 	var d := b.profondita()
