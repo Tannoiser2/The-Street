@@ -446,6 +446,26 @@ static func basetta_box(gs: GameState, b: Building) -> AABB:
 	return AABB(Vector3(c.x - span_w(b.width()) / 2.0, c.y, c.z - d / 2.0),
 		Vector3(span_w(b.width()), basetta_y(), d))
 
+# LE TESSERE SCAVO SULLA MAPPA (registri 130 e 131): con le carte restituite
+# la rovina non ha piu' la sua carta sul tavolo; nelle caselle che occupava
+# ci sono le tessere scavo coperte del proprietario, una per casella. Una
+# scatola per tessera, nel posto della carta, con un filo di margine perche'
+# si vedano separate. Lo spianato non lascia tessere.
+static func tessere_scavo_box(gs: GameState, b: Building) -> Array[AABB]:
+	var out: Array[AABB] = []
+	if not TessereScavo.fuori(b) or TessereScavo.quante(b) == 0: return out
+	var box := basetta_box(gs, b)
+	var w := b.width()
+	var d := b.profondita()
+	var cw := box.size.x / w
+	var cd := box.size.z / d
+	var margine := 0.06 * minf(cw, cd)
+	for i in w:
+		for j in d:
+			out.append(AABB(Vector3(box.position.x + i * cw + margine, box.position.y,
+				box.position.z + j * cd + margine), Vector3(cw - 2.0 * margine, box.size.y, cd - 2.0 * margine)))
+	return out
+
 static func tile_box(col: int, era: int) -> AABB:
 	return AABB(Vector3(col_x(col), 0.0, rail_z(era)), Vector3(TESSERA_W, TESSERA_Y, slot_d()))
 

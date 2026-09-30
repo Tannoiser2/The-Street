@@ -65,6 +65,7 @@ func _ready() -> void:
 	_run("il quarto lavoratore sulla bacchetta (v2)", _test_quarto_lavoratore)
 	_run("lo scheletro del lavoratore sotto il potenziamento (v2)", _test_scheletro_lavoratore)
 	_run("la rovina senza rudere: la carta si capovolge (v2)", _test_rovina_senza_rudere)
+	_run("v2: le tessere scavo al posto della carta crollata (registro 131)", _test_tessere_scavo_vista)
 	_run("il riepilogo finale con i nomi del regolamento v2", _test_riepilogo_v2)
 	_run("le facce degli edifici della v2", _test_facce_v2)
 	print("\n%d superati, %d falliti" % [_passed, _failed])
@@ -2848,3 +2849,33 @@ func _test_facce_v2() -> void:
 			BoardLayout3D.carta_path("mercato", "ed_dolmen").contains("/edifici/"))
 	CardDB.load_db(CardDB.DB_PATH)
 
+
+# Con le carte restituite (registro 131) la rovina si disegna come tessere
+# scavo coperte, una per casella, dentro il posto della carta.
+func _test_tessere_scavo_vista() -> void:
+	if not FileAccess.file_exists("res://data/cards-v2.json"): return
+	CardDB.load_db("res://data/cards-v2.json")
+	var ctl := GameController.new()
+	ctl.new_game(3, 131)
+	var gs := ctl.gs
+	gs.grid.buildings.clear()
+	var r := Building.new()
+	r.uid = 9001
+	r.data = CardDB.buildings["ed_tumulo_funerario"]
+	r.owner = 1
+	r.col_from = 0
+	r.col_to = r.col_from + int(r.data["width"])
+	r.state = Enums.BuildingState.ROVINA
+	gs.grid.buildings.append(r)
+	_ok("senza la regola la rovina resta una carta", BoardLayout3D.tessere_scavo_box(gs, r).is_empty())
+	CardDB.constants["tessere_scavo"] = {"mazzo": [{"v": 1}], "carte_restituite": true}
+	var scatole := BoardLayout3D.tessere_scavo_box(gs, r)
+	_eq("con le carte restituite una tessera per casella", scatole.size(), TessereScavo.quante(r))
+	var posto := BoardLayout3D.basetta_box(gs, r)
+	var dentro := true
+	for t in scatole:
+		if not posto.grow(0.01).encloses(t): dentro = false
+	_ok("  tutte nel posto della carta", dentro)
+	r.was_razed = true
+	_ok("  lo spianato non ne lascia", BoardLayout3D.tessere_scavo_box(gs, r).is_empty())
+	CardDB.load_db(CardDB.DB_PATH)

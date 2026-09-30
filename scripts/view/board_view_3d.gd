@@ -473,6 +473,9 @@ func _basetta(b: Building) -> void:
 	# disteso sulle caselle, con la faccia della carta sopra - in bianco e
 	# nero se e' in rovina, cioe' capovolta - e i fianchi del colore del
 	# giocatore, perche' le carte sono uguali per tutti.
+	if BoardLayout3D.cartoni() and TessereScavo.fuori(b):
+		_tessere_scavo(b)
+		return
 	if BoardLayout3D.cartoni():
 		var tinta: Color = COLORI_GIOCATORE[b.owner % COLORI_GIOCATORE.size()].darkened(0.15)
 		_carta_stesa(box, BoardLayout3D.carta_edificio_path(b), tinta, false, Color.WHITE, true)
@@ -484,6 +487,22 @@ func _basetta(b: Building) -> void:
 	m.position = box.position + box.size / 2.0
 	add_child(m)
 	_banner_scavo(b)
+
+# Le tessere scavo coperte al posto della carta crollata (registro 131), nel
+# colore del proprietario ma scure, come il dorso di una tessera. Scoperte
+# dall'era moderna, mostrano il loro valore.
+func _tessere_scavo(b: Building) -> void:
+	var tinta: Color = COLORI_GIOCATORE[b.owner % COLORI_GIOCATORE.size()].darkened(0.5)
+	var scatole := BoardLayout3D.tessere_scavo_box(gs, b)
+	for i in scatole.size():
+		var t: AABB = scatole[i]
+		var m := _scatola(t.size, tinta)
+		m.position = t.position + t.size / 2.0
+		add_child(m)
+		if b.scavata and i < b.tessere.size():
+			var v: Dictionary = b.tessere[i]
+			var testo := str(int(v.get("v", 0))) + (" +scheletro" if bool(v.get("s", false)) else "")
+			_scritta(t.position + Vector3(t.size.x / 2.0, t.size.y + 0.5, t.size.z / 2.0), testo, 0.05, Color.WHITE)
 
 # Il valore di Scavo scritto sulla basetta, davanti e dietro: la striscia di
 # terra e macerie che cresce col numero. Due piani appoggiati alle facce, non

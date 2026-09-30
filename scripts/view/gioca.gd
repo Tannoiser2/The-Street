@@ -324,7 +324,7 @@ func _descrivi_sotto(pixel: Vector2) -> PackedStringArray:
 		# Nella v2 la rovina propria si ristruttura: il riquadro lo dice,
 		# perche' e' l'unica cosa che una rovina in piedi invita a fare.
 		elif b.state == Enums.BuildingState.ROVINA and BoardLayout3D.senza_rudere() \
-				and b.owner == _io():
+				and b.owner == _io() and not TessereScavo.carte_restituite():
 			stato += ", si puo' ristrutturare"
 		out.append(str(b.data["name"]))
 		out.append("G%d · %s · res %d · vetusta %d" % [b.owner, stato,
@@ -333,6 +333,9 @@ func _descrivi_sotto(pixel: Vector2) -> PackedStringArray:
 			var nomi := PackedStringArray()
 			for u in b.upgrades: nomi.append(str(CardDB.upgrades[u]["name"]))
 			out.append("potenziamenti: " + ", ".join(nomi))
+		if TessereScavo.fuori(b) and TessereScavo.quante(b) > 0:
+			out.append("%d tessere scavo di G%d, %s; la carta e' tornata al proprietario" % [
+				TessereScavo.quante(b), b.owner, "scoperte" if b.scavata else "coperte"])
 		var sc := descrivi_scheletro(b)
 		if sc != "": out.append(sc)
 		return out
@@ -772,6 +775,12 @@ func _disegna_hud() -> void:
 	var testa := "Era %d · %s · %s: %d PV, %s, lavoratori %d/%d" % [
 		gs.era, str(gs.current_event.get("name", "nessun evento")), chi,
 		p.vp, risorse, p.workers_used, p.workers]
+	# I token riscattati dalle proprie rovine (registro 131), col loro valore
+	# di fine partita.
+	if not p.potenziamenti_riscattati.is_empty():
+		var valore := 0
+		for u in p.potenziamenti_riscattati: valore += TessereScavo.costo(u)
+		testa += ", token riscattati %d (%d PV)" % [p.potenziamenti_riscattati.size(), valore]
 	_striscia(font, testa, 41.0, 12.0, 18)
 	_hud.draw_rect(Rect2(Vector2(20, 17), Vector2(13, 13)),
 		VISTA.colore_giocatore(v), true)
@@ -1111,12 +1120,14 @@ func _disegna_bottoni(font: Font, p: PlayerState) -> void:
 	var din := AvailableActions.dinastia(ctl.gs, _io())
 	voci.append({"voce": din, "testo": "Dinastia  " + DescrizioneAzione.prezzo(din),
 		"attiva": din.legale and din.pagabile(p)})
-	var restauri := AvailableActions.restauri(ctl.gs, _io(), ctl.colonna_attivata())
-	var quanti := 0
-	for r in restauri:
-		if r.legale: quanti += 1
-	voci.append({"voce": null, "modo": "restauro",
-		"testo": "%s  (%d)" % [DescrizioneAzione.verbo_restauro(), quanti], "attiva": quanti > 0})
+	# Con le carte restituite non si ristruttura (registro 131): niente tasto.
+	if not TessereScavo.carte_restituite():
+		var restauri := AvailableActions.restauri(ctl.gs, _io(), ctl.colonna_attivata())
+		var quanti := 0
+		for r in restauri:
+			if r.legale: quanti += 1
+		voci.append({"voce": null, "modo": "restauro",
+			"testo": "%s  (%d)" % [DescrizioneAzione.verbo_restauro(), quanti], "attiva": quanti > 0})
 	var tutte := AvailableActions.tutte(ctl.gs, _io(), ctl.colonna_attivata())
 	voci.append({"voce": tutte[tutte.size() - 1], "testo": "Passa", "attiva": true})
 
