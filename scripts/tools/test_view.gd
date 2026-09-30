@@ -67,6 +67,8 @@ func _ready() -> void:
 	_run("la rovina senza rudere: la carta si capovolge (v2)", _test_rovina_senza_rudere)
 	_run("v2: le tessere scavo al posto della carta crollata (registro 131)", _test_tessere_scavo_vista)
 	_run("v2: il mercato a grandezza vera (registro 133)", _test_mercato_vero)
+	_run("v2: token sugli edifici e carte restituite davanti al giocatore (registro 133)", _test_token_e_restituite)
+	_run("v2: nessun edificio sospeso nel vuoto (registro 134)", _test_niente_sospesi)
 	_run("il riepilogo finale con i nomi del regolamento v2", _test_riepilogo_v2)
 	_run("le facce degli edifici della v2", _test_facce_v2)
 	print("\n%d superati, %d falliti" % [_passed, _failed])
@@ -2634,6 +2636,10 @@ func _test_quarto_lavoratore() -> void:
 func _test_scheletro_lavoratore() -> void:
 	if not FileAccess.file_exists("res://data/cards-v2.json"): return
 	CardDB.load_db("res://data/cards-v2.json")
+	# Il ventaglio degli edifici c'e' solo senza le carte restituite: con
+	# quelle (registro 133) lo scheletro sta sulla mappa. Qui si prova il
+	# ventaglio.
+	CardDB.constants.erase("tessere_scavo")
 	var ctl := GameController.new()
 	ctl.new_game(3, 11)
 	var gs := ctl.gs
@@ -2880,6 +2886,8 @@ func _test_tessere_scavo_vista() -> void:
 	_ok("  tutte nel posto della carta", dentro)
 	r.was_razed = true
 	_ok("  lo spianato non ne lascia", BoardLayout3D.tessere_scavo_box(gs, r).is_empty())
+	_eq("  ma ha il terrapieno, una tessera per casella", BoardLayout3D.terrapieni_spianato_box(gs, r).size(),
+		int(r.data["width"]) * int(r.data.get("depth", 1)))
 	CardDB.load_db(CardDB.DB_PATH)
 
 # Con le carte restituite la carta edificio e' la sua tessera: sul mercato ha
@@ -2903,4 +2911,111 @@ func _test_mercato_vero() -> void:
 	var uno := BoardLayout3D.misura_edificio("ed_capanne")
 	var due := BoardLayout3D.misura_edificio("ed_tumulo_funerario")
 	_ok("  una larga due e' larga il doppio di una colonna, piu' lo spazio fra le due", due.x > uno.x * 1.9)
+	CardDB.load_db(CardDB.DB_PATH)
+
+# Con le carte restituite (registro 133): i potenziamenti sono token, uno per
+# casella sopra l'edificio e della stessa misura nella fila; davanti al
+# giocatore non ci sono gli edifici in piedi, solo le carte restituite (a
+# colori, a grandezza vera) e i token riscattati.
+func _test_token_e_restituite() -> void:
+	if not FileAccess.file_exists("res://data/cards-v2.json"): return
+	CardDB.load_db("res://data/cards-v2.json")
+	var ctl := GameController.new()
+	ctl.new_game(3, 134)
+	var gs := ctl.gs
+	while not gs.pending_choice.is_empty():
+		ctl.choose(int((gs.pending_choice["options"] as Array)[0]))
+	gs.grid.buildings.clear()
+	var viva := _metti(gs, "ed_tumulo_funerario", 0, 2, 0, 0)
+	var upg := str(CardDB.upgrades.keys()[0])
+	viva.upgrades.append(upg)
+	viva.upgrades.append(str(CardDB.upgrades.keys()[1]))
+	var t := BoardLayout3D.token_box(gs, viva)
+	_eq("un token per potenziamento sull'edificio", t.size(), 2)
+	var posto := BoardLayout3D.basetta_box(gs, viva)
+	_ok("  in caselle diverse, sopra la tessera", t[0].position.x != t[1].position.x
+		and is_equal_approx(t[0].position.y, posto.end.y))
+	var morta := _metti(gs, "ed_capanne", 4, 1, 0, 0)
+	morta.state = Enums.BuildingState.ROVINA
+	gs.players[0].potenziamenti_riscattati.append(upg)
+	var mie := BoardLayout3D.carte_giocatore(gs, 0, 0)
+	var edifici := []
+	var token := []
+	for c in mie:
+		if str(c["kind"]) == "mercato": edifici.append(str(c["id"]))
+		if str(c["kind"]) == "token": token.append(str(c["id"]))
+	_eq("davanti al giocatore solo la carta restituita", edifici, ["ed_capanne"])
+	_eq("  e il token riscattato", token, [upg])
+	var misura_giusta := false
+	for c in BoardLayout3D.player_cards(gs, 0):
+		if int(c.get("player", -1)) == 0 and str(c["kind"]) == "mercato":
+			var a: AABB = c["aabb"]
+			var m := BoardLayout3D.misura_edificio("ed_capanne")
+			misura_giusta = absf(a.size.x - m.x) < 0.01 and absf(a.size.z - m.y) < 0.01
+	_ok("  a grandezza vera", misura_giusta)
+	var fila_ok := true
+	for c in BoardLayout3D.side_cards(gs):
+		if str(c["kind"]) == "potenziamento" and not c.has("player"):
+			var a: AABB = c["aabb"]
+			if absf(a.size.x - BoardLayout3D.misura_token().x) > 0.01: fila_ok = false
+	_ok("la fila dei potenziamenti e' fatta di token", fila_ok)
+	var tk := BoardLayout3D.misura_token()
+	_ok("il token ha le proporzioni della tessera stampata (135 x 70)", absf(tk.x / tk.y - 135.0 / 70.0 * (BoardLayout3D.span_w(1) / BoardLayout3D.basetta_d()) / (194.4 / 115.6)) < 0.01)
+	CardDB.load_db(CardDB.DB_PATH)
+
+# Nessun edificio sospeso (registro 134): in una partita vera, ogni casella di
+# un edificio sopra il livello 0 poggia su qualcosa di disegnato - una
+# tessera edificio in piedi, le tessere scavo di una rovina, il terrapieno di
+# uno spianato o la terra riportata. Il designer vedeva edifici "fluttuare":
+# erano sopra gli spianati, che non lasciavano niente.
+func _test_niente_sospesi() -> void:
+	if not FileAccess.file_exists("res://data/cards-v2.json"): return
+	CardDB.load_db("res://data/cards-v2.json")
+	var sospese := 0
+	var controllate := 0
+	var esempio := ""
+	for seme in [7, 21]:
+		var ctl := GameController.new()
+		ctl.new_game(3, seme)
+		var canone := StrategyBot.canone()
+		var guardia := 0
+		while ctl.gs.phase != Enums.Phase.FINE_PARTITA and guardia < 3000:
+			StrategyBot.play_turn(ctl, canone[ctl.gs.current_index % canone.size()])
+			guardia += 1
+		var gs := ctl.gs
+		var appoggi: Array[AABB] = []
+		var nomi: Array[String] = []
+		for b in gs.grid.buildings:
+			var tipo := "%s L%d %s%s" % [b.data["name"], b.level, ["intatto", "rudere", "rovina"][b.state], " sepolto" if b.is_buried else ""]
+			if not TessereScavo.fuori(b):
+				appoggi.append(BoardLayout3D.basetta_box(gs, b)); nomi.append("carta " + tipo)
+			for t in BoardLayout3D.tessere_scavo_box(gs, b): appoggi.append(t); nomi.append("tessere " + tipo)
+			for t in BoardLayout3D.terrapieni_spianato_box(gs, b): appoggi.append(t); nomi.append("spianato " + tipo)
+			for t in BoardLayout3D.terrapieni(gs, b): appoggi.append(t); nomi.append("terra " + tipo)
+		for b in gs.grid.buildings:
+			if b.level == 0: continue
+			var piede: AABB = BoardLayout3D.basetta_box(gs, b)
+			var w: int = b.width()
+			var d: int = b.profondita()
+			for i in w:
+				for j in d:
+					var x: float = piede.position.x + (i + 0.5) * piede.size.x / w
+					var z: float = piede.position.z + (j + 0.5) * piede.size.z / d
+					controllate += 1
+					var retta := false
+					for a in appoggi:
+						if absf(a.end.y - piede.position.y) < 1.0 and x >= a.position.x - 1.0 \
+								and x <= a.end.x + 1.0 and z >= a.position.z - 1.0 and z <= a.end.z + 1.0:
+							retta = true
+							break
+					if not retta:
+						if sospese < 3:
+							print("SOSPESO %s L%d col %d x=%.1f z=%.1f y=%.1f basi=%s" % [b.data["name"], b.level, b.col_from + i, x, z, piede.position.y, str(b.basi)])
+							for k in appoggi.size():
+								var a2: AABB = appoggi[k]
+								if x >= a2.position.x - 1.0 and x <= a2.end.x + 1.0:
+									print("   %s  y %.1f-%.1f z %.1f-%.1f" % [nomi[k], a2.position.y, a2.end.y, a2.position.z, a2.end.z])
+						sospese += 1
+						if esempio == "": esempio = "%s livello %d, colonna %d" % [b.data["name"], b.level, b.col_from + i]
+	_eq("caselle sospese nel vuoto su %d controllate%s" % [controllate, (" (es. " + esempio + ")") if esempio != "" else ""], sospese, 0)
 	CardDB.load_db(CardDB.DB_PATH)

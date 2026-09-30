@@ -273,10 +273,39 @@ static func terrapieno_box(gs: GameState, b: Building, col: int) -> AABB:
 static func terrapieni(gs: GameState, b: Building) -> Array[AABB]:
 	var out: Array[AABB] = []
 	if b.level == 0: return out
+	# CASELLA PER CASELLA (registro 134). Una carta profonda due binari puo'
+	# poggiare su un binario al livello 1 e sull'altro al livello 0: la terra
+	# per colonna partiva dalla quota piu' alta e sotto l'altro binario
+	# restava il vuoto (l'edificio "fluttuava"). Con le carte ogni casella ha
+	# la sua quota.
+	if cartoni() and b.profondita() > 1:
+		var base := basetta_box(gs, b)
+		var fetta := base.size.x / float(b.width())
+		var passo := base.size.z / float(b.profondita())
+		for col in range(b.col_from, b.col_to):
+			for j in b.profondita():
+				var z0 := base.position.z + j * passo
+				var q := _quota_sotto_striscia(gs, b, col, z0, z0 + passo)
+				var da := level_y(q + 1)
+				if base.position.y - da > 0.0:
+					out.append(AABB(Vector3(base.position.x + (col - b.col_from) * fetta, da, z0),
+						Vector3(fetta, base.position.y - da, passo)))
+		return out
 	for col in range(b.col_from, b.col_to):
 		var box := terrapieno_box(gs, b, col)
 		if box.size.y > 0.0: out.append(box)
 	return out
+
+# Il livello piu' alto sotto `b` nella colonna e nella striscia di profondita'
+# [z0, z1): -1 se non c'e' niente.
+static func _quota_sotto_striscia(gs: GameState, b: Building, col: int, z0: float, z1: float) -> int:
+	var q := -1
+	for s in gs.grid.buildings:
+		if s == b or not s.covers(col) or s.level >= b.level: continue
+		var r := basetta_box(gs, s)
+		if r.end.z <= z0 + 0.01 or r.position.z >= z1 - 0.01: continue
+		q = maxi(q, s.level)
+	return q
 
 # Il livello di cio' che regge questa colonna, -1 se sotto non c'e' niente.
 # Si guardano le basi fissate alla costruzione - come per la z, quello che
@@ -471,8 +500,19 @@ static func terrapiano_path() -> String:
 	return ROVINA_DIR + "terrapiano.png"
 
 static func tessere_scavo_box(gs: GameState, b: Building) -> Array[AABB]:
+	if not TessereScavo.fuori(b) or TessereScavo.quante(b) == 0: return []
+	return _caselle_della_carta(gs, b)
+
+# LO SPIANATO (registro 134): la carta torna al proprietario e non lascia
+# tessere scavo, ma chi ci ha costruito sopra poggia su qualcosa. Al suo
+# posto va il terrapieno, una tessera generica per casella. Senza, l'edificio
+# costruito sopra restava sospeso nel vuoto per un livello.
+static func terrapieni_spianato_box(gs: GameState, b: Building) -> Array[AABB]:
+	if not TessereScavo.fuori(b) or TessereScavo.quante(b) > 0: return []
+	return _caselle_della_carta(gs, b)
+
+static func _caselle_della_carta(gs: GameState, b: Building) -> Array[AABB]:
 	var out: Array[AABB] = []
-	if not TessereScavo.fuori(b) or TessereScavo.quante(b) == 0: return out
 	var box := basetta_box(gs, b)
 	var w := b.width()
 	var d := b.profondita()
@@ -483,6 +523,24 @@ static func tessere_scavo_box(gs: GameState, b: Building) -> Array[AABB]:
 		for j in d:
 			out.append(AABB(Vector3(box.position.x + i * cw + margine, box.position.y,
 				box.position.z + j * cd + margine), Vector3(cw - 2.0 * margine, box.size.y, cd - 2.0 * margine)))
+	return out
+
+# I token sull'edificio in piedi: uno per casella, nell'ordine in cui sono
+# stati messi, al centro della casella e appoggiati sopra la tessera.
+static func token_box(gs: GameState, b: Building) -> Array[AABB]:
+	var out: Array[AABB] = []
+	if not grandezza_vera() or b.upgrades.is_empty() or TessereScavo.fuori(b): return out
+	var box := basetta_box(gs, b)
+	var w := b.width()
+	var d := b.profondita()
+	var cw := box.size.x / w
+	var cd := box.size.z / d
+	for i in b.upgrades.size():
+		var cx := box.position.x + (i % w) * cw + cw / 2.0
+		var cz := box.position.z + ((i / w) % d) * cd + cd / 2.0
+		var t := misura_token()
+		out.append(AABB(Vector3(cx - t.x / 2.0, box.end.y, cz - t.y / 2.0),
+			Vector3(t.x, TOKEN_Y, t.y)))
 	return out
 
 static func tile_box(col: int, era: int) -> AABB:
@@ -586,6 +644,7 @@ const CARTELLE_CARTE := {
 	"eredita": ["eredita", "png"],
 	"eredita_coperta": ["dorsi", "png"],
 	"dinastia": ["dorsi", "png"],
+	"token": ["potenziamenti_v2", "png"],
 }
 
 # Nella v2 gli edifici hanno le loro facce (registro 120: i cinque PDF
@@ -600,6 +659,11 @@ static func e_v2() -> bool:
 
 static func carta_path(tipo: String, id: String) -> String:
 	if not CARTELLE_CARTE.has(tipo): return ""
+	# Nella v2 i potenziamenti hanno le facce del loro PDF (registro 128), e
+	# sono le stesse per il token (registro 133).
+	if tipo in ["potenziamento", "token"] and e_v2():
+		var pv2 := "res://assets/carte/potenziamenti_v2/%s.png" % id
+		if ResourceLoader.exists(pv2) or tipo == "token": return pv2
 	if tipo == "mercato" and e_v2():
 		var v2 := CARTELLA_EDIFICI_V2 % id
 		if ResourceLoader.exists(v2): return v2
@@ -949,7 +1013,20 @@ static func misura_edificio(id: String) -> Vector2:
 	var p := int(d.get("depth", 1))
 	return Vector2(span_w(w), basetta_d() + (p - 1) * slot_d())
 
+# I POTENZIAMENTI COME TOKEN (registro 133): la tessera del potenziamento,
+# stampata dal designer a 135 x 70 pt (Potenziamenti_Completi_A4.pdf), sta
+# sopra una casella dell'edificio, uno per casella. La misura e' in scala con
+# la tessera dell'edificio da una casella (194 x 116 pt), ed e' la stessa
+# nella fila, sulla mappa e davanti al giocatore che li riscatta.
+const TOKEN_PT := Vector2(135.0, 70.0)
+const EDIFICIO_PT := Vector2(194.4, 115.6)
+const TOKEN_Y := 3.0
+
+static func misura_token() -> Vector2:
+	return Vector2(span_w(1) * TOKEN_PT.x / EDIFICIO_PT.x, basetta_d() * TOKEN_PT.y / EDIFICIO_PT.y)
+
 static func misura_carta(tipo: String) -> Vector2:
+	if grandezza_vera() and tipo in ["potenziamento", "token"]: return misura_token()
 	var m: Vector2 = MISURE_CARTE.get(tipo, Vector2(CARTA, CARTA))
 	if e_v2() and MISURE_CARTE_V2.has(tipo): m = MISURE_CARTE_V2[tipo]
 	if not (tipo in CARTE_IN_PIEDI) or m.y <= 0.0: return m
@@ -1129,6 +1206,17 @@ static func carte_giocatore(gs: GameState, player: int, umano := -1) -> Array[Di
 		visti[str(c)] = true
 		out.append({"kind": "personaggio", "id": str(c)})
 	for m in p.monuments_claimed: out.append({"kind": "monumento", "id": str(m)})
+	# CON LE CARTE RESTITUITE (registri 131-133) davanti al giocatore non c'e'
+	# il mazzetto degli edifici: quelli in piedi stanno sulla mappa, e
+	# davanti a lui tornano solo le carte degli edifici crollati, a colori e
+	# a grandezza vera, piu' i token che ha riscattato.
+	if grandezza_vera():
+		for b in gs.grid.buildings:
+			if b.owner == player and TessereScavo.fuori(b):
+				out.append({"kind": "mercato", "id": str(b.data["id"]), "restituita": true})
+		for u in p.potenziamenti_riscattati:
+			out.append({"kind": "token", "id": str(u)})
+		return out
 	# LE CARTE DEGLI EDIFICI COSTRUITI. "Costruire significa pagare il costo
 	# della carta e mettere la sagoma sul tabellone": la carta resta davanti
 	# a chi l'ha presa - il regolamento ci fa infilare sotto i personaggi a
@@ -1292,6 +1380,7 @@ static func player_cards(gs: GameState, umano := -1) -> Array[Dictionary]:
 				ventaglio.append(carte[j])
 				continue
 			var m := misura_carta(str(carte[j]["kind"]))
+			if bool(carte[j].get("restituita", false)): m = misura_edificio(str(carte[j]["id"]))
 			# A capo quando la carta non ci sta piu'. La prima di una riga ci
 			# resta comunque, anche se da sola sborda: e' meglio di una riga
 			# vuota e di un giro infinito.
