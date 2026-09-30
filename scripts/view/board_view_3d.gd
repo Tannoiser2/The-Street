@@ -443,6 +443,12 @@ func _terrapieni(b: Building) -> void:
 		var m := _scatola(box.size, TERRAPIENO)
 		m.position = box.position + box.size / 2.0
 		add_child(m)
+		# Con le carte restituite il terrapieno ha la sua tessera, stampata
+		# dal designer: la si stende sopra la terra riportata.
+		if BoardLayout3D.grandezza_vera():
+			_carta_stesa(AABB(box.position + Vector3(0.0, box.size.y, 0.0),
+				Vector3(box.size.x, 0.4, box.size.z)), BoardLayout3D.terrapiano_path(),
+				TERRAPIENO, false, Color.WHITE, false)
 		# La terra riportata e' TERRA, e ha un disegno suo: una sezione di
 		# terreno. Prima era un parallelepipedo grigio e in mezzo a due
 		# basette disegnate sembrava un buco nella costruzione, non il pieno
@@ -496,9 +502,10 @@ func _tessere_scavo(b: Building) -> void:
 	var scatole := BoardLayout3D.tessere_scavo_box(gs, b)
 	for i in scatole.size():
 		var t: AABB = scatole[i]
-		var m := _scatola(t.size, tinta)
-		m.position = t.position + t.size / 2.0
-		add_child(m)
+		# Il dorso "ROVINA" finche' e' coperta; scoperta, la sua faccia.
+		var dati: Dictionary = b.tessere[i] if i < b.tessere.size() else {}
+		_carta_stesa(t, BoardLayout3D.tessera_rovina_path(dati, b.scavata and not dati.is_empty()),
+			tinta, false, Color.WHITE, false)
 		if b.scavata and i < b.tessere.size():
 			var v: Dictionary = b.tessere[i]
 			var testo := str(int(v.get("v", 0))) + (" +scheletro" if bool(v.get("s", false)) else "")

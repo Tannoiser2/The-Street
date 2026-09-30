@@ -451,6 +451,18 @@ static func basetta_box(gs: GameState, b: Building) -> AABB:
 # ci sono le tessere scavo coperte del proprietario, una per casella. Una
 # scatola per tessera, nel posto della carta, con un filo di margine perche'
 # si vedano separate. Lo spianato non lascia tessere.
+# La grafica delle tessere rovina, dal PDF del designer (tools/estrai_grafica.py):
+# il dorso, una faccia per valore e icona, il terrapiano.
+const ROVINA_DIR := "res://assets/tessere_rovina/"
+
+static func tessera_rovina_path(t: Dictionary, scoperta: bool) -> String:
+	if not scoperta: return ROVINA_DIR + "dorso.png"
+	var icona := "s" if bool(t.get("s", false)) else ("p" if bool(t.get("p", false)) else "")
+	return ROVINA_DIR + "faccia_%d%s.png" % [int(t.get("v", 0)), icona]
+
+static func terrapiano_path() -> String:
+	return ROVINA_DIR + "terrapiano.png"
+
 static func tessere_scavo_box(gs: GameState, b: Building) -> Array[AABB]:
 	var out: Array[AABB] = []
 	if not TessereScavo.fuori(b) or TessereScavo.quante(b) == 0: return out
