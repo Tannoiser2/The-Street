@@ -107,6 +107,8 @@ static func scava(gs: GameState, costruito: Building) -> void:
 			if quante(b) > 0 and not b.scavata:
 				b.scavata = true
 				tessere(gs, b)
+				# Il Restauratore (registro 133) conta le proprie rovine scoperte.
+				gs.players[b.owner].bump("rovine_scoperte")
 				gs.log_line("Scavo dell'era moderna: %s riporta alla luce %s" % [costruito.data["name"], b.data["name"]])
 			coda.append_array(b.basi)
 

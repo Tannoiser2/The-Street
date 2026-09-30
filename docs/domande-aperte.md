@@ -2213,3 +2213,36 @@ dato è stato importato da lì. Ma due confronti fra ciò che è stampato e
     dispersi, strategie ferme, il vincitore cambia nelle partite chiuse
     (7 / 12 / 12 %). Da decidere: il mazzetto (20 e' largo, se ne pescano
     meno di 4), il premio di chi costruisce sopra, le icone sulle coperte.
+131. **Le carte restituite e i potenziamenti come token.** Il designer: "i
+    Potenziamenti diventano Token che vengono posizionati sull'edificio e
+    quando questo va in rovina vengono riscattati dal giocatore
+    proprietario, inoltre non ci sono piu' le carte Edificio [...] viene
+    restituito al proprietario"; poi "(c), restituito al proprietario,
+    togli ristrutturare, rovine non contano". Nel motore
+    (`TessereScavo.fuori`, `Effects.chiede_mappa`, costante
+    `tessere_scavo.carte_restituite`): per le regole di mappa la rovina non
+    c'e' piu'; le regole sulle tue rovine leggono la carta restituita; gli
+    effetti finali della carta crollata non scattano; niente ristrutturare;
+    il token riscattato perde l'effetto sull'edificio. Misura: la
+    Continuita' di colonna crollava da 16 a 3 PV (registro 132).
+132. **La Continuita' come collezione e i flussi di PV.** Il designer
+    sceglie la collezione: per ogni classe contano i tuoi edifici in piedi
+    piu' le carte restituite, a soglie (3 → 3 PV, 5 → 5, 7 → 8, 9 → 12). E
+    "vorrei che i PV arrivino tutti piu' o meno uguali": Lampo, Rendita,
+    Scavo e Continuita' i quattro flussi principali. Il Lampo delle ere 4-5
+    scende da 2 a 1, la Rendita 1 sale a 2 (con +1 su tutte la Rendita
+    arrivava a 24 PV). Prova a 3 giocatori: Lampo 15, Rendita 20, Scavo
+    17, Continuita' 19 (tabella poi abbassata a 3/5/8/12, stimata 16).
+133. **Il mazzetto rovine, l'arte ritrovata, un token per casella.** Il
+    designer: 12 tessere per giocatore (0: semplice, scheletro, arte; 1: tre
+    semplici e uno scheletro; 2: due semplici e un'arte; 3: due semplici);
+    "(a)": solo i token arte riscattati valgono, col loro Scavo stampato
+    (5 l'era 1 ... 1 l'era 5), e solo se un'icona arte scoperta li
+    ritrova; anche i Personaggi hanno uno Scavo stampato per lo scheletro;
+    massimo un potenziamento per casella (il Colosseo 4); le carte del
+    mercato hanno la misura della mappa. Senza ristrutturare, il
+    Restauratore diventa "almeno 2 tue rovine riportate alla luce dall'era
+    Moderna" e le Secolarizzazioni tengono solo "Religione −2 res". Sul
+    mazzetto: nelle misure un giocatore pesca in media 3,5-3,8 tessere, 9
+    o meno nel 99% delle partite, al massimo 12.
+

@@ -820,6 +820,16 @@ def rovine_e_flussi(v):
         if b["era"] >= 4 and b["lampo"] >= 2: b["lampo"] = 1
         if b["rendita"] == 1: b["rendita"] = 2
     v["constants"]["continuita_collezione"] = dict(CONTINUITA_COLLEZIONE)
+    # Senza ristrutturare, due carte parlavano di una mossa che non c'e' piu'.
+    # Il Restauratore diventa chi vede riportate alla luce le proprie rovine
+    # (scoperte dall'era moderna, da chiunque); le Secolarizzazioni tengono
+    # solo il colpo alla resistenza.
+    l = {x["id"]: x for x in v["legacies"]}["er_il_restauratore"]
+    l["condition"] = {"op": "counter", "name": "rovine_scoperte", "min": 2}
+    l["condition_text"] = "almeno 2 tue rovine riportate alla luce da un edificio dell'era Moderna."
+    e = {x["id"]: x for x in v["events"]}["ev_secolarizzazioni"]
+    e["effects"] = [x for x in e["effects"] if x.get("name") != "free_restore_of_class"]
+    e["effect_text"] = "Forza 3. Religione −2 res."
 
 import sys
 variante = sys.argv[sys.argv.index("--variante") + 1] if "--variante" in sys.argv else ""

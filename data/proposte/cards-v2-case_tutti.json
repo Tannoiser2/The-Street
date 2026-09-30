@@ -5717,22 +5717,12 @@
       "force": 3,
       "severity": "grave",
       "kind": "classe",
-      "effect_text": "Forza 3. Religione −2 res · durante l’era, restaurare un rudere Religione non costa risorse (richiede comunque l’azione) e vale sui ruderi già presenti.",
+      "effect_text": "Forza 3. Religione −2 res.",
       "effects": [
         {
           "hook": "on_event",
           "op": "resistance",
           "value": -2,
-          "target": {
-            "class": [
-              "religione"
-            ]
-          }
-        },
-        {
-          "hook": "on_build",
-          "op": "rule_override",
-          "name": "free_restore_of_class",
           "target": {
             "class": [
               "religione"
@@ -6212,11 +6202,11 @@
       "id": "er_il_restauratore",
       "name": "Il Restauratore",
       "vp": 4,
-      "condition_text": "hai ristrutturato una tua rovina.",
+      "condition_text": "almeno 2 tue rovine riportate alla luce da un edificio dell'era Moderna.",
       "condition": {
         "op": "counter",
-        "name": "restauri",
-        "min": 1
+        "name": "rovine_scoperte",
+        "min": 2
       }
     },
     {
