@@ -504,10 +504,17 @@ const SPINTE_V2 := {"rendita_per_era": 0.9, "rendita_zero": -1.5, "lampo": 1.6, 
 # due la Obiettivi vinceva il 59 % e la Lampo il 38 %, a tre la Obiettivi il
 # 38 %, a quattro il 32 %. Il peso della Obiettivi va GIU' per indebolirla (a
 # differenza del Lampo, dove la spinta alta e' un handicap).
-const SPINTE_V2_PER_GIOCATORI := {2: {"lampo": 2.0, "obiettivi_peso": 0.6},
-	3: {"lampo": 2.6, "obiettivi_peso": 0.7},
-	4: {"lampo": 2.8, "lampo_potenzia": 5.0, "rendita_per_era": 1.5,
-		"scavo_premio": 0.2, "scavo_terra_scavo": 0.1, "obiettivi_peso": 0.6}}
+# Registro 136, con le rovine a tessere, le carte restituite, la Continuita'
+# a collezione e i flussi riequilibrati: la Rendita vinceva il 20% a ogni
+# tavolo qualunque fosse il suo peso, perche' scartava le carte senza
+# Rendita (l'80% del mazzo): senza quella penalita' torna nella media. Il
+# premio di scavo nel bot rafforzava la Scavo invece di frenarla (34-39% a
+# quattro con 0,6): a zero la riporta al 26%. La Lampo torna in media con
+# meno peso (1,4 a tre, 1,0 a quattro).
+const SPINTE_V2_PER_GIOCATORI := {2: {"lampo": 2.0, "obiettivi_peso": 0.6, "rendita_zero": 0.0},
+	3: {"lampo": 1.4, "obiettivi_peso": 1.5, "rendita_zero": 0.0, "scavo_premio": 0.0},
+	4: {"lampo": 1.0, "lampo_potenzia": 5.0, "rendita_per_era": 1.5, "rendita_zero": 0.0,
+		"scavo_premio": 0.0, "scavo_terra_scavo": 0.1, "obiettivi_peso": 0.45}}
 static var giocatori := 0
 static var spinte_override := {}
 
