@@ -801,6 +801,19 @@ def tessere_scavo_premio2(v):
     tessere_scavo_premio(v)
     v["constants"]["tessere_scavo"]["per_tessera"] = 2
 
+# LE CARTE RESTITUITE (registro 131). Il designer: niente piu' carte edificio
+# sulla mappa; la rovina torna al proprietario e sulla mappa restano le sue
+# tessere scavo; le rovine non contano per le regole di mappa; niente
+# ristrutturare; i potenziamenti sono token, riscattati dal proprietario
+# quando l'edificio crolla, e valgono il loro costo a fine partita. L'icona
+# potenziamento sulle tessere diventa un doppione del riscatto: le due
+# tessere che la portavano restano, senza icona.
+def tessere_carte(v):
+    tessere_scavo_premio2(v)
+    t = v["constants"]["tessere_scavo"]
+    t["carte_restituite"] = True
+    t["mazzo"] = [{k: x for k, x in m.items() if k != "p"} for m in t["mazzo"]]
+
 import sys
 variante = sys.argv[sys.argv.index("--variante") + 1] if "--variante" in sys.argv else ""
 # Le case in riserva stanno nel file v2 di tutti (registro 116); le varianti di
@@ -817,7 +830,7 @@ potenziamenti_di_classe(v2)
 if variante:
     {"doppioni": doppioni, "abitazioni": abitazioni, "case": case,
      "case_doppioni": case_doppioni, "case_scavo": case_scavo, "case_nulle": case_nulle,
-     "case_mista": case_mista, "case_tutti": case_tutti, "tessere_scavo": tessere_scavo, "tessere_scavo_premio": tessere_scavo_premio, "tessere_scavo_premio2": tessere_scavo_premio2}[variante](v2)
+     "case_mista": case_mista, "case_tutti": case_tutti, "tessere_scavo": tessere_scavo, "tessere_scavo_premio": tessere_scavo_premio, "tessere_scavo_premio2": tessere_scavo_premio2, "tessere_carte": tessere_carte}[variante](v2)
     v2["meta"]["ruleset"] = "v2-" + variante
     v2["meta"]["origine"] = "generato da tools/genera_cards_v2.py --variante %s: non modificare a mano" % variante
     out = os.path.join(RADICE, "data/proposte/cards-v2-%s.json" % variante)

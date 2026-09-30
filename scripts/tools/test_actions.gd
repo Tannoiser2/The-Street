@@ -48,6 +48,7 @@ func _ready() -> void:
 	_run("v2: i potenziamenti raddoppiati (registro 123)", _test_potenziamenti_nuovi)
 	_run("v2: la fila dei potenziamenti resta un'era (registro 126)", _test_potenzia_adiacente)
 	_run("v2: le tessere scavo (registro 130)", _test_tessere_scavo)
+	_run("v2: le carte restituite e i token riscattati (registro 131)", _test_carte_restituite)
 	print("\n%d superati, %d falliti" % [_passed, _failed])
 	get_tree().quit(0 if _failed == 0 else 1)
 
@@ -1882,4 +1883,47 @@ func _test_tessere_scavo() -> void:
 	CardDB.constants["tessere_scavo"]["premio"] = "tessere"
 	_eq("  o, con premio \"tessere\", le tessere sotto", TessereScavo.scavo_per_premio(r), 2)
 	_eq("  e lo spianato non ne ha", TessereScavo.scavo_per_premio(spianata), 0)
+	CardDB.load_db(CardDB.DB_PATH)
+
+# LE CARTE RESTITUITE (registro 131): la rovina torna al proprietario, per la
+# mappa non c'e' piu'; i potenziamenti tornano al proprietario come token che
+# a fine partita valgono il loro costo; niente ristrutturare.
+func _test_carte_restituite() -> void:
+	if not FileAccess.file_exists("res://data/cards-v2.json"): return
+	CardDB.load_db("res://data/cards-v2.json")
+	_ok("nel file v2 le carte restano sulla mappa", not TessereScavo.carte_restituite())
+	CardDB.constants["tessere_scavo"] = {"mazzo": [{"v": 1}], "carte_restituite": true}
+	var ctl := _game(2, 52)
+	var gs := ctl.gs
+	gs.grid.buildings.clear()
+	var viva := _put(gs, 0, "ed_capanne", 0)
+	var r := _put(gs, 0, "ed_capanne", 0, 1, Enums.BuildingState.ROVINA)
+	_ok("una rovina e' fuori dalla mappa", TessereScavo.fuori(r))
+	_ok("  un edificio in piedi no", not TessereScavo.fuori(viva))
+	_ok("  i predicati di mappa non la vedono", not Effects.matches(gs, r, {"owner": "self", "level": {"min": 1}}, null, 0))
+	_ok("  chi chiede le rovine la vede", Effects.matches(gs, r, {"owner": "self", "state": ["rovina"], "level": {"min": 1}}, null, 0))
+	_ok("  le classi della carta restituita contano ancora", Effects.matches(gs, r, {"owner": "self", "class": r.data["classes"]}, null, 0))
+	_ok("non si ristruttura", not ActionRules.quote_restore(gs, 0, r).legal)
+	var upg := ""
+	for id in CardDB.upgrades:
+		var fx: Array = CardDB.upgrades[id].get("effects", [])
+		for e in fx:
+			if e["hook"] == "on_acquire" and str(e["op"]) == "resistance" and e.get("condition", {}).is_empty():
+				upg = id
+		if upg != "": break
+	_ok("c'e' un potenziamento che da' Resistenza", upg != "")
+	viva.upgrades.append(upg)
+	Effects.apply_on_acquire(gs, 0, CardDB.upgrades[upg], viva)
+	var res_prima := viva.bonus_res
+	_ok("  il token alza la Resistenza", res_prima > 0)
+	viva.state = Enums.BuildingState.ROVINA
+	TessereScavo.riscatta(gs, viva)
+	_eq("  in rovina il token torna al proprietario", gs.players[0].potenziamenti_riscattati, [upg])
+	_eq("  e l'edificio perde il bonus", viva.bonus_res, 0)
+	_ok("  e non lo porta piu'", viva.upgrades.is_empty())
+	var p: PlayerState = gs.players[0]
+	p.bump("riscattati_pv", 0)
+	var prima := int(p.counters.get("riscattati_pv", 0))
+	TessereScavo.conta(gs)
+	_eq("a fine partita il token vale il suo costo", int(p.counters.get("riscattati_pv", 0)) - prima, TessereScavo.costo(upg))
 	CardDB.load_db(CardDB.DB_PATH)

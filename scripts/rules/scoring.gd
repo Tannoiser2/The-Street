@@ -92,7 +92,7 @@ static func _continuity(gs: GameState) -> void:
 		for p in gs.players:
 			var count := {}
 			for b in gs.grid.in_column(col):
-				if b.owner != p.index: continue
+				if b.owner != p.index or TessereScavo.fuori(b): continue
 				for c in b.classes(): count[c] = count.get(c, 0) + 1
 			if count.is_empty(): continue
 			var best: int = count.values().max()

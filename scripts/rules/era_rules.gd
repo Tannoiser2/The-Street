@@ -128,6 +128,7 @@ static func paga_edificio(gs: GameState, b: Building) -> void:
 			# la misura mente.
 			if bool(CardDB.constants.get("senza_rudere", false)):
 				b.state = Enums.BuildingState.ROVINA
+				TessereScavo.riscatta(gs, b)
 				b.upgrades.clear()
 				gs.log_line("%s si esaurisce e crolla in rovina" % b.data["name"])
 			else:
@@ -176,6 +177,7 @@ static func resolve_event(gs: GameState) -> Array[int]:
 			gs.log_line("%s diventa rudere" % b.data["name"])
 		else:
 			b.state = Enums.BuildingState.ROVINA
+			TessereScavo.riscatta(gs, b)
 			b.upgrades.clear()
 			if not b.owner in persi: persi.append(b.owner)
 			gs.log_line("%s crolla in rovina" % b.data["name"])

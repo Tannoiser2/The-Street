@@ -108,6 +108,9 @@ static func quote_restore(gs: GameState, player: int, target: Building) -> Actio
 		return ActionQuote.no("nessun rudere bersaglio")
 	if target.is_buried:
 		return ActionQuote.no("l'edificio e' sotterrato")
+	if TessereScavo.carte_restituite():
+		# La carta e' tornata al proprietario (registro 131): niente da rialzare.
+		return ActionQuote.no("con le carte restituite non si ristruttura")
 	if bool(CardDB.constants.get("senza_rudere", false)):
 		# SENZA RUDERE (D13): si ristruttura una PROPRIA rovina esposta. Niente
 		# furto: senza rudere ogni edificio caduto sarebbe rubabile. Dipende

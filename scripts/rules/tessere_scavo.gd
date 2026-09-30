@@ -21,6 +21,40 @@ extends RefCounted
 static func attive() -> bool:
 	return CardDB.constants.has("tessere_scavo")
 
+# LE CARTE RESTITUITE (registro 131, `carte_restituite`). Il designer: non ci
+# sono piu' carte edificio sulla mappa; quando un edificio va in rovina la sua
+# tessera torna al proprietario (resta davanti a lui, "il suo museo") e sulla
+# mappa restano solo le tessere scavo. Tre conseguenze:
+# - le regole che guardano la MAPPA (colonne, terreni, livelli, cime) non
+#   vedono piu' la rovina: "le rovine non contano";
+# - le regole che contano le TUE rovine (classi, era, Scavo stampato) leggono
+#   la carta restituita, quindi funzionano come prima;
+# - gli effetti della carta crollata non scattano piu'.
+static func carte_restituite() -> bool:
+	return attive() and bool(CardDB.constants["tessere_scavo"].get("carte_restituite", false))
+
+# La rovina la cui carta e' tornata al proprietario: fuori dalla mappa.
+static func fuori(b: Building) -> bool:
+	return carte_restituite() and b.state == Enums.BuildingState.ROVINA
+
+# I POTENZIAMENTI COME TOKEN (registro 131): quando l'edificio va in rovina il
+# proprietario riscatta i token che portava. L'effetto sull'edificio finisce
+# (si tolgono i bonus che il token gli dava) e il token, tenuto davanti a se',
+# vale a fine partita il suo costo in PV.
+static func riscatta(gs: GameState, b: Building) -> void:
+	if not carte_restituite() or b.upgrades.is_empty(): return
+	var p: PlayerState = gs.players[b.owner]
+	for uid in b.upgrades:
+		if not CardDB.upgrades.has(uid): continue
+		Effects.annulla_potenziamento(gs, b, CardDB.upgrades[uid])
+		p.potenziamenti_riscattati.append(uid)
+		gs.log_line("%s va in rovina: il giocatore %d riscatta %s" % [b.data["name"], b.owner, CardDB.upgrades[uid]["name"]])
+	b.upgrades.clear()
+
+static func costo(uid: String) -> int:
+	var c: Dictionary = CardDB.upgrades[uid]["cost"]
+	return int(c.get("pietra", 0)) + int(c.get("oro", 0)) + int(c.get("idee", 0))
+
 # Le caselle che l'edificio occupava: una tessera ciascuna. Lo spianato non
 # ne ha (il suo Scavo valeva gia' 0).
 static func quante(b: Building) -> int:
@@ -105,3 +139,10 @@ static func conta(gs: GameState) -> void:
 			b.rende("scavo", v)
 			p.bump("scavo_tessere", v)
 			if b.scavata: p.bump("scavo_scoperto", v)
+		# I token riscattati: ognuno vale il suo costo.
+		var riscatto := 0
+		for uid in p.potenziamenti_riscattati:
+			if CardDB.upgrades.has(uid): riscatto += costo(uid)
+		if riscatto > 0:
+			p.add_vp("scavo", riscatto)
+			p.bump("riscattati_pv", riscatto)

@@ -16,6 +16,13 @@ static func met(gs: GameState, player: int, cond: Dictionary) -> bool:
 	if cond.has("min_era") and gs.era < int(cond["min_era"]): return false
 	var t: Dictionary = cond.get("target", {})
 	var n: int = int(cond.get("min", 1))
+	# Carte restituite (registro 131): gli operatori che guardano la MAPPA
+	# (colonne, terreni) non vedono le rovine, salvo chi le chiede apposta.
+	if TessereScavo.carte_restituite() and str(cond["op"]) in ["same_column_count",
+			"distinct_columns", "consecutive_columns", "all_terrains"] \
+			and not (bool(t.get("buried", false)) or "rovina" in t.get("state", [])):
+		t = t.duplicate()
+		t["state"] = ["intatto", "rudere"]
 	match str(cond["op"]):
 		"count_matching":      return _hits(gs, player, t).size() >= n
 		"same_column_count":   return _max_per_colonna(gs, player, t) >= n

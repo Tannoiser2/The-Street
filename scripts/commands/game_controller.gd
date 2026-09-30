@@ -420,6 +420,7 @@ func build(card_id: String, col_from: int, above: bool, pay_option: int = 0, des
 			p.bump("spianati")
 			base.was_razed = true
 			base.state = Enums.BuildingState.ROVINA
+			TessereScavo.riscatta(gs, base)
 		elif base.state == Enums.BuildingState.RUDERE:
 			base.state = Enums.BuildingState.ROVINA
 		building_changed.emit(base)

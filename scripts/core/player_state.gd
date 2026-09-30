@@ -47,6 +47,8 @@ var counters: Dictionary = {}
 # I Personaggi avuti nella partita, con la loro era: [id, era] (registro 130,
 # per gli scheletri delle tessere scavo).
 var personaggi_storia: Array = []
+# I potenziamenti riscattati dalle proprie rovine (registro 131).
+var potenziamenti_riscattati: Array[String] = []
 
 # Una copia su cui provare: vedi Building.duplica.
 func duplica() -> PlayerState:
@@ -69,6 +71,7 @@ func duplica() -> PlayerState:
 	p.recruited_total = recruited_total
 	p.final_characters = final_characters.duplicate()
 	p.personaggi_storia = personaggi_storia.duplicate(true)
+	p.potenziamenti_riscattati = potenziamenti_riscattati.duplicate()
 	p.effect_used = effect_used.duplicate(true)
 	p.character_targets = character_targets.duplicate(true)
 	p.counters = counters.duplicate(true)
