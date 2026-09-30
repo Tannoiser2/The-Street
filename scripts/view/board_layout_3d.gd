@@ -457,7 +457,14 @@ const ROVINA_DIR := "res://assets/tessere_rovina/"
 
 static func tessera_rovina_path(t: Dictionary, scoperta: bool) -> String:
 	if not scoperta: return ROVINA_DIR + "dorso.png"
-	var icona := "s" if bool(t.get("s", false)) else ("p" if bool(t.get("p", false)) else "")
+	# Lo scheletro porta l'era (registro 135): "s2", e l'arte "p" ("s1p" tutte e due).
+	var s = t.get("s", false)
+	var icona := ""
+	if typeof(s) == TYPE_BOOL:
+		if s: icona = "s"
+	elif int(s) > 0:
+		icona = "s%d" % int(s)
+	if bool(t.get("p", false)): icona += "p"
 	return ROVINA_DIR + "faccia_%d%s.png" % [int(t.get("v", 0)), icona]
 
 static func terrapiano_path() -> String:

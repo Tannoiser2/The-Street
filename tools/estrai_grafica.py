@@ -1166,6 +1166,11 @@ def estrai_tessere_rovina(dest):
     doc = pymupdf.open(pdf)
     indice = {"dorso": "", "terrapiano": "", "facce": []}
     for pn, pg in enumerate(doc):
+        # L'arte, nel PDF di 20 tessere, e' un'ellisse dorata tracciata
+        # attorno all'opera (colore 1,0 / 0,78 / 0,24).
+        ellissi = [g["rect"] for g in pg.get_drawings()
+                   if g.get("color") and abs(g["color"][0] - 1.0) < 0.05
+                   and abs(g["color"][1] - 0.78) < 0.05 and abs(g["color"][2] - 0.24) < 0.05]
         testi = []
         for b in pg.get_text("dict")["blocks"]:
             for l in b.get("lines", []):
@@ -1174,7 +1179,7 @@ def estrai_tessere_rovina(dest):
         for r in _bordi_tessere(pg):
             dentro = [t for t, bb in testi if r.contains(bb.tl + (1, 1))]
             clip = pymupdf.Rect(r.x0 - 2, r.y0 - 2, r.x1 + 2, r.y1 + 2)
-            if "TERRAPIANO" in dentro:
+            if "TERRAPIANO" in dentro or "TERRAPIENO" in dentro:
                 if not indice["terrapiano"]:
                     pg.get_pixmap(dpi=DPI_V2, clip=clip).save(os.path.join(out_dir, "terrapiano.png"))
                     indice["terrapiano"] = "terrapiano.png"
@@ -1195,7 +1200,14 @@ def estrai_tessere_rovina(dest):
                         c = pix.pixel(x, y)
                         if c[0] > 110 and c[2] > 90 and c[1] < 70: viola += 1
                         if c[0] > 225 and c[1] > 210 and c[2] > 170: chiaro += 1
-                icona = "p" if viola > 40 else ("s" if chiaro > pix.width * pix.height * 0.35 else "")
+                # Lo scheletro porta scritta l'era dello strato ("ERA 2",
+                # registro 135); l'arte e' l'icona viola.
+                ere = [int(t.split()[-1]) for t in dentro if t.upper().startswith("ERA ") and t.split()[-1].isdigit()]
+                arte = viola > 40 or any(r.contains(e.tl) for e in ellissi)
+                if ere:
+                    icona = "s%d" % ere[0] + ("p" if arte else "")
+                else:
+                    icona = "p" if arte else ("s" if chiaro > pix.width * pix.height * 0.35 else "")
                 nome = "faccia_%d%s_%d.png" % (v, icona, len(indice["facce"]))
                 pg.get_pixmap(dpi=DPI_V2, clip=clip).save(os.path.join(out_dir, nome))
                 indice["facce"].append({"file": nome, "v": v, "icona": icona})
@@ -1205,7 +1217,7 @@ def estrai_tessere_rovina(dest):
                     pg.get_pixmap(dpi=DPI_V2, clip=clip).save(tipo)
     v2 = json.load(open(os.path.join(ROOT, "data", "cards-v2.json"), encoding="utf-8"))
     mazzo = v2["constants"].get("tessere_scavo", {}).get("mazzo", [])
-    chiave = lambda v, s, p: "%d%s%s" % (v, "s" if s else "", "p" if p else "")
+    chiave = lambda v, s, p: "%d%s%s" % (v, ("s%d" % s if type(s) is int else "s") if s else "", "p" if p else "")
     dati = sorted(chiave(t["v"], t.get("s"), t.get("p")) for t in mazzo)
     stampate = sorted("%d%s" % (f["v"], f["icona"]) for f in indice["facce"])
     print(f"tessere rovina: {len(stampate)} facce, dorso {'si' if indice['dorso'] else 'no'}, "

@@ -56,7 +56,8 @@ mai carte di edifici in rovina.
 | Case della riserva | 28 (3 tipi per era, 2 nell'era Moderna, 2 copie ciascuno) |
 | Personaggi | 25 (5 per era, con lo Scavo stampato) + 4 Dinastia |
 | Potenziamenti (gettoni) | 50 |
-| Tessere scavo | 20 per giocatore, del suo colore (il mazzetto rovine), più una tessera terrapiano |
+| Tessere scavo | 20 per giocatore, del suo colore (il mazzetto rovine) |
+| Tessere terrapieno | generiche, quante ne servono |
 | Eventi | 24 (6 per era, ere 1–4) |
 | Monumenti celebri | 14 |
 | Eredità (obiettivi segreti) | 16 |
@@ -338,7 +339,7 @@ degli edifici in piedi.
 
 Ogni giocatore ha un mazzetto rovine di 20 tessere del proprio colore, con valori da 0 a 3
 (media 1,4). Alcune portano un'icona: lo **scheletro**, con una linea che indica lo strato di
-un'era (dalla 1 alla 4), o l'**arte**; due le portano entrambe.
+un'era (dalla 1 alla 4), o l'**arte** (un'opera cerchiata in oro); due le portano entrambe.
 
 | valore | semplici | con scheletro | con arte | con tutte e due | totale |
 |--:|--:|--:|--:|--:|--:|
