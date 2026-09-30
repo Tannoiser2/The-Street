@@ -774,8 +774,8 @@ def potenziamenti_di_classe(v):
     v["constants"]["potenziamento_stessa_classe"] = True
 
 # LE ROVINE E I FLUSSI (registri 130-133), decisioni del designer:
-# - TESSERE SCAVO: ogni giocatore ha un mazzetto di 16 tessere del suo colore,
-#   da 0 a 3 (media 1,375); tre con lo scheletro ("s"), tre con l'arte ("p").
+# - TESSERE SCAVO: ogni giocatore ha un mazzetto di 20 tessere del suo colore,
+#   da 0 a 3 (media 1,4); quattro scheletri (uno per era), quattro arte.
 #   Quando un edificio va in rovina il proprietario ne pesca una per casella
 #   e le mette coperte; un edificio dell'era 5 costruito sopra le scopre; a
 #   fine partita le scoperte valgono per intero, le coperte a meta', e le
@@ -797,14 +797,17 @@ def potenziamenti_di_classe(v):
 #   a 2 (con +1 su tutte la Rendita arrivava a 24 PV); la Continuita' diventa
 #   una collezione: per ogni classe, i tuoi edifici in piedi piu' le carte
 #   restituite, a soglie.
-# Il designer ha portato il mazzetto a 16 (registro 134), con tre scheletri e
-# tre arte: valore medio 1,375.
+# Il mazzetto (registro 135): 20 tessere, valore medio 1,4. Quattro scheletri,
+# UNO PER ERA ("s": l'era, 1-4): la tessera segna con una linea lo strato
+# dell'era e vale lo Scavo del Personaggio preso in quell'era. Quattro arte:
+# un giocatore riscatta in media 0,5-0,7 token arte e ne pesca 4 tessere, 4
+# icone su 20 gliene fanno trovare 0,8. Due tessere hanno tutte e due.
 MAZZO_SCAVO = (
-    [{"v": 0}] * 2 + [{"v": 0, "s": True}, {"v": 0, "p": True}]
-    + [{"v": 1}] * 3 + [{"v": 1, "s": True}, {"v": 1, "p": True}]
-    + [{"v": 2}] * 3 + [{"v": 2, "s": True}]
-    + [{"v": 3}] * 2 + [{"v": 3, "p": True}])
-assert len(MAZZO_SCAVO) == 16
+    [{"v": 0}] * 2 + [{"v": 0, "s": 1, "p": True}, {"v": 0, "s": 2}, {"v": 0, "p": True}]
+    + [{"v": 1}] * 4 + [{"v": 1, "s": 3}, {"v": 1, "p": True}]
+    + [{"v": 2}] * 4 + [{"v": 2, "s": 4, "p": True}]
+    + [{"v": 3}] * 4)
+assert len(MAZZO_SCAVO) == 20
 CONTINUITA_COLLEZIONE = {"3": 3, "5": 5, "7": 8, "9": 12}
 
 def scavo_per_era(era):

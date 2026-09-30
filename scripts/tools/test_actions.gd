@@ -1940,4 +1940,16 @@ func _test_carte_restituite() -> void:
 	prima = p.vp
 	TessereScavo.conta(gs)
 	_eq("  scoperta ritrova il token arte", p.vp - prima, int(CardDB.upgrades[arte]["scavo"]))
+	# Lo scheletro con l'era (registro 135): vale lo Scavo del Personaggio
+	# preso in quell'era, non il migliore.
+	p.personaggi_storia = [["pe_capotribu", 1], [str(CardDB.characters.keys()[5]), int(CardDB.characters.values()[5]["era"])]]
+	var era2 := int(CardDB.characters.values()[5]["era"])
+	ss.tessere = [{"v": 0, "s": era2}]
+	prima = p.vp
+	TessereScavo.conta(gs)
+	_eq("  lo scheletro dell'era %d vale il Personaggio di quell'era" % era2, p.vp - prima, int(CardDB.characters.values()[5]["scavo"]))
+	ss.tessere = [{"v": 0, "s": 3}]
+	prima = p.vp
+	TessereScavo.conta(gs)
+	_eq("  senza Personaggio di quell'era vale 0", p.vp - prima, 0)
 	CardDB.load_db(CardDB.DB_PATH)

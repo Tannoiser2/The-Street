@@ -56,7 +56,7 @@ mai carte di edifici in rovina.
 | Case della riserva | 28 (3 tipi per era, 2 nell'era Moderna, 2 copie ciascuno) |
 | Personaggi | 25 (5 per era, con lo Scavo stampato) + 4 Dinastia |
 | Potenziamenti (gettoni) | 50 |
-| Tessere scavo | 16 per giocatore, del suo colore (il mazzetto rovine) |
+| Tessere scavo | 20 per giocatore, del suo colore (il mazzetto rovine), più una tessera terrapiano |
 | Eventi | 24 (6 per era, ere 1–4) |
 | Monumenti celebri | 14 |
 | Eredità (obiettivi segreti) | 16 |
@@ -94,7 +94,7 @@ la strada. Ogni colonna ha un solo terreno, valido per tutte le ere. Separate le
 dell'era per era: a inizio di ogni era mescolate le 14 dell'era e posatene una su ogni colonna.
 
 Ogni giocatore prende 4 lavoratori, le basette e i gettoni del proprio colore e 2 Costruzione. In
-due giocatori, il secondo riceve anche 1 Denaro. Ognuno mescola le 16 tessere scavo del proprio
+due giocatori, il secondo riceve anche 1 Denaro. Ognuno mescola le 20 tessere scavo del proprio
 colore e le tiene coperte davanti a sé: è il suo **mazzetto rovine**.
 
 Separate le sagome per era in cinque mazzi e scoprite il mercato dell'Era 1: sei edifici
@@ -336,20 +336,21 @@ degli edifici in piedi.
 
 #### Le tessere scavo
 
-Ogni giocatore ha un mazzetto rovine di 16 tessere del proprio colore, con valori da 0 a 3
-(media 1,375). Alcune portano un'icona: lo **scheletro** o l'**arte**.
+Ogni giocatore ha un mazzetto rovine di 20 tessere del proprio colore, con valori da 0 a 3
+(media 1,4). Alcune portano un'icona: lo **scheletro**, con una linea che indica lo strato di
+un'era (dalla 1 alla 4), o l'**arte**; due le portano entrambe.
 
-| valore | semplici | con scheletro | con arte | totale |
-|--:|--:|--:|--:|--:|
-| 0 | 2 | 1 | 1 | 4 |
-| 1 | 3 | 1 | 1 | 5 |
-| 2 | 3 | 1 | — | 4 |
-| 3 | 2 | — | 1 | 3 |
+| valore | semplici | con scheletro | con arte | con tutte e due | totale |
+|--:|--:|--:|--:|--:|--:|
+| 0 | 2 | 1 (era 2) | 1 | 1 (era 1) | 5 |
+| 1 | 4 | 1 (era 3) | 1 | — | 6 |
+| 2 | 4 | — | — | 1 (era 4) | 5 |
+| 3 | 4 | — | — | — | 4 |
 
 Si pesca una tessera per casella, e le tessere si ricordano insieme: quelle posate dalla stessa
-rovina formano un gruppo. **Se il mazzetto finisce** (avete già posato tutte le 16 tessere), le
+rovina formano un gruppo. **Se il mazzetto finisce** (avete già posato tutte le 20 tessere), le
 caselle delle rovine successive restano senza tessera e valgono 0. Nelle partite misurate un
-giocatore pesca in media meno di 4 tessere, al massimo 12: con 16 non succede quasi mai.
+giocatore pesca in media meno di 4 tessere, al massimo 12: con 20 non succede.
 
 Costruire sopra funziona come sempre: le tessere restano sotto, coperte, e nessuno le guarda.
 
@@ -416,8 +417,8 @@ siano. Quelle **scoperte** valgono il loro valore pieno. Quelle ancora **coperte
 valgono **metà**, arrotondata per difetto, gruppo per gruppo (le tessere di una stessa rovina si
 sommano, poi si dimezza). Le icone contano **solo sulle tessere scoperte**:
 
-- **Scheletro**: vale lo Scavo stampato del vostro Personaggio migliore fra quelli avuti in
-  partita, non ancora usato da un altro scheletro.
+- **Scheletro**: la linea sulla tessera indica un'era; vale lo Scavo stampato del Personaggio
+  che avete preso in quell'era (5 per l'era 1, 4 per la 2, 3 per la 3, 2 per la 4).
 - **Arte**: vale lo Scavo stampato del vostro miglior gettone Arte riscattato, non ancora usato
   da un'altra icona arte.
 

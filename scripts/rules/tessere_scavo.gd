@@ -56,6 +56,16 @@ static func riscatta(gs: GameState, b: Building) -> void:
 		gs.log_line("%s va in rovina: il giocatore %d riscatta %s" % [b.data["name"], b.owner, CardDB.upgrades[uid]["name"]])
 	b.upgrades.clear()
 
+# Lo Scavo del Personaggio che il giocatore ha preso in quell'era (il migliore,
+# se ne ha piu' d'uno); 0 se non ne ha.
+static func scavo_personaggio_di_era(p: PlayerState, era: int) -> int:
+	var meglio := 0
+	for voce in p.personaggi_storia:
+		if int(voce[1]) != era: continue
+		var carta: Dictionary = CardDB.characters.get(str(voce[0]), {})
+		meglio = maxi(meglio, int(carta.get("scavo", 6 - era)))
+	return meglio
+
 static func costo(uid: String) -> int:
 	var c: Dictionary = CardDB.upgrades[uid]["cost"]
 	return int(c.get("pietra", 0)) + int(c.get("oro", 0)) + int(c.get("idee", 0))
@@ -155,7 +165,15 @@ static func conta(gs: GameState) -> void:
 			for t in tessere(gs, b):
 				somma += int(t.get("v", 0))
 				if not b.scavata: continue
-				if bool(t.get("s", false)) and not personaggi.is_empty(): extra += int(personaggi.pop_back())
+				var s = t.get("s", false)
+				if typeof(s) == TYPE_BOOL:
+					if s and not personaggi.is_empty(): extra += int(personaggi.pop_back())
+				elif int(s) > 0:
+					# Lo scheletro con l'era (registro 135): vale lo Scavo del
+					# Personaggio preso in quell'era.
+					var sc := scavo_personaggio_di_era(p, int(s))
+					extra += sc
+					p.bump("scavo_scheletri_era", sc)
 				if bool(t.get("p", false)) and not opere.is_empty():
 					var arte := int(opere.pop_back())
 					extra += arte

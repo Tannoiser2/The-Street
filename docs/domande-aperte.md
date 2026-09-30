@@ -2254,4 +2254,16 @@ dato è stato importato da lì. Ma due confronti fra ciò che è stampato e
     scavo di chi appartiene. Da valutare": di regola resta senza tessere;
     la variante `spianato_tessere` gli fa lasciare le tessere del
     proprietario (senza premio). Da misurare.
+135. **Il mazzetto a 20, gli scheletri per era, piu' arte.** Il designer: 4
+    scheletri, uno per era, con una linea che indica lo strato e l'era, cosi'
+    si sa quale Personaggio usare; piu' arte, tante quante i token arte che
+    un giocatore riscatta; 20 tessere per giocatore piu' la tessera
+    terrapiano; alcune con scheletro e arte. Misura (120 partite per
+    tavolo): un giocatore riscatta 0,66 / 0,64 / 0,49 token arte a 2 / 3 / 4
+    (per lo piu' delle ere 2 e 3, al massimo 3-4), e pesca in media 4
+    tessere. Mazzetto: 0 ×5 (due semplici, scheletro era 2, arte,
+    scheletro era 1 + arte), 1 ×6 (quattro semplici, scheletro era 3,
+    arte), 2 ×5 (quattro semplici, scheletro era 4 + arte), 3 ×4; media 1,4.
+    Lo scheletro con l'era vale lo Scavo del Personaggio preso in
+    quell'era (`TessereScavo.scavo_personaggio_di_era`).
 

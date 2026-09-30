@@ -1205,7 +1205,7 @@ def estrai_tessere_rovina(dest):
                     pg.get_pixmap(dpi=DPI_V2, clip=clip).save(tipo)
     v2 = json.load(open(os.path.join(ROOT, "data", "cards-v2.json"), encoding="utf-8"))
     mazzo = v2["constants"].get("tessere_scavo", {}).get("mazzo", [])
-    chiave = lambda v, s, p: "%d%s" % (v, "s" if s else ("p" if p else ""))
+    chiave = lambda v, s, p: "%d%s%s" % (v, "s" if s else "", "p" if p else "")
     dati = sorted(chiave(t["v"], t.get("s"), t.get("p")) for t in mazzo)
     stampate = sorted("%d%s" % (f["v"], f["icona"]) for f in indice["facce"])
     print(f"tessere rovina: {len(stampate)} facce, dorso {'si' if indice['dorso'] else 'no'}, "
