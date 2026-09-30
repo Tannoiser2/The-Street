@@ -86,7 +86,32 @@ static func _spezza(punti: int, carte: Array, canale: String) -> void:
 		var quota: int = base + (1 if i < resto else 0)
 		if quota != 0: carte[i].rende(canale, quota)
 
+# LA CONTINUITA' COME COLLEZIONE (registro 132, costante `continuita_collezione`).
+# Con le carte restituite la classe delle rovine non e' piu' sulla mappa, e
+# la Continuita' di colonna crollava da 16 a 3 PV. Il designer ha scelto:
+# per ogni classe contano i tuoi edifici in piedi piu' le carte restituite
+# (tutti i tuoi edifici, in qualunque stato), e la tabella paga a soglie.
+static func continuita_collezione_pv(quanti: int) -> int:
+	var tabella: Dictionary = CardDB.constants["continuita_collezione"]
+	var meglio := 0
+	for soglia in tabella:
+		if quanti >= int(soglia): meglio = maxi(meglio, int(tabella[soglia]))
+	return meglio
+
+static func classi_di(gs: GameState, player: int) -> Dictionary:
+	var count := {}
+	for b in gs.grid.buildings:
+		if b.owner != player: continue
+		for c in b.data["classes"]: count[c] = int(count.get(c, 0)) + 1
+	return count
+
 static func _continuity(gs: GameState) -> void:
+	if CardDB.constants.has("continuita_collezione"):
+		for p in gs.players:
+			for c in classi_di(gs, p.index).values():
+				var pv := continuita_collezione_pv(int(c))
+				if pv > 0: p.add_vp("continuita", pv)
+		return
 	var table = CardDB.constants["continuity_vp"]
 	for col in gs.grid.n_cols:
 		for p in gs.players:

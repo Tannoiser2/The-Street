@@ -588,15 +588,25 @@ static func _valore_costruzione(gs: GameState, p: PlayerState, v, strategia: Str
 				q += premio * 0.8
 				premio_stimato = premio
 	# Continuita' di luogo: una seconda carta della stessa classe nella colonna.
+	# Come collezione (registro 132) conta quanto la carta allunga la classe
+	# fra tutti i propri edifici, dovunque siano.
 	var mie := {}
-	for b in gs.grid.in_column(col_from):
-		if b.owner != p.index: continue
-		for c in b.classes(): mie[c] = int(mie.get(c, 0)) + 1
-	for c in d["classes"]:
-		if int(mie.get(c, 0)) >= 1:
-			q += 1.5
-			dett["continuita' di classe in colonna"] = 1.5
-			break
+	var collezione := CardDB.constants.has("continuita_collezione")
+	if collezione:
+		mie = Scoring.classi_di(gs, p.index)
+		var passo := _premio_collezione(mie, d)
+		if passo > 0.0:
+			q += passo * 0.5
+			dett["collezione di classe"] = passo * 0.5
+	else:
+		for b in gs.grid.in_column(col_from):
+			if b.owner != p.index: continue
+			for c in b.classes(): mie[c] = int(mie.get(c, 0)) + 1
+		for c in d["classes"]:
+			if int(mie.get(c, 0)) >= 1:
+				q += 1.5
+				dett["continuita' di classe in colonna"] = 1.5
+				break
 	# Lo Scavo si incassa solo da sotterrati: vale, ma meno della rendita.
 	if float(d["scavo"]) != 0.0: dett["Scavo suo"] = float(d["scavo"]) * 0.25
 	q += float(d["scavo"]) * 0.25
@@ -628,11 +638,26 @@ static func _valore_costruzione(gs: GameState, p: PlayerState, v, strategia: Str
 		"verticale":
 			if sopra: q += 3.0 + 1.2 * float(par.get("level", 1))
 			else: q -= 1.5
-		"continuita": q += _premio_catena(mie, d) * float(sp["continuita_peso"])
+		"continuita":
+			var catena := _premio_collezione(mie, d) if collezione else _premio_catena(mie, d)
+			q += catena * float(sp["continuita_peso"])
 		"obiettivi": q += _premio_obiettivi(gs, p, d, col_from, par) * float(sp["obiettivi_peso"])
 	if q != prima_della_spinta:
 		dett["spinta della strategia %s" % strategia] = q - prima_della_spinta
 	return q
+
+# Quanto vale la carta per la collezione (registro 132): i PV che aggiunge
+# alla classe migliore, piu' un anticipo per la soglia successiva, perche' a
+# soglie la carta che non la passa vale zero ma avvicina.
+static func _premio_collezione(mie: Dictionary, d: Dictionary) -> float:
+	var meglio := 0.0
+	for c in d["classes"]:
+		var quante := int(mie.get(c, 0))
+		var ora := Scoring.continuita_collezione_pv(quante)
+		var dopo := Scoring.continuita_collezione_pv(quante + 1)
+		var poi := Scoring.continuita_collezione_pv(quante + 2)
+		meglio = maxf(meglio, float(dopo - ora) + 0.5 * float(poi - dopo))
+	return meglio
 
 # Quanto vale allungare una catena di classe in questa colonna: la differenza
 # fra quello che la colonna paga adesso e quello che pagherebbe dopo.

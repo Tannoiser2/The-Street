@@ -808,11 +808,36 @@ def tessere_scavo_premio2(v):
 # quando l'edificio crolla, e valgono il loro costo a fine partita. L'icona
 # potenziamento sulle tessere diventa un doppione del riscatto: le due
 # tessere che la portavano restano, senza icona.
+# I FLUSSI DI PV (registro 132). Il designer: Lampo, Rendita, Scavo e
+# Continuita' sono i quattro flussi principali e devono pesare piu' o meno
+# uguale; il Lampo faceva il doppio della Rendita (22 contro 11 PV). Il Lampo
+# delle ere 4 e 5 (tutte carte da 2, 13 PV sui 22) scende a 1; ogni carta con
+# Rendita guadagna 1. La Continuita' diventa una collezione a soglie.
+CONTINUITA_COLLEZIONE = {"3": 3, "5": 6, "7": 10, "9": 15}
+
+def flussi(v, rendita_piu=(1, 2)):
+    for b in v["buildings"]:
+        if b["era"] >= 4 and b["lampo"] >= 2: b["lampo"] = 1
+        if b["rendita"] in rendita_piu: b["rendita"] += 1
+    v["constants"]["continuita_collezione"] = dict(CONTINUITA_COLLEZIONE)
+
 def tessere_carte(v):
     tessere_scavo_premio2(v)
     t = v["constants"]["tessere_scavo"]
     t["carte_restituite"] = True
     t["mazzo"] = [{k: x for k, x in m.items() if k != "p"} for m in t["mazzo"]]
+
+def tessere_flussi(v):
+    tessere_carte(v)
+    flussi(v)
+
+def tessere_flussi_r1(v):
+    tessere_carte(v)
+    flussi(v, rendita_piu=(1,))
+
+def tessere_flussi_r0(v):
+    tessere_carte(v)
+    flussi(v, rendita_piu=())
 
 import sys
 variante = sys.argv[sys.argv.index("--variante") + 1] if "--variante" in sys.argv else ""
@@ -830,7 +855,7 @@ potenziamenti_di_classe(v2)
 if variante:
     {"doppioni": doppioni, "abitazioni": abitazioni, "case": case,
      "case_doppioni": case_doppioni, "case_scavo": case_scavo, "case_nulle": case_nulle,
-     "case_mista": case_mista, "case_tutti": case_tutti, "tessere_scavo": tessere_scavo, "tessere_scavo_premio": tessere_scavo_premio, "tessere_scavo_premio2": tessere_scavo_premio2, "tessere_carte": tessere_carte}[variante](v2)
+     "case_mista": case_mista, "case_tutti": case_tutti, "tessere_scavo": tessere_scavo, "tessere_scavo_premio": tessere_scavo_premio, "tessere_scavo_premio2": tessere_scavo_premio2, "tessere_carte": tessere_carte, "tessere_flussi": tessere_flussi, "tessere_flussi_r1": tessere_flussi_r1, "tessere_flussi_r0": tessere_flussi_r0}[variante](v2)
     v2["meta"]["ruleset"] = "v2-" + variante
     v2["meta"]["origine"] = "generato da tools/genera_cards_v2.py --variante %s: non modificare a mano" % variante
     out = os.path.join(RADICE, "data/proposte/cards-v2-%s.json" % variante)
