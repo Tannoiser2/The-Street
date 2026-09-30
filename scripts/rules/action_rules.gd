@@ -65,6 +65,12 @@ static func quote_upgrade(gs: GameState, player: int, upg_id: String, target: Bu
 	# ma si potenzia solo cio' che e' vivo. Vedi docs/domande-aperte.md punto 9.
 	if not target.is_alive():
 		return ActionQuote.no("l'edificio non e' intatto")
+	# LA STESSA CLASSE (registro 129): un potenziamento va solo su un edificio
+	# della sua classe, contando anche quelle acquisite (la Merlatura).
+	if bool(CardDB.constants.get("potenziamento_stessa_classe", false)):
+		var cl := str(CardDB.upgrades[upg_id].get("class", ""))
+		if cl != "" and not cl in target.classes():
+			return ActionQuote.no("il potenziamento e' %s, l'edificio no" % cl.capitalize())
 	if altrui:
 		return ActionQuote.yes(0, 0, target)
 	var cap := upgrade_capacity_for(gs, player, target)

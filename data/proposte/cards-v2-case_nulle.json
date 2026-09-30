@@ -103,7 +103,8 @@
     "tessere_era": true,
     "caselle": true,
     "fila_potenziamenti_resta": true,
-    "avanzo_idee": true
+    "avanzo_idee": true,
+    "potenziamento_stessa_classe": true
   },
   "terrains": [
     {
@@ -4090,27 +4091,12 @@
         "idee": 1
       },
       "family": "arte",
-      "effect_text": "Subito: +1 PV, +2 PV se l'edificio è Religione.",
+      "effect_text": "Subito: +1 PV.",
       "effects": [
         {
           "hook": "on_acquire",
           "op": "vp",
           "value": 1
-        },
-        {
-          "hook": "on_acquire",
-          "op": "vp",
-          "value": 1,
-          "condition": {
-            "op": "count_matching",
-            "min": 1,
-            "target": {
-              "is_self": true,
-              "class": [
-                "religione"
-              ]
-            }
-          }
         }
       ]
     },
@@ -4414,27 +4400,12 @@
         "idee": 1
       },
       "family": "arte",
-      "effect_text": "Subito: +1 PV, +2 PV se l'edificio è Religione.",
+      "effect_text": "Subito: +1 PV.",
       "effects": [
         {
           "hook": "on_acquire",
           "op": "vp",
           "value": 1
-        },
-        {
-          "hook": "on_acquire",
-          "op": "vp",
-          "value": 1,
-          "condition": {
-            "op": "count_matching",
-            "min": 1,
-            "target": {
-              "is_self": true,
-              "class": [
-                "religione"
-              ]
-            }
-          }
         }
       ]
     },
@@ -4538,7 +4509,7 @@
         "idee": 0
       },
       "family": "struttura",
-      "effect_text": "L'edificio ha +1 Resistenza, +2 se è Militare.",
+      "effect_text": "L'edificio ha +1 Resistenza.",
       "effects": [
         {
           "hook": "on_acquire",
@@ -4547,25 +4518,6 @@
           "duration": "permanent",
           "target": {
             "is_self": true
-          }
-        },
-        {
-          "hook": "on_acquire",
-          "op": "resistance",
-          "value": 1,
-          "duration": "permanent",
-          "target": {
-            "is_self": true
-          },
-          "condition": {
-            "op": "count_matching",
-            "min": 1,
-            "target": {
-              "is_self": true,
-              "class": [
-                "militare"
-              ]
-            }
           }
         }
       ]
@@ -4688,27 +4640,12 @@
         "idee": 1
       },
       "family": "arte",
-      "effect_text": "Subito: +1 PV, +2 PV se l'edificio è Civico.",
+      "effect_text": "Subito: +1 PV.",
       "effects": [
         {
           "hook": "on_acquire",
           "op": "vp",
           "value": 1
-        },
-        {
-          "hook": "on_acquire",
-          "op": "vp",
-          "value": 1,
-          "condition": {
-            "op": "count_matching",
-            "min": 1,
-            "target": {
-              "is_self": true,
-              "class": [
-                "civico"
-              ]
-            }
-          }
         }
       ]
     },
@@ -4817,27 +4754,12 @@
         "idee": 1
       },
       "family": "arte",
-      "effect_text": "Subito: +1 PV, +2 PV se l'edificio è Cultura.",
+      "effect_text": "Subito: +1 PV.",
       "effects": [
         {
           "hook": "on_acquire",
           "op": "vp",
           "value": 1
-        },
-        {
-          "hook": "on_acquire",
-          "op": "vp",
-          "value": 1,
-          "condition": {
-            "op": "count_matching",
-            "min": 1,
-            "target": {
-              "is_self": true,
-              "class": [
-                "cultura"
-              ]
-            }
-          }
         }
       ]
     },
@@ -4875,7 +4797,7 @@
         "idee": 0
       },
       "family": "struttura",
-      "effect_text": "L'edificio ha +1 Resistenza, +2 se è Militare.",
+      "effect_text": "L'edificio ha +1 Resistenza.",
       "effects": [
         {
           "hook": "on_acquire",
@@ -4884,25 +4806,6 @@
           "duration": "permanent",
           "target": {
             "is_self": true
-          }
-        },
-        {
-          "hook": "on_acquire",
-          "op": "resistance",
-          "value": 1,
-          "duration": "permanent",
-          "target": {
-            "is_self": true
-          },
-          "condition": {
-            "op": "count_matching",
-            "min": 1,
-            "target": {
-              "is_self": true,
-              "class": [
-                "militare"
-              ]
-            }
           }
         }
       ]
@@ -5039,7 +4942,7 @@
         "idee": 0
       },
       "family": "altro",
-      "effect_text": "Quando attivi l'edificio: +1 Denaro, +2 se è Commercio.",
+      "effect_text": "Quando attivi l'edificio: +1 Denaro.",
       "effects": [
         {
           "hook": "on_activate",
@@ -5047,24 +4950,6 @@
           "oro": 1,
           "target": {
             "is_self": true
-          }
-        },
-        {
-          "hook": "on_activate",
-          "op": "resource",
-          "oro": 1,
-          "target": {
-            "is_self": true
-          },
-          "condition": {
-            "op": "count_matching",
-            "min": 1,
-            "target": {
-              "is_self": true,
-              "class": [
-                "commercio"
-              ]
-            }
           }
         }
       ]
@@ -5080,7 +4965,7 @@
         "idee": 0
       },
       "family": "struttura",
-      "effect_text": "L'edificio ha +1 Resistenza, +2 se è Militare.",
+      "effect_text": "L'edificio ha +1 Resistenza.",
       "effects": [
         {
           "hook": "on_acquire",
@@ -5089,25 +4974,6 @@
           "duration": "permanent",
           "target": {
             "is_self": true
-          }
-        },
-        {
-          "hook": "on_acquire",
-          "op": "resistance",
-          "value": 1,
-          "duration": "permanent",
-          "target": {
-            "is_self": true
-          },
-          "condition": {
-            "op": "count_matching",
-            "min": 1,
-            "target": {
-              "is_self": true,
-              "class": [
-                "militare"
-              ]
-            }
           }
         }
       ]
@@ -5123,27 +4989,12 @@
         "idee": 1
       },
       "family": "arte",
-      "effect_text": "Subito: +1 PV, +2 PV se l'edificio è Civico.",
+      "effect_text": "Subito: +1 PV.",
       "effects": [
         {
           "hook": "on_acquire",
           "op": "vp",
           "value": 1
-        },
-        {
-          "hook": "on_acquire",
-          "op": "vp",
-          "value": 1,
-          "condition": {
-            "op": "count_matching",
-            "min": 1,
-            "target": {
-              "is_self": true,
-              "class": [
-                "civico"
-              ]
-            }
-          }
         }
       ]
     },
@@ -5158,27 +5009,12 @@
         "idee": 2
       },
       "family": "arte",
-      "effect_text": "Subito: +2 PV, +3 PV se l'edificio è Religione.",
+      "effect_text": "Subito: +2 PV.",
       "effects": [
         {
           "hook": "on_acquire",
           "op": "vp",
           "value": 2
-        },
-        {
-          "hook": "on_acquire",
-          "op": "vp",
-          "value": 1,
-          "condition": {
-            "op": "count_matching",
-            "min": 1,
-            "target": {
-              "is_self": true,
-              "class": [
-                "religione"
-              ]
-            }
-          }
         }
       ]
     },
@@ -5298,27 +5134,12 @@
         "idee": 2
       },
       "family": "arte",
-      "effect_text": "Subito: +2 PV, +3 PV se l'edificio è Cultura.",
+      "effect_text": "Subito: +2 PV.",
       "effects": [
         {
           "hook": "on_acquire",
           "op": "vp",
           "value": 2
-        },
-        {
-          "hook": "on_acquire",
-          "op": "vp",
-          "value": 1,
-          "condition": {
-            "op": "count_matching",
-            "min": 1,
-            "target": {
-              "is_self": true,
-              "class": [
-                "cultura"
-              ]
-            }
-          }
         }
       ]
     },
@@ -5356,12 +5177,16 @@
         "idee": 0
       },
       "family": "struttura",
-      "effect_text": "Subito: +2 PV.",
+      "effect_text": "L'edificio ha +2 Resistenza.",
       "effects": [
         {
           "hook": "on_acquire",
-          "op": "vp",
-          "value": 2
+          "op": "resistance",
+          "value": 2,
+          "duration": "permanent",
+          "target": {
+            "is_self": true
+          }
         }
       ]
     },
@@ -5376,27 +5201,12 @@
         "idee": 0
       },
       "family": "altro",
-      "effect_text": "Subito: +1 PV, +2 PV se l'edificio è Civico.",
+      "effect_text": "Subito: +1 PV.",
       "effects": [
         {
           "hook": "on_acquire",
           "op": "vp",
           "value": 1
-        },
-        {
-          "hook": "on_acquire",
-          "op": "vp",
-          "value": 1,
-          "condition": {
-            "op": "count_matching",
-            "min": 1,
-            "target": {
-              "is_self": true,
-              "class": [
-                "civico"
-              ]
-            }
-          }
         }
       ]
     },

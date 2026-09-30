@@ -1791,16 +1791,28 @@ func _test_potenziamenti_nuovi() -> void:
 	_eq("il Focolare da' 1 Idea a chi abita", p.idee, idee + 1)
 
 	# La Bottega d'artista sconta nella risorsa del potenziamento (registro 124).
-	b.upgrades.clear()
+	# Ogni potenziamento sulla sua classe (registro 129): la Statua su un
+	# edificio Cultura, i Bastioni su uno Militare.
+	var bc := _put(gs, 0, "ed_grotte_dipinte", 2)
+	var bm := _put(gs, 0, "ed_villaggio_palizzato", 3)
 	gs.upg_row = ["po_statua", "po_bastioni"]
-	var statua := ActionRules.quote_upgrade(gs, 0, "po_statua", b)
-	var bastioni := ActionRules.quote_upgrade(gs, 0, "po_bastioni", b)
+	var statua := ActionRules.quote_upgrade(gs, 0, "po_statua", bc)
+	var bastioni := ActionRules.quote_upgrade(gs, 0, "po_bastioni", bm)
 	_put(gs, 0, "ed_bottega_dartista", 1)
-	var statua2 := ActionRules.quote_upgrade(gs, 0, "po_statua", b)
-	var bastioni2 := ActionRules.quote_upgrade(gs, 0, "po_bastioni", b)
+	var statua2 := ActionRules.quote_upgrade(gs, 0, "po_statua", bc)
+	var bastioni2 := ActionRules.quote_upgrade(gs, 0, "po_bastioni", bm)
 	_ok("la Bottega sconta la Statua di 1 Idea", statua.legal and statua2.idee == statua.idee - 1,
 		"%s %s %d -> %d" % [statua.legal, statua.reason, statua.idee, statua2.idee])
 	_ok("  e i Bastioni di 1 Costruzione", bastioni.legal and bastioni2.pietra == bastioni.pietra - 1)
+
+	# La stessa classe (registro 129).
+	_ok("la Statua (Cultura) non va sulle Capanne (Civico)",
+		not ActionRules.quote_upgrade(gs, 0, "po_statua", b).legal)
+	_ok("  e i Bastioni (Militare) non vanno sulle Grotte (Cultura)",
+		not ActionRules.quote_upgrade(gs, 0, "po_bastioni", bc).legal)
+	bc.extra_classes.append("militare")
+	_ok("  ma si', se le Grotte contano anche come Militari",
+		ActionRules.quote_upgrade(gs, 0, "po_bastioni", bc).legal)
 	CardDB.load_db(CardDB.DB_PATH)
 
 # POTENZIARE NELLA COLONNA ADIACENTE (registro 126), manopola spenta nel file

@@ -1,6 +1,6 @@
 Ti allego i cinque PDF delle carte edificio del mio gioco da tavolo "La Strada delle Ere", versione 2.0 (Edifici_Prima_Era_A4.pdf, Edifici_Seconda_Era_A4.pdf, Edifici_Terza_Era_A4.pdf, Edifici_Quarta_Era_A4.pdf, Edifici_Quinta_Era_A4.pdf), e il file carte-v2-da-stampare.md. Il file .md è la fonte: contiene, per ogni edificio e ogni potenziamento, tutto e solo quello che va scritto sulla carta. Se un PDF e il .md non coincidono, vale il .md.
 
-Ti chiedo di: correggere le icone dei punti su tutti gli edifici, correggere i testi di alcuni edifici, abbassare il Lampo di 16 edifici, cambiare alcuni numeri su altri otto, creare le carte dei 50 potenziamenti e correggere tre tessere dell'era e tre Eredità. Tutto il resto resta identico: formato A4, impaginazione, dimensioni e forme delle carte, illustrazioni, font, colori di barre, classi e luoghi, nomi, costi, resistenza, Scavo e produzione. Il testo delle carte deve restare testo vero (selezionabile), non immagine, come adesso.
+Ti chiedo di: correggere le icone dei punti su tutti gli edifici, correggere i testi di alcuni edifici, abbassare il Lampo di 16 edifici, cambiare alcuni numeri su altri otto, correggere la classe di cinque potenziamenti e correggere tre tessere dell'era e tre Eredità. Tutto il resto resta identico: formato A4, impaginazione, dimensioni e forme delle carte, illustrazioni, font, colori di barre, classi e luoghi, nomi, costi, resistenza, Scavo e produzione. Il testo delle carte deve restare testo vero (selezionabile), non immagine, come adesso.
 
 ## 1. Le icone in basso: i punti non sono Denaro
 
@@ -96,17 +96,17 @@ Su queste carte cambia solo quanto scritto qui; tutto il resto resta com'è:
 | Era 3 | Mura | Lampo: da 1 a **2** |
 | Era 5 | Museo | costo: da 1 Costruzione, 1 Denaro, 2 Idee a **1 Costruzione, 1 Denaro, 1 Idea** |
 
-## 5. Le carte dei potenziamenti (nuove, 50)
+## 5. Cinque potenziamenti: la classe
 
-Crea le carte di tutti i 50 potenziamenti del .md, dieci per era, in cinque PDF nuovi: Potenziamenti_Prima_Era_A4.pdf … Potenziamenti_Quinta_Era_A4.pdf.
+Nel PDF Potenziamenti_Completi_A4.pdf cambia solo il box della classe (nome e colore) di cinque carte; tutto il resto resta com'è:
 
-- **Formato**: come una carta edificio normale (una casella, orizzontale, circa 194 x 116 pt), stesso bordo nero arrotondato, stessa griglia a tre carte per riga sul foglio A4.
-- **Barra del nome** in alto con il nome e "Era N", nello stesso colore d'era degli edifici.
-- **Sotto la barra**, a sinistra il box della **classe** (stesso colore della classe sugli edifici), a destra il box della **famiglia**: Arte, Struttura o Altro. Scegli per la famiglia tre colori neutri che non si confondano con classi e luoghi.
-- **Costo** a sinistra, con l'icona della risorsa: lampadina per le Idee (Arte), mattone per la Costruzione (Struttura), moneta per il Denaro (Altro).
-- **Testo** nel riquadro in basso, parola per parola dal .md.
-- **Illustrazione**: il soggetto del nome (un totem, una palizzata, un mosaico…), nello stesso stile isometrico degli edifici e dell'epoca giusta.
-- Il potenziamento non ha resistenza, Scavo, Rendita né Lampo: non mettere quelle icone.
+| potenziamento | classe stampata | classe giusta |
+|---|---|---|
+| Cupola | Religione | **Ingegneria** |
+| Giardino pensile | Cultura | **Civico** |
+| Targa storica | Cultura | **Civico** |
+| Ascensore panoramico | Civico | **Ingegneria** |
+| Memoriale | Militare | **Religione** |
 
 ## 6. Tessere dell'era ed Eredità (altri PDF)
 
@@ -131,6 +131,6 @@ Sempre in Carte.pdf, i sei eventi dell'era 4 (Alluvione, Bonifiche, Controriform
 ## 7. Cosa mi restituisci
 
 1. I cinque PDF degli edifici corretti, con gli stessi nomi di file, e i PDF delle tessere e delle carte corretti.
-2. I cinque PDF nuovi dei potenziamenti.
+2. Il PDF dei potenziamenti corretto.
 3. Un elenco breve delle carte che hai modificato, pagina per pagina.
 4. Una piccola legenda con le icone nuove (corona d'alloro, clessidra, fulmine) e i colori delle famiglie dei potenziamenti, così la riporto nel regolamento.

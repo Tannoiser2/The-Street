@@ -259,10 +259,10 @@ I secondi 25 (registro 123) raddoppiano il mazzo: dieci potenziamenti diversi pe
 |--:|---|---|--:|---|---|---|
 | 1 | Pittura rupestre | arte | 0/0/1 | **Subito: +1 PV. L'edificio ha +2 Scavo.** |  | oggi: "Arte: +1 PV. Scavo dell'edificio +2" |
 | 1 | Palizzata | struttura | 1/0/0 | **L'edificio ha +1 Resistenza.** |  | oggi: "Struttura: +1 res" |
-| 1 | Idolo | arte | 0/0/1 | **Subito: +1 PV, +2 PV se l'edificio è Religione.** |  | oggi: "Arte: +1 PV (+1 extra su edificio Religione)" |
+| 1 | Idolo | arte | 0/0/1 | **Subito: +1 PV.** |  | oggi: "Arte: +1 PV (+1 extra su edificio Religione)" |
 | 1 | Granaio comune | altro | 0/1/0 | **Quando attivi l'edificio: +1 Costruzione.** |  | oggi: "Quando abiti questo edificio, +1 pietra" |
 | 1 | Fondamenta in pietra | struttura | 1/0/0 | **L'edificio ha +1 Resistenza.** |  | oggi: "Struttura: +1 res" |
-| 1 | Totem | arte | 0/0/1 | Subito: +1 PV, +2 PV se l'edificio è Civico. |  |  |
+| 1 | Totem | arte | 0/0/1 | Subito: +1 PV. |  |  |
 | 1 | Argine | struttura | 1/0/0 | L'edificio ha +1 Resistenza. |  |  |
 | 1 | Focolare | altro | 0/1/0 | Quando attivi l'edificio: +1 Idea. |  |  |
 | 1 | Recinto per il bestiame | altro | 0/1/0 | Quando attivi l'edificio: +1 Denaro. |  |  |
@@ -272,27 +272,27 @@ I secondi 25 (registro 123) raddoppiano il mazzo: dieci potenziamenti diversi pe
 | 2 | Bastioni | struttura | 1/0/0 | **L'edificio ha +1 Resistenza.** |  | oggi: "Struttura: +1 res" |
 | 2 | Banchina | altro | 0/1/0 | **Quando attivi l'edificio, se tocca il Fiume: +1 Denaro.** |  | oggi: "Solo su slot fiume: quando abiti qui, +1 oro" |
 | 2 | Iscrizione | altro | 0/1/0 | **L'edificio ha +2 Scavo.** |  | oggi: "Scavo dell'edificio +2" |
-| 2 | Mosaico | arte | 0/0/1 | Subito: +1 PV, +2 PV se l'edificio è Cultura. |  |  |
+| 2 | Mosaico | arte | 0/0/1 | Subito: +1 PV. |  |  |
 | 2 | Terme private | altro | 0/1/0 | Quando attivi l'edificio: +1 Idea. |  |  |
-| 2 | Mura di cinta | struttura | 1/0/0 | L'edificio ha +1 Resistenza, +2 se è Militare. |  |  |
+| 2 | Mura di cinta | struttura | 1/0/0 | L'edificio ha +1 Resistenza. |  |  |
 | 2 | Mulino ad acqua | altro | 0/1/0 | Quando attivi l'edificio, se tocca il Fiume: +1 Costruzione. |  |  |
 | 2 | Lapide funeraria | altro | 0/1/0 | A fine partita: +2 Scavo a ogni edificio sotterrato sotto l'edificio. |  |  |
 | 3 | Contrafforte | struttura | 1/0/0 | **L'edificio ha +1 Resistenza.** |  | oggi: "Struttura: +1 res" |
 | 3 | Campanile | altro | 0/1/0 | **Subito: +1 PV. L'edificio ha +1 Resistenza.** |  | oggi: "Ibrido: +1 PV e +1 res" |
 | 3 | Merlatura | struttura | 1/0/0 | **L'edificio ha +1 Resistenza e conta anche come Militare.** |  | oggi: "Struttura: +1 res. L'edificio conta anche come Militare" |
 | 3 | Stalli mercantili | altro | 0/1/0 | **L'edificio ha +1 Rendita.** |  | oggi: "L'affitto incassato da questo edificio è +1" |
-| 3 | Reliquia | arte | 0/0/1 | **Subito: +1 PV, +2 PV se l'edificio è Religione.** |  | oggi: "Arte: +2 PV su edificio Religione, altrimenti +1" |
+| 3 | Reliquia | arte | 0/0/1 | **Subito: +1 PV.** |  | oggi: "Arte: +2 PV su edificio Religione, altrimenti +1" |
 | 3 | Vetrata | arte | 0/0/1 | Subito: +1 PV. L'edificio ha +2 Scavo. |  |  |
 | 3 | Arco rampante | struttura | 1/0/0 | L'edificio ha +1 Resistenza e conta anche come Religione. |  |  |
-| 3 | Portico | altro | 0/1/0 | Quando attivi l'edificio: +1 Denaro, +2 se è Commercio. |  |  |
-| 3 | Torre di guardia | struttura | 1/0/0 | L'edificio ha +1 Resistenza, +2 se è Militare. |  |  |
-| 3 | Stemma di famiglia | arte | 0/0/1 | Subito: +1 PV, +2 PV se l'edificio è Civico. |  |  |
+| 3 | Portico | altro | 0/1/0 | Quando attivi l'edificio: +1 Denaro. |  |  |
+| 3 | Torre di guardia | struttura | 1/0/0 | L'edificio ha +1 Resistenza. |  |  |
+| 3 | Stemma di famiglia | arte | 0/0/1 | Subito: +1 PV. |  |  |
 | 4 | Opera d'arte | arte | 0/0/2 | **Subito: +3 PV.** |  | oggi: "Arte: +3 PV" |
 | 4 | Affreschi | arte | 0/0/2 | **Subito: +2 PV.** |  | oggi: "Arte: +2 PV" |
 | 4 | Cupola | altro | 0/2/0 | **Subito: +2 PV. L'edificio ha +1 Resistenza.** |  | oggi: "Ibrido: +2 PV e +1 res" |
 | 4 | Giardino pensile | arte | 0/0/2 | **Subito: +2 PV.** |  | oggi: "Arte: +2 PV" |
-| 4 | Cannoniere | struttura | 2/0/0 | **L'edificio ha +1 Resistenza, +2 se è Militare.** |  | oggi: "Struttura: +1 res (+2 su edificio Militare)" |
-| 4 | Pala d'altare | arte | 0/0/2 | Subito: +2 PV, +3 PV se l'edificio è Religione. |  |  |
+| 4 | Cannoniere | struttura | 2/0/0 | **L'edificio ha +1 Resistenza.** |  | oggi: "Struttura: +1 res (+2 su edificio Militare)" |
+| 4 | Pala d'altare | arte | 0/0/2 | Subito: +2 PV. |  |  |
 | 4 | Loggia | altro | 0/2/0 | Subito: +1 PV. L'edificio ha +1 Rendita. |  |  |
 | 4 | Bastione a stella | struttura | 2/0/0 | L'edificio ha +2 Resistenza. |  |  |
 | 4 | Fontana monumentale | arte | 0/0/2 | Subito: +2 PV. L'edificio ha +2 Scavo. |  |  |
@@ -302,10 +302,10 @@ I secondi 25 (registro 123) raddoppiano il mazzo: dieci potenziamenti diversi pe
 | 5 | Ascensore panoramico | altro | 0/2/0 | **Subito: +2 PV.** |  | oggi: "+2 PV" |
 | 5 | Boutique | altro | 0/2/0 | **Quando attivi l'edificio: +2 Denaro.** |  | oggi: "Quando abiti questo edificio, +2 oro" |
 | 5 | Memoriale | altro | 0/2/0 | **Subito: +2 PV.** |  | oggi: "+2 PV" |
-| 5 | Murale | arte | 0/0/2 | Subito: +2 PV, +3 PV se l'edificio è Cultura. |  |  |
+| 5 | Murale | arte | 0/0/2 | Subito: +2 PV. |  |  |
 | 5 | Pannelli solari | altro | 0/2/0 | Quando attivi l'edificio: +2 Costruzione. |  |  |
-| 5 | Cemento armato | struttura | 2/0/0 | Subito: +2 PV. |  |  |
-| 5 | Terrazza panoramica | altro | 0/2/0 | Subito: +1 PV, +2 PV se l'edificio è Civico. |  |  |
+| 5 | Cemento armato | struttura | 2/0/0 | L'edificio ha +2 Resistenza. |  |  |
+| 5 | Terrazza panoramica | altro | 0/2/0 | Subito: +1 PV. |  |  |
 | 5 | Archivio storico | altro | 0/2/0 | L'edificio ha +3 Scavo. |  |  |
 
 ## I 24 eventi
