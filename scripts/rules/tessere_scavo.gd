@@ -29,10 +29,10 @@ static func quante(b: Building) -> int:
 
 # Lo Scavo su cui si paga il premio di chi costruisce sopra. Di regola quello
 # stampato; con `premio: "tessere"` la carta della rovina non c'e' piu' e si
-# contano le tessere coperte sotto (una per casella).
+# contano le tessere coperte sotto (una per casella), `per_tessera` PV l'una.
 static func scavo_per_premio(b: Building) -> int:
 	if attive() and str(CardDB.constants["tessere_scavo"].get("premio", "")) == "tessere":
-		return quante(b)
+		return quante(b) * int(CardDB.constants["tessere_scavo"].get("per_tessera", 1))
 	return b.scavo_value()
 
 static func _mazzo(gs: GameState, player: int) -> Array:

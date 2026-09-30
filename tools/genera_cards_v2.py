@@ -795,6 +795,12 @@ def tessere_scavo_premio(v):
     tessere_scavo(v)
     v["constants"]["tessere_scavo"]["premio"] = "tessere"
 
+# Con 1 PV a tessera il premio scendeva da 9 a 4 PV a partita e la Lampo
+# crollava (ventiseiesima misura): la prova con 2 PV a tessera.
+def tessere_scavo_premio2(v):
+    tessere_scavo_premio(v)
+    v["constants"]["tessere_scavo"]["per_tessera"] = 2
+
 import sys
 variante = sys.argv[sys.argv.index("--variante") + 1] if "--variante" in sys.argv else ""
 # Le case in riserva stanno nel file v2 di tutti (registro 116); le varianti di
@@ -811,7 +817,7 @@ potenziamenti_di_classe(v2)
 if variante:
     {"doppioni": doppioni, "abitazioni": abitazioni, "case": case,
      "case_doppioni": case_doppioni, "case_scavo": case_scavo, "case_nulle": case_nulle,
-     "case_mista": case_mista, "case_tutti": case_tutti, "tessere_scavo": tessere_scavo, "tessere_scavo_premio": tessere_scavo_premio}[variante](v2)
+     "case_mista": case_mista, "case_tutti": case_tutti, "tessere_scavo": tessere_scavo, "tessere_scavo_premio": tessere_scavo_premio, "tessere_scavo_premio2": tessere_scavo_premio2}[variante](v2)
     v2["meta"]["ruleset"] = "v2-" + variante
     v2["meta"]["origine"] = "generato da tools/genera_cards_v2.py --variante %s: non modificare a mano" % variante
     out = os.path.join(RADICE, "data/proposte/cards-v2-%s.json" % variante)
