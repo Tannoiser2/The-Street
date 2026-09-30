@@ -66,11 +66,11 @@ Domanda per era (C / D / I): era 1: 16 / 0 / 5 · era 2: 27 / 0 / 6 · era 3: 24
 | Capanne di fango | civico | qualsiasi | 1 | 1/0/0 | 2 | 0 | 1 | 1 | — | 0 | — | — | RIS x2 | nuova: in riserva, sempre disponibile; niente lato di oggi |
 | Case di pietra | civico | qualsiasi | 1 | 2/0/0 | 2 | 0 | 2 | 1 | — | 0 | — | — | RIS x2 | nuova: in riserva, sempre disponibile; niente lato di oggi |
 | Cava | commercio | Pianura | 1 | 1/0/0 | 1 | 0 | 0 | 2 | 2 C | 0 | 4 | — |  |  |
-| Circolo di pietre | religione | qualsiasi | 1 | 2/0/1 | 4 | 1 | 0 | 5 | — | 0 | — | Lo Stonehenge della strada. |  |  |
-| Dolmen | religione | Collina | 1 | 1/0/1 | 3 | 1 | 0 | 3 | — | 0 | — | — |  |  |
+| Circolo di pietre | religione | qualsiasi | 1 | 2/0/1 | 4 | 2 | 0 | 5 | — | 0 | — | Lo Stonehenge della strada. |  |  |
+| Dolmen | religione | Collina | 1 | 1/0/1 | 3 | 2 | 0 | 3 | — | 0 | — | — |  |  |
 | Focolare comune | civico | Pianura | 1 | 1/0/0 | 1 | 0 | 1 | 2 | — | 0 | — | **Quando lo attivi: +1 Costruzione.** |  | oggi: "Quartiere: +1 pietra quando abiti qui" |
 | Grotte dipinte | cultura | Collina | 1 | 0/0/1 | 2 | 0 | 0 | 6 | — | 0 | — | — |  |  |
-| Menhir | religione | Bosco | 1 | 1/0/1 | 4 | 1 | 0 | 3 | — | 0 | — | Piccolo ma quasi indistruttibile. |  |  |
+| Menhir | religione | Bosco | 1 | 1/0/1 | 4 | 2 | 0 | 3 | — | 0 | — | Piccolo ma quasi indistruttibile. |  |  |
 | Palafitte | civico | Fiume | 1 | 1/0/0 | 2 | 0 | 1 | 2 | 1 C | 0 | — | — |  |  |
 | Ripari | civico | qualsiasi | 1 | 1/0/0 | 1 | 0 | 1 | 2 | — | 0 | — | — | RIS x2 | nuova: in riserva, sempre disponibile; niente lato di oggi |
 | Trappole da pesca | ingegneria | Fiume | 1 | 1/0/0 | 1 | 0 | 0 | 0 | 1 C | 0 | — | — |  |  |
@@ -81,18 +81,18 @@ Domanda per era (C / D / I): era 1: 16 / 0 / 5 · era 2: 27 / 0 / 6 · era 3: 24
 
 | edificio | classi | terreno | slot | costo C/D/I | res | Rendita | Lampo | Scavo | produce | liv. | esaur. | testo | motivo | nota |
 |---|---|---|--:|--:|--:|--:|--:|--:|---|--:|--:|---|---|---|
-| Acquedotto | ingegneria | Fiume | 3 | 2/0/1 | 4 | 1 | 0 | 3 | — | 0 | — | **A fine partita, se è in piedi: +2 PV.** |  | oggi: "Colossale: 2 slot adiacenti (3 pagando +1 pietra; in 2 giocatori il terzo slot è vietato), almeno uno con fiume. Eco: +2 PV (lampo) se ancora in piedi nel Moderno" |
+| Acquedotto | ingegneria | Fiume | 3 | 2/0/1 | 4 | 2 | 0 | 3 | — | 0 | — | **A fine partita, se è in piedi: +2 PV.** |  | oggi: "Colossale: 2 slot adiacenti (3 pagando +1 pietra; in 2 giocatori il terzo slot è vietato), almeno uno con fiume. Eco: +2 PV (lampo) se ancora in piedi nel Moderno" |
 | Anfiteatro | cultura | qualsiasi | 2 | 4/0/1 | 5 | 2 | 0 | 6 | 1 D | 0 | — | **Solo sopra: mai a terra. Sopra di lui si costruisce solo quando è in rovina.** |  | oggi: "Colossale: occupa 2 slot adiacenti, si attiva da entrambe le colonne e conta come strato in entrambe. Produce 1 oro a ogni attivazione — il Colosseo vende i biglietti" |
 | Case a schiera | civico | qualsiasi | 1 | 1/0/0 | 3 | 0 | 1 | 1 | — | 0 | — | — | RIS x2 | nuova: in riserva, sempre disponibile; niente lato di oggi |
 | Castrum | militare | Pianura | 1 | 2/0/0 | 4 | 0 | 2 | 3 | — | 0 | — | **Negli eventi, i tuoi edifici nelle sue colonne hanno +1 Resistenza.** |  | oggi: "+1 res ai tuoi edifici in questa colonna" |
 | Domus | civico | qualsiasi | 1 | 2/0/0 | 3 | 0 | 2 | 1 | — | 0 | — | — | RIS x2 | nuova: in riserva, sempre disponibile; niente lato di oggi |
 | Emporio | commercio | Fiume | 1 | 2/0/0 | 2 | 0 | 2 | 2 | 1 D | 0 | — | — |  | Lampo 1 → 2 (registro 100) |
-| Foro | commercio, civico | Pianura | 1 | 3/0/0 | 3 | 1 | 0 | 5 | 1 D | 0 | — | — |  |  |
+| Foro | commercio, civico | Pianura | 1 | 3/0/0 | 3 | 2 | 0 | 5 | 1 D | 0 | — | — |  |  |
 | Insulae | civico | Pianura | 1 | 2/0/0 | 2 | 0 | 2 | 2 | 1 C | 0 | — | — |  | Lampo 1 → 2 (registro 100) |
-| Ponte | ingegneria | Fiume | 2 | 2/0/1 | 3 | 1 | 0 | 3 | — | 0 | — | **Gli edifici adiacenti producono 1 in più di ogni risorsa che già producono.** |  | oggi: "Quartiere: +1 produzione agli edifici adiacenti" |
+| Ponte | ingegneria | Fiume | 2 | 2/0/1 | 3 | 2 | 0 | 3 | — | 0 | — | **Gli edifici adiacenti producono 1 in più di ogni risorsa che già producono.** |  | oggi: "Quartiere: +1 produzione agli edifici adiacenti" |
 | Sacello | religione | Collina | 1 | 0/0/1 | 2 | 0 | 1 | 3 | — | 0 | — | — |  |  |
 | Teatro | cultura | qualsiasi | 1 | 1/0/1 | 3 | 0 | 2 | 5 | — | 0 | — | — |  |  |
-| Tempio | religione | Collina | 1 | 2/0/1 | 3 | 1 | 0 | 3 | — | 0 | — | — |  |  |
+| Tempio | religione | Collina | 1 | 2/0/1 | 3 | 2 | 0 | 3 | — | 0 | — | — |  |  |
 | Terme | civico | qualsiasi | 1 | 2/0/0 | 2 | 0 | 2 | 3 | — | 0 | — | — |  |  |
 | Torre di vedetta | militare | Collina | 1 | 1/0/0 | 3 | 0 | 2 | 2 | — | 0 | — | **Negli eventi, i tuoi edifici adiacenti hanno +1 Resistenza.** |  | oggi: "Quartiere: +1 res ai tuoi edifici adiacenti" |
 | Tuguri | civico | qualsiasi | 1 | 1/0/0 | 2 | 0 | 1 | 2 | — | 0 | — | — | RIS x2 | nuova: in riserva, sempre disponibile; niente lato di oggi |
@@ -121,40 +121,40 @@ Domanda per era (C / D / I): era 1: 16 / 0 / 5 · era 2: 27 / 0 / 6 · era 3: 24
 
 | edificio | classi | terreno | slot | costo C/D/I | res | Rendita | Lampo | Scavo | produce | liv. | esaur. | testo | motivo | nota |
 |---|---|---|--:|--:|--:|--:|--:|--:|---|--:|--:|---|---|---|
-| Accademia | cultura | qualsiasi | 1 | 1/0/2 | 2 | 0 | 2 | 3 | — | 0 | — | — |  |  |
-| Banco | commercio | qualsiasi | 1 | 1/0/1 | 2 | 0 | 2 | 0 | 1 D | 0 | — | — |  | Lampo 2 → 3 (registro 100) |
-| Bottega d'artista | cultura | qualsiasi | 1 | 1/0/1 | 2 | 0 | 2 | 2 | — | 0 | — | **I tuoi potenziamenti costano 1 in meno, nella loro risorsa.** |  | oggi: "I tuoi potenziamenti costano 1 oro in meno" |
-| Casa borghese | civico | qualsiasi | 1 | 0/0/1 | 2 | 0 | 2 | 1 | — | 0 | — | — | RIS x2 | nuova: in riserva, sempre disponibile; niente lato di oggi |
-| Case popolari | civico | qualsiasi | 1 | 0/0/1 | 2 | 0 | 2 | 2 | — | 0 | — | — | RIS x2 | nuova: in riserva, sempre disponibile; niente lato di oggi |
+| Accademia | cultura | qualsiasi | 1 | 1/0/2 | 2 | 0 | 1 | 3 | — | 0 | — | — |  |  |
+| Banco | commercio | qualsiasi | 1 | 1/0/1 | 2 | 0 | 1 | 0 | 1 D | 0 | — | — |  | Lampo 2 → 3 (registro 100) |
+| Bottega d'artista | cultura | qualsiasi | 1 | 1/0/1 | 2 | 0 | 1 | 2 | — | 0 | — | **I tuoi potenziamenti costano 1 in meno, nella loro risorsa.** |  | oggi: "I tuoi potenziamenti costano 1 oro in meno" |
+| Casa borghese | civico | qualsiasi | 1 | 0/0/1 | 2 | 0 | 1 | 1 | — | 0 | — | — | RIS x2 | nuova: in riserva, sempre disponibile; niente lato di oggi |
+| Case popolari | civico | qualsiasi | 1 | 0/0/1 | 2 | 0 | 1 | 2 | — | 0 | — | — | RIS x2 | nuova: in riserva, sempre disponibile; niente lato di oggi |
 | Duomo | religione, cultura | qualsiasi | 1 | 3/1/2 | 4 | 2 | 0 | 5 | — | 2 | — | **Solo sopra: al livello 2 o più.** |  | Rendita 4 → 2 (registro 97) |
 | Fortezza bastionata | militare, ingegneria | Collina | 2 | 3/1/1 | 5 | 2 | 0 | 2 | — | 1 | — | **Solo sopra: mai a terra. Sopra di lui si costruisce solo quando è in rovina.** |  | Rendita 3 → 2 (registro 97) |
-| Giardino all'italiana | cultura | Collina | 1 | 0/0/2 | 1 | 0 | 2 | 0 | — | 0 | — | Effimero per eccellenza: PV subito, difficilmente sopravvivrà. |  |  |
-| Loggia | civico | qualsiasi | 1 | 1/0/1 | 2 | 0 | 2 | 2 | — | 0 | — | — |  | Lampo 2 → 3 (registro 100) |
-| Osservatorio | ingegneria | Collina | 1 | 1/1/1 | 2 | 0 | 2 | 2 | — | 0 | — | **A fine partita, se è in piedi: +2 PV.** |  | oggi: "Eco: +2 PV (lampo) se ancora in piedi a fine partita" |
-| Palazzetto | civico | qualsiasi | 1 | 0/1/1 | 3 | 0 | 2 | 1 | — | 0 | — | — | RIS x2 | nuova: in riserva, sempre disponibile; niente lato di oggi |
-| Palazzo signorile | civico | Pianura | 1 | 2/1/1 | 3 | 0 | 2 | 3 | 1 I | 0 | — | — | 3R | produce 1 Idea al posto di 1 cultura (già nel file v2) |
+| Giardino all'italiana | cultura | Collina | 1 | 0/0/2 | 1 | 0 | 1 | 0 | — | 0 | — | Effimero per eccellenza: PV subito, difficilmente sopravvivrà. |  |  |
+| Loggia | civico | qualsiasi | 1 | 1/0/1 | 2 | 0 | 1 | 2 | — | 0 | — | — |  | Lampo 2 → 3 (registro 100) |
+| Osservatorio | ingegneria | Collina | 1 | 1/1/1 | 2 | 0 | 1 | 2 | — | 0 | — | **A fine partita, se è in piedi: +2 PV.** |  | oggi: "Eco: +2 PV (lampo) se ancora in piedi a fine partita" |
+| Palazzetto | civico | qualsiasi | 1 | 0/1/1 | 3 | 0 | 1 | 1 | — | 0 | — | — | RIS x2 | nuova: in riserva, sempre disponibile; niente lato di oggi |
+| Palazzo signorile | civico | Pianura | 1 | 2/1/1 | 3 | 0 | 1 | 3 | 1 I | 0 | — | — | 3R | produce 1 Idea al posto di 1 cultura (già nel file v2) |
 | Piazza monumentale | civico | Pianura | 1 | 2/1/1 | 3 | 2 | 0 | 3 | — | 1 | — | **Solo sopra: al livello 1 o più. A fine partita: +1 PV per ogni tuo edificio in cima a una colonna adiacente.** |  | oggi: "A fine partita: +1 PV per tuo edificio in cima adiacente. Richiede livello 1+" |
 | Ponte monumentale | ingegneria | Fiume | 2 | 2/1/1 | 4 | 2 | 0 | 3 | — | 0 | — | — |  | Rendita 3 → 2 (registro 97) |
-| Villa | civico | Collina | 1 | 2/1/1 | 3 | 0 | 2 | 3 | — | 0 | — | — |  |  |
+| Villa | civico | Collina | 1 | 2/1/1 | 3 | 0 | 1 | 3 | — | 0 | — | — |  |  |
 
 ### Era 5
 
 | edificio | classi | terreno | slot | costo C/D/I | res | Rendita | Lampo | Scavo | produce | liv. | esaur. | testo | motivo | nota |
 |---|---|---|--:|--:|--:|--:|--:|--:|---|--:|--:|---|---|---|
-| Biblioteca | cultura | qualsiasi | 1 | 1/1/2 | 3 | 0 | 2 | 0 | — | 0 | — | **A fine partita: +1 PV per ogni classe diversa fra i tuoi edifici nelle sue colonne, sotterrati compresi.** |  | oggi: "+1 PV per classe diversa fra i tuoi edifici in questa colonna, Sotterrati inclusi" |
-| Caffè letterario | cultura | qualsiasi | 1 | 0/0/2 | 1 | 0 | 2 | 0 | — | 0 | — | **A fine partita: +1 PV se è adiacente a un edificio Cultura.** |  | oggi: "Quartiere: +1 PV se adiacente a un edificio Cultura" |
-| Condominio | civico | qualsiasi | 1 | 1/0/1 | 2 | 0 | 2 | 0 | — | 0 | — | Economico: costruire il presente sopra il passato non è mai stato così facile. |  | resta: si costruisce sopra le rovine con lo sconto di metà resistenza (punto 10); Lampo 2 → 3 (registro 100) |
-| Condominio popolare | civico | qualsiasi | 1 | 0/1/1 | 4 | 0 | 2 | 1 | — | 0 | — | — | RIS x2 | nuova: in riserva, sempre disponibile; niente lato di oggi |
-| Fondazione d'arte | cultura | qualsiasi | 1 | 1/0/2 | 2 | 0 | 2 | 0 | — | 0 | — | **A fine partita: +1 PV per ogni tuo potenziamento.** |  | oggi: "I tuoi potenziamenti valgono +1 PV" |
-| Grattacielo | commercio | Pianura | 1 | 2/3/1 | 3 | 0 | 2 | 0 | — | 2 | — | **Solo sopra: al livello 2 o più, mai a terra. A fine partita: +1 PV per ogni livello a cui è costruito; ogni edificio altrui in cima a una colonna adiacente toglie 1 PV al suo proprietario.** |  | oggi: "Svettante: +1 PV per livello a cui è costruito. Quartiere: −1 PV agli edifici in cima adiacenti altrui, valutato a fine partita. Richiede livello 2+" |
-| Monumento ai caduti | militare, religione | qualsiasi | 1 | 1/1/1 | 3 | 0 | 2 | 0 | — | 0 | — | **A fine partita: +1 PV per ogni altro tuo edificio Militare, in piedi o sotterrato.** |  | oggi: "Sacrario: +1 PV per ogni altro tuo edificio Militare, in piedi o Sotterrato" |
-| Museo | cultura | qualsiasi | 1 | 1/1/1 | 3 | 0 | 2 | 0 | — | 1 | — | **Solo sopra: al livello 1 o più. A fine partita: +2 PV per ogni edificio sotterrato sotto di lui.** |  | oggi: "+2 PV per ogni edificio Sotterrato sotto di sé. Richiede livello 1+" |
-| Officina | ingegneria | qualsiasi | 1 | 1/0/1 | 2 | 0 | 2 | 0 | 2 D | 0 | — | — |  | Lampo 2 → 3 (registro 100) |
-| Palazzina | civico | qualsiasi | 1 | 0/0/1 | 3 | 0 | 2 | 1 | — | 0 | — | — | RIS x2 | nuova: in riserva, sempre disponibile; niente lato di oggi |
-| Parco archeologico | cultura | qualsiasi | 1 | 1/0/2 | 2 | 0 | 2 | 0 | — | 0 | — | **A fine partita: fino a 2 tuoi edifici non sotterrati nelle colonne adiacenti valgono il loro Scavo come se fossero sotterrati.** |  | oggi: "Finale: fino a 2 tuoi edifici non Sotterrati nelle colonne adiacenti valgono il loro Scavo come se lo fossero" |
-| Ponte in acciaio | ingegneria | Fiume | 2 | 1/2/1 | 4 | 0 | 2 | 0 | — | 0 | — | — |  |  |
-| Stazione | commercio, ingegneria | Pianura | 3 | 2/3/1 | 4 | 0 | 2 | 0 | 2 D | 1 | — | **Solo sopra: al livello 1 o più.** |  | oggi: "Colossale: 2 slot adiacenti, si attiva da entrambe le colonne. Produce 2 oro. Richiede livello 1+" |
-| Università | cultura, civico | qualsiasi | 1 | 2/1/2 | 3 | 0 | 2 | 0 | — | 1 | — | **Solo sopra: al livello 1 o più. A fine partita: +1 PV per ogni tuo Personaggio.** |  | oggi: "+1 PV per ogni tuo personaggio reclutato. Richiede livello 1+" |
+| Biblioteca | cultura | qualsiasi | 1 | 1/1/2 | 3 | 0 | 1 | 0 | — | 0 | — | **A fine partita: +1 PV per ogni classe diversa fra i tuoi edifici nelle sue colonne, sotterrati compresi.** |  | oggi: "+1 PV per classe diversa fra i tuoi edifici in questa colonna, Sotterrati inclusi" |
+| Caffè letterario | cultura | qualsiasi | 1 | 0/0/2 | 1 | 0 | 1 | 0 | — | 0 | — | **A fine partita: +1 PV se è adiacente a un edificio Cultura.** |  | oggi: "Quartiere: +1 PV se adiacente a un edificio Cultura" |
+| Condominio | civico | qualsiasi | 1 | 1/0/1 | 2 | 0 | 1 | 0 | — | 0 | — | Economico: costruire il presente sopra il passato non è mai stato così facile. |  | resta: si costruisce sopra le rovine con lo sconto di metà resistenza (punto 10); Lampo 2 → 3 (registro 100) |
+| Condominio popolare | civico | qualsiasi | 1 | 0/1/1 | 4 | 0 | 1 | 1 | — | 0 | — | — | RIS x2 | nuova: in riserva, sempre disponibile; niente lato di oggi |
+| Fondazione d'arte | cultura | qualsiasi | 1 | 1/0/2 | 2 | 0 | 1 | 0 | — | 0 | — | **A fine partita: +1 PV per ogni tuo potenziamento.** |  | oggi: "I tuoi potenziamenti valgono +1 PV" |
+| Grattacielo | commercio | Pianura | 1 | 2/3/1 | 3 | 0 | 1 | 0 | — | 2 | — | **Solo sopra: al livello 2 o più, mai a terra. A fine partita: +1 PV per ogni livello a cui è costruito; ogni edificio altrui in cima a una colonna adiacente toglie 1 PV al suo proprietario.** |  | oggi: "Svettante: +1 PV per livello a cui è costruito. Quartiere: −1 PV agli edifici in cima adiacenti altrui, valutato a fine partita. Richiede livello 2+" |
+| Monumento ai caduti | militare, religione | qualsiasi | 1 | 1/1/1 | 3 | 0 | 1 | 0 | — | 0 | — | **A fine partita: +1 PV per ogni altro tuo edificio Militare, in piedi o sotterrato.** |  | oggi: "Sacrario: +1 PV per ogni altro tuo edificio Militare, in piedi o Sotterrato" |
+| Museo | cultura | qualsiasi | 1 | 1/1/1 | 3 | 0 | 1 | 0 | — | 1 | — | **Solo sopra: al livello 1 o più. A fine partita: +2 PV per ogni edificio sotterrato sotto di lui.** |  | oggi: "+2 PV per ogni edificio Sotterrato sotto di sé. Richiede livello 1+" |
+| Officina | ingegneria | qualsiasi | 1 | 1/0/1 | 2 | 0 | 1 | 0 | 2 D | 0 | — | — |  | Lampo 2 → 3 (registro 100) |
+| Palazzina | civico | qualsiasi | 1 | 0/0/1 | 3 | 0 | 1 | 1 | — | 0 | — | — | RIS x2 | nuova: in riserva, sempre disponibile; niente lato di oggi |
+| Parco archeologico | cultura | qualsiasi | 1 | 1/0/2 | 2 | 0 | 1 | 0 | — | 0 | — | **A fine partita: fino a 2 tuoi edifici non sotterrati nelle colonne adiacenti valgono il loro Scavo come se fossero sotterrati.** |  | oggi: "Finale: fino a 2 tuoi edifici non Sotterrati nelle colonne adiacenti valgono il loro Scavo come se lo fossero" |
+| Ponte in acciaio | ingegneria | Fiume | 2 | 1/2/1 | 4 | 0 | 1 | 0 | — | 0 | — | — |  |  |
+| Stazione | commercio, ingegneria | Pianura | 3 | 2/3/1 | 4 | 0 | 1 | 0 | 2 D | 1 | — | **Solo sopra: al livello 1 o più.** |  | oggi: "Colossale: 2 slot adiacenti, si attiva da entrambe le colonne. Produce 2 oro. Richiede livello 1+" |
+| Università | cultura, civico | qualsiasi | 1 | 2/1/2 | 3 | 0 | 1 | 0 | — | 1 | — | **Solo sopra: al livello 1 o più. A fine partita: +1 PV per ogni tuo Personaggio.** |  | oggi: "+1 PV per ogni tuo personaggio reclutato. Richiede livello 1+" |
 
 ## Le tessere terreno
 

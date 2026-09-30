@@ -42,6 +42,10 @@ class ActionQuote:
 const UPGRADE_CAPACITY_BASE := 1
 
 static func upgrade_capacity(data: Dictionary) -> int:
+	# UN POTENZIAMENTO PER CASELLA (registro 133): i token stanno sopra la
+	# tessera dell'edificio, uno per casella; il Colosseo, 2x2, ne porta 4.
+	if bool(CardDB.constants.get("potenziamenti_per_casella", false)):
+		return int(data.get("width", 1)) * int(data.get("depth", 1))
 	return int(data.get("upgrade_slots", UPGRADE_CAPACITY_BASE))
 
 # La capienza puo' crescere per un effetto attivo (il Vescovo: "capienza dei
@@ -108,6 +112,9 @@ static func quote_restore(gs: GameState, player: int, target: Building) -> Actio
 		return ActionQuote.no("nessun rudere bersaglio")
 	if target.is_buried:
 		return ActionQuote.no("l'edificio e' sotterrato")
+	if TessereScavo.carte_restituite():
+		# La carta e' tornata al proprietario (registro 131): niente da rialzare.
+		return ActionQuote.no("con le carte restituite non si ristruttura")
 	if bool(CardDB.constants.get("senza_rudere", false)):
 		# SENZA RUDERE (D13): si ristruttura una PROPRIA rovina esposta. Niente
 		# furto: senza rudere ogni edificio caduto sarebbe rubabile. Dipende

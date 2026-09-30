@@ -504,10 +504,17 @@ const SPINTE_V2 := {"rendita_per_era": 0.9, "rendita_zero": -1.5, "lampo": 1.6, 
 # due la Obiettivi vinceva il 59 % e la Lampo il 38 %, a tre la Obiettivi il
 # 38 %, a quattro il 32 %. Il peso della Obiettivi va GIU' per indebolirla (a
 # differenza del Lampo, dove la spinta alta e' un handicap).
-const SPINTE_V2_PER_GIOCATORI := {2: {"lampo": 2.0, "obiettivi_peso": 0.6},
-	3: {"lampo": 2.6, "obiettivi_peso": 0.7},
-	4: {"lampo": 2.8, "lampo_potenzia": 5.0, "rendita_per_era": 1.5,
-		"scavo_premio": 0.2, "scavo_terra_scavo": 0.1, "obiettivi_peso": 0.6}}
+# Registro 136, con le rovine a tessere, le carte restituite, la Continuita'
+# a collezione e i flussi riequilibrati: la Rendita vinceva il 20% a ogni
+# tavolo qualunque fosse il suo peso, perche' scartava le carte senza
+# Rendita (l'80% del mazzo): senza quella penalita' torna nella media. Il
+# premio di scavo nel bot rafforzava la Scavo invece di frenarla (34-39% a
+# quattro con 0,6): a zero la riporta al 26%. La Lampo torna in media con
+# meno peso (1,4 a tre, 1,0 a quattro).
+const SPINTE_V2_PER_GIOCATORI := {2: {"lampo": 2.0, "obiettivi_peso": 0.6, "rendita_zero": 0.0},
+	3: {"lampo": 1.4, "obiettivi_peso": 1.5, "rendita_zero": 0.0, "scavo_premio": 0.0},
+	4: {"lampo": 1.0, "lampo_potenzia": 5.0, "rendita_per_era": 1.5, "rendita_zero": 0.0,
+		"scavo_premio": 0.0, "scavo_terra_scavo": 0.1, "obiettivi_peso": 0.45}}
 static var giocatori := 0
 static var spinte_override := {}
 
@@ -582,21 +589,31 @@ static func _valore_costruzione(gs: GameState, p: PlayerState, v, strategia: Str
 		# finire coperta del tutto da questa costruzione.
 		if str(CardDB.constants.get("premio_scavo", "nessuno")) != "nessuno":
 			var premio := 0.0
-			for b in q2.bases: premio += float(Scoring.premio_scavo(b.scavo_value(), q2.level, gs.era))
+			for b in q2.bases: premio += float(Scoring.premio_scavo(TessereScavo.scavo_per_premio(b), q2.level, gs.era))
 			if premio != 0.0:
 				dett["premio di scavo"] = premio * 0.8
 				q += premio * 0.8
 				premio_stimato = premio
 	# Continuita' di luogo: una seconda carta della stessa classe nella colonna.
+	# Come collezione (registro 132) conta quanto la carta allunga la classe
+	# fra tutti i propri edifici, dovunque siano.
 	var mie := {}
-	for b in gs.grid.in_column(col_from):
-		if b.owner != p.index: continue
-		for c in b.classes(): mie[c] = int(mie.get(c, 0)) + 1
-	for c in d["classes"]:
-		if int(mie.get(c, 0)) >= 1:
-			q += 1.5
-			dett["continuita' di classe in colonna"] = 1.5
-			break
+	var collezione := CardDB.constants.has("continuita_collezione")
+	if collezione:
+		mie = Scoring.classi_di(gs, p.index)
+		var passo := _premio_collezione(mie, d)
+		if passo > 0.0:
+			q += passo * 0.5
+			dett["collezione di classe"] = passo * 0.5
+	else:
+		for b in gs.grid.in_column(col_from):
+			if b.owner != p.index: continue
+			for c in b.classes(): mie[c] = int(mie.get(c, 0)) + 1
+		for c in d["classes"]:
+			if int(mie.get(c, 0)) >= 1:
+				q += 1.5
+				dett["continuita' di classe in colonna"] = 1.5
+				break
 	# Lo Scavo si incassa solo da sotterrati: vale, ma meno della rendita.
 	if float(d["scavo"]) != 0.0: dett["Scavo suo"] = float(d["scavo"]) * 0.25
 	q += float(d["scavo"]) * 0.25
@@ -628,11 +645,26 @@ static func _valore_costruzione(gs: GameState, p: PlayerState, v, strategia: Str
 		"verticale":
 			if sopra: q += 3.0 + 1.2 * float(par.get("level", 1))
 			else: q -= 1.5
-		"continuita": q += _premio_catena(mie, d) * float(sp["continuita_peso"])
+		"continuita":
+			var catena := _premio_collezione(mie, d) if collezione else _premio_catena(mie, d)
+			q += catena * float(sp["continuita_peso"])
 		"obiettivi": q += _premio_obiettivi(gs, p, d, col_from, par) * float(sp["obiettivi_peso"])
 	if q != prima_della_spinta:
 		dett["spinta della strategia %s" % strategia] = q - prima_della_spinta
 	return q
+
+# Quanto vale la carta per la collezione (registro 132): i PV che aggiunge
+# alla classe migliore, piu' un anticipo per la soglia successiva, perche' a
+# soglie la carta che non la passa vale zero ma avvicina.
+static func _premio_collezione(mie: Dictionary, d: Dictionary) -> float:
+	var meglio := 0.0
+	for c in d["classes"]:
+		var quante := int(mie.get(c, 0))
+		var ora := Scoring.continuita_collezione_pv(quante)
+		var dopo := Scoring.continuita_collezione_pv(quante + 1)
+		var poi := Scoring.continuita_collezione_pv(quante + 2)
+		meglio = maxf(meglio, float(dopo - ora) + 0.5 * float(poi - dopo))
+	return meglio
 
 # Quanto vale allungare una catena di classe in questa colonna: la differenza
 # fra quello che la colonna paga adesso e quello che pagherebbe dopo.

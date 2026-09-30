@@ -128,9 +128,24 @@ Nel PDF Carte.pdf cambia la condizione di tre carte Eredità; nome e punti invar
 
 Sempre in Carte.pdf, i sei eventi dell'era 4 (Alluvione, Bonifiche, Controriforma, Rivoluzione industriale, Secolarizzazioni, Speculazione edilizia) passano da **Forza 5** a **Forza 3**: cambia solo il numero della forza, il resto del testo resta.
 
-## 7. Cosa mi restituisci
+## 7. Le rovine, i token e i nuovi numeri (registri 130-133)
+
+Il designer ha cambiato le rovine e i punti. Sulle carte cambia questo:
+
+- **Edifici, Lampo:** tutti gli edifici delle ere 4 e 5 che avevano Lampo 2 ora hanno **Lampo 1**.
+- **Edifici, Rendita:** gli edifici con Rendita 1 ora hanno **Rendita 2** (Menhir, Dolmen, Circolo di pietre, Tempio, Ponte, Foro, Acquedotto).
+- **Edifici, misura:** ogni carta edificio ha la misura che occupa sulla mappa: una colonna per casella di larghezza, un binario per casella di profondità (il Colosseo è 2x2).
+- **Edifici, retro:** non serve più il retro in bianco e nero della rovina: quando un edificio crolla la carta torna al proprietario.
+- **Personaggi:** aggiungete un valore **Scavo** stampato, per era: era 1 = 5, era 2 = 4, era 3 = 3, era 4 = 2, era 5 = 1.
+- **Potenziamenti:** diventano **token** tondi o quadrati, uno per casella, da mettere sopra l'edificio. I 16 potenziamenti **Arte** hanno un valore **Scavo** stampato per era, con la stessa scala dei Personaggi.
+- **Tessere scavo (nuove):** 20 per giocatore, nei 4 colori, dorso nel colore del giocatore; il terrapieno è una tessera generica, da stampare in quante copie servono. Fronte: un numero da 0 a 3 e, su alcune, le icone. Lo scheletro ha una linea che attraversa lo strato con scritto "Era N" (N da 1 a 4). Per ogni colore: valore 0 ×5 (due semplici, una scheletro Era 2, una arte, una scheletro Era 1 + arte); valore 1 ×6 (quattro semplici, una scheletro Era 3, una arte); valore 2 ×5 (quattro semplici, una scheletro Era 4 + arte); valore 3 ×4 (quattro semplici).
+- **Eredità Il Restauratore:** condizione nuova "almeno 2 tue rovine riportate alla luce da un edificio dell'era Moderna" (4 PV, invariati).
+- **Evento Secolarizzazioni:** testo nuovo "Forza 3. Religione −2 res." (via la parte sul restauro).
+
+## 8. Cosa mi restituisci
 
 1. I cinque PDF degli edifici corretti, con gli stessi nomi di file, e i PDF delle tessere e delle carte corretti.
 2. Il PDF dei potenziamenti corretto.
 3. Un elenco breve delle carte che hai modificato, pagina per pagina.
-4. Una piccola legenda con le icone nuove (corona d'alloro, clessidra, fulmine) e i colori delle famiglie dei potenziamenti, così la riporto nel regolamento.
+4. Le 80 tessere scavo (20 per colore) e le tessere terrapieno e i token dei potenziamenti.
+5. Una piccola legenda con le icone nuove (corona d'alloro, clessidra, fulmine) e i colori delle famiglie dei potenziamenti, così la riporto nel regolamento.

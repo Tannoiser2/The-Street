@@ -443,6 +443,12 @@ func _terrapieni(b: Building) -> void:
 		var m := _scatola(box.size, TERRAPIENO)
 		m.position = box.position + box.size / 2.0
 		add_child(m)
+		# Con le carte restituite il terrapieno ha la sua tessera, stampata
+		# dal designer: la si stende sopra la terra riportata.
+		if BoardLayout3D.grandezza_vera():
+			_carta_stesa(AABB(box.position + Vector3(0.0, box.size.y, 0.0),
+				Vector3(box.size.x, 0.4, box.size.z)), BoardLayout3D.terrapiano_path(),
+				TERRAPIENO, false, Color.WHITE, false)
 		# La terra riportata e' TERRA, e ha un disegno suo: una sezione di
 		# terreno. Prima era un parallelepipedo grigio e in mezzo a due
 		# basette disegnate sembrava un buco nella costruzione, non il pieno
@@ -473,6 +479,9 @@ func _basetta(b: Building) -> void:
 	# disteso sulle caselle, con la faccia della carta sopra - in bianco e
 	# nero se e' in rovina, cioe' capovolta - e i fianchi del colore del
 	# giocatore, perche' le carte sono uguali per tutti.
+	if BoardLayout3D.cartoni() and TessereScavo.fuori(b):
+		_tessere_scavo(b)
+		return
 	if BoardLayout3D.cartoni():
 		var tinta: Color = COLORI_GIOCATORE[b.owner % COLORI_GIOCATORE.size()].darkened(0.15)
 		_carta_stesa(box, BoardLayout3D.carta_edificio_path(b), tinta, false, Color.WHITE, true)
@@ -484,6 +493,23 @@ func _basetta(b: Building) -> void:
 	m.position = box.position + box.size / 2.0
 	add_child(m)
 	_banner_scavo(b)
+
+# Le tessere scavo coperte al posto della carta crollata (registro 131), nel
+# colore del proprietario ma scure, come il dorso di una tessera. Scoperte
+# dall'era moderna, mostrano il loro valore.
+func _tessere_scavo(b: Building) -> void:
+	var tinta: Color = COLORI_GIOCATORE[b.owner % COLORI_GIOCATORE.size()].darkened(0.5)
+	var scatole := BoardLayout3D.tessere_scavo_box(gs, b)
+	for i in scatole.size():
+		var t: AABB = scatole[i]
+		# Il dorso "ROVINA" finche' e' coperta; scoperta, la sua faccia.
+		var dati: Dictionary = b.tessere[i] if i < b.tessere.size() else {}
+		_carta_stesa(t, BoardLayout3D.tessera_rovina_path(dati, b.scavata and not dati.is_empty()),
+			tinta, false, Color.WHITE, false)
+		if b.scavata and i < b.tessere.size():
+			var v: Dictionary = b.tessere[i]
+			var testo := str(int(v.get("v", 0))) + (" +scheletro" if bool(v.get("s", false)) else "")
+			_scritta(t.position + Vector3(t.size.x / 2.0, t.size.y + 0.5, t.size.z / 2.0), testo, 0.05, Color.WHITE)
 
 # Il valore di Scavo scritto sulla basetta, davanti e dietro: la striscia di
 # terra e macerie che cresce col numero. Due piani appoggiati alle facce, non

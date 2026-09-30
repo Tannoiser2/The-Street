@@ -47,6 +47,8 @@ func _ready() -> void:
 	_run("v2: le caselle, il binario scelto e le carte profonde (registro 122)", _test_caselle)
 	_run("v2: i potenziamenti raddoppiati (registro 123)", _test_potenziamenti_nuovi)
 	_run("v2: la fila dei potenziamenti resta un'era (registro 126)", _test_potenzia_adiacente)
+	_run("v2: le tessere scavo (registro 130)", _test_tessere_scavo)
+	_run("v2: le carte restituite e i token riscattati (registro 131)", _test_carte_restituite)
 	print("\n%d superati, %d falliti" % [_passed, _failed])
 	get_tree().quit(0 if _failed == 0 else 1)
 
@@ -1838,4 +1840,116 @@ func _test_potenzia_adiacente() -> void:
 	var b := _put(gs, chi, "ed_capanne", 1)
 	_ok("con la manopola accesa si potenzia dalla colonna accanto",
 		AvailableActions.potenziamenti(gs, chi, 2).any(func(v): return v.legale and int(v.parametri.get("uid", -1)) == b.uid))
+	CardDB.load_db(CardDB.DB_PATH)
+
+# LE TESSERE SCAVO (registro 130): una rovina pesca una tessera per casella dal
+# mazzetto del proprietario; a fine partita le scoperte valgono per intero,
+# le coperte la meta'; un edificio dell'era 5 scopre la pila sotto di se'.
+func _test_tessere_scavo() -> void:
+	if not FileAccess.file_exists("res://data/cards-v2.json"): return
+	CardDB.load_db("res://data/cards-v2.json")
+	_ok("nel file v2 le tessere scavo sono accese", TessereScavo.attive())
+	CardDB.constants["tessere_scavo"] = {"mazzo": [{"v": 3}, {"v": 2, "s": true}, {"v": 1}, {"v": 0}]}
+	var ctl := _game(2, 51)
+	var gs := ctl.gs
+	gs.grid.buildings.clear()
+	var r := _put(gs, 0, "ed_tumulo_funerario", 0, 0, Enums.BuildingState.ROVINA)
+	_eq("una rovina larga 2 ha due tessere", TessereScavo.quante(r), 2)
+	var spianata := _put(gs, 0, "ed_capanne", 3, 0, Enums.BuildingState.ROVINA)
+	spianata.was_razed = true
+	_eq("  uno spianato nessuna", TessereScavo.quante(spianata), 0)
+	var viva := _put(gs, 0, "ed_capanne", 4)
+	_eq("  un edificio in piedi nessuna", TessereScavo.quante(viva), 0)
+	var t := TessereScavo.tessere(gs, r)
+	var somma := int(t[0]["v"]) + int(t[1]["v"])
+	var p: PlayerState = gs.players[0]
+	var prima := p.vp
+	TessereScavo.conta(gs)
+	_eq("coperte valgono la meta'", p.vp - prima, somma / 2)
+	r.scavata = true
+	p.personaggi_storia = [["pe_capotribu", 1]]
+	prima = p.vp
+	TessereScavo.conta(gs)
+	var atteso := somma
+	for x in t:
+		if bool(x.get("s", false)): atteso += 5
+	_eq("  scoperte per intero, con lo scheletro di un Personaggio dell'era 1", p.vp - prima, atteso)
+	var sopra := _put(gs, 1, "ed_grattacielo", 0, 1)
+	sopra.basi.append(r.uid)
+	r.scavata = false
+	TessereScavo.scava(gs, sopra)
+	_ok("un edificio dell'era 5 costruito sopra la scopre", r.scavata)
+	_eq("il premio di chi costruisce sopra usa lo Scavo stampato", TessereScavo.scavo_per_premio(r), r.scavo_value())
+	CardDB.constants["tessere_scavo"]["premio"] = "tessere"
+	_eq("  o, con premio \"tessere\", le tessere sotto", TessereScavo.scavo_per_premio(r), 2)
+	_eq("  e lo spianato non ne ha", TessereScavo.scavo_per_premio(spianata), 0)
+	CardDB.load_db(CardDB.DB_PATH)
+
+# LE CARTE RESTITUITE (registro 131): la rovina torna al proprietario, per la
+# mappa non c'e' piu'; i potenziamenti tornano al proprietario come token che
+# a fine partita valgono il loro costo; niente ristrutturare.
+func _test_carte_restituite() -> void:
+	if not FileAccess.file_exists("res://data/cards-v2.json"): return
+	CardDB.load_db("res://data/cards-v2.json")
+	_ok("nel file v2 le carte tornano al proprietario", TessereScavo.carte_restituite())
+	CardDB.constants["tessere_scavo"] = {"mazzo": [{"v": 1}], "carte_restituite": true}
+	var ctl := _game(2, 52)
+	var gs := ctl.gs
+	gs.grid.buildings.clear()
+	var viva := _put(gs, 0, "ed_capanne", 0)
+	var r := _put(gs, 0, "ed_capanne", 0, 1, Enums.BuildingState.ROVINA)
+	_ok("una rovina e' fuori dalla mappa", TessereScavo.fuori(r))
+	_ok("  un edificio in piedi no", not TessereScavo.fuori(viva))
+	_ok("  i predicati di mappa non la vedono", not Effects.matches(gs, r, {"owner": "self", "level": {"min": 1}}, null, 0))
+	_ok("  chi chiede le rovine la vede", Effects.matches(gs, r, {"owner": "self", "state": ["rovina"], "level": {"min": 1}}, null, 0))
+	_ok("  le classi della carta restituita contano ancora", Effects.matches(gs, r, {"owner": "self", "class": r.data["classes"]}, null, 0))
+	_ok("non si ristruttura", not ActionRules.quote_restore(gs, 0, r).legal)
+	var upg := ""
+	for id in CardDB.upgrades:
+		var fx: Array = CardDB.upgrades[id].get("effects", [])
+		for e in fx:
+			if e["hook"] == "on_acquire" and str(e["op"]) == "resistance" and e.get("condition", {}).is_empty():
+				upg = id
+		if upg != "": break
+	_ok("c'e' un potenziamento che da' Resistenza", upg != "")
+	viva.upgrades.append(upg)
+	Effects.apply_on_acquire(gs, 0, CardDB.upgrades[upg], viva)
+	var res_prima := viva.bonus_res
+	_ok("  il token alza la Resistenza", res_prima > 0)
+	viva.state = Enums.BuildingState.ROVINA
+	TessereScavo.riscatta(gs, viva)
+	_eq("  in rovina il token torna al proprietario", gs.players[0].potenziamenti_riscattati, [upg])
+	_eq("  e l'edificio perde il bonus", viva.bonus_res, 0)
+	_ok("  e non lo porta piu'", viva.upgrades.is_empty())
+	# L'arte ritrovata (registro 133): il token arte riscattato vale il suo
+	# Scavo solo se un'icona arte scoperta lo ritrova; gli altri niente.
+	var p: PlayerState = gs.players[0]
+	var arte := ""
+	for id in CardDB.upgrades:
+		if str(CardDB.upgrades[id].get("family", "")) == "arte" and CardDB.upgrades[id].has("scavo"):
+			arte = id
+			break
+	_ok("i potenziamenti arte hanno uno Scavo stampato", arte != "")
+	p.potenziamenti_riscattati.append(arte)
+	var ss := _put(gs, 0, "ed_capanne", 3, 0, Enums.BuildingState.ROVINA)
+	ss.tessere = [{"v": 0, "p": true}]
+	var prima := p.vp
+	TessereScavo.conta(gs)
+	_eq("  coperta, l'icona arte non ritrova niente", p.vp - prima, 0)
+	ss.scavata = true
+	prima = p.vp
+	TessereScavo.conta(gs)
+	_eq("  scoperta ritrova il token arte", p.vp - prima, int(CardDB.upgrades[arte]["scavo"]))
+	# Lo scheletro con l'era (registro 135): vale lo Scavo del Personaggio
+	# preso in quell'era, non il migliore.
+	p.personaggi_storia = [["pe_capotribu", 1], [str(CardDB.characters.keys()[5]), int(CardDB.characters.values()[5]["era"])]]
+	var era2 := int(CardDB.characters.values()[5]["era"])
+	ss.tessere = [{"v": 0, "s": era2}]
+	prima = p.vp
+	TessereScavo.conta(gs)
+	_eq("  lo scheletro dell'era %d vale il Personaggio di quell'era" % era2, p.vp - prima, int(CardDB.characters.values()[5]["scavo"]))
+	ss.tessere = [{"v": 0, "s": 3}]
+	prima = p.vp
+	TessereScavo.conta(gs)
+	_eq("  senza Personaggio di quell'era vale 0", p.vp - prima, 0)
 	CardDB.load_db(CardDB.DB_PATH)

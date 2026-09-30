@@ -30,7 +30,7 @@ func _ready() -> void:
 	#   --giro -20    gradi attorno all'asse verticale
 	#   --alt 12      gradi sopra l'orizzonte
 	#   --mira 3      la colonna da mettere al centro
-	if args.has("zoom") or args.has("giro") or args.has("alt") or args.has("mira"):
+	if args.has("zoom") or args.has("giro") or args.has("alt") or args.has("mira") or args.has("miraz"):
 		var o := CameraOrbita.da_stato(ctl.gs)
 		o.distanza *= float(args.get("zoom", "1"))
 		o.imbardata += float(args.get("giro", "0"))
@@ -39,6 +39,9 @@ func _ready() -> void:
 			var col := int(args["mira"])
 			o.mira = Vector3(BoardLayout3D.col_x(col) + BoardLayout3D.TESSERA_W / 2.0,
 				BoardLayout3D.TESSERA_Y * 4.0, BoardLayout3D.board_d() / 2.0)
+		# --miraz 400   sposta la mira in profondita' (mm): per guardare da
+		#               vicino le carte dei giocatori, davanti alla strada.
+		if args.has("miraz"): o.mira.z = float(args["miraz"])
 		vista.orbita = o
 	vista.mostra(ctl.gs)
 	# --crollo 0.4   abbatte una sagoma e ferma lo sgretolamento a quel punto

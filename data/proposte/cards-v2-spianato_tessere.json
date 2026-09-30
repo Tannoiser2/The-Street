@@ -1,10 +1,10 @@
 {
   "meta": {
     "game": "La Strada delle Ere",
-    "ruleset": "v2-tre-risorse",
+    "ruleset": "v2-spianato_tessere",
     "language": "it",
     "source": "distinta-carte (fonte unica)",
-    "origine": "generato da tools/genera_cards_v2.py: non modificare a mano"
+    "origine": "generato da tools/genera_cards_v2.py --variante spianato_tessere: non modificare a mano"
   },
   "constants": {
     "eras": 5,
@@ -178,7 +178,8 @@
       ],
       "premio": "tessere",
       "per_tessera": 2,
-      "carte_restituite": true
+      "carte_restituite": true,
+      "spianato_lascia_tessere": true
     },
     "potenziamenti_per_casella": true,
     "continuita_collezione": {

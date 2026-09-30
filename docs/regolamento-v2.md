@@ -1,7 +1,7 @@
 # La Strada delle Ere — Regolamento v2
 
 > Il regolamento della v2, scritto sulle decisioni del registro (`domande-aperte.md`, punti
-> 84–106) e su quello che gioca il motore con `data/cards-v2.json`. Dove la v2 non cambia la
+> 84–106 e 130–133) e su quello che gioca il motore con `data/cards-v2.json`. Dove la v2 non cambia la
 > v1.5, il testo è quello del regolamento v1.5 (`reference/regolamento-completo.html`). Le carte
 > stanno in `carte-v2.md`; qui ci sono le regole. In fondo, le cose che restano da decidere al
 > tavolo.
@@ -42,9 +42,11 @@ Il tabellone è una griglia di 5 binari per una fila di colonne di terreno: 5 co
 giocatori, 7 in tre, 9 in quattro. Ogni casella è un posto dove può stare un edificio.
 
 Ogni edificio è **una carta sola**, che porta tutto: costo, produzione, resistenza, Rendita,
-Lampo, Scavo, classe, terreno richiesto. Incollata su un cartone di circa 15 mm del vostro
-colore, si stende sulle caselle che occupa; chi costruisce sopra la impila. Quando va in
-rovina si gira: il retro è la stessa carta in bianco e nero, con il valore di Scavo in vista.
+Lampo, Scavo, classe, terreno richiesto. La carta ha già nel mercato la misura che avrà sulla
+mappa: si stende sulle caselle che occupa, nella basetta del vostro colore. Quando va in
+rovina **lascia la mappa**: torna al proprietario, che la tiene scoperta davanti a sé, e al suo
+posto si mettono le sue **tessere scavo**, coperte (vedi *Gli stati*). Sulla mappa non restano
+mai carte di edifici in rovina.
 
 | componente | quantità |
 |---|--:|
@@ -52,8 +54,10 @@ rovina si gira: il retro è la stessa carta in bianco e nero, con il valore di S
 | Tessere dell'era | 70 (7 per era, in due copie) |
 | Sagome edificio | 60 (12 per era) |
 | Case della riserva | 28 (3 tipi per era, 2 nell'era Moderna, 2 copie ciascuno) |
-| Personaggi | 25 (5 per era) + 4 Dinastia |
-| Potenziamenti | 50 |
+| Personaggi | 25 (5 per era, con lo Scavo stampato) + 4 Dinastia |
+| Potenziamenti (gettoni) | 50 |
+| Tessere scavo | 20 per giocatore, del suo colore (il mazzetto rovine) |
+| Tessere terrapieno | generiche, quante ne servono |
 | Eventi | 24 (6 per era, ere 1–4) |
 | Monumenti celebri | 14 |
 | Eredità (obiettivi segreti) | 16 |
@@ -71,9 +75,9 @@ esiste).
 ## Le tre risorse — Costruzione, Denaro, Idee
 
 - **Costruzione (C)**: la pietra di ieri. Paga gli edifici, i terrapieni, i potenziamenti
-  Struttura, la ristrutturazione.
-- **Denaro (D)**: l'oro di ieri. Paga gli edifici, i potenziamenti che non sono Arte né
-  Struttura, la ristrutturazione.
+  Struttura.
+- **Denaro (D)**: l'oro di ieri. Paga gli edifici e i potenziamenti che non sono Arte né
+  Struttura.
 - **Idee (I)**: la Cultura resa risorsa. Paga gli edifici di Cultura, Religione e Ingegneria, i
   potenziamenti Arte e la Dinastia. Le Idee sono una risorsa, non punti: quello che ieri si
   chiamava "cultura" sul segnapunti oggi si chiama **PV**. Cultura resta il nome della classe.
@@ -91,7 +95,8 @@ la strada. Ogni colonna ha un solo terreno, valido per tutte le ere. Separate le
 dell'era per era: a inizio di ogni era mescolate le 14 dell'era e posatene una su ogni colonna.
 
 Ogni giocatore prende 4 lavoratori, le basette e i gettoni del proprio colore e 2 Costruzione. In
-due giocatori, il secondo riceve anche 1 Denaro.
+due giocatori, il secondo riceve anche 1 Denaro. Ognuno mescola le 20 tessere scavo del proprio
+colore e le tiene coperte davanti a sé: è il suo **mazzetto rovine**.
 
 Separate le sagome per era in cinque mazzi e scoprite il mercato dell'Era 1: sei edifici
 visibili. Accanto al mercato mettete **la riserva**: le case dell'era, tre tipi in due copie (due tipi
@@ -104,9 +109,10 @@ il passato non si costruisce più.
 #### Le case
 
 Ogni era ha tre case generiche, in due copie: la **casa piccola** (costa 1, poca resistenza,
-Lampo 1), la **casa grande** (costa 2, Lampo 2) e la **casa con lo Scavo**
-(Ripari, Tuguri, Casupole, Case popolari: costa 1, Lampo 1, Scavo 2). Nell'era Moderna la
-casa con lo Scavo non c'è: dopo l'ultima era nessuno costruisce più sopra, e lo Scavo non vale.
+Lampo 1), la **casa grande** (costa 2, Lampo 2; Lampo 1 nelle ere 4 e 5) e la **casa con lo
+Scavo** (Ripari, Tuguri, Casupole, Case popolari: costa 1, Lampo 1, Scavo 2). Lo Scavo stampato
+non paga più né il premio né il proprietario (lo fanno le tessere scavo): conta per le carte che
+lo leggono, come le Eredità e l'Archeologo. Nell'era Moderna la casa con lo Scavo non c'è.
 Non producono e non rendono: sono suolo a buon mercato e un rientro annacquato di punti, per chi
 non trova niente nel mercato o vuole riempire una colonna. Classe civico, nessun terreno
 richiesto. Sono uguali a ogni numero di giocatori.
@@ -136,7 +142,7 @@ che vale a ogni attivazione per tutta l'era, e un **effetto**.
 **L'effetto scatta una volta per era, alla prima occasione, poi la tessera si gira** e per
 quell'era non vale più. Scatta **solo per la colonna che avete scelto**, cioè dove avete messo il
 lavoratore: "chi attiva per primo" è il primo che piazza un lavoratore qui; "il primo edificio
-costruito qui" è il primo costruito, ristrutturato o potenziato scegliendo questa colonna, e un
+costruito qui" è il primo costruito o potenziato scegliendo questa colonna, e un
 edificio largo che copre anche altre colonne fa scattare solo la tessera della colonna scelta.
 Un effetto che non darebbe niente (per esempio la Fiera quando nella colonna ci siete solo voi)
 non fa girare la tessera.
@@ -160,8 +166,11 @@ prosegue in giro normale — per compensare il vantaggio di chi occupa il suolo 
 ### Il draft
 
 I cinque Personaggi dell'era sono scoperti. In ordine di turno ognuno ne prende **uno, gratis,
-senza usare un lavoratore**. Il Personaggio vale per l'era e si scarta alla fine: non si
-seppellisce. Gli avanzi si scartano.
+senza usare un lavoratore**. Il Personaggio vale per l'era; alla fine non si seppellisce e
+non ha più effetto, ma non lo scartate: tenetelo da parte davanti a voi. Ogni Personaggio porta
+uno **Scavo stampato** secondo la sua era — 5 nella Preistoria, 4 nell'Antichità, 3 nel
+Medioevo, 2 nel Rinascimento, 1 nel Moderno — che serve a fine partita alle icone scheletro
+delle tessere scavo. Gli avanzi del draft si scartano.
 
 Le carte che parlano di "questo lavoratore" o "l'edificio che abiti" — Capotribù, Legionario,
 Cavaliere e simili — si legano al **primo edificio che costruite nell'era**. Le Impronte
@@ -181,7 +190,7 @@ propria produzione al proprio proprietario: Costruzione, Denaro, Idee, o PV subi
 colonna trafficata arricchisce anche gli avversari: è il prezzo di andare dove la città è viva.
 
 **3. Compi un'azione (facoltativa).** Una sola, legata alla colonna che avete attivato:
-costruire lì o in una colonna adiacente; potenziare o ristrutturare un vostro edificio lì; oppure
+costruire lì o in una colonna adiacente; potenziare un vostro edificio lì; oppure
 comprare la Dinastia. Passare è non fare niente dopo l'attivazione.
 
 #### Prosperità urbana
@@ -196,7 +205,7 @@ gira: per quell'era il Centro ha già dato. A inizio era si rigirano tutti.
 Costruire significa pagare il costo della sagoma e metterla sul tabellone, nella colonna che avete
 attivato o in una adiacente. Si costruiscono solo edifici dell'era corrente, dal mercato o dalla
 riserva delle case.
-L'edificio occupa le caselle disegnate sulla sua carta: una, due o tre colonne affiancate, e
+L'edificio occupa le caselle che copre la sua carta, già in misura reale: una, due o tre colonne affiancate, e
 uno, due o tre binari in profondità (le carte quadrate sono una colonna per due binari, i 2x2
 due colonne per due binari, il Grattacielo una colonna per tre binari). Ci sono due modi.
 
@@ -210,13 +219,14 @@ partita: quando è pieno, si sale.
 ### Costruire sopra
 
 Invece del suolo, poggiate l'edificio su ciò che esiste già nelle caselle scelte. Ogni
-casella ha la sua pila: conta la carta in cima a quella casella. Ogni casella della vostra
-impronta deve offrire una base valida, e almeno una deve averla davvero:
+casella ha la sua pila: conta ciò che sta in cima a quella casella, una carta in piedi o la
+tessera scavo di una rovina. Ogni casella della vostra impronta deve offrire una base valida, e
+almeno una deve averla davvero:
 
 | cosa c'è sotto | cosa succede |
 |---|---|
-| Una rovina, di chiunque | Base gratuita, e vi sconta 1 Costruzione (le macerie sono materiale) |
-| Un vostro edificio in piedi | Lo spianate: vi sconta in Costruzione metà della sua resistenza, arrotondata per eccesso, ma il suo Scavo vale 0 |
+| Una rovina (tessere scavo), di chiunque | Base gratuita, e vi sconta 1 Costruzione (le macerie sono materiale) |
+| Un vostro edificio in piedi | Lo spianate: la carta torna a voi e non lascia tessere scavo; vi sconta in Costruzione metà della sua resistenza, arrotondata per eccesso |
 | Un edificio in piedi altrui | Impossibile. Blocca finché è vivo |
 | Terreno nudo | Terrapieno: +1 Costruzione per ogni casella priva di base, una volta sola qualunque sia la quota |
 
@@ -226,31 +236,43 @@ nessuna delle colonne della sua impronta è già salita in quell'era.
 
 #### Il premio di scavo
 
-Chi costruisce sopra **incassa subito** lo Scavo di ciò che seppellisce, moltiplicato per il
-livello a cui costruisce: una rovina con Scavo 3 sepolta dal livello 2 paga 6 PV a chi la
-seppellisce. Se l'edificio sotto era già sotterrato non paga: si paga solo chi finisce sotto
-terra adesso. **Nell'era Moderna il premio è dimezzato**, arrotondato per difetto: l'ultima era
-non deve decidere da sola la partita.
+La carta della rovina non c'è più: il premio conta le **tessere scavo**. Chi costruisce sopra
+**incassa subito 2 PV per ogni tessera coperta** che finisce sotto il nuovo edificio,
+moltiplicati per il livello a cui costruisce: una rovina che ha lasciato 2 tessere, sepolta dal
+livello 2, paga 2 × 2 × 2 = 8 PV a chi la seppellisce. Le tessere già sotterrate non pagano: si
+paga solo ciò che finisce sotto terra adesso. **Nell'era Moderna il premio è dimezzato**,
+arrotondato per difetto: l'ultima era non deve decidere da sola la partita. Lo Scavo stampato
+sulla carta non conta più per il premio.
 
-Il proprietario dell'edificio sepolto non perde nulla: a fine partita incassa lo Scavo stampato
-della sua sagoma, come sempre. Il premio è per chi scava; lo Scavo resta a chi è stato scavato.
+Il proprietario della rovina sepolta non perde nulla: le tessere restano sue, sotto il nuovo
+edificio, e a fine partita le conta (vedi *Fine partita*). Il premio è per chi scava; le tessere
+restano a chi è stato scavato.
 
 #### Spolia
 
 Spianare un proprio edificio in piedi non costa nulla: anzi, vi sconta in Costruzione metà della
-sua resistenza, arrotondata per eccesso. I blocchi del vecchio muro diventano il nuovo. In cambio
-quella sagoma vale Scavo 0 e non paga premio a nessuno: chi demolisce non lascia archeologia.
+sua resistenza, arrotondata per eccesso. I blocchi del vecchio muro diventano il nuovo. La carta
+torna a voi come ogni rovina, ma **non lascia tessere scavo**: non paga premio a nessuno e alla
+fine non vi dà Scavo. Chi demolisce non lascia archeologia.
 
-## Potenziare, ristrutturare, la Dinastia
+## Potenziare e la Dinastia
 
 **Potenziare** costa 1 nelle prime tre ere e 2 nelle ultime due, nella risorsa della famiglia:
 i potenziamenti **Arte** in Idee, quelli **Struttura** in Costruzione, tutti gli altri in
-Denaro. Infilate la carta sotto un vostro edificio in piedi della colonna attivata **della
-stessa classe del potenziamento** (vale anche una classe acquisita, come con la Merlatura),
-lasciandone
-sporgere la linguetta. I potenziamenti Arte danno PV subito; quelli Struttura danno resistenza
-permanente, segnata con un cubetto nero. La capienza base è un potenziamento per edificio, salvo
-le carte che ne dichiarano di più.
+Denaro. Il potenziamento è un **gettone**: posatelo sopra un vostro edificio in piedi della
+colonna attivata **della stessa classe del potenziamento** (vale anche una classe acquisita,
+come con la Merlatura). I potenziamenti Arte danno PV subito; quelli Struttura danno resistenza
+permanente, segnata con un cubetto nero.
+
+**Un gettone per casella.** La capienza di un edificio è pari alle caselle che occupa: un
+edificio da una casella ne porta uno, il Colosseo (2x2) ne porta quattro.
+
+**Il riscatto.** Quando l'edificio va in rovina, il proprietario **riscatta** i suoi gettoni: il
+loro effetto sull'edificio finisce, e i gettoni restano davanti a lui. Solo i gettoni **Arte**
+hanno ancora un valore: ognuno porta uno Scavo stampato secondo l'era — 5 nella Preistoria, 4
+nell'Antichità, 3 nel Medioevo, 2 nel Rinascimento, 1 nel Moderno — che vale solo se a fine
+partita un'icona arte di una tessera scoperta lo "ritrova". Gli altri gettoni riscattati non
+valgono niente.
 
 **La fila dei potenziamenti resta un'era.** A fine era i potenziamenti non presi non si scartano:
 restano accanto alla fila nuova per tutta l'era successiva, poi si scartano. Così quelli dell'era 1,
@@ -260,15 +282,14 @@ che nell'era 1 non trovano quasi mai un vostro edificio da potenziare, si posson
 
 Il lavoratore che piazza un potenziamento **lascia uno scheletro**: mettete il gettone
 dell'era sotto quell'edificio. Il lavoratore torna comunque a fine era; il gettone resta. Uno
-solo per edificio, e non nell'era Moderna. A fine partita ogni scheletro vale **6 meno la sua
-era** — 5 dalla Preistoria, 4 dall'Antichità, 3 dal Medioevo, 2 dal Rinascimento — **comunque
-finisca l'edificio**: in piedi, in rovina o sotterrato. Un artista o un architetto verrà ricordato
-anche se il palazzo non c'è più.
+solo per edificio, e non nell'era Moderna. Quando l'edificio va in rovina, il gettone scheletro
+resta sulle sue tessere scavo. A fine partita ogni scheletro vale **6 meno la sua era** — 5 dalla
+Preistoria, 4 dall'Antichità, 3 dal Medioevo, 2 dal Rinascimento — **comunque finisca
+l'edificio**: in piedi, in rovina o sotterrato. Un artista o un architetto verrà ricordato anche
+se il palazzo non c'è più. (Il gettone scheletro non va confuso con l'icona scheletro stampata su
+alcune tessere scavo: sono due cose diverse, e si contano separatamente.)
 
-**Ristrutturare** vale sulle **vostre rovine** della colonna attivata: pagate metà del costo
-originale, arrotondato per eccesso, in Costruzione e in Denaro (la parte del costo in Idee si
-paga in Denaro), e la sagoma torna sul lato attivo, con la resistenza guadagnata e lo scheletro
-che aveva; i potenziamenti persi nel crollo non tornano. Le rovine altrui non si ristrutturano: senza il rudere, ogni edificio caduto sarebbe rubabile.
+**Ristrutturare non esiste più**: una rovina non torna in piedi.
 
 **La Dinastia** si compra al posto dell'azione, nelle ere 1–4: nessuna abilità, ma un **quinto
 lavoratore permanente**, attivo da subito e per tutte le ere che restano. Costa Idee: 4 nell'Era
@@ -278,27 +299,73 @@ lavoratore permanente**, attivo da subito e per tutte le ere che restano. Costa 
 
 ## Gli stati — Vivo, in rovina, sepolto
 
-Un edificio attraversa fino a tre condizioni, e solo la ristrutturazione riporta indietro.
+Un edificio attraversa fino a tre condizioni, e nessuna torna indietro.
 
-**Attivo.** La sagoma è dritta, lato illustrato. Produce, segna Rendita, ospita lavoratori,
-subisce gli eventi. Un edificio attivo è sempre in superficie: nulla può sorgere sopra un
-edificio vivo altrui.
+**Attivo.** La carta è sulla mappa, nella basetta del proprietario. Produce, segna Rendita,
+ospita lavoratori e gettoni, subisce gli eventi. Un edificio attivo è sempre in superficie: nulla
+può sorgere sopra un edificio vivo altrui.
 
-**Rovina.** La sagoma si gira e mostra il lato rovina, con lo Scavo. L'edificio non produce, non
-rende, perde i potenziamenti; ma è ancora lì, alza il livello e fa da base a chi costruirà sopra.
-Il proprietario può ristrutturarla. Ci si arriva fallendo un evento di due o più punti.
+**Rovina.** La carta **lascia la mappa e torna al proprietario**, che la tiene scoperta davanti a
+sé; i suoi potenziamenti si riscattano. Al suo posto il proprietario pesca dal proprio mazzetto
+rovine **una tessera scavo per ogni casella** che l'edificio occupava (larghezza per
+profondità: un 2x2 come il Colosseo ne pesca quattro) e le posa **coperte** su quelle caselle.
+Le tessere non producono e non rendono, ma alzano il livello e fanno da base a chi costruirà
+sopra. Ci si arriva fallendo un evento di due o più punti, esaurendo una Cava, o spianando un
+proprio edificio per costruirci sopra: in quest'ultimo caso la carta torna a voi ma **non si
+pescano tessere**.
 
-**Sotterrato.** Non è uno stato alternativo agli altri due: è una condizione di posizione. È
-sotterrato qualsiasi edificio su cui è stata costruita una sopraelevazione. Cessa di essere in
-piedi, non produce, non subisce più eventi, non si ristruttura, e a fine partita vale il suo
-Scavo.
+**Sotterrato.** Non è uno stato alternativo agli altri due: è una condizione di posizione. Sono
+sotterrate le tessere scavo su cui è stato costruito un altro edificio. Restano sotto, coperte,
+e nessuno le guarda fino alla fine della partita, salvo lo scavo dell'era Moderna.
+
+#### Le rovine sulla mappa
+
+Una rovina non è più un edificio sulla mappa: sono solo tessere. **Tutte le regole che guardano
+la mappa non la contano**: colonne, terreno, livello, "in cima", adiacenze, i Monumenti celebri
+(San Clemente, Campidoglio, Via Appia, Terme di Caracalla, Acropoli, Isola Tiberina, Ponte
+Milvio e simili) e i Personaggi che contano "nella colonna" (Console, Mercante). Fanno eccezione
+le carte che chiedono espressamente cose sepolte o in rovina, come le Catacombe o i Fori
+imperiali (i sotterrati): quelle contano le tessere, che sulla mappa ci sono.
+
+Le carte che contano **le vostre rovine per quello che erano** — classe, era, Scavo stampato —
+leggono invece le carte restituite davanti a voi, e funzionano come prima: le Eredità Condottiero,
+Costruttore di cattedrali, Cronista, Antiquario, Archeologo; la Biblioteca, il Monumento ai
+caduti, il Parco archeologico, l'Archeologo dell'era Moderna.
+
+Un edificio in rovina **non fa più scattare i suoi effetti di fine partita**: contano solo quelli
+degli edifici in piedi.
+
+#### Le tessere scavo
+
+Ogni giocatore ha un mazzetto rovine di 20 tessere del proprio colore, con valori da 0 a 3
+(media 1,4). Alcune portano un'icona: lo **scheletro**, con una linea che indica lo strato di
+un'era (dalla 1 alla 4), o l'**arte** (un'opera cerchiata in oro); due le portano entrambe.
+
+| valore | semplici | con scheletro | con arte | con tutte e due | totale |
+|--:|--:|--:|--:|--:|--:|
+| 0 | 2 | 1 (era 2) | 1 | 1 (era 1) | 5 |
+| 1 | 4 | 1 (era 3) | 1 | — | 6 |
+| 2 | 4 | — | — | 1 (era 4) | 5 |
+| 3 | 4 | — | — | — | 4 |
+
+Si pesca una tessera per casella, e le tessere si ricordano insieme: quelle posate dalla stessa
+rovina formano un gruppo. **Se il mazzetto finisce** (avete già posato tutte le 20 tessere), le
+caselle delle rovine successive restano senza tessera e valgono 0. Nelle partite misurate un
+giocatore pesca in media meno di 4 tessere, al massimo 12: con 20 non succede.
+
+Costruire sopra funziona come sempre: le tessere restano sotto, coperte, e nessuno le guarda.
+
+**Lo scavo dell'era Moderna.** Quando un edificio dell'era Moderna si costruisce sopra delle
+rovine (a livello 1 o più), tutte le tessere sotto di lui, a qualsiasi profondità, si girano a
+faccia in su: sono **scoperte**, chiunque abbia costruito e di chiunque siano.
 
 #### Un edificio conserva sempre il proprio ingombro
 
-Una sagoma in rovina mantiene esattamente la larghezza che aveva: cambia lato, non spazio. Un
-castello da 2 caselle in rovina ne occupa ancora 2, e un edificio da 1 casella costruito sopra ne
-sotterra solo metà. Una rovina è sotterrata quando l'unione degli strati successivi copre
-interamente la sua proiezione, anche se quegli strati appartengono a ere diverse.
+Una rovina lascia esattamente le caselle che l'edificio occupava, una tessera per casella. Un
+castello da 2 caselle in rovina lascia 2 tessere, e un edificio da 1 casella costruito sopra ne
+sotterra una sola: l'altra resta in superficie, e fa da base a chi verrà. Ogni tessera è
+sotterrata quando qualcuno ci costruisce sopra, anche se gli strati che coprono un gruppo
+appartengono a ere diverse.
 
 ## Fine era — Il tempo presenta il conto
 
@@ -309,7 +376,8 @@ resistenza stampata, i potenziamenti Struttura, il +2 di ogni lavoratore che lo 
 della collina se l'ha preso e i modificatori dell'evento, e confronta il totale con la forza
 dell'epoca: 2 nella Preistoria, 3 nell'Antichità, 4 nel Medioevo, 3 nel Rinascimento. **Chi
 fallisce di un solo punto regge per un soffio e resta attivo; chi fallisce di due o più crolla in
-rovina.** Non c'è più il rudere e non c'è più la Vetustà: reggere non dà cubetti. L'era Moderna
+rovina**: la carta torna al proprietario e al suo posto si posano le tessere scavo. Non c'è più
+il rudere e non c'è più la Vetustà: reggere non dà cubetti. L'era Moderna
 non ha evento.
 
 **Il censimento** segue il crollo, mai il contrario: si conta solo ciò che è sopravvissuto. Ogni
@@ -319,8 +387,8 @@ vostro edificio in piedi paga la sua Rendita stampata.
 Prima di scartare, **ogni 2 risorse oltre il tetto diventano 1 Idea** (senza superare il tetto
 delle Idee): i granai non attraversano i secoli, il sapere sì. Il resto si scarta a scelta.
 
-**Il ricambio**: i lavoratori tornano ai proprietari, i Personaggi dell'era e le case avanzate
-si scartano, le
+**Il ricambio**: i lavoratori tornano ai proprietari, i Personaggi presi restano a chi li ha
+presi (il loro Scavo serve alla fine), quelli non scelti si scartano, le case avanzate si scartano, le
 tessere dell'era nuova si posano sulle colonne (una per colonna, dalle 14 dell'era), i
 cartellini della Prosperità si rigirano, si scartano le file vecchie, si aprono
 quelle dell'era nuova e si rivela il nuovo evento.
@@ -334,13 +402,39 @@ premi di scavo; i censimenti delle ere precedenti. Restano sei voci da calcolare
 | # | voce | punti |
 |--:|---|---|
 | 1 | Censimento finale | la Rendita di ogni vostro edificio in piedi |
-| 2 | Continuità di luogo | +2 per colonna con 2 vostri edifici della stessa classe, +5 con 3 o più |
-| 3 | Scavo | il valore stampato di ogni vostro edificio sotterrato |
+| 2 | Continuità (collezione) | per ogni classe, i vostri edifici in piedi più le carte restituite: 3 = 3 PV, 5 = 5, 7 = 8, 9 = 12 |
+| 3 | Scavo | le tessere scavo del vostro colore: scoperte a valore pieno, coperte a metà; più le icone sulle scoperte |
 | 4 | Scheletri | 6 meno l'era di ogni vostro gettone scheletro, ovunque sia l'edificio |
 | 5 | Obiettivi | Monumenti celebri reclamati + la vostra Eredità, se soddisfatta |
-| 6 | Effetti finali | Museo, Piazza monumentale, Biblioteca, effetti «eco», Personaggi con abilità Finale |
+| 6 | Effetti finali | Museo, Piazza monumentale, Biblioteca, effetti «eco», Personaggi con abilità Finale — solo degli edifici in piedi |
+
+**La Continuità è una collezione**, non più una colonna. Per ogni classe contate tutti i vostri
+edifici, in piedi e restituiti: 3 della stessa classe valgono 3 PV, 5 ne valgono 5, 7 ne valgono
+8, 9 ne valgono 12. Vale solo la soglia più alta raggiunta, classe per classe; un edificio con
+due classi conta per tutte e due.
+
+**Lo Scavo si conta sulle tessere.** Ognuno raccoglie le tessere del proprio colore, ovunque
+siano. Quelle **scoperte** valgono il loro valore pieno. Quelle ancora **coperte** si girano e
+valgono **metà**, arrotondata per difetto, gruppo per gruppo (le tessere di una stessa rovina si
+sommano, poi si dimezza). Le icone contano **solo sulle tessere scoperte**:
+
+- **Scheletro**: la linea sulla tessera indica un'era; vale lo Scavo stampato del Personaggio
+  che avete preso in quell'era (5 per l'era 1, 4 per la 2, 3 per la 3, 2 per la 4).
+- **Arte**: vale lo Scavo stampato del vostro miglior gettone Arte riscattato, non ancora usato
+  da un'altra icona arte.
+
+Un'icona che non trova niente vale 0. Lo Scavo stampato sulle carte degli edifici non paga più il
+proprietario: lo sostituiscono le tessere.
 
 Non c'è più la Verticalità: l'altezza si è già pagata, colpo per colpo, con il premio di scavo.
+
+#### I flussi di punti
+
+I punti arrivano da quattro flussi principali: **Lampo** e **Rendita** durante la partita,
+**Scavo** e **Continuità** alla fine. Potenziamenti, Personaggi e Monumenti danno punti minori
+durante la partita; gettoni Arte, scheletri ed Eredità punti minori alla fine. Per tenerli in
+equilibrio le carte sono cambiate (registri 130–133): tutti gli edifici delle ere 4 e 5 con
+Lampo 2 hanno ora Lampo 1, e gli edifici con Rendita 1 hanno ora Rendita 2.
 
 Vince chi ha più punti. In caso di parità, vince chi ha più edifici ancora in piedi; se persiste,
 chi ha più risorse residue.
@@ -352,14 +446,15 @@ chi ha più risorse residue.
 Acquedotto e Stazione occupano tre colonne affiancate; Anfiteatro (il Colosseo), Castello e
 Fortezza bastionata sono 2x2, quattro caselle; il Grattacielo è una colonna per tre binari. Si
 costruiscono con una sola azione, contano come strato in tutte le caselle che toccano, si
-attivano da ciascuna delle loro colonne, e se crollano vanno in rovina ovunque. Valgono il
-proprio Scavo una sola volta, e solo quando l'intera proiezione è coperta.
+attivano da ciascuna delle loro colonne, e se crollano vanno in rovina ovunque: la carta torna al
+proprietario, che pesca una tessera scavo per ogni casella (tre per l'Acquedotto, quattro per il
+Colosseo). Portano un gettone potenziamento per casella.
 
 **I 2x2 e il Grattacielo non si costruiscono mai a terra**, solo sopra, con le regole di
-sempre: almeno una base vera (una rovina di chiunque, o un vostro edificio attivo che spianate
-e diventa rovina), terrapieno sulle caselle vuote, e nessun edificio attivo altrui sotto. Le
-rovine che coprono per intero vengono sepolte e diventano scavo. E sopra di loro non si
-costruisce nulla finché non sono a loro volta in rovina.
+sempre: almeno una base vera (una rovina di chiunque, o un vostro edificio attivo che spianate),
+terrapieno sulle caselle vuote, e nessun edificio attivo altrui sotto. Le tessere che coprono
+vengono sepolte e pagano il premio di scavo. E sopra di loro non si costruisce nulla finché non
+sono a loro volta in rovina.
 
 ### Costo flessibile ◈
 
@@ -370,16 +465,22 @@ solo al momento dell'acquisto e per una sola unità.
 ### Impronte ed esauribili
 
 Due Personaggi — Incisore e Retore — non danno un'abilità ma un'impronta: la carta si infila
-sotto un vostro edificio e ne alza il valore di Scavo in permanenza. Un edificio può portarne una
-sola; si prende nel draft solo se avete un edificio dove metterla. Alcune sagome hanno la parola
-chiave Esauribile: ogni attivazione consuma un cubetto carica, e quando finiscono l'edificio
-crolla in rovina. La cava si svuota.
+sotto un vostro edificio e ne alza il valore di Scavo stampato in permanenza. Un edificio può
+portarne una sola; si prende nel draft solo se avete un edificio dove metterla. Lo Scavo stampato
+non fa più premio né punti al proprietario: l'impronta conta per le carte che lo leggono sulle
+carte restituite (Eredità, Archeologo e simili), e se l'edificio va in rovina segue la sua carta.
+Alcune sagome hanno la parola chiave Esauribile: ogni attivazione consuma un cubetto carica, e
+quando finiscono l'edificio crolla in rovina — la carta torna al proprietario e si posano le
+tessere scavo. La cava si svuota.
 
-### Le carte che nominavano il rudere e la Vetustà
+### Le carte che nominavano il rudere, la Vetustà e la ristrutturazione
 
-Colosseo, Il Silvicoltore e Speculazione edilizia sono state riscritte (registro 99); le
-Secolarizzazioni sono "ristrutturare una propria rovina Religione non costa risorse". I testi
-nuovi sono in grassetto in `carte-v2.md`.
+Colosseo, Il Silvicoltore e Speculazione edilizia sono state riscritte (registro 99). Con la
+ristrutturazione tolta (registri 130–133), le Secolarizzazioni sono ora solo "Forza 3. Religione
+−2 res.", e l'Eredità **Il Restauratore** (4 PV) chiede "almeno 2 tue rovine riportate alla luce
+da un edificio dell'era Moderna": vostre rovine le cui tessere sono state scoperte dallo scavo
+dell'era Moderna, chiunque l'abbia costruito. I testi nuovi del registro 99 sono in grassetto in
+`carte-v2.md`.
 
 ## Varianti — Se volete che il tempo morda di più
 
@@ -400,12 +501,25 @@ Le varianti non sono state misurate con la v2: i numeri del regolamento v1.5 non
 altrui blocca il suo spazio finché resiste. La sopravvivenza è anche una forma di controllo del
 territorio.
 
-**Chi incassa lo Scavo di un edificio sotterrato da un altro giocatore?** Tutti e due, in due
-momenti: chi lo sotterra incassa subito il premio di scavo (Scavo per livello); il proprietario
-incassa lo Scavo stampato a fine partita.
+**Chi incassa lo Scavo di una rovina sotterrata da un altro giocatore?** Tutti e due, in due
+momenti: chi la sotterra incassa subito il premio di scavo (2 PV per tessera, per il livello); il
+proprietario conta le sue tessere a fine partita, a metà se sono ancora coperte.
 
-**Se spiano un mio edificio, perdo lo scheletro che c'era sotto?** No. Lo scheletro vale sempre,
-comunque finisca l'edificio. Perdete lo Scavo dell'edificio, non il gettone.
+**Se spiano un mio edificio, perdo lo scheletro che c'era sotto?** No. Il gettone scheletro vale
+sempre, comunque finisca l'edificio. Perdete le tessere scavo (lo spianato non ne lascia), non il
+gettone.
+
+**Il mazzetto rovine finisce?** Può succedere, ma è raro: in media si pescano meno di 4 tessere a
+partita. Se finisce, le caselle della vostra nuova rovina restano senza tessera e valgono 0; la
+carta torna comunque a voi e conta per la Continuità.
+
+**Un gettone potenziamento non Arte riscattato vale qualcosa?** No. Dopo il riscatto solo i
+gettoni Arte valgono, e solo se un'icona arte su una tessera scoperta li ritrova. Gli altri
+restano davanti a voi come ricordo.
+
+**Una rovina conta per il Console, il Mercante o un Monumento?** No: sulla mappa una rovina non è
+un edificio. La contano solo le carte che chiedono espressamente cose sepolte (Catacombe, Fori
+imperiali) e quelle che leggono le vostre carte restituite (Eredità, Biblioteca, Archeologo).
 
 **Il mio lavoratore che ha piazzato il potenziamento è perso?** No: torna a fine era come gli
 altri. Quello che resta sotto l'edificio è il gettone scheletro.
@@ -416,11 +530,11 @@ primo" e non è ancora girato. La Prosperità la
 prendete solo se avete un edificio lì.
 
 **Cosa succede se nessuno può più costruire?** Nulla di speciale: si continua a piazzare
-lavoratori per attivare colonne, potenziare e ristrutturare. L'azione è facoltativa.
+lavoratori per attivare colonne e potenziare. L'azione è facoltativa.
 
-**Una rovina può restare tale per più ere?** Sì. Non subisce più eventi e non produce, ma resta
-base per chi costruisce sopra e resta ristrutturabile dal proprietario finché nessuno la
-seppellisce.
+**Una rovina può restare tale per più ere?** Sì. Le sue tessere non subiscono eventi e non
+producono, ma restano base per chi costruisce sopra finché nessuno le seppellisce. Una rovina non
+torna mai in piedi: la ristrutturazione non esiste più.
 
 **Il tetto delle risorse vale durante l'era?** No, solo alla dispersione di fine era. Durante
 l'era potete accumulare quanto volete; a fine era tenete al massimo 3 per risorsa e 5 in tutto.
@@ -433,11 +547,13 @@ Cultura sono PV e vanno subito sul segnapunti.
 Sono le domande della proposta che il motore non deve risolvere e che il regolamento lascia a
 voi (domande 1–3 di `proposte/nuova-meccanica.md`):
 
-- **Il mercato**: sei sagome in fila al posto delle carte, o le carte con le sagome a parte.
-- **Di chi è la rovina**: la basetta colorata basta a dirlo. Se le sagome girate stanno in una
-  basetta neutra, serve un segnalino.
-- **Le misure**: 15 mm di altezza e 20 di larghezza stanno nello slot da 26 mm; quanto è alta
-  una sagoma girata, cioè quanto alza chi ci costruisce sopra.
+- **Il mercato**: le carte hanno già la misura della mappa; resta da provare quanto spazio
+  occupa una fila di sei.
+- **Di chi è la rovina**: lo dicono le tessere scavo, del colore del proprietario; non serve un
+  segnalino.
+- **Le misure**: quanto sono spesse le tessere scavo, cioè quanto alza chi ci costruisce sopra.
+- **Le caselle senza tessera** (mazzetto finito): se fanno ancora da base a chi costruisce sopra,
+  o se contano come terreno nudo.
 - **Il tetto delle risorse** (3 per risorsa, 5 in tutto, con l'avanzo in Idee): misurato
   (registro 126); alzarlo da solo non bastava, perché la Costruzione entra più di quanto si spende.
 

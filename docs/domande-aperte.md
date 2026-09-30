@@ -2201,3 +2201,76 @@ dato è stato importato da lì. Ma due confronti fra ciò che è stampato e
     Memoriale) vanno nel prompt per ChatGPT. Misura: venticinquesima: tutte
     le strategie nell'errore a 2, 3 e 4 (scarto massimo 9 / 9 / 7), un quarto
     di potenziamenti in meno, i potenziamenti "struttura" tornano vivi.
+130. **Le tessere scavo.** Il designer: quando un edificio va in rovina si
+    toglie la carta e il giocatore pesca una tessera scavo coperta per ogni
+    casella che occupava; si rivelano a fine partita quando ci si costruisce
+    sopra un edificio dell'era 5; alcune hanno uno scheletro o un
+    potenziamento. "Il valore di scavo va a chi era proprietario
+    dell'edificio ... ogni giocatore ha un mazzetto rovine del suo colore."
+    Nel motore (`TessereScavo`, costante `tessere_scavo`), oggi solo nella
+    variante `tessere_scavo`; regole in `docs/proposte/tessere-scavo.md`.
+    Ventiseiesima misura: stessi punti dello Scavo stampato, un po' piu'
+    dispersi, strategie ferme, il vincitore cambia nelle partite chiuse
+    (7 / 12 / 12 %). Da decidere: il mazzetto (20 e' largo, se ne pescano
+    meno di 4), il premio di chi costruisce sopra, le icone sulle coperte.
+131. **Le carte restituite e i potenziamenti come token.** Il designer: "i
+    Potenziamenti diventano Token che vengono posizionati sull'edificio e
+    quando questo va in rovina vengono riscattati dal giocatore
+    proprietario, inoltre non ci sono piu' le carte Edificio [...] viene
+    restituito al proprietario"; poi "(c), restituito al proprietario,
+    togli ristrutturare, rovine non contano". Nel motore
+    (`TessereScavo.fuori`, `Effects.chiede_mappa`, costante
+    `tessere_scavo.carte_restituite`): per le regole di mappa la rovina non
+    c'e' piu'; le regole sulle tue rovine leggono la carta restituita; gli
+    effetti finali della carta crollata non scattano; niente ristrutturare;
+    il token riscattato perde l'effetto sull'edificio. Misura: la
+    Continuita' di colonna crollava da 16 a 3 PV (registro 132).
+132. **La Continuita' come collezione e i flussi di PV.** Il designer
+    sceglie la collezione: per ogni classe contano i tuoi edifici in piedi
+    piu' le carte restituite, a soglie (3 → 3 PV, 5 → 5, 7 → 8, 9 → 12). E
+    "vorrei che i PV arrivino tutti piu' o meno uguali": Lampo, Rendita,
+    Scavo e Continuita' i quattro flussi principali. Il Lampo delle ere 4-5
+    scende da 2 a 1, la Rendita 1 sale a 2 (con +1 su tutte la Rendita
+    arrivava a 24 PV). Prova a 3 giocatori: Lampo 15, Rendita 20, Scavo
+    17, Continuita' 19 (tabella poi abbassata a 3/5/8/12, stimata 16).
+133. **Il mazzetto rovine, l'arte ritrovata, un token per casella.** Il
+    designer: 12 tessere per giocatore (0: semplice, scheletro, arte; 1: tre
+    semplici e uno scheletro; 2: due semplici e un'arte; 3: due semplici);
+    "(a)": solo i token arte riscattati valgono, col loro Scavo stampato
+    (5 l'era 1 ... 1 l'era 5), e solo se un'icona arte scoperta li
+    ritrova; anche i Personaggi hanno uno Scavo stampato per lo scheletro;
+    massimo un potenziamento per casella (il Colosseo 4); le carte del
+    mercato hanno la misura della mappa. Senza ristrutturare, il
+    Restauratore diventa "almeno 2 tue rovine riportate alla luce dall'era
+    Moderna" e le Secolarizzazioni tengono solo "Religione −2 res". Sul
+    mazzetto: nelle misure un giocatore pesca in media 3,5-3,8 tessere, 9
+    o meno nel 99% delle partite, al massimo 12.
+134. **Il mazzetto a 16 e lo spianato.** Il designer: "Rifai le tessere
+    scavo con 16 tessere": 0 ×4 (due semplici, scheletro, arte), 1 ×5 (tre
+    semplici, scheletro, arte), 2 ×4 (tre semplici, scheletro), 3 ×3 (due
+    semplici, arte); media 1,375, tre scheletri e tre arte. I Personaggi
+    presi restano ai giocatori, quelli non scelti si scartano. Lo spianato:
+    "restituisce carta e lascia un terrapieno oppure si mette la tessera
+    scavo di chi appartiene. Da valutare": di regola resta senza tessere;
+    la variante `spianato_tessere` gli fa lasciare le tessere del
+    proprietario (senza premio). Da misurare.
+135. **Il mazzetto a 20, gli scheletri per era, piu' arte.** Il designer: 4
+    scheletri, uno per era, con una linea che indica lo strato e l'era, cosi'
+    si sa quale Personaggio usare; piu' arte, tante quante i token arte che
+    un giocatore riscatta; 20 tessere per giocatore piu' la tessera
+    terrapiano; alcune con scheletro e arte. Misura (120 partite per
+    tavolo): un giocatore riscatta 0,66 / 0,64 / 0,49 token arte a 2 / 3 / 4
+    (per lo piu' delle ere 2 e 3, al massimo 3-4), e pesca in media 4
+    tessere. Mazzetto: 0 ×5 (due semplici, scheletro era 2, arte,
+    scheletro era 1 + arte), 1 ×6 (quattro semplici, scheletro era 3,
+    arte), 2 ×5 (quattro semplici, scheletro era 4 + arte), 3 ×4; media 1,4.
+    Lo scheletro con l'era vale lo Scavo del Personaggio preso in
+    quell'era (`TessereScavo.scavo_personaggio_di_era`).
+136. **I bot ritarati per le rovine a tessere.** Con le regole dei registri
+    130-135 la Lampo vinceva il 22 / 10 % a tre e quattro e la Rendita il
+    20 % a ogni tavolo. La Rendita del bot scartava le carte senza Rendita
+    (`rendita_zero`), l'80 % del mazzo: a zero torna in media. Il premio di
+    scavo del bot rafforzava la Scavo: a zero a tre e quattro. La Lampo con
+    meno peso (1,4 a tre, 1,0 a quattro). Ventisettesima misura. Le regole
+    non cambiano: sono pesi del bot.
+

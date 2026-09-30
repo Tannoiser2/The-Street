@@ -155,6 +155,10 @@ static func consume_override(gs: GameState, player: int, carta: Dictionary) -> v
 static func matches(gs: GameState, b: Building, t: Dictionary,
 		source: Building = null, owner: int = -1) -> bool:
 	if t.is_empty(): return true
+	# Carte restituite (registro 131): una rovina non sta piu' sulla mappa, e
+	# per i predicati di posizione non c'e'. Resta per chi la chiede apposta
+	# (sotterrata, spianata, in rovina: sono le tessere scavo).
+	if TessereScavo.fuori(b) and chiede_mappa(t): return false
 
 	var mio: int = source.owner if source != null else owner
 	if t.has("owner") and mio >= 0:
@@ -209,6 +213,16 @@ static func matches(gs: GameState, b: Building, t: Dictionary,
 	if t.get("same_column_as_self", false):
 		if source == null or not _shares_column(b, source): return false
 	return true
+
+const PREDICATI_DI_MAPPA := ["terrain", "level", "width", "column", "is_top",
+	"below_self", "adjacent_to_self", "same_column_as_self"]
+
+# Il selettore guarda la mappa, e non chiede apposta le rovine?
+static func chiede_mappa(t: Dictionary) -> bool:
+	if bool(t.get("buried", false)) or t.has("razed") or "rovina" in t.get("state", []): return false
+	for k in PREDICATI_DI_MAPPA:
+		if t.has(k): return true
+	return false
 
 # In cima ad almeno una delle colonne che occupa.
 static func _is_top(gs: GameState, b: Building) -> bool:
@@ -328,6 +342,7 @@ static func apply_on_activate(gs: GameState, attivatore: int, col: int) -> void:
 		# i candidati sono i soli edifici della colonna attivata
 		var trovato := false
 		for b in gs.grid.in_column(col):
+			if TessereScavo.fuori(b): continue          # le rovine non contano
 			if matches(gs, b, e.get("target", {}), src, own): trovato = true; break
 		if not trovato: continue
 		match str(e["op"]):
@@ -640,6 +655,21 @@ static func _bersagli(gs: GameState, src: Building, e: Dictionary) -> Array[Buil
 	if e.has("times"): out = out.slice(0, int(e["times"]))
 	return out
 
+# Il token riscattato (registro 131) toglie all'edificio quello che gli aveva
+# dato: Resistenza, Scavo, Rendita e le classi in piu'.
+static func annulla_potenziamento(gs: GameState, host: Building, card: Dictionary) -> void:
+	for e in card.get("effects", []):
+		if e["hook"] != "on_acquire": continue
+		if not _condition_met(gs, host, e.get("condition", {})): continue
+		if not host in _bersagli(gs, host, e): continue
+		match str(e["op"]):
+			"resistance": host.bonus_res -= int(e["value"])
+			"scavo_delta": host.bonus_scavo -= int(e["value"])
+			"rendita_delta": host.bonus_rendita -= int(e["value"])
+			"rule_override":
+				if str(e.get("name", "")) == "counts_as_class":
+					for cl in e.get("adds_class", []): host.extra_classes.erase(str(cl))
+
 # ---- hook: on_final_scoring (applica) -------------------------------
 # Voce 7 del conteggio, "Effetti finali". Ogni edificio in gioco porta i propri
 # effetti, in qualunque stato si trovi: le carte che richiedono di essere
@@ -659,6 +689,7 @@ static func apply_final_scoring(gs: GameState) -> void:
 					"vp": _award(gs, p.index, int(e.get("value", 0)), CardDB.characters[cid])
 					"vp_per": _apply_vp_per(gs, null, e, p.index, CardDB.characters[cid])
 	for src in gs.grid.buildings:
+		if TessereScavo.fuori(src): continue          # la carta crollata non scatta
 		for card in _carte_di(src):
 			for e in card.get("effects", []):
 				if e["hook"] != "on_final_scoring": continue
@@ -680,6 +711,7 @@ static func _carte_di(b: Building) -> Array[Dictionary]:
 # conti i punti, altrimenti arrivano tardi.
 static func apply_scavo_modifiers(gs: GameState) -> void:
 	for src in gs.grid.buildings:
+		if TessereScavo.fuori(src): continue
 		for card in _carte_di(src):
 			for e in card.get("effects", []):
 				if e["hook"] != "on_final_scoring" or e["op"] != "scavo_delta": continue

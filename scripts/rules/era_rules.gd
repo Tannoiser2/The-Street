@@ -128,6 +128,7 @@ static func paga_edificio(gs: GameState, b: Building) -> void:
 			# la misura mente.
 			if bool(CardDB.constants.get("senza_rudere", false)):
 				b.state = Enums.BuildingState.ROVINA
+				TessereScavo.riscatta(gs, b)
 				b.upgrades.clear()
 				gs.log_line("%s si esaurisce e crolla in rovina" % b.data["name"])
 			else:
@@ -176,6 +177,7 @@ static func resolve_event(gs: GameState) -> Array[int]:
 			gs.log_line("%s diventa rudere" % b.data["name"])
 		else:
 			b.state = Enums.BuildingState.ROVINA
+			TessereScavo.riscatta(gs, b)
 			b.upgrades.clear()
 			if not b.owner in persi: persi.append(b.owner)
 			gs.log_line("%s crolla in rovina" % b.data["name"])
@@ -215,6 +217,7 @@ static func place_gift(gs: GameState, omaggio: Dictionary, host: Building) -> vo
 	var giocatore := int(omaggio["player"])
 	var upg_id := str(omaggio["upg_id"])
 	host.upgrades.append(upg_id)
+	host.upgrades_storia.append(upg_id)
 	Effects.apply_on_acquire(gs, giocatore, CardDB.upgrades[upg_id], host)
 	gs.log_line("%s: giocatore %d pesca %s e la infila sotto %s" % [
 		gs.current_event["name"], giocatore, CardDB.upgrades[upg_id]["name"], host.data["name"]])

@@ -56,6 +56,13 @@ const LAVORATORE := "lavoratore"
 var buried_character: String = ""   # personaggio sepolto qui (meccanica Scheletri)
 var buried_character_era: int = 0
 var charges: int = 0          # cubetti carica per edifici Esauribili
+# Le tessere scavo (registro 130): quelle pescate per le sue caselle quando e'
+# in rovina, se sono state scoperte da un edificio dell'era 5, e i
+# potenziamenti che ha portato (in rovina si perdono, ma il proprietario se
+# li tiene come opere d'arte da ritrovare).
+var tessere: Array = []
+var scavata := false
+var upgrades_storia: Array[String] = []
 # Quanto ha reso, canale per canale. Il nucleo i punti li divide gia' per
 # canale quando li segna al giocatore (PlayerState.vp_breakdown); qui li
 # divide anche per CARTA, perche' "quanto vale questo edificio in una
@@ -108,6 +115,9 @@ func duplica() -> Building:
 	b.buried_character = buried_character
 	b.buried_character_era = buried_character_era
 	b.charges = charges
+	b.tessere = tessere.duplicate(true)
+	b.scavata = scavata
+	b.upgrades_storia = upgrades_storia.duplicate()
 	b.vp_reso = vp_reso.duplicate(true)
 	return b
 

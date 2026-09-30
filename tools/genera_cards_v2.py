@@ -773,6 +773,75 @@ def potenziamenti_di_classe(v):
     assert all(uid in {u["id"] for u in v["upgrades"]} for uid in TESTI_SENZA_BONUS)
     v["constants"]["potenziamento_stessa_classe"] = True
 
+# LE ROVINE E I FLUSSI (registri 130-133), decisioni del designer:
+# - TESSERE SCAVO: ogni giocatore ha un mazzetto di 20 tessere del suo colore,
+#   da 0 a 3 (media 1,4); quattro scheletri (uno per era), quattro arte.
+#   Quando un edificio va in rovina il proprietario ne pesca una per casella
+#   e le mette coperte; un edificio dell'era 5 costruito sopra le scopre; a
+#   fine partita le scoperte valgono per intero, le coperte a meta', e le
+#   icone solo sulle scoperte.
+# - PREMIO DI CHI COSTRUISCE SOPRA: la carta della rovina se ne va, quindi si
+#   contano le tessere sotto: 2 PV a tessera x livello, meta' nell'era 5 (con
+#   1 PV il premio scendeva da 9 a 4 PV e la Lampo crollava).
+# - CARTE RESTITUITE: la carta della rovina torna al proprietario; per le
+#   regole di mappa le rovine non contano; niente ristrutturare; i
+#   potenziamenti sono token che il proprietario riscatta al crollo.
+# - IL VALORE DI SCAVO sui Personaggi e sui potenziamenti arte, per l'era (5
+#   l'era 1, 1 l'era 5): lo scheletro scoperto fa incassare il miglior
+#   Personaggio avuto, l'arte scoperta il miglior token arte riscattato. Gli
+#   altri token riscattati non valgono niente.
+# - UN POTENZIAMENTO PER CASELLA: la capienza e' larghezza x profondita'.
+# - I FLUSSI DI PV: Lampo, Rendita, Scavo e Continuita' devono pesare piu' o
+#   meno uguale; il Lampo faceva il doppio della Rendita (22 contro 11 PV).
+#   Il Lampo delle ere 4 e 5 (tutte carte da 2) scende a 1; la Rendita 1 sale
+#   a 2 (con +1 su tutte la Rendita arrivava a 24 PV); la Continuita' diventa
+#   una collezione: per ogni classe, i tuoi edifici in piedi piu' le carte
+#   restituite, a soglie.
+# Il mazzetto (registro 135): 20 tessere, valore medio 1,4. Quattro scheletri,
+# UNO PER ERA ("s": l'era, 1-4): la tessera segna con una linea lo strato
+# dell'era e vale lo Scavo del Personaggio preso in quell'era. Quattro arte:
+# un giocatore riscatta in media 0,5-0,7 token arte e ne pesca 4 tessere, 4
+# icone su 20 gliene fanno trovare 0,8. Due tessere hanno tutte e due.
+MAZZO_SCAVO = (
+    [{"v": 0}] * 2 + [{"v": 0, "s": 1, "p": True}, {"v": 0, "s": 2}, {"v": 0, "p": True}]
+    + [{"v": 1}] * 4 + [{"v": 1, "s": 3}, {"v": 1, "p": True}]
+    + [{"v": 2}] * 4 + [{"v": 2, "s": 4, "p": True}]
+    + [{"v": 3}] * 4)
+assert len(MAZZO_SCAVO) == 20
+CONTINUITA_COLLEZIONE = {"3": 3, "5": 5, "7": 8, "9": 12}
+
+def scavo_per_era(era):
+    return 6 - int(era) if era else 0
+
+def rovine_e_flussi(v):
+    v["constants"]["tessere_scavo"] = {"mazzo": [dict(t) for t in MAZZO_SCAVO],
+        "premio": "tessere", "per_tessera": 2, "carte_restituite": True}
+    v["constants"]["potenziamenti_per_casella"] = True
+    for c in v["characters"]:
+        c["scavo"] = scavo_per_era(c.get("era"))
+    for u in v["upgrades"]:
+        if u.get("family") == "arte": u["scavo"] = scavo_per_era(u["era"])
+    for b in v["buildings"]:
+        if b["era"] >= 4 and b["lampo"] >= 2: b["lampo"] = 1
+        if b["rendita"] == 1: b["rendita"] = 2
+    v["constants"]["continuita_collezione"] = dict(CONTINUITA_COLLEZIONE)
+    # Senza ristrutturare, due carte parlavano di una mossa che non c'e' piu'.
+    # Il Restauratore diventa chi vede riportate alla luce le proprie rovine
+    # (scoperte dall'era moderna, da chiunque); le Secolarizzazioni tengono
+    # solo il colpo alla resistenza.
+    l = {x["id"]: x for x in v["legacies"]}["er_il_restauratore"]
+    l["condition"] = {"op": "counter", "name": "rovine_scoperte", "min": 2}
+    l["condition_text"] = "almeno 2 tue rovine riportate alla luce da un edificio dell'era Moderna."
+    e = {x["id"]: x for x in v["events"]}["ev_secolarizzazioni"]
+    e["effects"] = [x for x in e["effects"] if x.get("name") != "free_restore_of_class"]
+    e["effect_text"] = "Forza 3. Religione −2 res."
+
+# LO SPIANATO CON LE TESSERE (registro 134, da valutare): lo spianato lascia
+# le tessere scavo del proprietario come ogni rovina, invece di restare un
+# terrapieno senza tessere. Il premio non lo paga comunque.
+def spianato_tessere(v):
+    v["constants"]["tessere_scavo"]["spianato_lascia_tessere"] = True
+
 import sys
 variante = sys.argv[sys.argv.index("--variante") + 1] if "--variante" in sys.argv else ""
 # Le case in riserva stanno nel file v2 di tutti (registro 116); le varianti di
@@ -786,10 +855,11 @@ lampo_tetto(v2)
 carte_vive(v2)
 eventi_e_avanzo(v2)
 potenziamenti_di_classe(v2)
+rovine_e_flussi(v2)
 if variante:
     {"doppioni": doppioni, "abitazioni": abitazioni, "case": case,
      "case_doppioni": case_doppioni, "case_scavo": case_scavo, "case_nulle": case_nulle,
-     "case_mista": case_mista, "case_tutti": case_tutti}[variante](v2)
+     "case_mista": case_mista, "case_tutti": case_tutti, "spianato_tessere": spianato_tessere}[variante](v2)
     v2["meta"]["ruleset"] = "v2-" + variante
     v2["meta"]["origine"] = "generato da tools/genera_cards_v2.py --variante %s: non modificare a mano" % variante
     out = os.path.join(RADICE, "data/proposte/cards-v2-%s.json" % variante)

@@ -750,11 +750,13 @@ def main(dest):
     edifici_v2_bn(dest)
     tess_v2 = estrai_tessere_v2(dest)
     pot_v2 = estrai_potenziamenti_v2(dest)
+    rovine = estrai_tessere_rovina(dest)
     with open(os.path.join(dest, "indice.json"), "w", encoding="utf-8") as f:
         json.dump({"carte_edifici": indice,
                    "carte_edifici_v2": v2,
                    "tessere_v2": tess_v2,
                    "potenziamenti_v2": pot_v2,
+                   "tessere_rovina": rovine,
                    "sagome": sag,
                    "conteggi": conteggi,
                    "per_id": per_id,
@@ -1135,3 +1137,93 @@ def estrai_potenziamenti_v2(dest):
 
 if __name__ == "__main__":
     main(sys.argv[1] if len(sys.argv) > 1 else os.path.join(ROOT, "assets"))
+
+# ---- le tessere rovina (registri 130-134) ----------------------------------
+# materiali/Tessere_Rovina_Fronte_Retro_A4.pdf: due pagine A4 fronte e retro,
+# tessere di 194 x 116 pt come una carta edificio da una casella. Pagina 1 i
+# dorsi ("ROVINA") e cinque TERRAPIANO; pagina 2 le facce, col valore di
+# Scavo scritto come testo e l'icona in basso a destra (scheletro chiaro,
+# arte viola), piu' i cinque terrapiani. Si ritagliano sul bordo tracciato;
+# il valore si legge dal testo, l'icona dal colore. Si confronta col mazzetto
+# di data/cards-v2.json: i dati restano la fonte, il PDF solo grafica.
+def _bordi_tessere(pg):
+    bordi = []
+    for g in pg.get_drawings():
+        r = g["rect"]
+        if g.get("type") == "s" and 180 < r.width < 210 and 100 < r.height < 130 and \
+                not any(abs(r.x0 - b.x0) < 1 and abs(r.y0 - b.y0) < 1 for b in bordi):
+            bordi.append(r)
+    return sorted(bordi, key=lambda r: (round(r.y0), r.x0))
+
+def estrai_tessere_rovina(dest):
+    pdf = os.path.join(ROOT, "materiali", "Tessere_Rovina_Fronte_Retro_A4.pdf")
+    if not os.path.isfile(pdf):
+        print("tessere rovina: manca il PDF")
+        return {}
+    out_dir = os.path.join(dest, "tessere_rovina")
+    _svuota(out_dir)
+    os.makedirs(out_dir, exist_ok=True)
+    doc = pymupdf.open(pdf)
+    indice = {"dorso": "", "terrapiano": "", "facce": []}
+    for pn, pg in enumerate(doc):
+        # L'arte, nel PDF di 20 tessere, e' un'ellisse dorata tracciata
+        # attorno all'opera (colore 1,0 / 0,78 / 0,24).
+        ellissi = [g["rect"] for g in pg.get_drawings()
+                   if g.get("color") and abs(g["color"][0] - 1.0) < 0.05
+                   and abs(g["color"][1] - 0.78) < 0.05 and abs(g["color"][2] - 0.24) < 0.05]
+        testi = []
+        for b in pg.get_text("dict")["blocks"]:
+            for l in b.get("lines", []):
+                for sp in l["spans"]:
+                    if sp["text"].strip(): testi.append((sp["text"].strip(), pymupdf.Rect(sp["bbox"])))
+        for r in _bordi_tessere(pg):
+            dentro = [t for t, bb in testi if r.contains(bb.tl + (1, 1))]
+            clip = pymupdf.Rect(r.x0 - 2, r.y0 - 2, r.x1 + 2, r.y1 + 2)
+            if "TERRAPIANO" in dentro or "TERRAPIENO" in dentro:
+                if not indice["terrapiano"]:
+                    pg.get_pixmap(dpi=DPI_V2, clip=clip).save(os.path.join(out_dir, "terrapiano.png"))
+                    indice["terrapiano"] = "terrapiano.png"
+            elif "ROVINA" in dentro:
+                if not indice["dorso"]:
+                    pg.get_pixmap(dpi=DPI_V2, clip=clip).save(os.path.join(out_dir, "dorso.png"))
+                    indice["dorso"] = "dorso.png"
+            else:
+                cifre = [t for t in dentro if t.isdigit()]
+                if not cifre: continue
+                v = int(cifre[0])
+                # L'icona sta nell'angolo in basso a destra: viola l'arte,
+                # chiaro con lo scheletro scuro, assente sulle semplici.
+                pix = pg.get_pixmap(dpi=100, clip=pymupdf.Rect(r.x1 - 36, r.y1 - 36, r.x1 - 6, r.y1 - 6))
+                viola = chiaro = 0
+                for y in range(pix.height):
+                    for x in range(pix.width):
+                        c = pix.pixel(x, y)
+                        if c[0] > 110 and c[2] > 90 and c[1] < 70: viola += 1
+                        if c[0] > 225 and c[1] > 210 and c[2] > 170: chiaro += 1
+                # Lo scheletro porta scritta l'era dello strato ("ERA 2",
+                # registro 135); l'arte e' l'icona viola.
+                ere = [int(t.split()[-1]) for t in dentro if t.upper().startswith("ERA ") and t.split()[-1].isdigit()]
+                arte = viola > 40 or any(r.contains(e.tl) for e in ellissi)
+                if ere:
+                    icona = "s%d" % ere[0] + ("p" if arte else "")
+                else:
+                    icona = "p" if arte else ("s" if chiaro > pix.width * pix.height * 0.35 else "")
+                nome = "faccia_%d%s_%d.png" % (v, icona, len(indice["facce"]))
+                pg.get_pixmap(dpi=DPI_V2, clip=clip).save(os.path.join(out_dir, nome))
+                indice["facce"].append({"file": nome, "v": v, "icona": icona})
+                # Una faccia per combinazione col nome fisso, per la vista.
+                tipo = os.path.join(out_dir, "faccia_%d%s.png" % (v, icona))
+                if not os.path.isfile(tipo) or len(indice["facce"]) == 1:
+                    pg.get_pixmap(dpi=DPI_V2, clip=clip).save(tipo)
+    v2 = json.load(open(os.path.join(ROOT, "data", "cards-v2.json"), encoding="utf-8"))
+    mazzo = v2["constants"].get("tessere_scavo", {}).get("mazzo", [])
+    chiave = lambda v, s, p: "%d%s%s" % (v, ("s%d" % s if type(s) is int else "s") if s else "", "p" if p else "")
+    dati = sorted(chiave(t["v"], t.get("s"), t.get("p")) for t in mazzo)
+    stampate = sorted("%d%s" % (f["v"], f["icona"]) for f in indice["facce"])
+    print(f"tessere rovina: {len(stampate)} facce, dorso {'si' if indice['dorso'] else 'no'}, "
+          f"terrapiano {'si' if indice['terrapiano'] else 'no'}")
+    if dati != stampate:
+        print(f"  DIVERSE dal mazzetto dei dati: stampate {stampate}, dati {dati}")
+    else:
+        print("  uguali al mazzetto dei dati")
+    return indice

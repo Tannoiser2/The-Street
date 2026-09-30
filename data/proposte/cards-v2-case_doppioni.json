@@ -104,7 +104,89 @@
     "caselle": true,
     "fila_potenziamenti_resta": true,
     "avanzo_idee": true,
-    "potenziamento_stessa_classe": true
+    "potenziamento_stessa_classe": true,
+    "tessere_scavo": {
+      "mazzo": [
+        {
+          "v": 0
+        },
+        {
+          "v": 0
+        },
+        {
+          "v": 0,
+          "s": 1,
+          "p": true
+        },
+        {
+          "v": 0,
+          "s": 2
+        },
+        {
+          "v": 0,
+          "p": true
+        },
+        {
+          "v": 1
+        },
+        {
+          "v": 1
+        },
+        {
+          "v": 1
+        },
+        {
+          "v": 1
+        },
+        {
+          "v": 1,
+          "s": 3
+        },
+        {
+          "v": 1,
+          "p": true
+        },
+        {
+          "v": 2
+        },
+        {
+          "v": 2
+        },
+        {
+          "v": 2
+        },
+        {
+          "v": 2
+        },
+        {
+          "v": 2,
+          "s": 4,
+          "p": true
+        },
+        {
+          "v": 3
+        },
+        {
+          "v": 3
+        },
+        {
+          "v": 3
+        },
+        {
+          "v": 3
+        }
+      ],
+      "premio": "tessere",
+      "per_tessera": 2,
+      "carte_restituite": true
+    },
+    "potenziamenti_per_casella": true,
+    "continuita_collezione": {
+      "3": 3,
+      "5": 5,
+      "7": 8,
+      "9": 12
+    }
   },
   "terrains": [
     {
@@ -317,7 +399,7 @@
       },
       "flexible": false,
       "resistance": 3,
-      "rendita": 1,
+      "rendita": 2,
       "lampo": 0,
       "scavo": 3,
       "level_required": 0,
@@ -402,7 +484,7 @@
       },
       "flexible": false,
       "resistance": 4,
-      "rendita": 1,
+      "rendita": 2,
       "lampo": 0,
       "scavo": 3,
       "level_required": 0,
@@ -554,7 +636,7 @@
       },
       "flexible": false,
       "resistance": 4,
-      "rendita": 1,
+      "rendita": 2,
       "lampo": 0,
       "scavo": 5,
       "level_required": 0,
@@ -683,7 +765,7 @@
       },
       "flexible": true,
       "resistance": 4,
-      "rendita": 1,
+      "rendita": 2,
       "lampo": 0,
       "scavo": 3,
       "level_required": 0,
@@ -833,7 +915,7 @@
       },
       "flexible": false,
       "resistance": 3,
-      "rendita": 1,
+      "rendita": 2,
       "lampo": 0,
       "scavo": 3,
       "level_required": 0,
@@ -862,7 +944,7 @@
       },
       "flexible": true,
       "resistance": 3,
-      "rendita": 1,
+      "rendita": 2,
       "lampo": 0,
       "scavo": 3,
       "level_required": 0,
@@ -959,7 +1041,7 @@
       },
       "flexible": false,
       "resistance": 3,
-      "rendita": 1,
+      "rendita": 2,
       "lampo": 0,
       "scavo": 5,
       "level_required": 0,
@@ -1455,7 +1537,7 @@
       "flexible": false,
       "resistance": 2,
       "rendita": 0,
-      "lampo": 2,
+      "lampo": 1,
       "scavo": 2,
       "level_required": 0,
       "production": {
@@ -1495,7 +1577,7 @@
       "flexible": false,
       "resistance": 1,
       "rendita": 0,
-      "lampo": 2,
+      "lampo": 1,
       "scavo": 0,
       "level_required": 0,
       "production": {
@@ -1524,7 +1606,7 @@
       "flexible": false,
       "resistance": 2,
       "rendita": 0,
-      "lampo": 2,
+      "lampo": 1,
       "scavo": 2,
       "level_required": 0,
       "production": {
@@ -1553,7 +1635,7 @@
       "flexible": true,
       "resistance": 2,
       "rendita": 0,
-      "lampo": 2,
+      "lampo": 1,
       "scavo": 2,
       "level_required": 0,
       "production": {
@@ -1600,7 +1682,7 @@
       "flexible": true,
       "resistance": 2,
       "rendita": 0,
-      "lampo": 2,
+      "lampo": 1,
       "scavo": 0,
       "level_required": 0,
       "production": {
@@ -1628,7 +1710,7 @@
       "flexible": false,
       "resistance": 3,
       "rendita": 0,
-      "lampo": 2,
+      "lampo": 1,
       "scavo": 3,
       "level_required": 0,
       "production": {
@@ -1657,7 +1739,7 @@
       "flexible": false,
       "resistance": 3,
       "rendita": 0,
-      "lampo": 2,
+      "lampo": 1,
       "scavo": 3,
       "level_required": 0,
       "production": {
@@ -1714,7 +1796,7 @@
       "flexible": false,
       "resistance": 2,
       "rendita": 0,
-      "lampo": 2,
+      "lampo": 1,
       "scavo": 3,
       "level_required": 0,
       "production": {
@@ -1849,7 +1931,7 @@
       "flexible": false,
       "resistance": 2,
       "rendita": 0,
-      "lampo": 2,
+      "lampo": 1,
       "scavo": 0,
       "level_required": 0,
       "production": {
@@ -1889,7 +1971,7 @@
       "flexible": false,
       "resistance": 2,
       "rendita": 0,
-      "lampo": 2,
+      "lampo": 1,
       "scavo": 0,
       "level_required": 0,
       "production": {
@@ -1918,7 +2000,7 @@
       "flexible": false,
       "resistance": 1,
       "rendita": 0,
-      "lampo": 2,
+      "lampo": 1,
       "scavo": 0,
       "level_required": 0,
       "production": {
@@ -1964,7 +2046,7 @@
       "flexible": true,
       "resistance": 2,
       "rendita": 0,
-      "lampo": 2,
+      "lampo": 1,
       "scavo": 0,
       "level_required": 0,
       "production": {
@@ -1993,7 +2075,7 @@
       "flexible": false,
       "resistance": 3,
       "rendita": 0,
-      "lampo": 2,
+      "lampo": 1,
       "scavo": 0,
       "level_required": 0,
       "production": {
@@ -2036,7 +2118,7 @@
       "flexible": false,
       "resistance": 3,
       "rendita": 0,
-      "lampo": 2,
+      "lampo": 1,
       "scavo": 0,
       "level_required": 1,
       "production": {
@@ -2076,7 +2158,7 @@
       "flexible": true,
       "resistance": 3,
       "rendita": 0,
-      "lampo": 2,
+      "lampo": 1,
       "scavo": 0,
       "level_required": 2,
       "production": {
@@ -2129,7 +2211,7 @@
       "flexible": false,
       "resistance": 3,
       "rendita": 0,
-      "lampo": 2,
+      "lampo": 1,
       "scavo": 0,
       "level_required": 0,
       "production": {
@@ -2170,7 +2252,7 @@
       "flexible": true,
       "resistance": 4,
       "rendita": 0,
-      "lampo": 2,
+      "lampo": 1,
       "scavo": 0,
       "level_required": 0,
       "production": {
@@ -2200,7 +2282,7 @@
       "flexible": false,
       "resistance": 4,
       "rendita": 0,
-      "lampo": 2,
+      "lampo": 1,
       "scavo": 0,
       "level_required": 1,
       "production": {
@@ -2236,7 +2318,7 @@
       "flexible": false,
       "resistance": 2,
       "rendita": 0,
-      "lampo": 2,
+      "lampo": 1,
       "scavo": 0,
       "level_required": 0,
       "production": {
@@ -2280,7 +2362,7 @@
       "flexible": false,
       "resistance": 3,
       "rendita": 0,
-      "lampo": 2,
+      "lampo": 1,
       "scavo": 0,
       "level_required": 1,
       "production": {
@@ -2591,7 +2673,7 @@
       "flexible": false,
       "resistance": 2,
       "rendita": 0,
-      "lampo": 2,
+      "lampo": 1,
       "scavo": 1,
       "level_required": 0,
       "production": {
@@ -2621,7 +2703,7 @@
       "flexible": false,
       "resistance": 3,
       "rendita": 0,
-      "lampo": 2,
+      "lampo": 1,
       "scavo": 1,
       "level_required": 0,
       "production": {
@@ -2651,7 +2733,7 @@
       "flexible": false,
       "resistance": 2,
       "rendita": 0,
-      "lampo": 2,
+      "lampo": 1,
       "scavo": 2,
       "level_required": 0,
       "production": {
@@ -2681,7 +2763,7 @@
       "flexible": false,
       "resistance": 3,
       "rendita": 0,
-      "lampo": 2,
+      "lampo": 1,
       "scavo": 1,
       "level_required": 0,
       "production": {
@@ -2711,7 +2793,7 @@
       "flexible": false,
       "resistance": 4,
       "rendita": 0,
-      "lampo": 2,
+      "lampo": 1,
       "scavo": 1,
       "level_required": 0,
       "production": {
@@ -3320,7 +3402,7 @@
       },
       "flexible": false,
       "resistance": 3,
-      "rendita": 1,
+      "rendita": 2,
       "lampo": 0,
       "scavo": 3,
       "level_required": 0,
@@ -3351,7 +3433,7 @@
       },
       "flexible": false,
       "resistance": 4,
-      "rendita": 1,
+      "rendita": 2,
       "lampo": 0,
       "scavo": 3,
       "level_required": 0,
@@ -3413,7 +3495,7 @@
       },
       "flexible": false,
       "resistance": 3,
-      "rendita": 1,
+      "rendita": 2,
       "lampo": 0,
       "scavo": 3,
       "level_required": 0,
@@ -3542,7 +3624,7 @@
       "flexible": false,
       "resistance": 2,
       "rendita": 0,
-      "lampo": 2,
+      "lampo": 1,
       "scavo": 2,
       "level_required": 0,
       "production": {
@@ -3585,7 +3667,7 @@
       "flexible": false,
       "resistance": 3,
       "rendita": 0,
-      "lampo": 2,
+      "lampo": 1,
       "scavo": 0,
       "level_required": 0,
       "production": {
@@ -3630,7 +3712,7 @@
       "flexible": false,
       "resistance": 1,
       "rendita": 0,
-      "lampo": 2,
+      "lampo": 1,
       "scavo": 0,
       "level_required": 0,
       "production": {
@@ -3683,7 +3765,8 @@
           "op": "protection_delta",
           "value": 1
         }
-      ]
+      ],
+      "scavo": 5
     },
     {
       "id": "pe_sciamano",
@@ -3707,7 +3790,8 @@
             ]
           }
         }
-      ]
+      ],
+      "scavo": 5
     },
     {
       "id": "pe_mercante_di_ossidiana",
@@ -3732,7 +3816,8 @@
           "duration": "era",
           "times": 2
         }
-      ]
+      ],
+      "scavo": 5
     },
     {
       "id": "pe_incisore",
@@ -3753,7 +3838,8 @@
             "is_self": true
           }
         }
-      ]
+      ],
+      "scavo": 5
     },
     {
       "id": "pe_costruttore_di_zattere",
@@ -3783,7 +3869,8 @@
             ]
           }
         }
-      ]
+      ],
+      "scavo": 5
     },
     {
       "id": "pe_architetto",
@@ -3813,7 +3900,8 @@
             }
           }
         }
-      ]
+      ],
+      "scavo": 4
     },
     {
       "id": "pe_legionario",
@@ -3839,7 +3927,8 @@
             "min": 1
           }
         }
-      ]
+      ],
+      "scavo": 4
     },
     {
       "id": "pe_sacerdotessa",
@@ -3870,7 +3959,8 @@
             ]
           }
         }
-      ]
+      ],
+      "scavo": 4
     },
     {
       "id": "pe_console",
@@ -3901,7 +3991,8 @@
             ]
           }
         }
-      ]
+      ],
+      "scavo": 4
     },
     {
       "id": "pe_retore",
@@ -3925,7 +4016,8 @@
             ]
           }
         }
-      ]
+      ],
+      "scavo": 4
     },
     {
       "id": "pe_mastro_costruttore",
@@ -3956,7 +4048,8 @@
           "duration": "permanent",
           "times": 1
         }
-      ]
+      ],
+      "scavo": 3
     },
     {
       "id": "pe_vescovo",
@@ -3992,7 +4085,8 @@
             ]
           }
         }
-      ]
+      ],
+      "scavo": 3
     },
     {
       "id": "pe_cavaliere",
@@ -4018,7 +4112,8 @@
             "min": 1
           }
         }
-      ]
+      ],
+      "scavo": 3
     },
     {
       "id": "pe_mercante",
@@ -4047,7 +4142,8 @@
           },
           "when": "other_activates"
         }
-      ]
+      ],
+      "scavo": 3
     },
     {
       "id": "pe_cronista",
@@ -4076,7 +4172,8 @@
             }
           }
         }
-      ]
+      ],
+      "scavo": 3
     },
     {
       "id": "pe_mecenate",
@@ -4100,7 +4197,8 @@
           "value": 1,
           "duration": "era"
         }
-      ]
+      ],
+      "scavo": 2
     },
     {
       "id": "pe_banchiere",
@@ -4118,7 +4216,8 @@
           "pietra": 0,
           "oro": 3
         }
-      ]
+      ],
+      "scavo": 2
     },
     {
       "id": "pe_ingegnere_militare",
@@ -4155,7 +4254,8 @@
             ]
           }
         }
-      ]
+      ],
+      "scavo": 2
     },
     {
       "id": "pe_cardinale",
@@ -4185,7 +4285,8 @@
             ]
           }
         }
-      ]
+      ],
+      "scavo": 2
     },
     {
       "id": "pe_artista_di_corte",
@@ -4211,7 +4312,8 @@
           "duration": "era",
           "times": 1
         }
-      ]
+      ],
+      "scavo": 2
     },
     {
       "id": "pe_archeologo",
@@ -4249,7 +4351,8 @@
             }
           }
         }
-      ]
+      ],
+      "scavo": 1
     },
     {
       "id": "pe_urbanista",
@@ -4273,7 +4376,8 @@
             }
           }
         }
-      ]
+      ],
+      "scavo": 1
     },
     {
       "id": "pe_industriale",
@@ -4298,7 +4402,8 @@
           "duration": "era",
           "times": 2
         }
-      ]
+      ],
+      "scavo": 1
     },
     {
       "id": "pe_soprintendente",
@@ -4320,7 +4425,8 @@
           },
           "times": 3
         }
-      ]
+      ],
+      "scavo": 1
     },
     {
       "id": "pe_veterano",
@@ -4347,7 +4453,8 @@
             ]
           }
         }
-      ]
+      ],
+      "scavo": 1
     },
     {
       "id": "pe_dinastia",
@@ -4380,7 +4487,8 @@
           "oro": 0,
           "idee": 3
         }
-      }
+      },
+      "scavo": 0
     }
   ],
   "upgrades": [
@@ -4411,7 +4519,8 @@
             "is_self": true
           }
         }
-      ]
+      ],
+      "scavo": 5
     },
     {
       "id": "po_palizzata",
@@ -4455,7 +4564,8 @@
           "op": "vp",
           "value": 1
         }
-      ]
+      ],
+      "scavo": 5
     },
     {
       "id": "po_granaio_comune",
@@ -4522,7 +4632,8 @@
           "op": "vp",
           "value": 2
         }
-      ]
+      ],
+      "scavo": 4
     },
     {
       "id": "po_altare",
@@ -4551,7 +4662,8 @@
             "is_self": true
           }
         }
-      ]
+      ],
+      "scavo": 4
     },
     {
       "id": "po_bastioni",
@@ -4764,7 +4876,8 @@
           "op": "vp",
           "value": 1
         }
-      ]
+      ],
+      "scavo": 3
     },
     {
       "id": "po_opera_darte",
@@ -4784,7 +4897,8 @@
           "op": "vp",
           "value": 3
         }
-      ]
+      ],
+      "scavo": 2
     },
     {
       "id": "po_affreschi",
@@ -4804,7 +4918,8 @@
           "op": "vp",
           "value": 2
         }
-      ]
+      ],
+      "scavo": 2
     },
     {
       "id": "po_cupola",
@@ -4853,7 +4968,8 @@
           "op": "vp",
           "value": 2
         }
-      ]
+      ],
+      "scavo": 2
     },
     {
       "id": "po_cannoniere",
@@ -4897,7 +5013,8 @@
           "op": "vp",
           "value": 3
         }
-      ]
+      ],
+      "scavo": 1
     },
     {
       "id": "po_targa_storica",
@@ -5004,7 +5121,8 @@
           "op": "vp",
           "value": 1
         }
-      ]
+      ],
+      "scavo": 5
     },
     {
       "id": "po_argine",
@@ -5118,7 +5236,8 @@
           "op": "vp",
           "value": 1
         }
-      ]
+      ],
+      "scavo": 4
     },
     {
       "id": "po_terme",
@@ -5251,7 +5370,8 @@
             "is_self": true
           }
         }
-      ]
+      ],
+      "scavo": 3
     },
     {
       "id": "po_arco_rampante",
@@ -5353,7 +5473,8 @@
           "op": "vp",
           "value": 1
         }
-      ]
+      ],
+      "scavo": 3
     },
     {
       "id": "po_pala_d_altare",
@@ -5373,7 +5494,8 @@
           "op": "vp",
           "value": 2
         }
-      ]
+      ],
+      "scavo": 2
     },
     {
       "id": "po_loggia",
@@ -5455,7 +5577,8 @@
             "is_self": true
           }
         }
-      ]
+      ],
+      "scavo": 2
     },
     {
       "id": "po_stamperia",
@@ -5498,7 +5621,8 @@
           "op": "vp",
           "value": 2
         }
-      ]
+      ],
+      "scavo": 1
     },
     {
       "id": "po_pannelli_solari",
@@ -6166,22 +6290,12 @@
       "force": 3,
       "severity": "grave",
       "kind": "classe",
-      "effect_text": "Forza 3. Religione −2 res · durante l’era, restaurare un rudere Religione non costa risorse (richiede comunque l’azione) e vale sui ruderi già presenti.",
+      "effect_text": "Forza 3. Religione −2 res.",
       "effects": [
         {
           "hook": "on_event",
           "op": "resistance",
           "value": -2,
-          "target": {
-            "class": [
-              "religione"
-            ]
-          }
-        },
-        {
-          "hook": "on_build",
-          "op": "rule_override",
-          "name": "free_restore_of_class",
           "target": {
             "class": [
               "religione"
@@ -6661,11 +6775,11 @@
       "id": "er_il_restauratore",
       "name": "Il Restauratore",
       "vp": 4,
-      "condition_text": "hai ristrutturato una tua rovina.",
+      "condition_text": "almeno 2 tue rovine riportate alla luce da un edificio dell'era Moderna.",
       "condition": {
         "op": "counter",
-        "name": "restauri",
-        "min": 1
+        "name": "rovine_scoperte",
+        "min": 2
       }
     },
     {
