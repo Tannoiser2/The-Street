@@ -916,6 +916,20 @@ const CARTE_IN_PIEDI: Array[String] = ["mercato", "personaggio",
 # le sue proporzioni, se no la faccia si schiaccerebbe in un quadrato.
 const MISURE_CARTE_V2 := {"mercato": Vector2(194.4, 115.6)}
 
+# LE CARTE A GRANDEZZA VERA (registro 133). Il designer: le carte edificio
+# del mercato hanno la stessa misura che avranno sulla mappa, e cosi' quelle
+# che tornano al proprietario quando crollano. Vale con le carte restituite:
+# la carta e' la tessera dell'edificio, larga quante colonne occupa e
+# profonda quanti binari.
+static func grandezza_vera() -> bool:
+	return cartoni() and TessereScavo.carte_restituite()
+
+static func misura_edificio(id: String) -> Vector2:
+	var d: Dictionary = CardDB.buildings.get(id, {})
+	var w := int(d.get("width", 1))
+	var p := int(d.get("depth", 1))
+	return Vector2(span_w(w), basetta_d() + (p - 1) * slot_d())
+
 static func misura_carta(tipo: String) -> Vector2:
 	var m: Vector2 = MISURE_CARTE.get(tipo, Vector2(CARTA, CARTA))
 	if e_v2() and MISURE_CARTE_V2.has(tipo): m = MISURE_CARTE_V2[tipo]
@@ -946,6 +960,7 @@ static func _fila_sinistra(gs: GameState) -> Array[Dictionary]:
 	if vendita.is_empty(): return out
 	var m := misura_carta("mercato")
 	var per_fila: int = int(ceil(vendita.size() / 2.0))
+	if grandezza_vera(): return _fila_sinistra_vera(vendita, per_fila)
 	var righe: int = mini(per_fila, vendita.size())
 	var alto := righe * m.y + maxf(0.0, righe - 1) * CARTA_GAP
 	var z0 := board_d() / 2.0 - alto / 2.0
@@ -960,6 +975,39 @@ static func _fila_sinistra(gs: GameState) -> Array[Dictionary]:
 			"aabb": AABB(
 				Vector3(x0 + fila * (m.x + CARTA_GAP), 0.0, z0 + riga * (m.y + CARTA_GAP)),
 				Vector3(m.x, TESSERA_Y, m.y))})
+	return out
+
+# Il mercato a grandezza vera: due file come sempre, ognuna larga quanto la
+# sua carta piu' larga, e ogni carta alta quanto e' profonda sulla mappa.
+static func _fila_sinistra_vera(vendita: Array, per_fila: int) -> Array[Dictionary]:
+	var out: Array[Dictionary] = []
+	var quante_file: int = 1 if vendita.size() <= per_fila else 2
+	var larghe: Array[float] = []
+	var alte: Array[float] = []
+	for f in quante_file:
+		larghe.append(0.0)
+		alte.append(0.0)
+	for i in vendita.size():
+		var m := misura_edificio(str(vendita[i]))
+		var f: int = i / per_fila
+		larghe[f] = maxf(larghe[f], m.x)
+		alte[f] += m.y + (CARTA_GAP if i % per_fila > 0 else 0.0)
+	var totale := 0.0
+	for f in quante_file: totale += larghe[f]
+	var x := -(BORDO + totale + (quante_file - 1) * CARTA_GAP)
+	var alto: float = alte.max()
+	var z_fila := board_d() / 2.0 - alto / 2.0
+	var z := z_fila
+	for i in vendita.size():
+		var f: int = i / per_fila
+		if i > 0 and i % per_fila == 0:
+			x += larghe[f - 1] + CARTA_GAP
+			z = z_fila
+		var m := misura_edificio(str(vendita[i]))
+		# La carta sta contro il bordo verso la strada della sua fila.
+		out.append({"kind": "mercato", "id": str(vendita[i]),
+			"aabb": AABB(Vector3(x + larghe[f] - m.x, 0.0, z), Vector3(m.x, TESSERA_Y, m.y))})
+		z += m.y + CARTA_GAP
 	return out
 
 # A DESTRA due file affiancate: i personaggi in colonna e, a fianco di
@@ -1293,6 +1341,9 @@ static func _ventaglio(carte: Array, player: int, x0: float, spazio: float,
 				"aabb": AABB(Vector3(x, giu, z0 + r * passo),
 					Vector3(m.x, TESSERA_Y, m.y))})
 			r += 1
+		# Nel mazzetto le carte restano tutte della stessa misura anche a
+		# grandezza vera: e' un riepilogo a ventaglio, e una colossale larga
+		# tre carte rimpiccioliva tutte le altre fino a non leggerle.
 		var box := AABB(Vector3(x, quota, z0 + r * passo),
 			Vector3(m.x, TESSERA_Y, m.y))
 		out.append({"kind": str(carte[j]["kind"]), "id": str(carte[j]["id"]),

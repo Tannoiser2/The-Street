@@ -66,6 +66,7 @@ func _ready() -> void:
 	_run("lo scheletro del lavoratore sotto il potenziamento (v2)", _test_scheletro_lavoratore)
 	_run("la rovina senza rudere: la carta si capovolge (v2)", _test_rovina_senza_rudere)
 	_run("v2: le tessere scavo al posto della carta crollata (registro 131)", _test_tessere_scavo_vista)
+	_run("v2: il mercato a grandezza vera (registro 133)", _test_mercato_vero)
 	_run("il riepilogo finale con i nomi del regolamento v2", _test_riepilogo_v2)
 	_run("le facce degli edifici della v2", _test_facce_v2)
 	print("\n%d superati, %d falliti" % [_passed, _failed])
@@ -2879,4 +2880,27 @@ func _test_tessere_scavo_vista() -> void:
 	_ok("  tutte nel posto della carta", dentro)
 	r.was_razed = true
 	_ok("  lo spianato non ne lascia", BoardLayout3D.tessere_scavo_box(gs, r).is_empty())
+	CardDB.load_db(CardDB.DB_PATH)
+
+# Con le carte restituite la carta edificio e' la sua tessera: sul mercato ha
+# la misura che avra' sulla mappa (registro 133).
+func _test_mercato_vero() -> void:
+	if not FileAccess.file_exists("res://data/cards-v2.json"): return
+	CardDB.load_db("res://data/cards-v2.json")
+	var ctl := GameController.new()
+	ctl.new_game(3, 133)
+	var gs := ctl.gs
+	_ok("nel file v2 le carte sono a grandezza vera", BoardLayout3D.grandezza_vera())
+	var giuste := true
+	var quante := 0
+	for c in BoardLayout3D.side_cards(gs):
+		if str(c["kind"]) != "mercato" or c.has("player"): continue
+		quante += 1
+		var a: AABB = c["aabb"]
+		var m := BoardLayout3D.misura_edificio(str(c["id"]))
+		if absf(a.size.x - m.x) > 0.01 or absf(a.size.z - m.y) > 0.01: giuste = false
+	_ok("  ogni carta del mercato ha la misura della mappa (%d carte)" % quante, giuste and quante > 0)
+	var uno := BoardLayout3D.misura_edificio("ed_capanne")
+	var due := BoardLayout3D.misura_edificio("ed_tumulo_funerario")
+	_ok("  una larga due e' larga il doppio di una colonna, piu' lo spazio fra le due", due.x > uno.x * 1.9)
 	CardDB.load_db(CardDB.DB_PATH)
