@@ -2245,4 +2245,13 @@ dato è stato importato da lì. Ma due confronti fra ciò che è stampato e
     Moderna" e le Secolarizzazioni tengono solo "Religione −2 res". Sul
     mazzetto: nelle misure un giocatore pesca in media 3,5-3,8 tessere, 9
     o meno nel 99% delle partite, al massimo 12.
+134. **Il mazzetto a 16 e lo spianato.** Il designer: "Rifai le tessere
+    scavo con 16 tessere": 0 ×4 (due semplici, scheletro, arte), 1 ×5 (tre
+    semplici, scheletro, arte), 2 ×4 (tre semplici, scheletro), 3 ×3 (due
+    semplici, arte); media 1,375, tre scheletri e tre arte. I Personaggi
+    presi restano ai giocatori, quelli non scelti si scartano. Lo spianato:
+    "restituisce carta e lascia un terrapieno oppure si mette la tessera
+    scavo di chi appartiene. Da valutare": di regola resta senza tessere;
+    la variante `spianato_tessere` gli fa lasciare le tessere del
+    proprietario (senza premio). Da misurare.
 

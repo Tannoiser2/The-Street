@@ -56,7 +56,7 @@ mai carte di edifici in rovina.
 | Case della riserva | 28 (3 tipi per era, 2 nell'era Moderna, 2 copie ciascuno) |
 | Personaggi | 25 (5 per era, con lo Scavo stampato) + 4 Dinastia |
 | Potenziamenti (gettoni) | 50 |
-| Tessere scavo | 12 per giocatore, del suo colore (il mazzetto rovine) |
+| Tessere scavo | 16 per giocatore, del suo colore (il mazzetto rovine) |
 | Eventi | 24 (6 per era, ere 1–4) |
 | Monumenti celebri | 14 |
 | Eredità (obiettivi segreti) | 16 |
@@ -94,7 +94,7 @@ la strada. Ogni colonna ha un solo terreno, valido per tutte le ere. Separate le
 dell'era per era: a inizio di ogni era mescolate le 14 dell'era e posatene una su ogni colonna.
 
 Ogni giocatore prende 4 lavoratori, le basette e i gettoni del proprio colore e 2 Costruzione. In
-due giocatori, il secondo riceve anche 1 Denaro. Ognuno mescola le 12 tessere scavo del proprio
+due giocatori, il secondo riceve anche 1 Denaro. Ognuno mescola le 16 tessere scavo del proprio
 colore e le tiene coperte davanti a sé: è il suo **mazzetto rovine**.
 
 Separate le sagome per era in cinque mazzi e scoprite il mercato dell'Era 1: sei edifici
@@ -336,19 +336,20 @@ degli edifici in piedi.
 
 #### Le tessere scavo
 
-Ogni giocatore ha un mazzetto rovine di 12 tessere del proprio colore, con valori da 0 a 3
-(media 1,33). Alcune portano un'icona: lo **scheletro** o l'**arte**.
+Ogni giocatore ha un mazzetto rovine di 16 tessere del proprio colore, con valori da 0 a 3
+(media 1,375). Alcune portano un'icona: lo **scheletro** o l'**arte**.
 
-| valore | semplici | con scheletro | con arte |
-|--:|--:|--:|--:|
-| 0 | 1 | 1 | 1 |
-| 1 | 3 | 1 | — |
-| 2 | 2 | — | 1 |
-| 3 | 2 | — | — |
+| valore | semplici | con scheletro | con arte | totale |
+|--:|--:|--:|--:|--:|
+| 0 | 2 | 1 | 1 | 4 |
+| 1 | 3 | 1 | 1 | 5 |
+| 2 | 3 | 1 | — | 4 |
+| 3 | 2 | — | 1 | 3 |
 
 Si pesca una tessera per casella, e le tessere si ricordano insieme: quelle posate dalla stessa
-rovina formano un gruppo. **Se il mazzetto finisce**, le caselle rimaste restano senza tessera e
-valgono 0. Nelle partite misurate un giocatore pesca in media meno di 4 tessere, al massimo 12.
+rovina formano un gruppo. **Se il mazzetto finisce** (avete già posato tutte le 16 tessere), le
+caselle delle rovine successive restano senza tessera e valgono 0. Nelle partite misurate un
+giocatore pesca in media meno di 4 tessere, al massimo 12: con 16 non succede quasi mai.
 
 Costruire sopra funziona come sempre: le tessere restano sotto, coperte, e nessuno le guarda.
 
@@ -384,8 +385,8 @@ vostro edificio in piedi paga la sua Rendita stampata.
 Prima di scartare, **ogni 2 risorse oltre il tetto diventano 1 Idea** (senza superare il tetto
 delle Idee): i granai non attraversano i secoli, il sapere sì. Il resto si scarta a scelta.
 
-**Il ricambio**: i lavoratori tornano ai proprietari, i Personaggi dell'era si mettono da parte
-(il loro Scavo serve alla fine), le case avanzate si scartano, le
+**Il ricambio**: i lavoratori tornano ai proprietari, i Personaggi presi restano a chi li ha
+presi (il loro Scavo serve alla fine), quelli non scelti si scartano, le case avanzate si scartano, le
 tessere dell'era nuova si posano sulle colonne (una per colonna, dalle 14 dell'era), i
 cartellini della Prosperità si rigirano, si scartano le file vecchie, si aprono
 quelle dell'era nuova e si rivela il nuovo evento.

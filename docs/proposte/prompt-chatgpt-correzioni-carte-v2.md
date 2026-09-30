@@ -138,7 +138,7 @@ Il designer ha cambiato le rovine e i punti. Sulle carte cambia questo:
 - **Edifici, retro:** non serve più il retro in bianco e nero della rovina: quando un edificio crolla la carta torna al proprietario.
 - **Personaggi:** aggiungete un valore **Scavo** stampato, per era: era 1 = 5, era 2 = 4, era 3 = 3, era 4 = 2, era 5 = 1.
 - **Potenziamenti:** diventano **token** tondi o quadrati, uno per casella, da mettere sopra l'edificio. I 16 potenziamenti **Arte** hanno un valore **Scavo** stampato per era, con la stessa scala dei Personaggi.
-- **Tessere scavo (nuove):** 12 per giocatore, nei 4 colori, dorso nel colore del giocatore. Fronte: un numero da 0 a 3 e, su alcune, un'icona (scheletro o arte). Per ogni colore: valore 0 ×3 (una semplice, una con scheletro, una con arte); valore 1 ×4 (tre semplici, una con scheletro); valore 2 ×3 (due semplici, una con arte); valore 3 ×2.
+- **Tessere scavo (nuove):** 16 per giocatore, nei 4 colori, dorso nel colore del giocatore. Fronte: un numero da 0 a 3 e, su alcune, un'icona (scheletro o arte). Per ogni colore: valore 0 ×4 (due semplici, una con scheletro, una con arte); valore 1 ×5 (tre semplici, una con scheletro, una con arte); valore 2 ×4 (tre semplici, una con scheletro); valore 3 ×3 (due semplici, una con arte).
 - **Eredità Il Restauratore:** condizione nuova "almeno 2 tue rovine riportate alla luce da un edificio dell'era Moderna" (4 PV, invariati).
 - **Evento Secolarizzazioni:** testo nuovo "Forza 3. Religione −2 res." (via la parte sul restauro).
 
@@ -147,5 +147,5 @@ Il designer ha cambiato le rovine e i punti. Sulle carte cambia questo:
 1. I cinque PDF degli edifici corretti, con gli stessi nomi di file, e i PDF delle tessere e delle carte corretti.
 2. Il PDF dei potenziamenti corretto.
 3. Un elenco breve delle carte che hai modificato, pagina per pagina.
-4. Le 48 tessere scavo (12 per colore) e i token dei potenziamenti.
+4. Le 64 tessere scavo (16 per colore) e i token dei potenziamenti.
 5. Una piccola legenda con le icone nuove (corona d'alloro, clessidra, fulmine) e i colori delle famiglie dei potenziamenti, così la riporto nel regolamento.

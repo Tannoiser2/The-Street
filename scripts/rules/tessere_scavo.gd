@@ -59,7 +59,13 @@ static func costo(uid: String) -> int:
 # Le caselle che l'edificio occupava: una tessera ciascuna. Lo spianato non
 # ne ha (il suo Scavo valeva gia' 0).
 static func quante(b: Building) -> int:
-	if b.state != Enums.BuildingState.ROVINA or b.was_razed: return 0
+	if b.state != Enums.BuildingState.ROVINA: return 0
+	# LO SPIANATO (registro 134, da valutare): di regola la carta torna al
+	# proprietario e non lascia tessere, come un terrapieno. Con
+	# `spianato_lascia_tessere` lascia le tessere del proprietario come ogni
+	# rovina (ma non paga il premio: chi spiana costruisce sopra il proprio).
+	if b.was_razed and not (attive() and bool(CardDB.constants["tessere_scavo"].get("spianato_lascia_tessere", false))):
+		return 0
 	return b.width() * b.profondita()
 
 # Lo Scavo su cui si paga il premio di chi costruisce sopra. Di regola quello
@@ -67,6 +73,7 @@ static func quante(b: Building) -> int:
 # contano le tessere coperte sotto (una per casella), `per_tessera` PV l'una.
 static func scavo_per_premio(b: Building) -> int:
 	if attive() and str(CardDB.constants["tessere_scavo"].get("premio", "")) == "tessere":
+		if b.was_razed: return 0
 		return quante(b) * int(CardDB.constants["tessere_scavo"].get("per_tessera", 1))
 	return b.scavo_value()
 

@@ -774,8 +774,8 @@ def potenziamenti_di_classe(v):
     v["constants"]["potenziamento_stessa_classe"] = True
 
 # LE ROVINE E I FLUSSI (registri 130-133), decisioni del designer:
-# - TESSERE SCAVO: ogni giocatore ha un mazzetto di 12 tessere del suo colore,
-#   da 0 a 3 (media 1,33); due con lo scheletro ("s"), due con l'arte ("p").
+# - TESSERE SCAVO: ogni giocatore ha un mazzetto di 16 tessere del suo colore,
+#   da 0 a 3 (media 1,375); tre con lo scheletro ("s"), tre con l'arte ("p").
 #   Quando un edificio va in rovina il proprietario ne pesca una per casella
 #   e le mette coperte; un edificio dell'era 5 costruito sopra le scopre; a
 #   fine partita le scoperte valgono per intero, le coperte a meta', e le
@@ -797,12 +797,14 @@ def potenziamenti_di_classe(v):
 #   a 2 (con +1 su tutte la Rendita arrivava a 24 PV); la Continuita' diventa
 #   una collezione: per ogni classe, i tuoi edifici in piedi piu' le carte
 #   restituite, a soglie.
+# Il designer ha portato il mazzetto a 16 (registro 134), con tre scheletri e
+# tre arte: valore medio 1,375.
 MAZZO_SCAVO = (
-    [{"v": 0}, {"v": 0, "s": True}, {"v": 0, "p": True}]
-    + [{"v": 1}] * 3 + [{"v": 1, "s": True}]
-    + [{"v": 2}] * 2 + [{"v": 2, "p": True}]
-    + [{"v": 3}] * 2)
-assert len(MAZZO_SCAVO) == 12
+    [{"v": 0}] * 2 + [{"v": 0, "s": True}, {"v": 0, "p": True}]
+    + [{"v": 1}] * 3 + [{"v": 1, "s": True}, {"v": 1, "p": True}]
+    + [{"v": 2}] * 3 + [{"v": 2, "s": True}]
+    + [{"v": 3}] * 2 + [{"v": 3, "p": True}])
+assert len(MAZZO_SCAVO) == 16
 CONTINUITA_COLLEZIONE = {"3": 3, "5": 5, "7": 8, "9": 12}
 
 def scavo_per_era(era):
@@ -831,6 +833,12 @@ def rovine_e_flussi(v):
     e["effects"] = [x for x in e["effects"] if x.get("name") != "free_restore_of_class"]
     e["effect_text"] = "Forza 3. Religione −2 res."
 
+# LO SPIANATO CON LE TESSERE (registro 134, da valutare): lo spianato lascia
+# le tessere scavo del proprietario come ogni rovina, invece di restare un
+# terrapieno senza tessere. Il premio non lo paga comunque.
+def spianato_tessere(v):
+    v["constants"]["tessere_scavo"]["spianato_lascia_tessere"] = True
+
 import sys
 variante = sys.argv[sys.argv.index("--variante") + 1] if "--variante" in sys.argv else ""
 # Le case in riserva stanno nel file v2 di tutti (registro 116); le varianti di
@@ -848,7 +856,7 @@ rovine_e_flussi(v2)
 if variante:
     {"doppioni": doppioni, "abitazioni": abitazioni, "case": case,
      "case_doppioni": case_doppioni, "case_scavo": case_scavo, "case_nulle": case_nulle,
-     "case_mista": case_mista, "case_tutti": case_tutti}[variante](v2)
+     "case_mista": case_mista, "case_tutti": case_tutti, "spianato_tessere": spianato_tessere}[variante](v2)
     v2["meta"]["ruleset"] = "v2-" + variante
     v2["meta"]["origine"] = "generato da tools/genera_cards_v2.py --variante %s: non modificare a mano" % variante
     out = os.path.join(RADICE, "data/proposte/cards-v2-%s.json" % variante)
