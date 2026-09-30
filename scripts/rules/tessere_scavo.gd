@@ -49,6 +49,10 @@ static func riscatta(gs: GameState, b: Building) -> void:
 		if not CardDB.upgrades.has(uid): continue
 		Effects.annulla_potenziamento(gs, b, CardDB.upgrades[uid])
 		p.potenziamenti_riscattati.append(uid)
+		# Per l'audit: quanti token arte si riscattano, e di che era.
+		if str(CardDB.upgrades[uid].get("family", "")) == "arte":
+			p.bump("riscattati_arte")
+			p.bump("riscattati_arte_e%d" % int(CardDB.upgrades[uid]["era"]))
 		gs.log_line("%s va in rovina: il giocatore %d riscatta %s" % [b.data["name"], b.owner, CardDB.upgrades[uid]["name"]])
 	b.upgrades.clear()
 
