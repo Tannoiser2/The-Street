@@ -774,17 +774,26 @@ def potenziamenti_di_classe(v):
     v["constants"]["potenziamento_stessa_classe"] = True
 
 # LE TESSERE SCAVO (registro 130), proposta da misurare: ogni giocatore ha
-# un mazzetto di 20 tessere del suo colore, da 0 a 3 (media 1,4). Tre hanno
-# lo scheletro ("s"), tre il potenziamento ("p").
+# un mazzetto di 12 tessere del suo colore, da 0 a 3 (media 1,33). Due hanno
+# lo scheletro ("s"), due il potenziamento ("p"). Erano 20, ma un giocatore
+# ne pesca in media meno di 4 e al massimo 12 (ventiseiesima misura): il
+# designer le ha ridotte a 12 con le stesse proporzioni.
 MAZZO_SCAVO = (
-    [{"v": 0}] * 3 + [{"v": 0, "s": True}, {"v": 0, "p": True}]
-    + [{"v": 1}] * 4 + [{"v": 1, "s": True}, {"v": 1, "p": True}]
-    + [{"v": 2}] * 3 + [{"v": 2, "s": True}, {"v": 2, "p": True}]
-    + [{"v": 3}] * 4)
-assert len(MAZZO_SCAVO) == 20
+    [{"v": 0}, {"v": 0, "s": True}, {"v": 0, "p": True}]
+    + [{"v": 1}] * 3 + [{"v": 1, "s": True}]
+    + [{"v": 2}] * 2 + [{"v": 2, "p": True}]
+    + [{"v": 3}] * 2)
+assert len(MAZZO_SCAVO) == 12
 
 def tessere_scavo(v):
     v["constants"]["tessere_scavo"] = {"mazzo": [dict(t) for t in MAZZO_SCAVO]}
+
+# Il premio di chi costruisce sopra con le tessere (proposta): la carta della
+# rovina se ne va, quindi il suo Scavo stampato non si vede piu'. Si contano
+# le tessere coperte sotto: 1 per tessera x livello, meta' nell'era 5.
+def tessere_scavo_premio(v):
+    tessere_scavo(v)
+    v["constants"]["tessere_scavo"]["premio"] = "tessere"
 
 import sys
 variante = sys.argv[sys.argv.index("--variante") + 1] if "--variante" in sys.argv else ""
@@ -802,7 +811,7 @@ potenziamenti_di_classe(v2)
 if variante:
     {"doppioni": doppioni, "abitazioni": abitazioni, "case": case,
      "case_doppioni": case_doppioni, "case_scavo": case_scavo, "case_nulle": case_nulle,
-     "case_mista": case_mista, "case_tutti": case_tutti, "tessere_scavo": tessere_scavo}[variante](v2)
+     "case_mista": case_mista, "case_tutti": case_tutti, "tessere_scavo": tessere_scavo, "tessere_scavo_premio": tessere_scavo_premio}[variante](v2)
     v2["meta"]["ruleset"] = "v2-" + variante
     v2["meta"]["origine"] = "generato da tools/genera_cards_v2.py --variante %s: non modificare a mano" % variante
     out = os.path.join(RADICE, "data/proposte/cards-v2-%s.json" % variante)

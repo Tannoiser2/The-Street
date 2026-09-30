@@ -1,10 +1,10 @@
 {
   "meta": {
     "game": "La Strada delle Ere",
-    "ruleset": "v2-tessere_scavo",
+    "ruleset": "v2-tessere_scavo_premio",
     "language": "it",
     "source": "distinta-carte (fonte unica)",
-    "origine": "generato da tools/genera_cards_v2.py --variante tessere_scavo: non modificare a mano"
+    "origine": "generato da tools/genera_cards_v2.py --variante tessere_scavo_premio: non modificare a mano"
   },
   "constants": {
     "eras": 5,
@@ -147,7 +147,8 @@
         {
           "v": 3
         }
-      ]
+      ],
+      "premio": "tessere"
     }
   },
   "terrains": [

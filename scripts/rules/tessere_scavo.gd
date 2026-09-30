@@ -27,6 +27,14 @@ static func quante(b: Building) -> int:
 	if b.state != Enums.BuildingState.ROVINA or b.was_razed: return 0
 	return b.width() * b.profondita()
 
+# Lo Scavo su cui si paga il premio di chi costruisce sopra. Di regola quello
+# stampato; con `premio: "tessere"` la carta della rovina non c'e' piu' e si
+# contano le tessere coperte sotto (una per casella).
+static func scavo_per_premio(b: Building) -> int:
+	if attive() and str(CardDB.constants["tessere_scavo"].get("premio", "")) == "tessere":
+		return quante(b)
+	return b.scavo_value()
+
 static func _mazzo(gs: GameState, player: int) -> Array:
 	if not gs.mazzi_scavo.has(player):
 		var m: Array = (CardDB.constants["tessere_scavo"]["mazzo"] as Array).duplicate(true)

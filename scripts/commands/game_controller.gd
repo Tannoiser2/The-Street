@@ -474,7 +474,7 @@ func build(card_id: String, col_from: int, above: bool, pay_option: int = 0, des
 			altro.buried_era = gs.era
 			# Il premio di scavo si paga qui, sul momento, come il Lampo: il
 			# livello e' quello dell'edificio appena costruito.
-			var premio := Scoring.premio_scavo(altro.scavo_value(), b.level, gs.era)
+			var premio := Scoring.premio_scavo(TessereScavo.scavo_per_premio(altro), b.level, gs.era)
 			# Tessera dell'era "Spoglio delle rovine" (registro 121).
 			premio += TessereEra.premio_in_piu(gs, p.index, altro, premio)
 			if premio > 0:

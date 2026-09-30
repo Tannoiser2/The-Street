@@ -1878,4 +1878,8 @@ func _test_tessere_scavo() -> void:
 	r.scavata = false
 	TessereScavo.scava(gs, sopra)
 	_ok("un edificio dell'era 5 costruito sopra la scopre", r.scavata)
+	_eq("il premio di chi costruisce sopra usa lo Scavo stampato", TessereScavo.scavo_per_premio(r), r.scavo_value())
+	CardDB.constants["tessere_scavo"]["premio"] = "tessere"
+	_eq("  o, con premio \"tessere\", le tessere sotto", TessereScavo.scavo_per_premio(r), 2)
+	_eq("  e lo spianato non ne ha", TessereScavo.scavo_per_premio(spianata), 0)
 	CardDB.load_db(CardDB.DB_PATH)
