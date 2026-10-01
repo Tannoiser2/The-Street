@@ -93,7 +93,9 @@ const V2_SCALA := TESSERA_D / 837.9
 const V2_BANDA_SU := 116.2 * V2_SCALA          # 37,6 mm
 const V2_SLOT_D := 121.1 * V2_SCALA            # 39,2 mm per binario
 const V2_CASELLA_ERA := 116.2 * V2_SCALA       # la casella della tessera dell'era
-const CARTONE_Y := 15.0                        # lo spessore del cartone
+# Lo spessore del blocco: era 15 mm, e il designer (registro 144) li trovava
+# "molto alti"; a 9 una pila di cinque ere resta leggibile senza torri.
+const CARTONE_Y := 9.0
 const CARTA_V2_D := 116.2 * V2_SCALA           # 37,6 mm: la carta, di profondita'
 const CARTA_MARGINE := 0.8
 

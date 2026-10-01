@@ -43,7 +43,7 @@ const VOCI_V2: Array[Dictionary] = [
 	{"id": "cultura", "nome": "PV prodotti"},
 	{"id": "rendita", "nome": "Censimento"},
 	{"id": "continuita", "nome": "Continuità"},
-	{"id": "scavo", "nome": "Scavo+premio"},
+	{"id": "scavo", "nome": "Scavo"},
 	{"id": "scheletri", "nome": "Scheletri"},
 	{"id": "monumenti", "nome": "Monumenti"},
 	{"id": "eredita", "nome": "Eredità"},
@@ -96,6 +96,7 @@ static func righe(gs: GameState) -> Array[Dictionary]:
 			"posto": posto + 1,
 			"vp": p.vp,
 			"punti": p.vp_breakdown.duplicate(),
+			"dettaglio": p.vp_dettaglio.duplicate(true),
 			"edifici": Scoring.in_piedi(gs, i),
 			"eredita": p.legacy_id,
 			"eredita_nome": _nome_eredita(p.legacy_id),
@@ -105,6 +106,31 @@ static func righe(gs: GameState) -> Array[Dictionary]:
 
 static func punti(riga: Dictionary, id: String) -> int:
 	return int((riga["punti"] as Dictionary).get(id, 0))
+
+# DA DOVE VENGONO I PUNTI DI UNA VOCE (registro 144). Il designer: "puoi
+# dividere i punteggi finali per capire da dove vengono? E Premi da dove
+# arrivano?". Le sottovoci di un canale che hanno dato punti a qualcuno,
+# dalla piu' ricca; vuote se il canale ha una fonte sola (non c'e' niente
+# da dividere). La voce senza nome e' quel che il nucleo segna senza dire
+# da dove: si chiama "altro".
+static func sottovoci(righe_: Array[Dictionary], id: String) -> Array[String]:
+	var somme := {}
+	for r in righe_:
+		var d: Dictionary = (r.get("dettaglio", {}) as Dictionary).get(id, {})
+		for v in d:
+			if int(d[v]) != 0: somme[v] = int(somme.get(v, 0)) + int(d[v])
+	if somme.size() < 2: return []
+	var out: Array[String] = []
+	for v in somme: out.append(str(v))
+	out.sort_custom(func(a, b): return int(somme[a]) > int(somme[b]))
+	return out
+
+static func punti_voce(riga: Dictionary, id: String, voce: String) -> int:
+	var d: Dictionary = (riga.get("dettaglio", {}) as Dictionary).get(id, {})
+	return int(d.get(voce, 0))
+
+static func nome_voce(voce: String) -> String:
+	return "altro" if voce == "" else voce
 
 # La somma delle colonne mostrate. Se non torna col totale segnato, la
 # differenza e' roba segnata prima che la tabella conoscesse il canale: si

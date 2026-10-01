@@ -179,6 +179,7 @@ static func conta(gs: GameState) -> void:
 			if b.owner != p.index or quante(b) == 0: continue
 			var somma := 0
 			var extra := 0
+			var ext_scheletri := 0
 			for t in tessere(gs, b):
 				somma += int(t.get("v", 0))
 				if not b.scavata: continue
@@ -190,6 +191,7 @@ static func conta(gs: GameState) -> void:
 					# Personaggio preso in quell'era.
 					var sc := scavo_personaggio_di_era(p, int(s))
 					extra += sc
+					ext_scheletri += sc
 					p.bump("scavo_scheletri_era", sc)
 				if bool(t.get("p", false)) and not opere.is_empty():
 					var arte := int(opere.pop_back())
@@ -197,7 +199,12 @@ static func conta(gs: GameState) -> void:
 					p.bump("scavo_arte", arte)
 			var v: int = (somma if b.scavata else somma / 2) + b.bonus_scavo + extra
 			if v <= 0: continue
-			p.add_vp("scavo", v)
+			# Tre voci per il riepilogo, un canale solo: le tessere, gli
+			# scheletri (lo Scavo dei Personaggi) e l'arte ritrovata.
+			var ext_arte := extra - ext_scheletri
+			p.add_vp("scavo", v - extra, "tessere scavo")
+			if ext_scheletri > 0: p.add_vp("scavo", ext_scheletri, "scheletri ritrovati")
+			if ext_arte > 0: p.add_vp("scavo", ext_arte, "arte ritrovata")
 			b.rende("scavo", v)
 			p.bump("scavo_tessere", v)
 			if b.scavata: p.bump("scavo_scoperto", v)

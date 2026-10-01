@@ -86,7 +86,7 @@ static func claim_monuments(gs: GameState) -> void:
 			var p: PlayerState = gs.players[int(i)]
 			if met(gs, p.index, m["condition"]):
 				p.monuments_claimed.append(mid)
-				p.add_vp("monumenti", int(m["vp"]))
+				p.add_vp("monumenti", int(m["vp"]), str(m.get("name", "")))
 				gs.monuments_open.erase(mid)
 				gs.log_line("%s reclamato dal giocatore %d (+%d PV)" % [m["name"], p.index, int(m["vp"])])
 				break

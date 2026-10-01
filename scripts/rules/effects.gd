@@ -313,7 +313,7 @@ static func apply_era_end_characters(gs: GameState) -> void:
 				if str(cond.get("op", "")) == "protected_survived":
 					if not _protetto_sopravvissuto(gs, p, cid): continue
 				elif not _condition_met(gs, null, cond, p.index): continue
-				p.add_vp("cultura", int(e["value"]))
+				p.add_vp("cultura", int(e["value"]), voce_di(carta))
 				gs.log_line("%s: l'edificio protetto ha retto, +%d cultura" % [carta["name"], int(e["value"])])
 
 static func _protetto_sopravvissuto(gs: GameState, p: PlayerState, cid: String) -> bool:
@@ -406,7 +406,7 @@ static func _paga_vp(gs: GameState, player: int, e: Dictionary, carta: Dictionar
 	var p: PlayerState = gs.players[player]
 	var dato := _quota(p, e, carta, v)
 	if dato <= 0: return
-	p.add_vp("cultura", dato)
+	p.add_vp("cultura", dato, voce_di(carta))
 	gs.log_line("%s: attivazione, %+d cultura a giocatore %d" % [carta["name"], dato, player])
 
 # ---- hook: on_build (applica) --------------------------------------
@@ -611,7 +611,7 @@ static func apply_on_acquire(gs: GameState, player: int, card: Dictionary,
 				p.gain(int(e.get("pietra", 0)), int(e.get("oro", 0)), int(e.get("idee", 0)), "personaggi")
 				gs.log_line("%s: %+d pietra %+d oro %+d idee" % [card["name"], int(e.get("pietra", 0)), int(e.get("oro", 0)), int(e.get("idee", 0))])
 			"vp":
-				p.add_vp("cultura", int(e["value"]))
+				p.add_vp("cultura", int(e["value"]), voce_di(card))
 				gs.log_line("%s: %+d cultura" % [card["name"], int(e["value"])])
 			"resistance":
 				for b in _bersagli(gs, host, e):
@@ -645,7 +645,7 @@ static func apply_on_acquire(gs: GameState, player: int, card: Dictionary,
 		var mec := player_override(gs, player, "arte_vp_bonus")
 		if not mec.is_empty():
 			var v := int(mec[0].get("value", 1))
-			p.add_vp("cultura", v)
+			p.add_vp("cultura", v, "Personaggi")
 			gs.log_line("%s: %s vale %+d PV" % [mec[1]["name"], card["name"], v])
 
 static func _bersagli(gs: GameState, src: Building, e: Dictionary) -> Array[Building]:
@@ -788,9 +788,17 @@ static func _conta(gs: GameState, owner: int, hits: Array[Building], per: String
 			return ere.size()
 	return hits.size()
 
+# Da dove viene un PV, per il riepilogo: la famiglia della carta che lo da'.
+static func voce_di(carta: Dictionary) -> String:
+	var id := str(carta.get("id", ""))
+	if id.begins_with("pe_"): return "Personaggi"
+	if id.begins_with("po_"): return "potenziamenti"
+	if id.begins_with("ed_"): return "edifici"
+	return str(carta.get("name", ""))
+
 static func _award(gs: GameState, player: int, pts: int, carta: Dictionary) -> void:
 	if pts == 0: return
-	gs.players[player].add_vp(VP_CHANNEL, pts)
+	gs.players[player].add_vp(VP_CHANNEL, pts, str(carta.get("name", "")))
 	gs.log_line("%s: %+d PV a giocatore %d" % [carta["name"], pts, player])
 
 # ---- op: resource (applica) ----------------------------------------

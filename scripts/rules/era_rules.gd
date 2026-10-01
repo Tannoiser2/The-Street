@@ -110,7 +110,7 @@ static func paga_edificio(gs: GameState, b: Building) -> void:
 	var ex := Effects.production_bonus(gs, b.owner, pp, po)
 	ow.gain(pp + ex.x, po + ex.y, pi, "edifici")
 	if pc > 0:
-		ow.add_vp("cultura", pc)
+		ow.add_vp("cultura", pc, "produzione degli edifici")
 	# Artista di corte: chi ha firmato l'edificio altrui incassa la sua
 	# quota. Non e' una produzione dell'edificio ma un taglio dell'artista,
 	# quindi non conta per l'Industriale, come l'oro della Prosperita'.
