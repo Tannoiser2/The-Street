@@ -183,6 +183,9 @@ static func matches(gs: GameState, b: Building, t: Dictionary,
 		if not ["intatto", "rudere", "rovina"][b.state] in t["state"]: return false
 	if t.has("buried") and b.is_buried != bool(t["buried"]): return false
 	if t.has("razed") and b.was_razed != bool(t["razed"]): return false
+	# Le rovine riportate alla luce dallo scavo dell'era Moderna (registro 150,
+	# il Ponte in acciaio).
+	if t.has("scavata") and b.scavata != bool(t["scavata"]): return false
 	if not _in_range(b.upgrades.size(), t.get("upgrades", {})): return false
 	if t.has("protected") and (b.protection > 0) != bool(t["protected"]): return false
 	if t.has("produces"):

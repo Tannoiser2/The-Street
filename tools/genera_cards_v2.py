@@ -145,15 +145,53 @@ v2["constants"]["tessere_una_volta_per_era"] = True
 v2["constants"].pop("disturbo_vp", None)
 v2["constants"]["vetusta_max"] = 0
 v2["constants"]["vetusta_max_bosco"] = 0
+# Registro 151: costruire sopra una rovina non sconta piu' la Costruzione.
+v2["constants"]["rubble_discount_pietra"] = 0
 # REGISTRO 142: via la Prosperita' Urbana. Il designer: "togli la Prosperita'
 # se il denaro e' abbondante e avanza a ogni era". Misurato senza: a fine era
 # avanzano 3-6 Denaro a testa dall'era 2 in poi, a zero in meno del 10% dei
 # casi, e i PV non si muovono (ventottesima misura).
 v2["constants"]["prosperity"] = dict(v2["constants"]["prosperity"], attiva=False)
+# REGISTRO 150: LE GILDE DELL'ERA MODERNA. Il designer: "gli edifici dell'era 5
+# dovrebbero funzionare come una specie di gilda di 7 Wonders, che oltre a
+# riscoprire le rovine danno PV in base ad alcune condizioni". Otto su
+# quattordici lo facevano gia'; queste quattro non avevano niente (le due case
+# restano case).
+def gilde_era5(v):
+    eb = {b["id"]: b for b in v["buildings"]}
+    def gilda(bid, effetti, testo):
+        eb[bid]["effects"] = effetti
+        eb[bid]["effect_text"] = testo
+    gilda("ed_condominio", [{"hook": "on_final_scoring", "op": "vp_per", "value": 1, "cap": 4,
+        "target": {"owner": "self", "class": ["civico"], "state": ["intatto"], "buried": False}}],
+        "A fine partita: +1 PV per ogni tuo edificio Civico in piedi (max +4).")
+    gilda("ed_officina", [{"hook": "on_final_scoring", "op": "vp_per", "value": 1, "cap": 4,
+        "target": {"owner": "self", "class": ["ingegneria"], "is_self": False}}],
+        "A fine partita: +1 PV per ogni altro tuo edificio Ingegneria, in piedi o sotterrato (max +4).")
+    gilda("ed_ponte_in_acciaio", [{"hook": "on_final_scoring", "op": "vp_per", "value": 2,
+        "target": {"owner": "self", "state": ["rovina"], "scavata": True, "same_column_as_self": True}}],
+        "A fine partita: +2 PV per ogni tua rovina riportata alla luce nelle sue colonne.")
+    # La Stazione tiene il suo rule_override (solo sopra): la gilda si aggiunge.
+    gilda("ed_stazione", [e for e in eb["ed_stazione"]["effects"] if e["hook"] != "on_final_scoring"] + [{"hook": "on_final_scoring", "op": "vp_per", "value": 1, "cap": 5,
+        "target": {"state": ["intatto"], "buried": False, "same_column_as_self": True, "is_self": False}}],
+        "Solo sopra: al livello 1 o piu'. A fine partita: +1 PV per ogni edificio in piedi nelle sue colonne, di chiunque (max +5).")
+
+# REGISTRO 149: l'evento finale. Il designer: "a cosa serve la resistenza negli
+# edifici di era 5? O si mette un evento anche alla fine oppure va eliminato.
+# Procedi con evento finale". Un evento solo, senza effetti speciali, di forza
+# 4 come il Medioevo: crolla chi resta sotto di due (resistenza 2 o meno senza
+# protezioni). Si risolve prima del conto finale, quindi prima del censimento
+# finale e dello Scavo: quel che crolla smette di rendere e diventa rovina da
+# contare.
+v2["constants"]["evento_finale"] = {"id": "ev_giudizio_del_tempo", "name": "Il giudizio del tempo",
+    "era": 5, "force": 4, "effects": [],
+    "text": "Fine dell'era Moderna: ogni edificio in piedi affronta la forza 4, poi si contano i punti."}
 # ---- le varianti di prova per la scarsita' di sagome a quattro (registro 110) --
 # A quattro giocatori sedici turni per era contro dodici sagome. Due idee del
 # designer, ognuna un file a parte in data/proposte/, che il file v2 non tocca:
-#   --variante premio_meta / premio_meta_tessere  il premio di scavo a 1 PV per tessera, e le tessere doppie (registro 145)
+#   --variante scavo_due   il bonus scavo a 2 PV per tessera invece di 1 (registro 151)
+#   --variante tessere_doppie  bonus a 1 PV, tessere del mazzetto di valore doppio (registro 151)
+#   --variante spianare_caro / strada_corta / caro_e_corta  spianare costa 1 per casella; una pianura in meno (registro 152)
 #   --variante doppioni    per era, una seconda copia della chiesa e del villaggio
 #                          piu' economici (1 casella: civico e religione, o cultura
 #                          dove la religione manca);
@@ -821,13 +859,16 @@ def scavo_per_era(era):
 
 def rovine_e_flussi(v):
     v["constants"]["tessere_scavo"] = {"mazzo": [dict(t) for t in MAZZO_SCAVO],
-        "premio": "tessere", "per_tessera": 2, "carte_restituite": True,
-        # REGISTRO 147: lo spianato lascia le tessere del proprietario come
-        # ogni rovina (senza premio: chi spiana costruisce sopra il proprio).
-        # Il designer: "il Terrapieno e' solo ed esclusivamente quando si crea
-        # un buco". Prima l'Acquedotto spianato da un edificio largo una
-        # colonna diventava tre terrapieni.
-        "spianato_lascia_tessere": True}
+        # REGISTRO 151, LE REGOLE SEMPLICI. Il designer: "Edificio proprio
+        # integro: bonus costruzione e nessuna rovina, al suo posto terrapieno.
+        # Rovine proprie o altrui: ogni tessera scavo sotto il nuovo edificio
+        # da' 1 punto (o 2, da misurare); dove non c'e' un terrapieno. Quando si
+        # costruisce nell'ultima era si girano le tessere e si danno i punteggi
+        # scritti al proprietario". Niente livello, niente dimezzamento
+        # nell'era 5, niente sconto macerie; le tessere mai girate valgono 0.
+        # (Il registro 147, lo spianato con le tessere, e' superato.)
+        "premio": "sotto", "per_tessera": 1, "riscoperta": "solo_scavate",
+        "carte_restituite": True}
     v["constants"]["potenziamenti_per_casella"] = True
     for c in v["characters"]:
         c["scavo"] = scavo_per_era(c.get("era"))
@@ -949,19 +990,36 @@ eventi_e_avanzo(v2)
 potenziamenti_di_classe(v2)
 rovine_e_flussi(v2)
 personaggi_e_arte(v2)
-# ---- le varianti del premio di scavo (registro 145) ---------------------
-# Il designer: "chi vince e' sempre quello che ha avuto il premio di scavo
-# piu' alto [...] nel gioco si deve dare valore a quello che si riscopre a
-# fine partita e non viceversa". Misurato: il vincitore ha il premio piu'
-# alto nel 59% delle partite a tre (55% a quattro), e il premio vale 10-11 PV
-# contro 6 della scoperta di fine partita.
-# "premio_meta": il premio scende a 1 PV per tessera (per livello).
-# "premio_meta_tessere": in piu' ogni tessera del mazzetto vale il doppio.
-def premio_meta(v):
-    v["constants"]["tessere_scavo"]["per_tessera"] = 1
+gilde_era5(v2)
+# ---- la variante del bonus scavo (registro 151) -------------------------
+# "ogni tessera scavo sotto il nuovo edificio da' 1 punto (o 2 da misurare)".
+def scavo_due(v):
+    v["constants"]["tessere_scavo"]["per_tessera"] = 2
 
-def premio_meta_tessere(v):
-    premio_meta(v)
+# REGISTRO 152. Il designer: "la spianata deve costare di piu', deve essere un
+# sacrificio che vale la pena fare perche' e' doloroso" e "togliere una
+# tessera territorio: con meno spazio ci si sovrappone di piu' e si e'
+# costretti a costruire sopra le rovine". Nelle misure i giocatori spianavano
+# 21 edifici propri a partita (a tre) e scavavano poco.
+# "spianare_caro": niente sconto spolia, 1 Costruzione per casella demolita.
+def spianare_caro(v):
+    v["constants"]["spianare_costo"] = 1
+
+# "strada_corta": una pianura in meno a ogni numero di giocatori (4/6/8 colonne).
+def strada_corta(v):
+    c = v["constants"]
+    c["columns_by_players"] = {k: int(n) - 1 for k, n in c["columns_by_players"].items()}
+    for k, mix in c["terrain_mix_by_players"].items():
+        mix["pianura"] = int(mix["pianura"]) - 1
+
+def caro_e_corta(v):
+    spianare_caro(v)
+    strada_corta(v)
+
+# "tessere_doppie": bonus a 1 PV, ma ogni tessera del mazzetto vale il doppio
+# alla riscoperta: con le regole semplici le tessere girate sono poche e la
+# riscoperta valeva 5 PV a testa.
+def tessere_doppie(v):
     for t in v["constants"]["tessere_scavo"]["mazzo"]:
         t["v"] = 2 * int(t["v"])
 
@@ -969,7 +1027,8 @@ if variante:
     {"doppioni": doppioni, "abitazioni": abitazioni, "case": case,
      "case_doppioni": case_doppioni, "case_scavo": case_scavo, "case_nulle": case_nulle,
      "case_mista": case_mista, "case_tutti": case_tutti, "spianato_tessere": spianato_tessere,
-     "premio_meta": premio_meta, "premio_meta_tessere": premio_meta_tessere}[variante](v2)
+     "scavo_due": scavo_due, "tessere_doppie": tessere_doppie,
+     "spianare_caro": spianare_caro, "strada_corta": strada_corta, "caro_e_corta": caro_e_corta}[variante](v2)
     v2["meta"]["ruleset"] = "v2-" + variante
     v2["meta"]["origine"] = "generato da tools/genera_cards_v2.py --variante %s: non modificare a mano" % variante
     out = os.path.join(RADICE, "data/proposte/cards-v2-%s.json" % variante)

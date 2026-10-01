@@ -21,6 +21,17 @@ extends RefCounted
 static func attive() -> bool:
 	return CardDB.constants.has("tessere_scavo")
 
+# REGISTRO 151, le regole semplici dello scavo. `premio: "sotto"`: chi
+# costruisce sopra delle rovine incassa subito `per_tessera` PV per ogni
+# tessera che finisce sotto il nuovo edificio. `riscoperta: "solo_scavate"`:
+# a fine partita contano solo le tessere girate dallo scavo dell'era Moderna,
+# a valore pieno con scheletri e arte; quelle mai girate non valgono niente.
+static func premio_sotto() -> bool:
+	return attive() and str(CardDB.constants["tessere_scavo"].get("premio", "")) == "sotto"
+
+static func solo_scavate() -> bool:
+	return attive() and str(CardDB.constants["tessere_scavo"].get("riscoperta", "")) == "solo_scavate"
+
 # LE CARTE RESTITUITE (registro 131, `carte_restituite`). Il designer: non ci
 # sono piu' carte edificio sulla mappa; quando un edificio va in rovina la sua
 # tessera torna al proprietario (resta davanti a lui, "il suo museo") e sulla
@@ -177,6 +188,7 @@ static func conta(gs: GameState) -> void:
 		opere.sort()
 		for b in gs.grid.buildings:
 			if b.owner != p.index or quante(b) == 0: continue
+			if solo_scavate() and not b.scavata: continue
 			var somma := 0
 			var extra := 0
 			var ext_scheletri := 0

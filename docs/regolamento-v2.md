@@ -33,7 +33,7 @@ Entrambe sono strategie; decidere quale seguire, e quando cambiarla, è il gioco
 
 Ogni volta che costruite vi trovate davanti alla stessa domanda: prendo posto a terra, o salgo
 sulle macerie? Espandersi lascia vivo il passato — che continua a produrre e a rendere — ma
-consuma il suolo. Salire vi paga subito il premio di scavo di ciò che seppellite, e alza la
+consuma il suolo. Salire vi paga subito il bonus scavo, un punto per ogni tessera che seppellite, e alza la
 città; ma uccide ciò che sta sotto.
 
 ## Componenti — Cosa trovate nella scatola
@@ -216,8 +216,8 @@ almeno una deve averla davvero:
 
 | cosa c'è sotto | cosa succede |
 |---|---|
-| Una rovina (tessere scavo), di chiunque | Base gratuita, e vi sconta 1 Costruzione (le macerie sono materiale) |
-| Un vostro edificio in piedi | Lo spianate: la carta torna a voi e, come ogni rovina, al suo posto vanno le vostre tessere scavo coperte, una per casella (nessun premio di scavo: è vostro); vi sconta in Costruzione metà della sua resistenza, arrotondata per eccesso |
+| Una rovina (tessere scavo), vostra o altrui | Base valida: **bonus scavo**, 1 PV subito per ogni tessera che finisce sotto il nuovo edificio. Le tessere restano del proprietario |
+| Un vostro edificio in piedi | Lo spianate: la carta torna a voi, nessuna rovina e nessuna tessera (il materiale si ricicla), al suo posto un terrapieno; vi sconta in Costruzione metà della sua resistenza, arrotondata per eccesso |
 | Un edificio in piedi altrui | Impossibile. Blocca finché è vivo |
 | Terreno nudo | Terrapieno: +1 Costruzione per ogni casella priva di base, una volta sola qualunque sia la quota |
 
@@ -225,26 +225,23 @@ Il nuovo edificio sta tutto a un livello solo, pari al più alto delle basi più
 può salire di un solo livello per era: un edificio da 2 o 3 caselle si costruisce sopra solo se
 nessuna delle colonne della sua impronta è già salita in quell'era.
 
-#### Il premio di scavo
+#### Il bonus scavo
 
-La carta della rovina non c'è più: il premio conta le **tessere scavo**. Chi costruisce sopra
-**incassa subito 2 PV per ogni tessera coperta** che finisce sotto il nuovo edificio,
-moltiplicati per il livello a cui costruisce: una rovina che ha lasciato 2 tessere, sepolta dal
-livello 2, paga 2 × 2 × 2 = 8 PV a chi la seppellisce. Le tessere già sotterrate non pagano: si
-paga solo ciò che finisce sotto terra adesso. **Nell'era Moderna il premio è dimezzato**,
-arrotondato per difetto: l'ultima era non deve decidere da sola la partita. Lo Scavo stampato
-sulla carta non conta più per il premio.
+Chi costruisce sopra delle rovine, proprie o altrui, **incassa subito 1 PV per ogni tessera scavo
+che finisce sotto il nuovo edificio**: con le vecchie tecniche si ritrova sempre qualcosa. Non
+conta il livello, non conta l'era: una tessera sotto, un punto. Dove sotto non c'è niente si mette
+un terrapieno, che non dà punti.
 
-Il proprietario della rovina sepolta non perde nulla: le tessere restano sue, sotto il nuovo
-edificio, e a fine partita le conta (vedi *Fine partita*). Il premio è per chi scava; le tessere
-restano a chi è stato scavato.
+Le tessere restano del proprietario della rovina, coperte, sotto il nuovo edificio. Il bonus è
+per chi costruisce; le tessere, e quello che varranno se qualcuno le riporta alla luce, restano a
+chi è stato scavato.
 
 #### Spolia
 
 Spianare un proprio edificio in piedi non costa nulla: anzi, vi sconta in Costruzione metà della
 sua resistenza, arrotondata per eccesso. I blocchi del vecchio muro diventano il nuovo. La carta
-torna a voi come ogni rovina, ma **non lascia tessere scavo**: non paga premio a nessuno e alla
-fine non vi dà Scavo. Chi demolisce non lascia archeologia.
+torna a voi e al suo posto va un terrapieno: **nessuna rovina, nessuna tessera scavo**, nessun
+bonus a nessuno. Chi ricicla il materiale non lascia archeologia.
 
 ## Potenziare e la Dinastia
 
@@ -343,7 +340,9 @@ Costruire sopra funziona come sempre: le tessere restano sotto, coperte, e nessu
 
 **Lo scavo dell'era Moderna.** Quando un edificio dell'era Moderna si costruisce sopra delle
 rovine (a livello 1 o più), tutte le tessere sotto di lui, a qualsiasi profondità, si girano a
-faccia in su: sono **scoperte**, chiunque abbia costruito e di chiunque siano.
+faccia in su: sono **scoperte**, chiunque abbia costruito e di chiunque siano. **Solo le tessere
+scoperte valgono punti**, al loro proprietario, a fine partita: quelle che nessuno riporta alla
+luce restano sottoterra e non valgono niente.
 
 #### Un edificio conserva sempre il proprio ingombro
 
@@ -360,11 +359,16 @@ Quando tutti hanno esaurito i lavoratori, l'era si chiude in quattro passi.
 **L'evento**, rivelato a inizio era, si risolve adesso. Ogni edificio in piedi somma la
 resistenza stampata, i potenziamenti Struttura, il +2 di ogni lavoratore che lo protegge, il +1
 della collina se l'ha preso e i modificatori dell'evento, e confronta il totale con la forza
-dell'epoca: 2 nella Preistoria, 3 nell'Antichità, 4 nel Medioevo, 3 nel Rinascimento. **Chi
+dell'epoca: 2 nella Preistoria, 3 nell'Antichità, 4 nel Medioevo, 3 nel Rinascimento, 4 nell'era
+Moderna. **Chi
 fallisce di un solo punto regge per un soffio e resta attivo; chi fallisce di due o più crolla in
 rovina**: la carta torna al proprietario e al suo posto si posano le tessere scavo. Non c'è più
-il rudere e non c'è più la Vetustà: reggere non dà cubetti. L'era Moderna
-non ha evento.
+il rudere e non c'è più la Vetustà: reggere non dà cubetti.
+
+**L'evento finale.** Anche l'era Moderna ha il suo evento, *Il giudizio del tempo*: forza 4,
+nessun effetto speciale, rivelato a inizio era come gli altri. Si risolve prima del conto finale:
+quel che crolla non paga il censimento finale e diventa rovina, con le sue tessere scavo da
+contare.
 
 **Il censimento** segue il crollo, mai il contrario: si conta solo ciò che è sopravvissuto. Ogni
 vostro edificio in piedi paga la sua Rendita stampata.
@@ -383,13 +387,13 @@ quelle dell'era nuova e si rivela il nuovo evento.
 
 Al termine dell'era Moderna la partita finisce. Molti punti sono già sul segnapunti: il Lampo,
 segnato al momento della costruzione; i PV prodotti dagli edifici e dai potenziamenti Arte; i
-premi di scavo; i censimenti delle ere precedenti. Restano cinque voci da calcolare (gli scheletri sono nello Scavo, con le icone delle tessere).
+bonus scavo; i censimenti delle ere precedenti. Restano cinque voci da calcolare (gli scheletri sono nello Scavo, con le icone delle tessere).
 
 | # | voce | punti |
 |--:|---|---|
 | 1 | Censimento finale | la Rendita di ogni vostro edificio in piedi |
 | 2 | Continuità (collezione) | per ogni classe, i vostri edifici in piedi più le carte restituite: 3 = 3 PV, 5 = 5, 7 = 8, 9 = 12 |
-| 3 | Scavo | le tessere scavo del vostro colore: scoperte a valore pieno, coperte a metà; più le icone sulle scoperte |
+| 3 | Scavo | le tessere scavo del vostro colore riportate alla luce nell'era Moderna: il numero scritto più le icone; le coperte valgono 0 |
 | 4 | Obiettivi | Monumenti celebri reclamati + la vostra Eredità, se soddisfatta |
 | 5 | Effetti finali | Museo, Piazza monumentale, Biblioteca, effetti «eco», Personaggi con abilità Finale — solo degli edifici in piedi |
 
@@ -398,10 +402,9 @@ edifici, in piedi e restituiti: 3 della stessa classe valgono 3 PV, 5 ne valgono
 8, 9 ne valgono 12. Vale solo la soglia più alta raggiunta, classe per classe; un edificio con
 due classi conta per tutte e due.
 
-**Lo Scavo si conta sulle tessere.** Ognuno raccoglie le tessere del proprio colore, ovunque
-siano. Quelle **scoperte** valgono il loro valore pieno. Quelle ancora **coperte** si girano e
-valgono **metà**, arrotondata per difetto, gruppo per gruppo (le tessere di una stessa rovina si
-sommano, poi si dimezza). Le icone contano **solo sulle tessere scoperte**:
+**Lo Scavo si conta sulle tessere scoperte.** Ognuno raccoglie le tessere del proprio colore
+riportate alla luce dallo scavo dell'era Moderna: valgono il numero scritto, più le icone. Le
+tessere rimaste coperte non valgono niente:
 
 - **Scheletro**: la linea sulla tessera indica un'era; vale lo Scavo stampato del Personaggio
   che avete preso in quell'era.
@@ -411,7 +414,7 @@ sommano, poi si dimezza). Le icone contano **solo sulle tessere scoperte**:
 Un'icona che non trova niente vale 0. Lo Scavo stampato sulle carte degli edifici non paga più il
 proprietario: lo sostituiscono le tessere.
 
-Non c'è più la Verticalità: l'altezza si è già pagata, colpo per colpo, con il premio di scavo.
+Non c'è più la Verticalità: l'altezza si è già pagata, colpo per colpo, con il bonus scavo.
 
 #### I flussi di punti
 
@@ -438,7 +441,7 @@ Colosseo). Portano un gettone potenziamento per casella.
 **I 2x2 e il Grattacielo non si costruiscono mai a terra**, solo sopra, con le regole di
 sempre: almeno una base vera (una rovina di chiunque, o un vostro edificio attivo che spianate),
 terrapieno sulle caselle vuote, e nessun edificio attivo altrui sotto. Le tessere che coprono
-vengono sepolte e pagano il premio di scavo. E sopra di loro non si costruisce nulla finché non
+vengono sepolte e pagano il bonus scavo. E sopra di loro non si costruisce nulla finché non
 sono a loro volta in rovina.
 
 ### Costo flessibile ◈
@@ -487,8 +490,9 @@ altrui blocca il suo spazio finché resiste. La sopravvivenza è anche una forma
 territorio.
 
 **Chi incassa lo Scavo di una rovina sotterrata da un altro giocatore?** Tutti e due, in due
-momenti: chi la sotterra incassa subito il premio di scavo (2 PV per tessera, per il livello); il
-proprietario conta le sue tessere a fine partita, a metà se sono ancora coperte.
+momenti: chi ci costruisce sopra incassa subito il bonus scavo (1 PV per tessera); il
+proprietario conta le sue tessere a fine partita, ma solo se nell'era Moderna qualcuno le ha
+riportate alla luce.
 
 **Il mazzetto rovine finisce?** Può succedere, ma è raro: in media si pescano meno di 4 tessere a
 partita. Se finisce, le caselle della vostra nuova rovina restano senza tessera e valgono 0; la

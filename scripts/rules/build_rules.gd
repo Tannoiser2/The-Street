@@ -24,6 +24,9 @@ class BuildQuote:
 	var terrapieno_free_applied: bool = false
 	var terrapieno_pietra: int = 0   # pietra effettivamente spesa in terrapieni
 	var binario: int = 0             # il binario scelto, quando si costruisce a terra
+	# Le tessere scavo che finiscono sotto il nuovo edificio (una per casella
+	# che poggia su una rovina con tessere): il bonus scavo del registro 151.
+	var tessere_sotto: int = 0
 
 # ---- requisiti di terreno -----------------------------------------
 # Morbidi per pianura/collina/bosco (colonna o adiacente), stretti per fiume.
@@ -207,7 +210,12 @@ static func quote_above(gs: GameState, player: int, data: Dictionary, col_from: 
 			Enums.BuildingState.INTATTO:
 				if top.owner != player:
 					q.reason = "un edificio intatto altrui blocca la colonna %d" % c; return q
-				if not top in q.razed:
+				# SPIANARE CHE COSTA (registro 152, manopola `spianare_costo`):
+				# al posto dello sconto, 1 Costruzione per ogni casella demolita.
+				if CardDB.constants.has("spianare_costo"):
+					spolia -= int(CardDB.constants["spianare_costo"])
+					if not top in q.razed: q.razed.append(top)
+				elif not top in q.razed:
 					q.razed.append(top)
 					spolia += int(ceil(float(top.data["resistance"] + top.bonus_res) / 2.0))
 			Enums.BuildingState.RUDERE:
@@ -220,6 +228,7 @@ static func quote_above(gs: GameState, player: int, data: Dictionary, col_from: 
 				# per dare un motivo di non seppellire sempre i propri.
 				if top.owner != player or not bool(CardDB.constants.get("sconto_macerie_solo_altrui", false)):
 					rubble_discount = true
+				if TessereScavo.quante(top) > 0: q.tessere_sotto += 1
 		if not top in q.bases: q.bases.append(top)
 		real_bases += 1
 		top_level = max(top_level, top.level + 1)
@@ -317,7 +326,10 @@ static func _quote_sopra_binario(gs: GameState, player: int, data: Dictionary, c
 				Enums.BuildingState.INTATTO:
 					if top.owner != player:
 						q.reason = "un edificio intatto altrui blocca la colonna %d" % c; return q
-					if not top in q.razed:
+					if CardDB.constants.has("spianare_costo"):
+						spolia -= int(CardDB.constants["spianare_costo"])
+						if not top in q.razed: q.razed.append(top)
+					elif not top in q.razed:
 						q.razed.append(top)
 						spolia += int(ceil(float(top.data["resistance"] + top.bonus_res) / 2.0))
 				Enums.BuildingState.RUDERE:
@@ -325,6 +337,7 @@ static func _quote_sopra_binario(gs: GameState, player: int, data: Dictionary, c
 				Enums.BuildingState.ROVINA:
 					if top.owner != player or not bool(CardDB.constants.get("sconto_macerie_solo_altrui", false)):
 						rubble_discount = true
+					if TessereScavo.quante(top) > 0: q.tessere_sotto += 1
 			if not top in q.bases: q.bases.append(top)
 			real_bases += 1
 			top_level = max(top_level, top.level + 1)

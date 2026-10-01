@@ -2384,3 +2384,40 @@ dato è stato importato da lì. Ma due confronti fra ciò che è stampato e
     una rovina come le altre: la carta torna al proprietario e al suo posto
     vanno le sue tessere coperte, una per casella, senza premio di scavo per
     chi spiana. Misura in corso insieme al premio (registro 145).
+149. **L'evento finale.** Il designer: "a cosa serve la resistenza negli
+    edifici di era 5? O si mette un evento anche alla fine oppure va
+    eliminato. Procedi con evento finale". Nel file v2 l'era Moderna ha un
+    evento, *Il giudizio del tempo* (costante `evento_finale`, la v1.5 non
+    cambia): forza 4, nessun effetto speciale, rivelato a inizio era e
+    risolto prima del conto finale. Quel che crolla non paga il censimento
+    finale e diventa rovina con le sue tessere. La forza e' una scelta
+    provvisoria (come il Medioevo); i sei eventi moderni veri, se il
+    designer li vuole come le altre ere, restano da disegnare. Misura in
+    corso.
+150. **Le gilde dell'era Moderna.** Il designer: "gli edifici dell'era 5
+    dovrebbero funzionare come una specie di gilda di 7 Wonders, che oltre a
+    riscoprire le rovine danno PV in base ad alcune condizioni". Otto dei
+    quattordici lo facevano gia' (Museo, Biblioteca, Grattacielo, Universita',
+    Fondazione d'arte, Caffe' letterario, Monumento ai caduti, Parco
+    archeologico). Le quattro senza condizione la prendono: Condominio +1 PV
+    per ogni tuo Civico in piedi (max 4); Officina +1 per ogni altro tuo
+    Ingegneria, in piedi o sotterrato (max 4); Ponte in acciaio +2 per ogni
+    tua rovina riportata alla luce nelle sue colonne (nuovo filtro
+    `scavata`); Stazione +1 per ogni edificio in piedi nelle sue colonne, di
+    chiunque (max 5). Le due case restano case. Misura insieme all'evento
+    finale (registro 149).
+151. **Le regole semplici del costruire sopra.** Il designer, davanti alla
+    tabella dei casi: "converrebbe sempre costruire su rovina propria [...]
+    Troppe regole complesse. Io la semplificherei al massimo". Terreno
+    libero: si costruisce. Proprio edificio integro: si spiana, sconto in
+    Costruzione, nessuna rovina, al suo posto il terrapieno (supera il
+    registro 147). Integro avversario: non si puo'. Rovine proprie o altrui:
+    bonus scavo, 1 PV subito per ogni tessera che finisce sotto il nuovo
+    edificio (2 da misurare, `--variante scavo_due`), senza livello ne'
+    dimezzamento nell'era 5; dove sotto non c'e' niente, terrapieno (0 PV);
+    niente piu' sconto macerie. Nell'era 5 un edificio sopra delle rovine
+    gira le tessere della pila sotto di se'; a fine partita contano solo le
+    tessere girate (numero scritto, scheletri, arte), quelle mai girate
+    valgono 0. Scelte del designer: si girano solo le tessere sotto
+    l'edificio dell'era 5, e le non girate valgono niente. Misura insieme a
+    evento finale e gilde.

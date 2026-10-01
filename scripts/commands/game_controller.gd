@@ -113,6 +113,13 @@ func _start_era(era: int) -> void:
 	if era <= 4:
 		var evs := CardDB.events_of_era(era)
 		gs.current_event = evs[gs.rng.randi_range(0, evs.size() - 1)]
+	elif CardDB.constants.has("evento_finale"):
+		# L'EVENTO FINALE (registro 149, solo nel file v2): anche l'era
+		# Moderna ha il suo evento, rivelato a inizio era e risolto prima del
+		# conto finale. Senza, la resistenza delle carte dell'era 5 non
+		# serviva a niente, e chi puntava sulla Rendita non rischiava nulla
+		# all'ultimo censimento.
+		gs.current_event = (CardDB.constants["evento_finale"] as Dictionary).duplicate(true)
 	else:
 		gs.current_event = {}
 
@@ -474,7 +481,10 @@ func build(card_id: String, col_from: int, above: bool, pay_option: int = 0, des
 			altro.buried_by = p.index
 			altro.buried_era = gs.era
 			# Il premio di scavo si paga qui, sul momento, come il Lampo: il
-			# livello e' quello dell'edificio appena costruito.
+			# livello e' quello dell'edificio appena costruito. Col bonus
+			# "sotto" (registro 151) si paga invece piu' giu', casella per
+			# casella, e qui non c'e' piu' niente da pagare.
+			if TessereScavo.premio_sotto(): continue
 			var premio := Scoring.premio_scavo(TessereScavo.scavo_per_premio(altro), b.level, gs.era)
 			# Tessera dell'era "Spoglio delle rovine" (registro 121).
 			premio += TessereEra.premio_in_piu(gs, p.index, altro, premio)
@@ -485,6 +495,20 @@ func build(card_id: String, col_from: int, above: bool, pay_option: int = 0, des
 				if gs.era >= int(CardDB.constants["eras"]): p.bump("scavo_e5", premio)
 				gs.log_line("%s seppellisce %s al livello %d: premio di scavo %d" % [
 					p.name, altro.data["name"], b.level, premio])
+	# IL BONUS SCAVO (registro 151). Il designer: "rovine proprie o altrui, si
+	# ottiene il bonus scavo: ogni tessera scavo sotto il nuovo edificio da' 1
+	# punto; dove non c'e' si mette un terrapieno (che da' 0 punti)". Senza
+	# livello, senza dimezzamento nell'era 5, subito, a chi costruisce. Le
+	# tessere restano del proprietario della rovina.
+	if TessereScavo.premio_sotto() and q.tessere_sotto > 0:
+		var bonus := q.tessere_sotto * int(CardDB.constants["tessere_scavo"].get("per_tessera", 1))
+		for altro in q.bases:
+			if altro.state == Enums.BuildingState.ROVINA:
+				bonus += TessereEra.premio_in_piu(gs, p.index, altro, bonus)
+				break
+		p.add_vp("scavo", bonus, "bonus scavo")
+		p.bump("scavo_scavato", bonus)
+		gs.log_line("%s costruisce sopra %d tessere scavo: bonus scavo %d" % [p.name, q.tessere_sotto, bonus])
 	Effects.apply_on_build(gs, p.index, b)
 	TessereEra.dopo_costruzione(gs, p.index, b, q.bases)
 	if above:

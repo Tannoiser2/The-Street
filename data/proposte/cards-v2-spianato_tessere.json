@@ -80,7 +80,7 @@
     },
     "recruit_cost_oro": 1,
     "terrapieno_cost_pietra": 1,
-    "rubble_discount_pietra": 1,
+    "rubble_discount_pietra": 0,
     "prosperity": {
       "min_buildings": 3,
       "min_owners": 2,
@@ -101,6 +101,14 @@
     "scheletro_potenziamento": false,
     "scheletro_conta": "sempre",
     "tessere_una_volta_per_era": true,
+    "evento_finale": {
+      "id": "ev_giudizio_del_tempo",
+      "name": "Il giudizio del tempo",
+      "era": 5,
+      "force": 4,
+      "effects": [],
+      "text": "Fine dell'era Moderna: ogni edificio in piedi affronta la forza 4, poi si contano i punti."
+    },
     "tessere_era": true,
     "caselle": true,
     "fila_potenziamenti_resta": true,
@@ -177,8 +185,9 @@
           "v": 3
         }
       ],
-      "premio": "tessere",
-      "per_tessera": 2,
+      "premio": "sotto",
+      "per_tessera": 1,
+      "riscoperta": "solo_scavate",
       "carte_restituite": true,
       "spianato_lascia_tessere": true
     },
@@ -1983,7 +1992,25 @@
         "idee": 0
       },
       "exhaustible": 0,
-      "effect_text": ""
+      "effect_text": "A fine partita: +1 PV per ogni tuo edificio Civico in piedi (max +4).",
+      "effects": [
+        {
+          "hook": "on_final_scoring",
+          "op": "vp_per",
+          "value": 1,
+          "cap": 4,
+          "target": {
+            "owner": "self",
+            "class": [
+              "civico"
+            ],
+            "state": [
+              "intatto"
+            ],
+            "buried": false
+          }
+        }
+      ]
     },
     {
       "id": "ed_caffe_letterario",
@@ -2057,7 +2084,23 @@
         "cultura": 0,
         "idee": 0
       },
-      "exhaustible": 0
+      "exhaustible": 0,
+      "effects": [
+        {
+          "hook": "on_final_scoring",
+          "op": "vp_per",
+          "value": 1,
+          "cap": 4,
+          "target": {
+            "owner": "self",
+            "class": [
+              "ingegneria"
+            ],
+            "is_self": false
+          }
+        }
+      ],
+      "effect_text": "A fine partita: +1 PV per ogni altro tuo edificio Ingegneria, in piedi o sotterrato (max +4)."
     },
     {
       "id": "ed_monumento_ai_caduti",
@@ -2264,7 +2307,22 @@
         "idee": 0
       },
       "exhaustible": 0,
-      "effect_text": ""
+      "effect_text": "A fine partita: +2 PV per ogni tua rovina riportata alla luce nelle sue colonne.",
+      "effects": [
+        {
+          "hook": "on_final_scoring",
+          "op": "vp_per",
+          "value": 2,
+          "target": {
+            "owner": "self",
+            "state": [
+              "rovina"
+            ],
+            "scavata": true,
+            "same_column_as_self": true
+          }
+        }
+      ]
     },
     {
       "id": "ed_stazione",
@@ -2294,12 +2352,26 @@
         "idee": 0
       },
       "exhaustible": 0,
-      "effect_text": "Solo sopra: al livello 1 o più.",
+      "effect_text": "Solo sopra: al livello 1 o piu'. A fine partita: +1 PV per ogni edificio in piedi nelle sue colonne, di chiunque (max +5).",
       "effects": [
         {
           "hook": "on_build",
           "op": "rule_override",
           "name": "colossal"
+        },
+        {
+          "hook": "on_final_scoring",
+          "op": "vp_per",
+          "value": 1,
+          "cap": 5,
+          "target": {
+            "state": [
+              "intatto"
+            ],
+            "buried": false,
+            "same_column_as_self": true,
+            "is_self": false
+          }
         }
       ]
     },

@@ -2923,7 +2923,9 @@ func _test_riepilogo_v2() -> void:
 				rotte += 1
 	_eq("in gioco + a fine partita = la voce, per ogni giocatore", rotte, 0)
 	var premio_alla_fine := 0
-	for rr in righe: premio_alla_fine += Riepilogo.punti_voce_fase(rr, "scavo", "premi di scavo", true)
+	for rr in righe:
+		premio_alla_fine += Riepilogo.punti_voce_fase(rr, "scavo", "premi di scavo", true)
+		premio_alla_fine += Riepilogo.punti_voce_fase(rr, "scavo", "bonus scavo", true)
 	_eq("  nessun premio di scavo nel conto finale", premio_alla_fine, 0)
 	CardDB.load_db(CardDB.DB_PATH)
 
@@ -2985,16 +2987,15 @@ func _test_tessere_scavo_vista() -> void:
 	_ok("  lo spianato non ne lascia", BoardLayout3D.tessere_scavo_box(gs, r).is_empty())
 	_eq("  ma ha il terrapieno, una tessera per casella", BoardLayout3D.terrapieni_spianato_box(gs, r).size(),
 		int(r.data["width"]) * int(r.data.get("depth", 1)))
-	# Registro 147: nel file v2 lo spianato lascia le tessere rovina del
-	# proprietario, una per casella, e nessun terrapieno (solo i buchi lo hanno).
+	# Registro 151 (supera il 147): nel file v2 lo spianato non lascia
+	# tessere: al suo posto il terrapieno, e nessun bonus a chi spiana.
 	if FileAccess.file_exists("res://data/cards-v2.json"):
 		CardDB.load_db("res://data/cards-v2.json")
 		r.data = CardDB.buildings["ed_acquedotto"] if CardDB.buildings.has("ed_acquedotto") else r.data
 		r.col_to = r.col_from + int(r.data["width"])
-		_eq("nella v2 lo spianato lascia una tessera per casella", BoardLayout3D.tessere_scavo_box(gs, r).size(),
+		_ok("nella v2 lo spianato non lascia tessere", BoardLayout3D.tessere_scavo_box(gs, r).is_empty())
+		_eq("  ma il terrapieno, una tessera per casella", BoardLayout3D.terrapieni_spianato_box(gs, r).size(),
 			int(r.data["width"]) * int(r.data.get("depth", 1)))
-		_ok("  e nessun terrapieno", BoardLayout3D.terrapieni_spianato_box(gs, r).is_empty())
-		_eq("  ma nessun premio a chi spiana", TessereScavo.scavo_per_premio(r), 0)
 	CardDB.load_db(CardDB.DB_PATH)
 
 # Con le carte restituite la carta edificio e' la sua tessera: sul mercato ha

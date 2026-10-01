@@ -1,34 +1,34 @@
 {
   "meta": {
     "game": "La Strada delle Ere",
-    "ruleset": "v2-premio_meta_tessere",
+    "ruleset": "v2-strada_corta",
     "language": "it",
     "source": "distinta-carte (fonte unica)",
-    "origine": "generato da tools/genera_cards_v2.py --variante premio_meta_tessere: non modificare a mano"
+    "origine": "generato da tools/genera_cards_v2.py --variante strada_corta: non modificare a mano"
   },
   "constants": {
     "eras": 5,
     "rails": 5,
     "columns_by_players": {
-      "2": 5,
-      "3": 7,
-      "4": 9
+      "2": 4,
+      "3": 6,
+      "4": 8
     },
     "terrain_mix_by_players": {
       "2": {
-        "pianura": 2,
+        "pianura": 1,
         "fiume": 1,
         "collina": 1,
         "bosco": 1
       },
       "3": {
-        "pianura": 2,
+        "pianura": 1,
         "fiume": 2,
         "collina": 1,
         "bosco": 2
       },
       "4": {
-        "pianura": 3,
+        "pianura": 2,
         "fiume": 2,
         "collina": 2,
         "bosco": 2
@@ -80,7 +80,7 @@
     },
     "recruit_cost_oro": 1,
     "terrapieno_cost_pietra": 1,
-    "rubble_discount_pietra": 1,
+    "rubble_discount_pietra": 0,
     "prosperity": {
       "min_buildings": 3,
       "min_owners": 2,
@@ -101,6 +101,14 @@
     "scheletro_potenziamento": false,
     "scheletro_conta": "sempre",
     "tessere_una_volta_per_era": true,
+    "evento_finale": {
+      "id": "ev_giudizio_del_tempo",
+      "name": "Il giudizio del tempo",
+      "era": 5,
+      "force": 4,
+      "effects": [],
+      "text": "Fine dell'era Moderna: ogni edificio in piedi affronta la forza 4, poi si contano i punti."
+    },
     "tessere_era": true,
     "caselle": true,
     "fila_potenziamenti_resta": true,
@@ -128,59 +136,59 @@
           "p": true
         },
         {
-          "v": 2
+          "v": 1
         },
         {
-          "v": 2
+          "v": 1
         },
         {
-          "v": 2
+          "v": 1
         },
         {
-          "v": 2
+          "v": 1
         },
         {
-          "v": 2,
+          "v": 1,
           "s": 3
         },
         {
-          "v": 2,
+          "v": 1,
           "p": true
         },
         {
-          "v": 4
+          "v": 2
         },
         {
-          "v": 4
+          "v": 2
         },
         {
-          "v": 4
+          "v": 2
         },
         {
-          "v": 4
+          "v": 2
         },
         {
-          "v": 4,
+          "v": 2,
           "s": 4,
           "p": true
         },
         {
-          "v": 6
+          "v": 3
         },
         {
-          "v": 6
+          "v": 3
         },
         {
-          "v": 6
+          "v": 3
         },
         {
-          "v": 6
+          "v": 3
         }
       ],
-      "premio": "tessere",
+      "premio": "sotto",
       "per_tessera": 1,
-      "carte_restituite": true,
-      "spianato_lascia_tessere": true
+      "riscoperta": "solo_scavate",
+      "carte_restituite": true
     },
     "potenziamenti_per_casella": true,
     "continuita_collezione": {
@@ -1983,7 +1991,25 @@
         "idee": 0
       },
       "exhaustible": 0,
-      "effect_text": ""
+      "effect_text": "A fine partita: +1 PV per ogni tuo edificio Civico in piedi (max +4).",
+      "effects": [
+        {
+          "hook": "on_final_scoring",
+          "op": "vp_per",
+          "value": 1,
+          "cap": 4,
+          "target": {
+            "owner": "self",
+            "class": [
+              "civico"
+            ],
+            "state": [
+              "intatto"
+            ],
+            "buried": false
+          }
+        }
+      ]
     },
     {
       "id": "ed_caffe_letterario",
@@ -2057,7 +2083,23 @@
         "cultura": 0,
         "idee": 0
       },
-      "exhaustible": 0
+      "exhaustible": 0,
+      "effects": [
+        {
+          "hook": "on_final_scoring",
+          "op": "vp_per",
+          "value": 1,
+          "cap": 4,
+          "target": {
+            "owner": "self",
+            "class": [
+              "ingegneria"
+            ],
+            "is_self": false
+          }
+        }
+      ],
+      "effect_text": "A fine partita: +1 PV per ogni altro tuo edificio Ingegneria, in piedi o sotterrato (max +4)."
     },
     {
       "id": "ed_monumento_ai_caduti",
@@ -2264,7 +2306,22 @@
         "idee": 0
       },
       "exhaustible": 0,
-      "effect_text": ""
+      "effect_text": "A fine partita: +2 PV per ogni tua rovina riportata alla luce nelle sue colonne.",
+      "effects": [
+        {
+          "hook": "on_final_scoring",
+          "op": "vp_per",
+          "value": 2,
+          "target": {
+            "owner": "self",
+            "state": [
+              "rovina"
+            ],
+            "scavata": true,
+            "same_column_as_self": true
+          }
+        }
+      ]
     },
     {
       "id": "ed_stazione",
@@ -2294,12 +2351,26 @@
         "idee": 0
       },
       "exhaustible": 0,
-      "effect_text": "Solo sopra: al livello 1 o più.",
+      "effect_text": "Solo sopra: al livello 1 o piu'. A fine partita: +1 PV per ogni edificio in piedi nelle sue colonne, di chiunque (max +5).",
       "effects": [
         {
           "hook": "on_build",
           "op": "rule_override",
           "name": "colossal"
+        },
+        {
+          "hook": "on_final_scoring",
+          "op": "vp_per",
+          "value": 1,
+          "cap": 5,
+          "target": {
+            "state": [
+              "intatto"
+            ],
+            "buried": false,
+            "same_column_as_self": true,
+            "is_self": false
+          }
         }
       ]
     },

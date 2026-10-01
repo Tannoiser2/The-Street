@@ -168,17 +168,17 @@ Come si leggono le colonne:
 |---|---|---|---|--:|---|--:|--:|--:|--:|---|---|
 | **Biblioteca** | Cultura | Qualsiasi | 1×1 | 1 / 1 / 2 | — | 3 | 0 | — | 1 | A fine partita: +1 PV per ogni classe diversa fra i tuoi edifici nelle sue colonne, sotterrati compresi. | 1 |
 | **Caffè letterario** | Cultura | Qualsiasi | 1×1 | 0 / 0 / 2 | — | 1 | 0 | — | 1 | A fine partita: +1 PV se è adiacente a un edificio Cultura. | 1 |
-| **Condominio** | Civico | Qualsiasi | 1×1 | 1 / 0 / 1 | — | 2 | 0 | — | 1 | — | 1 |
+| **Condominio** | Civico | Qualsiasi | 1×1 | 1 / 0 / 1 | — | 2 | 0 | — | 1 | A fine partita: +1 PV per ogni tuo edificio Civico in piedi (max +4). | 1 |
 | **Condominio popolare** | Civico | Qualsiasi | 1×1 | 0 / 1 / 1 | — | 4 | 1 | — | 1 | — | 2 (RIS) |
 | **Fondazione d'arte** | Cultura | Qualsiasi | 1×1 | 1 / 0 / 2 | — | 2 | 0 | — | 1 | A fine partita: +1 PV per ogni tuo potenziamento. | 1 |
 | **Grattacielo** | Commercio | Pianura | 1×3 | 2 / 3 / 1 | — | 3 | 0 | — | 1 | Solo sopra: al livello 2 o più, mai a terra. A fine partita: +1 PV per ogni livello a cui è costruito; ogni edificio altrui in cima a una colonna adiacente toglie 1 PV al suo proprietario. | 1 |
 | **Monumento ai caduti** | Militare / Religione | Qualsiasi | 1×1 | 1 / 1 / 1 | — | 3 | 0 | — | 1 | A fine partita: +1 PV per ogni altro tuo edificio Militare, in piedi o sotterrato. | 1 |
 | **Museo** | Cultura | Qualsiasi | 1×1 | 1 / 1 / 1 | — | 3 | 0 | — | 1 | Solo sopra: al livello 1 o più. A fine partita: +2 PV per ogni edificio sotterrato sotto di lui. | 1 |
-| **Officina** | Ingegneria | Qualsiasi | 1×1 | 1 / 0 / 1 | 2 Denaro | 2 | 0 | — | 1 | — | 1 |
+| **Officina** | Ingegneria | Qualsiasi | 1×1 | 1 / 0 / 1 | 2 Denaro | 2 | 0 | — | 1 | A fine partita: +1 PV per ogni altro tuo edificio Ingegneria, in piedi o sotterrato (max +4). | 1 |
 | **Palazzina** | Civico | Qualsiasi | 1×1 | 0 / 0 / 1 | — | 3 | 1 | — | 1 | — | 2 (RIS) |
 | **Parco archeologico** | Cultura | Qualsiasi | 1×2 | 1 / 0 / 2 | — | 2 | 0 | — | 1 | A fine partita: fino a 2 tuoi edifici non sotterrati nelle colonne adiacenti valgono il loro Scavo come se fossero sotterrati. | 1 |
-| **Ponte in acciaio** | Ingegneria | Fiume | 2×1 | 1 / 2 / 1 | — | 4 | 0 | — | 1 | — | 1 |
-| **Stazione** | Commercio / Ingegneria | Pianura | 3×1 | 2 / 3 / 1 | 2 Denaro | 4 | 0 | — | 1 | Solo sopra: al livello 1 o più. | 1 |
+| **Ponte in acciaio** | Ingegneria | Fiume | 2×1 | 1 / 2 / 1 | — | 4 | 0 | — | 1 | A fine partita: +2 PV per ogni tua rovina riportata alla luce nelle sue colonne. | 1 |
+| **Stazione** | Commercio / Ingegneria | Pianura | 3×1 | 2 / 3 / 1 | 2 Denaro | 4 | 0 | — | 1 | Solo sopra: al livello 1 o piu'. A fine partita: +1 PV per ogni edificio in piedi nelle sue colonne, di chiunque (max +5). | 1 |
 | **Università** | Cultura / Civico | Qualsiasi | 1×2 | 2 / 1 / 2 | — | 3 | 0 | — | 1 | Solo sopra: al livello 1 o più. A fine partita: +1 PV per ogni tuo Personaggio. | 1 |
 
 ### Potenziamenti
