@@ -175,7 +175,62 @@ for b in v3["buildings"]:
     if b["id"] in RENDITA_E1:
         b["rendita"] = RENDITA_E1[b["id"]]
 
-out = os.path.join(RADICE, "data/proposte/cards-v3-era1.json")
+# ---- le varianti del pozzo (registro 156) ----------------------------------
+# Il designer: "Ci deve essere una mancanza di risorse, non un surplus";
+# "anche gli edifici potrebbero costare di piu'"; la catena dei Castelli di
+# Borgogna, "far fare piu' azioni o acquisti oltre i 4 consentiti".
+#   --variante costi      ogni edificio dell'era 1 costa 1 Costruzione in piu'
+#   --variante terreno    il terreno di base non produce: resta la tessera dell'era
+#   --variante acquisto   dopo l'azione si compra ancora un potenziamento o una casa
+#   --variante pacchetto  tutte e tre insieme
+#   --variante acquisto_caro / pacchetto_caro   come sopra, con lo spianare caro (registro 152)
+#   --variante catena     terreno + acquisto + spianare caro, costi com'erano
+#   --variante costi_misti   +1 della seconda risorsa della classe (Denaro o Idee o Costruzione)
+#   --variante catena_misti  catena + costi misti
+import sys
+variante = sys.argv[sys.argv.index("--variante") + 1] if "--variante" in sys.argv else ""
+
+def costi(v):
+    for b in v["buildings"]:
+        if b["era"] == 1: b["cost"]["pietra"] += 1
+def terreno(v):
+    for t in v["terrains"]:
+        t["produzione_base"] = {"pietra": 0, "oro": 0, "idee": 0}
+        t["base_production_by_era"] = {e: {"pietra": 0, "oro": 0, "idee": 0} for e in "12345"}
+def acquisto(v):
+    v["constants"]["acquisto_extra"] = True
+def pacchetto(v):
+    costi(v); terreno(v); acquisto(v)
+# Lo spianare caro (registro 152, costante `spianare_costo`): i bot usavano
+# l'acquisto extra per spianare i propri Dolmen e Circoli con una casa.
+def caro(v):
+    v["constants"]["spianare_costo"] = 1
+def acquisto_caro(v):
+    acquisto(v); caro(v)
+def pacchetto_caro(v):
+    pacchetto(v); caro(v)
+# La catena: terreno che non produce, acquisto extra, spianare caro, costi
+# com'erano. E i costi misti: la seconda risorsa della classe (Commercio e
+# Civico +1 Denaro, Religione e Cultura +1 Idea, Ingegneria e Militare +1
+# Costruzione), cosi' nell'era 1 anche Denaro e Idee hanno dove andare.
+def catena(v):
+    terreno(v); acquisto(v); caro(v)
+SECONDA = {"commercio": "oro", "civico": "oro", "religione": "idee", "cultura": "idee",
+           "ingegneria": "pietra", "militare": "pietra"}
+def costi_misti(v):
+    for b in v["buildings"]:
+        if b["era"] != 1: continue
+        b["cost"][SECONDA[b["classes"][0]]] += 1
+def catena_misti(v):
+    catena(v); costi_misti(v)
+VARIANTI = {"costi": costi, "terreno": terreno, "acquisto": acquisto, "pacchetto": pacchetto,
+            "acquisto_caro": acquisto_caro, "pacchetto_caro": pacchetto_caro,
+            "catena": catena, "costi_misti": costi_misti, "catena_misti": catena_misti}
+if variante:
+    VARIANTI[variante](v3)
+    v3["meta"]["ruleset"] = "v3-era1-prova-" + variante
+
+out = os.path.join(RADICE, "data/proposte/cards-v3-era1%s.json" % ("-" + variante if variante else ""))
 json.dump(v3, open(out, "w", encoding="utf-8"), indent=2, ensure_ascii=False)
 print("scritto", os.path.relpath(out, RADICE), "-", len(v3["characters"]), "Personaggi,",
       sum(1 for b in v3["buildings"] if b.get("azione")), "edifici con azione")

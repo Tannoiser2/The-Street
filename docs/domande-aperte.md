@@ -2463,3 +2463,21 @@ dato è stato importato da lì. Ma due confronti fra ciò che è stampato e
     bot non sa ancora che le risorse muoiono
     e non potenzia nell'era 1: una parte del morto e' sua. **Da decidere con
     il designer** prima di toccare le carte.
+156. **Mancanza, non surplus: le leve del pozzo.** Il designer, letta la prima
+    misura: "si puo' ricalibrare tutto, anche gli edifici potrebbero costare
+    di piu'"; la catena dei Castelli di Borgogna ("quando si comprano edifici
+    ti permette di prenderne o comprarne altri"); "trova modi per spendere piu'
+    risorse o far fare piu' azioni o acquisti oltre i 4 consentiti [...] Ci
+    deve essere una mancanza di risorse non un surplus" (Dune Imperium). Tre
+    leve misurate da sole e insieme (trentunesima misura, "Le leve del
+    pozzo"): costi +1, terreno che non produce, l'**acquisto extra** (costante
+    `acquisto_extra`: dopo l'azione del turno si compra ancora un
+    potenziamento o una casa della riserva, pagando, senza lavoratore). Il
+    bot usava l'extra per spianare i propri Dolmen con una casa (Circolo
+    spianato nell'81% delle partite): serve lo spianare caro del registro
+    152. La **catena** (terreno a zero, acquisto extra, spianare caro) e' la
+    prima in cui si spende piu' di quanto muore (7,0 contro 3,1); con i
+    **costi misti** (+1 della seconda risorsa della classe) il morto scende a
+    2,3 su tutte e tre le risorse e la Lampo al 55%, ma l'era si fa povera
+    (2,8 costruzioni a testa). Proposta: la catena come base dell'era 1 e una
+    via di mezzo sui costi. **Da decidere con il designer.**

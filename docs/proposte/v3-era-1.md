@@ -26,6 +26,8 @@ Le costanti nuove del file dati, tutte spente nella v2 e nella v1.5:
 | `dinastia` | spenta | niente quinto lavoratore nella prova |
 | `azione_edificio` | `"proprietario"` | l'azione speciale di un edificio scatta per chi lo possiede, a ogni attivazione della colonna, di chiunque |
 | `event_force_by_era.1` | 2 | come oggi |
+| `acquisto_extra` | spento nel file base; acceso nelle varianti `acquisto`, `catena`, ... | dopo l'azione del turno si compra ancora un potenziamento o una casa, pagando, senza lavoratore (registro 156) |
+| `spianare_costo` | assente nel file base; 1 nelle varianti `_caro` e `catena` | lo spianare caro del registro 152 |
 
 Ordine dell'attivazione: la tessera della colonna (produzione, poi effetto se non ancora
 usato); ogni edificio in piedi nella colonna, di chiunque (produzione al proprietario, poi
@@ -182,6 +184,11 @@ misura, registro 155). In breve: prodotto 14,0 a testa, speso 5,4, **morto 8,7**
 Guerriero sempre primo nel draft, il Custode delle ossa sempre ultimo. Il pozzo
 manca: e' il primo punto da decidere. Le tabelle complete le fa
 `python3 tools/misura_era.py e1.err`.
+
+Secondo giro, le leve del pozzo (registro 156): la **catena** (terreno di base che non produce,
+**acquisto extra** dopo l'azione del turno, spianare caro) spende 7,0 e lascia morire 3,1; con i
+**costi misti** (+1 della seconda risorsa della classe) il morto e' 2,3 e la Lampo scende al 55%.
+Le varianti sono file generati: `tools/genera_cards_v3.py --variante catena` eccetera.
 
 ## Che cosa serve nel codice
 

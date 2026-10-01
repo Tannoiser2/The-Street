@@ -149,6 +149,19 @@ static func play_turn(ctl: GameController, strategia := "bilanciata") -> void:
 		return
 	if not _esegui(ctl, scelta["mossa"]):
 		_passa(ctl, gs, p)
+		return
+	# V3, l'acquisto extra: dopo la mossa si puo' ancora comprare un
+	# potenziamento o una casa. Stessa testa: la voce che vale di piu', se vale
+	# piu' di zero, altrimenti si chiude il turno.
+	if gs.acquisto_extra_aperto and gs.current_index == p.index and gs.pending_choice.is_empty():
+		var extra: Array[Dictionary] = []
+		for v in _opzioni(gs, p.index, col):
+			if v.tipo == "potenzia" or (v.tipo == "costruisci" and str(v.parametri.get("card_id", "")) in gs.riserva):
+				extra.append({"mossa": v, "valore": _valore(gs, p, v, strategia, col)})
+		var ex := migliore(extra)
+		if racconta: taccuino["extra"] = ex
+		if ex.is_empty() or not _esegui(ctl, ex["mossa"]):
+			ctl.pass_action()
 
 # Passare nel turno v1: con l'incasso al passaggio (`passa_incasso`) si
 # sceglie la risorsa che vale di piu', come nel turno a un'azione; senza, si

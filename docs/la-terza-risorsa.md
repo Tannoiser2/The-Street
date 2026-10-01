@@ -1632,9 +1632,86 @@ conversione libera risorse → PV a fine era, da scrivere nel metro). Da
 decidere con il designer.
 
 
+### Le leve del pozzo (registro 156)
+
+Il designer, letta la misura: "Ci deve essere una mancanza di risorse, non un
+surplus" (Dune Imperium: tre lavoratori e la scarsita' si sente); "anche gli
+edifici potrebbero costare di piu'"; la catena dei Castelli di Borgogna, che
+"quando si comprano edifici ti permette di prenderne o comprarne altri";
+"trova modi per spendere piu' risorse o far fare piu' azioni o acquisti oltre
+i 4 consentiti". Tre leve, da sole e insieme, stesse 300 ere, stessi semi, in
+altrettanti file generati (`tools/genera_cards_v3.py --variante ...`):
+
+- **costi**: ogni edificio dell'era 1 costa 1 Costruzione in piu';
+- **terreno**: il terreno di base non produce piu', resta la tessera dell'era;
+- **acquisto**: l'acquisto extra (costante `acquisto_extra`), fatta l'azione del
+  turno si puo' ancora comprare un potenziamento o una casa della riserva,
+  pagando, senza consumare il lavoratore. Il bot lo usa con la stessa testa
+  delle altre mosse.
+
+Il primo giro ha mostrato un effetto collaterale: con l'acquisto extra il bot
+compra una casa e la mette **sopra un proprio Dolmen o Circolo**, spianandolo
+(il Circolo spianato nell'81% delle partite), perche' spianare sconta meta'
+della resistenza. E' lo stesso difetto del registro 152, qui amplificato, e
+la cura e' la stessa: **spianare caro** (`spianare_costo` 1). Le varianti con
+`_caro` lo hanno acceso; **catena** e' terreno + acquisto + caro con i costi
+com'erano; **costi misti** alza di 1 la seconda risorsa della classe (Commercio
+e Civico +1 Denaro, Religione e Cultura +1 Idea, Ingegneria e Militare +1
+Costruzione), cosi' anche Denaro e Idee hanno dove andare.
+
+| a giocatore | base | costi | terreno | acquisto | acquisto + caro | pacchetto (tre) | pacchetto + caro | **catena** | catena + costi misti |
+|---|---|---|---|---|---|---|---|---|---|
+| prodotto | 14,0 | 14,1 | 10,3 | 12,3 | 13,2 | 9,4 | 10,1 | 10,1 | 9,3 |
+| speso | 5,4 | 7,2 | 5,2 | 6,5 | 8,4 | 5,9 | 6,2 | 7,0 | 7,0 |
+| **morto** | 8,7 | 6,8 | 5,0 | 5,9 | 4,8 | 3,4 | 3,8 | **3,1** | **2,3** |
+| di cui ⚒ / 🪙 / 💡 | 3,3/3,5/1,8 | 1,9/3,2/1,8 | 1,6/2,5/1,0 | 2,2/2,5/1,1 | 1,0/2,5/1,2 | 0,6/1,8/1,0 | 0,8/1,9/1,1 | 0,6/1,8/0,8 | 1,3/0,4/0,6 |
+| costruzioni / potenziamenti / passi | 3,9 / 0 / 0,1 | 3,0 / 0 / 1,0 | 3,9 / 0 / 0,1 | 5,8 / 0,65 / 0,1 | 5,3 / 0,74 / 0,1 | 3,1 / 0,24 / 1,8 | 2,3 / 0,44 / 1,7 | 4,7 / 0,60 / 0,3 | 2,8 / 0,21 / 1,3 |
+| acquisti extra usati | - | - | - | 2,6 | 2,1 | 1,2 | 0,4 | 1,5 | 0,3 |
+| edifici a partita (di cui case) | 11,8 (1,0) | 9,0 (0,3) | 11,7 (1,0) | 17,5 (6,0) | 15,8 (4,7) | 9,3 (2,9) | 6,9 (0,2) | 14,0 (3,6) | 8,5 (1,4) |
+| spianati / crollati a partita | 0,9 / 2,5 | 0,9 / 1,8 | 0,9 / 2,7 | **4,8** / 3,3 | 2,3 / 3,1 | 2,9 / 2,2 | 0,0 / 1,5 | 1,1 / 3,2 | 0,2 / 2,3 |
+| PV dell'era (Lampo / censimento) | 4,3 (2,7/1,1) | 3,3 (1,8/1,1) | 4,3 (2,6/1,1) | 6,1 (5,0/0,4) | 6,3 (4,2/1,3) | 2,7 (2,1/0,3) | 2,8 (1,2/1,1) | 5,4 (3,3/1,3) | 3,6 (2,2/0,9) |
+| vittorie Lampo (le altre) | 73 (20-35) | 72 (19-35) | 77 (20-34) | 63 (24-29) | 65 (23-31) | 65 (23-35) | 59 (23-35) | 62 (21-31) | **55** (21-38) |
+
+Cosa dicono i numeri:
+- **Una leva sola non basta.** Costi +1 taglia una costruzione (da 3,9 a 3,0) e
+  fa passare un turno su quattro: muore meno (6,8) perche' si produce uguale e
+  si compra una carta in piu' di prezzo, non perche' si spenda meglio. Il
+  terreno a zero toglie 4 risorse e il morto scende a 5,0 senza toccare il
+  gioco (stesse costruzioni, stessi PV). L'acquisto extra da solo apre la
+  spesa (6,5) ma viene usato per spianare.
+- **La catena** (terreno a zero + acquisto extra + spianare caro) e' la prima
+  combinazione in cui si spende piu' di quanto muore: 7,0 contro 3,1, con 4,7
+  costruzioni e 0,6 potenziamenti a testa, 5,4 PV, Lampo al 62%. La
+  Costruzione e' scarsa (0,6 morta); Denaro (1,8) e Idee (0,8) ancora no,
+  perche' nell'era 1 quasi niente costa Denaro.
+- **I costi misti** sopra la catena portano il morto a 2,3 e il Denaro a 0,4:
+  la scarsita' arriva su tutte e tre le risorse, e la Lampo scende al 55%, il
+  minimo visto. Il prezzo: 2,8 costruzioni a testa, 1,3 passi, 8,5 edifici a
+  partita su 12 nel mazzo; Grotte dipinte (0,13) e Tumulo (0,11) quasi non
+  si costruiscono piu' perche' chiedono 2 Idee. E' un'era povera: forse
+  troppo, forse e' quel che il designer vuole ("la scarsita' si sente").
+- Il pacchetto con costi +1 Costruzione (con o senza caro) e' peggio della
+  catena: fa passare quasi due turni su quattro.
+
+Raccomandazione: la **catena** come base dell'era 1 (terreno che non produce,
+acquisto extra, spianare caro), e sui costi una via di mezzo fra "com'erano"
+e "misti": alzare di 1 la seconda risorsa solo alle carte che oggi costano 1
+(le piu' costruite), lasciando a 1 Idea le Grotte e il Tumulo. Da misurare al
+prossimo giro, con il bot che sa che le risorse muoiono. Le strategie: in
+tutte le varianti la Lampo vince da sola perche' l'era 1 da sola paga solo
+il Lampo; il numero che conta e' il **divario** fra Lampo e le altre, che va
+da 73-20 nella base a 55-21 con la catena e i costi misti.
+
 ## Come rifare il conto
 
 ```bash
+# trentunesima misura, le leve del pozzo: una variante per file
+for v in costi terreno acquisto acquisto_caro pacchetto pacchetto_caro catena costi_misti catena_misti; do
+  python3 tools/genera_cards_v3.py --variante $v
+  godot --headless res://scenes/audit_partita.tscn -- --players 3 --games 300 --seed 700000 --giro tutte \
+    --dati data/proposte/cards-v3-era1-$v.json --rapporto 1 --fino_era 1 > e1_$v.csv 2> e1_$v.err
+  python3 tools/misura_era.py e1_$v.err > e1_$v.txt
+done
 # trentunesima misura: l'era 1 della v3 da sola, e la controprova con i potenziamenti adiacenti
 python3 tools/genera_cards_v2.py && python3 tools/genera_cards_v3.py
 godot --headless res://scenes/audit_partita.tscn -- --players 3 --games 300 --seed 700000 --giro tutte \

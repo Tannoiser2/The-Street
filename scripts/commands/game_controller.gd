@@ -497,6 +497,8 @@ func build(card_id: String, col_from: int, above: bool, pay_option: int = 0, des
 	# V2: si costruisce in qualsiasi colonna legale (D9), non solo vicino alla attivata.
 	if not turno_v2() and abs(col_from - gs.colonna_attivata) > 1: return false
 	if not card_id in gs.market and not card_id in gs.riserva: return false
+	# L'acquisto extra (v3) compra solo dalla riserva delle case.
+	if gs.acquisto_extra_aperto and not card_id in gs.riserva: return false
 	var p := gs.current_player()
 	var data: Dictionary = CardDB.buildings[card_id]
 	# `binario`: con le caselle (registro 122) chi costruisce sceglie il
@@ -658,7 +660,7 @@ func build(card_id: String, col_from: int, above: bool, pay_option: int = 0, des
 	# Con il draft i protettori aspettano il primo edificio costruito nell'era.
 	if draft_v2(): _protettori_sul_nuovo(b, p)
 	building_placed.emit(b)
-	_end_turn()
+	_dopo_azione()
 	return true
 
 # Potenziare: carta dalla fila, sotto un tuo edificio in piedi della colonna attivata.
@@ -735,7 +737,7 @@ func upgrade(upg_id: String, target: Building) -> bool:
 			TessereEra.dopo_scheletro(gs, p.index, target)
 			gs.log_line("il lavoratore resta sotto %s come scheletro" % target.data["name"])
 	building_changed.emit(target)
-	_end_turn()
+	_dopo_azione()
 	return true
 
 # Restaurare: stessa azione del potenziamento. Il rudere torna intatto,
@@ -743,6 +745,7 @@ func upgrade(upg_id: String, target: Building) -> bool:
 func restore(target: Building) -> bool:
 	if not gs.pending_choice.is_empty(): return false
 	if not _puo_agire(): return false
+	if gs.acquisto_extra_aperto: return false     # l'extra compra, non ristruttura
 	if target == null: return false
 	if not turno_v2() and not target.covers(gs.colonna_attivata): return false
 	var p := gs.current_player()
@@ -851,12 +854,33 @@ func _protetto() -> Building:
 	return null
 
 func pass_action(scelta := "pietra") -> void:
+	# Rinunciare all'acquisto extra (v3) chiude il turno e non e' un passa.
+	if gs.acquisto_extra_aperto and gs.phase == Enums.Phase.AZIONE:
+		_end_turn()
+		return
 	if passa_incasso():
 		passa(scelta)
 		return
 	if gs.phase == Enums.Phase.AZIONE:
 		gs.current_player().bump("az_passa")
 		_end_turn()
+
+# L'ACQUISTO EXTRA (v3, costante `acquisto_extra`, registro 156): fatta
+# l'azione del turno, si puo' ancora comprare un potenziamento o una casa
+# della riserva, pagando, senza consumare un lavoratore. E' la catena dei
+# Castelli di Borgogna, chiesta dal designer per spendere piu' di quanto quattro
+# azioni assorbono. Una volta per turno: chi compra nell'extra chiude il turno.
+func acquisto_extra() -> bool:
+	return PersonaggiV3.attivo() and bool(CardDB.constants.get("acquisto_extra", false))
+
+func _dopo_azione() -> void:
+	if acquisto_extra() and not gs.acquisto_extra_aperto and gs.phase == Enums.Phase.AZIONE:
+		gs.acquisto_extra_aperto = true
+		gs.current_player().bump("extra_aperti")
+		state_changed.emit()
+		return
+	if gs.acquisto_extra_aperto: gs.current_player().bump("extra_usati")
+	_end_turn()
 
 # L'INCASSO AL PASSAGGIO (registro 109, costante `passa_incasso`, spenta dove
 # manca): anche nel turno della v1.5 chi non fa l'azione dopo l'attivazione
@@ -921,6 +945,7 @@ func _end_turn() -> void:
 		p.sconto_se = ""
 		p.lampo_turno = 0
 		gs.personaggio_attivo = ""
+	gs.acquisto_extra_aperto = false
 	gs.phase = Enums.Phase.PIAZZA
 	if _advance_to_next_player():
 		state_changed.emit()
