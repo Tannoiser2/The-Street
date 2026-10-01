@@ -846,6 +846,82 @@ def rovine_e_flussi(v):
 def spianato_tessere(v):
     v["constants"]["tessere_scavo"]["spianato_lascia_tessere"] = True
 
+# I PERSONAGGI E L'ARTE (registro 138). Misura senza pedine scheletro (750
+# partite per tavolo): forti Architetto, Archeologo, Costruttore di zattere,
+# Cavaliere; deboli Console, Vescovo, Sacerdotessa, Cardinale, Sciamano,
+# Veterano, i due Mercanti, Banchiere, Cronista, Soprintendente, Urbanista.
+# Il designer approva: lo Scavo stampato carta per carta (meno ai forti, piu'
+# ai deboli; l'era 5 non ne ha, non ci sono scheletri dell'era 5), i testi
+# rotti dalle regole nuove, i deboli rinforzati, i forti limati; l'arte vale
+# il suo "Subito" + 2.
+SCAVO_PERSONAGGI = {
+    "pe_capotribu": 5, "pe_costruttore_di_zattere": 4, "pe_mercante_di_ossidiana": 6,
+    "pe_sciamano": 6, "pe_incisore": 5,
+    "pe_architetto": 2, "pe_legionario": 4, "pe_console": 6, "pe_sacerdotessa": 6, "pe_retore": 4,
+    "pe_cavaliere": 2, "pe_mastro_costruttore": 3, "pe_cronista": 4, "pe_mercante": 5, "pe_vescovo": 5,
+    "pe_artista_di_corte": 2, "pe_mecenate": 2, "pe_ingegnere_militare": 2, "pe_banchiere": 3,
+    "pe_cardinale": 4,
+}
+
+def personaggi_e_arte(v):
+    ch = {c["id"]: c for c in v["characters"]}
+    for c in v["characters"]:
+        c["scavo"] = SCAVO_PERSONAGGI.get(c["id"], 0)
+    def eff(cid, effetti, testo):
+        ch[cid]["effects"] = effetti
+        ch[cid]["effect_text"] = testo
+    eff("pe_urbanista", [{"hook": "on_final_scoring", "op": "vp_per", "value": 1, "cap": 4, "per": "distinct_era",
+        "target": {"owner": "self", "state": ["intatto"], "buried": False}}],
+        "Finale: +1 PV per ogni era diversa fra i tuoi edifici in piedi (max +4).")
+    e = ch["pe_cronista"]["effects"]
+    e[1]["target"] = {"column": {"min_eras": 2}}
+    ch["pe_cronista"]["effect_text"] = ("Subito: +1 cultura. Per l'era: quando attivi una colonna che contiene "
+        "edifici in piedi di 2+ ere diverse, +1 cultura (max 2).")
+    eff("pe_console", [{"hook": "on_acquire", "op": "resource", "pietra": 0, "oro": 1},
+        {"hook": "on_activate", "op": "vp", "value": 1, "duration": "era", "cap": 2,
+         "target": {"owner": "self", "class": ["civico"]}}],
+        "Subito: +1 Denaro. Per l'era: quando attivi una colonna con un tuo edificio Civico in piedi, +1 PV (max 2).")
+    ch["pe_mercante"]["effects"][1]["cap"] = 3
+    ch["pe_mercante"]["effect_text"] = ("Subito: +1 Denaro. Per l'era: quando un avversario attiva una colonna "
+        "con tuoi edifici in piedi, +1 Denaro (max 3).")
+    ch["pe_sacerdotessa"]["effects"][1].pop("times", None)
+    ch["pe_sacerdotessa"]["effect_text"] = ("Subito: +1 Denaro. Per l'era: ogni edificio Religione che costruisci "
+        "ti rimborsa 1 Denaro.")
+    eff("pe_vescovo", [{"hook": "on_acquire", "op": "vp", "value": 2},
+        {"hook": "on_build", "op": "rule_override", "name": "free_upgrade_of_class", "times": 1,
+         "target": {"owner": "self", "class": ["religione"]}}],
+        "Subito: +2 cultura. Per l'era: il prossimo potenziamento su un tuo edificio Religione costa 0.")
+    ch["pe_cardinale"]["effects"][1]["pietra"] = -1
+    ch["pe_cardinale"]["effect_text"] = ("Subito: +1 Denaro. Per l'era: −1 Costruzione e −1 Denaro agli edifici "
+        "Religione (minimo 0).")
+    eff("pe_banchiere", [{"hook": "on_acquire", "op": "resource", "pietra": 0, "oro": 3, "idee": 1}],
+        "Subito: +3 Denaro e +1 Idea.")
+    ch["pe_mercante_di_ossidiana"]["effects"][0]["idee"] = 1
+    ch["pe_mercante_di_ossidiana"]["effect_text"] = ("Subito: +1 Denaro e +1 Idea. Per l'era: fino a 2 scambi "
+        "Costruzione↔Denaro alla pari.")
+    ch["pe_sciamano"]["effects"].insert(0, {"hook": "on_acquire", "op": "vp", "value": 1})
+    ch["pe_sciamano"]["effect_text"] = "Subito: +1 cultura. Per l'era: i tuoi edifici Religione hanno +1 res."
+    eff("pe_veterano", [{"hook": "on_final_scoring", "op": "vp_per", "value": 1, "cap": 5,
+        "target": {"owner": "self", "class": ["militare"]}}],
+        "Finale: +1 PV per ogni tuo edificio Militare, in piedi o restituito (max +5).")
+    eff("pe_soprintendente", [{"hook": "on_final_scoring", "op": "scavo_delta", "value": 2,
+        "target": {"owner": "self", "state": ["rovina"]}, "times": 4}],
+        "Finale: fino a 4 tue rovine valgono +2 Scavo.")
+    ch["pe_architetto"]["effects"][1]["times"] = 1
+    ch["pe_architetto"]["effect_text"] = ("Subito: +1 Costruzione. Per l'era: −1 Costruzione al primo edificio "
+        "da 2 o 3 caselle.")
+    ch["pe_archeologo"]["effects"][0]["cap"] = 4
+    ch["pe_archeologo"]["effect_text"] = ("Finale: scegli una tua rovina non sotterrata: vale il suo Scavo "
+        "(max 4). Se hai gia' 3+ edifici sotterrati, +1 PV.")
+    ch["pe_cavaliere"]["effects"][0]["value"] = 1
+    ch["pe_cavaliere"]["effect_text"] = ("Per l'era: la sua protezione vale +3 invece di +2; se l'edificio "
+        "protetto sopravvive, +1 cultura.")
+    for u in v["upgrades"]:
+        if u.get("family") != "arte": continue
+        subito = sum(int(x.get("value", 0)) for x in u.get("effects", [])
+                     if x["hook"] == "on_acquire" and x["op"] == "vp" and not x.get("condition"))
+        u["scavo"] = subito + 2
+
 import sys
 variante = sys.argv[sys.argv.index("--variante") + 1] if "--variante" in sys.argv else ""
 # Le case in riserva stanno nel file v2 di tutti (registro 116); le varianti di
@@ -860,6 +936,7 @@ carte_vive(v2)
 eventi_e_avanzo(v2)
 potenziamenti_di_classe(v2)
 rovine_e_flussi(v2)
+personaggi_e_arte(v2)
 if variante:
     {"doppioni": doppioni, "abitazioni": abitazioni, "case": case,
      "case_doppioni": case_doppioni, "case_scavo": case_scavo, "case_nulle": case_nulle,

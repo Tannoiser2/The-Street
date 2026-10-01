@@ -2282,4 +2282,28 @@ dato è stato importato da lì. Ma due confronti fra ciò che è stampato e
     giocatori pesa 1,2 (31-37 % a ogni strategia su 300 partite), e
     tools/estrai_grafica.py lanciato da riga di comando si fermava prima di
     estrarre le tessere rovina (la funzione stava dopo il `__main__`).
+138. **I Personaggi e l'arte, carta per carta.** Il designer: "devi calcolare i
+    punti per le carte personaggio e gli effetti per ciascuno... anche i
+    potenziamenti arte dovrebbero avere dei PV". Misura senza pedine
+    scheletro (750 partite per tavolo), vittorie di chi prende la carta:
+    forti Architetto 60/52/42, Archeologo 63/47/39, Costruttore di zattere
+    59/47/36, Cavaliere 61/46/34; deboli Console 14/13, Vescovo 14,
+    Sacerdotessa 18/14, Cardinale 16, Sciamano 17, Veterano 15 a quattro, i
+    due Mercanti 20, Banchiere 19-23, Cronista 22-24, Soprintendente 22-26.
+    Approvato: lo Scavo stampato carta per carta (2-6, nessuno all'era 5),
+    i testi rotti dalle rovine riscritti (Urbanista per ere diverse in
+    piedi, Cronista 2+ ere in piedi, Console +1 PV, Mercante max 3), i
+    deboli rinforzati, i forti limati (Architetto il primo edificio grande,
+    Archeologo max 4, Cavaliere +3). L'arte vale "Subito" + 2 e l'icona la
+    ritrova anche sugli edifici in piedi (valeva 0,3 PV a partita).
+139. **La vista dopo la prova del designer.** "Edifici e terrapieni non hanno
+    la stessa dimensione": le tessere scavo e il terrapieno dello spianato
+    avevano un margine del 6% per lato, ora 0,4 mm. "La scritta Girata e'
+    bruttissima": la tessera dell'era usata si capovolge (animazione) e
+    mostra la faccia in bianco e nero; la sua produzione in piu' resta
+    attiva, si consuma solo l'effetto. "Elimina le carte davanti al
+    giocatore": restano i Personaggi scelti, i token riscattati, Eredita' e
+    Monumenti, e il mazzetto rovine; le classi per la Continuita' stanno
+    nella barra in alto. "Le tessere volano dal mazzetto al posto
+    dell'edificio, i potenziamenti davanti al giocatore": fatto.
 

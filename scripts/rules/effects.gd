@@ -607,8 +607,9 @@ static func apply_on_acquire(gs: GameState, player: int, card: Dictionary,
 		if not _condition_met(gs, host, e.get("condition", {})): continue
 		match str(e["op"]):
 			"resource":
-				p.gain(int(e.get("pietra", 0)), int(e.get("oro", 0)), 0, "personaggi")
-				gs.log_line("%s: %+d pietra %+d oro" % [card["name"], int(e.get("pietra", 0)), int(e.get("oro", 0))])
+				# Anche le Idee (registro 138: Banchiere, Mercante di ossidiana).
+				p.gain(int(e.get("pietra", 0)), int(e.get("oro", 0)), int(e.get("idee", 0)), "personaggi")
+				gs.log_line("%s: %+d pietra %+d oro %+d idee" % [card["name"], int(e.get("pietra", 0)), int(e.get("oro", 0)), int(e.get("idee", 0))])
 			"vp":
 				p.add_vp("cultura", int(e["value"]))
 				gs.log_line("%s: %+d cultura" % [card["name"], int(e["value"])])
@@ -780,6 +781,11 @@ static func _conta(gs: GameState, owner: int, hits: Array[Building], per: String
 			return n2
 		"recruited_character":
 			return gs.players[owner].recruited_total
+		# Le ere diverse fra i bersagli (l'Urbanista, registro 138).
+		"distinct_era":
+			var ere := {}
+			for b in hits: ere[b.era_built] = true
+			return ere.size()
 	return hits.size()
 
 static func _award(gs: GameState, player: int, pts: int, carta: Dictionary) -> void:

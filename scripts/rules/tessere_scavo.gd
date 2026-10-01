@@ -66,6 +66,15 @@ static func scavo_personaggio_di_era(p: PlayerState, era: int) -> int:
 		meglio = maxi(meglio, int(carta.get("scavo", 6 - era)))
 	return meglio
 
+# Quante tessere restano nel mazzetto del giocatore: il mazzetto meno quelle
+# gia' posate sulle sue rovine (la vista ne disegna la pila).
+static func rimaste(gs: GameState, player: int) -> int:
+	if not attive(): return 0
+	var usate := 0
+	for b in gs.grid.buildings:
+		if b.owner == player: usate += quante(b)
+	return maxi(0, (CardDB.constants["tessere_scavo"]["mazzo"] as Array).size() - usate)
+
 static func costo(uid: String) -> int:
 	var c: Dictionary = CardDB.upgrades[uid]["cost"]
 	return int(c.get("pietra", 0)) + int(c.get("oro", 0)) + int(c.get("idee", 0))
@@ -153,6 +162,14 @@ static func conta(gs: GameState) -> void:
 			for u in p.potenziamenti_riscattati:
 				if CardDB.upgrades.has(u) and str(CardDB.upgrades[u].get("family", "")) == "arte":
 					opere.append(int(CardDB.upgrades[u].get("scavo", 0)))
+			# Registro 138: l'icona arte ritrova anche un token Arte ancora su
+			# un tuo edificio in piedi, non solo quelli riscattati: l'arte
+			# ritrovata valeva 0,3 PV a partita, troppo poco per un flusso.
+			for b in gs.grid.buildings:
+				if b.owner != p.index or fuori(b): continue
+				for u in b.upgrades:
+					if CardDB.upgrades.has(u) and str(CardDB.upgrades[u].get("family", "")) == "arte":
+						opere.append(int(CardDB.upgrades[u].get("scavo", 0)))
 		else:
 			for b in gs.grid.buildings:
 				if b.owner != p.index or b.state != Enums.BuildingState.ROVINA: continue

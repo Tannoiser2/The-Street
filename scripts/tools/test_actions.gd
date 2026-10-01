@@ -49,6 +49,7 @@ func _ready() -> void:
 	_run("v2: la fila dei potenziamenti resta un'era (registro 126)", _test_potenzia_adiacente)
 	_run("v2: le tessere scavo (registro 130)", _test_tessere_scavo)
 	_run("v2: le carte restituite e i token riscattati (registro 131)", _test_carte_restituite)
+	_run("v2: i Personaggi e l'arte ritoccati (registro 138)", _test_personaggi_e_arte)
 	print("\n%d superati, %d falliti" % [_passed, _failed])
 	get_tree().quit(0 if _failed == 0 else 1)
 
@@ -1955,4 +1956,40 @@ func _test_carte_restituite() -> void:
 	prima = p.vp
 	TessereScavo.conta(gs)
 	_eq("  senza Personaggio di quell'era vale 0", p.vp - prima, 0)
+	CardDB.load_db(CardDB.DB_PATH)
+
+# I PERSONAGGI E L'ARTE (registro 138): Scavo stampato carta per carta,
+# effetti ritoccati, l'arte che si ritrova anche sugli edifici in piedi.
+func _test_personaggi_e_arte() -> void:
+	if not FileAccess.file_exists("res://data/cards-v2.json"): return
+	CardDB.load_db("res://data/cards-v2.json")
+	_eq("l'Architetto (forte) ha Scavo 2", int(CardDB.characters["pe_architetto"]["scavo"]), 2)
+	_eq("  la Console (debole) 6", int(CardDB.characters["pe_console"]["scavo"]), 6)
+	_eq("  l'era 5 non ne ha", int(CardDB.characters["pe_urbanista"]["scavo"]), 0)
+	var ctl := _game(3, 138)
+	var gs := ctl.gs
+	gs.grid.buildings.clear()
+	var p: PlayerState = gs.players[0]
+	var idee := p.idee
+	Effects.apply_on_acquire(gs, 0, CardDB.characters["pe_banchiere"])
+	_eq("il Banchiere da' anche 1 Idea", p.idee - idee, 1)
+	_put(gs, 0, "ed_capanne", 0)
+	var b2 := _put(gs, 0, "ed_capanne", 1)
+	b2.era_built = 3
+	var b3 := _put(gs, 0, "ed_capanne", 2)
+	b3.era_built = 3
+	var prima := p.vp
+	Effects._apply_vp_per(gs, null, CardDB.characters["pe_urbanista"]["effects"][0], 0, CardDB.characters["pe_urbanista"])
+	_eq("l'Urbanista conta le ere diverse fra gli edifici in piedi", p.vp - prima, 2)
+	# L'arte ritrovata anche su un edificio in piedi.
+	var arte := ""
+	for id in CardDB.upgrades:
+		if str(CardDB.upgrades[id].get("family", "")) == "arte": arte = id; break
+	b2.upgrades.append(arte)
+	var r := _put(gs, 0, "ed_capanne", 3, 0, Enums.BuildingState.ROVINA)
+	r.tessere = [{"v": 0, "p": true}]
+	r.scavata = true
+	prima = p.vp
+	TessereScavo.conta(gs)
+	_eq("l'icona arte ritrova il token Arte su un edificio in piedi", p.vp - prima, int(CardDB.upgrades[arte]["scavo"]))
 	CardDB.load_db(CardDB.DB_PATH)
