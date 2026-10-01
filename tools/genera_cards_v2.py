@@ -190,6 +190,7 @@ v2["constants"]["evento_finale"] = {"id": "ev_giudizio_del_tempo", "name": "Il g
 # A quattro giocatori sedici turni per era contro dodici sagome. Due idee del
 # designer, ognuna un file a parte in data/proposte/, che il file v2 non tocca:
 #   --variante scavo_due   il bonus scavo a 2 PV per tessera invece di 1 (registro 151)
+#   --variante tessere_doppie  bonus a 1 PV, tessere del mazzetto di valore doppio (registro 151)
 #   --variante doppioni    per era, una seconda copia della chiesa e del villaggio
 #                          piu' economici (1 casella: civico e religione, o cultura
 #                          dove la religione manca);
@@ -994,11 +995,18 @@ gilde_era5(v2)
 def scavo_due(v):
     v["constants"]["tessere_scavo"]["per_tessera"] = 2
 
+# "tessere_doppie": bonus a 1 PV, ma ogni tessera del mazzetto vale il doppio
+# alla riscoperta: con le regole semplici le tessere girate sono poche e la
+# riscoperta valeva 5 PV a testa.
+def tessere_doppie(v):
+    for t in v["constants"]["tessere_scavo"]["mazzo"]:
+        t["v"] = 2 * int(t["v"])
+
 if variante:
     {"doppioni": doppioni, "abitazioni": abitazioni, "case": case,
      "case_doppioni": case_doppioni, "case_scavo": case_scavo, "case_nulle": case_nulle,
      "case_mista": case_mista, "case_tutti": case_tutti, "spianato_tessere": spianato_tessere,
-     "scavo_due": scavo_due}[variante](v2)
+     "scavo_due": scavo_due, "tessere_doppie": tessere_doppie}[variante](v2)
     v2["meta"]["ruleset"] = "v2-" + variante
     v2["meta"]["origine"] = "generato da tools/genera_cards_v2.py --variante %s: non modificare a mano" % variante
     out = os.path.join(RADICE, "data/proposte/cards-v2-%s.json" % variante)
