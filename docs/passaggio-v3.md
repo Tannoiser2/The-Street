@@ -1,0 +1,145 @@
+# Passaggio alla sessione nuova: lo stato della v2 e l'idea della v3
+
+Stato al **1 ottobre 2026**. Questo documento si legge **dopo** `docs/passaggio-di-consegne.md`,
+che resta valido per il modo di lavorare con il designer, i vincoli e gli strumenti. Qui c'è
+quello che è cambiato da allora e la nuova direzione che il designer vuole prendere.
+
+## Le regole di sempre, in breve
+
+- Si risponde **sempre in italiano**, anche nei riepiloghi lunghi: due volte la risposta è
+  scappata in inglese e il designer se n'è accorto subito.
+- Le regole sono del designer: si misura, si propone con una raccomandazione, si chiede. Le PR si
+  aprono **in bozza** e si mergiano solo quando lui scrive "mergia" (merge commit, con lo SHA
+  atteso). Dopo il merge si controlla che la build di GitHub Pages (`pages.yml`) sia andata: il
+  designer gioca la pagina web, spesso su iPad.
+- `data/cards.json` (v1.5) non cambia comportamento: `tools/verifica_riferimento.sh` deve dire
+  "TORNEO: identico" e "VITA: identica" prima di ogni push che tocca motore o bot.
+- `data/cards-v2.json` e `data/proposte/*.json` si generano con `tools/genera_cards_v2.py`
+  (poi `tools/carte_v2.py` e `tools/stampa_carte_v2.py`); mai a mano.
+- I PDF in `materiali/` servono solo per la grafica, mai per i dati.
+- Le regole non cambiano col numero di giocatori.
+- Ogni decisione va nel registro `docs/domande-aperte.md`; ogni misura in
+  `docs/la-terza-risorsa.md`, con i numeri e i comandi per rifarla.
+
+## L'ambiente (cose imparate a fatica)
+
+- **Godot 4.7** non è installato: si scarica come fa `pages.yml`
+  (`Godot_v4.7-stable_linux.x86_64.zip` dalle release di godotengine). I test: le scene
+  `test_actions`, `test_effects`, `test_schema_validator`, `test_view`
+  (`godot --headless res://scenes/<scena>.tscn`). Dopo un `class_name` nuovo:
+  `godot --headless --editor --quit`. La grafica (`assets/`) non è versionata: si estrae con
+  `python3 tools/estrai_grafica.py` (serve pymupdf); senza, alcuni test della vista falliscono.
+- **Un errore di parsing GDScript fa restare appesa la scena headless senza messaggio**: sempre
+  con `timeout`, e si cerca `SCRIPT ERROR` / `Parse Error` nell'output. Le variabili prese da
+  Array/Dictionary vanno tipizzate (`var x: int = ...`), e non si scrive `for ...: if ...:` su una
+  riga.
+- **Il container si riavvia spesso** (ogni 30-60 minuti in questa sessione) e uccide i processi
+  lanciati. Le misure lunghe si lanciano con `setsid nohup ... &` e si riprendono con
+  `--da N --games G`: attenzione, `--da N` parte dalla partita N e ne gioca **G** (non fino a G).
+  Le partite fatte sono le righe `J ` nello stderr.
+- Non usare `pkill -f` con un testo che compare nel proprio comando: uccide la shell. Si
+  uccide per PID.
+- Le misure: `audit_partita.tscn -- --games N --seed 700000 --players N --giro tutte
+  --dati <file> --rapporto 1`; ogni partita è una riga `J {json}` nello stderr con canali di PV,
+  contatori (`cnt`) e lo stato finale degli edifici.
+
+## Cosa è su main (fino alla PR #69)
+
+Registri 140-147, in breve:
+- 140 menu e riepilogo ingranditi (lente); 141 posto del giocatore in due colonne;
+- 142 via la Prosperità Urbana; cubetti neri solo per la resistenza senza gettone;
+- 143 il Lampo è un flusso di tutti (Lampo 2 nell'era 4 non aiutava la strategia Lampo);
+- 144-145 riepilogo con i giocatori in colonna, i PV divisi per fonte, PV in gioco e PV di fine
+  partita separati; blocchi della v2 a 9 mm;
+- 146 tasti "Attiva e incassa", "Annulla la scelta", "Fine turno"; la cronaca del turno sotto la
+  barra (`scripts/view/cronaca.gd`);
+- 147 lo spianato con le tessere (poi superato dal 151, vedi sotto).
+
+## Cosa è aperto
+
+- **PR #71** (bozza, ramo `claude/evento-finale`): evento finale *Il giudizio del tempo* (forza 4,
+  registro 149), gilde dell'era 5 (Condominio, Officina, Ponte in acciaio, Stazione, registro
+  150), **regole semplici dello scavo** (registro 151: spianare = terrapieno senza tessere; su una
+  rovina 1 PV per tessera sotto il nuovo edificio; nell'era 5 si girano le tessere sotto e solo
+  quelle contano a fine partita), le varianti `scavo_due`, `tessere_doppie`, `spianare_caro`,
+  `strada_corta`, `caro_e_corta` (registro 152), i contatori della produzione per era (148) e
+  la trentesima misura. Test verdi, v1.5 identica. **Non mergiata**: il designer non ha ancora
+  scelto, e con la v3 molte di queste cose vanno ripensate.
+- **PR #70** (bozza): i soli contatori della produzione, superata dalla #71: si può chiudere.
+
+I numeri chiave dell'ultima misura (3 giocatori, regole semplici + evento finale + gilde):
+Scavo 7 PV a testa (bonus 2,6 + riscoperta 4,7), Lampo 16,5, Rendita 13,5, Continuità 17,9;
+si spianano 21 edifici propri a partita, si riscoprono solo ~5 rovine (nell'era 5 si costruiscono
+6-7 edifici in tutto). Spianare caro (1 Costruzione per casella) porta gli spianati a 9 e la
+Rendita a 20. La strada corta da sola non aiuta.
+
+## La produzione oggi (la base per la v3)
+
+Risorse prodotte a giocatore per era, regole di main, 3 giocatori (fra parentesi quelle ancora
+in mano a fine era, prima della dispersione):
+
+| era | Costruzione | Denaro | Idee |
+|---|---|---|---|
+| 1 | 5,6 (3,9) | 2,0 (2,1) | 1,7 (0,5) |
+| 2 | 8,1 (6,1) | 2,6 (4,3) | 2,7 (1,0) |
+| 3 | 4,2 (2,2) | 3,5 (3,8) | 2,7 (3,1) |
+| 4 | 2,9 (2,5) | 5,3 (5,7) | 4,5 (2,6) |
+| 5 | 2,5 (2,3) | 6,7 (6,5) | 4,4 (3,7) |
+
+Fonti in tutta la partita: terreno 9,8 / 6,7 / 6,2; tessera dell'era 5,6 / 4,6 / 8,9; edifici
+5,7 / 6,5 / 0,2; Personaggi 1,7 / 2,4 / 0,4. A fine partita si buttano ~12 risorse a testa.
+
+## La v3: l'idea del designer (1 ottobre 2026, parole sue)
+
+> Troppe risorse vanno sprecate e riconvertirle in idee non è la soluzione. Le risorse nascono e
+> muoiono nell'era, non si portano appresso tra le ere. Quindi bisogna renderle fruibili durante
+> l'era. Quando si scelgono i personaggi si fa un draft delle carte: ogni giocatore prende 4
+> personaggi, ne prende uno e quelli rimasti li passa al giocatore alla sua destra, e si ripete
+> finché tutti hanno scelto tre personaggi, più quello che rimane alla fine. Questi saranno i
+> personaggi dell'era (quindi dovrebbero essere almeno 16 per era, totale 16×5). Questi hanno
+> produzione e azione speciale quando verranno utilizzati come lavoratori durante l'era (non ci
+> sono più lavoratori non specializzati). Ogni edificio fa anche produzione e azione speciale.
+> Quindi quando un personaggio viene messo su una colonna, attiva gli edifici per ogni giocatore
+> + produzione ed effetto della colonna + produzione ed effetto del personaggio. Questo dovrebbe
+> portare a una sorta di micromondo che comprende produzione, PV ecc. solo per quell'era. I
+> personaggi poi hanno la possibilità di essere ripescati come scheletri.
+
+### Il parere dato al designer (da riprendere)
+
+Punti di forza:
+- **Risorse che muoiono a fine era** chiudono il problema dello spreco alla radice: niente
+  dispersione, niente conversione in Idee, niente avanzi nell'era 5. Ogni era diventa un
+  problema di economia chiuso, da pianificare.
+- **Il draft a passaggio** (alla 7 Wonders) dà interazione vera già prima di giocare: si sceglie
+  per sé e si toglie agli altri.
+- **I lavoratori sono i Personaggi**: ogni piazzamento è una scelta (quale personaggio, su quale
+  colonna), non più "un lavoratore qualunque". Lega i Personaggi agli scheletri delle tessere
+  rovina, che già portano l'era.
+
+Cose da decidere o da tenere d'occhio:
+1. **Quante carte**: 4 a testa vuol dire 8/12/16 personaggi per era a 2/3/4 giocatori. Per non
+   cambiare le regole col numero di giocatori: si mescolano i 16 dell'era e se ne danno 4 a
+   testa, gli altri fuori. A 2 giocatori il draft gira poco (2 scelte vere): valutare.
+2. **"Tre scelti più quello che rimane"**: con 4 carte in mano si sceglie, si passa, si sceglie,
+   si passa, si sceglie, e l'ultima arriva da sola. Va confermato che l'ultima è un lavoratore
+   come le altre (4 lavoratori a testa, come oggi). La Dinastia (quinto lavoratore) va ripensata.
+3. **Direzione del passaggio**: sempre a destra, o alternata per era come in 7 Wonders.
+4. **Il ciclo dell'attivazione** diventa ricco: produzione ed effetto della colonna (tessera
+   dell'era), poi di **ogni edificio** in piedi nella colonna (di tutti i giocatori), poi del
+   Personaggio. Gli effetti devono essere brevi e iconografici, o il turno si allunga molto.
+   Chiarire se l'azione speciale degli edifici scatta per il proprietario o per chi attiva.
+5. **Che cosa resta tra un'era e l'altra**: solo PV, edifici sulla mappa, rovine, token
+   riscattati e i Personaggi presi (per gli scheletri). Lampo e Rendita restano i flussi in PV.
+6. **Lavoro sulle carte**: 80 Personaggi (16 × 5) con produzione + azione; tutti i 74 edifici
+   con produzione + azione speciale. È il grosso del lavoro, e va fatto con il generatore (le
+   carte di oggi non hanno questi campi).
+7. **Lato codice**: il turno cambia (piazzare un Personaggio invece di un lavoratore), il draft
+   diventa a passaggio (oggi è "uno a testa in ordine di turno fra tutti quelli dell'era"),
+   le risorse si azzerano a fine era (al posto di `disperse`), l'attivazione legge la produzione
+   del Personaggio. I bot vanno riadattati. Conviene una costante nuova (es. `turno_v3`) nel
+   file dati, come si è fatto per la v2, così la v1.5 e la v2 restano giocabili e misurabili.
+
+Prima mossa proposta per la sessione nuova: scrivere con il designer la scheda di **un'era di
+prova** (16 Personaggi con produzione e azione, gli edifici di quell'era con produzione e
+azione), simularla e guardare la tabella della produzione per giro, prima di toccare tutte le
+cinque ere.
