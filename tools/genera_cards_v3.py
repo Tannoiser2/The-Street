@@ -223,6 +223,33 @@ for t in v3["tessere_era"]:
         t["effetto"] = {"quando": "attiva", "extra": 1}
         t["testo"] = "Chi attiva per primo puo' comprare ancora un potenziamento o una casa in quel turno."
 
+# ---- il tuning delle risorse (registro 159) ------------------------------------
+# Il designer, letta la trentaduesima misura ("un'era di case", potenziamenti a
+# zero): "un tuning delle risorse: se Idee e Denaro sono poco bisogna alzarle,
+# poi i potenziamenti devono essere comprati". Si producevano 5,5 Costruzione,
+# 1,5 Denaro e 1,7 Idee a testa, e le carte del mazzo chiedono Denaro o Idee.
+# Le quattro tessere dell'era 1 che non producevano niente ora danno Denaro o
+# Idee; tre Personaggi passano dalla Costruzione a Denaro e Idee (fra i 16:
+# Costruzione 7, Denaro 6, Idee 6, invece di 10/4/5).
+TESSERE_PRODUZIONE = {"te_radura": prod(idee=1), "te_sentiero_dei_pastori": prod(oro=1),
+                      "te_terra_di_nessuno": prod(oro=1), "te_luogo_sacro": prod(idee=1)}
+for t in v3["tessere_era"]:
+    if t["id"] in TESSERE_PRODUZIONE:
+        t["produzione"] = TESSERE_PRODUZIONE[t["id"]]
+PERSONAGGI_PRODUZIONE = {"pe_guardiano_del_fuoco": prod(idee=1), "pe_anziana_del_villaggio": prod(oro=1),
+                         "pe_barattatore": prod(oro=1, idee=1)}
+TESTI_PRODUZIONE = {"pe_guardiano_del_fuoco": "Produce 1 Idea. +1 resistenza fino a fine era a ogni tuo Religione in questa colonna.",
+                    "pe_anziana_del_villaggio": "Produce 1 Denaro. Cambia 1 risorsa in un'altra.",
+                    "pe_barattatore": "Produce 1 Denaro e 1 Idea. Nessuna azione."}
+for ch in v3["characters"]:
+    if ch["id"] in PERSONAGGI_PRODUZIONE:
+        ch["produzione"] = PERSONAGGI_PRODUZIONE[ch["id"]]
+        ch["effect_text"] = TESTI_PRODUZIONE[ch["id"]]
+# I potenziamenti si comprano anche nelle colonne accanto a quella attivata
+# (registro 126): nell'era 1 i propri edifici stanno sulle colonne gia'
+# attivate, e senza questo nessuno li compra.
+c["potenzia_adiacente"] = True
+
 # ---- le controprove ----------------------------------------------------------
 #   --variante extra_sempre   l'acquisto extra a ogni turno, senza carte (la "catena" del registro 156)
 #   --variante senza_extra    nessun acquisto extra: le quattro carte tornano com'erano nella scheda
@@ -248,7 +275,28 @@ def costi_vecchi(v):
     for b in v["buildings"]:
         if b["era"] != 1 or b.get("riserva"): continue
         b["cost"][SECONDA[b["classes"][0]]] -= 1
-VARIANTI = {"extra_sempre": extra_sempre, "senza_extra": senza_extra, "costi_vecchi": costi_vecchi}
+#   --variante case_seconda   anche le case con +1 Denaro, tranne i Ripari (la casa di salvataggio)
+#   --variante case_lampo1    il Lampo di tutte le case a 1
+#   --variante senza_tuning   la produzione di prima del registro 159 (controllo)
+def case_seconda(v):
+    for b in v["buildings"]:
+        if b["era"] == 1 and b.get("riserva") and b["id"] != "ed_casa_e1_s":
+            b["cost"]["oro"] += 1
+def case_lampo1(v):
+    for b in v["buildings"]:
+        if b["era"] == 1 and b.get("riserva"):
+            b["lampo"] = min(int(b["lampo"]), 1)
+def senza_tuning(v):
+    for t in v["tessere_era"]:
+        if t["id"] in TESTI_PRODUZIONE or t["id"] in TESSERE_PRODUZIONE:
+            t["produzione"] = prod()
+    for ch in v["characters"]:
+        if ch["id"] == "pe_guardiano_del_fuoco": ch["produzione"] = prod(pietra=1)
+        if ch["id"] == "pe_anziana_del_villaggio": ch["produzione"] = prod(pietra=1)
+        if ch["id"] == "pe_barattatore": ch["produzione"] = prod(pietra=1, oro=1)
+    v["constants"]["potenzia_adiacente"] = False
+VARIANTI = {"extra_sempre": extra_sempre, "senza_extra": senza_extra, "costi_vecchi": costi_vecchi,
+            "case_seconda": case_seconda, "case_lampo1": case_lampo1, "senza_tuning": senza_tuning}
 if variante:
     VARIANTI[variante](v3)
     v3["meta"]["ruleset"] = "v3-era1-prova-" + variante

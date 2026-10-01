@@ -1768,9 +1768,69 @@ Proposte al designer, da misurare una per volta:
 4. Il bot: l'azione ⊕ vale 1,2 al draft, va portata a quel che rende (0,3-0,5
    finche' l'extra non si usa di piu').
 
+## Trentatreesima misura: il tuning delle risorse e i potenziamenti
+
+Il designer, letta la trentaduesima: "un tuning delle risorse: se Idee e
+Denaro sono poco bisogna alzarle, poi i potenziamenti devono essere comprati,
+anche questo e' un difetto da riparare" (registro 159). Nel file base: le
+quattro tessere dell'era 1 che non producevano niente danno Denaro (Sentiero
+dei pastori, Terra di nessuno) o Idee (Radura, Luogo sacro); tre Personaggi
+passano dalla Costruzione a Denaro e Idee (Guardiano del fuoco 💡, Anziana del
+villaggio 🪙, Barattatore 🪙💡: fra i 16 ora Costruzione 7, Denaro 6, Idee 6,
+invece di 10/4/5); i potenziamenti si comprano anche nelle colonne accanto a
+quella attivata (`potenzia_adiacente`, registro 126). Nel bot: le Idee contano
+nella domanda del mercato come il Denaro (il Barattatore, Denaro e Idea, finiva
+ultimo nel draft), e l'azione ⊕ vale 0,4 invece di 1,2 (si usa un quarto delle
+volte che si apre). Stesse 300 ere 1, 3 giocatori, seme 700000. Una
+controprova: `case_seconda`, anche le case con +1 Denaro tranne i Ripari.
+
+| a giocatore | reg. 158 | tuning | **tuning + bot** | + case con +1 Denaro |
+|---|---|---|---|---|
+| prodotto ⚒ / 🪙 / 💡 | 5,5 / 1,5 / 1,7 | 4,4 / 2,7 / 2,9 | **4,3 / 2,6 / 3,0** | 4,2 / 2,7 / 3,1 |
+| prodotto in tutto | 8,7 | 10,0 | 9,8 | 10,0 |
+| speso | 7,2 | 7,6 | 7,6 | 8,0 |
+| morto (⚒ / 🪙 / 💡) | 1,5 (0,5/0,5/0,5) | 2,4 (0,4/1,1/1,0) | **2,2** (0,3/0,9/1,0) | 2,0 (0,4/0,7/0,9) |
+| costruzioni / **potenziamenti** / passi | 3,8 / 0,03 / 0,4 | 3,5 / 0,44 / 0,2 | 3,6 / **0,46** / 0,1 | 3,5 / **0,53** / 0,2 |
+| acquisti extra aperti / usati | 0,74 / 0,25 | 0,72 / 0,15 | 0,78 / 0,23 | 0,79 / 0,21 |
+| edifici a partita (di cui case) | 11,4 (5,1) | 10,6 (3,2) | 10,9 (3,6) | 10,6 (2,6) |
+| PV dell'era (Lampo / censimento / prodotti) | 5,0 (3,8/0,8/0,2) | 4,4 (2,7/1,1/0,4) | 4,7 (3,1/1,0/0,4) | 4,5 (2,7/1,1/0,5) |
+| vittorie: Bil / Cont / **Lampo** / Obi / Rend / Scavo | 26/33/**61**/31/23/27 | 33/36/**49**/31/23/27 | 41/41/**37**/37/26/19 | 43/42/**38**/38/19/19 |
+
+Cosa dicono i numeri:
+- **Denaro e Idee alzati, i potenziamenti tornano.** Da 1,5 e 1,7 a 2,6 e 3,0
+  prodotti a testa; i potenziamenti da 0,03 a 0,46 (budget del metro: 1), con
+  le case con +1 Denaro 0,53. Il morto sale da 1,5 a 2,2, sul bordo alto del
+  budget: quel che muore ora e' Denaro e Idee (0,9 e 1,0), mezza unita' l'una
+  piu' di prima, perche' se ne producono di piu' e non sempre si combinano.
+- **L'era non e' piu' di case.** Le case scendono da 5,1 a 3,6 a partita (2,6
+  con il +1 Denaro); Dolmen 0,78, Menhir 0,89, Circolo 0,63, Grotte dipinte
+  0,44, Tumulo 0,37 risalgono. Le Trappole da pesca non si costruiscono piu'
+  (0,00: 2 Costruzione per una produzione di 1).
+- **La Lampo non domina piu' nemmeno nell'era 1 da sola**: 37% con le sei
+  strategie fra 19 e 41. Il bot che valuta le Idee ha fatto la meta' del
+  lavoro (da 49 a 37): Bilanciata e Continuita' ora comprano Dolmen e Menhir.
+  La Scavo e' al 19% per costruzione della misura (lo Scavo non paga
+  nell'era 1); la Rendita al 26 e' sul bordo basso.
+- **L'acquisto extra resta debole**: si apre 0,78 volte e si usa 0,23. Il
+  Mercante di ossidiana (⊕) e' ora l'ultima scelta del draft (3,89), il
+  Capotribu' (⊕) a meta' (2,12): il bot lo valuta per quel che rende. Perche'
+  renda di piu' serve una delle due cose dette nella trentaduesima: lo sconto
+  sull'acquisto extra, o potenziamenti piu' economici.
+- Le case con +1 Denaro migliorano tutto di poco (morto 2,0, potenziamenti
+  0,53, case 2,6) e portano la Rendita al 19: da tenere come opzione, non
+  come base, finche' la Rendita non ha il suo bot.
+
+Stato dopo tre giri: produzione 9,8 (budget 10-12), spesa 7,6 (budget 8-10),
+morto 2,2 (budget 1-2), 3,6 costruzioni e 0,46 potenziamenti (budget 3 e 1):
+l'economia dell'era 1 e' nel metro o sul suo bordo. Restano il Guerriero
+sempre primo nel draft (1,11), le Trappole da pesca mai costruite, l'extra che
+non si usa, e la misura della coppia 1-2 per Scavo e scheletri.
+
 ## Come rifare il conto
 
 ```bash
+# trentatreesima misura: il file base con il tuning delle risorse (registro 159); controprova case_seconda
+# (stessi comandi della trentaduesima; il file base di allora lo rigenera il generatore al commit b764ad7)
 # trentaduesima misura: il file base con catena, costi misti ed extra dalle carte; tre controprove
 python3 tools/genera_cards_v2.py && python3 tools/genera_cards_v3.py
 for v in extra_sempre senza_extra costi_vecchi; do python3 tools/genera_cards_v3.py --variante $v; done

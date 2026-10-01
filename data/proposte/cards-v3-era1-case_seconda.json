@@ -1,7 +1,7 @@
 {
   "meta": {
     "game": "La Strada delle Ere",
-    "ruleset": "v3-era1-prova-extra_sempre",
+    "ruleset": "v3-era1-prova-case_seconda",
     "language": "it",
     "source": "distinta-carte (fonte unica)",
     "origine": "generato da tools/genera_cards_v3.py da data/cards-v2.json: non modificare a mano"
@@ -206,8 +206,7 @@
     "risorse_muoiono": true,
     "azione_edificio": "proprietario",
     "spianare_costo": 1,
-    "potenzia_adiacente": true,
-    "acquisto_extra": true
+    "potenzia_adiacente": true
   },
   "terrains": [
     {
@@ -2549,7 +2548,7 @@
       "width": 1,
       "cost": {
         "pietra": 1,
-        "oro": 0,
+        "oro": 1,
         "idee": 0
       },
       "flexible": false,
@@ -2582,7 +2581,7 @@
       "width": 1,
       "cost": {
         "pietra": 2,
-        "oro": 0,
+        "oro": 1,
         "idee": 0
       },
       "flexible": false,

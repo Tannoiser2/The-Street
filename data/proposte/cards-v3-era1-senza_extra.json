@@ -205,7 +205,8 @@
     "personaggi_per_era": 16,
     "risorse_muoiono": true,
     "azione_edificio": "proprietario",
-    "spianare_costo": 1
+    "spianare_costo": 1,
+    "potenzia_adiacente": true
   },
   "terrains": [
     {
@@ -2999,12 +3000,12 @@
       "is_dynasty": false,
       "timing": "v3",
       "imprint": false,
-      "effect_text": "Produce 1 Costruzione. Cambia 1 risorsa in un'altra.",
+      "effect_text": "Produce 1 Denaro. Cambia 1 risorsa in un'altra.",
       "effects": [],
       "scavo": 0,
       "produzione": {
-        "pietra": 1,
-        "oro": 0,
+        "pietra": 0,
+        "oro": 1,
         "idee": 0
       },
       "azione": {
@@ -3067,13 +3068,13 @@
       "is_dynasty": false,
       "timing": "v3",
       "imprint": false,
-      "effect_text": "Produce 1 Costruzione. +1 resistenza fino a fine era a ogni tuo Religione in questa colonna.",
+      "effect_text": "Produce 1 Idea. +1 resistenza fino a fine era a ogni tuo Religione in questa colonna.",
       "effects": [],
       "scavo": 0,
       "produzione": {
-        "pietra": 1,
+        "pietra": 0,
         "oro": 0,
-        "idee": 0
+        "idee": 1
       },
       "azione": {
         "tipo": "resistenza",
@@ -3133,13 +3134,13 @@
       "is_dynasty": false,
       "timing": "v3",
       "imprint": false,
-      "effect_text": "Produce 1 Costruzione e 1 Denaro. Nessuna azione.",
+      "effect_text": "Produce 1 Denaro e 1 Idea. Nessuna azione.",
       "effects": [],
       "scavo": 0,
       "produzione": {
-        "pietra": 1,
+        "pietra": 0,
         "oro": 1,
-        "idee": 0
+        "idee": 1
       },
       "azione": {
         "tipo": "nessuna"
@@ -7153,7 +7154,7 @@
       "produzione": {
         "pietra": 0,
         "oro": 0,
-        "idee": 0
+        "idee": 1
       },
       "testo": "Il primo edificio Civico costruito qui dà +1 Lampo.",
       "effetto": {
@@ -7173,7 +7174,7 @@
       "era": 1,
       "produzione": {
         "pietra": 0,
-        "oro": 0,
+        "oro": 1,
         "idee": 0
       },
       "testo": "Chi attiva per primo puo' comprare ancora un potenziamento o una casa in quel turno.",
@@ -7191,7 +7192,7 @@
       "era": 1,
       "produzione": {
         "pietra": 0,
-        "oro": 0,
+        "oro": 1,
         "idee": 0
       },
       "testo": "Il primo edificio costruito qui ignora il requisito di terreno.",
@@ -7224,7 +7225,7 @@
       "produzione": {
         "pietra": 0,
         "oro": 0,
-        "idee": 0
+        "idee": 1
       },
       "testo": "Il primo edificio Religione costruito qui costa 1 Idea in meno.",
       "effetto": {

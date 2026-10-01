@@ -30,6 +30,7 @@ Le costanti nuove del file dati, tutte spente nella v2 e nella v1.5:
 | `spianare_costo` | 1 | spianare caro (registro 152): niente sconto a chi spiana il proprio edificio |
 | costi dell'era 1 | +1 della seconda risorsa della classe | Commercio e Civico +1 Denaro, Religione e Cultura +1 Idea, Ingegneria e Militare +1 Costruzione; le case della riserva come sono (registro 157) |
 | Ripari | costo 1, ◈ Costruzione o Denaro | la casa che si compra sempre (registro 157) |
+| `potenzia_adiacente` | vero | i potenziamenti anche nelle colonne accanto a quella attivata (registri 126, 159) |
 | `acquisto_extra` | spento | l'acquisto extra arriva solo dall'azione ⊕ di una carta (due Personaggi, due edifici, una tessera); la variante `extra_sempre` lo dà a ogni turno |
 
 Ordine dell'attivazione: la tessera della colonna (produzione, poi effetto se non ancora
@@ -48,16 +49,15 @@ Restano quelle di oggi, 7 tipi in 2 copie (registro 121):
 | tessera | produce | effetto (una volta per era) |
 |---|---|---|
 | Campi arati | ⚒1 | il primo edificio da 2 o 3 caselle costruito qui costa 1 Costruzione in meno |
-| Radura | — | il primo Civico costruito qui ha +1 Lampo |
-| Sentiero dei pastori | — | chi attiva per primo ⊕ può comprare ancora un potenziamento o una casa in quel turno (registro 157; era +1 Denaro) |
-| Terra di nessuno | — | il primo edificio costruito qui ignora il requisito di terreno |
+| Radura | 💡1 | il primo Civico costruito qui ha +1 Lampo |
+| Sentiero dei pastori | 🪙1 | chi attiva per primo ⊕ può comprare ancora un potenziamento o una casa in quel turno (registro 157; era +1 Denaro) |
+| Terra di nessuno | 🪙1 | il primo edificio costruito qui ignora il requisito di terreno |
 | Recinto di pietre | ⚒1 | il primo edificio costruito qui ha +1 resistenza fino a fine era |
-| Luogo sacro | — | il primo Religione costruito qui costa 1 Idea in meno |
+| Luogo sacro | 💡1 | il primo Religione costruito qui costa 1 Idea in meno |
 | Raccoglitori | ⚒1 | chi attiva per primo può cambiare 1 Costruzione in 1 Idea |
 
-Da tenere d'occhio nella misura: quattro tessere su sette non producono. Con i Personaggi
-che producono uno ciascuno la cosa può andare bene; se la produzione dell'era resta sotto
-le 10 risorse, la prima correzione è ⚒1 anche su Radura e Sentiero.
+Le quattro tessere che non producevano niente danno Denaro o Idee dal registro 159: il terreno di
+base non produce più, e Denaro e Idee erano troppo pochi per i costi misti.
 
 ## I 16 Personaggi
 
@@ -69,13 +69,13 @@ metro.
 | # | Personaggio | classe | produce | azione (quando lo piazzi) |
 |---|---|---|---|---|
 | 1 | Capotribù | Civico | ⚒1 | ⊕ in questo turno puoi comprare ancora un potenziamento o una casa (registro 157; era 🛡 +1 res) |
-| 2 | Anziana del villaggio | Civico | ⚒1 | ⇄ cambia 1 risorsa in un'altra |
+| 2 | Anziana del villaggio | Civico | 🪙1 | ⇄ cambia 1 risorsa in un'altra |
 | 3 | Cacciatore | Civico | ⚒1 | ✦ +1 Lampo all'edificio che costruisci in questo turno |
 | 4 | Sciamano | Religione | 💡1 | ★ +1 PV se hai un edificio Religione in piedi in questa colonna |
-| 5 | Guardiano del fuoco | Religione | ⚒1 | 🛡 +1 res fino a fine era a ogni tuo Religione in questa colonna |
+| 5 | Guardiano del fuoco | Religione | 💡1 | 🛡 +1 res fino a fine era a ogni tuo Religione in questa colonna |
 | 6 | Custode delle ossa | Religione | 💡1 | ⚱ +1 Scavo permanente a un tuo edificio in questa colonna |
 | 7 | Mercante di ossidiana | Commercio | 🪙1 | ⊕ in questo turno puoi comprare ancora un potenziamento o una casa (registro 157; era ⇄ 2 cambi) |
-| 8 | Barattatore | Commercio | ⚒1 🪙1 | nessuna |
+| 8 | Barattatore | Commercio | 🪙1 💡1 | nessuna |
 | 9 | Portatore di sale | Commercio | 🪙1 | 👥 +1 Denaro per ogni altro giocatore con un edificio in questa colonna (max 2) |
 | 10 | Incisore | Cultura | 💡1 | ⚱ +2 Scavo permanente a un tuo edificio in questa colonna (l'Impronta di oggi, senza carta sotto) |
 | 11 | Cantastorie | Cultura | 💡1 | ★ +1 PV |
@@ -91,10 +91,8 @@ La differenza la fa **dove** lo si piazza (una colonna con i propri Religione pe
 Guardiano, una colonna affollata per il Portatore di sale) e **chi** si toglie agli altri
 nel draft. Il Barattatore è il metro di paragone: 2 risorse e niente da leggere.
 
-Produzione dei 16 messi insieme: ⚒10, 🪙4, 💡5 (il Barattatore conta due volte). A 3
-giocatori se ne usano 12: in media ⚒7,5 🪙3 💡4 per era, cioè una Costruzione in meno e
-un'Idea in più a testa rispetto a oggi, dove le Idee dell'era 1 bastano appena per i
-Dolmen e i Menhir.
+Produzione dei 16 messi insieme: ⚒7, 🪙6, 💡6 (il Barattatore conta due volte; registro 159, erano
+10/4/5 prima del tuning). A 3 giocatori se ne usano 12.
 
 ## I 15 edifici
 
@@ -200,6 +198,10 @@ carte e il bot che sa che le risorse muoiono: prodotto 8,7, speso 7,2, **morto 1
 mancanza c'e'. Ma si costruiscono 5 case a partita su 11 edifici, i potenziamenti spariscono e
 l'acquisto extra si usa un quarto delle volte che si apre: le proposte sono nella trentaduesima
 misura.
+
+Quarto giro (registro 159, trentatreesima misura), il tuning delle risorse: Denaro 2,6 e Idee 3,0
+prodotti a testa, potenziamenti 0,46, case 3,6 a partita, morto 2,2, Lampo al 37% con le strategie
+fra 19 e 41. L'economia dell'era 1 è nel metro o sul suo bordo.
 
 ## Che cosa serve nel codice
 

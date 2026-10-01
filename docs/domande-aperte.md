@@ -2513,3 +2513,21 @@ dato è stato importato da lì. Ma due confronti fra ciò che è stampato e
     potenziamento nell'extra gratis); potenziamenti a 0 o in Costruzione
     nell'era 1; il bot che valuta l'azione ⊕ per quel che rende. **Da
     decidere con il designer.**
+159. **Il tuning delle risorse e i potenziamenti.** Il designer: "E' questo
+    quello che devi fare, un tuning delle risorse, se Idee e Denaro sono poco
+    bisogna alzarle, poi i potenziamenti devono essere comprati, anche questo
+    e' un difetto da riparare". Perche' prima si comprava tutto: si
+    producevano 14 risorse, di cui 8 Costruzione, e le carte costavano 1-2
+    Costruzione; con i costi misti le carte del mazzo chiedono Denaro o Idee,
+    che si producevano 1,5 e 1,7 a testa, e le case restavano l'unica cosa
+    pagabile. Nel file base: le quattro tessere dell'era 1 senza produzione
+    danno Denaro (Sentiero, Terra di nessuno) o Idee (Radura, Luogo sacro);
+    Guardiano del fuoco 💡, Anziana 🪙, Barattatore 🪙💡 (fra i 16: 7/6/6);
+    `potenzia_adiacente` acceso. Nel bot le Idee contano nella domanda del
+    mercato (solo nella v3) e l'azione ⊕ vale 0,4. Trentatreesima misura:
+    Denaro 2,6 e Idee 3,0 prodotti, potenziamenti 0,46 a testa, case 3,6 a
+    partita, morto 2,2, Lampo al 37% con le strategie fra 19 e 41. Restano:
+    l'acquisto extra che si usa un quarto delle volte (sconto o potenziamenti
+    piu' economici), il Guerriero sempre primo, le Trappole da pesca mai
+    costruite, la Rendita sul bordo basso. Controprova `case_seconda` (le
+    case con +1 Denaro tranne i Ripari): un po' meglio su tutto, Rendita al 19.

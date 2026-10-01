@@ -78,13 +78,18 @@ const VALORE_MEDIO := 0.8
 static func valore_risorse(gs: GameState, p: PlayerState) -> Vector2:
 	var chiede_p := 0.0
 	var chiede_o := 0.0
+	# V3 (registro 159): le Idee sono una risorsa chiesta dal mercato come il
+	# Denaro, e si contano con lui (il valutatore ha due componenti, e le Idee
+	# si pagano al valore del Denaro). Fuori dalla v3 il conto non cambia.
+	var v3 := PersonaggiV3.attivo()
+	var stock_o := p.oro + (p.idee if v3 else 0)
 	for id in gs.in_vendita():
 		var c: Dictionary = CardDB.buildings[id]["cost"]
 		chiede_p += float(c["pietra"])
-		chiede_o += float(c["oro"])
+		chiede_o += float(c["oro"]) + (float(c.get("idee", 0)) if v3 else 0.0)
 	if chiede_p + chiede_o <= 0.0: return Vector2(VALORE_MEDIO, VALORE_MEDIO)
 	var vp := chiede_p / float(p.pietra + 1)
-	var vo := chiede_o / float(p.oro + 1)
+	var vo := chiede_o / float(stock_o + 1)
 	if vp + vo <= 0.0: return Vector2(VALORE_MEDIO, VALORE_MEDIO)
 	# Si normalizza sulla media, cosi' a cambiare e' il RAPPORTO fra le due e
 	# non la scala: se no un mercato caro farebbe sembrare tutto impagabile.
@@ -293,8 +298,8 @@ static func _guadagno_v3(gs: GameState, p: PlayerState, copia: GameState, pc: Pl
 	# valgono: si guarda la copia, dove il piazzamento e' gia' fatto.
 	q *= _fattore_morte(copia, pc)
 	q += float(pc.vp - p.vp) * 0.9
-	# L'acquisto extra guadagnato vale un pezzo di azione in piu'.
-	q += 1.2 * float(pc.extra_turno - p.extra_turno)
+	# L'acquisto extra guadagnato vale qualcosa solo se resta con che comprare.
+	q += 0.4 * float(pc.extra_turno - p.extra_turno)
 	var prima := {}
 	for b in gs.grid.buildings: prima[b.uid] = [b.protection, b.bonus_scavo]
 	for b in copia.grid.buildings:
@@ -873,7 +878,7 @@ static func _valore_personaggio_v3(gs: GameState, p: PlayerState, d: Dictionary,
 		"scavo": a = 0.3 * float(az.get("n", 1)) + (0.8 if strategia == "scavo" else 0.0)
 		"lampo": a = 1.0 + (0.5 if strategia == "lampo" else 0.0)
 		"altri": a = 0.6
-		"acquisto": a = 1.2
+		"acquisto": a = 0.4     # si usa poco: quando si apre, spesso non resta niente da spendere (registro 159)
 		"adiacente": a = 0.6
 		"tessera": a = 0.4
 	# La collezione (Continuita'): un Personaggio della classe che si sta

@@ -1,7 +1,7 @@
 {
   "meta": {
     "game": "La Strada delle Ere",
-    "ruleset": "v3-era1-prova-extra_sempre",
+    "ruleset": "v3-era1-prova-case_lampo1",
     "language": "it",
     "source": "distinta-carte (fonte unica)",
     "origine": "generato da tools/genera_cards_v3.py da data/cards-v2.json: non modificare a mano"
@@ -206,8 +206,7 @@
     "risorse_muoiono": true,
     "azione_edificio": "proprietario",
     "spianare_costo": 1,
-    "potenzia_adiacente": true,
-    "acquisto_extra": true
+    "potenzia_adiacente": true
   },
   "terrains": [
     {
@@ -2588,7 +2587,7 @@
       "flexible": false,
       "resistance": 2,
       "rendita": 0,
-      "lampo": 2,
+      "lampo": 1,
       "scavo": 1,
       "level_required": 0,
       "production": {
