@@ -191,6 +191,7 @@ v2["constants"]["evento_finale"] = {"id": "ev_giudizio_del_tempo", "name": "Il g
 # designer, ognuna un file a parte in data/proposte/, che il file v2 non tocca:
 #   --variante scavo_due   il bonus scavo a 2 PV per tessera invece di 1 (registro 151)
 #   --variante tessere_doppie  bonus a 1 PV, tessere del mazzetto di valore doppio (registro 151)
+#   --variante spianare_caro / strada_corta / caro_e_corta  spianare costa 1 per casella; una pianura in meno (registro 152)
 #   --variante doppioni    per era, una seconda copia della chiesa e del villaggio
 #                          piu' economici (1 casella: civico e religione, o cultura
 #                          dove la religione manca);
@@ -995,6 +996,26 @@ gilde_era5(v2)
 def scavo_due(v):
     v["constants"]["tessere_scavo"]["per_tessera"] = 2
 
+# REGISTRO 152. Il designer: "la spianata deve costare di piu', deve essere un
+# sacrificio che vale la pena fare perche' e' doloroso" e "togliere una
+# tessera territorio: con meno spazio ci si sovrappone di piu' e si e'
+# costretti a costruire sopra le rovine". Nelle misure i giocatori spianavano
+# 21 edifici propri a partita (a tre) e scavavano poco.
+# "spianare_caro": niente sconto spolia, 1 Costruzione per casella demolita.
+def spianare_caro(v):
+    v["constants"]["spianare_costo"] = 1
+
+# "strada_corta": una pianura in meno a ogni numero di giocatori (4/6/8 colonne).
+def strada_corta(v):
+    c = v["constants"]
+    c["columns_by_players"] = {k: int(n) - 1 for k, n in c["columns_by_players"].items()}
+    for k, mix in c["terrain_mix_by_players"].items():
+        mix["pianura"] = int(mix["pianura"]) - 1
+
+def caro_e_corta(v):
+    spianare_caro(v)
+    strada_corta(v)
+
 # "tessere_doppie": bonus a 1 PV, ma ogni tessera del mazzetto vale il doppio
 # alla riscoperta: con le regole semplici le tessere girate sono poche e la
 # riscoperta valeva 5 PV a testa.
@@ -1006,7 +1027,8 @@ if variante:
     {"doppioni": doppioni, "abitazioni": abitazioni, "case": case,
      "case_doppioni": case_doppioni, "case_scavo": case_scavo, "case_nulle": case_nulle,
      "case_mista": case_mista, "case_tutti": case_tutti, "spianato_tessere": spianato_tessere,
-     "scavo_due": scavo_due, "tessere_doppie": tessere_doppie}[variante](v2)
+     "scavo_due": scavo_due, "tessere_doppie": tessere_doppie,
+     "spianare_caro": spianare_caro, "strada_corta": strada_corta, "caro_e_corta": caro_e_corta}[variante](v2)
     v2["meta"]["ruleset"] = "v2-" + variante
     v2["meta"]["origine"] = "generato da tools/genera_cards_v2.py --variante %s: non modificare a mano" % variante
     out = os.path.join(RADICE, "data/proposte/cards-v2-%s.json" % variante)

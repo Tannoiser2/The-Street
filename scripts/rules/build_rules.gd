@@ -210,7 +210,12 @@ static func quote_above(gs: GameState, player: int, data: Dictionary, col_from: 
 			Enums.BuildingState.INTATTO:
 				if top.owner != player:
 					q.reason = "un edificio intatto altrui blocca la colonna %d" % c; return q
-				if not top in q.razed:
+				# SPIANARE CHE COSTA (registro 152, manopola `spianare_costo`):
+				# al posto dello sconto, 1 Costruzione per ogni casella demolita.
+				if CardDB.constants.has("spianare_costo"):
+					spolia -= int(CardDB.constants["spianare_costo"])
+					if not top in q.razed: q.razed.append(top)
+				elif not top in q.razed:
 					q.razed.append(top)
 					spolia += int(ceil(float(top.data["resistance"] + top.bonus_res) / 2.0))
 			Enums.BuildingState.RUDERE:
@@ -321,7 +326,10 @@ static func _quote_sopra_binario(gs: GameState, player: int, data: Dictionary, c
 				Enums.BuildingState.INTATTO:
 					if top.owner != player:
 						q.reason = "un edificio intatto altrui blocca la colonna %d" % c; return q
-					if not top in q.razed:
+					if CardDB.constants.has("spianare_costo"):
+						spolia -= int(CardDB.constants["spianare_costo"])
+						if not top in q.razed: q.razed.append(top)
+					elif not top in q.razed:
 						q.razed.append(top)
 						spolia += int(ceil(float(top.data["resistance"] + top.bonus_res) / 2.0))
 				Enums.BuildingState.RUDERE:
