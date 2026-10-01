@@ -38,7 +38,7 @@ func _io() -> int:
 # di turno, che e' meglio di una riga vuota.
 # La v2 si riconosce dal file dati caricato, non da una variabile della vista.
 func _v2() -> bool:
-	return str(CardDB.ruleset).begins_with("v2")
+	return (str(CardDB.ruleset).begins_with("v2") or str(CardDB.ruleset).begins_with("v3"))
 
 func _in_vetrina() -> int:
 	if ctl == null: return -1

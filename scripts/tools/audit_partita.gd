@@ -57,6 +57,9 @@ func _ready() -> void:
 		# con turni diversi non si confondono.
 		print("# turno_v2 = %s" % str(bool(CardDB.constants.get("turno_v2", false))))
 		print("# draft_personaggi = %s" % str(bool(CardDB.constants.get("draft_personaggi", false))))
+		# La v3 si dichiara solo dove c'e': i lotti v2 tengono la loro intestazione.
+		if CardDB.constants.has("turno_v3"):
+			print("# turno_v3 = %s" % str(bool(CardDB.constants["turno_v3"])))
 	_muto = args.has("muto")
 	_tutto = args.has("tutto")
 	_strategie = not args.has("caso")

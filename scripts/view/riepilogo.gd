@@ -52,7 +52,7 @@ const VOCI_V2: Array[Dictionary] = [
 
 # Le voci del regolamento in gioco: il file dei dati dice quale e'.
 static func voci() -> Array[Dictionary]:
-	return VOCI_V2 if str(CardDB.ruleset).begins_with("v2") else VOCI
+	return VOCI_V2 if (str(CardDB.ruleset).begins_with("v2") or str(CardDB.ruleset).begins_with("v3")) else VOCI
 
 # Le colonne da mostrare: le voci che hanno dato punti a qualcuno. Una colonna
 # di zeri per tutti non dice niente e ruba spazio alle altre.

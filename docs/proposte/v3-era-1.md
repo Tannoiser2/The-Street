@@ -174,6 +174,15 @@ La tabella, a giocatore e per strategia:
 Un Personaggio preso sempre al primo giro è troppo forte; uno che arriva sempre per ultimo
 è da rifare. È la misura più diretta del draft, e l'unica che non si può fare a mano.
 
+## La prima misura (1 ottobre, trentunesima misura)
+
+Fatta: 300 ere 1 da sole, 3 giocatori (`docs/la-terza-risorsa.md`, trentunesima
+misura, registro 155). In breve: prodotto 14,0 a testa, speso 5,4, **morto 8,7**;
+4 costruzioni e 0 potenziamenti; Lampo 5,6 PV e Rendita 1,2 di censimento; il
+Guerriero sempre primo nel draft, il Custode delle ossa sempre ultimo. Il pozzo
+manca: e' il primo punto da decidere. Le tabelle complete le fa
+`python3 tools/misura_era.py e1.err`.
+
 ## Che cosa serve nel codice
 
 1. Il generatore `tools/genera_cards_v3.py` (o una variante del v2) che scrive
@@ -190,3 +199,10 @@ Un Personaggio preso sempre al primo giro è troppo forte; uno che arriva sempre
    Ritrovamenti (scheletri e arte) in più.
 7. La manopola `--fino_era N` nell'audit: **fatta** in questo ramo (fermati a era N chiusa;
    l'intestazione si stampa solo se la manopola è data, la v1.5 resta identica).
+
+Stato al 1 ottobre: i punti 1-5 e 7 sono **fatti** in questo ramo (`tools/genera_cards_v3.py`,
+`scripts/rules/personaggi_v3.gd`, il controller, `tools/misura_era.py`); del punto 6 c'è la
+scelta del Personaggio e della colonna provando ogni coppia su una copia della partita e la
+valutazione delle carte al draft, mancano il bot che sa che le risorse muoiono e la strategia
+Ritrovamenti. L'interfaccia a schermo non conosce ancora la v3: il file di prova non è fra
+quelli che la schermata di gioco offre.

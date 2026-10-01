@@ -1516,9 +1516,132 @@ andamenti (Scavo 7-8, Rendita giu' di 7 PV). Proposta al designer: spianare
 caro nel file v2, strada invariata, e per la riscoperta lo scavo dell'era
 Moderna su tutte le colonne dell'edificio (da misurare).
 
+## Trentunesima misura: l'era 1 della v3, da sola
+
+La prima misura della v3 (registri 153-154): il file generato
+`data/proposte/cards-v3-era1.json` con l'era 1 riscritta secondo la scheda
+(`docs/proposte/v3-era-1.md`), giocata **da sola** con `--fino_era 1`: la
+partita si ferma a era chiusa, evento compreso, e i punti sono quelli presi
+nell'era (Lampo, PV prodotti, censimento, Monumenti). Scavo, Continuita' e
+finali non si contano: si misureranno con la coppia 1-2. 300 partite, 3
+giocatori, seme 700000, tutte le strategie a rotazione. La tabella la fa
+`tools/misura_era.py` sulle righe `J` del rapporto. Medie a giocatore.
+
+Due avvertenze sui bot, che spiegano una parte dei numeri: il bot **non sa
+che le risorse muoiono** (valuta le mosse come nella v2, dove si portavano
+avanti) e **non compra potenziamenti nell'era 1** (si potenzia solo nella
+colonna attivata, e i propri edifici stanno sulle colonne gia' attivate;
+registro 126 lo diceva gia'). Il Personaggio e la colonna li sceglie provando
+ogni coppia su una copia della partita, il draft con una valutazione fissa
+della produzione e dell'azione.
+
+### Il budget dell'era
+
+| a giocatore, era 1 | v2 oggi | v3 prova | budget del metro |
+|---|---|---|---|
+| prodotto | 9,3 | **14,0** (⚒ 8,3 · 🪙 3,2 · 💡 2,5) | 10-12 |
+| di cui: terreno / tessera / Personaggi / edifici / azioni | n.d. per era | 4,0 / 3,1 / 4,2 / 1,6 / 1,1 | |
+| speso | - | 5,4 | 8-10 |
+| **morto** a fine era | (restavano 6,5) | **8,7** (⚒ 3,3 · 🪙 3,5 · 💡 1,8) | 1-2 |
+| costruzioni / potenziamenti / passi | - | 3,92 / **0** / 0,08 | 3 / 1 / 0 |
+| cambi 1:1 fatti | - | 1,26 | |
+| PV dell'era | - | 4,3 (Lampo 2,7 · censimento 1,1 · PV prodotti 0,4) | |
+| rovine lasciate all'era 2 | 3,1 | 3,5 | |
+
+Si produce **piu'** di prima (il terreno e la tessera producono come nella
+v2, e i Personaggi aggiungono 4,2) e si spende **meno** del budget: quattro
+costruzioni da 1-2 Costruzione e nessun potenziamento. Il Denaro muore quasi
+tutto (3,5 su 3,2 prodotti piu' i cambi), le Idee per meta'. Il pozzo manca:
+e' il punto 6 del metro, confermato al primo colpo.
+
+### Le strategie nell'era 1
+
+| | Bilanciata | Continuita' | Lampo | Obiettivi | Rendita | Scavo |
+|---|---|---|---|---|---|---|
+| PV dell'era | 3,7 | 3,7 | **6,6** | 4,4 | 3,8 | 3,6 |
+| di cui Lampo / censimento | 2,1 / 1,1 | 2,2 / 1,0 | 5,6 / 0,6 | 2,2 / 1,2 | 2,2 / 1,2 | 1,9 / 1,2 |
+| morto | 8,7 | 9,2 | 7,8 | 9,1 | 8,5 | 8,8 |
+| vittorie (atteso 33, errore ±4) | 25 | 20 | **73** | 35 | 24 | 23 |
+
+La Lampo vince il 73% delle ere 1 giocate da sole: e' atteso, perche' qui si
+contano solo i punti dell'era e il Lampo e' l'unico canale che paga subito. La
+misura utile non e' chi vince ma il **budget per strategia**: Lampo 5,6 PV
+subito contro il budget di 10-12; Rendita 1,2 PV di censimento (contro i 3
+del metro), cioe' 4,8 se gli edifici reggono fino alla fine. Tutte le
+strategie stanno sotto il metro, e la Rendita a meta'.
+
+### Le carte
+
+Edifici: tutti e dodici del mazzo si costruiscono (le Grotte dipinte 0,74 a
+partita, il Focolare 0,44); le case della riserva poco (Case di pietra 0,63,
+Ripari 0,37, Capanne di fango mai). All'evento di forza 2 crollano Approdo
+61%, Trappole da pesca 54%, Capanne 52%, Ripari 49%, Cava 45% (resistenza 1);
+Villaggio palizzato 4% e Grotte dipinte 1% (il 🛡 dei Personaggi va a loro).
+
+Personaggi, giro medio del draft (1 = prima scelta, 4 = l'ultima carta che
+arriva da sola): Guerriero **1,11**, Cacciatore 1,22, Tagliapietre 1,43,
+Guardiano del fuoco 1,74, Capotribu' 1,79, Anziana 1,82, Costruttore di
+zattere 1,99, Barattatore 2,40, Cantastorie 2,70, Incisore 2,91, Portatore di
+sale 3,09, Mercante di ossidiana 3,40, Sciamano 3,44, Sentinella 3,53, Pittore
+delle grotte 3,60, Custode delle ossa **3,77**. Il Guerriero (+2 resistenza
+all'edificio abitato) e' preso quasi sempre per primo da tutte le strategie;
+gli ultimi quattro arrivano per scarto. Le azioni scattate a partita:
+resistenza 4,1, cambio 3,6, Scavo 2,8, risorsa 2,5, sconto 2,3, PV 1,1,
+Lampo 0,8, altri 0,7.
+
+### Cosa dice la misura
+
+1. **Il pozzo e' la prima cosa da sistemare**: 8,7 risorse morte a testa su
+   14 prodotte. Tre vie, non esclusive, tutte da misurare: i potenziamenti
+   comprabili anche nella colonna adiacente (`--potenzia_adiacente 1`,
+   controprova sotto); meno produzione dal tabellone (il terreno di base
+   produce 4 e la tessera 3: con i Personaggi che producono 4, il terreno
+   potrebbe non produrre piu'); piu' azioni ⇄ e ★ nelle carte.
+2. **Il Guerriero e' troppo forte** per il bot (primo a 1,11) e il Custode
+   delle ossa troppo debole (3,77): lo Scavo permanente non vale niente in
+   una misura che si ferma all'era 1, quindi questo numero va riletto con la
+   coppia 1-2.
+3. **Il bot va insegnato**: deve sapere che le risorse muoiono (spendere
+   all'ultimo giro vale piu' che tenere) e deve potenziare. Finche' non lo sa,
+   il morto e' in parte suo e non delle regole.
+
+### Controprova: i potenziamenti nella colonna adiacente
+
+Stesse 300 ere, con `--potenzia_adiacente 1` (registro 126: si potenzia anche
+nelle colonne accanto a quella attivata).
+
+| a giocatore | base | potenzia adiacente |
+|---|---|---|
+| prodotto | 14,0 | 13,9 |
+| speso | 5,4 | 5,3 |
+| **morto** | 8,7 | **8,6** (⚒ 3,7 · 🪙 3,2 · 💡 1,7) |
+| costruzioni / potenziamenti | 3,92 / 0 | 3,52 / 0,45 |
+| PV dell'era | 4,3 | 4,1 (Lampo 2,3 · censimento 1,1 · PV prodotti 0,5) |
+| vittorie Lampo | 73 | 49 (le altre 23-39) |
+
+I potenziamenti si comprano (0,45 a testa, la Lampo quasi uno) ma **al posto**
+di una costruzione, non in piu': con quattro azioni per era si spende lo
+stesso, e il morto non si muove. La Lampo perde il 24% delle vittorie perche'
+potenzia invece di costruire e fa meno Lampo (3,9 contro 5,6): il
+potenziamento Arte da 1 PV vale meno di una casa da 2. Il pozzo quindi non e'
+"dove si spende" ma "quanto si puo' spendere con quattro azioni": 14 risorse
+prodotte contro circa 6 che quattro azioni assorbono. Le vie restano due: meno
+produzione dal tabellone (il terreno di base, 4 a testa, e' la candidata), o
+una spesa che non consuma l'azione (le azioni ⇄ e ★ delle carte, o una
+conversione libera risorse → PV a fine era, da scrivere nel metro). Da
+decidere con il designer.
+
+
 ## Come rifare il conto
 
 ```bash
+# trentunesima misura: l'era 1 della v3 da sola, e la controprova con i potenziamenti adiacenti
+python3 tools/genera_cards_v2.py && python3 tools/genera_cards_v3.py
+godot --headless res://scenes/audit_partita.tscn -- --players 3 --games 300 --seed 700000 --giro tutte \
+  --dati data/proposte/cards-v3-era1.json --rapporto 1 --fino_era 1 > e1.csv 2> e1.err
+godot --headless res://scenes/audit_partita.tscn -- --players 3 --games 300 --seed 700000 --giro tutte \
+  --dati data/proposte/cards-v3-era1.json --rapporto 1 --fino_era 1 --potenzia_adiacente 1 > e1pa.csv 2> e1pa.err
+python3 tools/misura_era.py e1.err; python3 tools/misura_era.py e1pa.err
 python3 tools/genera_cards_v2.py                       # rigenera data/cards-v2.json
 A="--players 3 --vita 2000 --seed 200000"              # o --games 750 --seed 700000
 godot --headless res://scenes/audit_partita.tscn -- $A --dati data/cards-v2.json > B.csv

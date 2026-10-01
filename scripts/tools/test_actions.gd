@@ -53,6 +53,7 @@ func _ready() -> void:
 	_run("v2: le tessere scavo (registro 130)", _test_tessere_scavo)
 	_run("v2: le carte restituite e i token riscattati (registro 131)", _test_carte_restituite)
 	_run("v2: i Personaggi e l'arte ritoccati (registro 138)", _test_personaggi_e_arte)
+	_run("v3: il draft a passaggio, i Personaggi lavoratori, le risorse che muoiono", _test_v3_era1)
 	print("\n%d superati, %d falliti" % [_passed, _failed])
 	get_tree().quit(0 if _failed == 0 else 1)
 
@@ -2112,4 +2113,88 @@ func _test_personaggi_e_arte() -> void:
 	prima = p.vp
 	TessereScavo.conta(gs)
 	_eq("l'icona arte ritrova il token Arte su un edificio in piedi", p.vp - prima, int(CardDB.upgrades[arte]["scavo"]))
+	CardDB.load_db(CardDB.DB_PATH)
+
+# ---- v3: l'era di prova ----------------------------------------------
+# Il file data/proposte/cards-v3-era1.json (generato da tools/genera_cards_v3.py):
+# il draft a passaggio (4 a testa, se ne tiene uno e si passa), i Personaggi
+# come unici lavoratori con produzione e azione, le azioni degli edifici al
+# proprietario, le risorse azzerate a fine era. Vedi docs/proposte/v3-era-1.md.
+func _test_v3_era1() -> void:
+	if not FileAccess.file_exists("res://data/proposte/cards-v3-era1.json"): return
+	CardDB.load_db("res://data/proposte/cards-v3-era1.json")
+	_ok("il file v3 accende il turno v3", PersonaggiV3.attivo())
+	var ctl := _game(3, 4321)
+	var gs := ctl.gs
+	_eq("all'inizio dell'era il gioco chiede il draft", str(gs.pending_choice.get("kind", "")), "draft")
+	_eq("  al giro 1", gs.draft_giro, 1)
+	for i in 3:
+		_eq("  la mano del giocatore %d ha 4 carte" % i, (gs.draft_mani[i] as Array).size(), 4)
+	_eq("  nel mazzo ne restano 4 (16 meno 12), fuori dal gioco", (gs.char_decks[1] as Array).size(), 4)
+	var primo: PlayerState = gs.players[int(gs.pending_choice["player"])]
+	_eq("  sceglie per primo il primo dell'ordine", primo.index, int(gs.turn_order[0]))
+	_eq("  la fila mostra la sua mano", gs.char_row.size(), 4)
+	var mano_prima: Array = (gs.draft_mani[primo.index] as Array).duplicate()
+	var scelta: String = gs.char_row[0]
+	_ok("  si sceglie", ctl.choose(0))
+	_ok("  il Personaggio e' suo", scelta in primo.specialized_characters)
+	_eq("  e non e' piu' nella mano", (gs.draft_mani[primo.index] as Array).size(), 3)
+	_ok("  senza effetti immediati: 0 risorse", primo.total_resources() == 0)
+	_eq("  poi tocca al secondo", int(gs.pending_choice["player"]), int(gs.turn_order[1]))
+	# il resto del primo giro
+	while not gs.pending_choice.is_empty() and gs.draft_giro == 1:
+		ctl.choose(int((gs.pending_choice["options"] as Array)[0]))
+	_eq("finito il giro le mani passano: giro 2", gs.draft_giro, 2)
+	var destra := (primo.index + 1) % 3
+	var mano_destra: Array = gs.draft_mani[destra]
+	var passate := 0
+	for c in mano_prima:
+		if c in mano_destra: passate += 1
+	_eq("  le 3 carte lasciate dal primo sono nella mano del vicino a destra (era 1)", passate, 3)
+	while not gs.pending_choice.is_empty():
+		ctl.choose(int((gs.pending_choice["options"] as Array)[0]))
+	_eq("finito il draft si gioca", gs.phase, Enums.Phase.PIAZZA)
+	for p in gs.players:
+		_eq("  giocatore %d ha 4 Personaggi" % p.index, p.specialized_characters.size(), 4)
+		_eq("  e 4 lavoratori", p.workers, 4)
+	_eq("  il mazzo e' rimasto a 4", (gs.char_decks[1] as Array).size(), 4)
+	# Il turno: il lavoratore e' un Personaggio, che produce e agisce.
+	var p0 := gs.current_player()
+	var liberi := ctl.personaggi_liberi(p0)
+	_eq("  tutti e 4 da piazzare", liberi.size(), 4)
+	var cid: String = liberi[0]
+	var d: Dictionary = CardDB.characters[cid]
+	var prima := Vector3i(p0.pietra, p0.oro, p0.idee)
+	_ok("  non si piazza un Personaggio che non si ha", not ctl.place_worker(0, null, "pe_lavoratore_e2_06"))
+	_ok("  si piazza %s in colonna 0" % d["name"], ctl.place_worker(0, null, cid))
+	_ok("  ed e' piazzato", cid in p0.personaggi_piazzati)
+	var pr: Dictionary = d["produzione"]
+	var dopo := Vector3i(p0.pietra, p0.oro, p0.idee)
+	var minimo := Vector3i(int(pr["pietra"]), int(pr["oro"]), int(pr["idee"]))
+	_ok("  ha prodotto almeno la sua produzione (%s)" % str(minimo),
+		dopo.x - prima.x >= minimo.x and dopo.y - prima.y >= minimo.y and dopo.z - prima.z >= minimo.z)
+	_ok("  non si ripiazza lo stesso Personaggio", ctl.personaggi_liberi(p0).size() == 3 and not cid in ctl.personaggi_liberi(p0))
+	# L'azione di un edificio scatta per il proprietario a ogni attivazione.
+	ctl.pass_action()
+	var p1 := gs.current_player()
+	var focolare := _put(gs, p1.index, "ed_focolare_comune", 3)
+	_ok("  il Focolare comune ha l'azione +1 Costruzione", str((focolare.data["azione"] as Dictionary).get("tipo", "")) == "risorsa")
+	var pietra1 := p1.pietra
+	var lib1 := ctl.personaggi_liberi(p1)
+	_ok("  il secondo attiva la colonna 3 col suo primo Personaggio", ctl.place_worker(3, null, lib1[0]))
+	_ok("  e il Focolare gli ha dato almeno 1 Costruzione in piu' della produzione",
+		p1.pietra - pietra1 >= 1 + int(CardDB.characters[lib1[0]]["produzione"]["pietra"]))
+	ctl.pass_action()
+	var p2 := gs.current_player()
+	var pietra_p1 := p1.pietra
+	var lib2 := ctl.personaggi_liberi(p2)
+	_ok("  il terzo attiva la stessa colonna 3", ctl.place_worker(3, null, lib2[0]))
+	_eq("  e il Focolare paga ancora il suo proprietario (+1)", p1.pietra - pietra_p1, 1)
+	# A fine era le risorse muoiono.
+	p2.pietra += 5
+	p2.oro += 2
+	EraRules.end_era_after_event(gs)
+	for p in gs.players:
+		_eq("  fine era: giocatore %d a zero risorse" % p.index, p.total_resources(), 0)
+	_ok("  e la morte e' contata", int(p2.counters.get("morte_e1_pietra", 0)) >= 5)
 	CardDB.load_db(CardDB.DB_PATH)

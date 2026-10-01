@@ -38,6 +38,14 @@ var pending_choice: Dictionary = {}
 # ogni giocatore ne prende uno gratis e senza lavoratore. Chi deve ancora
 # scegliere sta qui, in ordine; vuoto = il draft e' finito o non c'e'.
 var draft_pending: Array[int] = []
+# IL DRAFT A PASSAGGIO (v3, costante `draft_passaggio`): la mano di ogni
+# giocatore (giocatore -> Array di id), e il giro (1 = prima scelta). Le mani
+# passano al vicino dopo che tutti hanno scelto.
+var draft_mani: Dictionary = {}
+var draft_giro: int = 0
+# IL PERSONAGGIO PIAZZATO IN QUESTO TURNO (v3): e' il lavoratore, e la sua
+# produzione e la sua azione scattano nell'attivazione. "" fuori dalla v3.
+var personaggio_attivo: String = ""
 # LE TESSERE USATE NELL'ERA (v2, registro 100): l'effetto di ogni tessera vale
 # una volta per era; qui, colonna per colonna, se e' gia' scattato.
 var tessere_usate: Array[bool] = []
@@ -94,6 +102,9 @@ func duplica() -> GameState:
 	g.monuments_open = monuments_open.duplicate()
 	g.pending_choice = pending_choice.duplicate(true)
 	g.draft_pending = draft_pending.duplicate()
+	g.draft_mani = draft_mani.duplicate(true)
+	g.draft_giro = draft_giro
+	g.personaggio_attivo = personaggio_attivo
 	g.tessere_usate = tessere_usate.duplicate()
 	g.tessere_colonna = tessere_colonna.duplicate()
 	g.tessere_scattate = tessere_scattate.duplicate()

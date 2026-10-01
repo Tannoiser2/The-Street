@@ -2421,3 +2421,45 @@ dato è stato importato da lì. Ma due confronti fra ciò che è stampato e
     valgono 0. Scelte del designer: si girano solo le tessere sotto
     l'edificio dell'era 5, e le non girate valgono niente. Misura insieme a
     evento finale e gilde.
+153. **La v3: il metro e la scheda dell'era 1.** Il designer (1 ottobre): "Troppe
+    risorse vanno sprecate [...] Le risorse nascono e muoiono nell'era"; i
+    Personaggi si prendono con un draft a passaggio (4 a testa, se ne tiene uno
+    e si passa a destra) e sono gli unici lavoratori, con produzione e azione;
+    ogni edificio ha produzione e azione; "si puo' lavorare per ere quasi a
+    compartimenti", con lo scopo di "piu' strategie [...] equilibrate fra di
+    loro e che nessuna sia palesemente dominante" (Lampo, Rendita, Scavo,
+    ritrovamenti, generi). Si parte dall'era 1, non dalla 2: si simula dalla
+    strada vuota, e quel che si costruisce li' e' il materiale dello Scavo
+    dopo. Due proposte da leggere e correggere: `docs/proposte/v3-metro.md`
+    (il cambio in PV, il budget di un'era, il vocabolario di dieci azioni, la
+    sagoma delle carte) e `docs/proposte/v3-era-1.md` (16 Personaggi, 15
+    edifici con l'azione, le costanti della prova). Il limite noto: nell'era 1
+    Scavo e scheletri non si vedono, si misurano con la coppia 1-2.
+154. **Le regole della prova (provvisorie, da confermare).** Nel file generato
+    `data/proposte/cards-v3-era1.json` (`tools/genera_cards_v3.py`): draft a
+    passaggio con direzione **alternata** (ere 1, 3, 5 a destra; 2 e 4 a
+    sinistra), **senza Dinastia**, azione degli edifici **al proprietario** a
+    ogni attivazione della colonna di chiunque, **nessun tetto** alle risorse
+    dentro l'era, si parte da **zero** risorse, le risorse muoiono a fine
+    era (nell'era 5 restano: spareggio). Le scelte che un'azione richiede
+    (quale risorsa cambiare, quale edificio proteggere) le fanno i bot con
+    una regola fissa scritta in `scripts/rules/personaggi_v3.gd`. Dolmen e
+    Menhir a Rendita 1 (da misurare contro il 2 di oggi). La v1.5 e la v2
+    non cambiano: tutto e' acceso dalla costante `turno_v3`.
+155. **La prima misura dell'era 1 della v3 (trentunesima misura).** Trecento
+    ere 1 giocate da sole (`--fino_era 1`), 3 giocatori: si producono 14
+    risorse a testa (budget del metro 10-12: terreno 4, tessera 3, Personaggi
+    4, edifici 1,6, azioni 1,1), se ne spendono 5,4 e ne **muoiono 8,7**
+    (budget 1-2); quattro costruzioni e zero potenziamenti a testa. La Lampo
+    vince il 73% delle ere giocate da sole (atteso: e' l'unico canale che paga
+    nell'era), Lampo 5,6 PV e Rendita 1,2 di censimento, tutte sotto il metro.
+    Il Guerriero e' preso quasi sempre per primo (giro 1,11), il Custode delle
+    ossa per ultimo (3,77). Il pozzo manca ed e' la prima cosa da decidere:
+    potenziamenti nella colonna adiacente (controprova nella misura), meno
+    produzione dal tabellone (il terreno di base potrebbe non produrre piu'),
+    piu' azioni di cambio e di PV. La controprova con i potenziamenti nella
+    colonna adiacente non sposta il morto (8,6): si potenzia al posto di
+    costruire, con quattro azioni si spende lo stesso (circa 6 su 14). Il
+    bot non sa ancora che le risorse muoiono
+    e non potenzia nell'era 1: una parte del morto e' sua. **Da decidere con
+    il designer** prima di toccare le carte.
