@@ -262,7 +262,7 @@ static func dopo_costruzione(gs: GameState, player: int, b: Building, bases: Arr
 		var cosa := []
 		if e.has("sconto"): cosa.append("sconto sul costo")
 		if int(e.get("lampo", 0)) > 0:
-			p.add_vp("lampo", int(e["lampo"])); b.rende("lampo", int(e["lampo"]))
+			p.add_vp("lampo", int(e["lampo"]), "tessere dell'era"); b.rende("lampo", int(e["lampo"]))
 			cosa.append("+%d Lampo" % int(e["lampo"]))
 		if int(e.get("lampo_per_altrui", 0)) > 0:
 			var n := 0
@@ -270,7 +270,7 @@ static func dopo_costruzione(gs: GameState, player: int, b: Building, bases: Arr
 				if altro.owner != player and altro.state == Enums.BuildingState.INTATTO: n += 1
 			n *= int(e["lampo_per_altrui"])
 			if n > 0:
-				p.add_vp("lampo", n); b.rende("lampo", n)
+				p.add_vp("lampo", n, "tessere dell'era"); b.rende("lampo", n)
 			cosa.append("+%d Lampo" % n)
 		if int(e.get("resistenza_era", 0)) > 0:
 			b.protection += int(e["resistenza_era"])
@@ -326,7 +326,7 @@ static func dopo_scheletro(gs: GameState, player: int, target: Building) -> void
 	var ce := _prima_su(gs, target, "scheletro")
 	if ce.is_empty(): return
 	var n := int(ce[1].get("punti", 0))
-	gs.players[player].add_vp("scheletri", n)
+	gs.players[player].add_vp("scheletri", n, "tessere dell'era")
 	gira(gs, ce[0], "+%d allo scheletro sotto %s" % [n, target.data["name"]])
 
 # "Chi seppellisce per primo un edificio qui prende +1 al premio di scavo":
@@ -348,5 +348,5 @@ static func fine_partita(gs: GameState) -> void:
 		var top := gs.grid.top_of(c)
 		if top == null or not top.is_alive(): continue
 		var n := int(e.get("cima_punti", 0))
-		gs.players[top.owner].add_vp("effetti_finali", n)
+		gs.players[top.owner].add_vp("effetti_finali", n, "tessere dell'era")
 		gira(gs, c, "+%d a giocatore %d per %s in cima" % [n, top.owner, top.data["name"]])

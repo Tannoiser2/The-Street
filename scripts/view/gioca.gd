@@ -1042,15 +1042,9 @@ func _invito(gs: GameState) -> String:
 # ---- il riepilogo finale ---------------------------------------------
 # Alla fine restava un numero solo - "vincitore: giocatore 3" - e non si
 # capiva DOVE fossero andati i punti. Il motore li divide gia' per canale
-# mentre la partita va avanti: qui si mettono in tabella, una riga per
-# giocatore e una colonna per fonte, in ordine di arrivo.
-# Le eredita' segrete a questo punto sono scoperte sul tavolo, quindi sotto
-# ogni riga si dice quale era e quanto ha fruttato.
-# 76 non bastavano: "Monumenti" usciva tagliato a meta'. L'intestazione e'
-# scritta piccola ma i nomi delle voci sono quelli del regolamento, e
-# abbreviarli avrebbe reso la tabella un rebus.
-const RIEP_COL := 86.0        # larghezza di una colonna di punti
-const RIEP_NOME := 176.0      # la prima colonna: posto, colore, giocatore
+# mentre la partita va avanti: qui si mettono in tabella, in ordine di
+# arrivo. Le eredita' segrete a questo punto sono scoperte sul tavolo, quindi
+# in fondo si dice quale era ciascuna.
 
 # LA LENTE (registro 140). Il designer, sull'iPad: "il menu iniziale e il
 # resoconto finale sono troppo piccoli e non si legge nulla". I due pannelli
@@ -1075,14 +1069,40 @@ func _disegna_riepilogo(font: Font, gs: GameState) -> void:
 	_disegna_riepilogo_dentro(font, gs)
 	_togli_lente()
 
+# IL RIEPILOGO GIRATO (registro 144). Il designer: "i giocatori in alto e
+# ogni riga indica i punti vittoria divisi per categoria, e sotto in basso il
+# totale". Prima ogni giocatore era una riga e le voci colonne strette da 86
+# px, coi nomi tagliati; ora le voci sono righe con il loro nome intero, e
+# sotto ognuna le sottovoci che dicono da dove vengono i punti (i premi di
+# scavo, le tessere, gli scheletri, l'arte...).
+const RIEP_VOCE := 210.0      # la colonna dei nomi delle voci
+const RIEP_GIOC := 160.0      # una colonna per giocatore
+const RIEP_RIGA := 26.0
+const RIEP_SOTTO := 20.0
+
 func _disegna_riepilogo_dentro(font: Font, gs: GameState) -> void:
 	var cols := Riepilogo.colonne(gs)
 	var righe := Riepilogo.righe(gs)
-	var largo: float = RIEP_NOME + (cols.size() + 1) * RIEP_COL + 48.0
-	var alto := 128.0 + righe.size() * 46.0 + 56.0
+	# Le righe della tabella, prima di disegnarle: servono per l'altezza.
+	var voci: Array[Dictionary] = []
+	for c in cols:
+		var id := str(c["id"])
+		voci.append({"id": id, "nome": str(c["nome"]), "sotto": false, "voce": ""})
+		for v in Riepilogo.sottovoci(righe, id):
+			voci.append({"id": id, "nome": Riepilogo.nome_voce(v), "sotto": true, "voce": v})
+	var resti := false
+	for riga in righe:
+		if Riepilogo.altro(gs, riga) != 0: resti = true
+	if resti: voci.append({"id": "_altro", "nome": "altro", "sotto": false, "voce": ""})
+	var alto_voci := 0.0
+	var prima_sotto := false
+	for v in voci:
+		if not bool(v["sotto"]) and prima_sotto: alto_voci += 6.0
+		alto_voci += RIEP_SOTTO if bool(v["sotto"]) else RIEP_RIGA
+		prima_sotto = bool(v["sotto"])
+	var largo: float = RIEP_VOCE + righe.size() * RIEP_GIOC + 48.0
+	var alto: float = 46.0 + 36.0 + 44.0 + alto_voci + 14.0 + 34.0 + 44.0 + 64.0
 	var r := _metti_lente(largo, alto)
-	# Piu' coperto degli altri pannelli: questo e' una tabella di numeri e ci
-	# cadono sotto le carte del tavolo, che la rendevano illeggibile.
 	_hud.draw_rect(r, Color(0.07, 0.08, 0.10, 1.0), true)
 	_hud.draw_rect(r, Color(1, 1, 1, 0.18), false, 1.0)
 	var x := r.position.x + 24.0
@@ -1091,55 +1111,66 @@ func _disegna_riepilogo_dentro(font: Font, gs: GameState) -> void:
 		HORIZONTAL_ALIGNMENT_LEFT, -1, 24, CHIARO)
 	y += 36.0
 
-	# L'intestazione: i nomi delle fonti, allineati a destra come i numeri
-	# che stanno sotto, cosi' le cifre si leggono in colonna.
-	var cx := x + RIEP_NOME
-	for c in cols:
-		_hud.draw_string(font, Vector2(cx, y), str(c["nome"]),
-			HORIZONTAL_ALIGNMENT_RIGHT, RIEP_COL - 10.0, 12, SPENTO)
-		cx += RIEP_COL
-	_hud.draw_string(font, Vector2(cx, y), "Totale",
-		HORIZONTAL_ALIGNMENT_RIGHT, RIEP_COL - 10.0, 12, CHIARO)
-	y += 12.0
-	_hud.draw_line(Vector2(x, y), Vector2(r.end.x - 24.0, y),
-		Color(1, 1, 1, 0.15), 1.0)
-	y += 28.0
-
-	for riga in righe:
-		var pl := int(riga["player"])
-		_hud.draw_rect(Rect2(Vector2(x, y - 11.0), Vector2(11, 11)),
+	# In alto i giocatori, in ordine di arrivo: posto, colore e nome, e sotto
+	# la testa del bot. I numeri stanno allineati a destra sotto il nome.
+	var x0 := x + RIEP_VOCE
+	for j in righe.size():
+		var pl := int(righe[j]["player"])
+		var cx := x0 + j * RIEP_GIOC
+		_hud.draw_rect(Rect2(Vector2(cx + RIEP_GIOC - 22.0, y - 11.0), Vector2(11, 11)),
 			VISTA.colore_giocatore(pl), true)
-		_hud.draw_string(font, Vector2(x + 20.0, y),
-			"%d.  %s" % [int(riga["posto"]), _nome_corto(pl)],
-			HORIZONTAL_ALIGNMENT_LEFT, RIEP_NOME - 24.0, 14, CHIARO)
-		cx = x + RIEP_NOME
-		for c in cols:
-			var n := Riepilogo.punti(riga, str(c["id"]))
+		var nome := "tu" if inizio.e_umano(pl) and inizio.umani() <= 1 else "giocatore %d" % pl
+		_hud.draw_string(font, Vector2(cx, y), "%d. %s" % [int(righe[j]["posto"]), nome],
+			HORIZONTAL_ALIGNMENT_RIGHT, RIEP_GIOC - 28.0, 13, CHIARO)
+		if not inizio.e_umano(pl):
+			_hud.draw_string(font, Vector2(cx, y + 17.0), "bot · %s" % inizio.nome_strategia(pl),
+				HORIZONTAL_ALIGNMENT_RIGHT, RIEP_GIOC - 10.0, 11, SPENTO)
+	y += 30.0
+	_hud.draw_line(Vector2(x, y), Vector2(r.end.x - 24.0, y), Color(1, 1, 1, 0.15), 1.0)
+	y += 14.0 + RIEP_RIGA - 8.0
+
+	var era_sotto := false
+	for v in voci:
+		var sotto := bool(v["sotto"])
+		var id := str(v["id"])
+		if not sotto and era_sotto: y += 6.0
+		era_sotto = sotto
+		var corpo := 12 if sotto else 14
+		_hud.draw_string(font, Vector2(x + (18.0 if sotto else 0.0), y), str(v["nome"]),
+			HORIZONTAL_ALIGNMENT_LEFT, RIEP_VOCE - 24.0, corpo, SPENTO if sotto else CHIARO)
+		for j in righe.size():
+			var n: int
+			if id == "_altro": n = Riepilogo.altro(gs, righe[j])
+			elif sotto: n = Riepilogo.punti_voce(righe[j], id, str(v["voce"]))
+			else: n = Riepilogo.punti(righe[j], id)
 			# Lo zero si scrive come un trattino: una colonna di zeri veri
 			# nasconde i numeri che contano.
-			_hud.draw_string(font, Vector2(cx, y), str(n) if n != 0 else "–",
-				HORIZONTAL_ALIGNMENT_RIGHT, RIEP_COL - 10.0, 14,
-				CHIARO if n != 0 else Color("#5b616c"))
-			cx += RIEP_COL
-		_hud.draw_string(font, Vector2(cx, y), str(int(riga["vp"])),
-			HORIZONTAL_ALIGNMENT_RIGHT, RIEP_COL - 10.0, 18, CHIARO)
+			var colore := (SPENTO if sotto else CHIARO) if n != 0 else Color("#5b616c")
+			_hud.draw_string(font, Vector2(x0 + j * RIEP_GIOC, y), str(n) if n != 0 else "–",
+				HORIZONTAL_ALIGNMENT_RIGHT, RIEP_GIOC - 10.0, corpo, colore)
+		y += RIEP_SOTTO if sotto else RIEP_RIGA
 
-		# Sotto la riga: l'eredita' segreta, che adesso e' scoperta sul tavolo,
-		# e quel che resta fuori dalle colonne.
-		# La testa del bot va qui sotto: nella colonna del nome, ingrandita
-		# dalla lente, veniva tagliata a meta' ("bot · C").
-		var sotto := "" if inizio.e_umano(pl) else "%s · " % inizio.nome_strategia(pl)
-		if str(riga["eredita_nome"]) != "":
-			sotto += "eredita': %s · %d" % [riga["eredita_nome"],
-				int(riga["eredita_punti"])]
-		else:
-			sotto += "nessuna eredita'"
-		sotto += " · %d edifici in piedi" % int(riga["edifici"])
-		var resto := Riepilogo.altro(gs, riga)
-		if resto != 0: sotto += " · altro %d" % resto
-		_hud.draw_string(font, Vector2(x + 20.0, y + 17.0), sotto,
-			HORIZONTAL_ALIGNMENT_LEFT, largo - 48.0, 12, SPENTO)
-		y += 46.0
+	# In fondo il totale, e sotto l'eredita' segreta e gli edifici in piedi.
+	y += 2.0
+	_hud.draw_line(Vector2(x, y - 14.0), Vector2(r.end.x - 24.0, y - 14.0), Color(1, 1, 1, 0.15), 1.0)
+	y += 10.0
+	_hud.draw_string(font, Vector2(x, y), "Totale", HORIZONTAL_ALIGNMENT_LEFT, -1, 18, CHIARO)
+	for j in righe.size():
+		_hud.draw_string(font, Vector2(x0 + j * RIEP_GIOC, y), str(int(righe[j]["vp"])),
+			HORIZONTAL_ALIGNMENT_RIGHT, RIEP_GIOC - 10.0, 20, CHIARO)
+	y += 26.0
+	_hud.draw_string(font, Vector2(x, y), "eredita' segreta", HORIZONTAL_ALIGNMENT_LEFT,
+		RIEP_VOCE - 24.0, 12, SPENTO)
+	for j in righe.size():
+		var ered := str(righe[j]["eredita_nome"])
+		_hud.draw_string(font, Vector2(x0 + j * RIEP_GIOC, y), ered if ered != "" else "nessuna",
+			HORIZONTAL_ALIGNMENT_RIGHT, RIEP_GIOC - 10.0, 12, SPENTO)
+	y += RIEP_SOTTO
+	_hud.draw_string(font, Vector2(x, y), "edifici in piedi", HORIZONTAL_ALIGNMENT_LEFT,
+		RIEP_VOCE - 24.0, 12, SPENTO)
+	for j in righe.size():
+		_hud.draw_string(font, Vector2(x0 + j * RIEP_GIOC, y), str(int(righe[j]["edifici"])),
+			HORIZONTAL_ALIGNMENT_RIGHT, RIEP_GIOC - 10.0, 12, SPENTO)
 
 	var t := _tasto(font, "Nuova partita", Vector2(x, r.end.y - 48.0), true,
 		{"che": "menu"}, 150.0)

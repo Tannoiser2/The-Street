@@ -479,7 +479,7 @@ func build(card_id: String, col_from: int, above: bool, pay_option: int = 0, des
 			# Tessera dell'era "Spoglio delle rovine" (registro 121).
 			premio += TessereEra.premio_in_piu(gs, p.index, altro, premio)
 			if premio > 0:
-				p.add_vp("scavo", premio)
+				p.add_vp("scavo", premio, "premi di scavo")
 				altro.rende("scavo", premio)
 				p.bump("scavo_scavato", premio)
 				if gs.era >= int(CardDB.constants["eras"]): p.bump("scavo_e5", premio)
@@ -491,7 +491,7 @@ func build(card_id: String, col_from: int, above: bool, pay_option: int = 0, des
 		for c in range(b.col_from, b.col_to): gs.grid.risen_this_era[c] = true
 	p.buildings_built += 1
 	if int(data["lampo"]) > 0:
-		p.add_vp("lampo", int(data["lampo"]))
+		p.add_vp("lampo", int(data["lampo"]), "edifici costruiti")
 		b.rende("lampo", int(data["lampo"]))
 	# Dal mercato si rimpiazza; dalla riserva se ne va una copia e basta.
 	if card_id in gs.market:
@@ -544,7 +544,7 @@ func upgrade(upg_id: String, target: Building) -> bool:
 		if not artista.is_empty():
 			Effects.consume_override(gs, p.index, artista[1])
 			var subito := int(artista[0].get("value", 0))
-			if subito > 0: p.add_vp("cultura", subito)
+			if subito > 0: p.add_vp("cultura", subito, "Personaggi")
 			var rendita := int(artista[0].get("oro", 0))
 			if rendita > 0:
 				target.patrons[p.index] = int(target.patrons.get(p.index, 0)) + rendita

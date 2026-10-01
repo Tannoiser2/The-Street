@@ -2339,3 +2339,18 @@ dato è stato importato da lì. Ma due confronti fra ciò che è stampato e
     cartellini. I cubetti neri non ripetono piu' la resistenza dei
     potenziamenti Struttura, che si legge sul gettone: restano per quella
     dei Personaggi, degli edifici militari e delle tessere dell'era.
+144. **Il riepilogo girato e diviso per fonte; i blocchi piu' bassi.** Il
+    designer: "i blocchi degli edifici sono molto alti", "puoi dividere i
+    punteggi finali per capire da dove vengono? e Premi da dove arrivano?",
+    "nel riepilogo finale i giocatori in alto, ogni riga i punti per
+    categoria, sotto il totale". Il blocco della v2 scende da 15 a 9 mm. I
+    PV ora portano anche la loro fonte (`vp_dettaglio`, solo per il
+    riepilogo: canali e misure non cambiano, la v1.5 resta identica): il
+    Lampo si divide in edifici costruiti e tessere dell'era; i PV prodotti
+    in produzione degli edifici, potenziamenti e Personaggi; lo Scavo in
+    premi di scavo, tessere scavo, scheletri ritrovati e arte ritrovata; i
+    Finali carta per carta. I "premi" sono il premio di scavo: chi costruisce
+    sopra un edificio e lo sotterra incassa subito lo Scavo di quello che
+    seppellisce, secondo il livello e l'era (come il Lampo, sul momento).
+    Il riepilogo ha i giocatori in colonna, le voci in riga con le sottovoci
+    sotto, il totale in fondo con l'eredita' segreta e gli edifici in piedi.

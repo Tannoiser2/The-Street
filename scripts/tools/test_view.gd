@@ -2768,7 +2768,7 @@ func _test_rovina_senza_rudere() -> void:
 	vista.mostra(gs)
 	_ok("nessuna sagoma in piedi", not BoardLayout3D.ha_sagoma(b))
 	var carta := BoardLayout3D.basetta_box(gs, b)
-	_eq("la carta e' un cartone di 15 mm", carta.size.y, BoardLayout3D.CARTONE_Y)
+	_eq("la carta e' un cartone di 9 mm", carta.size.y, BoardLayout3D.CARTONE_Y)
 	_ok("  che sta dentro la sua casella", carta.size.z <= BoardLayout3D.slot_d()
 		and carta.position.z >= BoardLayout3D.rail_z(b.binario_effettivo()) - 0.01)
 	_ok("  intatta, la faccia e' a colori", BoardLayout3D.carta_edificio_path(b).contains("/edifici_v2/"))
@@ -2826,7 +2826,8 @@ func _test_riepilogo_v2() -> void:
 	CardDB.load_db("res://data/cards-v2.json")
 	var nomi_v2 := {}
 	for v in Riepilogo.voci(): nomi_v2[str(v["id"])] = str(v["nome"])
-	_eq("nella v2 lo Scavo dice anche del premio", str(nomi_v2.get("scavo", "")), "Scavo+premio")
+	# Registro 143: il premio e le tessere sono sottovoci, la voce e' Scavo.
+	_eq("nella v2 la voce e' Scavo", str(nomi_v2.get("scavo", "")), "Scavo")
 	_eq("  la Rendita e' il Censimento", str(nomi_v2.get("rendita", "")), "Censimento")
 	_ok("  e la Verticalita' non c'e' piu'", not nomi_v2.has("verticalita"))
 	for v in Riepilogo.voci():
@@ -2853,6 +2854,18 @@ func _test_riepilogo_v2() -> void:
 				fuori.append(str(canale))
 	_eq("nessun canale della v2 resta fuori dalla tabella (%s)" % ", ".join(fuori), fuori.size(), 0)
 	_ok("  e la Verticalita' non e' una colonna", not noti.has("verticalita"))
+	# Registro 143: le sottovoci tornano col canale, giocatore per giocatore,
+	# e lo Scavo si divide (premi, tessere...).
+	var storte := 0
+	for pl in gs.players:
+		for canale in pl.vp_breakdown:
+			var somma := 0
+			for v in (pl.vp_dettaglio.get(canale, {}) as Dictionary).values(): somma += int(v)
+			if somma != int(pl.vp_breakdown[canale]): storte += 1
+	_eq("le sottovoci sommano al loro canale", storte, 0)
+	var righe := Riepilogo.righe(gs)
+	_ok("  lo Scavo si divide in sottovoci (%s)" % ", ".join(Riepilogo.sottovoci(righe, "scavo")),
+		Riepilogo.sottovoci(righe, "scavo").size() >= 2)
 	CardDB.load_db(CardDB.DB_PATH)
 
 

@@ -17,6 +17,10 @@ var has_dynasty: bool = false
 var buildings_built: int = 0
 var vp: int = 0                        # punti già segnati durante la partita
 var vp_breakdown: Dictionary = {}      # canale -> punti (per il riepilogo finale)
+# Dentro ogni canale, da dove vengono (registro 144): canale -> {voce: punti}.
+# Il designer guardava "Scavo+premi" senza sapere quanto fosse premio e quanto
+# tessere. Solo per il riepilogo: i canali, e le misure, restano quelli.
+var vp_dettaglio: Dictionary = {}
 var legacy_id: String = ""             # Eredità segreta tenuta
 var monuments_claimed: Array = []
 # Personaggi reclutati in quest'era, uno per lavoratore specializzato.
@@ -63,6 +67,7 @@ func duplica() -> PlayerState:
 	p.buildings_built = buildings_built
 	p.vp = vp
 	p.vp_breakdown = vp_breakdown.duplicate(true)
+	p.vp_dettaglio = vp_dettaglio.duplicate(true)
 	p.legacy_id = legacy_id
 	p.monuments_claimed = monuments_claimed.duplicate()
 	p.specialized_characters = specialized_characters.duplicate()
@@ -117,9 +122,12 @@ func _conta(chiave: String, p: int, o: int, i: int) -> void:
 	if o > 0: bump(chiave + "_oro", o)
 	if i > 0: bump(chiave + "_idee", i)
 
-func add_vp(channel: String, amount: int) -> void:
+func add_vp(channel: String, amount: int, voce := "") -> void:
 	vp += amount
 	vp_breakdown[channel] = vp_breakdown.get(channel, 0) + amount
+	var d: Dictionary = vp_dettaglio.get(channel, {})
+	d[voce] = int(d.get(voce, 0)) + amount
+	vp_dettaglio[channel] = d
 
 func total_resources() -> int:
 	return pietra + oro + idee
