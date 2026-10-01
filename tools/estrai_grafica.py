@@ -1135,8 +1135,6 @@ def estrai_potenziamenti_v2(dest):
     return indice
 
 
-if __name__ == "__main__":
-    main(sys.argv[1] if len(sys.argv) > 1 else os.path.join(ROOT, "assets"))
 
 # ---- le tessere rovina (registri 130-134) ----------------------------------
 # materiali/Tessere_Rovina_Fronte_Retro_A4.pdf: due pagine A4 fronte e retro,
@@ -1227,3 +1225,7 @@ def estrai_tessere_rovina(dest):
     else:
         print("  uguali al mazzetto dei dati")
     return indice
+
+
+if __name__ == "__main__":
+    main(sys.argv[1] if len(sys.argv) > 1 else os.path.join(ROOT, "assets"))

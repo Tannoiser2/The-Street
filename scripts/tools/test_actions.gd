@@ -1318,7 +1318,10 @@ func _test_senza_vetusta_v2() -> void:
 	EraRules.bury_characters(gs)
 	_eq("a fine era il Personaggio non finisce sotto l'edificio", costruito.buried_character, "")
 	# Lo scheletro lo lascia il potenziamento: il lavoratore resta sotto.
-	_ok("il file v2 accende lo scheletro del potenziamento", bool(CardDB.constants.get("scheletro_potenziamento", false)))
+	# Registro 137: con gli scheletri sulle tessere scavo il file v2 lo spegne;
+	# il meccanismo resta e qui lo si prova acceso a mano.
+	_ok("nel file v2 lo scheletro del potenziamento e' spento", not bool(CardDB.constants.get("scheletro_potenziamento", false)))
+	CardDB.constants["scheletro_potenziamento"] = true
 	var chi := costruito.owner
 	var potenziato := false
 	var guard := 0

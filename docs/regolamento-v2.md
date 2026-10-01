@@ -63,7 +63,6 @@ mai carte di edifici in rovina.
 | Eredità (obiettivi segreti) | 16 |
 | Lavoratori | 4 per giocatore, + 1 con la Dinastia |
 | Basette colorate | un set per giocatore |
-| Gettoni scheletro | 4 per giocatore (uno per era, ere 1–4) |
 | Cubetti neri (resistenza) | 40 |
 | Risorse: Costruzione, Denaro, Idee | 40 + 40 + 40 |
 | Cartellini Prosperità Urbana | 1 per colonna |
@@ -280,14 +279,9 @@ che nell'era 1 non trovano quasi mai un vostro edificio da potenziare, si posson
 
 #### Scheletri
 
-Il lavoratore che piazza un potenziamento **lascia uno scheletro**: mettete il gettone
-dell'era sotto quell'edificio. Il lavoratore torna comunque a fine era; il gettone resta. Uno
-solo per edificio, e non nell'era Moderna. Quando l'edificio va in rovina, il gettone scheletro
-resta sulle sue tessere scavo. A fine partita ogni scheletro vale **6 meno la sua era** — 5 dalla
-Preistoria, 4 dall'Antichità, 3 dal Medioevo, 2 dal Rinascimento — **comunque finisca
-l'edificio**: in piedi, in rovina o sotterrato. Un artista o un architetto verrà ricordato anche
-se il palazzo non c'è più. (Il gettone scheletro non va confuso con l'icona scheletro stampata su
-alcune tessere scavo: sono due cose diverse, e si contano separatamente.)
+Non ci sono più gettoni scheletro: il lavoratore che piazza un potenziamento torna a fine era
+come gli altri e non lascia niente. Gli scheletri sono le **icone sulle tessere scavo**, una per
+era dalla 1 alla 4: scoperte, valgono lo Scavo del Personaggio che avete preso in quell'era.
 
 **Ristrutturare non esiste più**: una rovina non torna in piedi.
 
@@ -397,16 +391,15 @@ quelle dell'era nuova e si rivela il nuovo evento.
 
 Al termine dell'era Moderna la partita finisce. Molti punti sono già sul segnapunti: il Lampo,
 segnato al momento della costruzione; i PV prodotti dagli edifici e dai potenziamenti Arte; i
-premi di scavo; i censimenti delle ere precedenti. Restano sei voci da calcolare.
+premi di scavo; i censimenti delle ere precedenti. Restano cinque voci da calcolare (gli scheletri sono nello Scavo, con le icone delle tessere).
 
 | # | voce | punti |
 |--:|---|---|
 | 1 | Censimento finale | la Rendita di ogni vostro edificio in piedi |
 | 2 | Continuità (collezione) | per ogni classe, i vostri edifici in piedi più le carte restituite: 3 = 3 PV, 5 = 5, 7 = 8, 9 = 12 |
 | 3 | Scavo | le tessere scavo del vostro colore: scoperte a valore pieno, coperte a metà; più le icone sulle scoperte |
-| 4 | Scheletri | 6 meno l'era di ogni vostro gettone scheletro, ovunque sia l'edificio |
-| 5 | Obiettivi | Monumenti celebri reclamati + la vostra Eredità, se soddisfatta |
-| 6 | Effetti finali | Museo, Piazza monumentale, Biblioteca, effetti «eco», Personaggi con abilità Finale — solo degli edifici in piedi |
+| 4 | Obiettivi | Monumenti celebri reclamati + la vostra Eredità, se soddisfatta |
+| 5 | Effetti finali | Museo, Piazza monumentale, Biblioteca, effetti «eco», Personaggi con abilità Finale — solo degli edifici in piedi |
 
 **La Continuità è una collezione**, non più una colonna. Per ogni classe contate tutti i vostri
 edifici, in piedi e restituiti: 3 della stessa classe valgono 3 PV, 5 ne valgono 5, 7 ne valgono
@@ -505,10 +498,6 @@ territorio.
 momenti: chi la sotterra incassa subito il premio di scavo (2 PV per tessera, per il livello); il
 proprietario conta le sue tessere a fine partita, a metà se sono ancora coperte.
 
-**Se spiano un mio edificio, perdo lo scheletro che c'era sotto?** No. Il gettone scheletro vale
-sempre, comunque finisca l'edificio. Perdete le tessere scavo (lo spianato non ne lascia), non il
-gettone.
-
 **Il mazzetto rovine finisce?** Può succedere, ma è raro: in media si pescano meno di 4 tessere a
 partita. Se finisce, le caselle della vostra nuova rovina restano senza tessera e valgono 0; la
 carta torna comunque a voi e conta per la Continuità.
@@ -522,7 +511,7 @@ un edificio. La contano solo le carte che chiedono espressamente cose sepolte (C
 imperiali) e quelle che leggono le vostre carte restituite (Eredità, Biblioteca, Archeologo).
 
 **Il mio lavoratore che ha piazzato il potenziamento è perso?** No: torna a fine era come gli
-altri. Quello che resta sotto l'edificio è il gettone scheletro.
+altri, e sotto l'edificio non resta niente.
 
 **Posso attivare una colonna dove non ho nulla?** Sì, e talvolta conviene: incassate la
 produzione di base e quella della tessera dell'era, e il suo effetto se è "chi attiva per

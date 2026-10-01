@@ -512,7 +512,7 @@ const SPINTE_V2 := {"rendita_per_era": 0.9, "rendita_zero": -1.5, "lampo": 1.6, 
 # quattro con 0,6): a zero la riporta al 26%. La Lampo torna in media con
 # meno peso (1,4 a tre, 1,0 a quattro).
 const SPINTE_V2_PER_GIOCATORI := {2: {"lampo": 2.0, "obiettivi_peso": 0.6, "rendita_zero": 0.0},
-	3: {"lampo": 1.4, "obiettivi_peso": 1.5, "rendita_zero": 0.0, "scavo_premio": 0.0},
+	3: {"lampo": 1.2, "obiettivi_peso": 1.5, "rendita_zero": 0.0, "scavo_premio": 0.0},
 	4: {"lampo": 1.0, "lampo_potenzia": 5.0, "rendita_per_era": 1.5, "rendita_zero": 0.0,
 		"scavo_premio": 0.0, "scavo_terra_scavo": 0.1, "obiettivi_peso": 0.45}}
 static var giocatori := 0
