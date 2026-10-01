@@ -145,6 +145,8 @@ v2["constants"]["tessere_una_volta_per_era"] = True
 v2["constants"].pop("disturbo_vp", None)
 v2["constants"]["vetusta_max"] = 0
 v2["constants"]["vetusta_max_bosco"] = 0
+# Registro 151: costruire sopra una rovina non sconta piu' la Costruzione.
+v2["constants"]["rubble_discount_pietra"] = 0
 # REGISTRO 142: via la Prosperita' Urbana. Il designer: "togli la Prosperita'
 # se il denaro e' abbondante e avanza a ogni era". Misurato senza: a fine era
 # avanzano 3-6 Denaro a testa dall'era 2 in poi, a zero in meno del 10% dei
@@ -187,7 +189,7 @@ v2["constants"]["evento_finale"] = {"id": "ev_giudizio_del_tempo", "name": "Il g
 # ---- le varianti di prova per la scarsita' di sagome a quattro (registro 110) --
 # A quattro giocatori sedici turni per era contro dodici sagome. Due idee del
 # designer, ognuna un file a parte in data/proposte/, che il file v2 non tocca:
-#   --variante premio_meta / premio_meta_tessere  il premio di scavo a 1 PV per tessera, e le tessere doppie (registro 145)
+#   --variante scavo_due   il bonus scavo a 2 PV per tessera invece di 1 (registro 151)
 #   --variante doppioni    per era, una seconda copia della chiesa e del villaggio
 #                          piu' economici (1 casella: civico e religione, o cultura
 #                          dove la religione manca);
@@ -855,13 +857,16 @@ def scavo_per_era(era):
 
 def rovine_e_flussi(v):
     v["constants"]["tessere_scavo"] = {"mazzo": [dict(t) for t in MAZZO_SCAVO],
-        "premio": "tessere", "per_tessera": 2, "carte_restituite": True,
-        # REGISTRO 147: lo spianato lascia le tessere del proprietario come
-        # ogni rovina (senza premio: chi spiana costruisce sopra il proprio).
-        # Il designer: "il Terrapieno e' solo ed esclusivamente quando si crea
-        # un buco". Prima l'Acquedotto spianato da un edificio largo una
-        # colonna diventava tre terrapieni.
-        "spianato_lascia_tessere": True}
+        # REGISTRO 151, LE REGOLE SEMPLICI. Il designer: "Edificio proprio
+        # integro: bonus costruzione e nessuna rovina, al suo posto terrapieno.
+        # Rovine proprie o altrui: ogni tessera scavo sotto il nuovo edificio
+        # da' 1 punto (o 2, da misurare); dove non c'e' un terrapieno. Quando si
+        # costruisce nell'ultima era si girano le tessere e si danno i punteggi
+        # scritti al proprietario". Niente livello, niente dimezzamento
+        # nell'era 5, niente sconto macerie; le tessere mai girate valgono 0.
+        # (Il registro 147, lo spianato con le tessere, e' superato.)
+        "premio": "sotto", "per_tessera": 1, "riscoperta": "solo_scavate",
+        "carte_restituite": True}
     v["constants"]["potenziamenti_per_casella"] = True
     for c in v["characters"]:
         c["scavo"] = scavo_per_era(c.get("era"))
@@ -984,27 +989,16 @@ potenziamenti_di_classe(v2)
 rovine_e_flussi(v2)
 personaggi_e_arte(v2)
 gilde_era5(v2)
-# ---- le varianti del premio di scavo (registro 145) ---------------------
-# Il designer: "chi vince e' sempre quello che ha avuto il premio di scavo
-# piu' alto [...] nel gioco si deve dare valore a quello che si riscopre a
-# fine partita e non viceversa". Misurato: il vincitore ha il premio piu'
-# alto nel 59% delle partite a tre (55% a quattro), e il premio vale 10-11 PV
-# contro 6 della scoperta di fine partita.
-# "premio_meta": il premio scende a 1 PV per tessera (per livello).
-# "premio_meta_tessere": in piu' ogni tessera del mazzetto vale il doppio.
-def premio_meta(v):
-    v["constants"]["tessere_scavo"]["per_tessera"] = 1
-
-def premio_meta_tessere(v):
-    premio_meta(v)
-    for t in v["constants"]["tessere_scavo"]["mazzo"]:
-        t["v"] = 2 * int(t["v"])
+# ---- la variante del bonus scavo (registro 151) -------------------------
+# "ogni tessera scavo sotto il nuovo edificio da' 1 punto (o 2 da misurare)".
+def scavo_due(v):
+    v["constants"]["tessere_scavo"]["per_tessera"] = 2
 
 if variante:
     {"doppioni": doppioni, "abitazioni": abitazioni, "case": case,
      "case_doppioni": case_doppioni, "case_scavo": case_scavo, "case_nulle": case_nulle,
      "case_mista": case_mista, "case_tutti": case_tutti, "spianato_tessere": spianato_tessere,
-     "premio_meta": premio_meta, "premio_meta_tessere": premio_meta_tessere}[variante](v2)
+     "scavo_due": scavo_due}[variante](v2)
     v2["meta"]["ruleset"] = "v2-" + variante
     v2["meta"]["origine"] = "generato da tools/genera_cards_v2.py --variante %s: non modificare a mano" % variante
     out = os.path.join(RADICE, "data/proposte/cards-v2-%s.json" % variante)

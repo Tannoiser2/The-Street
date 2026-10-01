@@ -140,7 +140,7 @@ static func nome_voce(voce: String) -> String:
 # in gioco sono il resto. La stessa voce puo' stare nelle due parti: lo
 # Scavo e' il premio in gioco e la riscoperta alla fine, il Censimento
 # quello delle ere 1-4 e quello finale.
-const NOMI_GIOCO := {"scavo": "Premi di scavo", "rendita": "Censimenti delle ere"}
+const NOMI_GIOCO := {"scavo": "Bonus scavo", "rendita": "Censimenti delle ere"}
 const NOMI_FINE := {"scavo": "Scavo (riscoperta)", "rendita": "Censimento finale"}
 
 # {voce: punti} di un canale in una delle due parti.

@@ -24,6 +24,9 @@ class BuildQuote:
 	var terrapieno_free_applied: bool = false
 	var terrapieno_pietra: int = 0   # pietra effettivamente spesa in terrapieni
 	var binario: int = 0             # il binario scelto, quando si costruisce a terra
+	# Le tessere scavo che finiscono sotto il nuovo edificio (una per casella
+	# che poggia su una rovina con tessere): il bonus scavo del registro 151.
+	var tessere_sotto: int = 0
 
 # ---- requisiti di terreno -----------------------------------------
 # Morbidi per pianura/collina/bosco (colonna o adiacente), stretti per fiume.
@@ -220,6 +223,7 @@ static func quote_above(gs: GameState, player: int, data: Dictionary, col_from: 
 				# per dare un motivo di non seppellire sempre i propri.
 				if top.owner != player or not bool(CardDB.constants.get("sconto_macerie_solo_altrui", false)):
 					rubble_discount = true
+				if TessereScavo.quante(top) > 0: q.tessere_sotto += 1
 		if not top in q.bases: q.bases.append(top)
 		real_bases += 1
 		top_level = max(top_level, top.level + 1)
@@ -325,6 +329,7 @@ static func _quote_sopra_binario(gs: GameState, player: int, data: Dictionary, c
 				Enums.BuildingState.ROVINA:
 					if top.owner != player or not bool(CardDB.constants.get("sconto_macerie_solo_altrui", false)):
 						rubble_discount = true
+					if TessereScavo.quante(top) > 0: q.tessere_sotto += 1
 			if not top in q.bases: q.bases.append(top)
 			real_bases += 1
 			top_level = max(top_level, top.level + 1)

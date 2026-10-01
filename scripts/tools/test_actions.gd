@@ -40,6 +40,7 @@ func _ready() -> void:
 	_run("v2: niente scheletri dal draft, niente Vetusta' (registro 95)", _test_senza_vetusta_v2)
 	_run("v2: niente Prosperita' Urbana (registro 142)", _test_senza_prosperita_v2)
 	_run("v2: l'evento finale dell'era Moderna (registro 149)", _test_evento_finale)
+	_run("v2: le regole semplici dello scavo (registro 151)", _test_scavo_semplice)
 	_run("v2: le tre carte che contavano la Vetusta' (registro 99)", _test_tre_carte_v2)
 	_run("v2: le tessere una volta per era (registro 100)", _test_tessere_v2)
 	_run("l'incasso al passaggio nel turno v1 (registro 109)", _test_passa_incasso)
@@ -1286,6 +1287,60 @@ func _test_draft_v2() -> void:
 	CardDB.load_db(CardDB.DB_PATH)
 
 
+# Registro 151, le regole semplici: sopra un proprio intatto si spiana senza
+# rovina (terrapieno); sopra una rovina 1 PV per ogni tessera che finisce
+# sotto il nuovo edificio; a fine partita contano solo le tessere girate
+# dallo scavo dell'era Moderna.
+func _test_scavo_semplice() -> void:
+	if not FileAccess.file_exists("res://data/cards-v2.json"): return
+	CardDB.load_db("res://data/cards-v2.json")
+	_ok("nel file v2 il bonus e' per tessera sotto", TessereScavo.premio_sotto())
+	_ok("  e contano solo le tessere scavate", TessereScavo.solo_scavate())
+	_eq("  e le macerie non scontano piu' la Costruzione", int(CardDB.constants["rubble_discount_pietra"]), 0)
+	var ctl := _game(3, 990)
+	var gs := ctl.gs
+	gs.grid.buildings.clear()
+	var chi := gs.current_index
+	var altro := (chi + 1) % 3
+	# Una rovina altrui larga due: costruirci sopra un edificio da una casella
+	# mette sotto UNA tessera.
+	var larga := _put(gs, altro, "ed_tumulo_funerario", 2, 0, Enums.BuildingState.ROVINA)
+	# Una carta da una casella che il terreno della colonna 2 accetta.
+	var una := ""
+	var q: BuildRules.BuildQuote = null
+	for id in CardDB.buildings:
+		var d: Dictionary = CardDB.buildings[id]
+		if int(d["era"]) != 1 or int(d["width"]) != 1 or int(d.get("depth", 1)) != 1: continue
+		var prova := BuildRules.quote_above(gs, chi, d, 2)
+		if prova.legal:
+			una = id
+			q = prova
+			break
+	if q == null: q = BuildRules.quote_above(gs, chi, CardDB.buildings["ed_capanne"], 2)
+	_ok("sopra la rovina si puo' (%s)" % q.reason, q.legal)
+	_eq("  e sotto finisce una tessera sola", q.tessere_sotto, 1)
+	# Un proprio intatto: si spiana, niente tessere.
+	gs.grid.buildings.clear()
+	var mio := _put(gs, chi, una, 2)
+	var q2 := BuildRules.quote_above(gs, chi, CardDB.buildings[una], 2)
+	_ok("sopra il proprio intatto si spiana", q2.legal and mio in q2.razed)
+	_eq("  senza tessere sotto", q2.tessere_sotto, 0)
+	mio.state = Enums.BuildingState.ROVINA
+	mio.was_razed = true
+	_eq("  e lo spianato non lascia tessere", TessereScavo.quante(mio), 0)
+	# A fine partita: la rovina mai scavata vale 0, quella scavata il suo valore.
+	gs.grid.buildings.clear()
+	CardDB.constants["tessere_scavo"]["mazzo"] = [{"v": 3}, {"v": 3}, {"v": 3}, {"v": 3}]
+	gs.mazzi_scavo.clear()
+	var coperta := _put(gs, chi, una, 1, 0, Enums.BuildingState.ROVINA)
+	var prima := int(gs.players[chi].vp_breakdown.get("scavo", 0))
+	TessereScavo.conta(gs)
+	_eq("la rovina mai scavata non vale niente", int(gs.players[chi].vp_breakdown.get("scavo", 0)) - prima, 0)
+	coperta.scavata = true
+	TessereScavo.conta(gs)
+	_eq("  quella riportata alla luce vale il numero scritto", int(gs.players[chi].vp_breakdown.get("scavo", 0)) - prima, 3)
+	CardDB.load_db(CardDB.DB_PATH)
+
 # Registro 149: nella v2 anche l'era Moderna ha un evento (forza 4), e chi
 # non lo regge crolla prima del conto finale; nella v1.5 l'era 5 resta senza.
 func _test_evento_finale() -> void:
@@ -1390,6 +1445,15 @@ func _test_senza_vetusta_v2() -> void:
 		if g.index == chi and gs.phase == Enums.Phase.PIAZZA and costruito.is_alive():
 			g.pietra = 5; g.oro = 5; g.idee = 5
 			if ctl.place_worker(costruito.col_from):
+				# Un potenziamento della classe giusta in fila, se il caso non
+				# ne ha messo uno: il test prova lo scheletro, non la fila.
+				var adatto := ""
+				for u in CardDB.upgrades:
+					var ud: Dictionary = CardDB.upgrades[u]
+					if int(ud.get("era", 1)) == gs.era and str(ud.get("class", "")) in costruito.classes():
+						adatto = str(u)
+						break
+				if adatto != "" and not adatto in gs.upg_row: gs.upg_row.append(adatto)
 				for upg_id in gs.upg_row.duplicate():
 					if ctl.upgrade(upg_id, costruito):
 						potenziato = true

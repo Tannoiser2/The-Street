@@ -2406,3 +2406,18 @@ dato è stato importato da lì. Ma due confronti fra ciò che è stampato e
     `scavata`); Stazione +1 per ogni edificio in piedi nelle sue colonne, di
     chiunque (max 5). Le due case restano case. Misura insieme all'evento
     finale (registro 149).
+151. **Le regole semplici del costruire sopra.** Il designer, davanti alla
+    tabella dei casi: "converrebbe sempre costruire su rovina propria [...]
+    Troppe regole complesse. Io la semplificherei al massimo". Terreno
+    libero: si costruisce. Proprio edificio integro: si spiana, sconto in
+    Costruzione, nessuna rovina, al suo posto il terrapieno (supera il
+    registro 147). Integro avversario: non si puo'. Rovine proprie o altrui:
+    bonus scavo, 1 PV subito per ogni tessera che finisce sotto il nuovo
+    edificio (2 da misurare, `--variante scavo_due`), senza livello ne'
+    dimezzamento nell'era 5; dove sotto non c'e' niente, terrapieno (0 PV);
+    niente piu' sconto macerie. Nell'era 5 un edificio sopra delle rovine
+    gira le tessere della pila sotto di se'; a fine partita contano solo le
+    tessere girate (numero scritto, scheletri, arte), quelle mai girate
+    valgono 0. Scelte del designer: si girano solo le tessere sotto
+    l'edificio dell'era 5, e le non girate valgono niente. Misura insieme a
+    evento finale e gilde.

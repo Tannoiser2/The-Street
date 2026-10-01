@@ -80,7 +80,7 @@
     },
     "recruit_cost_oro": 1,
     "terrapieno_cost_pietra": 1,
-    "rubble_discount_pietra": 1,
+    "rubble_discount_pietra": 0,
     "prosperity": {
       "min_buildings": 3,
       "min_owners": 2,
@@ -185,8 +185,9 @@
           "v": 3
         }
       ],
-      "premio": "tessere",
-      "per_tessera": 2,
+      "premio": "sotto",
+      "per_tessera": 1,
+      "riscoperta": "solo_scavate",
       "carte_restituite": true,
       "spianato_lascia_tessere": true
     },
