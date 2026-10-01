@@ -150,6 +150,30 @@ v2["constants"]["vetusta_max_bosco"] = 0
 # avanzano 3-6 Denaro a testa dall'era 2 in poi, a zero in meno del 10% dei
 # casi, e i PV non si muovono (ventottesima misura).
 v2["constants"]["prosperity"] = dict(v2["constants"]["prosperity"], attiva=False)
+# REGISTRO 150: LE GILDE DELL'ERA MODERNA. Il designer: "gli edifici dell'era 5
+# dovrebbero funzionare come una specie di gilda di 7 Wonders, che oltre a
+# riscoprire le rovine danno PV in base ad alcune condizioni". Otto su
+# quattordici lo facevano gia'; queste quattro non avevano niente (le due case
+# restano case).
+def gilde_era5(v):
+    eb = {b["id"]: b for b in v["buildings"]}
+    def gilda(bid, effetti, testo):
+        eb[bid]["effects"] = effetti
+        eb[bid]["effect_text"] = testo
+    gilda("ed_condominio", [{"hook": "on_final_scoring", "op": "vp_per", "value": 1, "cap": 4,
+        "target": {"owner": "self", "class": ["civico"], "state": ["intatto"], "buried": False}}],
+        "A fine partita: +1 PV per ogni tuo edificio Civico in piedi (max +4).")
+    gilda("ed_officina", [{"hook": "on_final_scoring", "op": "vp_per", "value": 1, "cap": 4,
+        "target": {"owner": "self", "class": ["ingegneria"], "is_self": False}}],
+        "A fine partita: +1 PV per ogni altro tuo edificio Ingegneria, in piedi o sotterrato (max +4).")
+    gilda("ed_ponte_in_acciaio", [{"hook": "on_final_scoring", "op": "vp_per", "value": 2,
+        "target": {"owner": "self", "state": ["rovina"], "scavata": True, "same_column_as_self": True}}],
+        "A fine partita: +2 PV per ogni tua rovina riportata alla luce nelle sue colonne.")
+    # La Stazione tiene il suo rule_override (solo sopra): la gilda si aggiunge.
+    gilda("ed_stazione", [e for e in eb["ed_stazione"]["effects"] if e["hook"] != "on_final_scoring"] + [{"hook": "on_final_scoring", "op": "vp_per", "value": 1, "cap": 5,
+        "target": {"state": ["intatto"], "buried": False, "same_column_as_self": True, "is_self": False}}],
+        "Solo sopra: al livello 1 o piu'. A fine partita: +1 PV per ogni edificio in piedi nelle sue colonne, di chiunque (max +5).")
+
 # REGISTRO 149: l'evento finale. Il designer: "a cosa serve la resistenza negli
 # edifici di era 5? O si mette un evento anche alla fine oppure va eliminato.
 # Procedi con evento finale". Un evento solo, senza effetti speciali, di forza
@@ -959,6 +983,7 @@ eventi_e_avanzo(v2)
 potenziamenti_di_classe(v2)
 rovine_e_flussi(v2)
 personaggi_e_arte(v2)
+gilde_era5(v2)
 # ---- le varianti del premio di scavo (registro 145) ---------------------
 # Il designer: "chi vince e' sempre quello che ha avuto il premio di scavo
 # piu' alto [...] nel gioco si deve dare valore a quello che si riscopre a

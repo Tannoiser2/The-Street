@@ -2394,3 +2394,15 @@ dato è stato importato da lì. Ma due confronti fra ciò che è stampato e
     provvisoria (come il Medioevo); i sei eventi moderni veri, se il
     designer li vuole come le altre ere, restano da disegnare. Misura in
     corso.
+150. **Le gilde dell'era Moderna.** Il designer: "gli edifici dell'era 5
+    dovrebbero funzionare come una specie di gilda di 7 Wonders, che oltre a
+    riscoprire le rovine danno PV in base ad alcune condizioni". Otto dei
+    quattordici lo facevano gia' (Museo, Biblioteca, Grattacielo, Universita',
+    Fondazione d'arte, Caffe' letterario, Monumento ai caduti, Parco
+    archeologico). Le quattro senza condizione la prendono: Condominio +1 PV
+    per ogni tuo Civico in piedi (max 4); Officina +1 per ogni altro tuo
+    Ingegneria, in piedi o sotterrato (max 4); Ponte in acciaio +2 per ogni
+    tua rovina riportata alla luce nelle sue colonne (nuovo filtro
+    `scavata`); Stazione +1 per ogni edificio in piedi nelle sue colonne, di
+    chiunque (max 5). Le due case restano case. Misura insieme all'evento
+    finale (registro 149).
