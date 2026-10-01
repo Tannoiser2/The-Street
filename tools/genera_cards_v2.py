@@ -153,6 +153,7 @@ v2["constants"]["prosperity"] = dict(v2["constants"]["prosperity"], attiva=False
 # ---- le varianti di prova per la scarsita' di sagome a quattro (registro 110) --
 # A quattro giocatori sedici turni per era contro dodici sagome. Due idee del
 # designer, ognuna un file a parte in data/proposte/, che il file v2 non tocca:
+#   --variante lampo_era4  le carte dell'era 4 con Lampo tagliato tornano a Lampo 2 (registro 143)
 #   --variante doppioni    per era, una seconda copia della chiesa e del villaggio
 #                          piu' economici (1 casella: civico e religione, o cultura
 #                          dove la religione manca);
@@ -827,7 +828,11 @@ def rovine_e_flussi(v):
     for u in v["upgrades"]:
         if u.get("family") == "arte": u["scavo"] = scavo_per_era(u["era"])
     for b in v["buildings"]:
-        if b["era"] >= 4 and b["lampo"] >= 2: b["lampo"] = 1
+        # Variante lampo_era4 (registro 143): la strategia Lampo vince poco;
+        # si prova a lasciare Lampo 2 alle carte dell'era 4, tagliando solo
+        # quelle dell'era 5.
+        if variante == "lampo_era4" and b["era"] == 4 and b["lampo"] >= 2: b["lampo"] = 2
+        elif b["era"] >= 4 and b["lampo"] >= 2: b["lampo"] = 1
         if b["rendita"] == 1: b["rendita"] = 2
     v["constants"]["continuita_collezione"] = dict(CONTINUITA_COLLEZIONE)
     # GLI SCHELETRI STANNO SULLE TESSERE (registro 137). Il designer: "le
@@ -945,7 +950,8 @@ personaggi_e_arte(v2)
 if variante:
     {"doppioni": doppioni, "abitazioni": abitazioni, "case": case,
      "case_doppioni": case_doppioni, "case_scavo": case_scavo, "case_nulle": case_nulle,
-     "case_mista": case_mista, "case_tutti": case_tutti, "spianato_tessere": spianato_tessere}[variante](v2)
+     "case_mista": case_mista, "case_tutti": case_tutti, "spianato_tessere": spianato_tessere,
+     "lampo_era4": lambda v: None}[variante](v2)
     v2["meta"]["ruleset"] = "v2-" + variante
     v2["meta"]["origine"] = "generato da tools/genera_cards_v2.py --variante %s: non modificare a mano" % variante
     out = os.path.join(RADICE, "data/proposte/cards-v2-%s.json" % variante)
