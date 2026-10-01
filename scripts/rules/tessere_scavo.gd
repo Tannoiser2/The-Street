@@ -153,6 +153,14 @@ static func conta(gs: GameState) -> void:
 			for u in p.potenziamenti_riscattati:
 				if CardDB.upgrades.has(u) and str(CardDB.upgrades[u].get("family", "")) == "arte":
 					opere.append(int(CardDB.upgrades[u].get("scavo", 0)))
+			# Registro 138: l'icona arte ritrova anche un token Arte ancora su
+			# un tuo edificio in piedi, non solo quelli riscattati: l'arte
+			# ritrovata valeva 0,3 PV a partita, troppo poco per un flusso.
+			for b in gs.grid.buildings:
+				if b.owner != p.index or fuori(b): continue
+				for u in b.upgrades:
+					if CardDB.upgrades.has(u) and str(CardDB.upgrades[u].get("family", "")) == "arte":
+						opere.append(int(CardDB.upgrades[u].get("scavo", 0)))
 		else:
 			for b in gs.grid.buildings:
 				if b.owner != p.index or b.state != Enums.BuildingState.ROVINA: continue

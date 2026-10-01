@@ -221,7 +221,7 @@ lavoratore del potenziamento.
 | era | Personaggio | classe | quando | testo | motivo | nota |
 |--:|---|---|---|---|---|---|
 | 1 | Capotribù | civico | misto | **Subito: +2 Costruzione. Per l'era: il primo edificio che costruisci ha +1 res.** | LAV 3R | oggi: "Subito: +2 pietra. Per l'era: l'edificio protetto da questo lavoratore ha +1 res" — è così nel motore: senza lavoratore che abita, il protettore si lega al primo edificio costruito nell'era |
-| 1 | Sciamano | religione | era | Per l'era: i tuoi edifici Religione hanno +1 res. |  |  |
+| 1 | Sciamano | religione | era | **Subito: +1 cultura. Per l'era: i tuoi edifici Religione hanno +1 res.** |  | oggi: "Per l'era: i tuoi edifici Religione hanno +1 res" |
 | 1 | Mercante di ossidiana | commercio | misto | **Subito: +1 Denaro. Per l'era: fino a 2 scambi alla pari fra due risorse qualsiasi.** | 3R | oggi: "Subito: +1 oro. Per l'era: fino a 2 scambi pietra↔oro alla pari" |
 | 1 | Incisore | cultura | subito | **Impronta: infila questa carta sotto il primo edificio che costruisci in quest'era; Scavo +3 permanente. Max 1 impronta per edificio.** | DRA | oggi: "Subito — Impronta: infila questa carta sotto un tuo edificio; Scavo +3 permanente. Max 1 impronta per edificio" — a inizio era 1 nessuno ha edifici: nel draft la carta si offre solo a chi ha un edificio, quindi va riscritta |
 | 1 | Costruttore di zattere | ingegneria | misto | **Subito: +1 Costruzione. Per l'era: −1 Costruzione alle costruzioni su slot con fiume.** | 3R | oggi: "Subito: +1 pietra. Per l'era: −1 pietra alle costruzioni su slot con fiume" |
@@ -240,11 +240,11 @@ lavoratore del potenziamento.
 | 4 | Ingegnere militare | militare | era | Per l'era: i tuoi edifici Militari hanno +1 res; uno a tua scelta +2. |  |  |
 | 4 | Cardinale | religione | misto | **Subito: +1 Denaro. Per l'era: −1 Idea agli edifici Religione (minimo 0).** | 3R | oggi: "Subito: +1 oro. Per l'era: −1 oro agli edifici Religione (minimo 0)" — Religione paga Idee |
 | 4 | Artista di corte | cultura | misto | **Subito: +1 PV. Per l'era: il primo potenziamento che piazzi su un edificio altrui è gratis e incassi 1 Denaro dal proprietario.** | 3R CUL | oggi: "Subito: +1 cultura. Per l'era: il primo potenziamento che piazzi su un edificio altrui è gratis e incassi 1 oro dal proprietario" |
-| 5 | Archeologo | cultura | finale | Finale: scegli una tua Rovina non Sotterrata: vale il suo Scavo. Se hai già 3+ edifici Sotterrati, +1 PV. |  |  |
-| 5 | Urbanista | civico | finale | Finale: +1 PV per ogni tuo strato in catene da 4+ ere (max +4). |  |  |
+| 5 | Archeologo | cultura | finale | **Finale: scegli una tua rovina non sotterrata: vale il suo Scavo (max 4). Se hai gia' 3+ edifici sotterrati, +1 PV.** |  | oggi: "Finale: scegli una tua Rovina non Sotterrata: vale il suo Scavo. Se hai già 3+ edifici Sotterrati, +1 PV" |
+| 5 | Urbanista | civico | finale | **Finale: +1 PV per ogni era diversa fra i tuoi edifici in piedi (max +4).** |  | oggi: "Finale: +1 PV per ogni tuo strato in catene da 4+ ere (max +4)" |
 | 5 | Industriale | commercio | misto | **Subito: +2 Denaro. Per l'era: le tue prime 2 produzioni di Denaro danno +1.** | 3R | oggi: "Subito: +2 oro. Per l'era: le tue prime 2 produzioni di oro danno +1" |
-| 5 | Soprintendente | ingegneria | finale | Finale: fino a 3 tuoi edifici Sotterrati hanno Scavo +2. |  |  |
-| 5 | Veterano | militare | finale | Finale: +1 PV per ogni tuo edificio Militare in piedi (max +4). |  |  |
+| 5 | Soprintendente | ingegneria | finale | **Finale: fino a 4 tue rovine valgono +2 Scavo.** |  | oggi: "Finale: fino a 3 tuoi edifici Sotterrati hanno Scavo +2" |
+| 5 | Veterano | militare | finale | **Finale: +1 PV per ogni tuo edificio Militare, in piedi o restituito (max +5).** |  | oggi: "Finale: +1 PV per ogni tuo edificio Militare in piedi (max +4)" |
 | — | Dinastia | civico | permanente | **Sempre disponibile, fuori dal draft, al posto dell'azione. Costo in Idee: era 1 = 4 · era 2 = 3 · era 3 = 3 · era 4 = 3. Nessuna abilità: aggiunge un quinto lavoratore, permanente e attivo da subito. Massimo una a testa.** | 3R | oggi: "Sempre disponibile fuori dalle file, nessuna classe richiesta. Costo a scalare secondo l'era: era 1 = 4 pietra · era 2 = 2 pietra + 1 oro · era 3 = 1 pietra + 2 oro · era 4 = 3 oro. Nessuna abilità: aggiunge un quarto lavoratore, permanente e attivo da subito. Massimo una a testa" — con quattro lavoratori di base (registro 94) è il quinto |
 
 ## I 50 potenziamenti
