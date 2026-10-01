@@ -24,6 +24,13 @@ var _piano := false
 var _tutti := ""
 var _giro := "vicini"        # --giro vicini|tutte
 var _da := 0                  # --da N: il lotto parte dalla partita N
+# FINO A UN'ERA (`--fino_era N`, v3): la partita si ferma appena l'era N e'
+# chiusa (evento, censimento, fine era compresi) e si spoglia li'. Serve a
+# disegnare un'era per volta: con N=1 la strada parte vuota e si misura la
+# sola era 1, senza i punti di fine partita (Scavo, Continuita', Finali), che
+# non si contano. Zero = partita intera. L'intestazione si stampa solo se la
+# manopola e' data, cosi' il riferimento della v1.5 non cambia.
+var _fino_era := 0
 var _posti := 3               # quanti posti al tavolo, per il giro "tutte"
 # Chi muove i bot: le sei strategie vere o il tira-a-caso di RandomBot.
 # Il caso serve ancora come metro di paragone - "quanto pesa la testa di chi
@@ -314,6 +321,9 @@ func _ready() -> void:
 		print("# fila_potenziamenti_resta = %s" % str(CardDB.constants["fila_potenziamenti_resta"]))
 
 	_rapporto = args.has("rapporto") and str(args["rapporto"]) != "0"
+	if args.has("fino_era"):
+		_fino_era = int(args["fino_era"])
+		print("# fino_era = %d" % _fino_era)
 	# `--da N` riprende un lotto interrotto dalla partita N: stesso seme
 	# (seme + N) e stesso giro delle strategie, come se non si fosse fermato.
 	_da = int(args.get("da", "0"))
@@ -342,7 +352,7 @@ func _ready() -> void:
 	var guard := 0
 	_fotografa(gs)
 	var log_letto := 0
-	while gs.phase != Enums.Phase.FINE_PARTITA and guard < 10000:
+	while _continua(gs) and guard < 10000:
 		if gs.era != era:
 			era = gs.era
 			_dì("\n--- ERA %d · evento: %s · ordine %s ---" % [
@@ -383,7 +393,7 @@ func _lotto(seme: int, players: int, quante: int) -> void:
 		ctl.new_game(players, seme + g)
 		var guard := 0
 		var traccia := {"rovina": {}, "sepolto": {}, "upg": {}, "pers": {}, "eventi": {}, "rovine_era": {}}
-		while ctl.gs.phase != Enums.Phase.FINE_PARTITA and guard < 10000:
+		while _continua(ctl.gs) and guard < 10000:
 			# L'era si prende PRIMA della mossa, come nella vita degli edifici:
 			# l'evento di fine era scatta dentro l'ultima mossa dell'era, e
 			# dopo la mossa il contatore e' gia' avanzato.
@@ -503,7 +513,7 @@ func _vita(seme: int, players: int, quante: int) -> void:
 		var era_sepolto := {}
 		var visto := {}
 		var guard := 0
-		while gs.phase != Enums.Phase.FINE_PARTITA and guard < 10000:
+		while _continua(gs) and guard < 10000:
 			var era: int = gs.era
 			_muovi(ctl, g)
 			for b in gs.grid.buildings:
@@ -666,6 +676,13 @@ func _quante_strategie() -> int:
 # Chi pianifica in questa partita: un posto solo, a rotazione.
 func pianifica_qui(i: int, g: int, players: int) -> bool:
 	return _piano and i == g % players
+
+# La partita continua finche' non e' finita e, con `--fino_era`, finche' l'era
+# N non e' chiusa: la fine di un'era scatta dentro l'ultima mossa dell'era e
+# dopo quella mossa il contatore e' gia' su N+1, quindi si guarda `gs.era`.
+func _continua(gs: GameState) -> bool:
+	if gs.phase == Enums.Phase.FINE_PARTITA: return false
+	return _fino_era == 0 or gs.era <= _fino_era
 
 func _muovi(ctl: GameController, g: int) -> void:
 	if _strategie:
