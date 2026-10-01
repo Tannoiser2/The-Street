@@ -97,6 +97,7 @@ static func righe(gs: GameState) -> Array[Dictionary]:
 			"vp": p.vp,
 			"punti": p.vp_breakdown.duplicate(),
 			"dettaglio": p.vp_dettaglio.duplicate(true),
+			"dettaglio_fine": p.vp_dettaglio_fine.duplicate(true),
 			"edifici": Scoring.in_piedi(gs, i),
 			"eredita": p.legacy_id,
 			"eredita_nome": _nome_eredita(p.legacy_id),
@@ -131,6 +132,64 @@ static func punti_voce(riga: Dictionary, id: String, voce: String) -> int:
 
 static func nome_voce(voce: String) -> String:
 	return "altro" if voce == "" else voce
+
+# ---- in gioco e a fine partita (registro 145) ----------------------------
+# Il designer: "il resoconto finale divida tutti i modi per prendere i PV
+# durante il gioco in alto, e tutti i PV presi a fine partita in basso". Il
+# nucleo segna a parte i PV del conto finale (`vp_dettaglio_fine`); quelli
+# in gioco sono il resto. La stessa voce puo' stare nelle due parti: lo
+# Scavo e' il premio in gioco e la riscoperta alla fine, il Censimento
+# quello delle ere 1-4 e quello finale.
+const NOMI_GIOCO := {"scavo": "Premi di scavo", "rendita": "Censimenti delle ere"}
+const NOMI_FINE := {"scavo": "Scavo (riscoperta)", "rendita": "Censimento finale"}
+
+# {voce: punti} di un canale in una delle due parti.
+static func dettaglio_fase(riga: Dictionary, id: String, fine: bool) -> Dictionary:
+	var tutto: Dictionary = (riga.get("dettaglio", {}) as Dictionary).get(id, {})
+	var alla_fine: Dictionary = (riga.get("dettaglio_fine", {}) as Dictionary).get(id, {})
+	if fine: return alla_fine.duplicate()
+	var out := {}
+	for v in tutto:
+		var n := int(tutto[v]) - int(alla_fine.get(v, 0))
+		if n != 0: out[v] = n
+	return out
+
+static func punti_fase(riga: Dictionary, id: String, fine: bool) -> int:
+	var d := dettaglio_fase(riga, id, fine)
+	var n := 0
+	for v in d: n += int(d[v])
+	# Senza dettaglio (canale segnato prima che esistesse) e' tutto "in gioco".
+	if d.is_empty() and not fine and not (riga.get("dettaglio", {}) as Dictionary).has(id):
+		return punti(riga, id)
+	return n
+
+static func punti_voce_fase(riga: Dictionary, id: String, voce: String, fine: bool) -> int:
+	return int(dettaglio_fase(riga, id, fine).get(voce, 0))
+
+static func sottovoci_fase(righe_: Array[Dictionary], id: String, fine: bool) -> Array[String]:
+	var somme := {}
+	for r in righe_:
+		var d := dettaglio_fase(r, id, fine)
+		for v in d:
+			if int(d[v]) != 0: somme[v] = int(somme.get(v, 0)) + int(d[v])
+	if somme.size() < 2: return []
+	var out: Array[String] = []
+	for v in somme: out.append(str(v))
+	out.sort_custom(func(a, b): return int(somme[a]) > int(somme[b]))
+	return out
+
+# Le voci di una parte: quelle che in quella parte hanno dato punti a qualcuno.
+static func colonne_fase(gs: GameState, righe_: Array[Dictionary], fine: bool) -> Array[Dictionary]:
+	var out: Array[Dictionary] = []
+	for c in colonne(gs):
+		var id := str(c["id"])
+		var qualcuno := false
+		for r in righe_:
+			if punti_fase(r, id, fine) != 0: qualcuno = true
+		if not qualcuno: continue
+		var nomi: Dictionary = NOMI_FINE if fine else NOMI_GIOCO
+		out.append({"id": id, "nome": str(nomi.get(id, c["nome"]))})
+	return out
 
 # La somma delle colonne mostrate. Se non torna col totale segnato, la
 # differenza e' roba segnata prima che la tabella conoscesse il canale: si

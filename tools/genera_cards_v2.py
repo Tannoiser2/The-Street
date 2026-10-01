@@ -153,6 +153,7 @@ v2["constants"]["prosperity"] = dict(v2["constants"]["prosperity"], attiva=False
 # ---- le varianti di prova per la scarsita' di sagome a quattro (registro 110) --
 # A quattro giocatori sedici turni per era contro dodici sagome. Due idee del
 # designer, ognuna un file a parte in data/proposte/, che il file v2 non tocca:
+#   --variante premio_meta / premio_meta_tessere  il premio di scavo a 1 PV per tessera, e le tessere doppie (registro 145)
 #   --variante doppioni    per era, una seconda copia della chiesa e del villaggio
 #                          piu' economici (1 casella: civico e religione, o cultura
 #                          dove la religione manca);
@@ -942,10 +943,27 @@ eventi_e_avanzo(v2)
 potenziamenti_di_classe(v2)
 rovine_e_flussi(v2)
 personaggi_e_arte(v2)
+# ---- le varianti del premio di scavo (registro 145) ---------------------
+# Il designer: "chi vince e' sempre quello che ha avuto il premio di scavo
+# piu' alto [...] nel gioco si deve dare valore a quello che si riscopre a
+# fine partita e non viceversa". Misurato: il vincitore ha il premio piu'
+# alto nel 59% delle partite a tre (55% a quattro), e il premio vale 10-11 PV
+# contro 6 della scoperta di fine partita.
+# "premio_meta": il premio scende a 1 PV per tessera (per livello).
+# "premio_meta_tessere": in piu' ogni tessera del mazzetto vale il doppio.
+def premio_meta(v):
+    v["constants"]["tessere_scavo"]["per_tessera"] = 1
+
+def premio_meta_tessere(v):
+    premio_meta(v)
+    for t in v["constants"]["tessere_scavo"]["mazzo"]:
+        t["v"] = 2 * int(t["v"])
+
 if variante:
     {"doppioni": doppioni, "abitazioni": abitazioni, "case": case,
      "case_doppioni": case_doppioni, "case_scavo": case_scavo, "case_nulle": case_nulle,
-     "case_mista": case_mista, "case_tutti": case_tutti, "spianato_tessere": spianato_tessere}[variante](v2)
+     "case_mista": case_mista, "case_tutti": case_tutti, "spianato_tessere": spianato_tessere,
+     "premio_meta": premio_meta, "premio_meta_tessere": premio_meta_tessere}[variante](v2)
     v2["meta"]["ruleset"] = "v2-" + variante
     v2["meta"]["origine"] = "generato da tools/genera_cards_v2.py --variante %s: non modificare a mano" % variante
     out = os.path.join(RADICE, "data/proposte/cards-v2-%s.json" % variante)

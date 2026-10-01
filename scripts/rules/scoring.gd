@@ -5,6 +5,8 @@ class_name Scoring
 extends RefCounted
 
 static func final_scoring(gs: GameState) -> void:
+	# Da qui in poi i PV sono "di fine partita" (registro 145, per il riepilogo).
+	for p in gs.players: p.a_fine_partita = true
 	# I modificatori di Scavo (Targa storica, Soprintendente) vanno applicati
 	# prima che _scavo conti: dopo sarebbe troppo tardi.
 	Effects.apply_scavo_modifiers(gs)

@@ -2866,6 +2866,18 @@ func _test_riepilogo_v2() -> void:
 	var righe := Riepilogo.righe(gs)
 	_ok("  lo Scavo si divide in sottovoci (%s)" % ", ".join(Riepilogo.sottovoci(righe, "scavo")),
 		Riepilogo.sottovoci(righe, "scavo").size() >= 2)
+	# Registro 145: le due parti del riepilogo, in gioco e a fine partita,
+	# sommano al canale; il premio di scavo sta in gioco, la riscoperta alla fine.
+	var rotte := 0
+	for rr in righe:
+		for c in Riepilogo.colonne(gs):
+			var id := str(c["id"])
+			if Riepilogo.punti_fase(rr, id, false) + Riepilogo.punti_fase(rr, id, true) != Riepilogo.punti(rr, id):
+				rotte += 1
+	_eq("in gioco + a fine partita = la voce, per ogni giocatore", rotte, 0)
+	var premio_alla_fine := 0
+	for rr in righe: premio_alla_fine += Riepilogo.punti_voce_fase(rr, "scavo", "premi di scavo", true)
+	_eq("  nessun premio di scavo nel conto finale", premio_alla_fine, 0)
 	CardDB.load_db(CardDB.DB_PATH)
 
 
