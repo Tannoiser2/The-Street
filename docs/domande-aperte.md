@@ -2481,3 +2481,35 @@ dato è stato importato da lì. Ma due confronti fra ciò che è stampato e
     2,3 su tutte e tre le risorse e la Lampo al 55%, ma l'era si fa povera
     (2,8 costruzioni a testa). Proposta: la catena come base dell'era 1 e una
     via di mezzo sui costi. **Da decidere con il designer.**
+157. **L'acquisto extra solo dalle carte; catena e costi misti nel file base;
+    i bot sanno che le risorse muoiono; una casa sempre comprabile.** Il
+    designer, letta la misura delle leve: "L'acquisto extra non si fa sempre,
+    ci vuole un effetto di una carta o personaggio o edificio o tessera
+    terreno; catena si' e costi misti; poi si' i bot devono sapere che le
+    risorse si perdono; inoltre i giocatori devono poter comprare sempre
+    almeno un edificio, magari le case di fango o qualcosa che costa poco".
+    Nel file base dell'era 1: terreno di base a zero (resta la tessera),
+    spianare caro, +1 della seconda risorsa della classe sugli edifici del
+    mazzo (le case come sono), i Ripari a costo 1 pagabile in Costruzione o
+    Denaro. L'acquisto extra e' l'azione ⊕ del vocabolario: la danno il
+    Capotribu' e il Mercante di ossidiana (al posto di 🛡 e ⇄), le Capanne
+    e la Cava a chi le possiede quando le attiva (al posto di ⇄), e la
+    tessera Sentiero dei pastori (al posto di +1 Denaro). Il bot sconta le
+    risorse che non potra' spendere nei piazzamenti rimasti (circa 2,5
+    l'uno): all'ultimo lavoratore spendere non costa niente e tenere non
+    vale niente (`StrategyBot._fattore_morte`). Controprove: `extra_sempre`,
+    `senza_extra`, `costi_vecchi`. Le otto varianti del primo giro sono
+    state tolte: le rigenera il generatore al commit 2db6223.
+158. **La trentaduesima misura: la mancanza c'e', l'era e' di case.** Con il
+    file base del registro 157 e il bot che sa che le risorse muoiono: si
+    produce 8,7 a testa, si spende 7,2, muore 1,5 (mezza risorsa per tipo,
+    dentro il budget). Ma si costruiscono 5 case a partita su 11 edifici
+    (Ripari in tutte le partite, Dolmen 0,5, Grotte 0,25, Tumulo 0,1): le
+    case costano una risorsa sola, le carte del mazzo due. I potenziamenti
+    spariscono (0,03 a testa) e l'acquisto extra si apre 0,74 volte e si usa
+    0,25: quando si apre non c'e' piu' niente in mano. Lampo 61%. Proposte
+    da misurare una per volta: le case con la seconda risorsa (Ripari a 1 ◈
+    come salvataggio) o il Lampo delle case a 1; l'extra con lo sconto (o il
+    potenziamento nell'extra gratis); potenziamenti a 0 o in Costruzione
+    nell'era 1; il bot che valuta l'azione ⊕ per quel che rende. **Da
+    decidere con il designer.**

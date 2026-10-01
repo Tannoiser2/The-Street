@@ -126,10 +126,14 @@ un turno che attiva una colonna con quattro edifici deve leggersi in dieci secon
 | 8 | ✦ | +1 Lampo all'edificio che costruisci in questo turno | la Radura di oggi |
 | 9 | 👥 | +1 Denaro per ogni altro giocatore con un edificio in questa colonna (max 2) | la Fiera di oggi: premia le colonne vive |
 | 10 | ⟲ | la tessera di questa colonna, se già girata, scatta di nuovo | rimette in gioco la tessera dell'era |
+| 11 | ⊕ | in questo turno puoi comprare ancora un potenziamento o una casa della riserva, pagando | l'acquisto extra (registro 157): la catena dei Castelli di Borgogna, solo da una carta, un edificio o una tessera, mai di diritto |
 
-Le voci 2 e 3 sono il **pozzo**: servono a non far morire le risorse all'ultimo giro. Se
-la misura dice che muore troppo, si aumentano i Personaggi e gli edifici con ⇄ e ★, non la
-produzione.
+Le voci 2, 3 e 11 sono i **modi di spendere** oltre le quattro azioni. Dopo la trentunesima
+misura (registri 155-157) la regola del designer è: **mancanza di risorse, non surplus**. Il
+terreno di base non produce più (resta la tessera dell'era), spianare costa (registro 152), i
+costi hanno una seconda risorsa (Commercio e Civico Denaro, Religione e Cultura Idee,
+Ingegneria e Militare Costruzione), e l'acquisto extra arriva solo da una carta. Una casa della
+riserva deve restare comprabile sempre: i Ripari costano 1, Costruzione o Denaro a scelta.
 
 ## La sagoma delle carte
 

@@ -82,6 +82,12 @@ static func esegui_azione(gs: GameState, chi: int, az: Dictionary, col: int, car
 			p.sconto_se = str(az.get("se", ""))
 			gs.log_line("%s: sconto %d%s per questo turno a giocatore %d" % [nome, n,
 				"" if p.sconto_se == "" else " (" + p.sconto_se + ")", chi])
+		"acquisto":
+			# L'acquisto extra (registro 157) serve a chi sta giocando il turno:
+			# un edificio lo da' al proprietario solo quando e' lui ad attivare.
+			if attivatore != chi: return
+			p.extra_turno += n
+			gs.log_line("%s: %d acquisto extra in questo turno a giocatore %d" % [nome, n, chi])
 		"lampo":
 			p.lampo_turno += n
 			gs.log_line("%s: +%d Lampo all'edificio costruito in questo turno" % [nome, n])

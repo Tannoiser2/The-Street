@@ -874,9 +874,15 @@ func acquisto_extra() -> bool:
 	return PersonaggiV3.attivo() and bool(CardDB.constants.get("acquisto_extra", false))
 
 func _dopo_azione() -> void:
-	if acquisto_extra() and not gs.acquisto_extra_aperto and gs.phase == Enums.Phase.AZIONE:
+	var p := gs.current_player()
+	# L'extra si apre se la costante lo da' sempre (variante di misura) o se
+	# un'azione di Personaggio, edificio o tessera lo ha dato in questo turno
+	# (registro 157: "ci vuole un effetto di una carta").
+	var aperto_da_carta := PersonaggiV3.attivo() and p.extra_turno > 0
+	if (acquisto_extra() or aperto_da_carta) and not gs.acquisto_extra_aperto and gs.phase == Enums.Phase.AZIONE:
+		if aperto_da_carta: p.extra_turno -= 1
 		gs.acquisto_extra_aperto = true
-		gs.current_player().bump("extra_aperti")
+		p.bump("extra_aperti")
 		state_changed.emit()
 		return
 	if gs.acquisto_extra_aperto: gs.current_player().bump("extra_usati")
@@ -944,6 +950,7 @@ func _end_turn() -> void:
 		p.sconto_turno = 0
 		p.sconto_se = ""
 		p.lampo_turno = 0
+		p.extra_turno = 0
 		gs.personaggio_attivo = ""
 	gs.acquisto_extra_aperto = false
 	gs.phase = Enums.Phase.PIAZZA

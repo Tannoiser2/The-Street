@@ -177,6 +177,12 @@ static func all_attivazione(gs: GameState, player: int, col: int) -> void:
 			for cl in b.classes():
 				if cl in pc["classi"]: n += 1; break
 		g[str(pc["risorsa"])] += n
+	# L'acquisto extra (v3, registro 157): la tessera non da' risorse, da' il
+	# diritto di comprare una cosa in piu' in questo turno.
+	if e.has("extra"):
+		p.extra_turno += int(e["extra"])
+		gira(gs, col, "%d acquisto extra a giocatore %d" % [int(e["extra"]), player])
+		return
 	if e.has("a_scelta"):
 		var poca := "pietra"
 		for r in RISORSE:

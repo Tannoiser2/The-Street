@@ -1702,10 +1702,83 @@ tutte le varianti la Lampo vince da sola perche' l'era 1 da sola paga solo
 il Lampo; il numero che conta e' il **divario** fra Lampo e le altre, che va
 da 73-20 nella base a 55-21 con la catena e i costi misti.
 
+## Trentaduesima misura: l'era 1 con la catena, i costi misti e l'acquisto extra dalle carte
+
+Le decisioni del designer dopo le leve del pozzo (registro 157), nel file
+base `data/proposte/cards-v3-era1.json`: terreno di base a zero, spianare caro,
++1 della seconda risorsa della classe sugli edifici del mazzo (case come
+sono), i Ripari a 1 pagabile in Costruzione o Denaro, e l'**acquisto extra
+solo da una carta**: l'azione ⊕ del Capotribu' e del Mercante di ossidiana,
+delle Capanne e della Cava quando le attiva il proprietario, e della tessera
+Sentiero dei pastori. In piu' il bot **sa che le risorse muoiono**: sconta
+quel che non potra' spendere nei piazzamenti rimasti, e all'ultimo lavoratore
+spende tutto quel che puo' (`StrategyBot._fattore_morte`). Stesse 300 ere 1,
+3 giocatori, seme 700000. Tre controprove: `extra_sempre` (l'extra a ogni
+turno, senza carte), `senza_extra` (le cinque carte tornano com'erano),
+`costi_vecchi` (senza il +1 della seconda risorsa).
+
+| a giocatore | primo giro (reg. 155) | catena + misti (reg. 156) | **base** | extra sempre | senza extra | costi vecchi |
+|---|---|---|---|---|---|---|
+| prodotto | 14,0 | 9,3 | **8,7** (tessera 2,8 · Personaggi 4,2 · edifici 1,0 · azioni 0,6) | 8,6 | 9,2 | 9,4 |
+| speso | 5,4 | 7,0 | **7,2** | 7,4 | 7,2 | 6,3 |
+| **morto** | 8,7 | 2,3 | **1,5** (⚒ 0,5 · 🪙 0,5 · 💡 0,5) | 1,2 | 2,0 | 3,1 |
+| costruzioni / potenziamenti / passi | 3,9 / 0 / 0,1 | 2,8 / 0,2 / 1,3 | 3,8 / **0,03** / 0,4 | 3,9 / 0,20 / 0,8 | 3,7 / 0 / 0,3 | 4,2 / 0,10 / 0,1 |
+| acquisti extra aperti / usati | - | - | 0,74 / **0,25** | 3,22 / 0,86 | - | 0,80 / 0,41 |
+| edifici a partita (di cui case) | 11,8 (1,0) | 8,5 (1,4) | 11,4 (**5,1**) | 11,6 (5,5) | 11,2 (4,4) | 12,7 (2,5) |
+| spianati / crollati a partita | 0,9 / 2,5 | 0,2 / 2,3 | 0,2 / 3,0 | 0,4 / 2,9 | 0,0 / 3,2 | 0,7 / 3,0 |
+| PV dell'era (Lampo / censimento) | 4,3 (2,7/1,1) | 3,6 (2,2/0,9) | 5,0 (3,8/0,8) | 5,1 (3,8/0,7) | 4,8 (3,5/0,9) | 5,3 (3,3/1,3) |
+| vittorie Lampo (le altre) | 73 (20-35) | 55 (21-38) | 61 (23-33) | 59 (24-33) | 61 (23-37) | 69 (21-31) |
+
+Cosa dicono i numeri:
+- **La mancanza c'e'.** Si produce 8,7 e se ne spende 7,2: muore 1,5 a testa,
+  mezza risorsa per tipo, dentro il budget del metro (1-2). Il bot che sa
+  che le risorse muoiono fa la sua parte: con le stesse regole del giro
+  prima (catena + misti) il morto scende da 2,3 a 1,5 e i passi da 1,3 a
+  0,4. Nessun giocatore resta senza niente da comprare: i Ripari si
+  costruiscono in tutte le partite, tutte e due le copie.
+- **Ma l'era e' diventata un'era di case.** Cinque case a partita su undici
+  edifici: Ripari 1,98, Case di pietra 1,56, Capanne di fango 1,55, mentre
+  Dolmen 0,49, Grotte dipinte 0,25, Tumulo 0,10. Le case costano 1-2
+  Costruzione e nient'altro; le carte del mazzo chiedono due risorse. Con
+  poco in mano si compra quel che costa una cosa sola, e il Lampo delle case
+  (3,8 PV su 5,0) tiene la Lampo al 61%. Con i costi vecchi si costruiscono
+  12,7 edifici e solo 2,5 case, ma muore il doppio (3,1) e la Lampo sale al
+  69%: i costi misti fanno il loro lavoro sul morto, non sulle case.
+- **I potenziamenti sono spariti** (0,03 a testa): costano 1 Denaro o 1 Idea,
+  le stesse risorse che ora chiedono gli edifici, e con 8,7 risorse per
+  quattro costruzioni non ne resta per loro. L'acquisto extra si apre 0,74
+  volte a testa e si usa 0,25: quando si apre, non c'e' piu' niente in mano.
+  Con l'extra a ogni turno (controprova) si usa 0,86 volte su 3,22 aperte:
+  la catena c'e', manca cosa metterci dentro.
+- **Il draft**: il Capotribu' (⊕) e' preso per primo nel 95% dei casi (giro
+  1,05); il bot valuta l'extra 1,2 e poi lo usa un quarto delle volte. Da
+  tarare. Il Custode delle ossa resta ultimo (3,81): e' lo Scavo, che l'era 1
+  da sola non paga.
+
+Proposte al designer, da misurare una per volta:
+1. **Le case nella stessa economia**: anche le case con la seconda risorsa
+   (Civico: +1 Denaro), tenendo i Ripari a 1 ◈ come casa di salvataggio; o il
+   Lampo delle case a 1 per tutte. Riporta le carte del mazzo al centro.
+2. **L'extra con lo sconto**: l'acquisto extra costa 1 in meno (o il
+   potenziamento comprato nell'extra e' gratis). Da' un senso alla catena
+   quando si apre a mani vuote, come la casa gratis dei Castelli di Borgogna.
+3. **Potenziamenti a 0 nell'era 1** o pagabili in Costruzione: oggi nessuno li
+   compra e la fila resta ferma (la regola della fila che resta un'era in
+   piu', registro 126, li porta all'era 2).
+4. Il bot: l'azione ⊕ vale 1,2 al draft, va portata a quel che rende (0,3-0,5
+   finche' l'extra non si usa di piu').
+
 ## Come rifare il conto
 
 ```bash
-# trentunesima misura, le leve del pozzo: una variante per file
+# trentaduesima misura: il file base con catena, costi misti ed extra dalle carte; tre controprove
+python3 tools/genera_cards_v2.py && python3 tools/genera_cards_v3.py
+for v in extra_sempre senza_extra costi_vecchi; do python3 tools/genera_cards_v3.py --variante $v; done
+godot --headless res://scenes/audit_partita.tscn -- --players 3 --games 300 --seed 700000 --giro tutte \
+  --dati data/proposte/cards-v3-era1.json --rapporto 1 --fino_era 1 > b.csv 2> b.err
+python3 tools/misura_era.py b.err
+# trentunesima misura, le leve del pozzo: una variante per file (le varianti del primo giro
+# le rigenera il generatore al commit 2db6223; il file base di allora non aveva la catena)
 for v in costi terreno acquisto acquisto_caro pacchetto pacchetto_caro catena costi_misti catena_misti; do
   python3 tools/genera_cards_v3.py --variante $v
   godot --headless res://scenes/audit_partita.tscn -- --players 3 --games 300 --seed 700000 --giro tutte \

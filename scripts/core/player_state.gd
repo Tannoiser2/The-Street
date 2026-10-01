@@ -41,6 +41,10 @@ var personaggi_piazzati: Array[String] = []
 var sconto_turno: int = 0
 var sconto_se: String = ""
 var lampo_turno: int = 0
+# Gli acquisti extra guadagnati in questo turno da un'azione (registro 157):
+# ognuno apre, dopo l'azione del turno, l'acquisto di un potenziamento o di
+# una casa senza consumare il lavoratore.
+var extra_turno: int = 0
 # "Il primo terrapieno di ogni giocatore in quest'era costa 0" (ev_bonifiche).
 var terrapieno_free_used: bool = false
 # Personaggi reclutati in tutta la partita: non si azzera a fine era.
@@ -90,6 +94,7 @@ func duplica() -> PlayerState:
 	p.sconto_turno = sconto_turno
 	p.sconto_se = sconto_se
 	p.lampo_turno = lampo_turno
+	p.extra_turno = extra_turno
 	p.terrapieno_free_used = terrapieno_free_used
 	p.recruited_total = recruited_total
 	p.final_characters = final_characters.duplicate()

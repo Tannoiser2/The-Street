@@ -1,7 +1,7 @@
 {
   "meta": {
     "game": "La Strada delle Ere",
-    "ruleset": "v3-era1-prova-pacchetto",
+    "ruleset": "v3-era1-prova-costi_vecchi",
     "language": "it",
     "source": "distinta-carte (fonte unica)",
     "origine": "generato da tools/genera_cards_v3.py da data/cards-v2.json: non modificare a mano"
@@ -205,7 +205,7 @@
     "personaggi_per_era": 16,
     "risorse_muoiono": true,
     "azione_edificio": "proprietario",
-    "acquisto_extra": true
+    "spianare_costo": 1
   },
   "terrains": [
     {
@@ -384,7 +384,7 @@
       "terrain": "pianura",
       "width": 1,
       "cost": {
-        "pietra": 2,
+        "pietra": 1,
         "oro": 0,
         "idee": 0
       },
@@ -402,11 +402,11 @@
       },
       "exhaustible": 0,
       "azione": {
-        "tipo": "cambio",
+        "tipo": "acquisto",
         "n": 1
       },
       "effects": [],
-      "effect_text": "A ogni attivazione: cambia 1 risorsa in un'altra."
+      "effect_text": "A ogni tua attivazione: puoi comprare ancora un potenziamento o una casa."
     },
     {
       "id": "ed_dolmen",
@@ -418,7 +418,7 @@
       "terrain": "collina",
       "width": 1,
       "cost": {
-        "pietra": 2,
+        "pietra": 1,
         "oro": 0,
         "idee": 1
       },
@@ -453,7 +453,7 @@
       "terrain": "collina",
       "width": 1,
       "cost": {
-        "pietra": 1,
+        "pietra": 0,
         "oro": 0,
         "idee": 1
       },
@@ -489,7 +489,7 @@
       "terrain": "fiume",
       "width": 1,
       "cost": {
-        "pietra": 2,
+        "pietra": 1,
         "oro": 0,
         "idee": 0
       },
@@ -526,7 +526,7 @@
       "terrain": "bosco",
       "width": 1,
       "cost": {
-        "pietra": 2,
+        "pietra": 1,
         "oro": 0,
         "idee": 1
       },
@@ -562,7 +562,7 @@
       "terrain": "fiume",
       "width": 1,
       "cost": {
-        "pietra": 2,
+        "pietra": 1,
         "oro": 0,
         "idee": 0
       },
@@ -598,7 +598,7 @@
       "terrain": "pianura",
       "width": 1,
       "cost": {
-        "pietra": 2,
+        "pietra": 1,
         "oro": 0,
         "idee": 0
       },
@@ -616,13 +616,11 @@
       },
       "exhaustible": 4,
       "azione": {
-        "tipo": "cambio",
-        "n": 1,
-        "da": "pietra",
-        "a": "oro"
+        "tipo": "acquisto",
+        "n": 1
       },
       "effects": [],
-      "effect_text": "A ogni attivazione: cambia 1 Costruzione in 1 Denaro."
+      "effect_text": "A ogni tua attivazione: puoi comprare ancora un potenziamento o una casa."
     },
     {
       "id": "ed_focolare_comune",
@@ -634,7 +632,7 @@
       "terrain": "pianura",
       "width": 1,
       "cost": {
-        "pietra": 2,
+        "pietra": 1,
         "oro": 0,
         "idee": 0
       },
@@ -670,7 +668,7 @@
       "terrain": "fiume",
       "width": 1,
       "cost": {
-        "pietra": 2,
+        "pietra": 1,
         "oro": 0,
         "idee": 0
       },
@@ -707,7 +705,7 @@
       "terrain": null,
       "width": 1,
       "cost": {
-        "pietra": 3,
+        "pietra": 2,
         "oro": 0,
         "idee": 1
       },
@@ -747,7 +745,7 @@
       "terrain": "pianura",
       "width": 1,
       "cost": {
-        "pietra": 2,
+        "pietra": 1,
         "oro": 0,
         "idee": 0
       },
@@ -784,7 +782,7 @@
       "terrain": "collina",
       "width": 2,
       "cost": {
-        "pietra": 2,
+        "pietra": 1,
         "oro": 0,
         "idee": 1
       },
@@ -2548,7 +2546,7 @@
       "terrain": null,
       "width": 1,
       "cost": {
-        "pietra": 2,
+        "pietra": 1,
         "oro": 0,
         "idee": 0
       },
@@ -2581,7 +2579,7 @@
       "terrain": null,
       "width": 1,
       "cost": {
-        "pietra": 3,
+        "pietra": 2,
         "oro": 0,
         "idee": 0
       },
@@ -2614,11 +2612,11 @@
       "terrain": null,
       "width": 1,
       "cost": {
-        "pietra": 2,
+        "pietra": 1,
         "oro": 0,
         "idee": 0
       },
-      "flexible": false,
+      "flexible": true,
       "resistance": 1,
       "rendita": 0,
       "lampo": 1,
@@ -2977,7 +2975,7 @@
       "is_dynasty": false,
       "timing": "v3",
       "imprint": false,
-      "effect_text": "Produce 1 Costruzione. +1 resistenza fino a fine era a un tuo edificio in questa colonna.",
+      "effect_text": "Produce 1 Costruzione. In questo turno puoi comprare ancora un potenziamento o una casa.",
       "effects": [],
       "scavo": 0,
       "produzione": {
@@ -2986,9 +2984,8 @@
         "idee": 0
       },
       "azione": {
-        "tipo": "resistenza",
-        "n": 1,
-        "a": "uno"
+        "tipo": "acquisto",
+        "n": 1
       }
     },
     {
@@ -3112,7 +3109,7 @@
       "is_dynasty": false,
       "timing": "v3",
       "imprint": false,
-      "effect_text": "Produce 1 Denaro. Fino a 2 cambi 1:1.",
+      "effect_text": "Produce 1 Denaro. In questo turno puoi comprare ancora un potenziamento o una casa.",
       "effects": [],
       "scavo": 0,
       "produzione": {
@@ -3121,8 +3118,8 @@
         "idee": 0
       },
       "azione": {
-        "tipo": "cambio",
-        "n": 2
+        "tipo": "acquisto",
+        "n": 1
       }
     },
     {
@@ -7176,12 +7173,10 @@
         "oro": 0,
         "idee": 0
       },
-      "testo": "Chi attiva per primo prende +1 Denaro.",
+      "testo": "Chi attiva per primo puo' comprare ancora un potenziamento o una casa in quel turno.",
       "effetto": {
         "quando": "attiva",
-        "guadagno": {
-          "oro": 1
-        }
+        "extra": 1
       },
       "copie": 2
     },

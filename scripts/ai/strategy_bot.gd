@@ -289,7 +289,12 @@ static func _guadagno_v3(gs: GameState, p: PlayerState, copia: GameState, pc: Pl
 		col: int, strategia: String) -> float:
 	var r := valore_risorse(gs, p)
 	var q := float(pc.pietra - p.pietra) * r.x + float(pc.oro - p.oro) * r.y + float(pc.idee - p.idee) * r.y
+	# Le risorse che non si potranno spendere prima della fine dell'era non
+	# valgono: si guarda la copia, dove il piazzamento e' gia' fatto.
+	q *= _fattore_morte(copia, pc)
 	q += float(pc.vp - p.vp) * 0.9
+	# L'acquisto extra guadagnato vale un pezzo di azione in piu'.
+	q += 1.2 * float(pc.extra_turno - p.extra_turno)
 	var prima := {}
 	for b in gs.grid.buildings: prima[b.uid] = [b.protection, b.bonus_scavo]
 	for b in copia.grid.buildings:
@@ -484,6 +489,9 @@ static func _valore(gs: GameState, p: PlayerState, v, strategia: String, col: in
 	var r := valore_risorse(gs, p)
 	# Le Idee (v2) si contano come l'oro: una risorsa che non si scava.
 	var speso := float(v.pietra) * r.x + float(v.oro) * r.y + float(v.idee) * r.y
+	# V3: le risorse muoiono a fine era. Quel che non si potra' spendere nei
+	# piazzamenti rimasti non costa niente spenderlo adesso.
+	speso *= _fattore_morte(gs, p)
 	if speso != 0.0: dett["costo"] = -speso
 	match v.tipo:
 		"passa":
@@ -502,6 +510,25 @@ static func _valore(gs: GameState, p: PlayerState, v, strategia: String, col: in
 		"recluta": return _valore_reclutamento(gs, p, v, strategia, r, dett) - speso
 		"dinastia": return _valore_dinastia(gs, dett) - speso
 	return 0.0
+
+# LE RISORSE MUOIONO (v3, costante `risorse_muoiono`, registro 157). Un
+# giocatore vero, all'ultimo lavoratore dell'era, spende tutto quel che ha:
+# tenere non vale niente. Qui si stima quanto si potra' ancora spendere nei
+# piazzamenti rimasti (circa 2,5 risorse l'uno, un po' di piu' se le carte
+# danno acquisti extra) e si confronta con quel che si ha in mano: la quota di
+# risorse che non si potra' spendere vale zero, sia come costo di una mossa
+# sia come guadagno di un'attivazione. Vale 1 (nessuno sconto) fuori dalla v3.
+# Lo stato guardato e' quello DOPO il piazzamento di questo turno, quindi i
+# lavoratori rimasti sono quelli che restano dopo questo.
+const SPESA_PER_PIAZZAMENTO := 2.5
+
+static func _fattore_morte(gs: GameState, p: PlayerState) -> float:
+	if not PersonaggiV3.risorse_muoiono(): return 1.0
+	var rimasti := maxi(0, p.workers - p.workers_used)
+	var capacita := float(rimasti) * SPESA_PER_PIAZZAMENTO + (1.5 if p.extra_turno > 0 or gs.acquisto_extra_aperto else 0.0)
+	var stock := float(p.total_resources())
+	if stock <= 0.0: return 1.0
+	return clampf(capacita / stock, 0.0, 1.0)
 
 static func _ere_rimaste(gs: GameState) -> int:
 	return 5 - gs.era
@@ -846,6 +873,7 @@ static func _valore_personaggio_v3(gs: GameState, p: PlayerState, d: Dictionary,
 		"scavo": a = 0.3 * float(az.get("n", 1)) + (0.8 if strategia == "scavo" else 0.0)
 		"lampo": a = 1.0 + (0.5 if strategia == "lampo" else 0.0)
 		"altri": a = 0.6
+		"acquisto": a = 1.2
 		"adiacente": a = 0.6
 		"tessera": a = 0.4
 	# La collezione (Continuita'): un Personaggio della classe che si sta

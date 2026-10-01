@@ -26,8 +26,11 @@ Le costanti nuove del file dati, tutte spente nella v2 e nella v1.5:
 | `dinastia` | spenta | niente quinto lavoratore nella prova |
 | `azione_edificio` | `"proprietario"` | l'azione speciale di un edificio scatta per chi lo possiede, a ogni attivazione della colonna, di chiunque |
 | `event_force_by_era.1` | 2 | come oggi |
-| `acquisto_extra` | spento nel file base; acceso nelle varianti `acquisto`, `catena`, ... | dopo l'azione del turno si compra ancora un potenziamento o una casa, pagando, senza lavoratore (registro 156) |
-| `spianare_costo` | assente nel file base; 1 nelle varianti `_caro` e `catena` | lo spianare caro del registro 152 |
+| terreni, `produzione_base` | 0 | il terreno di base non produce: resta la tessera dell'era (registro 157) |
+| `spianare_costo` | 1 | spianare caro (registro 152): niente sconto a chi spiana il proprio edificio |
+| costi dell'era 1 | +1 della seconda risorsa della classe | Commercio e Civico +1 Denaro, Religione e Cultura +1 Idea, Ingegneria e Militare +1 Costruzione; le case della riserva come sono (registro 157) |
+| Ripari | costo 1, ◈ Costruzione o Denaro | la casa che si compra sempre (registro 157) |
+| `acquisto_extra` | spento | l'acquisto extra arriva solo dall'azione ⊕ di una carta (due Personaggi, due edifici, una tessera); la variante `extra_sempre` lo dà a ogni turno |
 
 Ordine dell'attivazione: la tessera della colonna (produzione, poi effetto se non ancora
 usato); ogni edificio in piedi nella colonna, di chiunque (produzione al proprietario, poi
@@ -46,7 +49,7 @@ Restano quelle di oggi, 7 tipi in 2 copie (registro 121):
 |---|---|---|
 | Campi arati | ⚒1 | il primo edificio da 2 o 3 caselle costruito qui costa 1 Costruzione in meno |
 | Radura | — | il primo Civico costruito qui ha +1 Lampo |
-| Sentiero dei pastori | — | chi attiva per primo prende +1 Denaro |
+| Sentiero dei pastori | — | chi attiva per primo ⊕ può comprare ancora un potenziamento o una casa in quel turno (registro 157; era +1 Denaro) |
 | Terra di nessuno | — | il primo edificio costruito qui ignora il requisito di terreno |
 | Recinto di pietre | ⚒1 | il primo edificio costruito qui ha +1 resistenza fino a fine era |
 | Luogo sacro | — | il primo Religione costruito qui costa 1 Idea in meno |
@@ -65,13 +68,13 @@ metro.
 
 | # | Personaggio | classe | produce | azione (quando lo piazzi) |
 |---|---|---|---|---|
-| 1 | Capotribù | Civico | ⚒1 | 🛡 +1 res fino a fine era a un tuo edificio in questa colonna |
+| 1 | Capotribù | Civico | ⚒1 | ⊕ in questo turno puoi comprare ancora un potenziamento o una casa (registro 157; era 🛡 +1 res) |
 | 2 | Anziana del villaggio | Civico | ⚒1 | ⇄ cambia 1 risorsa in un'altra |
 | 3 | Cacciatore | Civico | ⚒1 | ✦ +1 Lampo all'edificio che costruisci in questo turno |
 | 4 | Sciamano | Religione | 💡1 | ★ +1 PV se hai un edificio Religione in piedi in questa colonna |
 | 5 | Guardiano del fuoco | Religione | ⚒1 | 🛡 +1 res fino a fine era a ogni tuo Religione in questa colonna |
 | 6 | Custode delle ossa | Religione | 💡1 | ⚱ +1 Scavo permanente a un tuo edificio in questa colonna |
-| 7 | Mercante di ossidiana | Commercio | 🪙1 | ⇄ fino a 2 cambi 1:1 |
+| 7 | Mercante di ossidiana | Commercio | 🪙1 | ⊕ in questo turno puoi comprare ancora un potenziamento o una casa (registro 157; era ⇄ 2 cambi) |
 | 8 | Barattatore | Commercio | ⚒1 🪙1 | nessuna |
 | 9 | Portatore di sale | Commercio | 🪙1 | 👥 +1 Denaro per ogni altro giocatore con un edificio in questa colonna (max 2) |
 | 10 | Incisore | Cultura | 💡1 | ⚱ +2 Scavo permanente a un tuo edificio in questa colonna (l'Impronta di oggi, senza carta sotto) |
@@ -95,21 +98,23 @@ Dolmen e i Menhir.
 
 ## I 15 edifici
 
-Dodici nel mazzo, tre case in riserva. Costi, resistenza, Lampo, Rendita e Scavo sono
-quelli di oggi salvo dove la nota lo dice; la **produzione** resta (quasi tutta a zero) e
+Dodici nel mazzo, tre case in riserva. Resistenza, Lampo, Rendita e Scavo sono quelli di
+oggi salvo dove la nota lo dice; i **costi** in tabella sono quelli della scheda, e il file
+base aggiunge a ciascuno (case escluse) **+1 della seconda risorsa della classe** (registro
+157: Capanne ⚒1 🪙1, Dolmen ⚒1 💡2, Grotte dipinte 💡2, Villaggio palizzato ⚒2...); la **produzione** resta (quasi tutta a zero) e
 l'**azione** è nuova. L'azione scatta per il proprietario a ogni attivazione della
 colonna, di chiunque: circa due volte per era.
 
 | edificio | classe | terreno | costo | res | Lampo | Rendita | Scavo | produce | azione | nota |
 |---|---|---|---|---|---|---|---|---|---|---|
-| Capanne | Civico | pianura | ⚒1 | 1 | 1 | — | 2 | ⚒1 | ⇄ cambia 1 risorsa | come oggi più l'azione |
+| Capanne | Civico | pianura | ⚒1 🪙1 | 1 | 1 | — | 2 | ⚒1 | ⊕ a ogni tua attivazione: puoi comprare ancora un potenziamento o una casa | registro 157; era ⇄ |
 | Palafitte | Civico | fiume | ⚒1 | 2 | 1 | — | 2 | ⚒1 | 🪙 +1 Denaro | |
 | Focolare comune | Civico | pianura | ⚒1 | 1 | 1 | — | 2 | — | ⚒ +1 Costruzione | oggi "quando lo attivi": ora a ogni attivazione |
 | Dolmen | Religione | collina | ⚒1 💡1 | 3 | — | **1** | 3 | — | 🛡 +1 res fino a fine era a un tuo edificio adiacente | Rendita da 2 a 1, da misurare contro il 2 di oggi (metro: fino a 4 censimenti; vita media oggi 2,2 ere) |
 | Menhir | Religione | bosco | ⚒1 💡1 | 4 | — | **1** | 3 | — | 💡 +1 Idea | Rendita da 2 a 1, come il Dolmen |
 | Circolo di pietre | Religione | — | ⚒2 💡1 | 4 | — | 2 | 5 | — | ★ +1 PV se hai 2+ Religione in piedi | resta a 2: costa 3 e vuole la collezione |
 | Approdo | Commercio | fiume | ⚒1 | 1 | — | — | 2 | ⚒1 | 🪙 +1 Denaro se chi attiva non sei tu | premia la colonna viva |
-| Cava | Commercio | pianura | ⚒1 | 1 | — | — | 2 | ⚒2 | ⇄ cambia 1 Costruzione in 1 Denaro | il produttore puro |
+| Cava | Commercio | pianura | ⚒1 🪙1 | 1 | — | — | 2 | ⚒2 | ⊕ a ogni tua attivazione: puoi comprare ancora un potenziamento o una casa | registro 157; era ⇄ |
 | Grotte dipinte | Cultura | collina | 💡1 | 2 | — | — | 6 | — | 💡 +1 Idea | la carta dello Scavo: cade all'evento e vale 6 se riscoperta |
 | Tumulo funerario | Religione, Cultura | collina, 2 caselle | ⚒1 💡1 | 3 | 1 | — | 5 | — | ⚱ +1 Scavo permanente a un tuo edificio adiacente | |
 | Trappole da pesca | Ingegneria | fiume | ⚒1 | 1 | — | — | 0 | ⚒1 | ⚒ +1 Costruzione se chi attiva sei tu | |
@@ -189,6 +194,12 @@ Secondo giro, le leve del pozzo (registro 156): la **catena** (terreno di base c
 **acquisto extra** dopo l'azione del turno, spianare caro) spende 7,0 e lascia morire 3,1; con i
 **costi misti** (+1 della seconda risorsa della classe) il morto e' 2,3 e la Lampo scende al 55%.
 Le varianti sono file generati: `tools/genera_cards_v3.py --variante catena` eccetera.
+
+Terzo giro (registri 157-158), con la catena e i costi misti nel file base, l'extra solo dalle
+carte e il bot che sa che le risorse muoiono: prodotto 8,7, speso 7,2, **morto 1,5**. La
+mancanza c'e'. Ma si costruiscono 5 case a partita su 11 edifici, i potenziamenti spariscono e
+l'acquisto extra si usa un quarto delle volte che si apre: le proposte sono nella trentaduesima
+misura.
 
 ## Che cosa serve nel codice
 

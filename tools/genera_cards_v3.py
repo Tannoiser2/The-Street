@@ -175,57 +175,80 @@ for b in v3["buildings"]:
     if b["id"] in RENDITA_E1:
         b["rendita"] = RENDITA_E1[b["id"]]
 
-# ---- le varianti del pozzo (registro 156) ----------------------------------
-# Il designer: "Ci deve essere una mancanza di risorse, non un surplus";
-# "anche gli edifici potrebbero costare di piu'"; la catena dei Castelli di
-# Borgogna, "far fare piu' azioni o acquisti oltre i 4 consentiti".
-#   --variante costi      ogni edificio dell'era 1 costa 1 Costruzione in piu'
-#   --variante terreno    il terreno di base non produce: resta la tessera dell'era
-#   --variante acquisto   dopo l'azione si compra ancora un potenziamento o una casa
-#   --variante pacchetto  tutte e tre insieme
-#   --variante acquisto_caro / pacchetto_caro   come sopra, con lo spianare caro (registro 152)
-#   --variante catena     terreno + acquisto + spianare caro, costi com'erano
-#   --variante costi_misti   +1 della seconda risorsa della classe (Denaro o Idee o Costruzione)
-#   --variante catena_misti  catena + costi misti
+# ---- la catena e i costi misti nel file base (registri 156-157) --------------
+# Il designer, letta la misura delle leve del pozzo: "catena si' e costi misti",
+# "l'acquisto extra non si fa sempre, ci vuole un effetto di una carta o
+# personaggio o edificio o tessera", "i giocatori devono poter comprare sempre
+# almeno un edificio, magari le case di fango o qualcosa che costa poco".
+# Il terreno di base non produce: resta la tessera dell'era.
+for t in v3["terrains"]:
+    t["produzione_base"] = {"pietra": 0, "oro": 0, "idee": 0}
+    t["base_production_by_era"] = {e: {"pietra": 0, "oro": 0, "idee": 0} for e in "12345"}
+# Spianare caro (registro 152): niente sconto a chi spiana il proprio edificio.
+c["spianare_costo"] = 1
+# I costi misti: +1 della seconda risorsa della classe (Commercio e Civico
+# Denaro, Religione e Cultura Idee, Ingegneria e Militare Costruzione). Le case
+# della riserva restano come sono: una casa deve restare comprabile sempre.
+SECONDA = {"commercio": "oro", "civico": "oro", "religione": "idee", "cultura": "idee",
+           "ingegneria": "pietra", "militare": "pietra"}
+for b in v3["buildings"]:
+    if b["era"] != 1 or b.get("riserva"): continue
+    b["cost"][SECONDA[b["classes"][0]]] += 1
+# La casa che si compra sempre: i Ripari costano 1, Costruzione o Denaro a scelta.
+for b in v3["buildings"]:
+    if b["id"] == "ed_casa_e1_s":
+        b["flexible"] = True
+# L'acquisto extra solo da un effetto: due Personaggi (il Capotribu' organizza,
+# il Mercante fa comprare), due edifici quando li attiva il proprietario (le
+# Capanne e la Cava), e una tessera dell'era (il Sentiero dei pastori).
+ACQUISTO = {"tipo": "acquisto", "n": 1}
+EXTRA_PERSONAGGI = {
+    "pe_capotribu": "Produce 1 Costruzione. In questo turno puoi comprare ancora un potenziamento o una casa.",
+    "pe_mercante_di_ossidiana": "Produce 1 Denaro. In questo turno puoi comprare ancora un potenziamento o una casa.",
+}
+for ch in v3["characters"]:
+    if ch["id"] in EXTRA_PERSONAGGI:
+        ch["azione"] = dict(ACQUISTO)
+        ch["effect_text"] = EXTRA_PERSONAGGI[ch["id"]]
+EXTRA_EDIFICI = {
+    "ed_capanne": "A ogni tua attivazione: puoi comprare ancora un potenziamento o una casa.",
+    "ed_cava": "A ogni tua attivazione: puoi comprare ancora un potenziamento o una casa.",
+}
+for b in v3["buildings"]:
+    if b["id"] in EXTRA_EDIFICI:
+        b["azione"] = dict(ACQUISTO)
+        b["effect_text"] = EXTRA_EDIFICI[b["id"]]
+for t in v3["tessere_era"]:
+    if t["id"] == "te_sentiero_dei_pastori":
+        t["effetto"] = {"quando": "attiva", "extra": 1}
+        t["testo"] = "Chi attiva per primo puo' comprare ancora un potenziamento o una casa in quel turno."
+
+# ---- le controprove ----------------------------------------------------------
+#   --variante extra_sempre   l'acquisto extra a ogni turno, senza carte (la "catena" del registro 156)
+#   --variante senza_extra    nessun acquisto extra: le quattro carte tornano com'erano nella scheda
+#   --variante costi_vecchi   i costi della scheda, senza il +1 della seconda risorsa
+# Le varianti del primo giro (costi, terreno, acquisto, pacchetto...) erano
+# relative al file base di prima che assorbisse la catena: le rigenera il
+# generatore al commit 2db6223.
 import sys
 variante = sys.argv[sys.argv.index("--variante") + 1] if "--variante" in sys.argv else ""
 
-def costi(v):
-    for b in v["buildings"]:
-        if b["era"] == 1: b["cost"]["pietra"] += 1
-def terreno(v):
-    for t in v["terrains"]:
-        t["produzione_base"] = {"pietra": 0, "oro": 0, "idee": 0}
-        t["base_production_by_era"] = {e: {"pietra": 0, "oro": 0, "idee": 0} for e in "12345"}
-def acquisto(v):
+def extra_sempre(v):
     v["constants"]["acquisto_extra"] = True
-def pacchetto(v):
-    costi(v); terreno(v); acquisto(v)
-# Lo spianare caro (registro 152, costante `spianare_costo`): i bot usavano
-# l'acquisto extra per spianare i propri Dolmen e Circoli con una casa.
-def caro(v):
-    v["constants"]["spianare_costo"] = 1
-def acquisto_caro(v):
-    acquisto(v); caro(v)
-def pacchetto_caro(v):
-    pacchetto(v); caro(v)
-# La catena: terreno che non produce, acquisto extra, spianare caro, costi
-# com'erano. E i costi misti: la seconda risorsa della classe (Commercio e
-# Civico +1 Denaro, Religione e Cultura +1 Idea, Ingegneria e Militare +1
-# Costruzione), cosi' nell'era 1 anche Denaro e Idee hanno dove andare.
-def catena(v):
-    terreno(v); acquisto(v); caro(v)
-SECONDA = {"commercio": "oro", "civico": "oro", "religione": "idee", "cultura": "idee",
-           "ingegneria": "pietra", "militare": "pietra"}
-def costi_misti(v):
+def senza_extra(v):
+    for ch in v["characters"]:
+        if ch["id"] == "pe_capotribu": ch["azione"] = resistenza(1, "uno")
+        if ch["id"] == "pe_mercante_di_ossidiana": ch["azione"] = cambio(2)
     for b in v["buildings"]:
-        if b["era"] != 1: continue
-        b["cost"][SECONDA[b["classes"][0]]] += 1
-def catena_misti(v):
-    catena(v); costi_misti(v)
-VARIANTI = {"costi": costi, "terreno": terreno, "acquisto": acquisto, "pacchetto": pacchetto,
-            "acquisto_caro": acquisto_caro, "pacchetto_caro": pacchetto_caro,
-            "catena": catena, "costi_misti": costi_misti, "catena_misti": catena_misti}
+        if b["id"] == "ed_capanne": b["azione"] = cambio(1)
+        if b["id"] == "ed_cava": b["azione"] = cambio(1, "pietra", "oro")
+    for t in v["tessere_era"]:
+        if t["id"] == "te_sentiero_dei_pastori": t["effetto"] = {"quando": "attiva", "guadagno": {"oro": 1}}
+def costi_vecchi(v):
+    for b in v["buildings"]:
+        if b["era"] != 1 or b.get("riserva"): continue
+        b["cost"][SECONDA[b["classes"][0]]] -= 1
+VARIANTI = {"extra_sempre": extra_sempre, "senza_extra": senza_extra, "costi_vecchi": costi_vecchi}
 if variante:
     VARIANTI[variante](v3)
     v3["meta"]["ruleset"] = "v3-era1-prova-" + variante
