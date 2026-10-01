@@ -97,7 +97,7 @@
     "passa_incasso_scelta": 1,
     "draft_personaggi": true,
     "personaggi_sepolti": false,
-    "scheletro_potenziamento": true,
+    "scheletro_potenziamento": false,
     "scheletro_conta": "sempre",
     "tessere_una_volta_per_era": true,
     "tessere_era": true,

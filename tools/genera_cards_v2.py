@@ -825,6 +825,10 @@ def rovine_e_flussi(v):
         if b["era"] >= 4 and b["lampo"] >= 2: b["lampo"] = 1
         if b["rendita"] == 1: b["rendita"] = 2
     v["constants"]["continuita_collezione"] = dict(CONTINUITA_COLLEZIONE)
+    # GLI SCHELETRI STANNO SULLE TESSERE (registro 137). Il designer: "le
+    # pedine scheletro non servono piu'". Il lavoratore che potenzia non
+    # resta piu' sotto l'edificio: gli scheletri sono le icone delle tessere.
+    v["constants"]["scheletro_potenziamento"] = False
     # Senza ristrutturare, due carte parlavano di una mossa che non c'e' piu'.
     # Il Restauratore diventa chi vede riportate alla luce le proprie rovine
     # (scoperte dall'era moderna, da chiunque); le Secolarizzazioni tengono

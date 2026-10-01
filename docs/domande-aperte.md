@@ -2273,4 +2273,13 @@ dato è stato importato da lì. Ma due confronti fra ciò che è stampato e
     scavo del bot rafforzava la Scavo: a zero a tre e quattro. La Lampo con
     meno peso (1,4 a tre, 1,0 a quattro). Ventisettesima misura. Le regole
     non cambiano: sono pesi del bot.
+137. **Via le pedine scheletro.** Il designer, provando il gioco: "ancora ci
+    sono le pedine scheletro che non servono piu'". Con gli scheletri sulle
+    tessere scavo (registro 135) il lavoratore che potenzia non lascia piu'
+    il gettone sotto l'edificio: `scheletro_potenziamento` spento nel file
+    v2 (il meccanismo resta, provato nei test). Tolti circa 8-9 PV a
+    giocatore di Scheletri; misura in corso. Insieme: la Lampo dei bot a tre
+    giocatori pesa 1,2 (31-37 % a ogni strategia su 300 partite), e
+    tools/estrai_grafica.py lanciato da riga di comando si fermava prima di
+    estrarre le tessere rovina (la funzione stava dopo il `__main__`).
 
