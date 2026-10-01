@@ -150,6 +150,16 @@ v2["constants"]["vetusta_max_bosco"] = 0
 # avanzano 3-6 Denaro a testa dall'era 2 in poi, a zero in meno del 10% dei
 # casi, e i PV non si muovono (ventottesima misura).
 v2["constants"]["prosperity"] = dict(v2["constants"]["prosperity"], attiva=False)
+# REGISTRO 149: l'evento finale. Il designer: "a cosa serve la resistenza negli
+# edifici di era 5? O si mette un evento anche alla fine oppure va eliminato.
+# Procedi con evento finale". Un evento solo, senza effetti speciali, di forza
+# 4 come il Medioevo: crolla chi resta sotto di due (resistenza 2 o meno senza
+# protezioni). Si risolve prima del conto finale, quindi prima del censimento
+# finale e dello Scavo: quel che crolla smette di rendere e diventa rovina da
+# contare.
+v2["constants"]["evento_finale"] = {"id": "ev_giudizio_del_tempo", "name": "Il giudizio del tempo",
+    "era": 5, "force": 4, "effects": [],
+    "text": "Fine dell'era Moderna: ogni edificio in piedi affronta la forza 4, poi si contano i punti."}
 # ---- le varianti di prova per la scarsita' di sagome a quattro (registro 110) --
 # A quattro giocatori sedici turni per era contro dodici sagome. Due idee del
 # designer, ognuna un file a parte in data/proposte/, che il file v2 non tocca:

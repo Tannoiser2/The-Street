@@ -101,6 +101,14 @@
     "scheletro_potenziamento": false,
     "scheletro_conta": "sempre",
     "tessere_una_volta_per_era": true,
+    "evento_finale": {
+      "id": "ev_giudizio_del_tempo",
+      "name": "Il giudizio del tempo",
+      "era": 5,
+      "force": 4,
+      "effects": [],
+      "text": "Fine dell'era Moderna: ogni edificio in piedi affronta la forza 4, poi si contano i punti."
+    },
     "tessere_era": true,
     "caselle": true,
     "fila_potenziamenti_resta": true,

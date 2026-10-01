@@ -360,11 +360,16 @@ Quando tutti hanno esaurito i lavoratori, l'era si chiude in quattro passi.
 **L'evento**, rivelato a inizio era, si risolve adesso. Ogni edificio in piedi somma la
 resistenza stampata, i potenziamenti Struttura, il +2 di ogni lavoratore che lo protegge, il +1
 della collina se l'ha preso e i modificatori dell'evento, e confronta il totale con la forza
-dell'epoca: 2 nella Preistoria, 3 nell'Antichità, 4 nel Medioevo, 3 nel Rinascimento. **Chi
+dell'epoca: 2 nella Preistoria, 3 nell'Antichità, 4 nel Medioevo, 3 nel Rinascimento, 4 nell'era
+Moderna. **Chi
 fallisce di un solo punto regge per un soffio e resta attivo; chi fallisce di due o più crolla in
 rovina**: la carta torna al proprietario e al suo posto si posano le tessere scavo. Non c'è più
-il rudere e non c'è più la Vetustà: reggere non dà cubetti. L'era Moderna
-non ha evento.
+il rudere e non c'è più la Vetustà: reggere non dà cubetti.
+
+**L'evento finale.** Anche l'era Moderna ha il suo evento, *Il giudizio del tempo*: forza 4,
+nessun effetto speciale, rivelato a inizio era come gli altri. Si risolve prima del conto finale:
+quel che crolla non paga il censimento finale e diventa rovina, con le sue tessere scavo da
+contare.
 
 **Il censimento** segue il crollo, mai il contrario: si conta solo ciò che è sopravvissuto. Ogni
 vostro edificio in piedi paga la sua Rendita stampata.

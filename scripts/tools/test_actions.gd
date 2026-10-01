@@ -39,6 +39,7 @@ func _ready() -> void:
 	_run("il draft dei Personaggi a inizio era (v2)", _test_draft_v2)
 	_run("v2: niente scheletri dal draft, niente Vetusta' (registro 95)", _test_senza_vetusta_v2)
 	_run("v2: niente Prosperita' Urbana (registro 142)", _test_senza_prosperita_v2)
+	_run("v2: l'evento finale dell'era Moderna (registro 149)", _test_evento_finale)
 	_run("v2: le tre carte che contavano la Vetusta' (registro 99)", _test_tre_carte_v2)
 	_run("v2: le tessere una volta per era (registro 100)", _test_tessere_v2)
 	_run("l'incasso al passaggio nel turno v1 (registro 109)", _test_passa_incasso)
@@ -1284,6 +1285,37 @@ func _test_draft_v2() -> void:
 	_ok("  con Personaggi draftati (%d)" % draftati, draftati >= 30)
 	CardDB.load_db(CardDB.DB_PATH)
 
+
+# Registro 149: nella v2 anche l'era Moderna ha un evento (forza 4), e chi
+# non lo regge crolla prima del conto finale; nella v1.5 l'era 5 resta senza.
+func _test_evento_finale() -> void:
+	var c1 := _game(3, 990)
+	c1._start_era(5)
+	_ok("con i dati v1.5 l'era 5 non ha evento", c1.gs.current_event.is_empty())
+	if not FileAccess.file_exists("res://data/cards-v2.json"): return
+	CardDB.load_db("res://data/cards-v2.json")
+	var ctl := _game(3, 990)
+	ctl._start_era(5)
+	_eq("nella v2 l'era 5 ha l'evento finale, forza 4", int(ctl.gs.current_event.get("force", 0)), 4)
+	var gs := ctl.gs
+	var debole := Building.new()
+	debole.uid = gs.new_uid()
+	debole.data = CardDB.buildings["ed_caffe_letterario"]
+	debole.owner = 0
+	debole.col_from = 1
+	debole.col_to = 2
+	gs.grid.buildings.append(debole)
+	var forte := Building.new()
+	forte.uid = gs.new_uid()
+	forte.data = CardDB.buildings["ed_casa_e5_g"]
+	forte.owner = 1
+	forte.col_from = 3
+	forte.col_to = 4
+	gs.grid.buildings.append(forte)
+	EraRules.resolve_event(gs)
+	_eq("  il Caffe' letterario (resistenza 1) crolla in rovina", debole.state, Enums.BuildingState.ROVINA)
+	_eq("  il Condominio popolare (resistenza 4) regge", forte.state, Enums.BuildingState.INTATTO)
+	CardDB.load_db(CardDB.DB_PATH)
 
 # Registro 142: nella v2 la Prosperita' Urbana non c'e' (il Denaro avanza
 # gia' a ogni era). Una colonna con tre edifici di due giocatori non e' un

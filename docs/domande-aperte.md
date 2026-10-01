@@ -2384,3 +2384,13 @@ dato è stato importato da lì. Ma due confronti fra ciò che è stampato e
     una rovina come le altre: la carta torna al proprietario e al suo posto
     vanno le sue tessere coperte, una per casella, senza premio di scavo per
     chi spiana. Misura in corso insieme al premio (registro 145).
+149. **L'evento finale.** Il designer: "a cosa serve la resistenza negli
+    edifici di era 5? O si mette un evento anche alla fine oppure va
+    eliminato. Procedi con evento finale". Nel file v2 l'era Moderna ha un
+    evento, *Il giudizio del tempo* (costante `evento_finale`, la v1.5 non
+    cambia): forza 4, nessun effetto speciale, rivelato a inizio era e
+    risolto prima del conto finale. Quel che crolla non paga il censimento
+    finale e diventa rovina con le sue tessere. La forza e' una scelta
+    provvisoria (come il Medioevo); i sei eventi moderni veri, se il
+    designer li vuole come le altre ere, restano da disegnare. Misura in
+    corso.

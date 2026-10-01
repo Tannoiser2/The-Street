@@ -113,6 +113,13 @@ func _start_era(era: int) -> void:
 	if era <= 4:
 		var evs := CardDB.events_of_era(era)
 		gs.current_event = evs[gs.rng.randi_range(0, evs.size() - 1)]
+	elif CardDB.constants.has("evento_finale"):
+		# L'EVENTO FINALE (registro 149, solo nel file v2): anche l'era
+		# Moderna ha il suo evento, rivelato a inizio era e risolto prima del
+		# conto finale. Senza, la resistenza delle carte dell'era 5 non
+		# serviva a niente, e chi puntava sulla Rendita non rischiava nulla
+		# all'ultimo censimento.
+		gs.current_event = (CardDB.constants["evento_finale"] as Dictionary).duplicate(true)
 	else:
 		gs.current_event = {}
 
