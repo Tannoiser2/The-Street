@@ -1486,6 +1486,36 @@ Lampo non perde perche' il Lampo vale poco, ma perche' inseguendolo lascia
 regola che alza il Lampo per tutti non la aiuta: la variante non entra nel
 file v2.
 
+## Trentesima misura: le regole semplici dello scavo, l'evento finale, lo spianare caro
+
+Tutte con l'evento finale (forza 4) e le gilde dell'era Moderna (registri
+149-150), contro le regole di main di allora (spianato con tessere, premio
+2 PV per tessera per livello). Seme 700000, tutte le strategie, 3 giocatori;
+236 partite la base, 199 le regole semplici, 153 le tessere doppie, 200
+ciascuna le ultime tre. Medie a giocatore, salvo dove detto.
+
+| | base | semplici 1 PV | tessere doppie | spianare caro | strada corta | caro + corta |
+|---|---|---|---|---|---|---|
+| bonus/premio di scavo | 10,4 | 2,6 | 2,6 | 4,1 | 2,4 | 4,0 |
+| riscoperta | 19,7 | 4,7 | 7,5 | 5,0 | 4,2 | 4,8 |
+| Rendita | 20,4 | 13,5 | 13,7 | 20,0 | 13,9 | 19,3 |
+| PV totali | 99,5 | 69,1 | 71,9 | 72,9 | 63,1 | 68,6 |
+| spianati (a partita) | - | 21,5 | - | 8,9 | 18,6 | 7,5 |
+| rovine riscoperte (a partita) | - | 5,4 | - | 5,4 | 4,8 | 5,2 |
+| vittorie per strategia | 23-39% | 28-37% | 26-41% | 19-44% | 20-44% | 24-39% |
+
+Le regole semplici portano lo Scavo da 30 a 7 PV: il bonus e' piccolo e si
+riscoprono solo circa 5 rovine a partita. Il collo di bottiglia e' l'era 5:
+vi si costruiscono 6-7 edifici in tutto (circa 2 a giocatore), e un terzo
+delle rovine nasce dall'evento finale, quando nessuno costruisce piu'. Lo
+spianare caro (1 Costruzione per casella, niente sconto) riduce gli spianati
+da 21,5 a 8,9 e porta piu' costruzioni sulle rovine altrui; la Rendita torna
+a 20. La strada corta (una pianura in meno) da sola toglie gioco a tutti e
+non aiuta lo Scavo. A 2 e 4 giocatori le regole semplici danno gli stessi
+andamenti (Scavo 7-8, Rendita giu' di 7 PV). Proposta al designer: spianare
+caro nel file v2, strada invariata, e per la riscoperta lo scavo dell'era
+Moderna su tutte le colonne dell'edificio (da misurare).
+
 ## Come rifare il conto
 
 ```bash
@@ -1578,4 +1608,8 @@ python3 tools/rapporto_partite.py rovine_p2.err rovine_p3.err > rapporto.json
 for p in 2 3 4; do godot --headless res://scenes/audit_partita.tscn -- --players $p --games 150 --seed 700000 --dati data/cards-v2.json --giro tutte --rapporto 1 --prosperita 99 > senza_p$p.csv 2> senza_p$p.err; done
 # ventinovesima misura: Lampo 2 sulle carte dell'era 4 (variante non adottata, non piu' nel generatore)
 for p in 3 4; do godot --headless res://scenes/audit_partita.tscn -- --players $p --games 300 --seed 700000 --dati data/cards-v2.json --giro tutte --rapporto 1 > base_p$p.csv 2> base_p$p.err; done
+# trentesima misura: regole semplici, tessere doppie, spianare caro, strada corta (evento finale e gilde nel file v2)
+for v in tessere_doppie spianare_caro strada_corta caro_e_corta; do python3 tools/genera_cards_v2.py --variante $v; done
+godot --headless res://scenes/audit_partita.tscn -- --players 3 --games 200 --seed 700000 --dati data/cards-v2.json --giro tutte --rapporto 1 > semplici_p3.csv 2> semplici_p3.err
+for v in tessere_doppie spianare_caro strada_corta caro_e_corta; do godot --headless res://scenes/audit_partita.tscn -- --players 3 --games 200 --seed 700000 --dati data/proposte/cards-v2-$v.json --giro tutte --rapporto 1 > ${v}_p3.csv 2> ${v}_p3.err; done
 ```
