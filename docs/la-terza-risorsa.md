@@ -1466,6 +1466,26 @@ non si muovono (meno di 2). La condizione del designer e' soddisfatta: la
 Prosperita' esce dal file v2 (`prosperity.attiva = false`; la v1.5 non
 cambia).
 
+## Ventinovesima misura: Lampo 2 sulle carte dell'era 4
+
+La strategia Lampo vinceva poco (registro 136). Proposta: le 11 carte
+dell'era 4 tagliate a Lampo 1 (registro 132) tornano a Lampo 2, l'era 5
+resta a 1 (`--variante lampo_era4`). Seme 700000, tutte le strategie; 299/300
+partite a 3 giocatori, 179 a 4. "Vince" e' la quota di partite vinte su
+quelle giocate (alla pari: 33% a tre, 25% a quattro).
+
+| | Lampo a 3 | vince Lampo a 3 | Lampo a 4 | vince Lampo a 4 | PV medi |
+|---|---|---|---|---|---|
+| regole attuali | 15,7 | 24% | 16,3 | 13% | 85,8 / 83,5 |
+| Lampo 2 all'era 4 | 18,7 | 25% | 19,5 | 14% | 88,3 / 87,1 |
+
+Il Lampo sale di 3 PV per TUTTI: il bot Lampo ne prende 22 contro 17-20
+degli altri, la stessa distanza di prima (19 contro 14-17). La strategia
+Lampo non perde perche' il Lampo vale poco, ma perche' inseguendolo lascia
+4-6 PV altrove (82,6 contro 86-87 a tre; 78,6 contro 83-85 a quattro). Una
+regola che alza il Lampo per tutti non la aiuta: la variante non entra nel
+file v2.
+
 ## Come rifare il conto
 
 ```bash
@@ -1556,4 +1576,7 @@ for p in 2 3; do godot --headless res://scenes/audit_partita.tscn -- --players $
 python3 tools/rapporto_partite.py rovine_p2.err rovine_p3.err > rapporto.json
 # ventottesima misura: il Denaro che avanza a fine era, con e senza la Prosperita'
 for p in 2 3 4; do godot --headless res://scenes/audit_partita.tscn -- --players $p --games 150 --seed 700000 --dati data/cards-v2.json --giro tutte --rapporto 1 --prosperita 99 > senza_p$p.csv 2> senza_p$p.err; done
+# ventinovesima misura: Lampo 2 sulle carte dell'era 4
+python3 tools/genera_cards_v2.py --variante lampo_era4
+for p in 3 4; do godot --headless res://scenes/audit_partita.tscn -- --players $p --games 300 --seed 700000 --dati data/proposte/cards-v2-lampo_era4.json --giro tutte --rapporto 1 > lampo4_p$p.csv 2> lampo4_p$p.err; done
 ```

@@ -2339,3 +2339,11 @@ dato è stato importato da lì. Ma due confronti fra ciò che è stampato e
     cartellini. I cubetti neri non ripetono piu' la resistenza dei
     potenziamenti Struttura, che si legge sul gettone: restano per quella
     dei Personaggi, degli edifici militari e delle tessere dell'era.
+143. **Lampo 2 sulle carte dell'era 4: non serve.** Il designer: "misura la
+    Lampo 2 sulle carte era 4". Ventinovesima misura: il Lampo sale di 3 PV
+    a testa per tutti, e la strategia Lampo resta dov'era (24 -> 25% a tre,
+    13 -> 14% a quattro). Il bot Lampo prende gia' piu' Lampo degli altri;
+    perde perche' inseguendolo lascia 4-6 PV altrove. La variante resta fra
+    le proposte (`--variante lampo_era4`), il file v2 non cambia. Aperto:
+    premiare chi si specializza nel Lampo, oppure accettare il Lampo come un
+    flusso che prendono tutti e non come una strada a se'.
