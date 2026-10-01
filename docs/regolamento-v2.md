@@ -217,7 +217,7 @@ almeno una deve averla davvero:
 | cosa c'è sotto | cosa succede |
 |---|---|
 | Una rovina (tessere scavo), di chiunque | Base gratuita, e vi sconta 1 Costruzione (le macerie sono materiale) |
-| Un vostro edificio in piedi | Lo spianate: la carta torna a voi e non lascia tessere scavo; vi sconta in Costruzione metà della sua resistenza, arrotondata per eccesso |
+| Un vostro edificio in piedi | Lo spianate: la carta torna a voi e, come ogni rovina, al suo posto vanno le vostre tessere scavo coperte, una per casella (nessun premio di scavo: è vostro); vi sconta in Costruzione metà della sua resistenza, arrotondata per eccesso |
 | Un edificio in piedi altrui | Impossibile. Blocca finché è vivo |
 | Terreno nudo | Terrapieno: +1 Costruzione per ogni casella priva di base, una volta sola qualunque sia la quota |
 

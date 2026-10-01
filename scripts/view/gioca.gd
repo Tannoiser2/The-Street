@@ -60,6 +60,10 @@ var vista: Node3D
 var _hud: Control
 var _colonna_sotto_mouse := -1
 var _messaggio := ""
+# La cronaca (registro 146): le ultime mosse raccontate, la piu' recente in
+# testa. Ogni voce: {"righe": Array[String], "mia": bool}.
+var _cronaca: Array = []
+const CRONACA_VOCI := 6
 
 # La carta scelta, {} se nessuna: {"kind": ..., "id": ...}. Da lei discendono
 # i bersagli accesi.
@@ -127,6 +131,7 @@ func comincia() -> void:
 		vista.queue_free()
 	_deseleziona(false)
 	_messaggio = ""
+	_cronaca = []
 	_orbita = null
 	_colonna_sotto_mouse = -1
 	# Il regolamento e' il file dati: si carica prima di cominciare, ogni
@@ -159,7 +164,7 @@ func torna_alla_scelta() -> void:
 	_hud.queue_redraw()
 
 func _aggiorna() -> void:
-	if ctl == null:
+	if ctl == null or vista == null:
 		_hud.queue_redraw()
 		return
 	# A turno sullo stesso schermo: l'obiettivo segreto scoperto e' quello di
@@ -204,9 +209,26 @@ func bot_da_muovere() -> bool:
 # vede: prima i bot giocavano tutti i loro turni fra un clic e l'altro e sul
 # tabellone comparivano tre edifici insieme, senza che si capisse chi avesse
 # fatto cosa.
+# Fa una mossa e la racconta: fotografia prima, differenza dopo.
+func _racconta(mossa: Callable) -> Variant:
+	if ctl == null: return mossa.call()
+	var prima := Cronaca.fotografa(ctl.gs)
+	var esito = mossa.call()
+	# "Tu" e' l'umano che ha mosso, se gioca da solo; a turno sullo stesso
+	# schermo ognuno e' "giocatore N". Si guarda chi ha mosso, non di chi e'
+	# il turno adesso: finita la mossa tocca gia' a un altro.
+	var chi := int(prima["chi"])
+	var mio := inizio.e_umano(chi)
+	var io := chi if mio and inizio.umani() <= 1 else -1
+	var righe := Cronaca.racconta(ctl.gs, prima, io)
+	if not righe.is_empty():
+		_cronaca.push_front({"righe": righe, "mia": mio})
+		while _cronaca.size() > CRONACA_VOCI: _cronaca.pop_back()
+	return esito
+
 func muovi_un_bot() -> void:
 	if not bot_da_muovere(): return
-	StrategyBot.play_turn(ctl, inizio.strategia(ctl.gs.current_index))
+	_racconta(func(): StrategyBot.play_turn(ctl, inizio.strategia(ctl.gs.current_index)))
 	_attesa = maxf(inizio.pausa_bot(), 0.0)
 	_aggiorna()
 
@@ -225,7 +247,7 @@ func _turni_dei_bot() -> void:
 	if not inizio.bot_subito(): return
 	var giri := 0
 	while bot_da_muovere() and giri < 500:
-		StrategyBot.play_turn(ctl, inizio.strategia(ctl.gs.current_index))
+		_racconta(func(): StrategyBot.play_turn(ctl, inizio.strategia(ctl.gs.current_index)))
 		giri += 1
 
 # ---- input -----------------------------------------------------------
@@ -624,13 +646,13 @@ func _clic(pixel: Vector2) -> void:
 				_aggiorna()
 				return
 			var nome := str(CardDB.characters[str(c["id"])]["name"])
-			if ctl.choose(posto):
+			if _racconta(func(): return ctl.choose(posto)):
 				_messaggio = "Hai preso %s." % nome
 				_turni_dei_bot()
 				_aggiorna()
 			return
 		var scelto := _edificio_puntato(pixel)
-		if scelto != null and ctl.choose(scelto.uid):
+		if scelto != null and _racconta(func(): return ctl.choose(scelto.uid)):
 			_messaggio = "Scelto."
 			_turni_dei_bot()
 			_aggiorna()
@@ -682,13 +704,20 @@ func _da_abitare(col: int) -> Building:
 		if b.owner == _io() and b.is_standing(): return b
 	return null
 
+func _piazza_in_colonna(col: int) -> void:
+	if _racconta(func(): return ctl.place_worker(col, _da_abitare(col))):
+		_messaggio = "Colonna %d attivata: ora puoi costruire o potenziare, oppure Fine turno." % (col + 1)
+	else:
+		_messaggio = "Non puoi piazzare un lavoratore nella colonna %d." % (col + 1)
+	_aggiorna()
+
 func _piazza_lavoratore(pixel: Vector2) -> void:
 	var col := _colonna_puntata(pixel)
 	if col < 0: return
-	if ctl.place_worker(col, _da_abitare(col)):
-		_messaggio = "Colonna %d attivata." % col
+	if _racconta(func(): return ctl.place_worker(col, _da_abitare(col))):
+		_messaggio = "Colonna %d attivata." % (col + 1)
 	else:
-		_messaggio = "Non puoi piazzare un lavoratore nella colonna %d." % col
+		_messaggio = "Non puoi piazzare un lavoratore nella colonna %d." % (col + 1)
 	_aggiorna()
 
 # Il clic e' caduto su un bersaglio acceso? Allora l'azione si fa.
@@ -837,6 +866,14 @@ func _nome_carta(kind: String, id: String) -> String:
 	return id
 
 func _esegui(v) -> void:
+	# La mossa si racconta da sola (registro 146); i bot muovono dopo, e
+	# ognuno ha la sua voce nella cronaca.
+	_racconta(func(): _esegui_mossa(v))
+	_deseleziona(false)
+	_turni_dei_bot()
+	_aggiorna()
+
+func _esegui_mossa(v) -> void:
 	var fatto := false
 	_messaggio = ""
 	# La carta si sceglie prima del lavoratore: il lavoratore lo piazza il
@@ -846,11 +883,9 @@ func _esegui(v) -> void:
 	if ctl.gs.phase == Enums.Phase.PIAZZA and v.parametri.has("attiva"):
 		var dove := int(v.parametri["attiva"])
 		if not ctl.place_worker(dove, _da_abitare(dove)):
-			_messaggio = "Non puoi piazzare un lavoratore nella colonna %d." % dove
-			_deseleziona(false)
-			_aggiorna()
+			_messaggio = "Non puoi piazzare un lavoratore nella colonna %d." % (dove + 1)
 			return
-		_messaggio = "Colonna %d attivata. " % dove
+		_messaggio = "Colonna %d attivata. " % (dove + 1)
 	match v.tipo:
 		"costruisci":
 			fatto = ctl.build(str(v.parametri["card_id"]), int(v.parametri["col_from"]),
@@ -867,9 +902,6 @@ func _esegui(v) -> void:
 			ctl.pass_action()
 			fatto = true
 	_messaggio += v.etichetta if fatto else "Rifiutata: %s" % v.etichetta
-	_deseleziona(false)
-	_turni_dei_bot()
-	_aggiorna()
 
 # ---- quel poco che resta a schermo ------------------------------------
 const SFONDO := Color(0.09, 0.10, 0.13, 0.86)
@@ -950,6 +982,15 @@ func _disegna_hud() -> void:
 	if gs.phase == Enums.Phase.AZIONE and _io() >= 0 \
 			and gs.pending_choice.is_empty():
 		_disegna_bottoni(font, p)
+	# REGISTRO 146: col lavoratore ancora da piazzare, un tasto per colonna
+	# che si puo' attivare. E' la mossa che c'e' sempre, anche quando nessuna
+	# carta ha un posto valido.
+	if gs.phase == Enums.Phase.PIAZZA and _io() >= 0 and gs.pending_choice.is_empty():
+		_disegna_attiva_colonne(font, p)
+	if not _scelta.is_empty() and _io() >= 0:
+		var schermo_a := _hud.get_viewport_rect().size
+		_tasto(font, "Annulla la scelta", Vector2(20.0, schermo_a.y - 96.0), false, {"che": "annulla"}, 170.0)
+	_disegna_cronaca(font, 82.0 if str(gs.pending_choice.get("kind", "")) != "tessera" else 116.0)
 	# La scelta di una tessera dell'era: un tasto per opzione, sotto l'invito.
 	if str(gs.pending_choice.get("kind", "")) == "tessera" \
 			and int(gs.pending_choice["player"]) == _io():
@@ -1338,17 +1379,66 @@ func _applica_scelta(d: Dictionary) -> void:
 			muovi_un_bot()
 			return
 		"scelta_tessera":
-			if ctl != null and ctl.choose(int(d["n"])):
+			if ctl != null and _racconta(func(): return ctl.choose(int(d["n"]))):
 				_messaggio = "Fatto."
 				_aggiorna()
 			return
 		"via":
 			comincia()
 			return
+		# REGISTRO 146: attivare una colonna e basta, con un tasto. Sull'iPad
+		# il clic sulla colonna poteva cadere su un edificio o su una carta,
+		# e con una carta scelta senza posti validi non c'era Esc: restava
+		# solo Passa, e la colonna non si attivava.
+		"attiva_colonna":
+			_deseleziona(false)
+			_piazza_in_colonna(int(d["n"]))
+			_turni_dei_bot()
+			return
+		"annulla":
+			_deseleziona()
+			_messaggio = "Scelta annullata."
+			_aggiorna()
+			return
 		"menu":
 			torna_alla_scelta()
 			return
 	_hud.queue_redraw()
+
+# I tasti "attiva la colonna N": numero e terreno, uno per colonna libera.
+func _disegna_attiva_colonne(font: Font, p: PlayerState) -> void:
+	var schermo := _hud.get_viewport_rect().size
+	var y := schermo.y - 58.0
+	_hud.draw_string(font, Vector2(20.0, y + 20.0), "Attiva e incassa:",
+		HORIZONTAL_ALIGNMENT_LEFT, -1, 14, SPENTO)
+	var x := 150.0
+	if p.workers_used >= p.workers: return
+	for c in ctl.gs.grid.n_cols:
+		if c in p.worker_cols: continue
+		var r := _tasto(font, "%d %s" % [c + 1, Cronaca._terreno(ctl.gs, c)], Vector2(x, y),
+			false, {"che": "attiva_colonna", "n": c})
+		x = r.end.x + 8.0
+
+# La cronaca sotto la barra: la mossa piu' recente per intero, le altre una
+# riga sola. Le proprie in chiaro, quelle degli altri spente.
+func _disegna_cronaca(font: Font, cima: float) -> void:
+	var y := cima
+	var righe_max := 9
+	for k in _cronaca.size():
+		var voce: Dictionary = _cronaca[k]
+		var righe: Array = voce["righe"]
+		var quante: int = righe.size() if k == 0 else 1
+		for j in mini(quante, righe_max):
+			var testo := str(righe[j])
+			var corpo := 13 if j == 0 else 12
+			_striscia(font, testo, 20.0, y - corpo - 2.0, corpo)
+			_hud.draw_string(font, Vector2(20.0 if j == 0 else 34.0, y), testo,
+				HORIZONTAL_ALIGNMENT_LEFT, -1, corpo,
+				CHIARO if bool(voce["mia"]) and k == 0 else SPENTO)
+			y += corpo + 8.0
+			righe_max -= 1
+		if righe_max <= 0: break
+		if k == 0: y += 6.0
 
 # Le azioni che non hanno una carta da cliccare sul tavolo. Sono tre, e stanno
 # in un angolo: non e' piu' un menu, e' quello che avanza.
@@ -1367,7 +1457,9 @@ func _disegna_bottoni(font: Font, p: PlayerState) -> void:
 		voci.append({"voce": null, "modo": "restauro",
 			"testo": "%s  (%d)" % [DescrizioneAzione.verbo_restauro(), quanti], "attiva": quanti > 0})
 	var tutte := AvailableActions.tutte(ctl.gs, _io(), ctl.colonna_attivata())
-	voci.append({"voce": tutte[tutte.size() - 1], "testo": "Passa", "attiva": true})
+	# "Passa" sembrava rinunciare al turno: la colonna e' gia' attivata e
+	# incassata, e questo tasto chiude il turno senza un'azione.
+	voci.append({"voce": tutte[tutte.size() - 1], "testo": "Fine turno", "attiva": true})
 
 	var y := schermo.y - 58.0
 	var x := 20.0

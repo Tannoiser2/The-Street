@@ -64,6 +64,7 @@ func _ready() -> void:
 	_run("l'interruttore del regolamento e il draft a schermo (v2)", _test_regolamento_e_draft)
 	_run("la tessera girata (v2)", _test_tessera_girata)
 	_run("il quarto lavoratore sulla bacchetta (v2)", _test_quarto_lavoratore)
+	_run("v2: attivare una colonna e basta, e la cronaca del turno (registro 146)", _test_attiva_e_cronaca)
 	_run("lo scheletro del lavoratore sotto il potenziamento (v2)", _test_scheletro_lavoratore)
 	_run("la rovina senza rudere: la carta si capovolge (v2)", _test_rovina_senza_rudere)
 	_run("v2: le tessere scavo al posto della carta crollata (registro 131)", _test_tessere_scavo_vista)
@@ -2653,6 +2654,52 @@ func _test_cubetti_senza_token() -> void:
 	_eq("  con il Cemento armato i token coprono tutto", BoardLayout3D.cubetti(gs, b).size(), 0)
 	CardDB.load_db(CardDB.DB_PATH)
 
+# Registro 146: il designer, sull'iPad, non riusciva ad attivare una colonna
+# senza fare altro, ed era costretto a passare. Il tasto "attiva" piazza il
+# lavoratore e incassa, sempre; e la cronaca racconta chi ha fatto cosa,
+# quali edifici hanno prodotto e quanto ha guadagnato ciascuno.
+func _test_attiva_e_cronaca() -> void:
+	if not FileAccess.file_exists("res://data/cards-v2.json"): return
+	CardDB.load_db("res://data/cards-v2.json")
+	var ctl := GameController.new()
+	ctl.new_game(3, 11)
+	var gs := ctl.gs
+	while not gs.pending_choice.is_empty():
+		ctl.choose(int((gs.pending_choice["options"] as Array)[0]))
+	var chi := gs.current_index
+	var p: PlayerState = gs.players[chi]
+	# La cronaca, pura: una colonna attivata e basta.
+	var prima := Cronaca.fotografa(gs)
+	_ok("il lavoratore va sulla colonna 2", ctl.place_worker(2))
+	var righe := Cronaca.racconta(gs, prima, chi)
+	_ok("  la cronaca dice l'azione: \"%s\"" % (righe[0] if not righe.is_empty() else ""),
+		not righe.is_empty() and righe[0].begins_with("Hai fatto: attiva la colonna 3"))
+	var risorse := false
+	for r in righe:
+		if r.begins_with("Risorse: tu +"): risorse = true
+	_ok("  e quanto hai incassato", risorse)
+	# Il tasto della scena: con una carta scelta e nessun posto, "attiva" funziona lo stesso.
+	ctl.pass_action()
+	var s := preload("res://scenes/gioca.tscn").instantiate()
+	add_child(s)
+	s.ctl = ctl
+	while not gs.pending_choice.is_empty():
+		ctl.choose(int((gs.pending_choice["options"] as Array)[0]))
+	var di := gs.current_index
+	var usati: int = gs.players[di].workers_used
+	var libera := -1
+	for c in gs.grid.n_cols:
+		if not (c in gs.players[di].worker_cols): libera = c
+	s._scelta = {"kind": "mercato", "id": "qualcosa"}
+	s._applica_scelta({"che": "attiva_colonna", "n": libera})
+	_eq("il tasto attiva piazza il lavoratore", gs.players[di].workers_used, usati + 1)
+	_ok("  e toglie la carta scelta", s._scelta.is_empty())
+	_ok("  e la mossa finisce nella cronaca", not s._cronaca.is_empty())
+	s.ctl = null
+	remove_child(s)
+	s.queue_free()
+	CardDB.load_db(CardDB.DB_PATH)
+
 # Registro 105: nella v2 lo scheletro lo lascia il lavoratore che piazza il
 # potenziamento. Non e' una carta: nel ventaglio del giocatore, sotto la
 # carta dell'edificio, ci va il gettone dell'era, e il riquadro del mouse
@@ -2938,6 +2985,16 @@ func _test_tessere_scavo_vista() -> void:
 	_ok("  lo spianato non ne lascia", BoardLayout3D.tessere_scavo_box(gs, r).is_empty())
 	_eq("  ma ha il terrapieno, una tessera per casella", BoardLayout3D.terrapieni_spianato_box(gs, r).size(),
 		int(r.data["width"]) * int(r.data.get("depth", 1)))
+	# Registro 147: nel file v2 lo spianato lascia le tessere rovina del
+	# proprietario, una per casella, e nessun terrapieno (solo i buchi lo hanno).
+	if FileAccess.file_exists("res://data/cards-v2.json"):
+		CardDB.load_db("res://data/cards-v2.json")
+		r.data = CardDB.buildings["ed_acquedotto"] if CardDB.buildings.has("ed_acquedotto") else r.data
+		r.col_to = r.col_from + int(r.data["width"])
+		_eq("nella v2 lo spianato lascia una tessera per casella", BoardLayout3D.tessere_scavo_box(gs, r).size(),
+			int(r.data["width"]) * int(r.data.get("depth", 1)))
+		_ok("  e nessun terrapieno", BoardLayout3D.terrapieni_spianato_box(gs, r).is_empty())
+		_eq("  ma nessun premio a chi spiana", TessereScavo.scavo_per_premio(r), 0)
 	CardDB.load_db(CardDB.DB_PATH)
 
 # Con le carte restituite la carta edificio e' la sua tessera: sul mercato ha

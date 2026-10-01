@@ -2361,3 +2361,26 @@ dato è stato importato da lì. Ma due confronti fra ciò che è stampato e
     perche' inseguendolo lascia 4-6 PV altrove. Il designer: "accetta il
     Lampo come flusso di tutti". Il file v2 non cambia; la strategia Lampo
     dei bot resta com'e', non si bilancia piu'.
+146. **Attivare una colonna e basta; la cronaca del turno.** Il designer:
+    "alcune volte sono costretto a passare perche' non ci sono mosse valide
+    [...] non posso mettere semplicemente un lavoratore sulla colonna e
+    incassare". La regola c'era; mancava il modo, sull'iPad: con una carta
+    scelta e nessun posto acceso ogni tocco sulla colonna diceva "li' non ci
+    va", e senza Esc restava solo Passa. Ora in basso c'e' una fila "Attiva e
+    incassa" (un tasto per colonna libera), il tasto "Annulla la scelta", e
+    "Passa" dopo l'attivazione si chiama "Fine turno". "Nella barra di stato
+    ci deve essere scritto cosa sto facendo e cosa ho fatto, quali effetti
+    degli edifici sono stati attivati e quante risorse ho guadagnato": sotto
+    la barra la cronaca (scripts/view/cronaca.gd) racconta ogni mossa, anche
+    dei bot: l'azione, gli edifici della colonna che hanno prodotto e per
+    chi, le risorse guadagnate da ciascuno, gli effetti e i crolli.
+147. **Lo spianato lascia le tessere; il terrapieno solo nei buchi.** Il
+    designer, dopo un Acquedotto (tre colonne) spianato da un edificio largo
+    una: "i due slot rimasti liberi sono diventati un terrapieno. E' un
+    errore clamoroso, dovevano diventare rovine. Il Terrapieno e' solo ed
+    esclusivamente quando si crea un buco". L'errore veniva dal registro 134
+    (lo spianato senza tessere, "da valutare") e dal 139 (al suo posto il
+    terrapieno, per non lasciare sospeso chi sta sopra). Ora lo spianato e'
+    una rovina come le altre: la carta torna al proprietario e al suo posto
+    vanno le sue tessere coperte, una per casella, senza premio di scavo per
+    chi spiana. Misura in corso insieme al premio (registro 145).
