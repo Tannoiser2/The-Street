@@ -510,6 +510,13 @@ func _descrivi_sotto_carta(c: Dictionary) -> PackedStringArray:
 			out.append(str(po["name"]))
 			out.append("potenziamento · %s" % po["family"])
 			if str(po.get("effect_text", "")) != "": out.append(str(po["effect_text"]))
+		"mazzetto":
+			out.append("Mazzetto rovine del giocatore %s" % id)
+			out.append("%d tessere scavo ancora da pescare" % TessereScavo.rimaste(ctl.gs, int(id)))
+		"token":
+			var tk: Dictionary = CardDB.upgrades[id]
+			out.append(str(tk["name"]))
+			out.append("token riscattato · %s" % tk["family"] + (" · Scavo %d" % int(tk["scavo"]) if tk.has("scavo") else ""))
 		"scheletro":
 			var era := int(id)
 			out.append("Scheletro")
@@ -901,6 +908,14 @@ func _disegna_hud() -> void:
 	var testa := "Era %d · %s · %s: %d PV, %s, lavoratori %d/%d" % [
 		gs.era, str(gs.current_event.get("name", "nessun evento")), chi,
 		p.vp, risorse, p.workers_used, p.workers]
+	# Le classi per la Continuita' (registro 139): edifici in piedi e carte
+	# restituite, contati per classe, al posto del mazzetto davanti al
+	# giocatore.
+	if TessereScavo.carte_restituite() and CardDB.constants.has("continuita_collezione"):
+		var classi := Scoring.classi_di(gs, v)
+		var pezzi := PackedStringArray()
+		for c in classi: pezzi.append("%s %d" % [str(c).capitalize(), int(classi[c])])
+		if not pezzi.is_empty(): testa += " · classi: " + ", ".join(pezzi)
 	# I token riscattati dalle proprie rovine (registro 131), col loro valore
 	# di fine partita.
 	if not p.potenziamenti_riscattati.is_empty():

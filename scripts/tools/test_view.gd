@@ -2574,7 +2574,10 @@ func _test_tessera_girata() -> void:
 		if not g2.tessere_colonna.is_empty(): g2.tessere_colonna[fiume] = "te_sentiero_dei_pastori"
 		_ok("attivare il fiume lo gira", ctl.place_worker(fiume) and g2.tessere_usate[fiume])
 		vista.mostra(g2)
-		_eq("  e sul tavolo c'e' un velo", girate.call(), 1)
+		# Registro 139: niente velo ne' scritta, la tessera si capovolge in
+		# bianco e nero.
+		_eq("  e sul tavolo non c'e' il velo", girate.call(), 0)
+		_ok("  la tessera si capovolge", vista._girando.has(fiume))
 		_ok("  su quella colonna", vista.tessera_girata(fiume) and not vista.tessera_girata((fiume + 1) % g2.grid.n_cols))
 		var s := preload("res://scenes/gioca.tscn").instantiate()
 		add_child(s)
@@ -2945,15 +2948,10 @@ func _test_token_e_restituite() -> void:
 	for c in mie:
 		if str(c["kind"]) == "mercato": edifici.append(str(c["id"]))
 		if str(c["kind"]) == "token": token.append(str(c["id"]))
-	_eq("davanti al giocatore solo la carta restituita", edifici, ["ed_capanne"])
+	# Registro 139: le carte crollate si mettono da parte, davanti al
+	# giocatore restano Personaggi, token, Eredita' e Monumenti.
+	_eq("davanti al giocatore nessuna carta edificio", edifici, [])
 	_eq("  e il token riscattato", token, [upg])
-	var misura_giusta := false
-	for c in BoardLayout3D.player_cards(gs, 0):
-		if int(c.get("player", -1)) == 0 and str(c["kind"]) == "mercato":
-			var a: AABB = c["aabb"]
-			var m := BoardLayout3D.misura_edificio("ed_capanne")
-			misura_giusta = absf(a.size.x - m.x) < 0.01 and absf(a.size.z - m.y) < 0.01
-	_ok("  a grandezza vera", misura_giusta)
 	var fila_ok := true
 	for c in BoardLayout3D.side_cards(gs):
 		if str(c["kind"]) == "potenziamento" and not c.has("player"):
@@ -3029,6 +3027,7 @@ func _test_tocco_e_voli() -> void:
 	if not FileAccess.file_exists("res://data/cards-v2.json"): return
 	var s = preload("res://scenes/gioca.tscn").instantiate()
 	add_child(s)
+	s.inizio.regolamento = 1          # la v2
 	s.inizio.giocatori = 3
 	s.inizio.bot = 2
 	s.inizio.velocita = s.inizio.VELOCITA.size() - 1
@@ -3096,6 +3095,20 @@ func _test_tocco_e_voli() -> void:
 		if not costruito: s._aggiorna()
 	s._aggiorna()
 	_ok("quando un edificio esce dal mercato la sua carta vola", not s.vista._in_volo.is_empty())
+	# Il crollo (registro 139): il mazzetto sta davanti al giocatore, e
+	# quando un edificio crolla le sue tessere volano dal mazzetto.
+	var mazzetti := 0
+	for c in BoardLayout3D.side_cards(gs, s._io()):
+		if str(c["kind"]) == "mazzetto": mazzetti += 1
+	_eq("un mazzetto rovine davanti a ogni giocatore", mazzetti, gs.n_players)
+	s.vista._scavo_in_volo.clear()
+	var vittima: Building = null
+	for b in gs.grid.buildings:
+		if b.state == Enums.BuildingState.INTATTO and not b.is_buried: vittima = b; break
+	if vittima != null:
+		vittima.state = Enums.BuildingState.ROVINA
+		s._aggiorna()
+		_ok("quando un edificio crolla le tessere volano dal mazzetto", s.vista._scavo_in_volo.has(vittima.uid))
 	remove_child(s)
 	s.queue_free()
 	CardDB.load_db(CardDB.DB_PATH)

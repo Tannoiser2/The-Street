@@ -51,6 +51,15 @@ var _mercato_prima: Dictionary = {}
 var _fila_pot_prima: Dictionary = {}
 var _in_volo: Dictionary = {}
 var _token_in_volo: Dictionary = {}
+# Le tessere dell'era che si stanno capovolgendo, e quali erano usate prima.
+var _girando: Dictionary = {}
+var _usate_prima: Array = []
+# Il crollo (registro 139): le tessere volano dal mazzetto alla rovina, i
+# token dalla rovina al giocatore. Si ricorda chi era gia' rovina e dove
+# stavano i token.
+var _fuori_prima: Dictionary = {}
+var _token_prima: Dictionary = {}
+var _scavo_in_volo: Dictionary = {}
 # La carta che il giocatore trascina col dito o col mouse.
 var _fantasma: Node3D = null
 
@@ -85,6 +94,11 @@ func mostra(stato: GameState, colonna_evidenziata := -1, acceso := {}) -> void:
 # ---- i voli -----------------------------------------------------------
 func _voli() -> void:
 	if _uid_prima.is_empty() and _mercato_prima.is_empty(): return
+	_voli_del_crollo()
+	if BoardLayout3D.cartoni() and TessereEra.attive() and _usate_prima.size() == gs.tessere_usate.size():
+		for c in gs.tessere_usate.size():
+			if bool(gs.tessere_usate[c]) and not bool(_usate_prima[c]) and not _girando.has(c):
+				_capovolgi(c)
 	for b in gs.grid.buildings:
 		if not _uid_prima.has(b.uid):
 			var id: String = str(b.data["id"])
@@ -129,7 +143,75 @@ func _vola(da: AABB, a: AABB, percorso: String, tinta: Color, fine: Callable) ->
 		fine.call()
 		if gs != null: mostra(gs, _evidenziata, evidenze))
 
+# La tessera dell'era si capovolge: la faccia a colori si alza e ruota fino a
+# mettersi di taglio, poi scende la faccia in bianco e nero.
+func _capovolgi(col: int) -> void:
+	if _effetti == null: return
+	_girando[col] = true
+	var te := BoardLayout3D.casella_era_box(col)
+	var centro := te.position + te.size / 2.0
+	var locale := AABB(-te.size / 2.0, te.size)
+	var su := Node3D.new()
+	_effetti.add_child(su)
+	_carta_stesa(locale, BoardLayout3D.tessera_era_path(gs, col, false), Color("#e9dfc4"), false, Color.WHITE, false, su)
+	su.position = centro
+	var giu := Node3D.new()
+	_effetti.add_child(giu)
+	_carta_stesa(locale, BoardLayout3D.tessera_era_path(gs, col, true), Color("#bdb7aa"), false, Color.WHITE, false, giu)
+	giu.position = centro + Vector3(0.0, 30.0, 0.0)
+	giu.rotation.x = -PI / 2.0
+	giu.visible = false
+	var t := create_tween()
+	t.tween_property(su, "position", centro + Vector3(0.0, 30.0, 0.0), 0.25)
+	t.parallel().tween_property(su, "rotation:x", PI / 2.0, 0.25)
+	t.tween_callback(func():
+		su.queue_free()
+		giu.visible = true)
+	t.tween_property(giu, "rotation:x", 0.0, 0.25)
+	t.parallel().tween_property(giu, "position", centro, 0.25)
+	t.finished.connect(func():
+		giu.queue_free()
+		_girando.erase(col)
+		if gs != null: mostra(gs, _evidenziata, evidenze))
+
+# Un edificio e' appena crollato: dal mazzetto del proprietario partono le sue
+# tessere coperte, una per casella; i token che portava volano davanti a lui.
+func _voli_del_crollo() -> void:
+	if not BoardLayout3D.grandezza_vera(): return
+	var laterali := BoardLayout3D.side_cards(gs, umano)
+	for b in gs.grid.buildings:
+		if not TessereScavo.fuori(b) or _fuori_prima.has(b.uid) or not _uid_prima.has(b.uid): continue
+		var mazzetto := AABB()
+		for c in laterali:
+			if str(c["kind"]) == "mazzetto" and int(c.get("player", -1)) == b.owner: mazzetto = c["aabb"]
+		var scatole := BoardLayout3D.tessere_scavo_box(gs, b)
+		if mazzetto.size != Vector3.ZERO and not scatole.is_empty():
+			var uid: int = b.uid
+			_scavo_in_volo[uid] = true
+			var tinta: Color = COLORI_GIOCATORE[b.owner % COLORI_GIOCATORE.size()].darkened(0.5)
+			var cima := AABB(mazzetto.position + Vector3(0.0, mazzetto.size.y, 0.0), Vector3(mazzetto.size.x, 1.0, mazzetto.size.z))
+			for t in scatole:
+				_vola(cima, t, BoardLayout3D.tessera_rovina_path({}, false), tinta, func(): _scavo_in_volo.erase(uid))
+		if _token_prima.has(b.uid):
+			var prima: Dictionary = _token_prima[b.uid]
+			var usati := {}
+			for k in (prima["ids"] as Array).size():
+				var u := str(prima["ids"][k])
+				for j in laterali.size():
+					var c: Dictionary = laterali[j]
+					if usati.has(j) or str(c["kind"]) != "token" or int(c.get("player", -1)) != b.owner or str(c["id"]) != u: continue
+					usati[j] = true
+					_vola(prima["boxes"][k], c["aabb"], BoardLayout3D.carta_path("token", u), Color(0.79, 0.64, 0.16), func(): pass)
+					break
+
 func _ricorda_per_i_voli() -> void:
+	_usate_prima = gs.tessere_usate.duplicate()
+	_fuori_prima.clear()
+	_token_prima.clear()
+	for b in gs.grid.buildings:
+		if TessereScavo.fuori(b): _fuori_prima[b.uid] = true
+		elif not b.upgrades.is_empty() and BoardLayout3D.grandezza_vera():
+			_token_prima[b.uid] = {"ids": b.upgrades.duplicate(), "boxes": BoardLayout3D.token_box(gs, b)}
 	_uid_prima.clear()
 	for b in gs.grid.buildings: _uid_prima[b.uid] = b.upgrades.size()
 	_mercato_prima.clear()
@@ -445,10 +527,12 @@ func _tessere() -> void:
 		# da' piu' niente. A inizio era il motore la rigira e il velo sparisce.
 		# LA TESSERA DELL'ERA (v2, registro 121): nella casella davanti alla
 		# colonna. Girata, si vede in bianco e nero.
+		# Registro 139: niente velo e niente scritta "girata". La tessera usata
+		# si capovolge (animazione) e mostra la faccia in bianco e nero.
 		if BoardLayout3D.cartoni() and TessereEra.attive():
 			var te := BoardLayout3D.casella_era_box(c)
-			_carta_stesa(te, BoardLayout3D.tessera_era_path(gs, c, tessera_girata(c)), Color("#e9dfc4"))
-			if tessera_girata(c): _tessera_girata(c, te)
+			if not _girando.has(c):
+				_carta_stesa(te, BoardLayout3D.tessera_era_path(gs, c, tessera_girata(c)), Color("#e9dfc4"))
 		elif tessera_girata(c): _tessera_girata(c, box)
 		if c == _evidenziata:
 			var velo := _quad(Vector2(box.size.x, box.size.z),
@@ -596,6 +680,7 @@ func _tessere_scavo(b: Building) -> void:
 	for t in BoardLayout3D.terrapieni_spianato_box(gs, b):
 		_carta_stesa(t, BoardLayout3D.terrapiano_path(), TERRAPIENO, false, Color.WHITE, false)
 	var scatole := BoardLayout3D.tessere_scavo_box(gs, b)
+	if _scavo_in_volo.has(b.uid): return
 	for i in scatole.size():
 		var t: AABB = scatole[i]
 		# Il dorso "ROVINA" finche' e' coperta; scoperta, la sua faccia.
@@ -885,6 +970,16 @@ func _file_laterali() -> void:
 		# in piedi sulla riga del ventaglio che gli tocca.
 		if str(c["kind"]) == "scheletro":
 			_gettone(BoardLayout3D.scheletro_nel_ventaglio(r), int(str(c["id"])))
+			continue
+		# Il mazzetto rovine: una pila alta quante tessere restano, col dorso.
+		if str(c["kind"]) == "mazzetto":
+			var chi := int(str(c["id"]))
+			var rimaste := TessereScavo.rimaste(gs, chi)
+			var pila := AABB(r.position, Vector3(r.size.x, maxf(1.0, rimaste * 0.9), r.size.z))
+			_carta_stesa(pila, BoardLayout3D.tessera_rovina_path({}, false),
+				COLORI_GIOCATORE[chi % COLORI_GIOCATORE.size()].darkened(0.5), false, Color.WHITE, false)
+			_scritta(Vector3(pila.position.x + pila.size.x / 2.0, pila.end.y + 6.0, pila.position.z + pila.size.z / 2.0),
+				str(rimaste), 0.12, Color.WHITE)
 			continue
 		var percorso := BoardLayout3D.carta_path(str(c["kind"]), str(c["id"]))
 		var sfondo := CARTA_SFONDO

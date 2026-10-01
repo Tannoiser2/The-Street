@@ -518,7 +518,9 @@ static func _caselle_della_carta(gs: GameState, b: Building) -> Array[AABB]:
 	var d := b.profondita()
 	var cw := box.size.x / w
 	var cd := box.size.z / d
-	var margine := 0.06 * minf(cw, cd)
+	# Un filo appena, per vederle separate: con il 6% della casella le tessere
+	# e il terrapieno sembravano piu' stretti dell'edificio sopra (registro 139).
+	var margine := 0.4
 	for i in w:
 		for j in d:
 			out.append(AABB(Vector3(box.position.x + i * cw + margine, box.position.y,
@@ -1027,6 +1029,7 @@ static func misura_token() -> Vector2:
 
 static func misura_carta(tipo: String) -> Vector2:
 	if grandezza_vera() and tipo in ["potenziamento", "token"]: return misura_token()
+	if tipo == "mazzetto": return Vector2(span_w(1), basetta_d())
 	var m: Vector2 = MISURE_CARTE.get(tipo, Vector2(CARTA, CARTA))
 	if e_v2() and MISURE_CARTE_V2.has(tipo): m = MISURE_CARTE_V2[tipo]
 	if not (tipo in CARTE_IN_PIEDI) or m.y <= 0.0: return m
@@ -1210,10 +1213,19 @@ static func carte_giocatore(gs: GameState, player: int, umano := -1) -> Array[Di
 	# il mazzetto degli edifici: quelli in piedi stanno sulla mappa, e
 	# davanti a lui tornano solo le carte degli edifici crollati, a colori e
 	# a grandezza vera, piu' i token che ha riscattato.
+	# Registro 139, il designer: davanti al giocatore restano i Personaggi
+	# scelti, i token riscattati, l'Eredita' e i Monumenti; le carte degli
+	# edifici crollati si mettono da parte (le loro classi, per la
+	# Continuita', le dice la barra in alto).
 	if grandezza_vera():
-		for b in gs.grid.buildings:
-			if b.owner == player and TessereScavo.fuori(b):
-				out.append({"kind": "mercato", "id": str(b.data["id"]), "restituita": true})
+		# IL MAZZETTO ROVINE (registro 139) sta davanti al giocatore, primo
+		# della riga: da li' volano le tessere quando un suo edificio crolla.
+		out.append({"kind": "mazzetto", "id": str(player)})
+		for voce in p.personaggi_storia:
+			var cid := str(voce[0])
+			if visti.has(cid): continue
+			visti[cid] = true
+			out.append({"kind": "personaggio", "id": cid})
 		for u in p.potenziamenti_riscattati:
 			out.append({"kind": "token", "id": str(u)})
 		return out

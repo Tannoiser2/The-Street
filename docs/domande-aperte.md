@@ -2296,4 +2296,14 @@ dato è stato importato da lì. Ma due confronti fra ciò che è stampato e
     deboli rinforzati, i forti limati (Architetto il primo edificio grande,
     Archeologo max 4, Cavaliere +3). L'arte vale "Subito" + 2 e l'icona la
     ritrova anche sugli edifici in piedi (valeva 0,3 PV a partita).
+139. **La vista dopo la prova del designer.** "Edifici e terrapieni non hanno
+    la stessa dimensione": le tessere scavo e il terrapieno dello spianato
+    avevano un margine del 6% per lato, ora 0,4 mm. "La scritta Girata e'
+    bruttissima": la tessera dell'era usata si capovolge (animazione) e
+    mostra la faccia in bianco e nero; la sua produzione in piu' resta
+    attiva, si consuma solo l'effetto. "Elimina le carte davanti al
+    giocatore": restano i Personaggi scelti, i token riscattati, Eredita' e
+    Monumenti, e il mazzetto rovine; le classi per la Continuita' stanno
+    nella barra in alto. "Le tessere volano dal mazzetto al posto
+    dell'edificio, i potenziamenti davanti al giocatore": fatto.
 
