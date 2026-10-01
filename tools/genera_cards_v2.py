@@ -821,7 +821,13 @@ def scavo_per_era(era):
 
 def rovine_e_flussi(v):
     v["constants"]["tessere_scavo"] = {"mazzo": [dict(t) for t in MAZZO_SCAVO],
-        "premio": "tessere", "per_tessera": 2, "carte_restituite": True}
+        "premio": "tessere", "per_tessera": 2, "carte_restituite": True,
+        # REGISTRO 147: lo spianato lascia le tessere del proprietario come
+        # ogni rovina (senza premio: chi spiana costruisce sopra il proprio).
+        # Il designer: "il Terrapieno e' solo ed esclusivamente quando si crea
+        # un buco". Prima l'Acquedotto spianato da un edificio largo una
+        # colonna diventava tre terrapieni.
+        "spianato_lascia_tessere": True}
     v["constants"]["potenziamenti_per_casella"] = True
     for c in v["characters"]:
         c["scavo"] = scavo_per_era(c.get("era"))

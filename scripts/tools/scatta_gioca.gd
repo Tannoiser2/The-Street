@@ -26,7 +26,7 @@ func _ready() -> void:
 		if not g.ctl.gs.pending_choice.is_empty():
 			g.ctl.choose(int((g.ctl.gs.pending_choice["options"] as Array)[0]))
 		else:
-			StrategyBot.play_turn(g.ctl, "bilanciata")
+			g._racconta(func(): StrategyBot.play_turn(g.ctl, "bilanciata"))
 		g._turni_dei_bot()
 	g._aggiorna()
 	print("era ", g.ctl.gs.era, " edifici ", g.ctl.gs.grid.buildings.size(), " carte restituite ", TessereScavo.carte_restituite(), " grandezza vera ", BoardLayout3D.grandezza_vera())
