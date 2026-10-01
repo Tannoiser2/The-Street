@@ -2307,3 +2307,12 @@ dato è stato importato da lì. Ma due confronti fra ciò che è stampato e
     nella barra in alto. "Le tessere volano dal mazzetto al posto
     dell'edificio, i potenziamenti davanti al giocatore": fatto.
 
+140. **Menu d'inizio e riepilogo finale leggibili.** Il designer: "Sono
+    troppo piccoli e non si legge nulla". Due cose: il progetto ora scala
+    tutta l'interfaccia 2D con la finestra (`stretch canvas_items`, aspetto
+    `expand`), cosi' su un iPad ad alta densita' non resta tutto in
+    miniatura; e i due pannelli passano sotto una "lente" che li ingrandisce
+    fino a riempire circa il 90% dello schermo (fattore fra 1 e 2,6), con i
+    tasti cliccabili dove si vedono. Il menu e' piu' largo (le descrizioni
+    uscivano dal bordo) e nel riepilogo la strategia del bot sta nella riga
+    sotto il nome, che altrimenti veniva tagliata.
