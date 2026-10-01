@@ -39,6 +39,21 @@ var _crolli: Array[Dictionary] = []
 # conosce - e non deve: la differenza si vede dallo stato, che c'e' gia'.
 var _stato_prima: Dictionary = {}
 
+# I VOLI (animazioni dei movimenti): quando un edificio esce dal mercato o un
+# token dalla fila, la sua carta vola dal posto di prima a quello nuovo invece
+# di sparire da una parte e comparire dall'altra. Si confronta col tavolo
+# dell'ultima volta: uid degli edifici (con quanti token portavano) e dove
+# stavano le carte del mercato e della fila. Finche' vola, il pezzo vero non
+# si disegna.
+const VOLO_SECONDI := 0.6
+var _uid_prima: Dictionary = {}
+var _mercato_prima: Dictionary = {}
+var _fila_pot_prima: Dictionary = {}
+var _in_volo: Dictionary = {}
+var _token_in_volo: Dictionary = {}
+# La carta che il giocatore trascina col dito o col mouse.
+var _fantasma: Node3D = null
+
 func mostra(stato: GameState, colonna_evidenziata := -1, acceso := {}) -> void:
 	var prima := gs
 	gs = stato
@@ -54,6 +69,7 @@ func mostra(stato: GameState, colonna_evidenziata := -1, acceso := {}) -> void:
 		_effetti = Node3D.new()
 		add_child(_effetti)
 	_nuovi_crolli(prima)
+	_voli()
 	_tavolo()
 	_cielo()
 	_tessere()
@@ -64,6 +80,79 @@ func mostra(stato: GameState, colonna_evidenziata := -1, acceso := {}) -> void:
 	_posti_liberi()
 	_luci()
 	_telecamera()
+	_ricorda_per_i_voli()
+
+# ---- i voli -----------------------------------------------------------
+func _voli() -> void:
+	if _uid_prima.is_empty() and _mercato_prima.is_empty(): return
+	for b in gs.grid.buildings:
+		if not _uid_prima.has(b.uid):
+			var id: String = str(b.data["id"])
+			if _mercato_prima.has(id) and not _in_volo.has(b.uid):
+				_in_volo[b.uid] = true
+				var uid: int = b.uid
+				_vola(_mercato_prima[id], BoardLayout3D.basetta_box(gs, b),
+					BoardLayout3D.carta_path("mercato", id),
+					COLORI_GIOCATORE[b.owner % COLORI_GIOCATORE.size()].darkened(0.15),
+					func(): _in_volo.erase(uid))
+		elif BoardLayout3D.grandezza_vera() and b.upgrades.size() > int(_uid_prima[b.uid]):
+			var prima_n: int = int(_uid_prima[b.uid])
+			var scatole := BoardLayout3D.token_box(gs, b)
+			var uid2: int = b.uid
+			_token_in_volo[uid2] = prima_n
+			for i in range(prima_n, mini(b.upgrades.size(), scatole.size())):
+				var u := str(b.upgrades[i])
+				if _fila_pot_prima.has(u):
+					_vola(_fila_pot_prima[u], scatole[i], BoardLayout3D.carta_path("token", u),
+						Color(0.79, 0.64, 0.16), func(): _token_in_volo.erase(uid2))
+			if _token_in_volo.has(uid2) and not _fila_pot_prima.has(str(b.upgrades[b.upgrades.size() - 1])):
+				_token_in_volo.erase(uid2)
+
+# Una carta che vola da `da` ad `a` lungo un arco, cambiando misura strada
+# facendo; all'arrivo sparisce e il tavolo si ridisegna col pezzo vero.
+func _vola(da: AABB, a: AABB, percorso: String, tinta: Color, fine: Callable) -> void:
+	if _effetti == null: return
+	var n := Node3D.new()
+	_effetti.add_child(n)
+	_carta_stesa(AABB(-da.size / 2.0, da.size), percorso, tinta, false, Color.WHITE, true, n)
+	n.position = da.position + da.size / 2.0
+	var arrivo := a.position + a.size / 2.0
+	var scala := Vector3(a.size.x / maxf(da.size.x, 0.01), 1.0, a.size.z / maxf(da.size.z, 0.01))
+	var cima := (n.position + arrivo) / 2.0 + Vector3(0.0, 90.0, 0.0)
+	var t := create_tween()
+	t.tween_property(n, "position", cima, VOLO_SECONDI / 2.0).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
+	t.parallel().tween_property(n, "scale", (Vector3.ONE + scala) / 2.0, VOLO_SECONDI / 2.0)
+	t.tween_property(n, "position", arrivo, VOLO_SECONDI / 2.0).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN)
+	t.parallel().tween_property(n, "scale", scala, VOLO_SECONDI / 2.0)
+	t.finished.connect(func():
+		n.queue_free()
+		fine.call()
+		if gs != null: mostra(gs, _evidenziata, evidenze))
+
+func _ricorda_per_i_voli() -> void:
+	_uid_prima.clear()
+	for b in gs.grid.buildings: _uid_prima[b.uid] = b.upgrades.size()
+	_mercato_prima.clear()
+	_fila_pot_prima.clear()
+	for c in BoardLayout3D.side_cards(gs, umano):
+		if c.has("player"): continue
+		match str(c["kind"]):
+			"mercato": _mercato_prima[str(c["id"])] = c["aabb"]
+			"potenziamento": _fila_pot_prima[str(c["id"])] = c["aabb"]
+
+# La carta trascinata: segue il dito, sollevata sul tavolo.
+func fantasma(percorso: String, centro: Vector3, misura: Vector2) -> void:
+	if _effetti == null: return
+	if _fantasma == null or not is_instance_valid(_fantasma):
+		_fantasma = Node3D.new()
+		_effetti.add_child(_fantasma)
+		_carta_stesa(AABB(Vector3(-misura.x / 2.0, 0.0, -misura.y / 2.0), Vector3(misura.x, 4.0, misura.y)),
+			percorso, Color(1.0, 0.88, 0.35), false, Color.WHITE, true, _fantasma)
+	_fantasma.position = centro
+
+func fantasma_via() -> void:
+	if _fantasma != null and is_instance_valid(_fantasma): _fantasma.queue_free()
+	_fantasma = null
 
 # ---- lo sgretolamento ------------------------------------------------
 # Chi e' passato a ROVINA da quando abbiamo guardato l'ultima volta si abbatte.
@@ -293,10 +382,11 @@ func _posti_liberi() -> void:
 # Senza immagine resta il rettangolo colorato: assets/ si rigenera dai PDF e
 # non e' versionata, quindi la plancia deve reggere anche senza.
 func _carta_stesa(box: AABB, percorso: String, tinta: Color,
-		giu := false, stampa := Color.WHITE, contieni := false) -> void:
+		giu := false, stampa := Color.WHITE, contieni := false, padre: Node = null) -> void:
+	if padre == null: padre = self
 	var m := _scatola(box.size, tinta)
 	m.position = box.position + box.size / 2.0
-	add_child(m)
+	padre.add_child(m)
 	if percorso == "" or not ResourceLoader.exists(percorso): return
 	var tex := load(percorso) as Texture2D
 	if tex == null: return
@@ -324,7 +414,7 @@ func _carta_stesa(box: AABB, percorso: String, tinta: Color,
 	mat.texture_filter = BaseMaterial3D.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
 	piano.position = Vector3(box.position.x + box.size.x / 2.0,
 		box.end.y + 0.4, box.position.z + box.size.z / 2.0)
-	add_child(piano)
+	padre.add_child(piano)
 
 func _tessere() -> void:
 	for c in gs.grid.n_cols:
@@ -414,6 +504,7 @@ func _cartello_prosperita(col: int) -> void:
 
 func _edifici() -> void:
 	for b in gs.grid.buildings:
+		if _in_volo.has(b.uid): continue
 		_terrapieni(b)
 		_basetta(b)
 		# Chi e' CROLLATO IN ROVINA non ha piu' una sagoma in piedi: resta il
@@ -782,7 +873,8 @@ const CARTA_SEPOLTA := Color(0.30, 0.28, 0.26)
 # la faccia del potenziamento, uno per casella.
 func _token(b: Building) -> void:
 	var scatole := BoardLayout3D.token_box(gs, b)
-	for i in scatole.size():
+	var quanti: int = int(_token_in_volo.get(b.uid, scatole.size()))
+	for i in mini(quanti, scatole.size()):
 		_carta_stesa(scatole[i], BoardLayout3D.carta_path("token", str(b.upgrades[i])),
 			Color(0.79, 0.64, 0.16), false, Color.WHITE, true)
 

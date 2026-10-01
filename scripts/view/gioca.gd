@@ -88,6 +88,23 @@ var _premuto := MOUSE_BUTTON_NONE
 var _partenza := Vector2.ZERO
 var _trascinato := false
 
+# IL TOCCO (iPad). Il tocco non diventa piu' un mouse finto
+# (`emulate_mouse_from_touch` spento): un dito che trascinava era il tasto
+# sinistro, cioe' solo rotazione, e un tocco tremava piu' dei 5 pixel di
+# soglia e diventava una rotazione invece di una scelta. Qui: un dito ruota,
+# tocca e trascina le carte; due dita pizzicano per lo zoom e scorrono per
+# spostare il tavolo.
+const SOGLIA_TOCCO := 22.0
+var _tocchi: Dictionary = {}
+var _pizzico := 0.0
+var _centro_dita := Vector2.ZERO
+
+# IL TRASCINAMENTO DELLE CARTE: premendo su una carta del mercato o della fila
+# e trascinando, la carta si sceglie, i posti si accendono e la si lascia
+# sul posto voluto. Senza trascinare resta il tocco-tocco di sempre.
+var _carta_presa: Dictionary = {}
+var _porta_carta := false
+
 func _ready() -> void:
 	var strato := CanvasLayer.new()
 	add_child(strato)
@@ -217,6 +234,10 @@ func _unhandled_input(evento: InputEvent) -> void:
 		_pulsante(evento)
 	elif evento is InputEventMouseMotion:
 		_movimento(evento)
+	elif evento is InputEventScreenTouch:
+		_tocco(evento)
+	elif evento is InputEventScreenDrag:
+		_trascina_dito(evento)
 	elif evento is InputEventKey and evento.pressed and not evento.echo:
 		if ctl == null and evento.keycode in [KEY_ENTER, KEY_KP_ENTER, KEY_SPACE]:
 			comincia()
@@ -234,41 +255,146 @@ func _pulsante(e: InputEventMouseButton) -> void:
 		MOUSE_BUTTON_WHEEL_DOWN:
 			if e.pressed: _zoom(-1.0)
 		MOUSE_BUTTON_LEFT, MOUSE_BUTTON_RIGHT, MOUSE_BUTTON_MIDDLE:
-			if e.pressed:
-				_premuto = e.button_index
-				_partenza = e.position
-				_trascinato = false
-			else:
-				if _premuto == MOUSE_BUTTON_LEFT and not _trascinato:
-					_clic(e.position)
-				elif _trascinato:
-					# Durante la trascinata la scena non si ridisegna: a gesto
-					# finito si riallinea quel che sta sotto il mouse.
-					_colonna_sotto_mouse = _colonna_puntata(e.position)
-					_aggiorna()
-				_premuto = MOUSE_BUTTON_NONE
+			if e.pressed: _premi(e.position, e.button_index)
+			else: _rilascia(e.position)
 
 func _movimento(e: InputEventMouseMotion) -> void:
 	if ctl == null:
 		_nota_dove = e.position
 		return
 	if _premuto != MOUSE_BUTTON_NONE:
-		if not _trascinato \
-				and e.position.distance_to(_partenza) < SOGLIA_TRASCINAMENTO:
-			return
-		_trascinato = true
-		if _premuto == MOUSE_BUTTON_LEFT:
-			_orbita.ruota(e.relative)
-		else:
-			_orbita.trasla(e.relative, get_viewport().get_visible_rect().size.y)
-		# Si muove la sola telecamera: ricostruire la scena a ogni pixel di
-		# trascinamento sarebbe uno spreco e la farebbe scattare.
-		vista.muovi_telecamera()
+		_sposta(e.position, e.relative, SOGLIA_TRASCINAMENTO)
 		return
-	_nota_dove = e.position
-	_nota = _descrivi_sotto(e.position)
-	_sotto_mouse = _bersaglio_sotto(e.position)
-	var col := _colonna_puntata(e.position)
+	_sopra(e.position)
+
+# ---- un gesto, dal mouse o dal dito ------------------------------------
+func _premi(pos: Vector2, tasto: int) -> void:
+	_premuto = tasto
+	_partenza = pos
+	_trascinato = false
+	_porta_carta = false
+	_carta_presa = {}
+	if tasto == MOUSE_BUTTON_LEFT and ctl != null and ctl.gs.phase != Enums.Phase.FINE_PARTITA \
+			and ctl.gs.pending_choice.is_empty() and _io() >= 0:
+		var c := _carta_puntata(pos)
+		if not c.is_empty() and not c.has("player") and str(c["kind"]) in ["mercato", "potenziamento"]:
+			_carta_presa = c
+
+func _sposta(pos: Vector2, relativo: Vector2, soglia: float) -> void:
+	if not _trascinato and pos.distance_to(_partenza) < soglia: return
+	_trascinato = true
+	if _premuto == MOUSE_BUTTON_LEFT and not _carta_presa.is_empty():
+		if not _porta_carta:
+			_porta_carta = true
+			var gia := str(_scelta.get("kind", "")) == str(_carta_presa["kind"]) \
+				and str(_scelta.get("id", "")) == str(_carta_presa["id"])
+			if not gia: _seleziona(_carta_presa)
+			if _scelta.is_empty():
+				_porta_carta = false
+				_carta_presa = {}
+				return
+		_nota_dove = pos
+		_sotto_mouse = _bersaglio_sotto(pos)
+		var kind := str(_carta_presa["kind"])
+		var id := str(_carta_presa["id"])
+		var misura := BoardLayout3D.misura_edificio(id) if kind == "mercato" and BoardLayout3D.grandezza_vera() \
+			else BoardLayout3D.misura_carta(kind)
+		vista.fantasma(BoardLayout3D.carta_path(kind, id), _sul_tavolo(pos, 60.0), misura)
+		_hud.queue_redraw()
+		return
+	if _premuto == MOUSE_BUTTON_LEFT:
+		_orbita.ruota(relativo)
+	else:
+		_orbita.trasla(relativo, get_viewport().get_visible_rect().size.y)
+	# Si muove la sola telecamera: ricostruire la scena a ogni pixel di
+	# trascinamento sarebbe uno spreco e la farebbe scattare.
+	vista.muovi_telecamera()
+
+func _rilascia(pos: Vector2) -> void:
+	if _porta_carta:
+		vista.fantasma_via()
+		var v := _bersaglio_sotto(pos)
+		if v != null: _esegui(v)
+		else:
+			_messaggio = "Lasciala su un posto acceso, oppure tocca un posto acceso."
+			_aggiorna()
+	elif _premuto == MOUSE_BUTTON_LEFT and not _trascinato:
+		_sopra(pos)
+		_clic(pos)
+	elif _trascinato:
+		# Durante la trascinata la scena non si ridisegna: a gesto finito si
+		# riallinea quel che sta sotto il puntatore.
+		_colonna_sotto_mouse = _colonna_puntata(pos)
+		_aggiorna()
+	_premuto = MOUSE_BUTTON_NONE
+	_porta_carta = false
+	_carta_presa = {}
+
+# Il punto del tavolo sotto il pixel, sollevato di `alto` mm.
+func _sul_tavolo(pixel: Vector2, alto: float) -> Vector3:
+	var o := _origine(pixel)
+	var d := _direzione(pixel)
+	if absf(d.y) < 0.0001: return o
+	return o + d * ((alto - o.y) / d.y)
+
+# ---- le dita ------------------------------------------------------------
+func _tocco(e: InputEventScreenTouch) -> void:
+	if e.pressed:
+		_tocchi[e.index] = e.position
+		if _tocchi.size() == 1:
+			if ctl != null: _sopra(e.position)
+			_premi(e.position, MOUSE_BUTTON_LEFT)
+		elif _tocchi.size() == 2:
+			# Il secondo dito trasforma il gesto in pizzico: niente rotazione
+			# e niente carta trascinata.
+			if _porta_carta: vista.fantasma_via()
+			_porta_carta = false
+			_carta_presa = {}
+			_premuto = MOUSE_BUTTON_NONE
+			_inizia_pizzico()
+		return
+	var solo := _tocchi.size() == 1
+	_tocchi.erase(e.index)
+	if solo and _premuto != MOUSE_BUTTON_NONE:
+		# Un tocco trema piu' di un clic: `_sposta` lo dice trascinamento solo
+		# oltre SOGLIA_TOCCO, quindi qui un tocco fermo resta un tocco.
+		_rilascia(e.position)
+	elif _tocchi.size() < 2:
+		_pizzico = 0.0
+		if ctl != null and vista != null: _aggiorna()
+
+func _trascina_dito(e: InputEventScreenDrag) -> void:
+	_tocchi[e.index] = e.position
+	if ctl == null: return
+	if _tocchi.size() == 1:
+		if _premuto != MOUSE_BUTTON_NONE: _sposta(e.position, e.relative, SOGLIA_TOCCO)
+		return
+	if _orbita == null: return
+	var dita: Array = _tocchi.values()
+	var a: Vector2 = dita[0]
+	var b: Vector2 = dita[1]
+	var d := a.distance_to(b)
+	var c := (a + b) / 2.0
+	if _pizzico > 0.0 and d > 0.0:
+		_orbita.zoom(log(d / _pizzico) / log(CameraOrbita.PASSO_ZOOM))
+		_orbita.trasla(c - _centro_dita, get_viewport().get_visible_rect().size.y)
+		vista.muovi_telecamera()
+	_pizzico = d
+	_centro_dita = c
+
+func _inizia_pizzico() -> void:
+	var dita: Array = _tocchi.values()
+	_pizzico = (dita[0] as Vector2).distance_to(dita[1])
+	_centro_dita = ((dita[0] as Vector2) + (dita[1] as Vector2)) / 2.0
+
+# Il puntatore e' sopra `pos` (il mouse che passa, o il dito che tocca): la
+# barra e il riquadro dicono cosa c'e' li'.
+func _sopra(pos: Vector2) -> void:
+	_nota_dove = pos
+	if ctl == null: return
+	_nota = _descrivi_sotto(pos)
+	_sotto_mouse = _bersaglio_sotto(pos)
+	var col := _colonna_puntata(pos)
 	if col != _colonna_sotto_mouse:
 		_colonna_sotto_mouse = col
 		_aggiorna()

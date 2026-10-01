@@ -14,6 +14,10 @@ CardDB="*res://scripts/data/card_db.gd"
 window/size/viewport_width=1520
 window/size/viewport_height=900
 
+[input_devices]
+
+pointing/emulate_mouse_from_touch=false
+
 [importer_defaults]
 
 ; La grafica viene da fotografie di cartoncino: in WebP con perdita pesa una
