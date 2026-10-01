@@ -815,7 +815,7 @@ const LINGUETTA_D := 9.0
 static func cubetti(gs: GameState, b: Building) -> Array[Dictionary]:
 	var out: Array[Dictionary] = []
 	if b.state == Enums.BuildingState.ROVINA: return out
-	var quanti := b.vetusta + maxi(0, b.bonus_res)
+	var quanti := b.vetusta + cubetti_neri(b)
 	if quanti <= 0: return out
 	var passo := CUBETTO + CUBETTO_GAP
 	var base := standee_base(gs, b)
@@ -836,6 +836,25 @@ static func cubetti(gs: GameState, b: Building) -> Array[Dictionary]:
 			"tipo": "vetusta" if i < b.vetusta else "resistenza",
 		})
 	return out
+
+# I CUBETTI NERI SOLO PER LA RESISTENZA CHE NON SI VEDE GIA' (registro 142).
+# Con i potenziamenti a token la tessera Struttura sta sull'edificio e dice
+# da se' il suo +1: il cubetto lo ripeteva. Restano i cubetti di quello che
+# non lascia segno sull'edificio - Personaggi, edifici militari, tessere
+# dell'era.
+static func cubetti_neri(b: Building) -> int:
+	var n := maxi(0, b.bonus_res)
+	if not grandezza_vera(): return n
+	return maxi(0, n - resistenza_dei_token(b))
+
+static func resistenza_dei_token(b: Building) -> int:
+	var r := 0
+	for u in b.upgrades:
+		for e in (CardDB.upgrades.get(u, {}) as Dictionary).get("effects", []):
+			if str(e.get("hook", "")) == "on_acquire" and str(e.get("op", "")) == "resistance" \
+					and bool((e.get("target", {}) as Dictionary).get("is_self", false)):
+				r += int(e.get("value", 0))
+	return r
 
 # ---- il cartellino della Prosperita' Urbana --------------------------
 # Un Centro Urbano e' una colonna con almeno tre edifici intatti di almeno due
@@ -1381,6 +1400,9 @@ static func player_cards(gs: GameState, umano := -1) -> Array[Dictionary]:
 		if carte.is_empty(): continue
 		var spazio := largo - 8.0
 		var x0 := i * largo + 4.0
+		if grandezza_vera():
+			out.append_array(_tavolo_giocatore(carte, i, x0, spazio, z0))
+			continue
 		var x := x0
 		var z := z0
 		var profonda := 0.0          # la carta piu' profonda della riga in corso
@@ -1409,6 +1431,61 @@ static func player_cards(gs: GameState, umano := -1) -> Array[Dictionary]:
 			var z_v := z + (profonda if profonda > 0.0 else 0.0) \
 				+ (CARTE_GIOCATORE_GAP if profonda > 0.0 else 0.0)
 			out.append_array(_ventaglio(ventaglio, i, x0, spazio, z_v, carte.size()))
+	return out
+
+# IL POSTO DEL GIOCATORE CON LE CARTE RESTITUITE (registro 141). Il
+# designer: "i personaggi impilati uno sopra l'altro leggermente sfasati in
+# modo da lasciare leggere il Nome, i potenziamenti sotto i personaggi uno
+# sotto l'altro, le milestone acquisite sotto l'obiettivo segreto". Due
+# colonne: a sinistra il mazzetto rovine e sotto l'Eredita' con i Monumenti,
+# a destra i Personaggi a ventaglio con sotto i token riscattati. In riga
+# ognuno si stendeva di fianco all'altro, andava a capo e a fine partita non
+# si capiva piu' cosa fosse di chi. Una terza colonna per l'Eredita' non ci
+# sta: a tre giocatori restava larga due dita.
+static func _tavolo_giocatore(carte: Array, player: int, x0: float, spazio: float,
+		z0: float) -> Array[Dictionary]:
+	var out: Array[Dictionary] = []
+	var colonne := {"mazzetto": [], "personaggio": [], "token": [], "obiettivi": []}
+	for j in carte.size():
+		var k := str(carte[j]["kind"])
+		var dove := k if k in ["mazzetto", "personaggio", "token"] else "obiettivi"
+		(colonne[dove] as Array).append(j)
+	var voce := func(j: int, box: AABB) -> Dictionary:
+		return {"kind": str(carte[j]["kind"]), "id": str(carte[j]["id"]),
+			"player": player, "ordine": j, "aabb": box}
+	var mp := misura_carta("personaggio")
+	var mt := misura_carta("token")
+	var largo_destra := 0.0
+	if not (colonne["personaggio"] as Array).is_empty(): largo_destra = mp.x
+	if not (colonne["token"] as Array).is_empty(): largo_destra = maxf(largo_destra, mt.x)
+	# La colonna di sinistra prende il posto che resta, mai piu' larga
+	# dell'Eredita' vera: le carte troppo larghe si stringono in scala.
+	var largo_sinistra := minf(misura_carta("eredita").x,
+		spazio - largo_destra - CARTE_GIOCATORE_GAP)
+	# A sinistra, dall'alto: il mazzetto rovine (da li' volano le tessere
+	# quando un edificio crolla), poi l'Eredita' e i Monumenti.
+	var z := z0
+	for dove in ["mazzetto", "obiettivi"]:
+		for j in colonne[dove]:
+			var m := misura_carta(str(carte[j]["kind"]))
+			if m.x > largo_sinistra: m *= largo_sinistra / m.x
+			out.append(voce.call(j, AABB(Vector3(x0, 0.0, z), Vector3(m.x, TESSERA_Y, m.y))))
+			z += m.y + CARTE_GIOCATORE_GAP
+	var x := x0 + maxf(largo_sinistra, misura_carta("mazzetto").x) + CARTE_GIOCATORE_GAP
+	# A destra i Personaggi a ventaglio: ognuno copre il precedente lasciandone
+	# fuori il nome e l'era, e sta un filo piu' in alto (chi copre sta sopra).
+	# Sotto l'ultimo, i token riscattati, uno sotto l'altro e tutti scoperti.
+	z = z0
+	var n := 0
+	for j in colonne["personaggio"]:
+		out.append(voce.call(j, AABB(Vector3(x, float(n) * VENTAGLIO_Y, z),
+			Vector3(mp.x, TESSERA_Y, mp.y))))
+		z += VENTAGLIO_Z
+		n += 1
+	if n > 0: z += mp.y - VENTAGLIO_Z + CARTE_GIOCATORE_GAP
+	for j in colonne["token"]:
+		out.append(voce.call(j, AABB(Vector3(x, 0.0, z), Vector3(mt.x, TESSERA_Y, mt.y))))
+		z += mt.y + CARTE_GIOCATORE_GAP
 	return out
 
 # Il mazzetto delle carte edificio, in DUE COLONNE CHE VOGLIONO DIRE

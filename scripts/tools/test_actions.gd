@@ -38,6 +38,7 @@ func _ready() -> void:
 	_run("il turno v2: un'azione per turno, il lavoratore dove agisce", _test_turno_v2)
 	_run("il draft dei Personaggi a inizio era (v2)", _test_draft_v2)
 	_run("v2: niente scheletri dal draft, niente Vetusta' (registro 95)", _test_senza_vetusta_v2)
+	_run("v2: niente Prosperita' Urbana (registro 142)", _test_senza_prosperita_v2)
 	_run("v2: le tre carte che contavano la Vetusta' (registro 99)", _test_tre_carte_v2)
 	_run("v2: le tessere una volta per era (registro 100)", _test_tessere_v2)
 	_run("l'incasso al passaggio nel turno v1 (registro 109)", _test_passa_incasso)
@@ -1283,6 +1284,29 @@ func _test_draft_v2() -> void:
 	_ok("  con Personaggi draftati (%d)" % draftati, draftati >= 30)
 	CardDB.load_db(CardDB.DB_PATH)
 
+
+# Registro 142: nella v2 la Prosperita' Urbana non c'e' (il Denaro avanza
+# gia' a ogni era). Una colonna con tre edifici di due giocatori non e' un
+# Centro e non paga; con i dati v1.5 lo e' ancora.
+func _test_senza_prosperita_v2() -> void:
+	for v2 in [false, true]:
+		if v2:
+			if not FileAccess.file_exists("res://data/cards-v2.json"): return
+			CardDB.load_db("res://data/cards-v2.json")
+		var gs := _game(3, 990).gs
+		for i in 3:
+			var b := Building.new()
+			b.uid = gs.new_uid()
+			b.data = CardDB.buildings.values()[0]
+			b.owner = i % 2
+			b.col_from = 2
+			b.col_to = 3
+			b.level = i
+			gs.grid.buildings.append(b)
+		if v2: _ok("nella v2 tre edifici di due giocatori non fanno un Centro",
+			not gs.grid.is_prosperity_center(2))
+		else: _ok("con i dati v1.5 lo fanno ancora", gs.grid.is_prosperity_center(2))
+	CardDB.load_db(CardDB.DB_PATH)
 
 # Registro 95: il Personaggio del draft non si seppellisce a fine era, e la
 # Vetusta' non esiste (tetto 0). Con i dati v1.5 tutto come prima.

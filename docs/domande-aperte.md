@@ -2316,3 +2316,26 @@ dato è stato importato da lì. Ma due confronti fra ciò che è stampato e
     tasti cliccabili dove si vedono. Il menu e' piu' largo (le descrizioni
     uscivano dal bordo) e nel riepilogo la strategia del bot sta nella riga
     sotto il nome, che altrimenti veniva tagliata.
+141. **Il posto del giocatore in due colonne; la Vetusta' sparita dal
+    riquadro.** Il designer: "i personaggi impilati uno sopra l'altro
+    leggermente sfasati in modo da lasciare leggere il Nome, i potenziamenti
+    sotto i personaggi uno sotto l'altro e le milestone acquisite sotto
+    l'obiettivo segreto". A sinistra il mazzetto rovine, sotto l'Eredita' e
+    sotto ancora i Monumenti; a destra i Personaggi a ventaglio (scoperti
+    nome ed era, 20 mm) e sotto i token riscattati. Una terza colonna non ci
+    stava: a tre giocatori l'Eredita' restava larga due dita. "Leggo ancora
+    la vetusta'": era il riquadro dell'edificio, che la scriveva sempre (a
+    zero); nella v2 scrive la resistenza e quanti cubetti neri ha. Domande
+    aperte al designer: i cubetti neri (resistenza guadagnata da
+    potenziamenti Struttura, Personaggi come Sciamano, Mastro costruttore e
+    Ingegnere militare, edifici militari, tessere dell'era) e la Prosperita'
+    Urbana, che nel regolamento v2 c'e' ancora.
+142. **Via la Prosperita' Urbana; i cubetti neri solo senza gettone.** Il
+    designer: "cubetti solo senza token, togli la Prosperita' se il denaro e'
+    abbondante e avanza a ogni era". Ventottesima misura: senza il Centro a
+    fine era avanzano comunque 3-6 Denaro a testa dall'era 2, a zero raramente,
+    e i PV non cambiano; la Prosperita' esce dal file v2 (manopola
+    `prosperity.attiva`, la v1.5 non cambia) e dal regolamento, con i suoi
+    cartellini. I cubetti neri non ripetono piu' la resistenza dei
+    potenziamenti Struttura, che si legge sul gettone: restano per quella
+    dei Personaggi, degli edifici militari e delle tessere dell'era.

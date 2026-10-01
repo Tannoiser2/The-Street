@@ -24,6 +24,7 @@ func _ready() -> void:
 	_run("3D: cielo e telecamera", _test_3d_scena)
 	_run("3D: una partita vera sta sulla strada", _test_3d_partita)
 	_run("3D: i cubetti sulla basetta", _test_cubetti)
+	_run("v2: i cubetti neri non ripetono i token (registro 142)", _test_cubetti_senza_token)
 	_run("3D: le linguette dei potenziamenti", _test_linguette)
 	_run("3D: le file e le plance sul tavolo", _test_tavolo)
 	_run("3D: cliccare una carta", _test_clic_sulle_carte)
@@ -2630,6 +2631,26 @@ func _test_quarto_lavoratore() -> void:
 	s.ctl = null
 	remove_child(s)
 	s.queue_free()
+	CardDB.load_db(CardDB.DB_PATH)
+
+# Registro 142: con i potenziamenti a token il +1 della Struttura si legge
+# sulla tessera posata sull'edificio; il cubetto nero lo ripeteva. Restano
+# i cubetti della resistenza che non lascia segno (Personaggi, edifici
+# militari, tessere dell'era).
+func _test_cubetti_senza_token() -> void:
+	if not FileAccess.file_exists("res://data/cards-v2.json"): return
+	CardDB.load_db("res://data/cards-v2.json")
+	_ok("nella v2 le carte sono a grandezza vera", BoardLayout3D.grandezza_vera())
+	var gs := _gioco().gs
+	var b := _metti(gs, "ed_capanne", 2, 1)
+	b.upgrades.append("po_palizzata")       # +1 resistenza, token sull'edificio
+	b.bonus_res = 1
+	_eq("il +1 della Palizzata non fa cubetto", BoardLayout3D.cubetti(gs, b).size(), 0)
+	b.bonus_res = 3                         # +2 da altro (un Personaggio)
+	_eq("  il resto si', due cubetti neri", BoardLayout3D.cubetti(gs, b).size(), 2)
+	b.upgrades.append("po_cemento_armato")  # +2: ora tutto viene dai token
+	b.bonus_res = 3
+	_eq("  con il Cemento armato i token coprono tutto", BoardLayout3D.cubetti(gs, b).size(), 0)
 	CardDB.load_db(CardDB.DB_PATH)
 
 # Registro 105: nella v2 lo scheletro lo lascia il lavoratore che piazza il

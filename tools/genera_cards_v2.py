@@ -145,6 +145,11 @@ v2["constants"]["tessere_una_volta_per_era"] = True
 v2["constants"].pop("disturbo_vp", None)
 v2["constants"]["vetusta_max"] = 0
 v2["constants"]["vetusta_max_bosco"] = 0
+# REGISTRO 142: via la Prosperita' Urbana. Il designer: "togli la Prosperita'
+# se il denaro e' abbondante e avanza a ogni era". Misurato senza: a fine era
+# avanzano 3-6 Denaro a testa dall'era 2 in poi, a zero in meno del 10% dei
+# casi, e i PV non si muovono (ventottesima misura).
+v2["constants"]["prosperity"] = dict(v2["constants"]["prosperity"], attiva=False)
 # ---- le varianti di prova per la scarsita' di sagome a quattro (registro 110) --
 # A quattro giocatori sedici turni per era contro dodici sagome. Due idee del
 # designer, ognuna un file a parte in data/proposte/, che il file v2 non tocca:

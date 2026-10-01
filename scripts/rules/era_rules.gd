@@ -341,6 +341,10 @@ static func end_era(gs: GameState) -> void:
 	end_era_after_event(gs)
 
 static func end_era_after_event(gs: GameState) -> void:
+	# Per le misure: il Denaro che avanza a fine era, prima delle entrate di
+	# fine era (registro 142: "se il denaro e' abbondante e avanza a ogni era
+	# la Prosperita' non serve").
+	for p in gs.players: p.bump("oro_avanzo_e%d" % gs.era, p.oro)
 	Effects.era_end_resources(gs)
 	Effects.apply_era_end_characters(gs)
 	# Il censimento delle ere 1-4 si paga qui. Quello dell'era 5 NON si paga:

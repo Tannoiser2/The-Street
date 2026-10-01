@@ -453,8 +453,16 @@ func _descrivi_sotto(pixel: Vector2) -> PackedStringArray:
 				and b.owner == _io() and not TessereScavo.carte_restituite():
 			stato += ", si puo' ristrutturare"
 		out.append(str(b.data["name"]))
-		out.append("G%d · %s · res %d · vetusta %d" % [b.owner, stato,
-			b.effective_resistance(), b.vetusta])
+		# Nella v2 la Vetusta' non esiste (tetto 0): il riquadro la nominava
+		# lo stesso, sempre a zero, e sembrava una regola ancora in gioco. Al
+		# suo posto i cubetti neri, che sono la resistenza guadagnata.
+		var riga := "G%d · %s · resistenza %d" % [b.owner, stato, b.effective_resistance()]
+		if int(CardDB.constants.get("vetusta_max", 0)) > 0:
+			riga += " · vetusta %d" % b.vetusta
+		elif BoardLayout3D.cubetti_neri(b) > 0:
+			var nc := BoardLayout3D.cubetti_neri(b)
+			riga += " (%d cubett%s ner%s)" % [nc, "o" if nc == 1 else "i", "o" if nc == 1 else "i"]
+		out.append(riga)
 		if not b.upgrades.is_empty():
 			var nomi := PackedStringArray()
 			for u in b.upgrades: nomi.append(str(CardDB.upgrades[u]["name"]))
