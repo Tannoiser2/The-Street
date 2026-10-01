@@ -1044,18 +1044,38 @@ func _invito(gs: GameState) -> String:
 const RIEP_COL := 86.0        # larghezza di una colonna di punti
 const RIEP_NOME := 176.0      # la prima colonna: posto, colore, giocatore
 
+# LA LENTE (registro 140). Il designer, sull'iPad: "il menu iniziale e il
+# resoconto finale sono troppo piccoli e non si legge nulla". I due pannelli
+# si disegnano alla loro misura e poi si ingrandiscono fino a riempire buona
+# parte dello schermo; i tasti si registrano gia' ingranditi, cosi' il tocco
+# cade dove si vede.
+var _lente := Transform2D.IDENTITY
+
+func _metti_lente(largo: float, alto: float) -> Rect2:
+	var schermo := _hud.get_viewport_rect().size
+	var k := clampf(minf(schermo.x * 0.9 / largo, schermo.y * 0.88 / alto), 1.0, 2.6)
+	var origine := Vector2((schermo.x - largo * k) / 2.0, (schermo.y - alto * k) / 2.0)
+	_lente = Transform2D(0.0, Vector2(k, k), 0.0, origine)
+	_hud.draw_set_transform_matrix(_lente)
+	return Rect2(Vector2.ZERO, Vector2(largo, alto))
+
+func _togli_lente() -> void:
+	_lente = Transform2D.IDENTITY
+	_hud.draw_set_transform_matrix(_lente)
+
 func _disegna_riepilogo(font: Font, gs: GameState) -> void:
+	_disegna_riepilogo_dentro(font, gs)
+	_togli_lente()
+
+func _disegna_riepilogo_dentro(font: Font, gs: GameState) -> void:
 	var cols := Riepilogo.colonne(gs)
 	var righe := Riepilogo.righe(gs)
-	var schermo := _hud.get_viewport_rect().size
-	var largo: float = minf(RIEP_NOME + (cols.size() + 1) * RIEP_COL + 48.0,
-		schermo.x - 40.0)
+	var largo: float = RIEP_NOME + (cols.size() + 1) * RIEP_COL + 48.0
 	var alto := 128.0 + righe.size() * 46.0 + 56.0
-	var r := Rect2(Vector2((schermo.x - largo) / 2.0, (schermo.y - alto) / 2.0),
-		Vector2(largo, alto))
+	var r := _metti_lente(largo, alto)
 	# Piu' coperto degli altri pannelli: questo e' una tabella di numeri e ci
 	# cadono sotto le carte del tavolo, che la rendevano illeggibile.
-	_hud.draw_rect(r, Color(0.07, 0.08, 0.10, 0.97), true)
+	_hud.draw_rect(r, Color(0.07, 0.08, 0.10, 1.0), true)
 	_hud.draw_rect(r, Color(1, 1, 1, 0.18), false, 1.0)
 	var x := r.position.x + 24.0
 	var y := r.position.y + 46.0
@@ -1082,7 +1102,7 @@ func _disegna_riepilogo(font: Font, gs: GameState) -> void:
 		_hud.draw_rect(Rect2(Vector2(x, y - 11.0), Vector2(11, 11)),
 			VISTA.colore_giocatore(pl), true)
 		_hud.draw_string(font, Vector2(x + 20.0, y),
-			"%d.  %s" % [int(riga["posto"]), _nome_giocatore(pl)],
+			"%d.  %s" % [int(riga["posto"]), _nome_corto(pl)],
 			HORIZONTAL_ALIGNMENT_LEFT, RIEP_NOME - 24.0, 14, CHIARO)
 		cx = x + RIEP_NOME
 		for c in cols:
@@ -1098,10 +1118,14 @@ func _disegna_riepilogo(font: Font, gs: GameState) -> void:
 
 		# Sotto la riga: l'eredita' segreta, che adesso e' scoperta sul tavolo,
 		# e quel che resta fuori dalle colonne.
-		var sotto := "nessuna eredita'"
+		# La testa del bot va qui sotto: nella colonna del nome, ingrandita
+		# dalla lente, veniva tagliata a meta' ("bot · C").
+		var sotto := "" if inizio.e_umano(pl) else "%s · " % inizio.nome_strategia(pl)
 		if str(riga["eredita_nome"]) != "":
-			sotto = "eredita': %s · %d" % [riga["eredita_nome"],
+			sotto += "eredita': %s · %d" % [riga["eredita_nome"],
 				int(riga["eredita_punti"])]
+		else:
+			sotto += "nessuna eredita'"
 		sotto += " · %d edifici in piedi" % int(riga["edifici"])
 		var resto := Riepilogo.altro(gs, riga)
 		if resto != 0: sotto += " · altro %d" % resto
@@ -1113,6 +1137,11 @@ func _disegna_riepilogo(font: Font, gs: GameState) -> void:
 		{"che": "menu"}, 150.0)
 	_tasto(font, "Guarda il tavolo", Vector2(t.end.x + 10.0, t.position.y),
 		false, {"che": "tavolo"}, 160.0)
+
+# Il nome senza la strategia, per la colonna stretta del riepilogo.
+func _nome_corto(i: int) -> String:
+	if not inizio.e_umano(i): return "giocatore %d (bot)" % i
+	return _nome_giocatore(i)
 
 func _nome_giocatore(i: int) -> String:
 	# Il bot dice anche che testa ha: guardarlo giocare senza sapere cosa
@@ -1128,17 +1157,19 @@ func _nome_giocatore(i: int) -> String:
 # I posti sono in ordine - prima gli umani, poi i bot - quindi chi gioca da
 # solo e' sempre il giocatore 0 e sa dove guardare. Con piu' umani si gioca a
 # turno sullo stesso schermo; con zero si guarda giocare.
-const SCELTA_LARGO := 560.0
+const SCELTA_LARGO := 680.0
 const SCELTA_ALTO := 296.0
 const RIGA_ALTA := 46.0
 
 func _disegna_scelta(font: Font) -> void:
-	var schermo := _hud.get_viewport_rect().size
+	_disegna_scelta_dentro(font)
+	_togli_lente()
+
+func _disegna_scelta_dentro(font: Font) -> void:
 	# Il pannello cresce con la riga della velocita', che c'e' solo se al
 	# tavolo siede almeno un bot.
 	var alto := SCELTA_ALTO + RIGA_ALTA + (RIGA_ALTA if inizio.bot > 0 else 0.0)
-	var r := Rect2(Vector2((schermo.x - SCELTA_LARGO) / 2.0,
-		(schermo.y - alto) / 2.0), Vector2(SCELTA_LARGO, alto))
+	var r := _metti_lente(SCELTA_LARGO, alto)
 	_hud.draw_rect(r, SFONDO, true)
 	_hud.draw_rect(r, Color(1, 1, 1, 0.18), false, 1.0)
 	var x := r.position.x + 28.0
@@ -1224,7 +1255,8 @@ func _tasto(font: Font, testo: String, dove: Vector2, acceso: bool,
 	var m := font.get_string_size(testo, HORIZONTAL_ALIGNMENT_LEFT, -1, 14).x
 	_hud.draw_string(font, r.position + Vector2((largo - m) / 2.0, 21.0), testo,
 		HORIZONTAL_ALIGNMENT_LEFT, -1, 14, CHIARO if acceso else SPENTO)
-	_bottoni.append({"rect": r, "scelta": dato})
+	# Il tasto si registra dove si vede: con la lente, ingrandito.
+	_bottoni.append({"rect": Rect2(_lente * r.position, r.size * _lente.get_scale()), "scelta": dato})
 	return r
 
 func _applica_scelta(d: Dictionary) -> void:

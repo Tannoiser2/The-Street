@@ -13,6 +13,8 @@ CardDB="*res://scripts/data/card_db.gd"
 
 window/size/viewport_width=1520
 window/size/viewport_height=900
+window/stretch/mode="canvas_items"
+window/stretch/aspect="expand"
 
 [input_devices]
 
