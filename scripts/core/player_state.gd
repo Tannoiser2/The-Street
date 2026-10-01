@@ -21,6 +21,10 @@ var vp_breakdown: Dictionary = {}      # canale -> punti (per il riepilogo final
 # Il designer guardava "Scavo+premi" senza sapere quanto fosse premio e quanto
 # tessere. Solo per il riepilogo: i canali, e le misure, restano quelli.
 var vp_dettaglio: Dictionary = {}
+# Gli stessi PV presi nel conto finale (registro 145): il riepilogo divide
+# quel che si prende giocando da quel che si scopre a fine partita.
+var vp_dettaglio_fine: Dictionary = {}
+var a_fine_partita := false
 var legacy_id: String = ""             # Eredità segreta tenuta
 var monuments_claimed: Array = []
 # Personaggi reclutati in quest'era, uno per lavoratore specializzato.
@@ -68,6 +72,8 @@ func duplica() -> PlayerState:
 	p.vp = vp
 	p.vp_breakdown = vp_breakdown.duplicate(true)
 	p.vp_dettaglio = vp_dettaglio.duplicate(true)
+	p.vp_dettaglio_fine = vp_dettaglio_fine.duplicate(true)
+	p.a_fine_partita = a_fine_partita
 	p.legacy_id = legacy_id
 	p.monuments_claimed = monuments_claimed.duplicate()
 	p.specialized_characters = specialized_characters.duplicate()
@@ -128,6 +134,10 @@ func add_vp(channel: String, amount: int, voce := "") -> void:
 	var d: Dictionary = vp_dettaglio.get(channel, {})
 	d[voce] = int(d.get(voce, 0)) + amount
 	vp_dettaglio[channel] = d
+	if a_fine_partita:
+		var f: Dictionary = vp_dettaglio_fine.get(channel, {})
+		f[voce] = int(f.get(voce, 0)) + amount
+		vp_dettaglio_fine[channel] = f
 
 func total_resources() -> int:
 	return pietra + oro + idee

@@ -2354,3 +2354,10 @@ dato è stato importato da lì. Ma due confronti fra ciò che è stampato e
     seppellisce, secondo il livello e l'era (come il Lampo, sul momento).
     Il riepilogo ha i giocatori in colonna, le voci in riga con le sottovoci
     sotto, il totale in fondo con l'eredita' segreta e gli edifici in piedi.
+143. **Il Lampo e' un flusso di tutti.** Il designer: "misura la Lampo 2
+    sulle carte era 4". Ventinovesima misura: il Lampo sale di 3 PV a testa
+    per tutti, e la strategia Lampo resta dov'era (24 -> 25% a tre, 13 -> 14%
+    a quattro): il bot Lampo prende gia' piu' Lampo degli altri, e perde
+    perche' inseguendolo lascia 4-6 PV altrove. Il designer: "accetta il
+    Lampo come flusso di tutti". Il file v2 non cambia; la strategia Lampo
+    dei bot resta com'e', non si bilancia piu'.

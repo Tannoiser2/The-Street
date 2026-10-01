@@ -1055,7 +1055,9 @@ var _lente := Transform2D.IDENTITY
 
 func _metti_lente(largo: float, alto: float) -> Rect2:
 	var schermo := _hud.get_viewport_rect().size
-	var k := clampf(minf(schermo.x * 0.9 / largo, schermo.y * 0.88 / alto), 1.0, 2.6)
+	# Anche sotto 1 (registro 145): il riepilogo in due parti e' piu' alto di
+	# uno schermo da 900, e un pannello tagliato non si legge comunque.
+	var k := clampf(minf(schermo.x * 0.9 / largo, schermo.y * 0.94 / alto), 0.6, 2.6)
 	var origine := Vector2((schermo.x - largo * k) / 2.0, (schermo.y - alto * k) / 2.0)
 	_lente = Transform2D(0.0, Vector2(k, k), 0.0, origine)
 	_hud.draw_set_transform_matrix(_lente)
@@ -1081,24 +1083,32 @@ const RIEP_RIGA := 26.0
 const RIEP_SOTTO := 20.0
 
 func _disegna_riepilogo_dentro(font: Font, gs: GameState) -> void:
-	var cols := Riepilogo.colonne(gs)
 	var righe := Riepilogo.righe(gs)
-	# Le righe della tabella, prima di disegnarle: servono per l'altezza.
+	# Le righe della tabella, prima di disegnarle: servono per l'altezza. Due
+	# parti (registro 145): in alto i PV presi giocando, in basso quelli del
+	# conto finale, ognuna col suo subtotale.
 	var voci: Array[Dictionary] = []
-	for c in cols:
-		var id := str(c["id"])
-		voci.append({"id": id, "nome": str(c["nome"]), "sotto": false, "voce": ""})
-		for v in Riepilogo.sottovoci(righe, id):
-			voci.append({"id": id, "nome": Riepilogo.nome_voce(v), "sotto": true, "voce": v})
+	for fine in [false, true]:
+		voci.append({"id": "_titolo", "nome": "A fine partita" if fine else "Durante il gioco",
+			"sotto": false, "voce": "", "fine": fine})
+		for c in Riepilogo.colonne_fase(gs, righe, fine):
+			var id := str(c["id"])
+			voci.append({"id": id, "nome": str(c["nome"]), "sotto": false, "voce": "", "fine": fine})
+			for v in Riepilogo.sottovoci_fase(righe, id, fine):
+				voci.append({"id": id, "nome": Riepilogo.nome_voce(v), "sotto": true, "voce": v, "fine": fine})
+		voci.append({"id": "_parziale", "nome": "totale a fine partita" if fine else "totale in gioco",
+			"sotto": false, "voce": "", "fine": fine})
 	var resti := false
 	for riga in righe:
 		if Riepilogo.altro(gs, riga) != 0: resti = true
-	if resti: voci.append({"id": "_altro", "nome": "altro", "sotto": false, "voce": ""})
+	if resti: voci.append({"id": "_altro", "nome": "altro", "sotto": false, "voce": "", "fine": true})
 	var alto_voci := 0.0
 	var prima_sotto := false
 	for v in voci:
 		if not bool(v["sotto"]) and prima_sotto: alto_voci += 6.0
 		alto_voci += RIEP_SOTTO if bool(v["sotto"]) else RIEP_RIGA
+		if str(v["id"]) == "_titolo": alto_voci += 4.0
+		if str(v["id"]) == "_parziale": alto_voci += 8.0
 		prima_sotto = bool(v["sotto"])
 	var largo: float = RIEP_VOCE + righe.size() * RIEP_GIOC + 48.0
 	var alto: float = 46.0 + 36.0 + 44.0 + alto_voci + 14.0 + 34.0 + 44.0 + 64.0
@@ -1133,22 +1143,38 @@ func _disegna_riepilogo_dentro(font: Font, gs: GameState) -> void:
 	for v in voci:
 		var sotto := bool(v["sotto"])
 		var id := str(v["id"])
+		var fine := bool(v["fine"])
 		if not sotto and era_sotto: y += 6.0
 		era_sotto = sotto
+		if id == "_titolo":
+			# Il titolo della parte: piccolo, in maiuscolo, color oro.
+			y += 4.0
+			_hud.draw_string(font, Vector2(x, y), str(v["nome"]).to_upper(),
+				HORIZONTAL_ALIGNMENT_LEFT, -1, 12, Color("#c9a24a"))
+			y += RIEP_RIGA
+			continue
+		if id == "_parziale":
+			_hud.draw_line(Vector2(x + RIEP_VOCE - 40.0, y - 16.0), Vector2(r.end.x - 24.0, y - 16.0),
+				Color(1, 1, 1, 0.10), 1.0)
 		var corpo := 12 if sotto else 14
 		_hud.draw_string(font, Vector2(x + (18.0 if sotto else 0.0), y), str(v["nome"]),
-			HORIZONTAL_ALIGNMENT_LEFT, RIEP_VOCE - 24.0, corpo, SPENTO if sotto else CHIARO)
+			HORIZONTAL_ALIGNMENT_LEFT, RIEP_VOCE - 24.0, corpo,
+			SPENTO if sotto or id == "_parziale" else CHIARO)
 		for j in righe.size():
 			var n: int
 			if id == "_altro": n = Riepilogo.altro(gs, righe[j])
-			elif sotto: n = Riepilogo.punti_voce(righe[j], id, str(v["voce"]))
-			else: n = Riepilogo.punti(righe[j], id)
+			elif id == "_parziale":
+				n = 0
+				for c in Riepilogo.colonne(gs): n += Riepilogo.punti_fase(righe[j], str(c["id"]), fine)
+			elif sotto: n = Riepilogo.punti_voce_fase(righe[j], id, str(v["voce"]), fine)
+			else: n = Riepilogo.punti_fase(righe[j], id, fine)
 			# Lo zero si scrive come un trattino: una colonna di zeri veri
 			# nasconde i numeri che contano.
 			var colore := (SPENTO if sotto else CHIARO) if n != 0 else Color("#5b616c")
 			_hud.draw_string(font, Vector2(x0 + j * RIEP_GIOC, y), str(n) if n != 0 else "–",
 				HORIZONTAL_ALIGNMENT_RIGHT, RIEP_GIOC - 10.0, corpo, colore)
 		y += RIEP_SOTTO if sotto else RIEP_RIGA
+		if id == "_parziale": y += 8.0
 
 	# In fondo il totale, e sotto l'eredita' segreta e gli edifici in piedi.
 	y += 2.0
