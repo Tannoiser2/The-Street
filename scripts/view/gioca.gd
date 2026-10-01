@@ -459,9 +459,9 @@ func _descrivi_sotto(pixel: Vector2) -> PackedStringArray:
 		var riga := "G%d · %s · resistenza %d" % [b.owner, stato, b.effective_resistance()]
 		if int(CardDB.constants.get("vetusta_max", 0)) > 0:
 			riga += " · vetusta %d" % b.vetusta
-		elif b.bonus_res > 0:
-			riga += " (%d cubett%s ner%s)" % [b.bonus_res, "o" if b.bonus_res == 1 else "i",
-				"o" if b.bonus_res == 1 else "i"]
+		elif BoardLayout3D.cubetti_neri(b) > 0:
+			var nc := BoardLayout3D.cubetti_neri(b)
+			riga += " (%d cubett%s ner%s)" % [nc, "o" if nc == 1 else "i", "o" if nc == 1 else "i"]
 		out.append(riga)
 		if not b.upgrades.is_empty():
 			var nomi := PackedStringArray()

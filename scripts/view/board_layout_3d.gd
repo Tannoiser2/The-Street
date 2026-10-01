@@ -815,7 +815,7 @@ const LINGUETTA_D := 9.0
 static func cubetti(gs: GameState, b: Building) -> Array[Dictionary]:
 	var out: Array[Dictionary] = []
 	if b.state == Enums.BuildingState.ROVINA: return out
-	var quanti := b.vetusta + maxi(0, b.bonus_res)
+	var quanti := b.vetusta + cubetti_neri(b)
 	if quanti <= 0: return out
 	var passo := CUBETTO + CUBETTO_GAP
 	var base := standee_base(gs, b)
@@ -836,6 +836,25 @@ static func cubetti(gs: GameState, b: Building) -> Array[Dictionary]:
 			"tipo": "vetusta" if i < b.vetusta else "resistenza",
 		})
 	return out
+
+# I CUBETTI NERI SOLO PER LA RESISTENZA CHE NON SI VEDE GIA' (registro 142).
+# Con i potenziamenti a token la tessera Struttura sta sull'edificio e dice
+# da se' il suo +1: il cubetto lo ripeteva. Restano i cubetti di quello che
+# non lascia segno sull'edificio - Personaggi, edifici militari, tessere
+# dell'era.
+static func cubetti_neri(b: Building) -> int:
+	var n := maxi(0, b.bonus_res)
+	if not grandezza_vera(): return n
+	return maxi(0, n - resistenza_dei_token(b))
+
+static func resistenza_dei_token(b: Building) -> int:
+	var r := 0
+	for u in b.upgrades:
+		for e in (CardDB.upgrades.get(u, {}) as Dictionary).get("effects", []):
+			if str(e.get("hook", "")) == "on_acquire" and str(e.get("op", "")) == "resistance" \
+					and bool((e.get("target", {}) as Dictionary).get("is_self", false)):
+				r += int(e.get("value", 0))
+	return r
 
 # ---- il cartellino della Prosperita' Urbana --------------------------
 # Un Centro Urbano e' una colonna con almeno tre edifici intatti di almeno due

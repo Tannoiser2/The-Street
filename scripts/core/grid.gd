@@ -77,6 +77,8 @@ func is_prosperity_center(col: int) -> bool:
 	var owners := {}
 	for b in alive: owners[b.owner] = true
 	var p = CardDB.constants["prosperity"]
+	# Spenta nella v2 (registro 142): il Denaro avanza gia' a ogni era.
+	if not bool(p.get("attiva", true)): return false
 	return alive.size() >= int(p["min_buildings"]) and owners.size() >= int(p["min_owners"])
 
 func owners_alive_in(col: int) -> Array:

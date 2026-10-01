@@ -2330,3 +2330,12 @@ dato è stato importato da lì. Ma due confronti fra ciò che è stampato e
     potenziamenti Struttura, Personaggi come Sciamano, Mastro costruttore e
     Ingegnere militare, edifici militari, tessere dell'era) e la Prosperita'
     Urbana, che nel regolamento v2 c'e' ancora.
+142. **Via la Prosperita' Urbana; i cubetti neri solo senza gettone.** Il
+    designer: "cubetti solo senza token, togli la Prosperita' se il denaro e'
+    abbondante e avanza a ogni era". Ventottesima misura: senza il Centro a
+    fine era avanzano comunque 3-6 Denaro a testa dall'era 2, a zero raramente,
+    e i PV non cambiano; la Prosperita' esce dal file v2 (manopola
+    `prosperity.attiva`, la v1.5 non cambia) e dal regolamento, con i suoi
+    cartellini. I cubetti neri non ripetono piu' la resistenza dei
+    potenziamenti Struttura, che si legge sul gettone: restano per quella
+    dei Personaggi, degli edifici militari e delle tessere dell'era.

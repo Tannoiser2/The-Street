@@ -63,9 +63,8 @@ mai carte di edifici in rovina.
 | Eredità (obiettivi segreti) | 16 |
 | Lavoratori | 4 per giocatore, + 1 con la Dinastia |
 | Basette colorate | un set per giocatore |
-| Cubetti neri (resistenza) | 40 |
+| Cubetti neri (resistenza non data da un gettone) | 40 |
 | Risorse: Costruzione, Denaro, Idee | 40 + 40 + 40 |
-| Cartellini Prosperità Urbana | 1 per colonna |
 | Segnapunti | 1 traccia + 1 pedina per giocatore |
 
 Non ci sono più cubetti bianchi (la Vetustà non esiste) né segnalini crepa (il rudere non
@@ -192,13 +191,6 @@ colonna trafficata arricchisce anche gli avversari: è il prezzo di andare dove 
 costruire lì o in una colonna adiacente; potenziare un vostro edificio lì; oppure
 comprare la Dinastia. Passare è non fare niente dopo l'attivazione.
 
-#### Prosperità urbana
-
-Una colonna con almeno 3 edifici in piedi di almeno 2 giocatori è un Centro Urbano. **La prima
-volta che viene attivata in un'era**, ogni giocatore che vi possiede un edificio in piedi riceve
-1 Denaro — chi attiva compreso, ma solo se ha qualcosa lì. Poi il cartellino della Prosperità si
-gira: per quell'era il Centro ha già dato. A inizio era si rigirano tutti.
-
 ## Costruire — A terra, o sopra il passato
 
 Costruire significa pagare il costo della sagoma e metterla sul tabellone, nella colonna che avete
@@ -261,7 +253,8 @@ i potenziamenti **Arte** in Idee, quelli **Struttura** in Costruzione, tutti gli
 Denaro. Il potenziamento è un **gettone**: posatelo sopra un vostro edificio in piedi della
 colonna attivata **della stessa classe del potenziamento** (vale anche una classe acquisita,
 come con la Merlatura). I potenziamenti Arte danno PV subito; quelli Struttura danno resistenza
-permanente, segnata con un cubetto nero.
+permanente: il gettone sull'edificio la dice da sé, senza cubetto. I cubetti neri segnano solo
+la resistenza che non lascia segno sull'edificio (Personaggi, edifici militari, tessere dell'era).
 
 **Un gettone per casella.** La capienza di un edificio è pari alle caselle che occupa: un
 edificio da una casella ne porta uno, il Colosseo (2x2) ne porta quattro.
@@ -382,8 +375,8 @@ delle Idee): i granai non attraversano i secoli, il sapere sì. Il resto si scar
 
 **Il ricambio**: i lavoratori tornano ai proprietari, i Personaggi presi restano a chi li ha
 presi (il loro Scavo serve alla fine), quelli non scelti si scartano, le case avanzate si scartano, le
-tessere dell'era nuova si posano sulle colonne (una per colonna, dalle 14 dell'era), i
-cartellini della Prosperità si rigirano, si scartano le file vecchie, si aprono
+tessere dell'era nuova si posano sulle colonne (una per colonna, dalle 14 dell'era), si
+scartano le file vecchie, si aprono
 quelle dell'era nuova e si rivela il nuovo evento.
 
 ## Fine partita — Come si contano i punti
@@ -515,8 +508,7 @@ altri, e sotto l'edificio non resta niente.
 
 **Posso attivare una colonna dove non ho nulla?** Sì, e talvolta conviene: incassate la
 produzione di base e quella della tessera dell'era, e il suo effetto se è "chi attiva per
-primo" e non è ancora girato. La Prosperità la
-prendete solo se avete un edificio lì.
+primo" e non è ancora girato.
 
 **Cosa succede se nessuno può più costruire?** Nulla di speciale: si continua a piazzare
 lavoratori per attivare colonne e potenziare. L'azione è facoltativa.

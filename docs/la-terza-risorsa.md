@@ -1441,6 +1441,31 @@ col numero di giocatori). A due tutte le strategie dentro l'errore; a tre e a qu
 appena sotto la banda e gli Obiettivi appena sopra a quattro. Il kingmaker scende (era 4 / 7 / 11 %).
 Un giocatore riscatta in media 0,5-0,7 token arte e pesca 3,5-3,9 tessere (al massimo 12).
 
+## Ventottesima misura: senza la Prosperita' Urbana
+
+Il designer: "togli la Prosperita' se il denaro e' abbondante e avanza a ogni
+era". Si conta il Denaro che ogni giocatore ha in mano a fine era, prima delle
+entrate di fine era (contatore `oro_avanzo_eN`), con la Prosperita' e senza
+(`--prosperita 99`, nessuna colonna e' un Centro). Seme 700000, tutte le
+strategie; 72/31/15 partite a 2/3/4 giocatori con, 73/32/15 senza.
+
+| giocatori | | era 1 | era 2 | era 3 | era 4 | era 5 | oro dal Centro | PV |
+|---|---|---|---|---|---|---|---|---|
+| 2 | con | 1,8 | 4,7 | 5,4 | 8,2 | 8,1 | 9,3 | 87,1 |
+| 2 | senza | 1,8 | 3,6 | 3,3 | 5,7 | 4,9 | – | 86,9 |
+| 3 | con | 2,3 | 5,5 | 6,6 | 8,7 | 10,8 | 11,1 | 86,3 |
+| 3 | senza | 2,3 | 4,3 | 4,0 | 5,8 | 6,5 | – | 85,9 |
+| 4 | con | 1,7 | 4,9 | 5,7 | 8,1 | 9,6 | 9,7 | 87,9 |
+| 4 | senza | 1,7 | 3,9 | 3,6 | 5,5 | 6,5 | – | 86,2 |
+
+Il Centro dava 9-11 Denaro a partita a testa, e quasi tutto avanzava: senza,
+a fine era restano comunque 3-6 Denaro dall'era 2 in poi. Chi chiude un'era a
+zero e' raro (al massimo 8% in un'era a quattro; l'era 1, 12% a quattro, e'
+uguale con e senza perche' li' il Centro non si forma quasi mai). I PV medi
+non si muovono (meno di 2). La condizione del designer e' soddisfatta: la
+Prosperita' esce dal file v2 (`prosperity.attiva = false`; la v1.5 non
+cambia).
+
 ## Come rifare il conto
 
 ```bash
@@ -1529,4 +1554,6 @@ python3 tools/confronta_torneo.py classe_p3.csv scavo_p3.csv
 # ventisettesima misura: le rovine a tessere e i flussi stanno nel file v2, i pesi dei bot nella tabella per tavolo
 for p in 2 3; do godot --headless res://scenes/audit_partita.tscn -- --players $p --games 750 --seed 700000 --dati data/cards-v2.json --giro tutte --rapporto 1 > rovine_p$p.csv 2> rovine_p$p.err; done
 python3 tools/rapporto_partite.py rovine_p2.err rovine_p3.err > rapporto.json
+# ventottesima misura: il Denaro che avanza a fine era, con e senza la Prosperita'
+for p in 2 3 4; do godot --headless res://scenes/audit_partita.tscn -- --players $p --games 150 --seed 700000 --dati data/cards-v2.json --giro tutte --rapporto 1 --prosperita 99 > senza_p$p.csv 2> senza_p$p.err; done
 ```
