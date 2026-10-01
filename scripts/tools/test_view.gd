@@ -69,6 +69,7 @@ func _ready() -> void:
 	_run("v2: il mercato a grandezza vera (registro 133)", _test_mercato_vero)
 	_run("v2: token sugli edifici e carte restituite davanti al giocatore (registro 133)", _test_token_e_restituite)
 	_run("v2: nessun edificio sospeso nel vuoto (registro 134)", _test_niente_sospesi)
+	_run("il tocco: pizzico, due dita, tocco su una carta; i voli delle carte", _test_tocco_e_voli)
 	_run("il riepilogo finale con i nomi del regolamento v2", _test_riepilogo_v2)
 	_run("le facce degli edifici della v2", _test_facce_v2)
 	print("\n%d superati, %d falliti" % [_passed, _failed])
@@ -3018,4 +3019,83 @@ func _test_niente_sospesi() -> void:
 						sospese += 1
 						if esempio == "": esempio = "%s livello %d, colonna %d" % [b.data["name"], b.level, b.col_from + i]
 	_eq("caselle sospese nel vuoto su %d controllate%s" % [controllate, (" (es. " + esempio + ")") if esempio != "" else ""], sospese, 0)
+	CardDB.load_db(CardDB.DB_PATH)
+
+# IL TOCCO (iPad) E I VOLI. Sull'iPad funzionava solo la rotazione: il dito
+# era un mouse finto col tasto sinistro. Qui si mandano alla partita eventi
+# di tocco veri: il pizzico avvicina, un tocco su una carta del mercato la
+# sceglie, e quando un edificio esce dal mercato la sua carta vola al posto.
+func _test_tocco_e_voli() -> void:
+	if not FileAccess.file_exists("res://data/cards-v2.json"): return
+	var s = preload("res://scenes/gioca.tscn").instantiate()
+	add_child(s)
+	s.inizio.giocatori = 3
+	s.inizio.bot = 2
+	s.inizio.velocita = s.inizio.VELOCITA.size() - 1
+	s.comincia()
+	var gs: GameState = s.ctl.gs
+	while not gs.pending_choice.is_empty():
+		s.ctl.choose(int((gs.pending_choice["options"] as Array)[0]))
+	s._turni_dei_bot()
+	s._aggiorna()
+	var tocca := func(indice: int, pos: Vector2, giu: bool) -> void:
+		var e := InputEventScreenTouch.new()
+		e.index = indice
+		e.position = pos
+		e.pressed = giu
+		s._unhandled_input(e)
+	var striscia := func(indice: int, pos: Vector2, rel: Vector2) -> void:
+		var e := InputEventScreenDrag.new()
+		e.index = indice
+		e.position = pos
+		e.relative = rel
+		s._unhandled_input(e)
+	# Il pizzico: due dita che si allontanano avvicinano il tavolo.
+	var prima: float = s._orbita.distanza
+	tocca.call(0, Vector2(400, 300), true)
+	tocca.call(1, Vector2(500, 300), true)
+	striscia.call(1, Vector2(600, 300), Vector2(100, 0))
+	_ok("il pizzico che allarga avvicina il tavolo", s._orbita.distanza < prima)
+	var mira: Vector3 = s._orbita.mira
+	striscia.call(0, Vector2(460, 360), Vector2(60, 60))
+	striscia.call(1, Vector2(660, 360), Vector2(60, 60))
+	_ok("  e due dita che scorrono spostano il tavolo", not s._orbita.mira.is_equal_approx(mira))
+	tocca.call(1, Vector2(660, 360), false)
+	tocca.call(0, Vector2(460, 360), false)
+	# Un tocco su una carta del mercato la sceglie (o, se ha un solo posto,
+	# la esegue): niente rotazione.
+	s._orbita.reimposta()
+	s.vista.muovi_telecamera()
+	var cam: Camera3D = s.get_viewport().get_camera_3d()
+	var scelta_ok := false
+	if cam != null and s._io() >= 0:
+		for c in BoardLayout3D.side_cards(gs, s._io()):
+			if str(c["kind"]) != "mercato" or c.has("player"): continue
+			var a: AABB = c["aabb"]
+			var pixel := cam.unproject_position((a.position + a.size / 2.0) * BoardLayout3D.U)
+			var trovata: Dictionary = s._carta_puntata(pixel)
+			if trovata.is_empty() or str(trovata.get("id", "")) != str(c["id"]): continue
+			tocca.call(0, pixel, true)
+			tocca.call(0, pixel + Vector2(6, 4), false)
+			scelta_ok = not s._scelta.is_empty() or s._messaggio != ""
+			break
+	_ok("un tocco (anche tremolante) su una carta del mercato la sceglie", scelta_ok)
+	s._deseleziona(false)
+	# I voli: un edificio esce dal mercato e la sua carta vola al posto.
+	var uid_prima := {}
+	for b in gs.grid.buildings: uid_prima[b.uid] = true
+	var guardia := 0
+	var costruito := false
+	while not costruito and guardia < 40 and gs.phase != Enums.Phase.FINE_PARTITA:
+		guardia += 1
+		while not gs.pending_choice.is_empty():
+			s.ctl.choose(int((gs.pending_choice["options"] as Array)[0]))
+		StrategyBot.play_turn(s.ctl, "bilanciata")
+		for b in gs.grid.buildings:
+			if not uid_prima.has(b.uid): costruito = true
+		if not costruito: s._aggiorna()
+	s._aggiorna()
+	_ok("quando un edificio esce dal mercato la sua carta vola", not s.vista._in_volo.is_empty())
+	remove_child(s)
+	s.queue_free()
 	CardDB.load_db(CardDB.DB_PATH)
