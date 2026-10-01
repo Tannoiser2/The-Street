@@ -167,9 +167,9 @@ prosegue in giro normale — per compensare il vantaggio di chi occupa il suolo 
 I cinque Personaggi dell'era sono scoperti. In ordine di turno ognuno ne prende **uno, gratis,
 senza usare un lavoratore**. Il Personaggio vale per l'era; alla fine non si seppellisce e
 non ha più effetto, ma non lo scartate: tenetelo da parte davanti a voi. Ogni Personaggio porta
-uno **Scavo stampato** secondo la sua era — 5 nella Preistoria, 4 nell'Antichità, 3 nel
-Medioevo, 2 nel Rinascimento, 1 nel Moderno — che serve a fine partita alle icone scheletro
-delle tessere scavo. Gli avanzi del draft si scartano.
+uno **Scavo stampato**, da 2 a 6: piu' alto sulle carte piu' deboli, piu' basso su quelle piu'
+forti (i Personaggi del Moderno non ne hanno: non ci sono scheletri dell'era 5). Serve a fine
+partita alle icone scheletro delle tessere scavo. Gli avanzi del draft si scartano.
 
 Le carte che parlano di "questo lavoratore" o "l'edificio che abiti" — Capotribù, Legionario,
 Cavaliere e simili — si legano al **primo edificio che costruite nell'era**. Le Impronte
@@ -268,10 +268,9 @@ edificio da una casella ne porta uno, il Colosseo (2x2) ne porta quattro.
 
 **Il riscatto.** Quando l'edificio va in rovina, il proprietario **riscatta** i suoi gettoni: il
 loro effetto sull'edificio finisce, e i gettoni restano davanti a lui. Solo i gettoni **Arte**
-hanno ancora un valore: ognuno porta uno Scavo stampato secondo l'era — 5 nella Preistoria, 4
-nell'Antichità, 3 nel Medioevo, 2 nel Rinascimento, 1 nel Moderno — che vale solo se a fine
-partita un'icona arte di una tessera scoperta lo "ritrova". Gli altri gettoni riscattati non
-valgono niente.
+hanno ancora un valore: ognuno porta uno Scavo stampato (i PV del suo "Subito" più 2, da 3 a 5)
+che vale solo se a fine partita un'icona arte di una tessera scoperta lo "ritrova". Gli altri
+gettoni riscattati non valgono niente.
 
 **La fila dei potenziamenti resta un'era.** A fine era i potenziamenti non presi non si scartano:
 restano accanto alla fila nuova per tutta l'era successiva, poi si scartano. Così quelli dell'era 1,
@@ -412,9 +411,9 @@ valgono **metà**, arrotondata per difetto, gruppo per gruppo (le tessere di una
 sommano, poi si dimezza). Le icone contano **solo sulle tessere scoperte**:
 
 - **Scheletro**: la linea sulla tessera indica un'era; vale lo Scavo stampato del Personaggio
-  che avete preso in quell'era (5 per l'era 1, 4 per la 2, 3 per la 3, 2 per la 4).
-- **Arte**: vale lo Scavo stampato del vostro miglior gettone Arte riscattato, non ancora usato
-  da un'altra icona arte.
+  che avete preso in quell'era.
+- **Arte**: vale lo Scavo stampato del vostro miglior gettone Arte, riscattato o ancora su un
+  vostro edificio in piedi, non ancora usato da un'altra icona arte.
 
 Un'icona che non trova niente vale 0. Lo Scavo stampato sulle carte degli edifici non paga più il
 proprietario: lo sostituiscono le tessere.
@@ -502,8 +501,9 @@ proprietario conta le sue tessere a fine partita, a metà se sono ancora coperte
 partita. Se finisce, le caselle della vostra nuova rovina restano senza tessera e valgono 0; la
 carta torna comunque a voi e conta per la Continuità.
 
-**Un gettone potenziamento non Arte riscattato vale qualcosa?** No. Dopo il riscatto solo i
-gettoni Arte valgono, e solo se un'icona arte su una tessera scoperta li ritrova. Gli altri
+**Un gettone potenziamento non Arte riscattato vale qualcosa?** No. Solo i gettoni Arte valgono,
+riscattati o ancora sui vostri edifici in piedi, e solo se un'icona arte su una tessera scoperta
+li ritrova. Gli altri
 restano davanti a voi come ricordo.
 
 **Una rovina conta per il Console, il Mercante o un Monumento?** No: sulla mappa una rovina non è

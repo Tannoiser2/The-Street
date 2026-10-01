@@ -142,6 +142,27 @@ Il designer ha cambiato le rovine e i punti. Sulle carte cambia questo:
 - **Eredità Il Restauratore:** condizione nuova "almeno 2 tue rovine riportate alla luce da un edificio dell'era Moderna" (4 PV, invariati).
 - **Evento Secolarizzazioni:** testo nuovo "Forza 3. Religione −2 res." (via la parte sul restauro).
 
+### 7b. Personaggi e potenziamenti Arte (registro 138)
+
+- **Scavo dei Personaggi**, carta per carta (sostituisce la scala per era): Capotribù 5, Costruttore di zattere 4, Mercante di ossidiana 6, Sciamano 6, Incisore 5; Architetto 2, Legionario 4, Console 6, Sacerdotessa 6, Retore 4; Cavaliere 2, Mastro costruttore 3, Cronista 4, Mercante 5, Vescovo 5; Artista di corte 2, Mecenate 2, Ingegnere militare 2, Banchiere 3, Cardinale 4. I Personaggi dell'era 5 non hanno Scavo.
+- **Testi nuovi dei Personaggi:**
+  - Urbanista: "Finale: +1 PV per ogni era diversa fra i tuoi edifici in piedi (max +4)."
+  - Cronista: "Subito: +1 cultura. Per l'era: quando attivi una colonna che contiene edifici in piedi di 2+ ere diverse, +1 cultura (max 2)."
+  - Console: "Subito: +1 Denaro. Per l'era: quando attivi una colonna con un tuo edificio Civico in piedi, +1 PV (max 2)."
+  - Mercante: "Subito: +1 Denaro. Per l'era: quando un avversario attiva una colonna con tuoi edifici in piedi, +1 Denaro (max 3)."
+  - Sacerdotessa: "Subito: +1 Denaro. Per l'era: ogni edificio Religione che costruisci ti rimborsa 1 Denaro."
+  - Vescovo: "Subito: +2 cultura. Per l'era: il prossimo potenziamento su un tuo edificio Religione costa 0."
+  - Cardinale: "Subito: +1 Denaro. Per l'era: −1 Costruzione e −1 Denaro agli edifici Religione (minimo 0)."
+  - Banchiere: "Subito: +3 Denaro e +1 Idea."
+  - Mercante di ossidiana: "Subito: +1 Denaro e +1 Idea. Per l'era: fino a 2 scambi Costruzione↔Denaro alla pari."
+  - Sciamano: "Subito: +1 cultura. Per l'era: i tuoi edifici Religione hanno +1 res."
+  - Veterano: "Finale: +1 PV per ogni tuo edificio Militare, in piedi o restituito (max +5)."
+  - Soprintendente: "Finale: fino a 4 tue rovine valgono +2 Scavo."
+  - Architetto: "Subito: +1 Costruzione. Per l'era: −1 Costruzione al primo edificio da 2 o 3 caselle."
+  - Archeologo: "Finale: scegli una tua rovina non sotterrata: vale il suo Scavo (max 4). Se hai già 3+ edifici sotterrati, +1 PV."
+  - Cavaliere: "Per l'era: la sua protezione vale +3 invece di +2; se l'edificio protetto sopravvive, +1 cultura."
+- **Scavo dei potenziamenti Arte:** i PV del loro "Subito" più 2: +1 PV → Scavo 3, +2 PV → Scavo 4, +3 PV → Scavo 5.
+
 ## 8. Cosa mi restituisci
 
 1. I cinque PDF degli edifici corretti, con gli stessi nomi di file, e i PDF delle tessere e delle carte corretti.
