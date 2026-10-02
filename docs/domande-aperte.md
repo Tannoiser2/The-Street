@@ -2522,7 +2522,8 @@ dato è stato importato da lì. Ma due confronti fra ciò che è stampato e
     che si producevano 1,5 e 1,7 a testa, e le case restavano l'unica cosa
     pagabile. Nel file base: le quattro tessere dell'era 1 senza produzione
     danno Denaro (Sentiero, Terra di nessuno) o Idee (Radura, Luogo sacro);
-    Guardiano del fuoco 💡, Anziana 🪙, Barattatore 🪙💡 (fra i 16: 7/6/6);
+    Guardiano del fuoco 💡, Anziana 🪙, Barattatore 🪙💡 (fra i 16, in unita':
+    5 Costruzione, 6 Denaro, 7 Idee; erano 10/4/5);
     `potenzia_adiacente` acceso. Nel bot le Idee contano nella domanda del
     mercato (solo nella v3) e l'azione ⊕ vale 0,4. Trentatreesima misura:
     Denaro 2,6 e Idee 3,0 prodotti, potenziamenti 0,46 a testa, case 3,6 a
@@ -2531,3 +2532,18 @@ dato è stato importato da lì. Ma due confronti fra ciò che è stampato e
     piu' economici), il Guerriero sempre primo, le Trappole da pesca mai
     costruite, la Rendita sul bordo basso. Controprova `case_seconda` (le
     case con +1 Denaro tranne i Ripari): un po' meglio su tutto, Rendita al 19.
+160. **Il potenziamento insieme alla costruzione.** Il designer: "E se i
+    potenziamenti non sono un'azione a parte ma possono essere presi insieme
+    agli edifici se il giocatore ha risorse sufficienti? Se non bastano
+    rimetterei la produzione base dei terreni". Costante
+    `potenziamento_con_costruzione` nel file base: dopo ogni costruzione si
+    puo' comprare un potenziamento, pagandolo, senza consumare il lavoratore
+    (l'acquisto extra limitato ai potenziamenti, aperto da ogni costruzione;
+    con una carta ⊕ si compra anche una casa). Trentaquattresima misura: i
+    potenziamenti da 0,46 a 0,71 a testa, morto 2,0, il resto fermo;
+    l'occasione si apre 3,6 volte e si usa una su sette, perche' dopo
+    l'edificio resta di rado la risorsa giusta. Con il terreno che produce
+    (variante `terreno_produce`) si arriva a 1,07 potenziamenti ma si torna
+    al surplus: morto 3,9, Lampo 51%, spianati di nuovo. Da misurare la via
+    di mezzo: terreno a meta' produzione, o potenziamento scontato di 1
+    nell'extra. **Da decidere con il designer.**

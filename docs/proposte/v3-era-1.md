@@ -31,6 +31,7 @@ Le costanti nuove del file dati, tutte spente nella v2 e nella v1.5:
 | costi dell'era 1 | +1 della seconda risorsa della classe | Commercio e Civico +1 Denaro, Religione e Cultura +1 Idea, Ingegneria e Militare +1 Costruzione; le case della riserva come sono (registro 157) |
 | Ripari | costo 1, ◈ Costruzione o Denaro | la casa che si compra sempre (registro 157) |
 | `potenzia_adiacente` | vero | i potenziamenti anche nelle colonne accanto a quella attivata (registri 126, 159) |
+| `potenziamento_con_costruzione` | vero | dopo ogni costruzione si può comprare un potenziamento, pagandolo, senza consumare il lavoratore (registro 160) |
 | `acquisto_extra` | spento | l'acquisto extra arriva solo dall'azione ⊕ di una carta (due Personaggi, due edifici, una tessera); la variante `extra_sempre` lo dà a ogni turno |
 
 Ordine dell'attivazione: la tessera della colonna (produzione, poi effetto se non ancora
@@ -91,7 +92,7 @@ La differenza la fa **dove** lo si piazza (una colonna con i propri Religione pe
 Guardiano, una colonna affollata per il Portatore di sale) e **chi** si toglie agli altri
 nel draft. Il Barattatore è il metro di paragone: 2 risorse e niente da leggere.
 
-Produzione dei 16 messi insieme: ⚒7, 🪙6, 💡6 (il Barattatore conta due volte; registro 159, erano
+Produzione dei 16 messi insieme: ⚒5, 🪙6, 💡7 (il Barattatore conta due volte; registro 159, erano
 10/4/5 prima del tuning). A 3 giocatori se ne usano 12.
 
 ## I 15 edifici
@@ -202,6 +203,9 @@ misura.
 Quarto giro (registro 159, trentatreesima misura), il tuning delle risorse: Denaro 2,6 e Idee 3,0
 prodotti a testa, potenziamenti 0,46, case 3,6 a partita, morto 2,2, Lampo al 37% con le strategie
 fra 19 e 41. L'economia dell'era 1 è nel metro o sul suo bordo.
+
+Quinto giro (registro 160, trentaquattresima misura), il potenziamento insieme alla costruzione:
+potenziamenti 0,71 a testa, morto 2,0; con il terreno che produce 1,07 ma morto 3,9 e Lampo al 51%.
 
 ## Che cosa serve nel codice
 

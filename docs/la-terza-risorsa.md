@@ -1776,7 +1776,7 @@ anche questo e' un difetto da riparare" (registro 159). Nel file base: le
 quattro tessere dell'era 1 che non producevano niente danno Denaro (Sentiero
 dei pastori, Terra di nessuno) o Idee (Radura, Luogo sacro); tre Personaggi
 passano dalla Costruzione a Denaro e Idee (Guardiano del fuoco 💡, Anziana del
-villaggio 🪙, Barattatore 🪙💡: fra i 16 ora Costruzione 7, Denaro 6, Idee 6,
+villaggio 🪙, Barattatore 🪙💡: fra i 16 ora Costruzione 5, Denaro 6, Idee 7,
 invece di 10/4/5); i potenziamenti si comprano anche nelle colonne accanto a
 quella attivata (`potenzia_adiacente`, registro 126). Nel bot: le Idee contano
 nella domanda del mercato come il Denaro (il Barattatore, Denaro e Idea, finiva
@@ -1826,9 +1826,49 @@ l'economia dell'era 1 e' nel metro o sul suo bordo. Restano il Guerriero
 sempre primo nel draft (1,11), le Trappole da pesca mai costruite, l'extra che
 non si usa, e la misura della coppia 1-2 per Scavo e scheletri.
 
+## Trentaquattresima misura: il potenziamento insieme alla costruzione
+
+Il designer (registro 160): "i potenziamenti non sono un'azione a parte ma
+possono essere presi insieme agli edifici se il giocatore ha risorse
+sufficienti. Se non bastano rimetterei la produzione base dei terreni". Nel
+file base la costante `potenziamento_con_costruzione`: chi costruisce puo'
+comprare subito un potenziamento (pagandolo, nella colonna attivata o accanto)
+senza consumare il lavoratore. Variante `terreno_produce`: in piu', la
+produzione base dei terreni della v2 (era 1: fiume e collina 2 Costruzione,
+pianura 1, bosco 1 Idea). Stesse 300 ere 1, 3 giocatori, seme 700000.
+
+| a giocatore | reg. 159 | **potenziamento insieme** | + terreno che produce |
+|---|---|---|---|
+| prodotto (⚒ / 🪙 / 💡) | 9,8 (4,3/2,6/3,0) | 9,8 (4,3/2,6/3,0) | 14,0 (6,1/3,8/4,1) |
+| speso | 7,6 | 7,9 | 10,1 |
+| morto (⚒ / 🪙 / 💡) | 2,2 (0,3/0,9/1,0) | **2,0** (0,3/0,8/0,9) | 3,9 (0,7/1,6/1,5) |
+| costruzioni / **potenziamenti** / passi | 3,6 / 0,46 / 0,1 | 3,7 / **0,71** / 0,1 | 4,1 / **1,07** / 0,0 |
+| occasioni di potenziare dopo una costruzione: aperte / usate | - | 3,57 / 0,50 | 3,79 / 1,18 |
+| edifici a partita (di cui case) / spianati | 10,9 (3,6) / 0,0 | 11,0 (3,7) / 0,0 | 12,3 (3,3) / **0,5** |
+| PV dell'era (Lampo / censimento / prodotti) | 4,7 (3,1/1,0/0,4) | 4,8 (3,1/1,0/0,5) | 5,9 (3,7/1,3/0,7) |
+| vittorie: Bil / Cont / Lampo / Obi / Rend / Scavo | 41/41/37/37/26/19 | 37/43/42/37/23/18 | 23/41/**51**/41/20/24 |
+
+Cosa dicono i numeri:
+- **Il potenziamento insieme alla costruzione funziona a meta'**: da 0,46 a
+  0,71 a testa (budget del metro: 1), con lo stesso morto o meno (2,0) e
+  tutto il resto fermo. Si apre 3,6 volte a testa e si usa una su sette:
+  dopo aver pagato l'edificio, con due risorse di tipo diverso, restano di
+  rado il Denaro o l'Idea che il potenziamento chiede.
+- **Con il terreno che produce le risorse bastano**, i potenziamenti arrivano
+  a 1,07 e si costruisce di piu' (12,3 edifici, 4,1 a testa), ma si torna al
+  surplus: morto 3,9, Lampo al 51%, e tornano gli spianati (0,5 a partita: con
+  Costruzione in piu', il bot mette case sopra i propri edifici anche se
+  spianare costa). Le Grotte dipinte scendono a 0,13: con piu' Costruzione in
+  giro si comprano le carte da Costruzione.
+- La via di mezzo non e' stata misurata: un terreno che produce **meta'** (1
+  Costruzione su fiume e collina, niente su pianura, 1 Idea sul bosco), o un
+  potenziamento che nell'extra costa 1 in meno. Sono le due prove successive,
+  se il designer vuole arrivare a 1 potenziamento a testa senza surplus.
+
 ## Come rifare il conto
 
 ```bash
+# trentaquattresima misura: il file base con il potenziamento insieme alla costruzione; variante terreno_produce
 # trentatreesima misura: il file base con il tuning delle risorse (registro 159); controprova case_seconda
 # (stessi comandi della trentaduesima; il file base di allora lo rigenera il generatore al commit b764ad7)
 # trentaduesima misura: il file base con catena, costi misti ed extra dalle carte; tre controprove

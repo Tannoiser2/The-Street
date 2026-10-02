@@ -1,7 +1,7 @@
 {
   "meta": {
     "game": "La Strada delle Ere",
-    "ruleset": "v3-era1-prova-extra_sempre",
+    "ruleset": "v3-era1-prova-terreno_produce",
     "language": "it",
     "source": "distinta-carte (fonte unica)",
     "origine": "generato da tools/genera_cards_v3.py da data/cards-v2.json: non modificare a mano"
@@ -207,8 +207,7 @@
     "azione_edificio": "proprietario",
     "spianare_costo": 1,
     "potenzia_adiacente": true,
-    "potenziamento_con_costruzione": true,
-    "acquisto_extra": true
+    "potenziamento_con_costruzione": true
   },
   "terrains": [
     {
@@ -221,33 +220,33 @@
       "rule": "Denaro, poco all'inizio e molto dopo. Una volta per era: un edificio da 2 o 3 caselle costa 1 Costruzione in meno.",
       "base_production_by_era": {
         "1": {
-          "pietra": 0,
+          "pietra": 1,
           "oro": 0,
           "idee": 0
         },
         "2": {
-          "pietra": 0,
-          "oro": 0,
+          "pietra": 1,
+          "oro": 1,
           "idee": 0
         },
         "3": {
           "pietra": 0,
-          "oro": 0,
+          "oro": 1,
           "idee": 0
         },
         "4": {
           "pietra": 0,
-          "oro": 0,
+          "oro": 2,
           "idee": 0
         },
         "5": {
           "pietra": 0,
-          "oro": 0,
+          "oro": 2,
           "idee": 0
         }
       },
       "produzione_base": {
-        "pietra": 0,
+        "pietra": 1,
         "oro": 0,
         "idee": 0
       }
@@ -262,34 +261,34 @@
       "rule": "Costruzione, tanta all'inizio e poco dopo. Una volta per era: +1 Denaro a chi la attiva. Requisito 'fiume' stretto.",
       "base_production_by_era": {
         "1": {
-          "pietra": 0,
+          "pietra": 2,
           "oro": 0,
           "idee": 0
         },
         "2": {
-          "pietra": 0,
+          "pietra": 2,
           "oro": 0,
           "idee": 0
         },
         "3": {
-          "pietra": 0,
+          "pietra": 1,
           "oro": 0,
           "idee": 0
         },
         "4": {
-          "pietra": 0,
+          "pietra": 1,
           "oro": 0,
           "idee": 0
         },
         "5": {
-          "pietra": 0,
+          "pietra": 1,
           "oro": 0,
           "idee": 0
         }
       },
       "produzione_base": {
         "pietra": 0,
-        "oro": 0,
+        "oro": 1,
         "idee": 0
       }
     },
@@ -303,33 +302,33 @@
       "rule": "Costruzione come il fiume. Una volta per era: il primo edificio costruito qui ha +1 resistenza per l'era.",
       "base_production_by_era": {
         "1": {
-          "pietra": 0,
+          "pietra": 2,
           "oro": 0,
           "idee": 0
         },
         "2": {
-          "pietra": 0,
+          "pietra": 2,
           "oro": 0,
           "idee": 0
         },
         "3": {
-          "pietra": 0,
+          "pietra": 1,
           "oro": 0,
           "idee": 0
         },
         "4": {
-          "pietra": 0,
+          "pietra": 1,
           "oro": 0,
           "idee": 0
         },
         "5": {
-          "pietra": 0,
+          "pietra": 1,
           "oro": 0,
           "idee": 0
         }
       },
       "produzione_base": {
-        "pietra": 0,
+        "pietra": 1,
         "oro": 0,
         "idee": 0
       }
@@ -346,33 +345,33 @@
         "1": {
           "pietra": 0,
           "oro": 0,
-          "idee": 0
+          "idee": 1
         },
         "2": {
           "pietra": 0,
           "oro": 0,
-          "idee": 0
+          "idee": 2
         },
         "3": {
           "pietra": 0,
           "oro": 0,
-          "idee": 0
+          "idee": 2
         },
         "4": {
           "pietra": 0,
           "oro": 0,
-          "idee": 0
+          "idee": 3
         },
         "5": {
           "pietra": 0,
           "oro": 0,
-          "idee": 0
+          "idee": 3
         }
       },
       "produzione_base": {
         "pietra": 0,
         "oro": 0,
-        "idee": 0
+        "idee": 1
       }
     }
   ],

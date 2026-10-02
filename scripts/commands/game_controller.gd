@@ -497,8 +497,9 @@ func build(card_id: String, col_from: int, above: bool, pay_option: int = 0, des
 	# V2: si costruisce in qualsiasi colonna legale (D9), non solo vicino alla attivata.
 	if not turno_v2() and abs(col_from - gs.colonna_attivata) > 1: return false
 	if not card_id in gs.market and not card_id in gs.riserva: return false
-	# L'acquisto extra (v3) compra solo dalla riserva delle case.
-	if gs.acquisto_extra_aperto and not card_id in gs.riserva: return false
+	# L'acquisto extra (v3) compra solo dalla riserva delle case; dopo una
+	# costruzione senza carta (registro 160) nemmeno quelle.
+	if gs.acquisto_extra_aperto and (gs.extra_solo_potenziamenti or not card_id in gs.riserva): return false
 	var p := gs.current_player()
 	var data: Dictionary = CardDB.buildings[card_id]
 	# `binario`: con le caselle (registro 122) chi costruisce sceglie il
@@ -660,7 +661,7 @@ func build(card_id: String, col_from: int, above: bool, pay_option: int = 0, des
 	# Con il draft i protettori aspettano il primo edificio costruito nell'era.
 	if draft_v2(): _protettori_sul_nuovo(b, p)
 	building_placed.emit(b)
-	_dopo_azione()
+	_dopo_azione("costruisci")
 	return true
 
 # Potenziare: carta dalla fila, sotto un tuo edificio in piedi della colonna attivata.
@@ -737,7 +738,7 @@ func upgrade(upg_id: String, target: Building) -> bool:
 			TessereEra.dopo_scheletro(gs, p.index, target)
 			gs.log_line("il lavoratore resta sotto %s come scheletro" % target.data["name"])
 	building_changed.emit(target)
-	_dopo_azione()
+	_dopo_azione("potenzia")
 	return true
 
 # Restaurare: stessa azione del potenziamento. Il rudere torna intatto,
@@ -873,15 +874,29 @@ func pass_action(scelta := "pietra") -> void:
 func acquisto_extra() -> bool:
 	return PersonaggiV3.attivo() and bool(CardDB.constants.get("acquisto_extra", false))
 
-func _dopo_azione() -> void:
+# IL POTENZIAMENTO INSIEME ALLA COSTRUZIONE (v3, costante
+# `potenziamento_con_costruzione`, registro 160). Il designer: "i potenziamenti
+# non sono un'azione a parte ma possono essere presi insieme agli edifici se il
+# giocatore ha risorse sufficienti". Chi costruisce puo' comprare subito un
+# potenziamento, pagandolo, senza consumare il lavoratore: e' l'acquisto extra
+# limitato ai potenziamenti, aperto da ogni costruzione.
+func potenziamento_con_costruzione() -> bool:
+	return PersonaggiV3.attivo() and bool(CardDB.constants.get("potenziamento_con_costruzione", false))
+
+func _dopo_azione(azione := "") -> void:
 	var p := gs.current_player()
-	# L'extra si apre se la costante lo da' sempre (variante di misura) o se
+	# L'extra si apre se la costante lo da' sempre (variante di misura), se
 	# un'azione di Personaggio, edificio o tessera lo ha dato in questo turno
-	# (registro 157: "ci vuole un effetto di una carta").
+	# (registro 157: "ci vuole un effetto di una carta"), o dopo una
+	# costruzione con il potenziamento insieme (registro 160).
 	var aperto_da_carta := PersonaggiV3.attivo() and p.extra_turno > 0
-	if (acquisto_extra() or aperto_da_carta) and not gs.acquisto_extra_aperto and gs.phase == Enums.Phase.AZIONE:
+	var dopo_costruzione := potenziamento_con_costruzione() and azione == "costruisci"
+	if (acquisto_extra() or aperto_da_carta or dopo_costruzione) and not gs.acquisto_extra_aperto \
+			and gs.phase == Enums.Phase.AZIONE:
 		if aperto_da_carta: p.extra_turno -= 1
 		gs.acquisto_extra_aperto = true
+		# Dopo una costruzione senza carta: solo potenziamenti, niente case.
+		gs.extra_solo_potenziamenti = dopo_costruzione and not aperto_da_carta and not acquisto_extra()
 		p.bump("extra_aperti")
 		state_changed.emit()
 		return
@@ -953,6 +968,7 @@ func _end_turn() -> void:
 		p.extra_turno = 0
 		gs.personaggio_attivo = ""
 	gs.acquisto_extra_aperto = false
+	gs.extra_solo_potenziamenti = false
 	gs.phase = Enums.Phase.PIAZZA
 	if _advance_to_next_player():
 		state_changed.emit()

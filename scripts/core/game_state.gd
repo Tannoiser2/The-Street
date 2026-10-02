@@ -50,6 +50,8 @@ var personaggio_attivo: String = ""
 # puo' comprare ancora un potenziamento o una casa della riserva senza
 # consumare un lavoratore. Vero finche' quell'acquisto e' aperto.
 var acquisto_extra_aperto: bool = false
+# ...e se e' aperto da una costruzione senza carta (registro 160), compra solo potenziamenti.
+var extra_solo_potenziamenti: bool = false
 # LE TESSERE USATE NELL'ERA (v2, registro 100): l'effetto di ogni tessera vale
 # una volta per era; qui, colonna per colonna, se e' gia' scattato.
 var tessere_usate: Array[bool] = []
@@ -110,6 +112,7 @@ func duplica() -> GameState:
 	g.draft_giro = draft_giro
 	g.personaggio_attivo = personaggio_attivo
 	g.acquisto_extra_aperto = acquisto_extra_aperto
+	g.extra_solo_potenziamenti = extra_solo_potenziamenti
 	g.tessere_usate = tessere_usate.duplicate()
 	g.tessere_colonna = tessere_colonna.duplicate()
 	g.tessere_scattate = tessere_scattate.duplicate()

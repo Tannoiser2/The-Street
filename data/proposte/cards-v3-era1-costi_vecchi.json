@@ -206,7 +206,8 @@
     "risorse_muoiono": true,
     "azione_edificio": "proprietario",
     "spianare_costo": 1,
-    "potenzia_adiacente": true
+    "potenzia_adiacente": true,
+    "potenziamento_con_costruzione": true
   },
   "terrains": [
     {

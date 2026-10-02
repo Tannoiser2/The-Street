@@ -229,8 +229,8 @@ for t in v3["tessere_era"]:
 # poi i potenziamenti devono essere comprati". Si producevano 5,5 Costruzione,
 # 1,5 Denaro e 1,7 Idee a testa, e le carte del mazzo chiedono Denaro o Idee.
 # Le quattro tessere dell'era 1 che non producevano niente ora danno Denaro o
-# Idee; tre Personaggi passano dalla Costruzione a Denaro e Idee (fra i 16:
-# Costruzione 7, Denaro 6, Idee 6, invece di 10/4/5).
+# Idee; tre Personaggi passano dalla Costruzione a Denaro e Idee (fra i 16, in
+# unita': Costruzione 5, Denaro 6, Idee 7, invece di 10/4/5).
 TESSERE_PRODUZIONE = {"te_radura": prod(idee=1), "te_sentiero_dei_pastori": prod(oro=1),
                       "te_terra_di_nessuno": prod(oro=1), "te_luogo_sacro": prod(idee=1)}
 for t in v3["tessere_era"]:
@@ -249,6 +249,14 @@ for ch in v3["characters"]:
 # (registro 126): nell'era 1 i propri edifici stanno sulle colonne gia'
 # attivate, e senza questo nessuno li compra.
 c["potenzia_adiacente"] = True
+
+# ---- il potenziamento insieme alla costruzione (registro 160) ----------------
+# Il designer: "i potenziamenti non sono un'azione a parte ma possono essere
+# presi insieme agli edifici se il giocatore ha risorse sufficienti. Se non
+# bastano rimetterei la produzione base dei terreni". La costante apre, dopo
+# ogni costruzione, l'acquisto di un potenziamento (pagato, senza lavoratore);
+# la variante `terreno_produce` rimette la produzione base dei terreni della v2.
+c["potenziamento_con_costruzione"] = True
 
 # ---- le controprove ----------------------------------------------------------
 #   --variante extra_sempre   l'acquisto extra a ogni turno, senza carte (la "catena" del registro 156)
@@ -286,6 +294,12 @@ def case_lampo1(v):
     for b in v["buildings"]:
         if b["era"] == 1 and b.get("riserva"):
             b["lampo"] = min(int(b["lampo"]), 1)
+def terreno_produce(v):
+    for t, t2 in zip(v["terrains"], base["terrains"]):
+        t["produzione_base"] = dict(t2["produzione_base"])
+        t["base_production_by_era"] = json.loads(json.dumps(t2["base_production_by_era"]))
+def senza_potenziamento_insieme(v):
+    v["constants"]["potenziamento_con_costruzione"] = False
 def senza_tuning(v):
     for t in v["tessere_era"]:
         if t["id"] in TESTI_PRODUZIONE or t["id"] in TESSERE_PRODUZIONE:
@@ -296,7 +310,8 @@ def senza_tuning(v):
         if ch["id"] == "pe_barattatore": ch["produzione"] = prod(pietra=1, oro=1)
     v["constants"]["potenzia_adiacente"] = False
 VARIANTI = {"extra_sempre": extra_sempre, "senza_extra": senza_extra, "costi_vecchi": costi_vecchi,
-            "case_seconda": case_seconda, "case_lampo1": case_lampo1, "senza_tuning": senza_tuning}
+            "case_seconda": case_seconda, "case_lampo1": case_lampo1, "senza_tuning": senza_tuning,
+            "terreno_produce": terreno_produce, "senza_potenziamento_insieme": senza_potenziamento_insieme}
 if variante:
     VARIANTI[variante](v3)
     v3["meta"]["ruleset"] = "v3-era1-prova-" + variante

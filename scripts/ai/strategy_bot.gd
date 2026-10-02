@@ -161,7 +161,8 @@ static func play_turn(ctl: GameController, strategia := "bilanciata") -> void:
 	if gs.acquisto_extra_aperto and gs.current_index == p.index and gs.pending_choice.is_empty():
 		var extra: Array[Dictionary] = []
 		for v in _opzioni(gs, p.index, col):
-			if v.tipo == "potenzia" or (v.tipo == "costruisci" and str(v.parametri.get("card_id", "")) in gs.riserva):
+			if v.tipo == "potenzia" or (not gs.extra_solo_potenziamenti and v.tipo == "costruisci" \
+					and str(v.parametri.get("card_id", "")) in gs.riserva):
 				extra.append({"mossa": v, "valore": _valore(gs, p, v, strategia, col)})
 		var ex := migliore(extra)
 		if racconta: taccuino["extra"] = ex
