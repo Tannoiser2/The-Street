@@ -2635,3 +2635,23 @@ dato è stato importato da lì. Ma due confronti fra ciò che è stampato e
     sopra". Il bot: tabella `SPINTE_V3` (lampo 0,8, lampo_potenzia 1,5): la
     Lampo vince il 30% con 69 PV (era 23% con 66); la piu' debole ora e' la
     Scavo (25%).
+166. **"A terra oppure sopra", e da dove vengono le Idee che muoiono.** Il
+    designer: "A terra oppure sopra, vai con la seconda" (la seconda via del
+    registro 165: il morto delle ere 2-5). Le cinque carte grandi (Anfiteatro,
+    Castello, Fortezza, Grattacielo, Stazione) prendono il campo
+    `a_terra_o_sopra`: a terra con le regole di tutti, sopra con quelle della
+    v2 (e sopra di loro si costruisce ancora solo quando sono in rovina).
+    Duomo, Piazza, Museo e Universita' (una colonna, livello 1-2) restano come
+    sono. Per il morto, prima la diagnosi: il rapporto ora distingue le
+    entrate per fonte era per era (`snap_e<N>_in_<fonte>_<risorsa>`, e le
+    azioni degli edifici in piedi sono `in_edifici_azione_*`, distinte dal
+    Personaggio). Sulla trentanovesima misura chi aveva l'Acquedotto (tre
+    colonne, in piedi dall'era 2 alla 5, "+1 Idea a ogni attivazione di
+    chiunque") incassava 19,8 Idee dalle azioni contro 2,6 di chi non lo
+    aveva: una carta da 17 Idee a partita, e il Foro 5,4 Denaro, la Piazza
+    monumentale 9 Idee. Senza le azioni degli edifici, Idee e Denaro prodotti
+    (7 e 8 a partita) pareggiano quasi quel che se ne spende (6,4 e 8,4): il
+    surplus e' tutto li'. Due controprove sugli stessi semi: le azioni degli
+    edifici che danno Denaro o Idee scattano solo quando attivi tu
+    (`--variante proprio_morte`), oppure tutte quelle che danno risorse
+    (`proprio_tutte`). I numeri nella quarantesima misura.

@@ -56,7 +56,7 @@ resistenza 1-2 delle ere 3 e 5 hanno +1.
 | Chiesa | ⚒2 🪙1 | 1 | ★ se 2+ Religione |
 | Mercato | ⚒1 🪙1 💡1 | — | 👥 altri |
 | Ospedale dei pellegrini | ⚒2 💡1 | — | 🛡 adiacente |
-| Castello (2x2, solo sopra) | ⚒3 🪙1 | 2 | 🛡 tutti in colonna |
+| Castello (2x2, a terra o sopra) | ⚒3 🪙1 | 2 | 🛡 tutti in colonna |
 | Abbazia (2 binari) | ⚒2 🪙1 💡1 | 2 | 💡 +1 Idea |
 | Arsenale (2 binari) | ⚒3 | — | 🛡 adiacenti |
 
@@ -72,7 +72,7 @@ resistenza 1-2 delle ere 3 e 5 hanno +1.
 | Ponte monumentale (2 caselle) | ⚒3 🪙1 | 2 | ⚒ +1 Costruzione |
 | Accademia | ⚒2 🪙1 | — | ⚱ +1 Scavo |
 | Duomo (2 binari, solo sopra) | ⚒3 🪙2 | 2 | ★ se 2+ Religione |
-| Fortezza bastionata (2x2, solo sopra) | ⚒4 | 2 | 🛡 tutti in colonna |
+| Fortezza bastionata (2x2, a terra o sopra) | ⚒4 | 2 | 🛡 tutti in colonna |
 | Piazza monumentale (2 binari, solo sopra) | ⚒2 💡2 | 2 | 👥 altri (+ il suo finale) |
 
 | era 5 | costo | azione (il finale della gilda resta) |
@@ -83,10 +83,10 @@ resistenza 1-2 delle ere 3 e 5 hanno +1.
 | Officina | ⚒2 | ⚒ +1 Costruzione |
 | Monumento ai caduti | ⚒2 🪙1 | 🛡 adiacenti |
 | Museo (solo sopra) | ⚒2 🪙1 | ⚱ +1 Scavo |
-| Grattacielo (3 binari, solo sopra) | ⚒3 💡1 | 👥 altri |
+| Grattacielo (3 binari, a terra o sopra) | ⚒3 💡1 | 👥 altri |
 | Biblioteca | ⚒2 🪙1 | ★ +1 PV |
 | Ponte in acciaio (2 caselle) | ⚒3 | ⚒ +1 Costruzione |
-| Stazione (3 caselle, solo sopra) | ⚒3 💡1 | ⚒ +1 Costruzione |
+| Stazione (3 caselle, a terra o sopra) | ⚒3 💡1 | ⚒ +1 Costruzione |
 | Parco archeologico (2 binari) | ⚒2 🪙1 | ⚱ +1 Scavo a un adiacente |
 | Università (2 binari, solo sopra) | ⚒2 🪙1 💡1 | ★ +1 PV |
 

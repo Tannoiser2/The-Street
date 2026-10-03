@@ -78,7 +78,7 @@ ogni attivazione della colonna.
 | Emporio (fiume) | Commercio | ⚒1 💡1 | 2 | 2 | — | 2 | 🪙 +1 Denaro se chi attiva non sei tu |
 | Insulae (pianura) | Civico | ⚒1 💡1 | 2 | 2 | — | 2 | ⚒ +1 Costruzione |
 | Foro (pianura, 2 binari) | Commercio, Civico | ⚒2 🪙1 💡1 | 3 | — | 2 | 5 | 👥 +1 Denaro per ogni altro giocatore con un edificio qui (max 2) |
-| Anfiteatro (2x2, solo sopra) | Cultura | ⚒3 🪙1 💡1 | 5 | — | 2 | 6 | ★ +1 PV |
+| Anfiteatro (2x2, a terra o sopra) | Cultura | ⚒3 🪙1 💡1 | 5 | — | 2 | 6 | ★ +1 PV |
 | Castrum (pianura, 2 binari) | Militare | ⚒2 | 4 | 2 | — | 3 | 🛡 +1 res per l'era ai tuoi edifici in questa colonna |
 
 I 10 potenziamenti e i 6 eventi dell'era 2 restano quelli della v2.

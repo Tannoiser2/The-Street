@@ -38,6 +38,7 @@ def delta(c, k):
     """Il contatore cumulativo `k` nell'era: la fotografia a fine era meno quella dell'era prima."""
     return c.get("snap_e%s_%s" % (E, k), 0) - (c.get("snap_e%s_%s" % (E0, k), 0) if era > 1 else 0)
 
+FONTI = ("terreno", "tessera", "personaggi", "edifici", "azioni", "edifici_azione", "effetti", "passa", "centro")
 acc = defaultdict(lambda: defaultdict(float))   # strategia -> voce -> somma
 n = defaultdict(int)                             # strategia -> giocatori
 vitt = defaultdict(int)
@@ -67,12 +68,18 @@ for r in righe:
                 if era == 1 and not fotografie:
                     a["prod_" + ris] += sum(v for k, v in c.items() if k.startswith("in_") and k.endswith("_" + ris)
                                             and not k.startswith("in_avanzo") and not k.startswith("in_cambio"))
-                    for fonte in ("terreno", "tessera", "personaggi", "edifici", "azioni", "effetti", "passa", "centro"):
+                    for fonte in FONTI:
                         a["fonte_" + fonte] += c.get("in_%s_%s" % (fonte, ris), 0)
+                        a["fonte_%s_%s" % (fonte, ris)] += c.get("in_%s_%s" % (fonte, ris), 0)
                 elif era == 1:
                     a["prod_" + ris] += c.get("cum_e1_%s" % ris, 0)
                 else:
                     a["prod_" + ris] += c.get("cum_e%s_%s" % (E, ris), 0) - c.get("cum_e%s_%s" % (E0, ris), 0)
+                if fotografie:
+                    # Le fonti dell'era (registro 166): le fotografie `snap_e<N>_in_<fonte>_<risorsa>`.
+                    for fonte in FONTI:
+                        a["fonte_" + fonte] += delta(c, "in_%s_%s" % (fonte, ris))
+                        a["fonte_%s_%s" % (fonte, ris)] += delta(c, "in_%s_%s" % (fonte, ris))
                 a["morto_" + ris] += c.get("morte_e%s_%s" % (E, ris), c.get("resta_e%s_%s" % (E, ris), 0))
             if not fotografie:
                 # rapporti vecchi, senza fotografie: i cumulati sono dell'era 1
@@ -108,9 +115,12 @@ print("\n%-22s" % "" + " ".join("%10s" % s[:10] for s in strategie))
 for ris, et in (("pietra", "Costruzione"), ("oro", "Denaro"), ("idee", "Idee")):
     riga("prodotto " + et, lambda a, k, r=ris: a["prod_" + r] / k)
 riga("prodotto in tutto", lambda a, k: sum(a["prod_" + r] for r in ("pietra", "oro", "idee")) / k)
-for fonte in ("terreno", "tessera", "personaggi", "edifici", "azioni", "effetti", "passa", "centro"):
+# Le fonti, con la ripartizione Costruzione/Denaro/Idee: `azioni` e' il
+# Personaggio piazzato, `edifici_azione` le azioni degli edifici in piedi.
+for fonte in FONTI:
     if acc["tutte"]["fonte_" + fonte] > 0:
         riga("  da " + fonte, lambda a, k, f=fonte: a["fonte_" + f] / k)
+        riga("    (⚒/🪙/💡)", lambda a, k, f=fonte: "%.1f/%.1f/%.1f" % tuple(a["fonte_%s_%s" % (f, r)] / k for r in ("pietra", "oro", "idee")), "%10s")
 riga("speso", lambda a, k: sum(a["prod_" + r] - a["morto_" + r] for r in ("pietra", "oro", "idee")) / k)
 for ris, et in (("pietra", "Costruzione"), ("oro", "Denaro"), ("idee", "Idee")):
     riga("MORTO " + et, lambda a, k, r=ris: a["morto_" + r] / k)

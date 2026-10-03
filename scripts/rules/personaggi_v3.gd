@@ -60,12 +60,16 @@ static func esegui_azione(gs: GameState, chi: int, az: Dictionary, col: int, car
 		if se == "proprio" and attivatore != chi: return
 	var n := int(az.get("n", 1))
 	var nome := str(carta.get("name", "?"))
+	# Solo per il rapporto: da dove vengono le risorse, dal Personaggio
+	# piazzato (`in_azioni_*`) o dall'azione di un edificio in piedi
+	# (`in_edifici_azione_*`, registro 166). Il gioco non lo legge.
+	var fonte := "azioni" if src == null else "edifici_azione"
 	match tipo:
 		"risorsa":
 			var pp := int(az.get("pietra", 0))
 			var po := int(az.get("oro", 0))
 			var pi := int(az.get("idee", 0))
-			p.gain(pp, po, pi, "azioni")
+			p.gain(pp, po, pi, fonte)
 			gs.log_line("%s: %s a giocatore %d" % [nome, _risorse(pp, po, pi), chi])
 		"cambio":
 			_cambio(gs, p, az, nome)
@@ -100,7 +104,7 @@ static func esegui_azione(gs: GameState, chi: int, az: Dictionary, col: int, car
 			quanti = mini(quanti, int(az.get("max", 2)))
 			var oro := quanti * int(az.get("oro", 1))
 			if oro > 0:
-				p.gain(0, oro, 0, "azioni")
+				p.gain(0, oro, 0, fonte)
 				gs.log_line("%s: +%d Denaro a giocatore %d per %d altri in colonna %d" % [nome, oro, chi, quanti, col])
 		"adiacente":
 			# La produzione della tessera di una colonna accanto: quella che
@@ -113,7 +117,7 @@ static func esegui_azione(gs: GameState, chi: int, az: Dictionary, col: int, car
 				var t := int(pr.get("pietra", 0)) + int(pr.get("oro", 0)) + int(pr.get("idee", 0))
 				if t > tot: tot = t; meglio = pr
 			if tot > 0:
-				p.gain(int(meglio.get("pietra", 0)), int(meglio.get("oro", 0)), int(meglio.get("idee", 0)), "azioni")
+				p.gain(int(meglio.get("pietra", 0)), int(meglio.get("oro", 0)), int(meglio.get("idee", 0)), fonte)
 				gs.log_line("%s: la produzione della tessera accanto a giocatore %d" % [nome, chi])
 		"tessera":
 			if col >= 0 and col < gs.tessere_usate.size() and gs.tessere_usate[col]:

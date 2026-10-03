@@ -382,6 +382,12 @@ static func end_era_after_event(gs: GameState) -> void:
 		for k in ["az_costruisci", "az_potenzia", "az_passa", "potenziamenti_piazzati", "extra_aperti",
 				"extra_usati", "scavo_scavato", "cambi", "sconti_v3"]:
 			p.bump("snap_e%d_%s" % [gs.era, k], int(p.counters.get(k, 0)))
+		# Anche le entrate per fonte (`in_<fonte>_<risorsa>`, registro 166): per
+		# sapere da dove vengono le risorse che muoiono, era per era.
+		for k in p.counters:
+			var chiave := str(k)
+			if chiave.begins_with("in_") and not chiave.begins_with("in_avanzo"):
+				p.bump("snap_e%d_%s" % [gs.era, chiave], int(p.counters[k]))
 		p.bump("pv_e%d" % gs.era, p.vp)
 		for ch in p.vp_breakdown:
 			p.bump("pv_e%d_%s" % [gs.era, str(ch)], int(p.vp_breakdown[ch]))

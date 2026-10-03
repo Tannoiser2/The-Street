@@ -1225,7 +1225,8 @@
       "azione": {
         "tipo": "pv",
         "n": 1
-      }
+      },
+      "a_terra_o_sopra": true
     },
     {
       "id": "ed_castrum",
@@ -1633,7 +1634,8 @@
         "tipo": "resistenza",
         "n": 1,
         "a": "tutti"
-      }
+      },
+      "a_terra_o_sopra": true
     },
     {
       "id": "ed_abbazia",
@@ -2124,7 +2126,8 @@
         "tipo": "resistenza",
         "n": 1,
         "a": "tutti"
-      }
+      },
+      "a_terra_o_sopra": true
     },
     {
       "id": "ed_piazza_monumentale",
@@ -2496,7 +2499,7 @@
         "idee": 0
       },
       "exhaustible": 0,
-      "effect_text": "A ogni attivazione: +1 Denaro per ogni altro giocatore con un edificio qui (max 2). Solo sopra, al livello 2 o piu'. A fine partita: come nella v2.",
+      "effect_text": "A ogni attivazione: +1 Denaro per ogni altro giocatore con un edificio qui (max 2). A fine partita: come nella v2.",
       "effects": [
         {
           "hook": "on_final_scoring",
@@ -2525,7 +2528,8 @@
         "tipo": "altri",
         "oro": 1,
         "max": 2
-      }
+      },
+      "a_terra_o_sopra": true
     },
     {
       "id": "ed_biblioteca",
@@ -2650,7 +2654,7 @@
         "idee": 0
       },
       "exhaustible": 0,
-      "effect_text": "A ogni attivazione: +1 Costruzione. Solo sopra, al livello 1 o piu'. A fine partita: +1 PV per ogni edificio in piedi nelle sue colonne (max 5).",
+      "effect_text": "A ogni attivazione: +1 Costruzione. A fine partita: +1 PV per ogni edificio in piedi nelle sue colonne (max 5).",
       "effects": [
         {
           "hook": "on_build",
@@ -2677,7 +2681,8 @@
         "pietra": 1,
         "oro": 0,
         "idee": 0
-      }
+      },
+      "a_terra_o_sopra": true
     },
     {
       "id": "ed_parco_archeologico",

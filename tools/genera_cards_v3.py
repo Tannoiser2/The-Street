@@ -68,8 +68,10 @@ def scavo(n=1, a="uno"):
     return {"tipo": "scavo", "n": n, "a": a}
 def lampo(n=1):
     return {"tipo": "lampo", "n": n}
-def altri(oro=1, massimo=2):
-    return {"tipo": "altri", "oro": oro, "max": massimo}
+def altri(oro=1, massimo=2, se=None):
+    x = {"tipo": "altri", "oro": oro, "max": massimo}
+    if se: x["se"] = se
+    return x
 NESSUNA = {"tipo": "nessuna"}
 
 def prod(pietra=0, oro=0, idee=0):
@@ -532,10 +534,10 @@ EDIFICI_345 = {
     "ed_officina":                (prod(pietra=2),                 None, risorsa(pietra=1),            "A ogni attivazione: +1 Costruzione. A fine partita: +1 PV per ogni altro tuo Ingegneria (max 4)."),
     "ed_monumento_ai_caduti":     (prod(pietra=2, oro=1),          None, resistenza(1, "adiacenti"),   "A ogni attivazione: +1 resistenza fino a fine era ai tuoi edifici adiacenti. A fine partita: +1 PV per ogni altro tuo Militare."),
     "ed_museo":                   (prod(pietra=2, oro=1),          None, scavo(1, "uno"),              "A ogni attivazione: +1 Scavo permanente a un tuo edificio in questa colonna. A fine partita: +2 PV per ogni tua rovina riscoperta."),
-    "ed_grattacielo":             (prod(pietra=3, idee=1),         None, altri(1, 2),                  "A ogni attivazione: +1 Denaro per ogni altro giocatore con un edificio qui (max 2). Solo sopra, al livello 2 o piu'. A fine partita: come nella v2."),
+    "ed_grattacielo":             (prod(pietra=3, idee=1),         None, altri(1, 2),                  "A ogni attivazione: +1 Denaro per ogni altro giocatore con un edificio qui (max 2). A fine partita: come nella v2."),
     "ed_biblioteca":              (prod(pietra=2, oro=1),          None, pv(1),                        "A ogni attivazione: +1 PV. A fine partita: +1 PV per ogni classe diversa fra i tuoi edifici."),
     "ed_ponte_in_acciaio":        (prod(pietra=3),                 None, risorsa(pietra=1),            "A ogni attivazione: +1 Costruzione. A fine partita: +2 PV per ogni tua rovina riportata alla luce nelle sue colonne."),
-    "ed_stazione":                (prod(pietra=3, idee=1),         None, risorsa(pietra=1),            "A ogni attivazione: +1 Costruzione. Solo sopra, al livello 1 o piu'. A fine partita: +1 PV per ogni edificio in piedi nelle sue colonne (max 5)."),
+    "ed_stazione":                (prod(pietra=3, idee=1),         None, risorsa(pietra=1),            "A ogni attivazione: +1 Costruzione. A fine partita: +1 PV per ogni edificio in piedi nelle sue colonne (max 5)."),
     "ed_parco_archeologico":      (prod(pietra=2, oro=1),          None, scavo(1, "adiacente"),        "A ogni attivazione: +1 Scavo permanente a un tuo edificio adiacente. A fine partita: come nella v2."),
     "ed_universita":              (prod(pietra=2, oro=1, idee=1),  None, pv(1),                        "A ogni attivazione: +1 PV. Solo sopra, al livello 1 o piu'. A fine partita: +1 PV per ogni tuo Personaggio reclutato."),
 }
@@ -603,6 +605,19 @@ TESSERE_345 = {
 for t in v3["tessere_era"]:
     if t["id"] in TESSERE_345: t["produzione"] = TESSERE_345[t["id"]]
 
+# LE CARTE GRANDI "A TERRA OPPURE SOPRA" (registro 166). Nella v2 i 2x2
+# (Anfiteatro, Castello, Fortezza) e il Grattacielo non andavano mai a terra
+# e la Stazione chiedeva il livello 1: si poggiavano spianando due propri
+# edifici dell'era stessa, con lo sconto. Nella v3 spianare costa e non si
+# spiana la stessa era, e si costruivano 0,01-0,26 volte a partita. Il
+# designer: "a terra oppure sopra". Il campo `a_terra_o_sopra` lo legge
+# BuildRules.quote_rail: a terra valgono le regole di tutti (terreno, binari
+# liberi); sopra restano quelle della v2, e sopra di loro si costruisce ancora
+# solo quando sono in rovina.
+A_TERRA = {"ed_anfiteatro", "ed_castello", "ed_fortezza_bastionata", "ed_grattacielo", "ed_stazione"}
+for b in v3["buildings"]:
+    if b["id"] in A_TERRA: b["a_terra_o_sopra"] = True
+
 # ---- le controprove ----------------------------------------------------------
 #   --variante extra_sempre   l'acquisto extra a ogni turno, senza carte (la "catena" del registro 156)
 #   --variante senza_extra    nessun acquisto extra: le quattro carte tornano com'erano nella scheda
@@ -654,7 +669,20 @@ def senza_tuning(v):
         if ch["id"] == "pe_anziana_del_villaggio": ch["produzione"] = prod(pietra=1)
         if ch["id"] == "pe_barattatore": ch["produzione"] = prod(pietra=1, oro=1)
     v["constants"]["potenzia_adiacente"] = False
-VARIANTI = {"extra_sempre": extra_sempre, "senza_extra": senza_extra, "costi_vecchi": costi_vecchi,
+#   --variante proprio_morte  le azioni degli edifici che danno Denaro o Idee scattano solo quando attivi tu
+#   --variante proprio_tutte  come sopra, ma anche quelle che danno Costruzione
+# (registro 166: l'Acquedotto, tre colonne in piedi per quattro ere, dava 17
+# Idee a partita al suo padrone, a ogni attivazione di chiunque)
+def _proprio(v, anche_pietra):
+    for b in v["buildings"]:
+        az = b.get("azione") or {}
+        if az.get("tipo") not in ("risorsa", "altri") or az.get("se"): continue
+        if az["tipo"] == "risorsa" and not anche_pietra and not (az.get("oro") or az.get("idee")): continue
+        az["se"] = "proprio"
+        b["effect_text"] = b["effect_text"].replace("A ogni attivazione:", "A ogni tua attivazione:")
+def proprio_morte(v): _proprio(v, False)
+def proprio_tutte(v): _proprio(v, True)
+VARIANTI = {"proprio_morte": proprio_morte, "proprio_tutte": proprio_tutte, "extra_sempre": extra_sempre, "senza_extra": senza_extra, "costi_vecchi": costi_vecchi,
             "case_seconda": case_seconda, "case_lampo1": case_lampo1, "senza_tuning": senza_tuning,
             "terreno_produce": terreno_produce, "senza_potenziamento_insieme": senza_potenziamento_insieme}
 if variante:
