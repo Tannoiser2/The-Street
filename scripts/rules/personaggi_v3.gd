@@ -58,6 +58,11 @@ static func esegui_azione(gs: GameState, chi: int, az: Dictionary, col: int, car
 	if se is String:
 		if se == "altrui" and attivatore == chi: return
 		if se == "proprio" and attivatore != chi: return
+	# `chi` dice per quale attivatore scatta, quando `se` serve ad altro (lo
+	# sconto usa `se` per la condizione: "fiume", "classe:X", "arte"...).
+	# Registro 169: gli sconti degli edifici valgono per l'acquisto di questo
+	# turno, quindi solo quando attiva il proprietario.
+	if str(az.get("chi", "")) == "proprio" and attivatore != chi: return
 	var n := int(az.get("n", 1))
 	var nome := str(carta.get("name", "?"))
 	# Solo per il rapporto: da dove vengono le risorse, dal Personaggio

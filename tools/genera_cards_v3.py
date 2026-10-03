@@ -716,7 +716,25 @@ def lampo_vecchio(v):
         if b["id"] in LAMPO_VECCHIO: b["lampo"] = LAMPO_VECCHIO[b["id"]]
     for t in v["tessere_era"]:
         if t["id"] in ("te_fondaco", "te_periferia"): t["produzione"] = prod(oro=1)
-VARIANTI = {"lampo_vecchio": lampo_vecchio, "chiunque": chiunque, "extra_sempre": extra_sempre, "senza_extra": senza_extra, "costi_vecchi": costi_vecchi,
+#   --variante sconti_edifici  sette azioni "+1 risorsa" o cambio diventano sconti (registro 169: il designer,
+#                              "mancano gli sconti, che sono essenziali"); valgono per l'acquisto del turno,
+#                              quindi solo quando attiva il proprietario (`chi: proprio`)
+SCONTI_EDIFICI = {
+    "ed_trappole_da_pesca": (sconto(1, "fiume"), "A ogni tua attivazione: -1 Costruzione all'edificio che costruisci su fiume in questo turno."),
+    "ed_insulae":           (sconto(1, "classe:civico"), "A ogni tua attivazione: -1 al costo dell'edificio Civico che costruisci in questo turno."),
+    "ed_mulino":            (sconto(1), "A ogni tua attivazione: -1 Costruzione alla costruzione di questo turno."),
+    "ed_bottega_dartista":  (sconto(1, "potenziamento"), "A ogni tua attivazione: il potenziamento che compri in questo turno costa 1 in meno."),
+    "ed_banco":             (sconto(1), "A ogni tua attivazione: -1 Costruzione alla costruzione di questo turno."),
+    "ed_officina":          (sconto(1, "classe:ingegneria"), "A ogni tua attivazione: -1 al costo dell'edificio Ingegneria che costruisci in questo turno. A fine partita: +1 PV per ogni altro tuo Ingegneria (max 4)."),
+    "ed_caffe_letterario":  (sconto(1, "arte"), "A ogni tua attivazione: il potenziamento Arte che compri in questo turno costa 1 in meno. A fine partita: +1 PV se e' adiacente a un edificio Cultura."),
+}
+def sconti_edifici(v):
+    for b in v["buildings"]:
+        if b["id"] in SCONTI_EDIFICI:
+            az, testo = SCONTI_EDIFICI[b["id"]]
+            b["azione"] = dict(az); b["azione"]["chi"] = "proprio"; b["effect_text"] = testo
+            if b["id"] == "ed_bottega_dartista": b["effects"] = []   # lo sconto permanente della v2 diventa l'azione
+VARIANTI = {"sconti_edifici": sconti_edifici, "lampo_vecchio": lampo_vecchio, "chiunque": chiunque, "extra_sempre": extra_sempre, "senza_extra": senza_extra, "costi_vecchi": costi_vecchi,
             "case_seconda": case_seconda, "case_lampo1": case_lampo1, "senza_tuning": senza_tuning,
             "terreno_produce": terreno_produce, "senza_potenziamento_insieme": senza_potenziamento_insieme}
 if variante:
