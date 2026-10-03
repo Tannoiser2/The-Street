@@ -379,7 +379,7 @@ for ch in v3["characters"]:
 EDIFICI_E2 = {
     "ed_teatro":           (prod(pietra=1, oro=1),         None, pv(1),                        "A ogni attivazione: +1 PV."),
     "ed_acquedotto":       (prod(pietra=2, oro=1, idee=1), 2,    risorsa(idee=1),              "A ogni attivazione: +1 Idea."),
-    "ed_terme":            (prod(pietra=1, idee=1),        None, risorsa(oro=1),               "A ogni attivazione: +1 Denaro."),
+    "ed_terme":            (prod(pietra=1, idee=1),        None, cambio(1),                    "A ogni attivazione: cambia 1 risorsa in un'altra."),
     "ed_sacello":          (prod(pietra=1, oro=1),         None, resistenza(1, "adiacente"),   "A ogni attivazione: +1 resistenza fino a fine era a un tuo edificio adiacente."),
     "ed_torre_di_vedetta": (prod(pietra=2),                None, resistenza(1, "adiacenti"),   "A ogni attivazione: +1 resistenza fino a fine era ai tuoi edifici adiacenti."),
     "ed_tempio":           (prod(pietra=1, oro=1),         1,    pv(1, "religione", "ovunque", 2), "A ogni attivazione: +1 PV se hai 2+ edifici Religione in piedi."),
@@ -421,8 +421,11 @@ for t in v3["tessere_era"]:
 # azioni sono il punto di partenza per il designer, non una scelta fatta.
 # Il numero dopo l'azione e' lo Scavo da scheletro (registro 135).
 def stampo(era, nomi):
+    # Secondo giro (registro 164): nelle ere 3-5 gli edifici delle ere passate
+    # producono gia' Denaro e Idee a ogni attivazione, e morivano 2-3 Denaro e
+    # Idee a testa: due ruoli passano alla Costruzione (11/3/3 invece di 9/4/4).
     ruoli = [
-        ("civico",     prod(oro=1),             pv(1, "civico", "colonna", 1), 3),
+        ("civico",     prod(pietra=1),          pv(1, "civico", "colonna", 1), 3),
         ("civico",     prod(pietra=1),          ACQUISTO,                      3),
         ("civico",     prod(pietra=1),          cambio(1),                     2),
         ("religione",  prod(idee=1),            sconto(1, "classe:religione"), 5),
@@ -432,7 +435,7 @@ def stampo(era, nomi):
         ("commercio",  prod(pietra=1, oro=1),   NESSUNA,                       5),
         ("commercio",  prod(oro=1),             sconto(1, "potenziamento"),    6),
         ("cultura",    prod(idee=1),            sconto(1, "arte"),             5),
-        ("cultura",    prod(idee=1),            pv(1),                         3),
+        ("cultura",    prod(pietra=1),          pv(1),                         3),
         ("cultura",    prod(idee=1),            scavo(2, "uno"),               4),
         ("ingegneria", prod(pietra=1),          sconto(1),                     2),
         ("ingegneria", prod(pietra=1),          {"tipo": "adiacente"},         3),
@@ -497,7 +500,7 @@ v3["characters"] = [ch for ch in v3["characters"] if ch.get("era") not in (3, 4,
 # dell'era 5, registro 150) e la Bottega d'artista restano.
 EDIFICI_345 = {
     # era 3
-    "ed_borgo":                   (prod(pietra=1, idee=1),         None, risorsa(oro=1),               "A ogni attivazione: +1 Denaro."),
+    "ed_borgo":                   (prod(pietra=1, idee=1),         None, pv(1, "civico", "colonna", 1), "A ogni attivazione: +1 PV se hai un altro Civico in piedi in questa colonna."),
     "ed_mura":                    (prod(pietra=2),                 None, resistenza(1, "adiacenti"),   "A ogni attivazione: +1 resistenza fino a fine era ai tuoi edifici adiacenti."),
     "ed_cappella":                (prod(pietra=1, oro=1),          None, resistenza(1, "adiacente"),   "A ogni attivazione: +1 resistenza fino a fine era a un tuo edificio adiacente."),
     "ed_torre_civica":            (prod(pietra=1, idee=1),         None, pv(1, "civico", "colonna", 1), "A ogni attivazione: +1 PV se hai un altro Civico in piedi in questa colonna."),
@@ -505,7 +508,7 @@ EDIFICI_345 = {
     "ed_mulino":                  (prod(pietra=1, idee=1),         None, risorsa(pietra=1),            "A ogni attivazione: +1 Costruzione."),
     "ed_chiesa":                  (prod(pietra=2, oro=1),          1,    pv(1, "religione", "ovunque", 2), "A ogni attivazione: +1 PV se hai 2+ edifici Religione in piedi."),
     "ed_mercato":                 (prod(pietra=1, idee=1),         None, altri(1, 2),                  "A ogni attivazione: +1 Denaro per ogni altro giocatore con un edificio qui (max 2)."),
-    "ed_ospedale_dei_pellegrini": (prod(pietra=2, idee=1),         None, risorsa(oro=1),               "A ogni attivazione: +1 Denaro."),
+    "ed_ospedale_dei_pellegrini": (prod(pietra=2, idee=1),         None, resistenza(1, "adiacente"),   "A ogni attivazione: +1 resistenza fino a fine era a un tuo edificio adiacente."),
     "ed_castello":                (prod(pietra=3, oro=1),          2,    resistenza(1, "tutti"),       "A ogni attivazione: +1 resistenza fino a fine era ai tuoi edifici in questa colonna."),
     "ed_abbazia":                 (prod(pietra=2, oro=1, idee=1),  2,    risorsa(idee=1),              "A ogni attivazione: +1 Idea."),
     "ed_arsenale":                (prod(pietra=3),                 None, resistenza(1, "adiacenti"),   "A ogni attivazione: +1 resistenza fino a fine era ai tuoi edifici adiacenti."),
@@ -514,8 +517,8 @@ EDIFICI_345 = {
     "ed_giardino_allitaliana":    (prod(pietra=1, oro=1),          None, pv(1),                        "A ogni attivazione: +1 PV."),
     "ed_loggia":                  (prod(pietra=1, idee=1),         None, cambio(1),                    "A ogni attivazione: cambia 1 risorsa in un'altra."),
     "ed_osservatorio":            (prod(pietra=2, oro=1),          None, risorsa(idee=1),              "A ogni attivazione: +1 Idea. A fine partita, se e' in piedi: +2 PV."),
-    "ed_banco":                   (prod(pietra=1, idee=1),         None, risorsa(oro=1),               "A ogni attivazione: +1 Denaro."),
-    "ed_villa":                   (prod(pietra=2, idee=1),         None, risorsa(oro=1),               "A ogni attivazione: +1 Denaro."),
+    "ed_banco":                   (prod(pietra=1, idee=1),         None, cambio(1),                    "A ogni attivazione: cambia 1 risorsa in un'altra."),
+    "ed_villa":                   (prod(pietra=2, idee=1),         None, pv(1),                        "A ogni attivazione: +1 PV."),
     "ed_palazzo_signorile":       (prod(pietra=2, idee=1),         None, pv(1, "civico", "colonna", 1), "A ogni attivazione: +1 PV se hai un altro Civico in piedi in questa colonna."),
     "ed_ponte_monumentale":       (prod(pietra=3, oro=1),          2,    risorsa(pietra=1),            "A ogni attivazione: +1 Costruzione."),
     "ed_accademia":               (prod(pietra=2, oro=1),          None, scavo(1, "uno"),              "A ogni attivazione: +1 Scavo permanente a un tuo edificio in questa colonna."),
@@ -524,7 +527,7 @@ EDIFICI_345 = {
     "ed_piazza_monumentale":      (prod(pietra=2, idee=2),         2,    altri(1, 2),                  "A ogni attivazione: +1 Denaro per ogni altro giocatore con un edificio qui (max 2). A fine partita: +1 PV per ogni tuo edificio in piedi nelle sue colonne."),
     # era 5 (le gilde del registro 150 tengono il loro effetto di fine partita)
     "ed_fondazione_darte":        (prod(pietra=1, oro=1),          None, pv(1),                        "A ogni attivazione: +1 PV. A fine partita: +1 PV per ogni tuo potenziamento."),
-    "ed_condominio":              (prod(pietra=1, idee=1),         None, risorsa(oro=1),               "A ogni attivazione: +1 Denaro. A fine partita: +1 PV per ogni tuo Civico in piedi (max 4)."),
+    "ed_condominio":              (prod(pietra=1, idee=1),         None, pv(1, "civico", "colonna", 1), "A ogni attivazione: +1 PV se hai un altro Civico in piedi in questa colonna. A fine partita: +1 PV per ogni tuo Civico in piedi (max 4)."),
     "ed_caffe_letterario":        (prod(pietra=1, oro=1),          None, risorsa(idee=1),              "A ogni attivazione: +1 Idea. A fine partita: +1 PV se e' adiacente a un edificio Cultura."),
     "ed_officina":                (prod(pietra=2),                 None, risorsa(pietra=1),            "A ogni attivazione: +1 Costruzione. A fine partita: +1 PV per ogni altro tuo Ingegneria (max 4)."),
     "ed_monumento_ai_caduti":     (prod(pietra=2, oro=1),          None, resistenza(1, "adiacenti"),   "A ogni attivazione: +1 resistenza fino a fine era ai tuoi edifici adiacenti. A fine partita: +1 PV per ogni altro tuo Militare."),
@@ -532,11 +535,26 @@ EDIFICI_345 = {
     "ed_grattacielo":             (prod(pietra=3, idee=1),         None, altri(1, 2),                  "A ogni attivazione: +1 Denaro per ogni altro giocatore con un edificio qui (max 2). Solo sopra, al livello 2 o piu'. A fine partita: come nella v2."),
     "ed_biblioteca":              (prod(pietra=2, oro=1),          None, pv(1),                        "A ogni attivazione: +1 PV. A fine partita: +1 PV per ogni classe diversa fra i tuoi edifici."),
     "ed_ponte_in_acciaio":        (prod(pietra=3),                 None, risorsa(pietra=1),            "A ogni attivazione: +1 Costruzione. A fine partita: +2 PV per ogni tua rovina riportata alla luce nelle sue colonne."),
-    "ed_stazione":                (prod(pietra=3, idee=1),         None, risorsa(oro=1),               "A ogni attivazione: +1 Denaro. Solo sopra, al livello 1 o piu'. A fine partita: +1 PV per ogni edificio in piedi nelle sue colonne (max 5)."),
+    "ed_stazione":                (prod(pietra=3, idee=1),         None, risorsa(pietra=1),            "A ogni attivazione: +1 Costruzione. Solo sopra, al livello 1 o piu'. A fine partita: +1 PV per ogni edificio in piedi nelle sue colonne (max 5)."),
     "ed_parco_archeologico":      (prod(pietra=2, oro=1),          None, scavo(1, "adiacente"),        "A ogni attivazione: +1 Scavo permanente a un tuo edificio adiacente. A fine partita: come nella v2."),
     "ed_universita":              (prod(pietra=2, oro=1, idee=1),  None, pv(1),                        "A ogni attivazione: +1 PV. Solo sopra, al livello 1 o piu'. A fine partita: +1 PV per ogni tuo Personaggio reclutato."),
 }
+# Terzo giro (registro 164): sulla partita intera il Denaro moriva 10 a testa, e
+# veniva per 7 dalle azioni degli edifici e per 4,4 dalla PRODUZIONE della v2
+# rimasta sulle carte (Mulino 2, Officina 2, Stazione 2...), che si sommava
+# all'azione. Dall'era 2 in su l'azione e' la produzione: il campo della v2 va
+# a zero (l'era 1 resta com'e' stata misurata).
+for b in v3["buildings"]:
+    if b["era"] >= 2 and not b.get("riserva"):
+        b["production"] = {"pietra": 0, "oro": 0, "cultura": 0, "idee": 0}
 CASE_FLESSIBILI = {"ed_casa_e3_s", "ed_casa_e4_s", "ed_casa_e5_p"}
+# Le case delle ere 3-5 nella stessa economia (registro 164): nella v2
+# costavano Denaro e Idee ed erano l'unica cosa che le assorbiva (due a partita
+# ciascuna nelle ere 4 e 5). Ora la piccola costa 1 Costruzione o Denaro, le
+# altre 1 o 2 Costruzione secondo il Lampo.
+CASE_345 = {"ed_casa_e3_p": prod(pietra=1), "ed_casa_e3_g": prod(pietra=2),
+            "ed_casa_e4_p": prod(pietra=2), "ed_casa_e4_g": prod(pietra=3),   # terzo giro: a 1 e 2 battevano il mazzo (2,0 e 1,9 a partita)
+            "ed_casa_e5_g": prod(pietra=3)}
 for b in v3["buildings"]:
     if b["era"] not in (3, 4, 5): continue
     if b["id"] in EDIFICI_345:
@@ -547,20 +565,27 @@ for b in v3["buildings"]:
         b["azione"] = azione
         if b["id"] in ("ed_mura", "ed_arsenale"): b["effects"] = []
         b["effect_text"] = testo
+        # Le carte fragili delle ere 3 e 5 (resistenza 1-2 contro la forza 4)
+        # crollavano all'82-99%: +1, cosi' con un 🛡 dei Personaggi reggono.
+        if b["era"] in (3, 5) and int(b["resistance"]) <= 2: b["resistance"] = int(b["resistance"]) + 1
     else:
         b["azione"] = NESSUNA
         if b["id"] in CASE_FLESSIBILI:
             b["cost"] = prod(pietra=1); b["flexible"] = True
+        elif b["id"] in CASE_345:
+            b["cost"] = dict(CASE_345[b["id"]])
 # Le tessere delle ere 3-5: cinque su sette producono, con tutte e tre le risorse.
+# Secondo giro (registro 164): tre su sette, quasi solo Costruzione; con cinque
+# su sette le ere 3-5 producevano 13-14,5 e ne morivano 5,6-6,3.
 TESSERE_345 = {
-    "te_fiera": prod(oro=1), "te_borgo_franco": prod(pietra=1), "te_scuola_dei_mastri": prod(idee=1),
-    "te_mura": prod(pietra=1), "te_rocca": prod(), "te_eremo": prod(idee=1), "te_spoglio_delle_rovine": prod(),
-    "te_villa_di_campagna": prod(oro=1), "te_piazza_del_mercato": prod(), "te_bottega": prod(idee=1),
+    "te_fiera": prod(), "te_borgo_franco": prod(pietra=1), "te_scuola_dei_mastri": prod(idee=1),
+    "te_mura": prod(pietra=1), "te_rocca": prod(), "te_eremo": prod(), "te_spoglio_delle_rovine": prod(),
+    "te_villa_di_campagna": prod(), "te_piazza_del_mercato": prod(), "te_bottega": prod(),
     "te_fondaco": prod(oro=1), "te_belvedere": prod(pietra=1), "te_giardino_all_italiana": prod(pietra=1),
     "te_cappella_di_famiglia": prod(),
     "te_periferia": prod(oro=1), "te_zona_industriale": prod(pietra=1), "te_isolato": prod(),
-    "te_scuola_politecnica": prod(oro=1), "te_quartiere_alto": prod(pietra=1), "te_parco_pubblico": prod(),
-    "te_orto_botanico": prod(idee=1),
+    "te_scuola_politecnica": prod(), "te_quartiere_alto": prod(pietra=1), "te_parco_pubblico": prod(),
+    "te_orto_botanico": prod(),
 }
 for t in v3["tessere_era"]:
     if t["id"] in TESSERE_345: t["produzione"] = TESSERE_345[t["id"]]

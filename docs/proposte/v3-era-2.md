@@ -70,7 +70,7 @@ ogni attivazione della colonna.
 |---|---|---|---|---|---|---|---|
 | Teatro | Cultura | ⚒1 🪙1 | 3 | 2 | — | 5 | ★ +1 PV |
 | Acquedotto (3 caselle, fiume) | Ingegneria | ⚒2 🪙1 💡1 | 4 | — | 2 | 3 | 💡 +1 Idea (e +2 PV a fine partita se in piedi) |
-| Terme | Civico | ⚒1 💡1 | 2 | 2 | — | 3 | 🪙 +1 Denaro |
+| Terme | Civico | ⚒1 💡1 | 2 | 2 | — | 3 | ⇄ cambia 1 risorsa (registro 164; era 🪙) |
 | Sacello (collina) | Religione | ⚒1 🪙1 | 2 | 1 | — | 3 | 🛡 +1 res per l'era a un tuo edificio adiacente |
 | Torre di vedetta (collina) | Militare | ⚒2 | 3 | 2 | — | 2 | 🛡 +1 res per l'era ai tuoi edifici adiacenti |
 | Tempio (collina) | Religione | ⚒1 🪙1 | 3 | — | 1 | 3 | ★ +1 PV se hai 2+ Religione in piedi |

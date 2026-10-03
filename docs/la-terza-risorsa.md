@@ -2034,9 +2034,75 @@ Proposta: il giro di tuning delle ere 3-5 come per l'era 2 (tessere,
 Personaggi, costi, case nella stessa economia), poi la resistenza dell'era 3
 e le carte "solo sopra" dell'era 5. Una misura intera dura 37 minuti.
 
+## Trentottesima misura: il tuning delle ere 3-5, due giri
+
+Il designer: "Vai". Stesse 300 partite intere della trentasettesima, due giri
+sulle ere 3-5 (registro 164).
+
+**Primo giro**: tessere delle ere 3-5 da cinque a tre su sette che producono,
+quasi solo Costruzione; nello stampo dei Personaggi due ruoli dalla
+produzione di Denaro e Idee alla Costruzione (11/3/3 invece di 9/4/4); le case
+delle ere 3-5 nella stessa economia (la piccola 1 flessibile, le altre 1 o 2
+Costruzione invece di Denaro e Idee); +1 resistenza alle carte delle ere 3 e 5
+con resistenza 1-2. Risultato: quasi niente. Le ere 3-5 producevano ancora
+13,5-14,2 e ne morivano 5,0-6,5, e il Denaro moriva **di piu'** (2,6 / 3,8 /
+3,2). Il conto delle entrate su tutta la partita ha detto perche': del Denaro
+incassato (20 a testa) 7,0 veniva dalle **azioni degli edifici** e 4,4 dalla
+**produzione della v2 rimasta sulle carte** (Mulino 2, Officina 2, Stazione
+2, Emporio, Foro, Borgo...), che si sommava all'azione; tessere e Personaggi
+ne davano 8. Dall'era 3 in su gli edifici in piedi sono quindici-venti e ogni
+attivazione ne paga due o tre: l'economia degli edifici si accumula.
+
+**Secondo giro**: la produzione della v2 a zero su tutti gli edifici del
+mazzo dall'era 2 in su (l'azione e' la loro produzione; l'era 1 resta com'e'
+stata misurata); sette azioni "+1 Denaro" diventano altro (Terme e Banco ⇄,
+Borgo e Condominio ★ se Civico in colonna, Ospedale 🛡, Villa ★, Stazione ⚒);
+le case delle ere 4 e 5 a 2 e 3 Costruzione (a 1 e 2 battevano il mazzo).
+
+| a giocatore | era 1 | era 2 prima → ora | era 3 prima → ora | era 4 prima → ora | era 5 prima → ora |
+|---|---|---|---|---|---|
+| prodotto | 10,1 | 12,0 → 11,3 | 14,5 → **11,2** | 13,3 → **10,9** | 14,0 → **11,0** |
+| di cui 🪙 / 💡 | 2,4 / 2,6 | 3,0 / 2,8 → 2,6 / 2,8 | 4,7 / 4,0 → 2,2 / 3,2 | 4,7 / 3,4 → 3,0 / 2,5 | 5,1 / 3,7 → 2,8 / 2,7 |
+| speso | 7,8 | 8,5 → 8,1 | 8,9 → 7,7 | 7,6 → 7,0 | 7,7 → 7,1 |
+| morto | 2,3 | 3,5 → 3,2 | 5,6 → **3,5** | 5,7 → **3,9** | 6,3 → **4,0** |
+| di cui ⚒ / 🪙 / 💡 | 0,7/0,8/0,9 | 0,9/1,3/1,4 → 0,8/1,0/1,5 | 0,9/2,4/2,2 → 0,6/1,2/1,7 | 1,4/3,0/1,2 → 0,9/1,8/1,2 | 1,4/2,4/2,5 → 1,0/1,1/1,9 |
+| costruzioni / potenziamenti / passi | 3,6 / 0,77 / 0,5 | 3,3/1,07/0,65 → 3,2/1,02/0,7 | 3,4/1,29/0,4 → 3,0/1,10/0,6 | 3,1/0,97/0,6 → 2,7/0,90/0,9 | 2,7/1,15/0,8 → 2,4/0,95/1,0 |
+| PV dell'era | 5,1 | 8,9 → 8,7 | 10,7 → 10,1 | 10,9 → 10,4 | 8,0 → 7,8 |
+
+La partita intera: 72,7 PV a testa (prima 74,7; v2 69,5), Lampo 16,2,
+Continuita' 14,4, Rendita 11,2, PV prodotti 11,1, Scavo 10,5 (tessere 6,5,
+scheletri 2,1, arte 1,3), finali 5,0. Vittorie: Obiettivi 41, Continuita' 36,
+Rendita 36, Bilanciata 35, Scavo 30, Lampo 23.
+
+Cosa dicono i numeri:
+- **Le ere 3-5 scendono a 11 prodotte e 3,5-4,0 morte**, da 14 e 6: il
+  grosso l'ha fatto togliere la produzione doppia e le azioni in Denaro. Il
+  morto resta sopra il budget (1-2) e sono ancora Denaro e Idee (1,1-1,8 e
+  1,2-1,9): le azioni degli edifici in piedi delle ere passate continuano a
+  pagarle, e dall'era 3 ce ne sono tanti. La via, se si vuole arrivare a 2,
+  e' una delle due dette gia': le azioni "risorsa" degli edifici solo quando
+  li attiva il proprietario, oppure un costo in piu' in Denaro e Idee sulle
+  carte delle ere 3-5 (oggi quasi tutte Costruzione piu' una).
+- **Si costruisce meno** nelle ere 4 e 5 (2,7 e 2,4 a testa) e si passa di
+  piu' (0,9 e 1,0): con meno risorse e carte da 3-4 il bot aspetta. Le case
+  piccole a 1 flessibile restano le piu' costruite (Casupole 1,9, Case
+  popolari 2,0, Palazzina 2,0): sono la carta di salvataggio, ma due a
+  partita sono tante.
+- **Le carte mai costruite**: Conceria 0,03, Castello 0,02, Arsenale 0,08
+  (era 3); Fortezza 0,01, Palazzetto 0,10, Osservatorio 0,13 (era 4);
+  Stazione 0,02, Grattacielo 0,07, Ponte in acciaio 0,09 (era 5). Le "solo
+  sopra" grandi non trovano dove salire; le altre costano troppo per quel
+  che rendono. Vanno riscritte una per una, con il designer.
+- **Le strategie** sulla partita intera: cinque fra 30 e 41, la Lampo al 23
+  con 66,7 PV contro 71-77 delle altre. Il Lampo e' il canale che tutti
+  prendono (16,2 PV a testa) e la strategia che lo insegue in piu' non ha
+  piu' un vantaggio: va ritarata nel bot, non nelle regole, come si fece per
+  la v2 (registro 114).
+
 ## Come rifare il conto
 
 ```bash
+# trentottesima misura: il tuning delle ere 3-5 (registro 164), stesso comando della trentasettesima
 # trentasettesima misura: la partita intera (registro 163)
 godot --headless res://scenes/audit_partita.tscn -- --players 3 --games 300 --seed 700000 --giro tutte \
   --dati data/proposte/cards-v3-era1.json --rapporto 1 > intera.csv 2> intera.err

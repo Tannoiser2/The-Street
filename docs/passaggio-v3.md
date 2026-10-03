@@ -166,7 +166,8 @@ Come si misura: `--fino_era N` nell'audit, `--rapporto 1`, poi `python3 tools/mi
 (dall'era 2 l'era e' la differenza fra le fotografie di fine era). 300 partite a 3 giocatori, seme 700000,
 `--giro tutte`; ogni lotto fino all'era 2 dura circa 12 minuti su questo container.
 
-Prossimi passi: il tuning delle ere 3-5 come fatto per l'era 2 (tessere, Personaggi, costi, case nella
-stessa economia: muoiono 5,6-6,3 risorse a testa), la resistenza dell'era 3 e le carte "solo sopra"
-dell'era 5; il morto dell'era 2 (3,5) da riportare a 1-2; il ⊕ che nessuno vuole al draft; l'interfaccia a schermo per la v3 (il file di prova
+Prossimi passi: il morto delle ere 2-5 (3,2-4,0 a testa, Denaro e Idee dalle azioni degli edifici in
+piedi: azioni "risorsa" solo per chi attiva, o costi in Denaro e Idee sulle carte tarde, da decidere con
+il designer); le carte mai costruite delle ere 3-5 (Conceria, Castello, Arsenale, Fortezza, Stazione,
+Grattacielo, Ponte in acciaio) da riscrivere una per una; la Lampo al 23% da ritarare nel bot; il ⊕ che nessuno vuole al draft; l'interfaccia a schermo per la v3 (il file di prova
 non e' fra quelli che la schermata di gioco offre) e la strategia Ritrovamenti nei bot.

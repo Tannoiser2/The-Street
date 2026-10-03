@@ -2601,3 +2601,20 @@ dato è stato importato da lì. Ma due confronti fra ciò che è stampato e
     si costruisce e quel che sta a terra crolla al Giudizio del tempo.
     **Prossimo passo**: il tuning delle ere 3-5 come per l'era 2, poi
     resistenza dell'era 3 e carte dell'era 5.
+164. **Il tuning delle ere 3-5.** Il designer: "Vai". Due giri sulla partita
+    intera (trentottesima misura). Il primo (tessere a tre su sette,
+    Personaggi 11/3/3, case in Costruzione, +1 resistenza alle carte fragili
+    delle ere 3 e 5) non ha mosso il morto: il Denaro veniva per 7 dalle
+    azioni degli edifici e per 4,4 dalla produzione della v2 rimasta sulle
+    carte, che si sommava all'azione. Il secondo: produzione della v2 a zero
+    dall'era 2 in su (l'azione e' la produzione), sette azioni "+1 Denaro"
+    cambiate (Terme, Banco ⇄; Borgo, Condominio, Villa ★; Ospedale 🛡;
+    Stazione ⚒), le case delle ere 4-5 a 2 e 3 Costruzione. Le ere 3-5
+    scendono da 14 prodotte e 6 morte a 11 e 3,5-4,0; la partita intera
+    72,7 PV a testa, vittorie fra 30 e 41 tranne la Lampo al 23. Restano: il
+    morto delle ere 3-5 sopra il budget (le azioni degli edifici delle ere
+    passate), le carte mai costruite (Conceria, Castello, Arsenale,
+    Fortezza, Stazione, Grattacielo, Ponte in acciaio), le case piccole a 2
+    a partita, la Lampo da ritarare nel bot. **Da decidere con il designer**
+    la via per il morto: azioni "risorsa" solo per chi attiva, o costi in
+    Denaro e Idee sulle carte delle ere 3-5.
