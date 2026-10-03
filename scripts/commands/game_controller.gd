@@ -919,9 +919,14 @@ func _dopo_azione(azione := "") -> void:
 		# Dopo una costruzione senza carta: solo potenziamenti, niente case.
 		gs.extra_solo_potenziamenti = dopo_costruzione and not aperto_da_carta and not acquisto_extra()
 		p.bump("extra_aperti")
+		# Solo per il rapporto (registro 168): quante aperture vengono da una
+		# carta ⊕ e quante dalla finestra dopo la costruzione.
+		p.bump("extra_aperti_carta" if aperto_da_carta else "extra_aperti_costruzione")
 		state_changed.emit()
 		return
-	if gs.acquisto_extra_aperto: gs.current_player().bump("extra_usati")
+	if gs.acquisto_extra_aperto:
+		gs.current_player().bump("extra_usati")
+		gs.current_player().bump("extra_usati_costruzione" if gs.extra_solo_potenziamenti else "extra_usati_carta")
 	_end_turn()
 
 # L'INCASSO AL PASSAGGIO (registro 109, costante `passa_incasso`, spenta dove
