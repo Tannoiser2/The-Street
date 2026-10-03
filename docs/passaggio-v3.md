@@ -149,9 +149,10 @@ cinque ere.
 
 La v3 e' nel codice, accesa dalla costante `turno_v3` del file dati (`data/proposte/cards-v3-era1.json`,
 generato da `tools/genera_cards_v3.py` dalla v2; la v1.5 e la v2 non cambiano, `verifica_riferimento`
-identico). Le ere 1 e 2 sono scritte e misurate (registri 153-162, misure dalla trentunesima alla
-trentaseiesima); le ere 3-5 sono ancora quelle della v2 con dei Lavoratori riempitivi nel draft.
-I documenti di lavoro: `docs/proposte/v3-metro.md` (il metro), `v3-era-1.md`, `v3-era-2.md`.
+identico). Le cinque ere sono scritte (registri 153-163, misure dalla trentunesima alla trentasettesima): le ere
+1 e 2 misurate e nel metro, le ere 3-5 in prima stesura da uno stampo, misurate una volta sulla partita
+intera e da ritarare. I documenti di lavoro: `docs/proposte/v3-metro.md` (il metro), `v3-era-1.md`,
+`v3-era-2.md`, `v3-ere-3-5.md`.
 
 Le regole decise dal designer lungo la strada, tutte nel file base: risorse che muoiono a fine era,
 draft a passaggio alternato, Personaggi lavoratori con produzione e azione, azioni degli edifici al
@@ -165,7 +166,7 @@ Come si misura: `--fino_era N` nell'audit, `--rapporto 1`, poi `python3 tools/mi
 (dall'era 2 l'era e' la differenza fra le fotografie di fine era). 300 partite a 3 giocatori, seme 700000,
 `--giro tutte`; ogni lotto fino all'era 2 dura circa 12 minuti su questo container.
 
-Prossimi passi: le ere 3-5 nello stesso schema (16 Personaggi con Scavo da scheletro, azioni, costi
-con la regola), poi la partita intera per Scavo, scheletri e riscoperta; il morto dell'era 2 (3,5) da
-riportare a 1-2; il ⊕ che nessuno vuole al draft; l'interfaccia a schermo per la v3 (il file di prova
+Prossimi passi: il tuning delle ere 3-5 come fatto per l'era 2 (tessere, Personaggi, costi, case nella
+stessa economia: muoiono 5,6-6,3 risorse a testa), la resistenza dell'era 3 e le carte "solo sopra"
+dell'era 5; il morto dell'era 2 (3,5) da riportare a 1-2; il ⊕ che nessuno vuole al draft; l'interfaccia a schermo per la v3 (il file di prova
 non e' fra quelli che la schermata di gioco offre) e la strategia Ritrovamenti nei bot.

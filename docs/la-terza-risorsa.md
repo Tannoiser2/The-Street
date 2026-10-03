@@ -1977,9 +1977,70 @@ Cosa dicono i numeri:
   Architetto 1,36; ultimi Argentario (3,98, ⊕), Mosaicista, Sacerdotessa,
   Console. Il ⊕ resta l'azione meno voluta anche qui.
 
+## Trentasettesima misura: la partita intera della v3, prima stesura delle ere 3-5
+
+Le ere 3, 4 e 5 scritte con uno stampo uguale per i 16 Personaggi (le stesse
+sedici azioni, produzione 9/4/4, i cinque della v2 al posto del loro ruolo) e
+gli edifici con la regola dei costi (`docs/proposte/v3-ere-3-5.md`, registro
+163). 300 partite intere a 3 giocatori, seme 700000, tutte le strategie a
+rotazione. La v2 di main, stesso lotto (trentunesima misura, 90 partite):
+69,5 PV a testa, Lampo 16,4, Continuita' 17,8, Rendita 13,9, Scavo 7,7.
+
+**La partita**: 74,7 PV a testa. Lampo 17,4, Continuita' 15,8, Rendita 11,7,
+**Scavo 11,6** (tessere 7,1, scheletri 2,2, arte 1,4, piu' il bonus di chi
+costruisce sulle rovine), PV prodotti dalle azioni 10,5, finali 3,3,
+Eredita' 2,5, Monumenti 1,8. Vittorie: Bilanciata 39, Rendita 38,
+Obiettivi 37, Continuita' 35, Scavo 27, **Lampo 23** (errore ±4, atteso 33).
+Lo Scavo, che nella v2 era a 8 PV, con gli scheletri dei Personaggi e il
+bonus delle rovine arriva a 12; la Lampo, che nell'era 1 da sola vinceva il
+54%, sulla partita intera e' l'ultima.
+
+| a giocatore | era 1 | era 2 | era 3 | era 4 | era 5 |
+|---|---|---|---|---|---|
+| prodotto (⚒ / 🪙 / 💡) | 10,1 (5,1/2,4/2,6) | 12,0 (6,2/3,0/2,8) | **14,5** (5,8/4,7/4,0) | 13,3 (5,1/4,7/3,4) | 14,0 (5,2/5,1/3,7) |
+| speso | 7,8 | 8,5 | 8,9 | 7,6 | 7,7 |
+| morto (⚒ / 🪙 / 💡) | 2,3 | 3,5 | **5,6** (0,9/2,4/2,2) | **5,7** (1,4/3,0/1,2) | **6,3** (1,4/2,4/2,5) |
+| costruzioni / potenziamenti / passi | 3,6 / 0,77 / 0,5 | 3,3 / 1,07 / 0,65 | 3,4 / 1,29 / 0,4 | 3,1 / 0,97 / 0,6 | 2,7 / 1,15 / 0,8 |
+| PV dell'era (Lampo / censimento / prodotti / scavo) | 5,1 (2,9/1,3/0,6/-) | 8,9 (3,9/2,5/1,3/0,7) | 10,7 (4,6/2,5/2,5/0,7) | 10,9 (2,9/3,0/2,8/1,9) | 8,0 (3,1/-/3,3/1,2) |
+| edifici a partita: costruiti / in rovina a fine partita / sotterrati | 10,7 / 8,8 / 8,2 | 9,9 / 6,3 / 5,4 | 10,2 / 7,7 / 6,4 | 9,3 / 5,4 / 2,0 | 8,0 / 2,6 / 0 |
+
+Cosa dicono i numeri:
+- **Le ere 1 e 2 tengono, le ere 3-5 no**: producono 13-14,5 e ne lasciano
+  morire 5,6-6,3, Denaro e Idee soprattutto (2,4-3,0 e 1,2-2,5). E' lo stesso
+  problema dell'era 2 al primo giro, e si cura allo stesso modo: meno tessere
+  che producono, Personaggi dello stampo spostati su Costruzione, i costi
+  delle carte da ritoccare dove non si costruiscono.
+- **Le case delle ere 4 e 5 dominano**: Case popolari 1,99 e Casa borghese
+  1,95 a partita nell'era 4, Palazzina 1,97 e Condominio popolare 1,91
+  nell'era 5, contro 0,1-0,6 delle carte del mazzo. Costano Denaro e Idee
+  (i costi della v2: 0/0/1, 0/1/1) e sono l'unica cosa che assorbe quelle
+  risorse: vanno nella stessa economia (una casa a 1 flessibile, le altre con
+  la Costruzione).
+- **Nell'era 5 il mazzo non si costruisce**: Stazione 0,01, Grattacielo 0,07,
+  Museo 0,12, Universita' 0,27 (tutti "solo sopra"), e quel che si costruisce
+  a terra con resistenza 1-2 crolla al Giudizio del tempo al 93-99%
+  (Caffe' letterario, Fondazione, Condominio, Officina, Parco archeologico).
+  Si costruiscono 2,7 edifici a testa, meno che in ogni altra era.
+- **L'era 3 crolla**: forza 4, e Case di legno, Casupole, Cappella, Borgo,
+  Ospedale cadono all'82-95%: 7,7 rovine su 10,2 costruiti. E' il materiale
+  dello Scavo (6,4 sotterrati), ma anche il segno che la resistenza delle
+  carte dell'era 3 e' quella della v2, non pensata per un'era di forza 4
+  senza il +2 del lavoratore su ogni edificio.
+- **Il draft**: in ogni era il Militare "+2 all'edificio su cui sta" e' la
+  prima scelta (Cavaliere 1,10, Ingegnere militare 1,14, Veterano 1,12), e
+  gli ultimi sono gli sconti e il ⊕. Lo stampo e' uguale, il draft pure.
+
+Proposta: il giro di tuning delle ere 3-5 come per l'era 2 (tessere,
+Personaggi, costi, case nella stessa economia), poi la resistenza dell'era 3
+e le carte "solo sopra" dell'era 5. Una misura intera dura 37 minuti.
+
 ## Come rifare il conto
 
 ```bash
+# trentasettesima misura: la partita intera (registro 163)
+godot --headless res://scenes/audit_partita.tscn -- --players 3 --games 300 --seed 700000 --giro tutte \
+  --dati data/proposte/cards-v3-era1.json --rapporto 1 > intera.csv 2> intera.err
+for e in 1 2 3 4 5; do python3 tools/misura_era.py intera.err --era $e; done
 # trentaseiesima misura: la coppia di ere 1-2 (registro 162)
 godot --headless res://scenes/audit_partita.tscn -- --players 3 --games 300 --seed 700000 --giro tutte \
   --dati data/proposte/cards-v3-era1.json --rapporto 1 --fino_era 2 > e12.csv 2> e12.err

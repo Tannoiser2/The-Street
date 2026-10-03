@@ -2585,3 +2585,19 @@ dato è stato importato da lì. Ma due confronti fra ciò che è stampato e
     Sacello, Torre di vedetta e Anfiteatro quasi mai costruiti, il ⊕ sempre
     ultimo nel draft. **Prossimo passo**: le ere 3-5 nello stesso schema, per
     vedere Scavo, scheletri e riscoperta sulla partita intera.
+163. **Le ere 3-5 e la partita intera.** Il designer: "Procedi". Le tre ere
+    scritte con uno stampo uguale per i 16 Personaggi (le stesse sedici
+    azioni, produzione 9/4/4, i cinque della v2 di ogni era al posto del loro
+    ruolo, nomi segnaposto) e gli edifici con la regola dei costi, Rendita 2
+    solo dove si paga 4 o piu', le case piu' piccole a 1 flessibile, cinque
+    tessere su sette che producono (`docs/proposte/v3-ere-3-5.md`). Non
+    servono piu' riempitivi: le cinque ere hanno i loro 16. Trentasettesima
+    misura, la prima partita intera della v3: 74,7 PV a testa (v2: 69,5),
+    Lampo 17,4, Continuita' 15,8, Rendita 11,7, Scavo 11,6 (v2: 7,7), PV
+    prodotti 10,5; vittorie Bilanciata 39, Rendita 38, Obiettivi 37,
+    Continuita' 35, Scavo 27, Lampo 23. Le ere 1-2 tengono il metro, le ere
+    3-5 producono 13-14,5 e ne lasciano morire 5,6-6,3; le case delle ere 4-5
+    (costi in Denaro e Idee) dominano; nell'era 5 il mazzo "solo sopra" non
+    si costruisce e quel che sta a terra crolla al Giudizio del tempo.
+    **Prossimo passo**: il tuning delle ere 3-5 come per l'era 2, poi
+    resistenza dell'era 3 e carte dell'era 5.
