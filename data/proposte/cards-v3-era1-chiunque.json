@@ -1,7 +1,7 @@
 {
   "meta": {
     "game": "La Strada delle Ere",
-    "ruleset": "v3-era1-prova-proprio_morte",
+    "ruleset": "v3-era1-prova-chiunque",
     "language": "it",
     "source": "distinta-carte (fonte unica)",
     "origine": "generato da tools/genera_cards_v3.py da data/cards-v2.json: non modificare a mano"
@@ -477,11 +477,10 @@
         "tipo": "risorsa",
         "pietra": 0,
         "oro": 0,
-        "idee": 1,
-        "se": "proprio"
+        "idee": 1
       },
       "effects": [],
-      "effect_text": "A ogni tua attivazione: +1 Idea."
+      "effect_text": "A ogni attivazione: +1 Idea."
     },
     {
       "id": "ed_approdo",
@@ -547,13 +546,12 @@
         "idee": 0
       },
       "exhaustible": 0,
-      "effect_text": "A ogni tua attivazione: +1 Idea.",
+      "effect_text": "A ogni attivazione: +1 Idea.",
       "azione": {
         "tipo": "risorsa",
         "pietra": 0,
         "oro": 0,
-        "idee": 1,
-        "se": "proprio"
+        "idee": 1
       },
       "effects": []
     },
@@ -588,11 +586,10 @@
         "tipo": "risorsa",
         "pietra": 0,
         "oro": 1,
-        "idee": 0,
-        "se": "proprio"
+        "idee": 0
       },
       "effects": [],
-      "effect_text": "A ogni tua attivazione: +1 Denaro."
+      "effect_text": "A ogni attivazione: +1 Denaro."
     },
     {
       "id": "ed_cava",
@@ -873,7 +870,7 @@
         "idee": 0
       },
       "exhaustible": 0,
-      "effect_text": "A ogni tua attivazione: +1 Idea.",
+      "effect_text": "A ogni attivazione: +1 Idea.",
       "effects": [
         {
           "hook": "on_final_scoring",
@@ -901,8 +898,7 @@
         "tipo": "risorsa",
         "pietra": 0,
         "oro": 0,
-        "idee": 1,
-        "se": "proprio"
+        "idee": 1
       }
     },
     {
@@ -1184,10 +1180,9 @@
       "azione": {
         "tipo": "altri",
         "oro": 1,
-        "max": 2,
-        "se": "proprio"
+        "max": 2
       },
-      "effect_text": "A ogni tua attivazione: +1 Denaro per ogni altro giocatore con un edificio in questa colonna (max 2)."
+      "effect_text": "A ogni attivazione: +1 Denaro per ogni altro giocatore con un edificio in questa colonna (max 2)."
     },
     {
       "id": "ed_anfiteatro",
@@ -1556,10 +1551,9 @@
       "azione": {
         "tipo": "altri",
         "oro": 1,
-        "max": 2,
-        "se": "proprio"
+        "max": 2
       },
-      "effect_text": "A ogni tua attivazione: +1 Denaro per ogni altro giocatore con un edificio qui (max 2)."
+      "effect_text": "A ogni attivazione: +1 Denaro per ogni altro giocatore con un edificio qui (max 2)."
     },
     {
       "id": "ed_ospedale_dei_pellegrini",
@@ -1676,10 +1670,9 @@
         "tipo": "risorsa",
         "pietra": 0,
         "oro": 0,
-        "idee": 1,
-        "se": "proprio"
+        "idee": 1
       },
-      "effect_text": "A ogni tua attivazione: +1 Idea."
+      "effect_text": "A ogni attivazione: +1 Idea."
     },
     {
       "id": "ed_arsenale",
@@ -1744,7 +1737,7 @@
         "idee": 0
       },
       "exhaustible": 0,
-      "effect_text": "A ogni tua attivazione: +1 Idea. I tuoi potenziamenti costano 1 in meno.",
+      "effect_text": "A ogni attivazione: +1 Idea. I tuoi potenziamenti costano 1 in meno.",
       "effects": [
         {
           "hook": "on_build",
@@ -1760,8 +1753,7 @@
         "tipo": "risorsa",
         "pietra": 0,
         "oro": 0,
-        "idee": 1,
-        "se": "proprio"
+        "idee": 1
       }
     },
     {
@@ -1857,7 +1849,7 @@
         "idee": 0
       },
       "exhaustible": 0,
-      "effect_text": "A ogni tua attivazione: +1 Idea. A fine partita, se e' in piedi: +2 PV.",
+      "effect_text": "A ogni attivazione: +1 Idea. A fine partita, se e' in piedi: +2 PV.",
       "effects": [
         {
           "hook": "on_final_scoring",
@@ -1880,8 +1872,7 @@
         "tipo": "risorsa",
         "pietra": 0,
         "oro": 0,
-        "idee": 1,
-        "se": "proprio"
+        "idee": 1
       }
     },
     {
@@ -2164,7 +2155,7 @@
         "idee": 0
       },
       "exhaustible": 0,
-      "effect_text": "A ogni tua attivazione: +1 Denaro per ogni altro giocatore con un edificio qui (max 2). A fine partita: +1 PV per ogni tuo edificio in piedi nelle sue colonne.",
+      "effect_text": "A ogni attivazione: +1 Denaro per ogni altro giocatore con un edificio qui (max 2). A fine partita: +1 PV per ogni tuo edificio in piedi nelle sue colonne.",
       "effects": [
         {
           "hook": "on_final_scoring",
@@ -2181,8 +2172,7 @@
       "azione": {
         "tipo": "altri",
         "oro": 1,
-        "max": 2,
-        "se": "proprio"
+        "max": 2
       }
     },
     {
@@ -2312,7 +2302,7 @@
         "idee": 0
       },
       "exhaustible": 0,
-      "effect_text": "A ogni tua attivazione: +1 Idea. A fine partita: +1 PV se e' adiacente a un edificio Cultura.",
+      "effect_text": "A ogni attivazione: +1 Idea. A fine partita: +1 PV se e' adiacente a un edificio Cultura.",
       "effects": [
         {
           "hook": "on_final_scoring",
@@ -2334,8 +2324,7 @@
         "tipo": "risorsa",
         "pietra": 0,
         "oro": 0,
-        "idee": 1,
-        "se": "proprio"
+        "idee": 1
       }
     },
     {
@@ -2509,7 +2498,7 @@
         "idee": 0
       },
       "exhaustible": 0,
-      "effect_text": "A ogni tua attivazione: +1 Denaro per ogni altro giocatore con un edificio qui (max 2). A fine partita: come nella v2.",
+      "effect_text": "A ogni attivazione: +1 Denaro per ogni altro giocatore con un edificio qui (max 2). A fine partita: come nella v2.",
       "effects": [
         {
           "hook": "on_final_scoring",
@@ -2537,8 +2526,7 @@
       "azione": {
         "tipo": "altri",
         "oro": 1,
-        "max": 2,
-        "se": "proprio"
+        "max": 2
       },
       "a_terra_o_sopra": true
     },

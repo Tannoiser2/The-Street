@@ -166,9 +166,11 @@ Come si misura: `--fino_era N` nell'audit, `--rapporto 1`, poi `python3 tools/mi
 (dall'era 2 l'era e' la differenza fra le fotografie di fine era). 300 partite a 3 giocatori, seme 700000,
 `--giro tutte`; ogni lotto fino all'era 2 dura circa 12 minuti su questo container.
 
-Prossimi passi: il morto delle ere 2-5 (3,2-4,0 a testa, Denaro e Idee dalle azioni degli edifici in
-piedi: azioni "risorsa" solo per chi attiva, o costi in Denaro e Idee sulle carte tarde, da decidere con
-il designer); le carte mai costruite delle ere 3-5 e le "solo sopra" grandi (Anfiteatro, Castello, Fortezza, Stazione,
-Grattacielo: nella v3 non si spiana la stessa era, e un 2x2 sopra rovine vecchie capita di rado) da
-decidere con il designer; la Scavo al 25% (la Lampo e' al 30 dopo la tabella `SPINTE_V3`); il ⊕ che nessuno vuole al draft; l'interfaccia a schermo per la v3 (il file di prova
-non e' fra quelli che la schermata di gioco offre) e la strategia Ritrovamenti nei bot.
+Prossimi passi: il morto delle ere 4-5 (2,5 a testa contro il budget di 1-2: nelle ere tarde si
+resta con Denaro e Idee mentre case e mazzo chiedono Costruzione, e si passa 1,2 volte a testa);
+la Lampo al 26% e la Scavo al 31 da riguardare nel bot (`SPINTE_V3`); le carte ancora rare
+(Fortezza, Grattacielo, Stazione per terreno e forma; Conceria, Arsenale, Ponte in acciaio); il ⊕
+che nessuno vuole al draft; l'interfaccia a schermo per la v3 (il file di prova non e' fra quelli
+che la schermata di gioco offre) e la strategia Ritrovamenti nei bot. Dal registro 166 le azioni
+degli edifici che danno risorse scattano solo quando attiva il proprietario ("A ogni tua
+attivazione"), e le cinque carte grandi vanno "a terra oppure sopra" (`a_terra_o_sopra`).

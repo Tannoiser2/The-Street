@@ -2174,7 +2174,8 @@ func _test_v3_era1() -> void:
 	_ok("  ha prodotto almeno la sua produzione (%s)" % str(minimo),
 		dopo.x - prima.x >= minimo.x and dopo.y - prima.y >= minimo.y and dopo.z - prima.z >= minimo.z)
 	_ok("  non si ripiazza lo stesso Personaggio", ctl.personaggi_liberi(p0).size() == 3 and not cid in ctl.personaggi_liberi(p0))
-	# L'azione di un edificio scatta per il proprietario a ogni attivazione.
+	# L'azione di un edificio scatta per il proprietario a ogni attivazione;
+	# se da' risorse, solo quando attiva lui (registro 166).
 	ctl.pass_action()
 	var p1 := gs.current_player()
 	var focolare := _put(gs, p1.index, "ed_focolare_comune", 3)
@@ -2189,7 +2190,7 @@ func _test_v3_era1() -> void:
 	var pietra_p1 := p1.pietra
 	var lib2 := ctl.personaggi_liberi(p2)
 	_ok("  il terzo attiva la stessa colonna 3", ctl.place_worker(3, null, lib2[0]))
-	_eq("  e il Focolare paga ancora il suo proprietario (+1)", p1.pietra - pietra_p1, 1)
+	_eq("  e il Focolare NON paga il suo proprietario: le risorse solo a ogni sua attivazione", p1.pietra - pietra_p1, 0)
 	# A fine era le risorse muoiono.
 	p2.pietra += 5
 	p2.oro += 2

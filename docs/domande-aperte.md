@@ -2654,4 +2654,11 @@ dato è stato importato da lì. Ma due confronti fra ciò che è stampato e
     surplus e' tutto li'. Due controprove sugli stessi semi: le azioni degli
     edifici che danno Denaro o Idee scattano solo quando attivi tu
     (`--variante proprio_morte`), oppure tutte quelle che danno risorse
-    (`proprio_tutte`). I numeri nella quarantesima misura.
+    (`proprio_tutte`). Risultato (quarantesima misura): il morto scende da
+    2,7-3,8 a 2,0-2,5 a testa in ogni era e la spesa quasi non cala; le carte
+    grandi a terra si costruiscono (Anfiteatro 0,46, Castello 0,12 a
+    partita). **Deciso**: la regola semplice, "le azioni degli edifici che
+    danno risorse scattano solo a ogni TUA attivazione" (PV, resistenza,
+    cambio e scavo restano a ogni attivazione di chiunque), e' il file base;
+    `--variante chiunque` rifa' la regola di prima. Vittorie 26-39; la piu'
+    debole e' ora la Lampo (26%), da riguardare nel bot.

@@ -2161,9 +2161,78 @@ e' la Scavo (25%, 68 PV), e la piu' forte la Obiettivi (43).
 Partita intera con i costi nuovi e il bot nuovo: 71,3 PV a testa, Lampo 15,9,
 Continuita' 14,1, Rendita 11,4, PV prodotti 10,4, Scavo 10,2.
 
+## Quarantesima misura: "a terra oppure sopra", e le azioni degli edifici solo quando attivi tu
+
+Il designer (registro 166): "A terra oppure sopra, vai con la seconda". Stesse
+300 partite intere, stessi semi; il rapporto distingue ora le entrate per fonte
+in ogni era (`snap_e<N>_in_<fonte>_<risorsa>`; `edifici_azione` sono le azioni
+degli edifici in piedi, `azioni` quelle del Personaggio piazzato).
+
+**Le carte grandi a terra.** Anfiteatro, Castello, Fortezza, Grattacielo e
+Stazione prendono `a_terra_o_sopra`. Costruite a partita, prima → ora (di cui a
+terra): Anfiteatro 0,02 → 0,46 (0,45), Castello 0,02 → 0,12 (0,11), Fortezza
+0,03 → 0,05, Grattacielo 0,05 → 0,07, Stazione 0,02 → 0,03. Le due 2x2 piu'
+economiche entrano in gioco; Fortezza (⚒4 su collina), Grattacielo (3 binari) e
+Stazione (3 colonne di pianura) restano rare per il terreno e la forma, non per
+la regola. Vittorie: Bilanciata 43, Obiettivi 35, Rendita 33, Continuita' 31,
+Scavo 30, Lampo 27 (era 36/43/32/33/25/30): l'Anfiteatro e' Cultura, e lo
+comprano Bilanciata e Scavo.
+
+**Da dove vengono le Idee che muoiono.** Sulla trentanovesima misura chi aveva
+l'Acquedotto (tre colonne, in piedi dall'era 2 alla 5, "+1 Idea a ogni
+attivazione di chiunque") incassava 19,8 Idee dalle azioni contro 2,6 di chi non
+lo aveva; la Piazza monumentale 14,6 contro 5,4, l'Abbazia 10,4 contro 5,3, il
+Foro 8,2 Denaro contro 2,8. Sulla partita intera le azioni degli edifici davano
+6,3 Idee e 4,2 Denaro a testa; senza di loro Idee e Denaro prodotti (7 e 8)
+pareggiavano quasi quel che se ne spendeva (6,4 e 8,4). Il surplus era tutto li'.
+
+**Due controprove**: le azioni degli edifici che danno Denaro o Idee scattano
+solo quando attivi tu (`proprio_morte`), oppure tutte quelle che danno risorse,
+Costruzione compresa (`proprio_tutte`). Le "altrui" (Approdo, Emporio,
+Conceria) restano com'erano; PV, resistenza, cambio e scavo scattano ancora a
+ogni attivazione di chiunque.
+
+| a giocatore | era 1 | era 2 | era 3 | era 4 | era 5 |
+|---|---|---|---|---|---|
+| **a terra** prodotto / speso / morto | 10,1 / 7,8 / 2,3 | 11,2 / 8,5 / 2,7 | 10,9 / 7,5 / 3,4 | 10,4 / 7,0 / 3,5 | 10,5 / 6,7 / 3,8 |
+| di cui dalle azioni degli edifici (⚒/🪙/💡) | 0,5 | 0,5/0,6/0,9 | 0,8/0,7/1,4 | 0,6/0,5/1,4 | 0,8/0,6/1,6 |
+| **proprio_morte** prodotto / speso / morto | 9,7 / 7,8 / 2,0 | 10,5 / 8,3 / 2,1 | 9,8 / 7,4 / 2,4 | 9,4 / 6,7 / 2,7 | 9,3 / 6,5 / 2,9 |
+| **proprio_tutte** prodotto / speso / morto | 9,7 / 7,8 / 2,0 | 10,1 / 8,1 / 2,0 | 9,4 / 7,2 / 2,2 | 9,1 / 6,5 / 2,5 | 8,9 / 6,3 / 2,5 |
+| di cui dalle azioni degli edifici (⚒/🪙/💡) | 0,1 | 0,2/0,3/0,4 | 0,5/0,5/0,6 | 0,3/0,3/0,6 | 0,4/0,3/0,7 |
+| costruzioni / potenziamenti (a terra → tutte) | 3,59 / 0,75 → 3,57 / 0,72 | 3,31 / 0,98 → 3,27 / 0,93 | 2,87 / 0,98 → 2,81 / 0,95 | 2,47 / 0,80 → 2,43 / 0,70 | 2,31 / 0,92 → 2,26 / 0,86 |
+
+| partita intera | a terra | proprio_morte | proprio_tutte |
+|---|---|---|---|
+| PV a testa | 72,7 | 71,2 | 70,2 |
+| Lampo / Continuita' / Rendita / PV prodotti / Scavo | 15,5 / 13,9 / 12,2 / 11,9 / 10,4 | 15,7 / 13,7 / 11,6 / 11,4 / 10,2 | 15,4 / 13,5 / 11,4 / 11,3 / 9,9 |
+| vittorie Bil / Cont / Lampo / Obi / Rend / Scavo | 43 / 31 / 27 / 35 / 33 / 30 | 40 / 31 / 27 / 37 / 35 / 31 | 36 / 33 / 26 / 39 / 34 / 31 |
+| Idee dell'Acquedotto al padrone (con / senza) | 19,8 / 2,7 | | 8,4 / 1,3 |
+
+Il morto scende di 1-1,3 a testa in ogni era, da 2,7-3,8 a 2,0-2,5, e la spesa
+quasi non cala (0,1-0,4): si tolgono risorse che non si spendevano. Costruzioni
+e potenziamenti perdono 0,02-0,1 a era. Fra le due, `proprio_tutte` ha il morto
+piu' basso, la regola piu' semplice ("a ogni TUA attivazione" per tutte le
+risorse) e le vittorie piu' strette (26-39): **e' il file base** da questa
+misura; `--variante chiunque` rifa' la regola di prima. Il budget del metro
+(morto 1-2) e' quasi raggiunto nelle ere 1-3 (2,0-2,2) e manca di mezzo punto
+nelle 4-5, dove muoiono 1,4 Denaro (era 4) e 1,1 Idee (era 5) e si passa 1,2
+volte a testa: nelle ere tarde le case e il mazzo chiedono Costruzione e si
+resta con l'altro.
+
+La piu' debole e' ora la Lampo (26-27%, 66-68 PV; con le carte grandi a terra ha
+perso 3 punti): da riguardare con la tabella `SPINTE_V3`, come la Scavo a 31.
+
 ## Come rifare il conto
 
 ```bash
+# quarantesima misura: le carte grandi a terra e le azioni degli edifici solo quando attivi tu
+#   (registro 166); il file base e' quello nuovo, `--variante chiunque` rifa' la regola di prima
+python3 tools/genera_cards_v3.py && python3 tools/genera_cards_v3.py --variante chiunque
+godot --headless res://scenes/audit_partita.tscn -- --players 3 --games 300 --seed 700000 --giro tutte \
+  --dati data/proposte/cards-v3-era1.json --rapporto 1 > p.csv 2> p.err
+godot --headless res://scenes/audit_partita.tscn -- --players 3 --games 300 --seed 700000 --giro tutte \
+  --dati data/proposte/cards-v3-era1-chiunque.json --rapporto 1 > pc.csv 2> pc.err
+for e in 1 2 3 4 5; do python3 tools/misura_era.py p.err --era $e; python3 tools/misura_era.py pc.err --era $e; done
 # trentanovesima misura: costi delle ere 3-4 e la Lampo nel bot (registro 165); le tarature con
 #   --spinta lampo=1.0   e   --spinta lampo=0.8,lampo_potenzia=1.5   sullo stesso comando
 # trentottesima misura: il tuning delle ere 3-5 (registro 164), stesso comando della trentasettesima

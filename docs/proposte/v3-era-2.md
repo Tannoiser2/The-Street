@@ -64,7 +64,8 @@ Dodici nel mazzo, tre case in riserva (Case a schiera ⚒1, Domus ⚒2, Tuguri �
 Denaro). Resistenza, Lampo e Scavo sono quelli della v2; la Rendita resta 2 solo dove si paga 4
 o più (Acquedotto, Foro, Anfiteatro), 1 su Tempio e Ponte. I costi sono quelli del terzo giro
 (registro 162): due risorse come l'era 1, un gradino in più solo alle carte grandi. L'azione scatta per il proprietario a
-ogni attivazione della colonna.
+ogni attivazione della colonna; dal registro 166 quelle che danno risorse solo quando attiva lui
+("A ogni tua attivazione": l'Acquedotto dava 17 Idee a partita al suo padrone).
 
 | edificio | classe | costo | res | Lampo | Rendita | Scavo | azione |
 |---|---|---|---|---|---|---|---|

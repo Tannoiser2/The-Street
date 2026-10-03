@@ -146,7 +146,8 @@ edifici, poi lui. A fine era finisce fra gli scheletri possibili.
 
 **Edificio**: era, classe (una o due), terreno, caselle, costo, resistenza, Lampo **o**
 Rendita (mai tutti e due), Scavo, **produzione** (0-1, al proprietario, a ogni attivazione
-di chiunque), **azione** (una voce, al proprietario, a ogni attivazione di chiunque). Le
+di chiunque), **azione** (una voce, al proprietario, a ogni attivazione di chiunque; se da' risorse,
+solo quando attiva lui: registro 166). Le
 case della riserva: niente azione, sono case.
 
 **Potenziamento**: era, classe, costo (1 risorsa nelle ere 1-3, 2 nelle ere 4-5), una

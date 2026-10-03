@@ -618,7 +618,6 @@ A_TERRA = {"ed_anfiteatro", "ed_castello", "ed_fortezza_bastionata", "ed_grattac
 for b in v3["buildings"]:
     if b["id"] in A_TERRA: b["a_terra_o_sopra"] = True
 
-# ---- le controprove ----------------------------------------------------------
 #   --variante extra_sempre   l'acquisto extra a ogni turno, senza carte (la "catena" del registro 156)
 #   --variante senza_extra    nessun acquisto extra: le quattro carte tornano com'erano nella scheda
 #   --variante costi_vecchi   i costi della scheda, senza il +1 della seconda risorsa
@@ -669,20 +668,32 @@ def senza_tuning(v):
         if ch["id"] == "pe_anziana_del_villaggio": ch["produzione"] = prod(pietra=1)
         if ch["id"] == "pe_barattatore": ch["produzione"] = prod(pietra=1, oro=1)
     v["constants"]["potenzia_adiacente"] = False
-#   --variante proprio_morte  le azioni degli edifici che danno Denaro o Idee scattano solo quando attivi tu
-#   --variante proprio_tutte  come sopra, ma anche quelle che danno Costruzione
-# (registro 166: l'Acquedotto, tre colonne in piedi per quattro ere, dava 17
-# Idee a partita al suo padrone, a ogni attivazione di chiunque)
-def _proprio(v, anche_pietra):
+# LE AZIONI DEGLI EDIFICI CHE DANNO RISORSE SCATTANO SOLO QUANDO ATTIVI TU
+# (registro 166, quarantesima misura). L'Acquedotto (tre colonne, in piedi
+# dall'era 2 alla 5, "+1 Idea a ogni attivazione di chiunque") dava 17 Idee a
+# partita al suo padrone; senza le azioni degli edifici Denaro e Idee prodotti
+# pareggiavano quasi quel che se ne spendeva. Con "a ogni TUA attivazione" il
+# morto delle ere 2-5 scende da 2,7-3,8 a 2,0-2,5 e le vittorie stanno fra 26
+# e 39. Vale per `risorsa` e `altri` senza condizione (quelle "altrui" restano);
+# PV, resistenza, cambio, scavo scattano ancora a ogni attivazione di chiunque.
+PROPRIO_IDS = set()
+def _proprio(v, anche_pietra=True, togli=False):
     for b in v["buildings"]:
         az = b.get("azione") or {}
+        if togli:
+            if b["id"] in PROPRIO_IDS:
+                del az["se"]; b["effect_text"] = b["effect_text"].replace("A ogni tua attivazione:", "A ogni attivazione:")
+            continue
         if az.get("tipo") not in ("risorsa", "altri") or az.get("se"): continue
         if az["tipo"] == "risorsa" and not anche_pietra and not (az.get("oro") or az.get("idee")): continue
-        az["se"] = "proprio"
+        az["se"] = "proprio"; PROPRIO_IDS.add(b["id"])
         b["effect_text"] = b["effect_text"].replace("A ogni attivazione:", "A ogni tua attivazione:")
-def proprio_morte(v): _proprio(v, False)
-def proprio_tutte(v): _proprio(v, True)
-VARIANTI = {"proprio_morte": proprio_morte, "proprio_tutte": proprio_tutte, "extra_sempre": extra_sempre, "senza_extra": senza_extra, "costi_vecchi": costi_vecchi,
+_proprio(v3)
+
+# ---- le controprove ----------------------------------------------------------
+#   --variante chiunque       le azioni degli edifici che danno risorse a ogni attivazione di chiunque (com'era fino alla trentanovesima misura)
+def chiunque(v): _proprio(v, togli=True)
+VARIANTI = {"chiunque": chiunque, "extra_sempre": extra_sempre, "senza_extra": senza_extra, "costi_vecchi": costi_vecchi,
             "case_seconda": case_seconda, "case_lampo1": case_lampo1, "senza_tuning": senza_tuning,
             "terreno_produce": terreno_produce, "senza_potenziamento_insieme": senza_potenziamento_insieme}
 if variante:

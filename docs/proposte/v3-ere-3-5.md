@@ -111,3 +111,8 @@ budget: i dettagli nella trentottesima misura e nel registro 164.
 Terzo giro (registro 165, trentanovesima misura): le carte piccole delle ere 3 e 4 a tre risorse. Il
 morto non si muove (3,4) e la spesa passa dal mazzo alle case medie; le carte "solo sopra" grandi
 restano rare perché nella v3 non si spiana più la stessa era. La Lampo nel bot ritarata (`SPINTE_V3`).
+
+Quarto giro (registro 166, quarantesima misura): le cinque carte grandi "a terra oppure sopra"
+(Anfiteatro 0,46 e Castello 0,12 a partita, prima 0,02); le azioni degli edifici che danno
+risorse scattano solo quando attiva il proprietario (l'Acquedotto dava 17 Idee a partita al suo
+padrone). Il morto delle ere 3-5 scende da 3,4-3,8 a 2,2-2,5, la spesa quasi non cala.
