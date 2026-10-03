@@ -168,6 +168,7 @@ Come si misura: `--fino_era N` nell'audit, `--rapporto 1`, poi `python3 tools/mi
 
 Prossimi passi: il morto delle ere 2-5 (3,2-4,0 a testa, Denaro e Idee dalle azioni degli edifici in
 piedi: azioni "risorsa" solo per chi attiva, o costi in Denaro e Idee sulle carte tarde, da decidere con
-il designer); le carte mai costruite delle ere 3-5 (Conceria, Castello, Arsenale, Fortezza, Stazione,
-Grattacielo, Ponte in acciaio) da riscrivere una per una; la Lampo al 23% da ritarare nel bot; il ⊕ che nessuno vuole al draft; l'interfaccia a schermo per la v3 (il file di prova
+il designer); le carte mai costruite delle ere 3-5 e le "solo sopra" grandi (Anfiteatro, Castello, Fortezza, Stazione,
+Grattacielo: nella v3 non si spiana la stessa era, e un 2x2 sopra rovine vecchie capita di rado) da
+decidere con il designer; la Scavo al 25% (la Lampo e' al 30 dopo la tabella `SPINTE_V3`); il ⊕ che nessuno vuole al draft; l'interfaccia a schermo per la v3 (il file di prova
 non e' fra quelli che la schermata di gioco offre) e la strategia Ritrovamenti nei bot.

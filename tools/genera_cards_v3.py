@@ -547,6 +547,19 @@ EDIFICI_345 = {
 for b in v3["buildings"]:
     if b["era"] >= 2 and not b.get("riserva"):
         b["production"] = {"pietra": 0, "oro": 0, "cultura": 0, "idee": 0}
+# Il designer (registro 165): "le carte ere 3-4 vanno rimodulate per costare un
+# po' di piu'". Le carte da due risorse delle ere 3 e 4 ne prendono una terza,
+# quella fra Denaro e Idee che non chiedevano (sono le due che muoiono):
+# Civico e Commercio +1 Denaro, Religione e Cultura +1 Idea, Ingegneria e
+# Militare +1 Denaro. Le carte da tre e quattro restano.
+SECONDA_TERZA = {"civico": "oro", "commercio": "oro", "religione": "idee", "cultura": "idee",
+                 "ingegneria": "oro", "militare": "oro"}
+for bid, (costo, rendita, azione, testo) in list(EDIFICI_345.items()):
+    era_b = next(b["era"] for b in v3["buildings"] if b["id"] == bid)
+    if era_b in (3, 4) and sum(costo.values()) == 2:
+        classe = next(b["classes"][0] for b in v3["buildings"] if b["id"] == bid)
+        nuovo = dict(costo); nuovo[SECONDA_TERZA[classe]] += 1
+        EDIFICI_345[bid] = (nuovo, rendita, azione, testo)
 CASE_FLESSIBILI = {"ed_casa_e3_s", "ed_casa_e4_s", "ed_casa_e5_p"}
 # Le case delle ere 3-5 nella stessa economia (registro 164): nella v2
 # costavano Denaro e Idee ed erano l'unica cosa che le assorbiva (due a partita

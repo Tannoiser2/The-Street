@@ -2618,3 +2618,20 @@ dato è stato importato da lì. Ma due confronti fra ciò che è stampato e
     a partita, la Lampo da ritarare nel bot. **Da decidere con il designer**
     la via per il morto: azioni "risorsa" solo per chi attiva, o costi in
     Denaro e Idee sulle carte delle ere 3-5.
+165. **Costi delle ere 3-4, le carte "solo sopra", la Lampo nel bot.** Il
+    designer: "Le carte ere 3-4 vanno rimodulate per costare un po' di piu'.
+    Le grandi 'solo sopra' che vuol dire? Prima si trovava il modo di
+    costruire perche' ora no? Le case piccole le teniamo cosi', per ora vanno
+    bene. Ritara bot per strategia lampo." Fatto (trentanovesima misura): le
+    carte da due risorse delle ere 3 e 4 ne prendono una terza (Denaro o
+    Idee); il morto non si muove (3,4) e la spesa passa dal mazzo alle case
+    medie. Le "solo sopra" sono le carte della v2 che non vanno a terra
+    (Anfiteatro, Castello, Fortezza 2x2; Grattacielo e Duomo al livello 2;
+    Piazza, Museo, Stazione, Universita' al livello 1): nella v2 un 2x2 si
+    poggiava spianando due propri edifici dell'era stessa con lo sconto, nella
+    v3 spianare costa e non si spiana la stessa era, quindi servono due
+    colonne adiacenti con rovine vecchie e capita di rado. **Da decidere**:
+    carte rare cosi' come sono, o riscritte a una colonna / "a terra oppure
+    sopra". Il bot: tabella `SPINTE_V3` (lampo 0,8, lampo_potenzia 1,5): la
+    Lampo vince il 30% con 69 PV (era 23% con 66); la piu' debole ora e' la
+    Scavo (25%).

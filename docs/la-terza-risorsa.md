@@ -2099,9 +2099,73 @@ Cosa dicono i numeri:
   piu' un vantaggio: va ritarata nel bot, non nelle regole, come si fece per
   la v2 (registro 114).
 
+## Trentanovesima misura: i costi delle ere 3-4, le carte "solo sopra", la Lampo nel bot
+
+Il designer (registro 165): "Le carte ere 3-4 vanno rimodulate per costare un
+po' di piu'. Le grandi 'solo sopra' che vuol dire? Prima si trovava il modo di
+costruire, perche' ora no? Le case piccole le teniamo cosi'. Ritara bot per
+strategia Lampo." Stesse 300 partite intere.
+
+**I costi.** Le carte da due risorse delle ere 3 e 4 ne prendono una terza, quella
+fra Denaro e Idee che non chiedevano (Borgo ⚒1 🪙1 💡1, Mura ⚒2 🪙1, Loggia ⚒1 🪙1
+💡1...); le carte da tre e quattro restano.
+
+| a giocatore | era 3 prima → ora | era 4 prima → ora |
+|---|---|---|
+| prodotto | 11,2 → 11,2 | 10,9 → 10,7 |
+| morto (⚒ / 🪙 / 💡) | 3,5 (0,6/1,2/1,7) → 3,4 (0,6/0,9/1,9) | 3,9 (0,9/1,8/1,2) → 3,4 (0,8/1,6/1,1) |
+| costruzioni / potenziamenti / passi | 3,0 / 1,10 / 0,6 → 2,9 / 1,03 / 0,7 | 2,7 / 0,90 / 0,9 → 2,6 / 0,76 / 1,0 |
+| case a partita | Casupole 1,9, Casa torre 1,0, Case di legno 1,1 → 2,0, **1,6, 1,5** | Case popolari 2,0, Casa borghese 1,2 → 2,0, **1,6** |
+| carte del mazzo a partita | Cappella 0,84, Borgo 0,72, Chiesa 0,63, Mercato 0,25 → 0,62, 0,44, 0,57, **0,08** | Loggia 0,73, Bottega 0,75, Banco 0,63 → 0,61, 0,55, 0,44 |
+
+Il morto quasi non si muove (3,4 in tutte e due) e la spesa passa dal mazzo
+alle case: con le carte piu' care il bot compra Casa torre, Case di legno e
+Casa borghese, che costano 1-3 Costruzione, e il Mercato e il Mulino a tre
+risorse scendono a 0,08 e 0,07. Il surplus di Denaro e Idee non si
+trasforma in spesa alzando i prezzi: si sposta su quel che costa una cosa
+sola. E' lo stesso meccanismo visto nell'era 1 con i costi misti (registro
+158). Le case piccole restano come sono per decisione del designer.
+
+**Le carte "solo sopra".** Sono le carte della v2 che non si costruiscono a
+terra: Anfiteatro, Castello, Fortezza (2x2, "mai a terra, sopra di lui si
+costruisce solo quando e' in rovina"), Grattacielo (solo al livello 2 o
+piu'), Duomo (livello 2), Piazza monumentale, Museo, Stazione, Universita'
+(livello 1). Nella v2 di main si costruivano 0,2-0,7 volte a partita, nella
+v3 0,01-0,26; eppure si costruisce sopra quanto prima (5-6 edifici per era
+in tutte e due). La differenza e' **su cosa**: nella v2 un 2x2 si poggiava
+spianando due propri edifici dell'era stessa, con lo sconto (il difetto del
+registro 152, 21 spianati a partita); nella v3 spianare costa e non si
+spiana la stessa era, quindi un 2x2 ha bisogno di due colonne adiacenti con
+rovine delle ere passate o propri edifici vecchi, e capita di rado. Le carte
+a una colonna di livello 1 (Museo, Universita', Piazza) si costruiscono
+ancora, 0,2-0,3 a partita, meno che nella v2 perche' costano 3 risorse di
+tipo diverso e il bot aspetta. La Stazione (3 colonne, livello 1) e il
+Grattacielo (livello 2) sono quasi impossibili. Da decidere con il designer:
+tenerle cosi' come carte rare, oppure riscriverle (una colonna, o "a terra
+oppure sopra").
+
+**La Lampo nel bot.** Tre lotti con la manopola `--spinta` sugli stessi semi:
+
+| | base (lampo 1,6, potenzia 3) | lampo 1,0 | **lampo 0,8, potenzia 1,5** |
+|---|---|---|---|
+| vittorie Lampo | 30 | 31 | 30 |
+| PV della Lampo | 65,6 | 66,2 | **69,1** |
+| le altre (Bil / Cont / Obi / Rend / Scavo) | 37/32/43/33/25 | 38/35/41/34/21 | 36/33/43/32/25 |
+
+Le tre tarature stanno nell'errore sulle vittorie (±4): con i costi nuovi la
+Lampo e' gia' al 30%, dal 23 della trentottesima. La taratura a 0,8 e 1,5 da'
+pero' 3,5 PV in piu' alla Lampo senza togliere niente alle altre: e' la
+tabella `SPINTE_V3` del bot, che vale solo con `turno_v3`. Ora la piu' debole
+e' la Scavo (25%, 68 PV), e la piu' forte la Obiettivi (43).
+
+Partita intera con i costi nuovi e il bot nuovo: 71,3 PV a testa, Lampo 15,9,
+Continuita' 14,1, Rendita 11,4, PV prodotti 10,4, Scavo 10,2.
+
 ## Come rifare il conto
 
 ```bash
+# trentanovesima misura: costi delle ere 3-4 e la Lampo nel bot (registro 165); le tarature con
+#   --spinta lampo=1.0   e   --spinta lampo=0.8,lampo_potenzia=1.5   sullo stesso comando
 # trentottesima misura: il tuning delle ere 3-5 (registro 164), stesso comando della trentasettesima
 # trentasettesima misura: la partita intera (registro 163)
 godot --headless res://scenes/audit_partita.tscn -- --players 3 --games 300 --seed 700000 --giro tutte \

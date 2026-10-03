@@ -646,8 +646,19 @@ const SPINTE_V2_PER_GIOCATORI := {2: {"lampo": 2.0, "obiettivi_peso": 0.6, "rend
 static var giocatori := 0
 static var spinte_override := {}
 
+# LA TABELLA V3 (registro 165). Sulla partita intera della v3 la Lampo vinceva
+# il 23% con 66 PV contro 71-77 delle altre: il Lampo e' il canale che tutti
+# prendono (16 PV a testa) e inseguirlo di piu' non rende. Con la spinta a 0,8
+# e i potenziamenti a 1,5 (misurati con `--spinta` sugli stessi 300 semi) la
+# Lampo fa 69 PV e vince il 30%, come con 1,0 e come la base: le tre tarature
+# stanno nell'errore sulle vittorie, questa da' i punti migliori.
+const SPINTE_V3 := {"rendita_per_era": 0.9, "rendita_zero": -1.5, "lampo": 0.8, "lampo_zero": -1.0,
+	"scavo_premio": 0.4, "scavo_terra": -0.5, "scavo_terra_scavo": 0.25, "protezione_attesa": 2.0,
+	"lampo_potenzia": 1.5, "lampo_sopra": 0.0, "obiettivi_peso": 1.0, "continuita_peso": 1.0}
+
 static func spinte() -> Dictionary:
 	var base := SPINTE_V2 if e_v2() else SPINTE_V1
+	if PersonaggiV3.attivo(): base = SPINTE_V3
 	var tavolo: Dictionary = SPINTE_V2_PER_GIOCATORI.get(giocatori, {}) if e_v2() else {}
 	if spinte_override.is_empty() and tavolo.is_empty(): return base
 	var out := base.duplicate()

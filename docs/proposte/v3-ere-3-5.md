@@ -35,7 +35,8 @@ della v2 di ogni era prendono il posto del loro ruolo. Il numero è lo Scavo da 
 ## Gli edifici
 
 Costi con la regola (Civico e Commercio ⚒ + 💡, Religione e Cultura ⚒ + 🪙, Ingegneria e Militare
-⚒): due risorse le carte piccole, tre le medie, quattro le grandi. Rendita 2 solo dove si paga 4
+⚒): nelle ere 3 e 4 anche le carte piccole chiedono tre risorse (registro 165: la terza è quella fra
+Denaro e Idee che mancava), le medie tre, le grandi quattro; nell'era 5 due le piccole. Rendita 2 solo dove si paga 4
 o più, altrimenti 1. Un'azione dal vocabolario col sapore della classe. Gli effetti di fine partita
 della v2 restano (Osservatorio, Piazza monumentale, le gilde dell'era 5 del registro 150, la
 Bottega d'artista); gli effetti "negli eventi" di Mura e Arsenale sono diventati azioni 🛡. La casa
@@ -46,14 +47,14 @@ resistenza 1-2 delle ere 3 e 5 hanno +1.
 
 | era 3 | costo | R | azione |
 |---|---|---|---|
-| Borgo | ⚒1 💡1 | — | ★ se Civico in colonna |
-| Mura | ⚒2 | — | 🛡 adiacenti |
-| Cappella | ⚒1 🪙1 | — | 🛡 adiacente |
-| Torre civica | ⚒1 💡1 | — | ★ se Civico in colonna |
-| Conceria | ⚒1 💡1 | — | 🪙 se chi attiva non sei tu |
-| Mulino | ⚒1 💡1 | — | ⚒ +1 Costruzione |
+| Borgo | ⚒1 🪙1 💡1 | — | ★ se Civico in colonna |
+| Mura | ⚒2 🪙1 | — | 🛡 adiacenti |
+| Cappella | ⚒1 🪙1 💡1 | — | 🛡 adiacente |
+| Torre civica | ⚒1 🪙1 💡1 | — | ★ se Civico in colonna |
+| Conceria | ⚒1 🪙1 💡1 | — | 🪙 se chi attiva non sei tu |
+| Mulino | ⚒1 🪙1 💡1 | — | ⚒ +1 Costruzione |
 | Chiesa | ⚒2 🪙1 | 1 | ★ se 2+ Religione |
-| Mercato | ⚒1 💡1 | — | 👥 altri |
+| Mercato | ⚒1 🪙1 💡1 | — | 👥 altri |
 | Ospedale dei pellegrini | ⚒2 💡1 | — | 🛡 adiacente |
 | Castello (2x2, solo sopra) | ⚒3 🪙1 | 2 | 🛡 tutti in colonna |
 | Abbazia (2 binari) | ⚒2 🪙1 💡1 | 2 | 💡 +1 Idea |
@@ -61,11 +62,11 @@ resistenza 1-2 delle ere 3 e 5 hanno +1.
 
 | era 4 | costo | R | azione |
 |---|---|---|---|
-| Bottega d'artista | ⚒1 🪙1 | — | 💡 +1 Idea (e i potenziamenti costano 1 in meno) |
-| Giardino all'italiana | ⚒1 🪙1 | — | ★ +1 PV |
-| Loggia | ⚒1 💡1 | — | ⇄ cambia 1 risorsa |
+| Bottega d'artista | ⚒1 🪙1 💡1 | — | 💡 +1 Idea (e i potenziamenti costano 1 in meno) |
+| Giardino all'italiana | ⚒1 🪙1 💡1 | — | ★ +1 PV |
+| Loggia | ⚒1 🪙1 💡1 | — | ⇄ cambia 1 risorsa |
 | Osservatorio | ⚒2 🪙1 | — | 💡 +1 Idea (+2 PV a fine partita) |
-| Banco | ⚒1 💡1 | — | ⇄ cambia 1 risorsa |
+| Banco | ⚒1 🪙1 💡1 | — | ⇄ cambia 1 risorsa |
 | Villa | ⚒2 💡1 | — | ★ +1 PV |
 | Palazzo signorile | ⚒2 💡1 | — | ★ se Civico in colonna |
 | Ponte monumentale (2 caselle) | ⚒3 🪙1 | 2 | ⚒ +1 Costruzione |
@@ -106,3 +107,7 @@ Prima stesura: le ere 3-5 producevano 13-14,5 e ne lasciavano morire 5,6-6,3; do
 azioni in Denaro cambiate) producono 11 e ne muoiono 3,5-4,0. Partita intera: 72,7 PV a testa,
 vittorie fra 30 e 41 tranne la Lampo al 23. Restano le carte mai costruite e il morto sopra il
 budget: i dettagli nella trentottesima misura e nel registro 164.
+
+Terzo giro (registro 165, trentanovesima misura): le carte piccole delle ere 3 e 4 a tre risorse. Il
+morto non si muove (3,4) e la spesa passa dal mazzo alle case medie; le carte "solo sopra" grandi
+restano rare perché nella v3 non si spiana più la stessa era. La Lampo nel bot ritarata (`SPINTE_V3`).

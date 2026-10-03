@@ -1274,7 +1274,7 @@
       "width": 1,
       "cost": {
         "pietra": 1,
-        "oro": 0,
+        "oro": 1,
         "idee": 1
       },
       "flexible": false,
@@ -1312,7 +1312,7 @@
       "width": 1,
       "cost": {
         "pietra": 2,
-        "oro": 0,
+        "oro": 1,
         "idee": 0
       },
       "flexible": false,
@@ -1348,7 +1348,7 @@
       "cost": {
         "pietra": 1,
         "oro": 1,
-        "idee": 0
+        "idee": 1
       },
       "flexible": false,
       "resistance": 3,
@@ -1381,7 +1381,7 @@
       "width": 1,
       "cost": {
         "pietra": 1,
-        "oro": 0,
+        "oro": 1,
         "idee": 1
       },
       "flexible": false,
@@ -1419,7 +1419,7 @@
       "width": 1,
       "cost": {
         "pietra": 1,
-        "oro": 0,
+        "oro": 1,
         "idee": 1
       },
       "flexible": true,
@@ -1456,7 +1456,7 @@
       "width": 1,
       "cost": {
         "pietra": 1,
-        "oro": 0,
+        "oro": 1,
         "idee": 1
       },
       "flexible": false,
@@ -1532,7 +1532,7 @@
       "width": 1,
       "cost": {
         "pietra": 1,
-        "oro": 0,
+        "oro": 1,
         "idee": 1
       },
       "flexible": true,
@@ -1721,7 +1721,7 @@
       "cost": {
         "pietra": 1,
         "oro": 1,
-        "idee": 0
+        "idee": 1
       },
       "flexible": false,
       "resistance": 2,
@@ -1767,7 +1767,7 @@
       "cost": {
         "pietra": 1,
         "oro": 1,
-        "idee": 0
+        "idee": 1
       },
       "flexible": false,
       "resistance": 1,
@@ -1799,7 +1799,7 @@
       "width": 1,
       "cost": {
         "pietra": 1,
-        "oro": 0,
+        "oro": 1,
         "idee": 1
       },
       "flexible": false,
@@ -1885,7 +1885,7 @@
       "width": 1,
       "cost": {
         "pietra": 1,
-        "oro": 0,
+        "oro": 1,
         "idee": 1
       },
       "flexible": true,
