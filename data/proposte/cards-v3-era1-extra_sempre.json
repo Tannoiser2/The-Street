@@ -206,6 +206,7 @@
     "risorse_muoiono": true,
     "azione_edificio": "proprietario",
     "spianare_costo": 1,
+    "spiana_solo_ere_precedenti": true,
     "potenzia_adiacente": true,
     "potenziamento_con_costruzione": true,
     "acquisto_extra": true
@@ -388,8 +389,8 @@
       "width": 1,
       "cost": {
         "pietra": 1,
-        "oro": 1,
-        "idee": 0
+        "oro": 0,
+        "idee": 1
       },
       "flexible": false,
       "resistance": 1,
@@ -422,8 +423,8 @@
       "width": 1,
       "cost": {
         "pietra": 1,
-        "oro": 0,
-        "idee": 2
+        "oro": 1,
+        "idee": 0
       },
       "flexible": false,
       "resistance": 3,
@@ -456,9 +457,9 @@
       "terrain": "collina",
       "width": 1,
       "cost": {
-        "pietra": 0,
-        "oro": 0,
-        "idee": 2
+        "pietra": 1,
+        "oro": 1,
+        "idee": 0
       },
       "flexible": false,
       "resistance": 2,
@@ -493,8 +494,8 @@
       "width": 1,
       "cost": {
         "pietra": 1,
-        "oro": 1,
-        "idee": 0
+        "oro": 0,
+        "idee": 1
       },
       "flexible": true,
       "resistance": 1,
@@ -530,8 +531,8 @@
       "width": 1,
       "cost": {
         "pietra": 1,
-        "oro": 0,
-        "idee": 2
+        "oro": 1,
+        "idee": 0
       },
       "flexible": false,
       "resistance": 4,
@@ -566,8 +567,8 @@
       "width": 1,
       "cost": {
         "pietra": 1,
-        "oro": 1,
-        "idee": 0
+        "oro": 0,
+        "idee": 1
       },
       "flexible": false,
       "resistance": 2,
@@ -602,8 +603,8 @@
       "width": 1,
       "cost": {
         "pietra": 1,
-        "oro": 1,
-        "idee": 0
+        "oro": 0,
+        "idee": 1
       },
       "flexible": true,
       "resistance": 1,
@@ -636,7 +637,7 @@
       "width": 1,
       "cost": {
         "pietra": 1,
-        "oro": 1,
+        "oro": 0,
         "idee": 0
       },
       "flexible": false,
@@ -671,7 +672,7 @@
       "terrain": "fiume",
       "width": 1,
       "cost": {
-        "pietra": 2,
+        "pietra": 1,
         "oro": 0,
         "idee": 0
       },
@@ -709,8 +710,8 @@
       "width": 1,
       "cost": {
         "pietra": 2,
-        "oro": 0,
-        "idee": 2
+        "oro": 1,
+        "idee": 1
       },
       "flexible": false,
       "resistance": 4,
@@ -786,8 +787,8 @@
       "width": 2,
       "cost": {
         "pietra": 1,
-        "oro": 0,
-        "idee": 2
+        "oro": 1,
+        "idee": 0
       },
       "flexible": false,
       "resistance": 3,
@@ -2999,12 +3000,12 @@
       "is_dynasty": false,
       "timing": "v3",
       "imprint": false,
-      "effect_text": "Produce 1 Denaro. Cambia 1 risorsa in un'altra.",
+      "effect_text": "Produce 1 Costruzione. Cambia 1 risorsa in un'altra.",
       "effects": [],
       "scavo": 0,
       "produzione": {
-        "pietra": 0,
-        "oro": 1,
+        "pietra": 1,
+        "oro": 0,
         "idee": 0
       },
       "azione": {
@@ -3067,7 +3068,7 @@
       "is_dynasty": false,
       "timing": "v3",
       "imprint": false,
-      "effect_text": "Produce 1 Idea. +1 resistenza fino a fine era a ogni tuo Religione in questa colonna.",
+      "effect_text": "Produce 1 Idea. −1 al costo dell'edificio Religione che costruisci in questo turno.",
       "effects": [],
       "scavo": 0,
       "produzione": {
@@ -3076,10 +3077,9 @@
         "idee": 1
       },
       "azione": {
-        "tipo": "resistenza",
+        "tipo": "sconto",
         "n": 1,
-        "a": "tutti",
-        "classe": "religione"
+        "se": "classe:religione"
       }
     },
     {
@@ -3090,7 +3090,7 @@
       "is_dynasty": false,
       "timing": "v3",
       "imprint": false,
-      "effect_text": "Produce 1 Idea. +1 Scavo permanente a un tuo edificio in questa colonna.",
+      "effect_text": "Produce 1 Idea. Il potenziamento che compri in questo turno costa 1 in meno.",
       "effects": [],
       "scavo": 0,
       "produzione": {
@@ -3099,9 +3099,9 @@
         "idee": 1
       },
       "azione": {
-        "tipo": "scavo",
+        "tipo": "sconto",
         "n": 1,
-        "a": "uno"
+        "se": "potenziamento"
       }
     },
     {
@@ -7151,9 +7151,9 @@
       "name": "Radura",
       "era": 1,
       "produzione": {
-        "pietra": 0,
+        "pietra": 1,
         "oro": 0,
-        "idee": 1
+        "idee": 0
       },
       "testo": "Il primo edificio Civico costruito qui dà +1 Lampo.",
       "effetto": {

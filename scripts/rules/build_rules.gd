@@ -210,6 +210,12 @@ static func quote_above(gs: GameState, player: int, data: Dictionary, col_from: 
 			Enums.BuildingState.INTATTO:
 				if top.owner != player:
 					q.reason = "un edificio intatto altrui blocca la colonna %d" % c; return q
+				# NON SI SPIANA LA STESSA ERA (v3, costante `spiana_solo_ere_precedenti`,
+				# registro 161): il designer, "non si possono spianare edifici della
+				# stessa era, ma solo ere precedenti". Toglie la casa messa sopra il
+				# proprio edificio appena costruito.
+				if bool(CardDB.constants.get("spiana_solo_ere_precedenti", false)) and top.era_built >= gs.era:
+					q.reason = "%s e' di quest'era: si spiana solo il passato" % top.data["name"]; return q
 				# SPIANARE CHE COSTA (registro 152, manopola `spianare_costo`):
 				# al posto dello sconto, 1 Costruzione per ogni casella demolita.
 				if CardDB.constants.has("spianare_costo"):
@@ -326,6 +332,8 @@ static func _quote_sopra_binario(gs: GameState, player: int, data: Dictionary, c
 				Enums.BuildingState.INTATTO:
 					if top.owner != player:
 						q.reason = "un edificio intatto altrui blocca la colonna %d" % c; return q
+					if bool(CardDB.constants.get("spiana_solo_ere_precedenti", false)) and top.era_built >= gs.era:
+						q.reason = "%s e' di quest'era: si spiana solo il passato" % top.data["name"]; return q
 					if CardDB.constants.has("spianare_costo"):
 						spolia -= int(CardDB.constants["spianare_costo"])
 						if not top in q.razed: q.razed.append(top)

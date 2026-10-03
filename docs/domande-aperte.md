@@ -2547,3 +2547,24 @@ dato è stato importato da lì. Ma due confronti fra ciò che è stampato e
     al surplus: morto 3,9, Lampo 51%, spianati di nuovo. Da misurare la via
     di mezzo: terreno a meta' produzione, o potenziamento scontato di 1
     nell'extra. **Da decidere con il designer.**
+161. **I costi rimodulati, le risorse che si tengono, gli sconti, lo spianare
+    solo del passato.** Il designer: "dovresti rimodulare i costi tu in modo
+    da rendere risorse prodotte e spese nella giusta proporzione, le risorse
+    possono essere tenute per poter comprare meglio con il lavoratore
+    successivo. Inoltre alcuni effetti potrebbero scontare dei tipi di
+    potenziamenti o edifici, possiamo poi mettere la regola che non si
+    possono spianare edifici della stessa era, ma solo ere precedenti". Nel
+    file base: costante `spiana_solo_ere_precedenti`; il Guardiano del fuoco
+    sconta l'edificio Religione del turno e il Custode delle ossa il
+    potenziamento del turno (azione `sconto` con `se` "classe:religione" o
+    "potenziamento"); i costi dell'era 1 nella tabella `COSTI_E1` del
+    generatore con la regola trovata misurando: **l'edificio chiede la
+    risorsa che i suoi potenziamenti non chiedono** (Civico e Commercio
+    Costruzione e Idea, Religione e Cultura Costruzione e Denaro, Focolare e
+    Trappole 1 Costruzione), Radura e Anziana tornano a Costruzione. Nel bot
+    `_valore_attesa`: si passa e si tiene se una carta oggi non pagabile ma
+    pagabile al prossimo incasso vale di piu' (sconto 0,4, margine 1).
+    Trentacinquesima misura, tre giri: prodotto 10,1, speso 7,8, morto 2,3
+    (0,7/0,8/0,9), 3,6 costruzioni, 0,77 potenziamenti, 2,2 case a partita,
+    zero spianati. Il bot che aspetta passa 0,5 turni a testa e nell'era 1 da
+    sola regala vittorie alla Lampo (54%): da rileggere sulla coppia 1-2.

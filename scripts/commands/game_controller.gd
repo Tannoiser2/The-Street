@@ -480,6 +480,22 @@ func place_worker(col: int, protect: Building = null, personaggio := "") -> bool
 	state_changed.emit()
 	return true
 
+# Lo sconto del turno vale per questo edificio? "" sempre; "fiume" solo su
+# fiume; "classe:religione" solo per quella classe (registro 161). Gli sconti
+# dei potenziamenti ("arte", "struttura", "altro", "potenziamento") qui no.
+func _sconto_vale_per_edificio(se: String, data: Dictionary, col_from: int) -> bool:
+	if se == "": return true
+	if se == "fiume": return gs.grid.terrains[col_from] == Enums.Terrain.FIUME
+	if se.begins_with("classe:"): return se.substr(7) in (data["classes"] as Array)
+	return false
+
+# Lo sconto del turno vale per questo potenziamento? La famiglia ("arte",
+# "struttura", "altro") o qualunque ("potenziamento"); e si applica alla
+# risorsa che il potenziamento chiede, quale che sia.
+func _sconto_vale_per_potenziamento(se: String, upg: Dictionary) -> bool:
+	if se == "potenziamento": return true
+	return se != "" and se == str(upg.get("family", ""))
+
 # I Personaggi del giocatore ancora da piazzare (v3).
 func personaggi_liberi(p: PlayerState) -> Array[String]:
 	var out: Array[String] = []
@@ -515,8 +531,7 @@ func build(card_id: String, col_from: int, above: bool, pay_option: int = 0, des
 	# V3: lo sconto lasciato dall'azione del Personaggio piazzato in questo
 	# turno (Tagliapietre: sempre; Costruttore di zattere: solo su fiume).
 	var sconto := 0
-	if PersonaggiV3.attivo() and p.sconto_turno > 0 and (p.sconto_se == "" \
-			or (p.sconto_se == "fiume" and gs.grid.terrains[col_from] == Enums.Terrain.FIUME)):
+	if PersonaggiV3.attivo() and p.sconto_turno > 0 and _sconto_vale_per_edificio(p.sconto_se, data, col_from):
 		sconto = mini(p.sconto_turno, cost.x)
 		cost.x -= sconto
 	if not p.can_pay(cost.x, cost.y, q.idee): return false
@@ -683,15 +698,21 @@ func upgrade(upg_id: String, target: Building) -> bool:
 		gs.log_line("Potenziamento rifiutato: %s" % q.reason)
 		return false
 	# V3: il Pittore delle grotte sconta di 1 Idea il potenziamento Arte del turno.
-	var sconto_arte := 0
-	if PersonaggiV3.attivo() and p.sconto_turno > 0 and p.sconto_se == "arte" \
-			and str(CardDB.upgrades[upg_id].get("family", "")) == "arte":
-		sconto_arte = mini(p.sconto_turno, q.idee)
-	if not p.can_pay(q.pietra, q.oro, q.idee - sconto_arte): return false
+	# V3: lo sconto del turno sui potenziamenti (Pittore delle grotte sull'Arte,
+	# registro 161 per famiglia o per qualunque), sulla risorsa che chiedono.
+	var sc_p := 0
+	var sc_o := 0
+	var sc_i := 0
+	if PersonaggiV3.attivo() and p.sconto_turno > 0 and _sconto_vale_per_potenziamento(p.sconto_se, CardDB.upgrades[upg_id]):
+		if q.idee > 0: sc_i = mini(p.sconto_turno, q.idee)
+		elif q.oro > 0: sc_o = mini(p.sconto_turno, q.oro)
+		elif q.pietra > 0: sc_p = mini(p.sconto_turno, q.pietra)
+	var sconto_arte := sc_p + sc_o + sc_i
+	if not p.can_pay(q.pietra - sc_p, q.oro - sc_o, q.idee - sc_i): return false
 	if sconto_arte > 0:
 		p.sconto_turno = 0
 		p.bump("sconti_v3", sconto_arte)
-		gs.log_line("Sconto di %d Idea su %s" % [sconto_arte, CardDB.upgrades[upg_id]["name"]])
+		gs.log_line("Sconto di %d su %s" % [sconto_arte, CardDB.upgrades[upg_id]["name"]])
 	# Il Vescovo si consuma qui, non nel preventivo: il preventivo viene
 	# chiesto anche solo per sapere se l'azione e' legale.
 	var vescovo := Effects.player_override(gs, p.index, "free_upgrade_of_class", target)
@@ -712,7 +733,7 @@ func upgrade(upg_id: String, target: Building) -> bool:
 				target.patrons[p.index] = int(target.patrons.get(p.index, 0)) + rendita
 			gs.log_line("%s: giocatore %d firma %s e ne incassa %d oro a ogni attivazione" % [
 				artista[1]["name"], p.index, target.data["name"], rendita])
-	p.pay(q.pietra, q.oro, q.idee - sconto_arte, "potenziare")
+	p.pay(q.pietra - sc_p, q.oro - sc_o, q.idee - sc_i, "potenziare")
 	TessereEra.dopo_potenziamento(gs, target)
 	target.upgrades.append(upg_id)
 	target.upgrades_storia.append(upg_id)

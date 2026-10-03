@@ -194,6 +194,39 @@ SECONDA = {"commercio": "oro", "civico": "oro", "religione": "idee", "cultura": 
 for b in v3["buildings"]:
     if b["era"] != 1 or b.get("riserva"): continue
     b["cost"][SECONDA[b["classes"][0]]] += 1
+# I COSTI RIMODULATI (registro 161). Il designer: "rimodulare i costi tu in modo
+# da rendere risorse prodotte e spese nella giusta proporzione". Con i costi
+# misti puri (sopra) la domanda era 5,0 Costruzione, 1,5 Denaro, 2,5 Idee a
+# testa contro un'offerta di 4,3 / 2,6 / 3,0: la Costruzione mancava, il Denaro
+# avanzava, e le carte da 2 Idee (Dolmen, Menhir, Grotte, Tumulo) restavano
+# nel mercato. Qui ogni carta del mazzo chiede due o tre risorse di tipo
+# diverso, mai due uguali, e la domanda si avvicina all'offerta; la tabella e'
+# il punto di partenza da cui si misura e si ritocca.
+# Secondo giro dei costi: l'edificio chiede la risorsa che i SUOI potenziamenti
+# non chiedono (`potenziamento_stessa_classe`: Civico e Commercio prendono i
+# potenziamenti "altro" a 1 Denaro, Religione e Cultura l'Arte a 1 Idea), cosi'
+# quel che resta dopo la costruzione compra il potenziamento. Nel primo giro
+# (Civico 1 Costruzione 1 Denaro, Religione 1 Costruzione 1 Idea) morivano 1,6
+# Idee a testa e i potenziamenti restavano a 0,7.
+COSTI_E1 = {
+    "ed_capanne":             prod(pietra=1, idee=1),
+    "ed_palafitte":           prod(pietra=1, idee=1),
+    "ed_focolare_comune":     prod(pietra=1),            # terzo giro: a 2 risorse non si costruiva (0,13)
+    "ed_approdo":             prod(pietra=1, idee=1),
+    "ed_cava":                prod(pietra=1, idee=1),
+    "ed_trappole_da_pesca":   prod(pietra=1),            # terzo giro: idem (0,03); produce 1, Scavo 0
+    "ed_dolmen":              prod(pietra=1, oro=1),
+    "ed_menhir":              prod(pietra=1, oro=1),
+    "ed_circolo_di_pietre":   prod(pietra=2, oro=1, idee=1),
+    "ed_grotte_dipinte":      prod(pietra=1, oro=1),
+    "ed_tumulo_funerario":    prod(pietra=1, oro=1),
+    "ed_villaggio_palizzato": prod(pietra=2),
+}
+for b in v3["buildings"]:
+    if b["id"] in COSTI_E1:
+        b["cost"] = dict(COSTI_E1[b["id"]])
+# Non si spiana un edificio della stessa era, solo quelli delle ere precedenti.
+c["spiana_solo_ere_precedenti"] = True
 # La casa che si compra sempre: i Ripari costano 1, Costruzione o Denaro a scelta.
 for b in v3["buildings"]:
     if b["id"] == "ed_casa_e1_s":
@@ -223,6 +256,21 @@ for t in v3["tessere_era"]:
         t["effetto"] = {"quando": "attiva", "extra": 1}
         t["testo"] = "Chi attiva per primo puo' comprare ancora un potenziamento o una casa in quel turno."
 
+# ---- gli sconti (registro 161) -------------------------------------------------
+# Il designer: "alcuni effetti potrebbero scontare dei tipi di potenziamenti o
+# edifici". Due Personaggi che il draft lasciava per ultimi: il Guardiano del
+# fuoco sconta gli edifici Religione, il Custode delle ossa sconta un
+# potenziamento qualunque. Il Pittore delle grotte scontava gia' l'Arte.
+SCONTI = {
+    "pe_guardiano_del_fuoco": (sconto(1, "classe:religione"),
+        "Produce 1 Idea. −1 al costo dell'edificio Religione che costruisci in questo turno."),
+    "pe_custode_delle_ossa": (sconto(1, "potenziamento"),
+        "Produce 1 Idea. Il potenziamento che compri in questo turno costa 1 in meno."),
+}
+for ch in v3["characters"]:
+    if ch["id"] in SCONTI:
+        ch["azione"], ch["effect_text"] = SCONTI[ch["id"]]
+
 # ---- il tuning delle risorse (registro 159) ------------------------------------
 # Il designer, letta la trentaduesima misura ("un'era di case", potenziamenti a
 # zero): "un tuning delle risorse: se Idee e Denaro sono poco bisogna alzarle,
@@ -231,15 +279,18 @@ for t in v3["tessere_era"]:
 # Le quattro tessere dell'era 1 che non producevano niente ora danno Denaro o
 # Idee; tre Personaggi passano dalla Costruzione a Denaro e Idee (fra i 16, in
 # unita': Costruzione 5, Denaro 6, Idee 7, invece di 10/4/5).
-TESSERE_PRODUZIONE = {"te_radura": prod(idee=1), "te_sentiero_dei_pastori": prod(oro=1),
+# Secondo giro (registro 161): la Radura torna a Costruzione e l'Anziana del
+# villaggio pure, perche' con i costi rimodulati mancava Costruzione (4,0
+# prodotte contro 4,8 chieste) e avanzavano Idee.
+TESSERE_PRODUZIONE = {"te_radura": prod(pietra=1), "te_sentiero_dei_pastori": prod(oro=1),
                       "te_terra_di_nessuno": prod(oro=1), "te_luogo_sacro": prod(idee=1)}
 for t in v3["tessere_era"]:
     if t["id"] in TESSERE_PRODUZIONE:
         t["produzione"] = TESSERE_PRODUZIONE[t["id"]]
-PERSONAGGI_PRODUZIONE = {"pe_guardiano_del_fuoco": prod(idee=1), "pe_anziana_del_villaggio": prod(oro=1),
+PERSONAGGI_PRODUZIONE = {"pe_guardiano_del_fuoco": prod(idee=1), "pe_anziana_del_villaggio": prod(pietra=1),
                          "pe_barattatore": prod(oro=1, idee=1)}
-TESTI_PRODUZIONE = {"pe_guardiano_del_fuoco": "Produce 1 Idea. +1 resistenza fino a fine era a ogni tuo Religione in questa colonna.",
-                    "pe_anziana_del_villaggio": "Produce 1 Denaro. Cambia 1 risorsa in un'altra.",
+TESTI_PRODUZIONE = {"pe_guardiano_del_fuoco": "Produce 1 Idea. −1 al costo dell'edificio Religione che costruisci in questo turno.",
+                    "pe_anziana_del_villaggio": "Produce 1 Costruzione. Cambia 1 risorsa in un'altra.",
                     "pe_barattatore": "Produce 1 Denaro e 1 Idea. Nessuna azione."}
 for ch in v3["characters"]:
     if ch["id"] in PERSONAGGI_PRODUZIONE:

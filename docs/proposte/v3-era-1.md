@@ -31,6 +31,7 @@ Le costanti nuove del file dati, tutte spente nella v2 e nella v1.5:
 | costi dell'era 1 | +1 della seconda risorsa della classe | Commercio e Civico +1 Denaro, Religione e Cultura +1 Idea, Ingegneria e Militare +1 Costruzione; le case della riserva come sono (registro 157) |
 | Ripari | costo 1, ◈ Costruzione o Denaro | la casa che si compra sempre (registro 157) |
 | `potenzia_adiacente` | vero | i potenziamenti anche nelle colonne accanto a quella attivata (registri 126, 159) |
+| `spiana_solo_ere_precedenti` | vero | non si spiana un edificio della stessa era (registro 161) |
 | `potenziamento_con_costruzione` | vero | dopo ogni costruzione si può comprare un potenziamento, pagandolo, senza consumare il lavoratore (registro 160) |
 | `acquisto_extra` | spento | l'acquisto extra arriva solo dall'azione ⊕ di una carta (due Personaggi, due edifici, una tessera); la variante `extra_sempre` lo dà a ogni turno |
 
@@ -50,7 +51,7 @@ Restano quelle di oggi, 7 tipi in 2 copie (registro 121):
 | tessera | produce | effetto (una volta per era) |
 |---|---|---|
 | Campi arati | ⚒1 | il primo edificio da 2 o 3 caselle costruito qui costa 1 Costruzione in meno |
-| Radura | 💡1 | il primo Civico costruito qui ha +1 Lampo |
+| Radura | ⚒1 | il primo Civico costruito qui ha +1 Lampo |
 | Sentiero dei pastori | 🪙1 | chi attiva per primo ⊕ può comprare ancora un potenziamento o una casa in quel turno (registro 157; era +1 Denaro) |
 | Terra di nessuno | 🪙1 | il primo edificio costruito qui ignora il requisito di terreno |
 | Recinto di pietre | ⚒1 | il primo edificio costruito qui ha +1 resistenza fino a fine era |
@@ -70,11 +71,11 @@ metro.
 | # | Personaggio | classe | produce | azione (quando lo piazzi) |
 |---|---|---|---|---|
 | 1 | Capotribù | Civico | ⚒1 | ⊕ in questo turno puoi comprare ancora un potenziamento o una casa (registro 157; era 🛡 +1 res) |
-| 2 | Anziana del villaggio | Civico | 🪙1 | ⇄ cambia 1 risorsa in un'altra |
+| 2 | Anziana del villaggio | Civico | ⚒1 | ⇄ cambia 1 risorsa in un'altra |
 | 3 | Cacciatore | Civico | ⚒1 | ✦ +1 Lampo all'edificio che costruisci in questo turno |
 | 4 | Sciamano | Religione | 💡1 | ★ +1 PV se hai un edificio Religione in piedi in questa colonna |
-| 5 | Guardiano del fuoco | Religione | 💡1 | 🛡 +1 res fino a fine era a ogni tuo Religione in questa colonna |
-| 6 | Custode delle ossa | Religione | 💡1 | ⚱ +1 Scavo permanente a un tuo edificio in questa colonna |
+| 5 | Guardiano del fuoco | Religione | 💡1 | − −1 al costo dell'edificio Religione che costruisci in questo turno (registro 161; era 🛡) |
+| 6 | Custode delle ossa | Religione | 💡1 | − il potenziamento che compri in questo turno costa 1 in meno (registro 161; era ⚱) |
 | 7 | Mercante di ossidiana | Commercio | 🪙1 | ⊕ in questo turno puoi comprare ancora un potenziamento o una casa (registro 157; era ⇄ 2 cambi) |
 | 8 | Barattatore | Commercio | 🪙1 💡1 | nessuna |
 | 9 | Portatore di sale | Commercio | 🪙1 | 👥 +1 Denaro per ogni altro giocatore con un edificio in questa colonna (max 2) |
@@ -92,15 +93,17 @@ La differenza la fa **dove** lo si piazza (una colonna con i propri Religione pe
 Guardiano, una colonna affollata per il Portatore di sale) e **chi** si toglie agli altri
 nel draft. Il Barattatore è il metro di paragone: 2 risorse e niente da leggere.
 
-Produzione dei 16 messi insieme: ⚒5, 🪙6, 💡7 (il Barattatore conta due volte; registro 159, erano
+Produzione dei 16 messi insieme: ⚒6, 🪙5, 💡7 (il Barattatore conta due volte; registro 159, erano
 10/4/5 prima del tuning). A 3 giocatori se ne usano 12.
 
 ## I 15 edifici
 
 Dodici nel mazzo, tre case in riserva. Resistenza, Lampo, Rendita e Scavo sono quelli di
-oggi salvo dove la nota lo dice; i **costi** in tabella sono quelli della scheda, e il file
-base aggiunge a ciascuno (case escluse) **+1 della seconda risorsa della classe** (registro
-157: Capanne ⚒1 🪙1, Dolmen ⚒1 💡2, Grotte dipinte 💡2, Villaggio palizzato ⚒2...); la **produzione** resta (quasi tutta a zero) e
+oggi salvo dove la nota lo dice; i **costi** in tabella sono quelli della scheda; il file base usa la
+tabella `COSTI_E1` del generatore (registro 161), con la regola che l'edificio chiede la
+risorsa che i suoi potenziamenti non chiedono: Capanne, Palafitte, Approdo, Cava ⚒1 💡1;
+Focolare e Trappole ⚒1; Dolmen, Menhir, Grotte dipinte, Tumulo ⚒1 🪙1; Circolo ⚒2 🪙1 💡1;
+Villaggio ⚒2; case come in tabella; la **produzione** resta (quasi tutta a zero) e
 l'**azione** è nuova. L'azione scatta per il proprietario a ogni attivazione della
 colonna, di chiunque: circa due volte per era.
 
@@ -206,6 +209,10 @@ fra 19 e 41. L'economia dell'era 1 è nel metro o sul suo bordo.
 
 Quinto giro (registro 160, trentaquattresima misura), il potenziamento insieme alla costruzione:
 potenziamenti 0,71 a testa, morto 2,0; con il terreno che produce 1,07 ma morto 3,9 e Lampo al 51%.
+
+Sesto giro (registro 161, trentacinquesima misura), i costi rimodulati: prodotto 10,1, speso 7,8,
+morto 2,3 ripartito 0,7 / 0,8 / 0,9; 3,6 costruzioni, 0,77 potenziamenti, 2,2 case a partita, zero
+spianati. La proporzione fra prodotto e speso c'è; il bot che aspetta passa 0,5 turni a testa.
 
 ## Che cosa serve nel codice
 

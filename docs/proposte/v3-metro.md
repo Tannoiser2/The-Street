@@ -134,6 +134,9 @@ terreno di base non produce più (resta la tessera dell'era), spianare costa (re
 costi hanno una seconda risorsa (Commercio e Civico Denaro, Religione e Cultura Idee,
 Ingegneria e Militare Costruzione), e l'acquisto extra arriva solo da una carta. Una casa della
 riserva deve restare comprabile sempre: i Ripari costano 1, Costruzione o Denaro a scelta.
+Due regole trovate misurando (registro 161): **l'edificio chiede la risorsa che i suoi
+potenziamenti non chiedono**, così quel che resta dopo la costruzione compra il potenziamento;
+e **non si spiana un edificio della stessa era**, solo quelli delle ere precedenti.
 
 ## La sagoma delle carte
 

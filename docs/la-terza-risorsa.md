@@ -1865,9 +1865,71 @@ Cosa dicono i numeri:
   potenziamento che nell'extra costa 1 in meno. Sono le due prove successive,
   se il designer vuole arrivare a 1 potenziamento a testa senza surplus.
 
+## Trentacinquesima misura: i costi rimodulati, il bot che aspetta, gli sconti, lo spianare
+
+Il designer (registro 161): "dovresti rimodulare i costi tu in modo da rendere
+risorse prodotte e spese nella giusta proporzione; le risorse possono essere
+tenute per poter comprare meglio con il lavoratore successivo; alcuni effetti
+potrebbero scontare dei tipi di potenziamenti o edifici; non si possono
+spianare edifici della stessa era, ma solo ere precedenti". Quattro cose nel
+file base e nel bot, poi tre giri di costi sugli stessi 300 semi.
+
+- **Non si spiana la stessa era** (costante `spiana_solo_ere_precedenti`): la
+  casa sopra il proprio Dolmen appena costruito non si puo' piu' mettere.
+- **Gli sconti**: il Guardiano del fuoco sconta di 1 l'edificio Religione del
+  turno, il Custode delle ossa sconta di 1 il potenziamento del turno (erano
+  gli ultimi del draft, con 🛡 e ⚱). Lo sconto sui potenziamenti vale sulla
+  risorsa che il potenziamento chiede, qualunque sia.
+- **Il bot che aspetta**: se una carta del mazzo che oggi non puo' pagare, ma
+  che il prossimo incasso rende pagabile, vale piu' della mossa di adesso
+  (scontata a 0,4, con un margine di 1), tiene le risorse e passa.
+- **I costi, tre giri.** Il principio trovato al secondo giro: **l'edificio
+  chiede la risorsa che i suoi potenziamenti non chiedono**. Con i
+  potenziamenti della stessa classe (registro 125), Civico e Commercio
+  prendono gli "altro" a 1 Denaro, Religione e Cultura l'Arte a 1 Idea: se il
+  Dolmen costa 1 Costruzione e 1 Denaro, dopo averlo costruito resta l'Idea
+  per l'Idolo; se costasse 1 Idea (primo giro) l'Idea non ci sarebbe piu' e
+  morirebbe. Costi finali dell'era 1: Capanne, Palafitte, Approdo, Cava 1⚒ 1💡;
+  Focolare e Trappole 1⚒ (a due risorse non si costruivano); Dolmen, Menhir,
+  Grotte dipinte, Tumulo 1⚒ 1🪙; Circolo 2⚒ 1🪙 1💡; Villaggio 2⚒; case come
+  prima. Produzione: la Radura torna a 1 Costruzione e l'Anziana del villaggio
+  pure, perche' al primo giro mancava Costruzione e avanzavano Idee.
+
+| a giocatore | reg. 160 | giro 1 (costi misti puri) | giro 2 (la regola) | **giro 3 (base)** |
+|---|---|---|---|---|
+| prodotto (⚒ / 🪙 / 💡) | 9,8 (4,3/2,6/3,0) | 9,6 (4,0/2,7/2,9) | 9,8 (4,9/2,3/2,6) | **10,1** (5,1/2,4/2,6) |
+| speso | 7,9 | 7,0 | 7,6 | **7,8** |
+| morto (⚒ / 🪙 / 💡) | 2,0 (0,3/0,8/0,9) | 2,6 (0,4/0,6/**1,6**) | 2,2 (0,6/0,7/0,8) | **2,3** (0,7/0,8/0,9) |
+| costruzioni / potenziamenti / passi | 3,7 / 0,71 / 0,1 | 3,0 / 0,71 / **1,0** | 3,3 / 0,81 / 0,7 | **3,6 / 0,77 / 0,5** |
+| occasioni di potenziare aperte / usate | 3,6 / 0,5 | 2,9 / 0,7 | 3,1 / 0,85 | 3,4 / 0,83 |
+| edifici a partita (di cui case) / spianati | 11,0 (3,7) / 0,0 | 9,1 (1,7) / 0,0 | 10,0 (2,1) / 0,0 | **10,7 (2,2) / 0,0** |
+| PV dell'era (Lampo / censimento / prodotti) | 4,8 (3,1/1,0/0,5) | 4,2 (2,1/1,3/0,6) | 4,9 (2,7/1,3/0,6) | 5,1 (2,9/1,3/0,6) |
+| vittorie: Bil / Cont / Lampo / Obi / Rend / Scavo | 37/43/42/37/23/18 | 29/39/46/41/27/19 | 26/29/51/40/31/23 | 22/37/**54**/39/29/19 |
+
+Cosa dicono i numeri:
+- **La proporzione c'e'.** Si producono 10,1 risorse, se ne spendono 7,8 e ne
+  muoiono 2,3, quasi uguali per tipo (0,7 / 0,8 / 0,9): nessuna risorsa e'
+  in surplus. Rispetto al metro: produzione 10-12 ✓, spesa 8-10 (7,8), morto
+  1-2 (2,3), 3 costruzioni ✓, 1 potenziamento (0,77). Il primo giro mostra
+  perche' la regola dei costi conta: con Religione a 1 Idea morivano 1,6 Idee.
+- **Il mazzo torna al centro**: Dolmen, Menhir, Circolo, Capanne, Cava,
+  Palafitte a 1,0 a partita, Tumulo 0,81, le case a 2,2 su 10,7. Restano fuori
+  le Grotte dipinte (0,09: lo Scavo non paga nell'era 1 da sola) e le Capanne
+  di fango (0,09: a 1 Costruzione per Lampo 1 i Ripari a costo flessibile
+  bastano).
+- **Il bot che aspetta passa 0,5 turni a testa** (giro 3; con lo sconto a 0,6
+  passava 1,0): e' la regola voluta dal designer, ma nell'era 1 da sola
+  aspettare non paga, perche' la carta comprata dopo rende meno di una casa
+  comprata subito. La Lampo, che non aspetta mai, ne approfitta: dal 42% al
+  54%. E' un effetto della misura ferma all'era 1, da rileggere sulla coppia
+  1-2; se restasse, lo sconto dell'attesa va abbassato ancora.
+- **Nessuno spiana piu'** (0,00 a partita): la regola della stessa era basta.
+
 ## Come rifare il conto
 
 ```bash
+# trentacinquesima misura: il file base con i costi rimodulati (registro 161); i giri 1 e 2 sono
+# i commit intermedi del ramo claude/v3-era-1 (costi in COSTI_E1 del generatore)
 # trentaquattresima misura: il file base con il potenziamento insieme alla costruzione; variante terreno_produce
 # trentatreesima misura: il file base con il tuning delle risorse (registro 159); controprova case_seconda
 # (stessi comandi della trentaduesima; il file base di allora lo rigenera il generatore al commit b764ad7)

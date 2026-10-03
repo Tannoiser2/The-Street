@@ -149,6 +149,14 @@ static func play_turn(ctl: GameController, strategia := "bilanciata") -> void:
 	if racconta:
 		taccuino["mosse"] = lista
 		taccuino["scelta"] = scelta
+	# V3 (registro 161): "le risorse possono essere tenute per poter comprare
+	# meglio con il lavoratore successivo". Se una carta che oggi non si puo'
+	# pagare, ma che il prossimo incasso rende pagabile, vale piu' della
+	# mossa di adesso, si tiene e si passa.
+	var attesa := _valore_attesa(gs, p, col, strategia)
+	if racconta: taccuino["attesa"] = attesa
+	if not scelta.is_empty() and attesa > float(scelta["valore"]) + MARGINE_ATTESA:
+		scelta = {}
 	if scelta.is_empty():
 		_passa(ctl, gs, p)
 		return
@@ -280,6 +288,31 @@ static func classifica_colonne(gs: GameState, p: PlayerState,
 			"produzione": prod, "protezione": prot, "mossa": migliore,
 			"salva": da_salvare, "pers": meglio_pers})
 	return out
+
+# Quanto vale ASPETTARE (v3): la migliore carta del mazzo che non si puo'
+# pagare adesso ma si potrebbe pagare al prossimo lavoratore, con l'incasso
+# di un'attivazione (circa 1 Costruzione, 1 Denaro o Idea), valutata come le
+# altre mosse e scontata, perche' il mercato puo' cambiare e la carta sparire.
+# Zero se non restano lavoratori o fuori dalla v3.
+const SCONTO_ATTESA := 0.4
+# Si aspetta solo se conviene chiaramente: con lo sconto a 0,6 e senza margine il
+# bot passava un turno su quattro, con 0,5 e margine 0,5 uno su sei.
+const MARGINE_ATTESA := 1.0
+const INCASSO_ATTESO := Vector3i(1, 1, 1)
+
+static func _valore_attesa(gs: GameState, p: PlayerState, col: int, strategia: String) -> float:
+	if not PersonaggiV3.risorse_muoiono(): return 0.0
+	if p.workers - p.workers_used <= 0: return 0.0
+	var best := 0.0
+	for card_id in gs.market:
+		var c: Dictionary = CardDB.buildings[card_id]["cost"]
+		if p.can_pay(int(c["pietra"]), int(c["oro"]), int(c.get("idee", 0))): continue
+		if int(c["pietra"]) > p.pietra + INCASSO_ATTESO.x or int(c["oro"]) > p.oro + INCASSO_ATTESO.y \
+				or int(c.get("idee", 0)) > p.idee + INCASSO_ATTESO.z: continue
+		for v in AvailableActions.piazzamenti_ovunque(gs, p.index, card_id):
+			best = maxf(best, _valore(gs, p, v, strategia, int(v.parametri["col_from"])) * SCONTO_ATTESA)
+			break          # un piazzamento basta: si decide se aspettare, non dove
+	return best
 
 # Il Personaggio scelto per la colonna (v3): sta nella voce della classifica.
 static func _personaggio_di(colonne: Array[Dictionary], col: int) -> String:
