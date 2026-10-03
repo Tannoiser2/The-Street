@@ -123,7 +123,7 @@ nuovi = [personaggio(cid, nome, cl, 1, pr, az, testo) for cid, nome, cl, pr, az,
 # si arriva a 16 con dei Lavoratori senza produzione e senza azione, cosi' il
 # draft a passaggio funziona anche li' e la partita puo' continuare.
 riempitivi = []
-for era in range(2, 6):
+for era in range(3, 6):
     quanti = sum(1 for ch in altri_personaggi if ch.get("era") == era)
     for k in range(quanti, c["personaggi_per_era"]):
         riempitivi.append(personaggio("pe_lavoratore_e%d_%02d" % (era, k + 1), "Lavoratore", "civico", era,
@@ -308,6 +308,109 @@ c["potenzia_adiacente"] = True
 # ogni costruzione, l'acquisto di un potenziamento (pagato, senza lavoratore);
 # la variante `terreno_produce` rimette la produzione base dei terreni della v2.
 c["potenziamento_con_costruzione"] = True
+
+# ---- gli scheletri: lo Scavo dei Personaggi (registro 162) ---------------------
+# A fine partita una tessera scavo con lo scheletro vale lo Scavo stampato del
+# Personaggio preso in quell'era (registro 135). I Personaggi della v3 ne hanno
+# uno ciascuno; e' anche una leva del draft: chi arriva ultimo nel draft vale di
+# piu' da scheletro.
+SCAVO_V3 = {
+    "pe_guerriero": 2, "pe_cacciatore": 2, "pe_tagliapietre": 2, "pe_capotribu": 3,
+    "pe_costruttore_di_zattere": 3, "pe_anziana_del_villaggio": 3, "pe_cantastorie": 3,
+    "pe_incisore": 4, "pe_portatore_di_sale": 4, "pe_sentinella": 4, "pe_sciamano": 5,
+    "pe_guardiano_del_fuoco": 5, "pe_pittore_delle_grotte": 5, "pe_barattatore": 5,
+    "pe_custode_delle_ossa": 6, "pe_mercante_di_ossidiana": 6,
+}
+
+# ---- l'era 2 (registro 162, docs/proposte/v3-era-2.md) --------------------------
+# Lo stesso schema dell'era 1: 16 Personaggi con produzione e azione, 15
+# edifici con azione, costi con la regola "l'edificio chiede la risorsa che i
+# suoi potenziamenti non chiedono", un gradino piu' cari dell'era 1. Cinque
+# Personaggi sono quelli della v2 riscritti, undici nuovi.
+PERSONAGGI_E2 = [
+    ("pe_console", "Console", "civico", prod(oro=1), pv(1, "civico", "colonna", 1), 3,
+     "Produce 1 Denaro. +1 PV se hai un edificio Civico in piedi in questa colonna."),
+    ("pe_edile", "Edile", "civico", prod(pietra=1), ACQUISTO, 3,
+     "Produce 1 Costruzione. In questo turno puoi comprare ancora un potenziamento o una casa."),
+    ("pe_tribuno", "Tribuno della plebe", "civico", prod(pietra=1), cambio(1), 2,
+     "Produce 1 Costruzione. Cambia 1 risorsa in un'altra."),
+    ("pe_sacerdotessa", "Sacerdotessa", "religione", prod(idee=1), sconto(1, "classe:religione"), 5,
+     "Produce 1 Idea. −1 al costo dell'edificio Religione che costruisci in questo turno."),
+    ("pe_augure", "Augure", "religione", prod(pietra=1), resistenza(1, "uno"), 4,
+     "Produce 1 Costruzione. +1 resistenza fino a fine era a un tuo edificio in questa colonna."),
+    ("pe_pontefice", "Pontefice", "religione", prod(pietra=1), pv(1, "religione", "ovunque", 2), 5,
+     "Produce 1 Costruzione. +1 PV se hai 2+ edifici Religione in piedi."),
+    ("pe_negotiator", "Negotiator", "commercio", prod(oro=1), altri(1, 2), 4,
+     "Produce 1 Denaro. +1 Denaro per ogni altro giocatore con un edificio in questa colonna (max 2)."),
+    ("pe_armatore", "Armatore", "commercio", prod(pietra=1, oro=1), NESSUNA, 5,
+     "Produce 1 Costruzione e 1 Denaro. Nessuna azione."),
+    ("pe_argentario", "Argentario", "commercio", prod(oro=1), ACQUISTO, 6,
+     "Produce 1 Denaro. In questo turno puoi comprare ancora un potenziamento o una casa."),
+    ("pe_retore", "Retore", "cultura", prod(idee=1), scavo(2, "uno"), 4,
+     "Produce 1 Idea. +2 Scavo permanente a un tuo edificio in questa colonna."),
+    ("pe_poeta", "Poeta", "cultura", prod(idee=1), pv(1), 3,
+     "Produce 1 Idea. +1 PV."),
+    ("pe_mosaicista", "Mosaicista", "cultura", prod(idee=1), sconto(1, "arte"), 5,
+     "Produce 1 Idea. Il potenziamento Arte che compri in questo turno costa 1 in meno."),
+    ("pe_architetto", "Architetto", "ingegneria", prod(pietra=1), sconto(1), 2,
+     "Produce 1 Costruzione. −1 Costruzione alla costruzione di questo turno."),
+    ("pe_agrimensore", "Agrimensore", "ingegneria", prod(pietra=1), {"tipo": "adiacente"}, 3,
+     "Produce 1 Costruzione. Prendi anche la produzione della tessera di una colonna accanto."),
+    ("pe_legionario", "Legionario", "militare", prod(pietra=1), resistenza(2, "abitato"), 2,
+     "Produce 1 Costruzione. +2 resistenza fino a fine era all'edificio su cui sta."),
+    ("pe_centurione", "Centurione", "militare", prod(pietra=1), resistenza(1, "tutti"), 4,
+     "Produce 1 Costruzione. +1 resistenza fino a fine era a ogni tuo edificio in questa colonna."),
+]
+assert len(PERSONAGGI_E2) == 16
+def personaggio_scavo(cid, nome, classe, produzione, azione, sc, testo, era=2):
+    ch = personaggio(cid, nome, classe, era, produzione, azione, testo)
+    ch["scavo"] = sc
+    return ch
+v3["characters"] = [ch for ch in v3["characters"] if ch.get("era") != 2] + \
+    [personaggio_scavo(*riga) for riga in PERSONAGGI_E2]   # via i cinque della v2 e i riempitivi dell'era 2
+for ch in v3["characters"]:
+    if ch["id"] in SCAVO_V3: ch["scavo"] = SCAVO_V3[ch["id"]]
+
+# Gli edifici dell'era 2: costo, Rendita (2 solo dove costa 4 o piu'), azione.
+# Terzo giro della coppia (registro 162): i costi come l'era 1 (due risorse di
+# tipo diverso), un gradino in piu' solo alle carte grandi (Acquedotto, Ponte,
+# Foro, Anfiteatro). Al secondo giro, con quasi tutto a tre risorse, si
+# costruivano 2,8 edifici a testa e le case erano 3,6 su 7,3.
+EDIFICI_E2 = {
+    "ed_teatro":           (prod(pietra=1, oro=1),         None, pv(1),                        "A ogni attivazione: +1 PV."),
+    "ed_acquedotto":       (prod(pietra=2, oro=1, idee=1), 2,    risorsa(idee=1),              "A ogni attivazione: +1 Idea."),
+    "ed_terme":            (prod(pietra=1, idee=1),        None, risorsa(oro=1),               "A ogni attivazione: +1 Denaro."),
+    "ed_sacello":          (prod(pietra=1, oro=1),         None, resistenza(1, "adiacente"),   "A ogni attivazione: +1 resistenza fino a fine era a un tuo edificio adiacente."),
+    "ed_torre_di_vedetta": (prod(pietra=2),                None, resistenza(1, "adiacenti"),   "A ogni attivazione: +1 resistenza fino a fine era ai tuoi edifici adiacenti."),
+    "ed_tempio":           (prod(pietra=1, oro=1),         1,    pv(1, "religione", "ovunque", 2), "A ogni attivazione: +1 PV se hai 2+ edifici Religione in piedi."),
+    "ed_ponte":            (prod(pietra=2, oro=1),         1,    risorsa(pietra=1),            "A ogni attivazione: +1 Costruzione."),
+    "ed_emporio":          (prod(pietra=1, idee=1),        None, risorsa(oro=1, se="altrui"),  "A ogni attivazione di un avversario: +1 Denaro."),
+    "ed_insulae":          (prod(pietra=1, idee=1),        None, risorsa(pietra=1),            "A ogni attivazione: +1 Costruzione."),
+    "ed_foro":             (prod(pietra=2, oro=1, idee=1), 2,    altri(1, 2),                  "A ogni attivazione: +1 Denaro per ogni altro giocatore con un edificio in questa colonna (max 2)."),
+    "ed_anfiteatro":       (prod(pietra=3, oro=1, idee=1), 2,    pv(1),                        "A ogni attivazione: +1 PV."),
+    "ed_castrum":          (prod(pietra=2),                None, resistenza(1, "tutti"),       "A ogni attivazione: +1 resistenza fino a fine era ai tuoi edifici in questa colonna."),
+}
+for b in v3["buildings"]:
+    if b["era"] != 2: continue
+    if b["id"] in EDIFICI_E2:
+        costo, rendita, azione, testo = EDIFICI_E2[b["id"]]
+        b["cost"] = dict(costo)
+        if rendita is not None: b["rendita"] = rendita
+        b["azione"] = azione
+        # Via gli effetti "negli eventi" e l'aura del Ponte: ora sono azioni.
+        if b["id"] in ("ed_torre_di_vedetta", "ed_castrum", "ed_ponte"):
+            b["effects"] = []
+        b["effect_text"] = testo
+    else:
+        b["azione"] = NESSUNA                  # le case sono case
+    if b["id"] == "ed_casa_e2_s": b["flexible"] = True   # i Tuguri a 1, Costruzione o Denaro
+# Le tessere dell'era 2 producevano quasi solo Costruzione: due passano al Denaro.
+for t in v3["tessere_era"]:
+    if t["id"] == "te_cambiavalute": t["produzione"] = prod(oro=1)
+    # Primo giro della coppia: nell'era 2 si producevano 13,5 risorse e ne
+    # morivano 5,3 (2,9 Idee). Le tre tessere con l'effetto piu' forte non
+    # producono (Via consolare, Cantiere, Necropoli), come quattro dell'era 1.
+    if t["id"] in ("te_via_consolare", "te_cantiere", "te_necropoli"): t["produzione"] = prod()
 
 # ---- le controprove ----------------------------------------------------------
 #   --variante extra_sempre   l'acquisto extra a ogni turno, senza carte (la "catena" del registro 156)

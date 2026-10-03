@@ -1925,9 +1925,65 @@ Cosa dicono i numeri:
   1-2; se restasse, lo sconto dell'attesa va abbassato ancora.
 - **Nessuno spiana piu'** (0,00 a partita): la regola della stessa era basta.
 
+## Trentaseiesima misura: la coppia di ere 1-2
+
+La prima misura su due ere (registro 162). L'era 2 e' scritta nello stesso
+schema dell'era 1 (`docs/proposte/v3-era-2.md`: 16 Personaggi con produzione,
+azione e Scavo da scheletro, 15 edifici con azione, costi con la regola
+"l'edificio chiede la risorsa che i suoi potenziamenti non chiedono"). Il
+rapporto fotografa a fine era i contatori e i punti per canale, e
+`tools/misura_era.py --era 2` misura l'era 2 come differenza (per questo i
+numeri dell'era 1 sono gli stessi della trentacinquesima: stessi semi). 300
+partite a 3 giocatori fermate a fine era 2, tre giri sull'era 2.
+
+| a giocatore | era 1 | era 2, giro 1 | era 2, giro 2 | **era 2, giro 3** |
+|---|---|---|---|---|
+| prodotto (⚒ / 🪙 / 💡) | 10,1 (5,1/2,4/2,6) | 13,5 (6,0/3,6/3,9) | 11,6 (5,1/3,7/2,8) | **12,0** (6,2/3,0/2,8) |
+| speso | 7,8 | 8,2 | 7,7 | **8,5** |
+| morto (⚒ / 🪙 / 💡) | 2,3 (0,7/0,8/0,9) | 5,3 (0,6/1,8/2,9) | 3,9 (0,5/1,9/1,5) | **3,5** (0,9/1,3/1,4) |
+| costruzioni / potenziamenti / passi | 3,6 / 0,77 / 0,5 | 3,0 / 1,16 / 0,8 | 2,8 / 1,08 / 1,0 | **3,3 / 1,07 / 0,65** |
+| occasioni di potenziare aperte / usate | 3,4 / 0,8 | 2,9 / 0,9 | 2,7 / 0,8 | 3,1 / 1,0 |
+| edifici a partita (di cui case) | 10,7 (2,2) | 9,0 (3,6) | 8,3 (3,6) | 10,9 (3,3) |
+| rovine dell'era 1 coperte / bonus scavo (PV) | - | 3,6 / 0,67 | 3,6 / 0,68 | 4,1 / 0,72 |
+| PV dell'era (Lampo / censimento / prodotti / scavo) | 5,1 (2,9/1,3/0,6/-) | 6,7 (3,0/1,3/1,3/0,7) | 7,5 (2,8/2,4/1,3/0,7) | **8,9** (3,9/2,5/1,3/0,7) |
+| vittorie a fine era 2: Bil / Cont / Lampo / Obi / Rend / Scavo | (era 1 sola: 22/37/54/39/29/19) | 30/31/31/44/31/33 | 27/33/35/41/37/27 | **31/32/39/41/27/30** |
+
+I tre giri: al primo le tessere dell'era 2 producevano tutte e i Personaggi
+davano 7 Idee: 13,5 prodotte, 5,3 morte. Al secondo tre tessere senza
+produzione (Via consolare, Cantiere, Necropoli) e due Personaggi passati alla
+Costruzione, ma i costi a tre risorse facevano costruire 2,8 edifici e 3,6
+case su 8,3. Al terzo i costi a due risorse come l'era 1 (tre solo per
+Acquedotto, Ponte, Foro, Anfiteatro), lo Statio e il Centurione alla
+Costruzione: 3,3 costruzioni, le case 3,3 su 10,9, il morto 3,5.
+
+Cosa dicono i numeri:
+- **La coppia riequilibra le strategie.** A fine era 2 le sei vincono fra il 27
+  e il 41%: la Lampo, al 54% nell'era 1 da sola, qui e' al 39; la Rendita
+  incassa il secondo censimento (2,5 PV nell'era 2) e la Scavo il bonus di chi
+  costruisce sulle rovine dell'era 1 (0,7 PV, 4,1 rovine coperte a partita su
+  2,5 lasciate). Lo scheletro e la riscoperta pagano solo a fine partita, e si
+  vedranno con le ere 3-5.
+- **L'era 2 spende di piu' e muore di piu'**: 8,5 spese e 3,5 morte contro 7,8
+  e 2,3 dell'era 1. I potenziamenti sono a 1,07 a testa, il budget del metro.
+  Il morto e' Denaro e Idee (1,3 e 1,4): la prossima correzione e' un'altra
+  tessera dell'era 2 senza produzione, o un Personaggio in meno su Denaro.
+- **Le carte**: Insulae, Tempio, Terme, Foro, Teatro 0,8-0,9 a partita,
+  Acquedotto e Ponte 0,6; deboli Castrum 0,29 (2 Costruzione, Lampo 2, nessuna
+  casa a quel prezzo lo batte... ma la Domus a 2 e' a 1,14), Sacello 0,18,
+  Torre di vedetta 0,08, Anfiteatro 0,03 (solo sopra: nell'era 2 ci sono
+  poche rovine larghe due). I Tuguri 1,6 a partita: la casa a costo flessibile
+  resta la carta di salvataggio, come i Ripari.
+- **Il draft dell'era 2**: Legionario primo (1,02, come il Guerriero),
+  Architetto 1,36; ultimi Argentario (3,98, ⊕), Mosaicista, Sacerdotessa,
+  Console. Il ⊕ resta l'azione meno voluta anche qui.
+
 ## Come rifare il conto
 
 ```bash
+# trentaseiesima misura: la coppia di ere 1-2 (registro 162)
+godot --headless res://scenes/audit_partita.tscn -- --players 3 --games 300 --seed 700000 --giro tutte \
+  --dati data/proposte/cards-v3-era1.json --rapporto 1 --fino_era 2 > e12.csv 2> e12.err
+python3 tools/misura_era.py e12.err --era 1; python3 tools/misura_era.py e12.err --era 2
 # trentacinquesima misura: il file base con i costi rimodulati (registro 161); i giri 1 e 2 sono
 # i commit intermedi del ramo claude/v3-era-1 (costi in COSTI_E1 del generatore)
 # trentaquattresima misura: il file base con il potenziamento insieme alla costruzione; variante terreno_produce

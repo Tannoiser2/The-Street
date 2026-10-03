@@ -823,8 +823,8 @@
       "width": 1,
       "cost": {
         "pietra": 1,
-        "oro": 0,
-        "idee": 1
+        "oro": 1,
+        "idee": 0
       },
       "flexible": false,
       "resistance": 3,
@@ -839,7 +839,11 @@
         "idee": 0
       },
       "exhaustible": 0,
-      "effect_text": ""
+      "effect_text": "A ogni attivazione: +1 PV.",
+      "azione": {
+        "tipo": "pv",
+        "n": 1
+      }
     },
     {
       "id": "ed_acquedotto",
@@ -852,7 +856,7 @@
       "width": 3,
       "cost": {
         "pietra": 2,
-        "oro": 0,
+        "oro": 1,
         "idee": 1
       },
       "flexible": true,
@@ -868,7 +872,7 @@
         "idee": 0
       },
       "exhaustible": 0,
-      "effect_text": "A fine partita, se è in piedi: +2 PV.",
+      "effect_text": "A ogni attivazione: +1 Idea.",
       "effects": [
         {
           "hook": "on_final_scoring",
@@ -891,7 +895,13 @@
           "op": "rule_override",
           "name": "colossal"
         }
-      ]
+      ],
+      "azione": {
+        "tipo": "risorsa",
+        "pietra": 0,
+        "oro": 0,
+        "idee": 1
+      }
     },
     {
       "id": "ed_terme",
@@ -903,9 +913,9 @@
       "terrain": null,
       "width": 1,
       "cost": {
-        "pietra": 2,
+        "pietra": 1,
         "oro": 0,
-        "idee": 0
+        "idee": 1
       },
       "flexible": false,
       "resistance": 2,
@@ -920,7 +930,13 @@
         "idee": 0
       },
       "exhaustible": 0,
-      "effect_text": ""
+      "effect_text": "A ogni attivazione: +1 Denaro.",
+      "azione": {
+        "tipo": "risorsa",
+        "pietra": 0,
+        "oro": 1,
+        "idee": 0
+      }
     },
     {
       "id": "ed_sacello",
@@ -932,9 +948,9 @@
       "terrain": "collina",
       "width": 1,
       "cost": {
-        "pietra": 0,
-        "oro": 0,
-        "idee": 1
+        "pietra": 1,
+        "oro": 1,
+        "idee": 0
       },
       "flexible": false,
       "resistance": 2,
@@ -949,7 +965,12 @@
         "idee": 0
       },
       "exhaustible": 0,
-      "effect_text": ""
+      "effect_text": "A ogni attivazione: +1 resistenza fino a fine era a un tuo edificio adiacente.",
+      "azione": {
+        "tipo": "resistenza",
+        "n": 1,
+        "a": "adiacente"
+      }
     },
     {
       "id": "ed_torre_di_vedetta",
@@ -961,7 +982,7 @@
       "terrain": "collina",
       "width": 1,
       "cost": {
-        "pietra": 1,
+        "pietra": 2,
         "oro": 0,
         "idee": 0
       },
@@ -978,18 +999,13 @@
         "idee": 0
       },
       "exhaustible": 0,
-      "effect_text": "Negli eventi, i tuoi edifici adiacenti hanno +1 Resistenza.",
-      "effects": [
-        {
-          "hook": "on_event",
-          "op": "resistance",
-          "value": 1,
-          "target": {
-            "owner": "self",
-            "adjacent_to_self": true
-          }
-        }
-      ]
+      "effect_text": "A ogni attivazione: +1 resistenza fino a fine era ai tuoi edifici adiacenti.",
+      "effects": [],
+      "azione": {
+        "tipo": "resistenza",
+        "n": 1,
+        "a": "adiacenti"
+      }
     },
     {
       "id": "ed_tempio",
@@ -1001,13 +1017,13 @@
       "terrain": "collina",
       "width": 1,
       "cost": {
-        "pietra": 2,
-        "oro": 0,
-        "idee": 1
+        "pietra": 1,
+        "oro": 1,
+        "idee": 0
       },
       "flexible": false,
       "resistance": 3,
-      "rendita": 2,
+      "rendita": 1,
       "lampo": 0,
       "scavo": 3,
       "level_required": 0,
@@ -1018,7 +1034,16 @@
         "idee": 0
       },
       "exhaustible": 0,
-      "effect_text": ""
+      "effect_text": "A ogni attivazione: +1 PV se hai 2+ edifici Religione in piedi.",
+      "azione": {
+        "tipo": "pv",
+        "n": 1,
+        "se": {
+          "classe": "religione",
+          "dove": "ovunque",
+          "min": 2
+        }
+      }
     },
     {
       "id": "ed_ponte",
@@ -1031,12 +1056,12 @@
       "width": 2,
       "cost": {
         "pietra": 2,
-        "oro": 0,
-        "idee": 1
+        "oro": 1,
+        "idee": 0
       },
       "flexible": true,
       "resistance": 3,
-      "rendita": 2,
+      "rendita": 1,
       "lampo": 0,
       "scavo": 3,
       "level_required": 0,
@@ -1047,18 +1072,14 @@
         "idee": 0
       },
       "exhaustible": 0,
-      "effect_text": "Gli edifici adiacenti producono 1 in più di ogni risorsa che già producono.",
-      "effects": [
-        {
-          "hook": "on_activate",
-          "op": "production_delta",
-          "value": 1,
-          "own_production": true,
-          "target": {
-            "adjacent_to_self": true
-          }
-        }
-      ]
+      "effect_text": "A ogni attivazione: +1 Costruzione.",
+      "effects": [],
+      "azione": {
+        "tipo": "risorsa",
+        "pietra": 1,
+        "oro": 0,
+        "idee": 0
+      }
     },
     {
       "id": "ed_emporio",
@@ -1070,9 +1091,9 @@
       "terrain": "fiume",
       "width": 1,
       "cost": {
-        "pietra": 2,
+        "pietra": 1,
         "oro": 0,
-        "idee": 0
+        "idee": 1
       },
       "flexible": true,
       "resistance": 2,
@@ -1086,7 +1107,15 @@
         "cultura": 0,
         "idee": 0
       },
-      "exhaustible": 0
+      "exhaustible": 0,
+      "azione": {
+        "tipo": "risorsa",
+        "pietra": 0,
+        "oro": 1,
+        "idee": 0,
+        "se": "altrui"
+      },
+      "effect_text": "A ogni attivazione di un avversario: +1 Denaro."
     },
     {
       "id": "ed_insulae",
@@ -1098,9 +1127,9 @@
       "terrain": "pianura",
       "width": 1,
       "cost": {
-        "pietra": 2,
+        "pietra": 1,
         "oro": 0,
-        "idee": 0
+        "idee": 1
       },
       "flexible": false,
       "resistance": 2,
@@ -1114,7 +1143,14 @@
         "cultura": 0,
         "idee": 0
       },
-      "exhaustible": 0
+      "exhaustible": 0,
+      "azione": {
+        "tipo": "risorsa",
+        "pietra": 1,
+        "oro": 0,
+        "idee": 0
+      },
+      "effect_text": "A ogni attivazione: +1 Costruzione."
     },
     {
       "id": "ed_foro",
@@ -1127,9 +1163,9 @@
       "terrain": "pianura",
       "width": 1,
       "cost": {
-        "pietra": 3,
-        "oro": 0,
-        "idee": 0
+        "pietra": 2,
+        "oro": 1,
+        "idee": 1
       },
       "flexible": false,
       "resistance": 3,
@@ -1144,7 +1180,13 @@
         "idee": 0
       },
       "exhaustible": 0,
-      "depth": 2
+      "depth": 2,
+      "azione": {
+        "tipo": "altri",
+        "oro": 1,
+        "max": 2
+      },
+      "effect_text": "A ogni attivazione: +1 Denaro per ogni altro giocatore con un edificio in questa colonna (max 2)."
     },
     {
       "id": "ed_anfiteatro",
@@ -1156,8 +1198,8 @@
       "terrain": null,
       "width": 2,
       "cost": {
-        "pietra": 4,
-        "oro": 0,
+        "pietra": 3,
+        "oro": 1,
         "idee": 1
       },
       "flexible": false,
@@ -1173,7 +1215,7 @@
         "idee": 0
       },
       "exhaustible": 0,
-      "effect_text": "Solo sopra: mai a terra. Sopra di lui si costruisce solo quando è in rovina.",
+      "effect_text": "A ogni attivazione: +1 PV.",
       "effects": [
         {
           "hook": "on_build",
@@ -1182,7 +1224,11 @@
         }
       ],
       "depth": 2,
-      "solo_su_rovine": true
+      "solo_su_rovine": true,
+      "azione": {
+        "tipo": "pv",
+        "n": 1
+      }
     },
     {
       "id": "ed_castrum",
@@ -1211,19 +1257,14 @@
         "idee": 0
       },
       "exhaustible": 0,
-      "effect_text": "Negli eventi, i tuoi edifici nelle sue colonne hanno +1 Resistenza.",
-      "effects": [
-        {
-          "hook": "on_event",
-          "op": "resistance",
-          "value": 1,
-          "target": {
-            "owner": "self",
-            "same_column_as_self": true
-          }
-        }
-      ],
-      "depth": 2
+      "effect_text": "A ogni attivazione: +1 resistenza fino a fine era ai tuoi edifici in questa colonna.",
+      "effects": [],
+      "depth": 2,
+      "azione": {
+        "tipo": "resistenza",
+        "n": 1,
+        "a": "tutti"
+      }
     },
     {
       "id": "ed_borgo",
@@ -2668,7 +2709,10 @@
       },
       "exhaustible": 0,
       "riserva": true,
-      "copie": 2
+      "copie": 2,
+      "azione": {
+        "tipo": "nessuna"
+      }
     },
     {
       "id": "ed_casa_e2_g",
@@ -2698,7 +2742,10 @@
       },
       "exhaustible": 0,
       "riserva": true,
-      "copie": 2
+      "copie": 2,
+      "azione": {
+        "tipo": "nessuna"
+      }
     },
     {
       "id": "ed_casa_e2_s",
@@ -2714,7 +2761,7 @@
         "oro": 0,
         "idee": 0
       },
-      "flexible": false,
+      "flexible": true,
       "resistance": 2,
       "rendita": 0,
       "lampo": 1,
@@ -2728,7 +2775,10 @@
       },
       "exhaustible": 0,
       "riserva": true,
-      "copie": 2
+      "copie": 2,
+      "azione": {
+        "tipo": "nessuna"
+      }
     },
     {
       "id": "ed_casa_e3_p",
@@ -2982,7 +3032,7 @@
       "imprint": false,
       "effect_text": "Produce 1 Costruzione. In questo turno puoi comprare ancora un potenziamento o una casa.",
       "effects": [],
-      "scavo": 0,
+      "scavo": 3,
       "produzione": {
         "pietra": 1,
         "oro": 0,
@@ -3004,7 +3054,7 @@
       "imprint": false,
       "effect_text": "Produce 1 Costruzione. Cambia 1 risorsa in un'altra.",
       "effects": [],
-      "scavo": 0,
+      "scavo": 3,
       "produzione": {
         "pietra": 1,
         "oro": 0,
@@ -3025,7 +3075,7 @@
       "imprint": false,
       "effect_text": "Produce 1 Costruzione. +1 Lampo all'edificio che costruisci in questo turno.",
       "effects": [],
-      "scavo": 0,
+      "scavo": 2,
       "produzione": {
         "pietra": 1,
         "oro": 0,
@@ -3046,7 +3096,7 @@
       "imprint": false,
       "effect_text": "Produce 1 Idea. +1 PV se hai un edificio Religione in piedi in questa colonna.",
       "effects": [],
-      "scavo": 0,
+      "scavo": 5,
       "produzione": {
         "pietra": 0,
         "oro": 0,
@@ -3072,7 +3122,7 @@
       "imprint": false,
       "effect_text": "Produce 1 Idea. −1 al costo dell'edificio Religione che costruisci in questo turno.",
       "effects": [],
-      "scavo": 0,
+      "scavo": 5,
       "produzione": {
         "pietra": 0,
         "oro": 0,
@@ -3094,7 +3144,7 @@
       "imprint": false,
       "effect_text": "Produce 1 Idea. Il potenziamento che compri in questo turno costa 1 in meno.",
       "effects": [],
-      "scavo": 0,
+      "scavo": 6,
       "produzione": {
         "pietra": 0,
         "oro": 0,
@@ -3116,7 +3166,7 @@
       "imprint": false,
       "effect_text": "Produce 1 Denaro. In questo turno puoi comprare ancora un potenziamento o una casa.",
       "effects": [],
-      "scavo": 0,
+      "scavo": 6,
       "produzione": {
         "pietra": 0,
         "oro": 1,
@@ -3137,7 +3187,7 @@
       "imprint": false,
       "effect_text": "Produce 1 Denaro e 1 Idea. Nessuna azione.",
       "effects": [],
-      "scavo": 0,
+      "scavo": 5,
       "produzione": {
         "pietra": 0,
         "oro": 1,
@@ -3157,7 +3207,7 @@
       "imprint": false,
       "effect_text": "Produce 1 Denaro. +1 Denaro per ogni altro giocatore con un edificio in questa colonna (max 2).",
       "effects": [],
-      "scavo": 0,
+      "scavo": 4,
       "produzione": {
         "pietra": 0,
         "oro": 1,
@@ -3179,7 +3229,7 @@
       "imprint": false,
       "effect_text": "Produce 1 Idea. +2 Scavo permanente a un tuo edificio in questa colonna.",
       "effects": [],
-      "scavo": 0,
+      "scavo": 4,
       "produzione": {
         "pietra": 0,
         "oro": 0,
@@ -3201,7 +3251,7 @@
       "imprint": false,
       "effect_text": "Produce 1 Idea. +1 PV.",
       "effects": [],
-      "scavo": 0,
+      "scavo": 3,
       "produzione": {
         "pietra": 0,
         "oro": 0,
@@ -3222,7 +3272,7 @@
       "imprint": false,
       "effect_text": "Produce 1 Idea. Il potenziamento Arte che compri in questo turno costa 1 in meno.",
       "effects": [],
-      "scavo": 0,
+      "scavo": 5,
       "produzione": {
         "pietra": 0,
         "oro": 0,
@@ -3244,7 +3294,7 @@
       "imprint": false,
       "effect_text": "Produce 1 Costruzione. −1 Costruzione se costruisci su fiume in questo turno.",
       "effects": [],
-      "scavo": 0,
+      "scavo": 3,
       "produzione": {
         "pietra": 1,
         "oro": 0,
@@ -3266,7 +3316,7 @@
       "imprint": false,
       "effect_text": "Produce 1 Costruzione. −1 Costruzione alla costruzione di questo turno.",
       "effects": [],
-      "scavo": 0,
+      "scavo": 2,
       "produzione": {
         "pietra": 1,
         "oro": 0,
@@ -3287,7 +3337,7 @@
       "imprint": false,
       "effect_text": "Produce 1 Costruzione. +2 resistenza fino a fine era all'edificio su cui sta.",
       "effects": [],
-      "scavo": 0,
+      "scavo": 2,
       "produzione": {
         "pietra": 1,
         "oro": 0,
@@ -3309,7 +3359,7 @@
       "imprint": false,
       "effect_text": "Produce 1 Denaro. +1 resistenza fino a fine era a ogni tuo edificio in questa colonna.",
       "effects": [],
-      "scavo": 0,
+      "scavo": 4,
       "produzione": {
         "pietra": 0,
         "oro": 1,
@@ -3320,153 +3370,6 @@
         "n": 1,
         "a": "tutti"
       }
-    },
-    {
-      "id": "pe_architetto",
-      "name": "Architetto",
-      "era": 2,
-      "class": "ingegneria",
-      "is_dynasty": false,
-      "timing": "misto",
-      "imprint": false,
-      "effect_text": "Subito: +1 Costruzione. Per l'era: −1 Costruzione al primo edificio da 2 o 3 caselle.",
-      "effects": [
-        {
-          "hook": "on_acquire",
-          "op": "resource",
-          "pietra": 1,
-          "oro": 0
-        },
-        {
-          "hook": "on_build",
-          "op": "cost_delta",
-          "pietra": -1,
-          "what": "building",
-          "duration": "era",
-          "target": {
-            "width": {
-              "min": 2
-            }
-          },
-          "times": 1
-        }
-      ],
-      "scavo": 2
-    },
-    {
-      "id": "pe_legionario",
-      "name": "Legionario",
-      "era": 2,
-      "class": "militare",
-      "is_dynasty": false,
-      "timing": "era",
-      "imprint": false,
-      "effect_text": "Per l'era: la sua protezione vale +3 invece di +2; se l'edificio protetto sopravvive all'evento, +1 cultura.",
-      "effects": [
-        {
-          "hook": "on_acquire",
-          "op": "protection_delta",
-          "value": 1
-        },
-        {
-          "hook": "on_era_end",
-          "op": "vp",
-          "value": 1,
-          "condition": {
-            "op": "protected_survived",
-            "min": 1
-          }
-        }
-      ],
-      "scavo": 4
-    },
-    {
-      "id": "pe_sacerdotessa",
-      "name": "Sacerdotessa",
-      "era": 2,
-      "class": "religione",
-      "is_dynasty": false,
-      "timing": "misto",
-      "imprint": false,
-      "effect_text": "Subito: +1 Denaro. Per l'era: ogni edificio Religione che costruisci ti rimborsa 1 Denaro.",
-      "effects": [
-        {
-          "hook": "on_acquire",
-          "op": "resource",
-          "pietra": 0,
-          "oro": 1
-        },
-        {
-          "hook": "on_build",
-          "op": "resource",
-          "oro": 1,
-          "duration": "era",
-          "target": {
-            "owner": "self",
-            "class": [
-              "religione"
-            ]
-          }
-        }
-      ],
-      "scavo": 6
-    },
-    {
-      "id": "pe_console",
-      "name": "Console",
-      "era": 2,
-      "class": "civico",
-      "is_dynasty": false,
-      "timing": "misto",
-      "imprint": false,
-      "effect_text": "Subito: +1 Denaro. Per l'era: quando attivi una colonna con un tuo edificio Civico in piedi, +1 PV (max 2).",
-      "effects": [
-        {
-          "hook": "on_acquire",
-          "op": "resource",
-          "pietra": 0,
-          "oro": 1
-        },
-        {
-          "hook": "on_activate",
-          "op": "vp",
-          "value": 1,
-          "duration": "era",
-          "cap": 2,
-          "target": {
-            "owner": "self",
-            "class": [
-              "civico"
-            ]
-          }
-        }
-      ],
-      "scavo": 6
-    },
-    {
-      "id": "pe_retore",
-      "name": "Retore",
-      "era": 2,
-      "class": "cultura",
-      "is_dynasty": false,
-      "timing": "subito",
-      "imprint": true,
-      "effect_text": "Subito — Impronta: infila questa carta sotto un tuo edificio Cultura; Scavo +5 permanente. Max 1 impronta per edificio.",
-      "effects": [
-        {
-          "hook": "on_acquire",
-          "op": "scavo_delta",
-          "value": 5,
-          "duration": "permanent",
-          "target": {
-            "is_self": true,
-            "class": [
-              "cultura"
-            ]
-          }
-        }
-      ],
-      "scavo": 4
     },
     {
       "id": "pe_mastro_costruttore",
@@ -3935,226 +3838,6 @@
         }
       },
       "scavo": 0
-    },
-    {
-      "id": "pe_lavoratore_e2_06",
-      "name": "Lavoratore",
-      "era": 2,
-      "class": "civico",
-      "is_dynasty": false,
-      "timing": "v3",
-      "imprint": false,
-      "effect_text": "Un lavoratore qualunque (riempitivo della prova).",
-      "effects": [],
-      "scavo": 0,
-      "produzione": {
-        "pietra": 0,
-        "oro": 0,
-        "idee": 0
-      },
-      "azione": {
-        "tipo": "nessuna"
-      }
-    },
-    {
-      "id": "pe_lavoratore_e2_07",
-      "name": "Lavoratore",
-      "era": 2,
-      "class": "civico",
-      "is_dynasty": false,
-      "timing": "v3",
-      "imprint": false,
-      "effect_text": "Un lavoratore qualunque (riempitivo della prova).",
-      "effects": [],
-      "scavo": 0,
-      "produzione": {
-        "pietra": 0,
-        "oro": 0,
-        "idee": 0
-      },
-      "azione": {
-        "tipo": "nessuna"
-      }
-    },
-    {
-      "id": "pe_lavoratore_e2_08",
-      "name": "Lavoratore",
-      "era": 2,
-      "class": "civico",
-      "is_dynasty": false,
-      "timing": "v3",
-      "imprint": false,
-      "effect_text": "Un lavoratore qualunque (riempitivo della prova).",
-      "effects": [],
-      "scavo": 0,
-      "produzione": {
-        "pietra": 0,
-        "oro": 0,
-        "idee": 0
-      },
-      "azione": {
-        "tipo": "nessuna"
-      }
-    },
-    {
-      "id": "pe_lavoratore_e2_09",
-      "name": "Lavoratore",
-      "era": 2,
-      "class": "civico",
-      "is_dynasty": false,
-      "timing": "v3",
-      "imprint": false,
-      "effect_text": "Un lavoratore qualunque (riempitivo della prova).",
-      "effects": [],
-      "scavo": 0,
-      "produzione": {
-        "pietra": 0,
-        "oro": 0,
-        "idee": 0
-      },
-      "azione": {
-        "tipo": "nessuna"
-      }
-    },
-    {
-      "id": "pe_lavoratore_e2_10",
-      "name": "Lavoratore",
-      "era": 2,
-      "class": "civico",
-      "is_dynasty": false,
-      "timing": "v3",
-      "imprint": false,
-      "effect_text": "Un lavoratore qualunque (riempitivo della prova).",
-      "effects": [],
-      "scavo": 0,
-      "produzione": {
-        "pietra": 0,
-        "oro": 0,
-        "idee": 0
-      },
-      "azione": {
-        "tipo": "nessuna"
-      }
-    },
-    {
-      "id": "pe_lavoratore_e2_11",
-      "name": "Lavoratore",
-      "era": 2,
-      "class": "civico",
-      "is_dynasty": false,
-      "timing": "v3",
-      "imprint": false,
-      "effect_text": "Un lavoratore qualunque (riempitivo della prova).",
-      "effects": [],
-      "scavo": 0,
-      "produzione": {
-        "pietra": 0,
-        "oro": 0,
-        "idee": 0
-      },
-      "azione": {
-        "tipo": "nessuna"
-      }
-    },
-    {
-      "id": "pe_lavoratore_e2_12",
-      "name": "Lavoratore",
-      "era": 2,
-      "class": "civico",
-      "is_dynasty": false,
-      "timing": "v3",
-      "imprint": false,
-      "effect_text": "Un lavoratore qualunque (riempitivo della prova).",
-      "effects": [],
-      "scavo": 0,
-      "produzione": {
-        "pietra": 0,
-        "oro": 0,
-        "idee": 0
-      },
-      "azione": {
-        "tipo": "nessuna"
-      }
-    },
-    {
-      "id": "pe_lavoratore_e2_13",
-      "name": "Lavoratore",
-      "era": 2,
-      "class": "civico",
-      "is_dynasty": false,
-      "timing": "v3",
-      "imprint": false,
-      "effect_text": "Un lavoratore qualunque (riempitivo della prova).",
-      "effects": [],
-      "scavo": 0,
-      "produzione": {
-        "pietra": 0,
-        "oro": 0,
-        "idee": 0
-      },
-      "azione": {
-        "tipo": "nessuna"
-      }
-    },
-    {
-      "id": "pe_lavoratore_e2_14",
-      "name": "Lavoratore",
-      "era": 2,
-      "class": "civico",
-      "is_dynasty": false,
-      "timing": "v3",
-      "imprint": false,
-      "effect_text": "Un lavoratore qualunque (riempitivo della prova).",
-      "effects": [],
-      "scavo": 0,
-      "produzione": {
-        "pietra": 0,
-        "oro": 0,
-        "idee": 0
-      },
-      "azione": {
-        "tipo": "nessuna"
-      }
-    },
-    {
-      "id": "pe_lavoratore_e2_15",
-      "name": "Lavoratore",
-      "era": 2,
-      "class": "civico",
-      "is_dynasty": false,
-      "timing": "v3",
-      "imprint": false,
-      "effect_text": "Un lavoratore qualunque (riempitivo della prova).",
-      "effects": [],
-      "scavo": 0,
-      "produzione": {
-        "pietra": 0,
-        "oro": 0,
-        "idee": 0
-      },
-      "azione": {
-        "tipo": "nessuna"
-      }
-    },
-    {
-      "id": "pe_lavoratore_e2_16",
-      "name": "Lavoratore",
-      "era": 2,
-      "class": "civico",
-      "is_dynasty": false,
-      "timing": "v3",
-      "imprint": false,
-      "effect_text": "Un lavoratore qualunque (riempitivo della prova).",
-      "effects": [],
-      "scavo": 0,
-      "produzione": {
-        "pietra": 0,
-        "oro": 0,
-        "idee": 0
-      },
-      "azione": {
-        "tipo": "nessuna"
-      }
     },
     {
       "id": "pe_lavoratore_e3_06",
@@ -4814,6 +4497,357 @@
       },
       "azione": {
         "tipo": "nessuna"
+      }
+    },
+    {
+      "id": "pe_console",
+      "name": "Console",
+      "era": 2,
+      "class": "civico",
+      "is_dynasty": false,
+      "timing": "v3",
+      "imprint": false,
+      "effect_text": "Produce 1 Denaro. +1 PV se hai un edificio Civico in piedi in questa colonna.",
+      "effects": [],
+      "scavo": 3,
+      "produzione": {
+        "pietra": 0,
+        "oro": 1,
+        "idee": 0
+      },
+      "azione": {
+        "tipo": "pv",
+        "n": 1,
+        "se": {
+          "classe": "civico",
+          "dove": "colonna",
+          "min": 1
+        }
+      }
+    },
+    {
+      "id": "pe_edile",
+      "name": "Edile",
+      "era": 2,
+      "class": "civico",
+      "is_dynasty": false,
+      "timing": "v3",
+      "imprint": false,
+      "effect_text": "Produce 1 Costruzione. In questo turno puoi comprare ancora un potenziamento o una casa.",
+      "effects": [],
+      "scavo": 3,
+      "produzione": {
+        "pietra": 1,
+        "oro": 0,
+        "idee": 0
+      },
+      "azione": {
+        "tipo": "acquisto",
+        "n": 1
+      }
+    },
+    {
+      "id": "pe_tribuno",
+      "name": "Tribuno della plebe",
+      "era": 2,
+      "class": "civico",
+      "is_dynasty": false,
+      "timing": "v3",
+      "imprint": false,
+      "effect_text": "Produce 1 Costruzione. Cambia 1 risorsa in un'altra.",
+      "effects": [],
+      "scavo": 2,
+      "produzione": {
+        "pietra": 1,
+        "oro": 0,
+        "idee": 0
+      },
+      "azione": {
+        "tipo": "cambio",
+        "n": 1
+      }
+    },
+    {
+      "id": "pe_sacerdotessa",
+      "name": "Sacerdotessa",
+      "era": 2,
+      "class": "religione",
+      "is_dynasty": false,
+      "timing": "v3",
+      "imprint": false,
+      "effect_text": "Produce 1 Idea. −1 al costo dell'edificio Religione che costruisci in questo turno.",
+      "effects": [],
+      "scavo": 5,
+      "produzione": {
+        "pietra": 0,
+        "oro": 0,
+        "idee": 1
+      },
+      "azione": {
+        "tipo": "sconto",
+        "n": 1,
+        "se": "classe:religione"
+      }
+    },
+    {
+      "id": "pe_augure",
+      "name": "Augure",
+      "era": 2,
+      "class": "religione",
+      "is_dynasty": false,
+      "timing": "v3",
+      "imprint": false,
+      "effect_text": "Produce 1 Costruzione. +1 resistenza fino a fine era a un tuo edificio in questa colonna.",
+      "effects": [],
+      "scavo": 4,
+      "produzione": {
+        "pietra": 1,
+        "oro": 0,
+        "idee": 0
+      },
+      "azione": {
+        "tipo": "resistenza",
+        "n": 1,
+        "a": "uno"
+      }
+    },
+    {
+      "id": "pe_pontefice",
+      "name": "Pontefice",
+      "era": 2,
+      "class": "religione",
+      "is_dynasty": false,
+      "timing": "v3",
+      "imprint": false,
+      "effect_text": "Produce 1 Costruzione. +1 PV se hai 2+ edifici Religione in piedi.",
+      "effects": [],
+      "scavo": 5,
+      "produzione": {
+        "pietra": 1,
+        "oro": 0,
+        "idee": 0
+      },
+      "azione": {
+        "tipo": "pv",
+        "n": 1,
+        "se": {
+          "classe": "religione",
+          "dove": "ovunque",
+          "min": 2
+        }
+      }
+    },
+    {
+      "id": "pe_negotiator",
+      "name": "Negotiator",
+      "era": 2,
+      "class": "commercio",
+      "is_dynasty": false,
+      "timing": "v3",
+      "imprint": false,
+      "effect_text": "Produce 1 Denaro. +1 Denaro per ogni altro giocatore con un edificio in questa colonna (max 2).",
+      "effects": [],
+      "scavo": 4,
+      "produzione": {
+        "pietra": 0,
+        "oro": 1,
+        "idee": 0
+      },
+      "azione": {
+        "tipo": "altri",
+        "oro": 1,
+        "max": 2
+      }
+    },
+    {
+      "id": "pe_armatore",
+      "name": "Armatore",
+      "era": 2,
+      "class": "commercio",
+      "is_dynasty": false,
+      "timing": "v3",
+      "imprint": false,
+      "effect_text": "Produce 1 Costruzione e 1 Denaro. Nessuna azione.",
+      "effects": [],
+      "scavo": 5,
+      "produzione": {
+        "pietra": 1,
+        "oro": 1,
+        "idee": 0
+      },
+      "azione": {
+        "tipo": "nessuna"
+      }
+    },
+    {
+      "id": "pe_argentario",
+      "name": "Argentario",
+      "era": 2,
+      "class": "commercio",
+      "is_dynasty": false,
+      "timing": "v3",
+      "imprint": false,
+      "effect_text": "Produce 1 Denaro. In questo turno puoi comprare ancora un potenziamento o una casa.",
+      "effects": [],
+      "scavo": 6,
+      "produzione": {
+        "pietra": 0,
+        "oro": 1,
+        "idee": 0
+      },
+      "azione": {
+        "tipo": "acquisto",
+        "n": 1
+      }
+    },
+    {
+      "id": "pe_retore",
+      "name": "Retore",
+      "era": 2,
+      "class": "cultura",
+      "is_dynasty": false,
+      "timing": "v3",
+      "imprint": false,
+      "effect_text": "Produce 1 Idea. +2 Scavo permanente a un tuo edificio in questa colonna.",
+      "effects": [],
+      "scavo": 4,
+      "produzione": {
+        "pietra": 0,
+        "oro": 0,
+        "idee": 1
+      },
+      "azione": {
+        "tipo": "scavo",
+        "n": 2,
+        "a": "uno"
+      }
+    },
+    {
+      "id": "pe_poeta",
+      "name": "Poeta",
+      "era": 2,
+      "class": "cultura",
+      "is_dynasty": false,
+      "timing": "v3",
+      "imprint": false,
+      "effect_text": "Produce 1 Idea. +1 PV.",
+      "effects": [],
+      "scavo": 3,
+      "produzione": {
+        "pietra": 0,
+        "oro": 0,
+        "idee": 1
+      },
+      "azione": {
+        "tipo": "pv",
+        "n": 1
+      }
+    },
+    {
+      "id": "pe_mosaicista",
+      "name": "Mosaicista",
+      "era": 2,
+      "class": "cultura",
+      "is_dynasty": false,
+      "timing": "v3",
+      "imprint": false,
+      "effect_text": "Produce 1 Idea. Il potenziamento Arte che compri in questo turno costa 1 in meno.",
+      "effects": [],
+      "scavo": 5,
+      "produzione": {
+        "pietra": 0,
+        "oro": 0,
+        "idee": 1
+      },
+      "azione": {
+        "tipo": "sconto",
+        "n": 1,
+        "se": "arte"
+      }
+    },
+    {
+      "id": "pe_architetto",
+      "name": "Architetto",
+      "era": 2,
+      "class": "ingegneria",
+      "is_dynasty": false,
+      "timing": "v3",
+      "imprint": false,
+      "effect_text": "Produce 1 Costruzione. −1 Costruzione alla costruzione di questo turno.",
+      "effects": [],
+      "scavo": 2,
+      "produzione": {
+        "pietra": 1,
+        "oro": 0,
+        "idee": 0
+      },
+      "azione": {
+        "tipo": "sconto",
+        "n": 1
+      }
+    },
+    {
+      "id": "pe_agrimensore",
+      "name": "Agrimensore",
+      "era": 2,
+      "class": "ingegneria",
+      "is_dynasty": false,
+      "timing": "v3",
+      "imprint": false,
+      "effect_text": "Produce 1 Costruzione. Prendi anche la produzione della tessera di una colonna accanto.",
+      "effects": [],
+      "scavo": 3,
+      "produzione": {
+        "pietra": 1,
+        "oro": 0,
+        "idee": 0
+      },
+      "azione": {
+        "tipo": "adiacente"
+      }
+    },
+    {
+      "id": "pe_legionario",
+      "name": "Legionario",
+      "era": 2,
+      "class": "militare",
+      "is_dynasty": false,
+      "timing": "v3",
+      "imprint": false,
+      "effect_text": "Produce 1 Costruzione. +2 resistenza fino a fine era all'edificio su cui sta.",
+      "effects": [],
+      "scavo": 2,
+      "produzione": {
+        "pietra": 1,
+        "oro": 0,
+        "idee": 0
+      },
+      "azione": {
+        "tipo": "resistenza",
+        "n": 2,
+        "a": "abitato"
+      }
+    },
+    {
+      "id": "pe_centurione",
+      "name": "Centurione",
+      "era": 2,
+      "class": "militare",
+      "is_dynasty": false,
+      "timing": "v3",
+      "imprint": false,
+      "effect_text": "Produce 1 Costruzione. +1 resistenza fino a fine era a ogni tuo edificio in questa colonna.",
+      "effects": [],
+      "scavo": 4,
+      "produzione": {
+        "pietra": 1,
+        "oro": 0,
+        "idee": 0
+      },
+      "azione": {
+        "tipo": "resistenza",
+        "n": 1,
+        "a": "tutti"
       }
     }
   ],
@@ -7289,7 +7323,7 @@
       "name": "Via consolare",
       "era": 2,
       "produzione": {
-        "pietra": 1,
+        "pietra": 0,
         "oro": 0,
         "idee": 0
       },
@@ -7328,8 +7362,8 @@
       "name": "Cambiavalute",
       "era": 2,
       "produzione": {
-        "pietra": 1,
-        "oro": 0,
+        "pietra": 0,
+        "oro": 1,
         "idee": 0
       },
       "testo": "Chi attiva per primo può cambiare 1 Costruzione in 1 Denaro.",
@@ -7347,7 +7381,7 @@
       "name": "Cantiere",
       "era": 2,
       "produzione": {
-        "pietra": 1,
+        "pietra": 0,
         "oro": 0,
         "idee": 0
       },
@@ -7391,7 +7425,7 @@
       "produzione": {
         "pietra": 0,
         "oro": 0,
-        "idee": 1
+        "idee": 0
       },
       "testo": "Il primo edificio costruito qui ha Scavo +1, per sempre.",
       "effetto": {

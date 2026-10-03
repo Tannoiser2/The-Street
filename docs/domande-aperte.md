@@ -2568,3 +2568,20 @@ dato è stato importato da lì. Ma due confronti fra ciò che è stampato e
     (0,7/0,8/0,9), 3,6 costruzioni, 0,77 potenziamenti, 2,2 case a partita,
     zero spianati. Il bot che aspetta passa 0,5 turni a testa e nell'era 1 da
     sola regala vittorie alla Lampo (54%): da rileggere sulla coppia 1-2.
+162. **La coppia di ere 1-2.** Il designer: "Vai pure". L'era 2 scritta nello
+    schema dell'era 1 (`docs/proposte/v3-era-2.md`): 16 Personaggi (cinque
+    della v2 riscritti, undici nuovi), 15 edifici con azione, costi a due
+    risorse con la regola del registro 161 e un gradino in piu' solo alle
+    carte grandi, Rendita 2 solo dove si paga 4 o piu', Cambiavalute a
+    Denaro, Via consolare, Cantiere e Necropoli senza produzione, i Tuguri a
+    costo flessibile. I Personaggi della v3 hanno uno **Scavo da scheletro**
+    (registro 135), piu' alto per chi il draft lascia per ultimo. Nel
+    rapporto le fotografie di fine era (`snap_e<N>_*`, `pv_e<N>*`), e
+    `tools/misura_era.py --era N` misura un'era come differenza.
+    Trentaseiesima misura, tre giri sull'era 2: prodotto 12,0, speso 8,5,
+    morto 3,5 (0,9/1,3/1,4), 3,3 costruzioni, 1,07 potenziamenti, 4,1 rovine
+    dell'era 1 coperte a partita; a fine era 2 le sei strategie fra il 27 e
+    il 41%. Restano: il morto dell'era 2 sopra il budget (Denaro e Idee),
+    Sacello, Torre di vedetta e Anfiteatro quasi mai costruiti, il ⊕ sempre
+    ultimo nel draft. **Prossimo passo**: le ere 3-5 nello stesso schema, per
+    vedere Scavo, scheletri e riscoperta sulla partita intera.

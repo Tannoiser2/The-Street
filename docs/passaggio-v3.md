@@ -143,3 +143,29 @@ Prima mossa proposta per la sessione nuova: scrivere con il designer la scheda d
 prova** (16 Personaggi con produzione e azione, gli edifici di quell'era con produzione e
 azione), simularla e guardare la tabella della produzione per giro, prima di toccare tutte le
 cinque ere.
+
+
+## Stato al 3 ottobre 2026 (ramo `claude/v3-era-1`, PR #73 in bozza)
+
+La v3 e' nel codice, accesa dalla costante `turno_v3` del file dati (`data/proposte/cards-v3-era1.json`,
+generato da `tools/genera_cards_v3.py` dalla v2; la v1.5 e la v2 non cambiano, `verifica_riferimento`
+identico). Le ere 1 e 2 sono scritte e misurate (registri 153-162, misure dalla trentunesima alla
+trentaseiesima); le ere 3-5 sono ancora quelle della v2 con dei Lavoratori riempitivi nel draft.
+I documenti di lavoro: `docs/proposte/v3-metro.md` (il metro), `v3-era-1.md`, `v3-era-2.md`.
+
+Le regole decise dal designer lungo la strada, tutte nel file base: risorse che muoiono a fine era,
+draft a passaggio alternato, Personaggi lavoratori con produzione e azione, azioni degli edifici al
+proprietario, terreno di base che non produce, spianare caro e mai nella stessa era, costi con la
+regola "l'edificio chiede la risorsa che i suoi potenziamenti non chiedono", una casa sempre
+comprabile (Ripari, Tuguri a costo flessibile), potenziamento insieme alla costruzione e nelle
+colonne adiacenti, acquisto extra solo dall'azione ⊕ di una carta, sconti per classe e per
+potenziamento, bot che sa che le risorse muoiono e che tiene le risorse per comprare meglio.
+
+Come si misura: `--fino_era N` nell'audit, `--rapporto 1`, poi `python3 tools/misura_era.py e.err --era N`
+(dall'era 2 l'era e' la differenza fra le fotografie di fine era). 300 partite a 3 giocatori, seme 700000,
+`--giro tutte`; ogni lotto fino all'era 2 dura circa 12 minuti su questo container.
+
+Prossimi passi: le ere 3-5 nello stesso schema (16 Personaggi con Scavo da scheletro, azioni, costi
+con la regola), poi la partita intera per Scavo, scheletri e riscoperta; il morto dell'era 2 (3,5) da
+riportare a 1-2; il ⊕ che nessuno vuole al draft; l'interfaccia a schermo per la v3 (il file di prova
+non e' fra quelli che la schermata di gioco offre) e la strategia Ritrovamenti nei bot.

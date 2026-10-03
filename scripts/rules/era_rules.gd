@@ -375,6 +375,16 @@ static func end_era_after_event(gs: GameState) -> void:
 	if gs.era < 5:
 		census(gs)
 	bury_characters(gs)
+	# La misura per era (v3, registro 162): dopo il censimento si fotografano i
+	# contatori cumulativi e i punti per canale; la differenza fra due ere e'
+	# quel che l'era ha dato. `bump` somma, quindi si parte da zero.
+	for p in gs.players:
+		for k in ["az_costruisci", "az_potenzia", "az_passa", "potenziamenti_piazzati", "extra_aperti",
+				"extra_usati", "scavo_scavato", "cambi", "sconti_v3"]:
+			p.bump("snap_e%d_%s" % [gs.era, k], int(p.counters.get(k, 0)))
+		p.bump("pv_e%d" % gs.era, p.vp)
+		for ch in p.vp_breakdown:
+			p.bump("pv_e%d_%s" % [gs.era, str(ch)], int(p.vp_breakdown[ch]))
 	# "Fra un'era e l'altra passano generazioni": la dispersione prepara l'era
 	# successiva, e dopo l'era 5 non ce n'e' una. Decisione del designer
 	# (domande-aperte punto 17): le risorse residue restano, perche' sono il
