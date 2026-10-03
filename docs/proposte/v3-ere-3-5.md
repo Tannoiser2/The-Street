@@ -41,7 +41,10 @@ o più, altrimenti 1. Un'azione dal vocabolario col sapore della classe. Gli eff
 della v2 restano (Osservatorio, Piazza monumentale, le gilde dell'era 5 del registro 150, la
 Bottega d'artista); gli effetti "negli eventi" di Mura e Arsenale sono diventati azioni 🛡. La casa
 più piccola di ogni era costa 1, Costruzione o Denaro; le altre 1-2 Costruzione nell'era 3, 2-3 nelle
-ere 4 e 5 (registro 164). Le tessere: tre su sette producono, quasi solo Costruzione. La produzione
+ere 4 e 5 (registro 164). Le tessere: tre su sette producono, solo Costruzione nelle ere 4 e 5
+(Fondaco e Periferia producevano Denaro, che moriva: registro 167). Il Lampo delle carte Lampo del
+mazzo vale almeno il costo in Costruzione, come dice il metro (Osservatorio, Villa, Officina, Museo,
+Biblioteca 2; Grattacielo, Ponte in acciaio, Stazione 3; registro 167). La produzione
 della v2 è a zero su tutti gli edifici del mazzo: l'azione è la loro produzione. Le carte con
 resistenza 1-2 delle ere 3 e 5 hanno +1.
 
@@ -116,3 +119,7 @@ Quarto giro (registro 166, quarantesima misura): le cinque carte grandi "a terra
 (Anfiteatro 0,46 e Castello 0,12 a partita, prima 0,02); le azioni degli edifici che danno
 risorse scattano solo quando attiva il proprietario (l'Acquedotto dava 17 Idee a partita al suo
 padrone). Il morto delle ere 3-5 scende da 3,4-3,8 a 2,2-2,5, la spesa quasi non cala.
+
+Quinto giro (registro 167, quarantunesima misura): il Lampo delle carte del mazzo pari al costo e
+Fondaco e Periferia in Costruzione. +2 PV a testa per tutti, le carte delle ere 4-5 costruite il
+doppio, il morto delle ere 4-5 a 2,2 e 2,1. La Lampo resta al 25%: il Lampo lo prendono tutti.

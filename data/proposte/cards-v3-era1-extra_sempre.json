@@ -1703,7 +1703,7 @@
       "flexible": false,
       "resistance": 3,
       "rendita": 0,
-      "lampo": 2,
+      "lampo": 3,
       "scavo": 2,
       "level_required": 0,
       "production": {
@@ -1852,7 +1852,7 @@
       "flexible": true,
       "resistance": 2,
       "rendita": 0,
-      "lampo": 1,
+      "lampo": 2,
       "scavo": 2,
       "level_required": 0,
       "production": {
@@ -1939,7 +1939,7 @@
       "flexible": false,
       "resistance": 3,
       "rendita": 0,
-      "lampo": 1,
+      "lampo": 2,
       "scavo": 3,
       "level_required": 0,
       "production": {
@@ -1972,7 +1972,7 @@
       "flexible": false,
       "resistance": 3,
       "rendita": 0,
-      "lampo": 1,
+      "lampo": 2,
       "scavo": 3,
       "level_required": 0,
       "production": {
@@ -2046,7 +2046,7 @@
       "flexible": false,
       "resistance": 2,
       "rendita": 0,
-      "lampo": 1,
+      "lampo": 2,
       "scavo": 3,
       "level_required": 0,
       "production": {
@@ -2361,7 +2361,7 @@
       "flexible": true,
       "resistance": 3,
       "rendita": 0,
-      "lampo": 1,
+      "lampo": 2,
       "scavo": 0,
       "level_required": 0,
       "production": {
@@ -2413,7 +2413,7 @@
       "flexible": false,
       "resistance": 3,
       "rendita": 0,
-      "lampo": 1,
+      "lampo": 2,
       "scavo": 0,
       "level_required": 0,
       "production": {
@@ -2461,7 +2461,7 @@
       "flexible": false,
       "resistance": 3,
       "rendita": 0,
-      "lampo": 1,
+      "lampo": 2,
       "scavo": 0,
       "level_required": 1,
       "production": {
@@ -2506,7 +2506,7 @@
       "flexible": true,
       "resistance": 3,
       "rendita": 0,
-      "lampo": 1,
+      "lampo": 3,
       "scavo": 0,
       "level_required": 2,
       "production": {
@@ -2566,7 +2566,7 @@
       "flexible": false,
       "resistance": 3,
       "rendita": 0,
-      "lampo": 1,
+      "lampo": 2,
       "scavo": 0,
       "level_required": 0,
       "production": {
@@ -2611,7 +2611,7 @@
       "flexible": true,
       "resistance": 4,
       "rendita": 0,
-      "lampo": 1,
+      "lampo": 3,
       "scavo": 0,
       "level_required": 0,
       "production": {
@@ -2663,7 +2663,7 @@
       "flexible": false,
       "resistance": 4,
       "rendita": 0,
-      "lampo": 1,
+      "lampo": 3,
       "scavo": 0,
       "level_required": 1,
       "production": {
@@ -2721,7 +2721,7 @@
       "flexible": false,
       "resistance": 3,
       "rendita": 0,
-      "lampo": 1,
+      "lampo": 2,
       "scavo": 0,
       "level_required": 0,
       "production": {
@@ -2770,7 +2770,7 @@
       "flexible": false,
       "resistance": 3,
       "rendita": 0,
-      "lampo": 1,
+      "lampo": 2,
       "scavo": 0,
       "level_required": 1,
       "production": {
@@ -7831,8 +7831,8 @@
       "name": "Fondaco",
       "era": 4,
       "produzione": {
-        "pietra": 0,
-        "oro": 1,
+        "pietra": 1,
+        "oro": 0,
         "idee": 0
       },
       "testo": "Il primo edificio Commercio costruito qui produce subito, una volta.",
@@ -7903,8 +7903,8 @@
       "name": "Periferia",
       "era": 5,
       "produzione": {
-        "pietra": 0,
-        "oro": 1,
+        "pietra": 1,
+        "oro": 0,
         "idee": 0
       },
       "testo": "Il primo edificio Civico costruito qui costa 1 Idea in meno.",

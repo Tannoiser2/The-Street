@@ -2662,3 +2662,15 @@ dato è stato importato da lì. Ma due confronti fra ciò che è stampato e
     cambio e scavo restano a ogni attivazione di chiunque), e' il file base;
     `--variante chiunque` rifa' la regola di prima. Vittorie 26-39; la piu'
     debole e' ora la Lampo (26%), da riguardare nel bot.
+167. **Il Lampo vale il costo; Fondaco e Periferia in Costruzione.** Il
+    designer: "Continua". Restavano il morto delle ere 4-5 (2,5) e la Lampo al
+    26%. Nelle ere 4-5 tutte le carte Lampo del mazzo valevano 1 anche a costo
+    3, contro il metro ("rende in Lampo il suo costo"): ora il Lampo delle
+    carte Lampo del mazzo delle ere 3-5 vale almeno il costo in Costruzione
+    (Osservatorio, Villa, Officina, Museo, Biblioteca... 2; Grattacielo, Ponte
+    in acciaio, Stazione 3). Le case restano come sono. Il Fondaco (era 4) e la
+    Periferia (era 5), uniche tessere a produrre Denaro nella loro era,
+    producono Costruzione. Quarantunesima misura: +2 PV a testa per tutti, le
+    carte tarde costruite il doppio, il morto delle ere 4-5 da 2,5 a 2,2 e
+    2,1, le costruzioni +0,15 a era. La Lampo resta la piu' debole (25%): il
+    Lampo lo prendono tutti; si cercano le spinte del bot con `--spinta`.

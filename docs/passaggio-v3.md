@@ -166,9 +166,10 @@ Come si misura: `--fino_era N` nell'audit, `--rapporto 1`, poi `python3 tools/mi
 (dall'era 2 l'era e' la differenza fra le fotografie di fine era). 300 partite a 3 giocatori, seme 700000,
 `--giro tutte`; ogni lotto fino all'era 2 dura circa 12 minuti su questo container.
 
-Prossimi passi: il morto delle ere 4-5 (2,5 a testa contro il budget di 1-2: nelle ere tarde si
-resta con Denaro e Idee mentre case e mazzo chiedono Costruzione, e si passa 1,2 volte a testa);
-la Lampo al 26% e la Scavo al 31 da riguardare nel bot (`SPINTE_V3`); le carte ancora rare
+Prossimi passi: il morto e' 2,0-2,2 in tutte le ere (registro 167: Lampo pari al costo, Fondaco e
+Periferia in Costruzione), il budget del metro (1-2) e' a un passo; la Lampo al 25% da riguardare
+nel bot (`SPINTE_V3`, cercare con `--spinta`): il Lampo lo prendono tutti, la strategia non ha un
+vantaggio suo, e perde 5 PV di Rendita; le carte ancora rare
 (Fortezza, Grattacielo, Stazione per terreno e forma; Conceria, Arsenale, Ponte in acciaio); il ⊕
 che nessuno vuole al draft; l'interfaccia a schermo per la v3 (il file di prova non e' fra quelli
 che la schermata di gioco offre) e la strategia Ritrovamenti nei bot. Dal registro 166 le azioni

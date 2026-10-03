@@ -2222,9 +2222,52 @@ resta con l'altro.
 La piu' debole e' ora la Lampo (26-27%, 66-68 PV; con le carte grandi a terra ha
 perso 3 punti): da riguardare con la tabella `SPINTE_V3`, come la Scavo a 31.
 
+## Quarantunesima misura: il Lampo vale il costo, Fondaco e Periferia in Costruzione
+
+Dopo la quarantesima restavano il morto delle ere 4-5 (2,5 a testa: 1,4 Denaro
+nell'era 4, 1,1 Idee nell'era 5) e la Lampo al 26%. Due cose viste nei dati:
+la strategia Lampo chiude a 66 PV con 19,8 di Lampo ma 5,7 di Rendita (le
+altre 10-16), e nelle ere 4 e 5 **tutte** le carte Lampo del mazzo valgono 1,
+anche a costo 3 (lo stampo della v2), contro il metro ("un edificio rende in
+Lampo il suo costo in Costruzione"). Nell'era 4 la tessera Fondaco e' l'unica a
+produrre Denaro ed e' attivata 1,1 volte a testa per era; nell'era 5 lo stesso
+per la Periferia. Tre controprove sugli stessi 300 semi, una sopra l'altra:
+
+| a giocatore | era 3 | era 4 | era 5 | partita |
+|---|---|---|---|---|
+| **base** (quarantesima) prodotto / speso / morto | 9,4 / 7,2 / 2,2 | 9,1 / 6,5 / 2,5 (🪙 1,4) | 8,9 / 6,3 / 2,5 (💡 1,1) | 70,2 PV, Lampo 15,4 |
+| **lampo_costo**: il Lampo del mazzo (ere 3-5) almeno pari al costo ⚒ | 9,4 / 7,2 / 2,2 | 9,1 / 6,7 / 2,4 | 8,9 / 6,5 / 2,4 | 72,2 PV, Lampo 17,3 |
+| **+ Fondaco in Costruzione** | = | 9,1 / 7,0 / 2,2 (🪙 1,0) | 8,9 / 6,5 / 2,4 | 72,4 PV |
+| **+ Periferia in Costruzione** | = | = | 8,9 / 6,7 / 2,1 (🪙 0,4) | 72,8 PV, Lampo 17,7 |
+| costruzioni / potenziamenti / passi, base → tutte e tre | 2,81 / 0,95 / 0,75 → = | 2,43 / 0,70 / 1,16 → 2,58 / 0,60 / 1,07 | 2,26 / 0,86 / 1,17 → 2,42 / 0,69 / 1,14 | |
+
+| vittorie | Bil | Cont | Lampo | Obi | Rend | Scavo |
+|---|---|---|---|---|---|---|
+| base | 36 | 33 | 26 | 39 | 34 | 31 |
+| lampo_costo | 37 | 33 | 27 | 37 | 33 | 33 |
+| + Fondaco | 39 | 31 | 26 | 39 | 36 | 29 |
+| + Periferia | 39 | 34 | 25 | 35 | 37 | 30 |
+
+Il Lampo pari al costo da' 2 PV a testa a **tutti** (17,7 di Lampo) e le carte
+delle ere 4-5 si costruiscono il doppio (Osservatorio 0,11 → 0,28 a partita,
+Villa 0,19 → 0,38, Ponte in acciaio 0,04 → 0,24, Grattacielo 0,05 → 0,14,
+Biblioteca 0,30 → 0,41); la strategia Lampo guadagna 2 PV come le altre e
+resta al 25-27%: il Lampo e' un canale che prendono tutti, non il suo
+vantaggio. Le due tessere tolgono il Denaro che moriva (era 4: 1,4 → 1,0; era
+5: 0,8 → 0,4) e lo danno in Costruzione, dove si passava: le costruzioni
+salgono di 0,15 a era e i passi calano di 0,1. **Tutte e tre nel file base**;
+`--variante lampo_vecchio` rifa' il file della quarantesima. Il morto e' ora
+2,0 / 2,0 / 2,2 / 2,2 / 2,1: il budget del metro (1-2) e' a un passo.
+
 ## Come rifare il conto
 
 ```bash
+# quarantunesima misura: il Lampo pari al costo e Fondaco/Periferia in Costruzione (registro 167);
+#   il file base e' quello nuovo, `--variante lampo_vecchio` rifa' quello della quarantesima
+python3 tools/genera_cards_v3.py && python3 tools/genera_cards_v3.py --variante lampo_vecchio
+godot --headless res://scenes/audit_partita.tscn -- --players 3 --games 300 --seed 700000 --giro tutte \
+  --dati data/proposte/cards-v3-era1.json --rapporto 1 > q.csv 2> q.err
+for e in 3 4 5; do python3 tools/misura_era.py q.err --era $e; done
 # quarantesima misura: le carte grandi a terra e le azioni degli edifici solo quando attivi tu
 #   (registro 166); il file base e' quello nuovo, `--variante chiunque` rifa' la regola di prima
 python3 tools/genera_cards_v3.py && python3 tools/genera_cards_v3.py --variante chiunque
