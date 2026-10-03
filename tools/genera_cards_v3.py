@@ -693,7 +693,25 @@ _proprio(v3)
 # ---- le controprove ----------------------------------------------------------
 #   --variante chiunque       le azioni degli edifici che danno risorse a ogni attivazione di chiunque (com'era fino alla trentanovesima misura)
 def chiunque(v): _proprio(v, togli=True)
-VARIANTI = {"chiunque": chiunque, "extra_sempre": extra_sempre, "senza_extra": senza_extra, "costi_vecchi": costi_vecchi,
+#   --variante lampo_costo    il Lampo delle carte Lampo del mazzo (ere 3-5) vale almeno il costo in Costruzione (metro: "rende in Lampo il suo costo")
+#   --variante lampo_fondaco  come sopra, e la tessera Fondaco (era 4) produce Costruzione invece di Denaro
+#   --variante lampo_tessere  come sopra, e anche la Periferia (era 5) produce Costruzione
+# (registro 167: nelle ere 4-5 tutte le carte Lampo valgono 1 anche a costo 3, e la
+# strategia Lampo finisce a 66 PV con 5,7 di Rendita; nell'era 4 muoiono 1,4 Denaro
+# a testa e la tessera Fondaco e' l'unica che ne produce)
+def lampo_costo(v):
+    for b in v["buildings"]:
+        if b["era"] in (3, 4, 5) and not b.get("riserva") and int(b["lampo"]) > 0 and int(b["rendita"]) == 0:
+            b["lampo"] = max(int(b["lampo"]), int(b["cost"]["pietra"]))
+def lampo_fondaco(v):
+    lampo_costo(v)
+    for t in v["tessere_era"]:
+        if t["id"] == "te_fondaco": t["produzione"] = prod(pietra=1)
+def lampo_tessere(v):
+    lampo_fondaco(v)
+    for t in v["tessere_era"]:
+        if t["id"] == "te_periferia": t["produzione"] = prod(pietra=1)
+VARIANTI = {"lampo_costo": lampo_costo, "lampo_fondaco": lampo_fondaco, "lampo_tessere": lampo_tessere, "chiunque": chiunque, "extra_sempre": extra_sempre, "senza_extra": senza_extra, "costi_vecchi": costi_vecchi,
             "case_seconda": case_seconda, "case_lampo1": case_lampo1, "senza_tuning": senza_tuning,
             "terreno_produce": terreno_produce, "senza_potenziamento_insieme": senza_potenziamento_insieme}
 if variante:
