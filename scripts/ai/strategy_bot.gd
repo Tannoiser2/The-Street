@@ -652,7 +652,12 @@ static var spinte_override := {}
 # e i potenziamenti a 1,5 (misurati con `--spinta` sugli stessi 300 semi) la
 # Lampo fa 69 PV e vince il 30%, come con 1,0 e come la base: le tre tarature
 # stanno nell'errore sulle vittorie, questa da' i punti migliori.
-const SPINTE_V3 := {"rendita_per_era": 0.9, "rendita_zero": -1.5, "lampo": 0.8, "lampo_zero": -1.0,
+# Registro 168: la penalita' sulle carte senza Lampo (`lampo_zero` -1) le
+# faceva scartare le carte a Rendita, le piu' forti (5,6 PV di Rendita contro
+# 10-16 delle altre). A zero la Lampo passa dal 25 al 31% con 71 PV e resta
+# una Lampo (22 PV dal canale); abbassare `lampo` a 0,4 la fa giocare come la
+# Bilanciata, alzarlo a 1,2 non rende.
+const SPINTE_V3 := {"rendita_per_era": 0.9, "rendita_zero": -1.5, "lampo": 0.8, "lampo_zero": 0.0,
 	"scavo_premio": 0.4, "scavo_terra": -0.5, "scavo_terra_scavo": 0.25, "protezione_attesa": 2.0,
 	"lampo_potenzia": 1.5, "lampo_sopra": 0.0, "obiettivi_peso": 1.0, "continuita_peso": 1.0}
 

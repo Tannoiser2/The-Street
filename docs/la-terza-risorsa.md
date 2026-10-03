@@ -2259,9 +2259,33 @@ salgono di 0,15 a era e i passi calano di 0,1. **Tutte e tre nel file base**;
 `--variante lampo_vecchio` rifa' il file della quarantesima. Il morto e' ora
 2,0 / 2,0 / 2,2 / 2,2 / 2,1: il budget del metro (1-2) e' a un passo.
 
+## Quarantaduesima misura: la Lampo nel bot, `lampo_zero` a zero
+
+Dopo la quarantunesima la Lampo era al 25% con 68 PV: 22,6 PV dal Lampo ma
+5,6 di Rendita contro 10-16 delle altre, perche' la tabella `SPINTE_V3`
+penalizzava di 1 ogni carta senza Lampo, cioe' tutte quelle a Rendita, le piu'
+forti. Tre tarature con `--spinta` sul file base della quarantunesima, stessi
+300 semi:
+
+| | base | `lampo_zero=0` | `lampo=0.4, lampo_zero=0, lampo_potenzia=2.5` | `lampo=1.2, lampo_zero=-0.5` |
+|---|---|---|---|---|
+| vittorie Lampo | 25 | **31** | 31 | 29 |
+| PV della Lampo | 68,3 | **71,0** | 70,7 | 69,8 |
+| suoi canali: Lampo / Rendita / Cultura | 22,6 / 5,6 / 10,2 | 22,1 / 7,2 / 10,9 | 18,0 / 10,3 / 11,8 | 22,4 / 6,1 / 11,0 |
+| le altre (Bil / Cont / Obi / Rend / Scavo) | 39 / 34 / 35 / 37 / 30 | 36 / 31 / 38 / 35 / 29 | 38 / 32 / 35 / 37 / 26 | 39 / 32 / 35 / 39 / 27 |
+
+`lampo_zero` a zero e' la tabella da questa misura: +6 punti di vittorie e +2,7
+PV, e la Lampo resta una Lampo (22 PV dal canale). La taratura bassa vince
+uguale ma gioca come la Bilanciata (18 di Lampo, 10 di Rendita); quella alta
+non rende. Vittorie ora fra 29 (Scavo) e 38 (Obiettivi); PV a testa 72,7.
+
 ## Come rifare il conto
 
 ```bash
+# quarantaduesima misura: le spinte della Lampo (registro 168); la tabella SPINTE_V3 ha ora lampo_zero=0,
+#   `--spinta lampo_zero=-1` rifa' la base della quarantunesima
+godot --headless res://scenes/audit_partita.tscn -- --players 3 --games 300 --seed 700000 --giro tutte \
+  --dati data/proposte/cards-v3-era1.json --rapporto 1 --spinta lampo_zero=-1 > r.csv 2> r.err
 # quarantunesima misura: il Lampo pari al costo e Fondaco/Periferia in Costruzione (registro 167);
 #   il file base e' quello nuovo, `--variante lampo_vecchio` rifa' quello della quarantesima
 python3 tools/genera_cards_v3.py && python3 tools/genera_cards_v3.py --variante lampo_vecchio

@@ -167,9 +167,11 @@ Come si misura: `--fino_era N` nell'audit, `--rapporto 1`, poi `python3 tools/mi
 `--giro tutte`; ogni lotto fino all'era 2 dura circa 12 minuti su questo container.
 
 Prossimi passi: il morto e' 2,0-2,2 in tutte le ere (registro 167: Lampo pari al costo, Fondaco e
-Periferia in Costruzione), il budget del metro (1-2) e' a un passo; la Lampo al 25% da riguardare
-nel bot (`SPINTE_V3`, cercare con `--spinta`): il Lampo lo prendono tutti, la strategia non ha un
-vantaggio suo, e perde 5 PV di Rendita; le carte ancora rare
+Periferia in Costruzione), il budget del metro (1-2) e' a un passo; le vittorie stanno fra 29
+(Scavo) e 38 (Obiettivi) dopo `lampo_zero` a zero nella tabella `SPINTE_V3` (registro 168); la
+Scavo e' ora la piu' debole; il ⊕ si misura con i contatori nuovi `extra_aperti_carta` e
+`extra_usati_carta` (scatta 2,2 volte a partita, quante si usino e' da leggere nel prossimo lotto);
+le carte ancora rare
 (Fortezza, Grattacielo, Stazione per terreno e forma; Conceria, Arsenale, Ponte in acciaio); il ⊕
 che nessuno vuole al draft; l'interfaccia a schermo per la v3 (il file di prova non e' fra quelli
 che la schermata di gioco offre) e la strategia Ritrovamenti nei bot. Dal registro 166 le azioni

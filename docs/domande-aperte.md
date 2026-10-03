@@ -2674,3 +2674,17 @@ dato è stato importato da lì. Ma due confronti fra ciò che è stampato e
     carte tarde costruite il doppio, il morto delle ere 4-5 da 2,5 a 2,2 e
     2,1, le costruzioni +0,15 a era. La Lampo resta la piu' debole (25%): il
     Lampo lo prendono tutti; si cercano le spinte del bot con `--spinta`.
+168. **La Lampo nel bot, e il ⊕ nel rapporto.** Il designer chiede quante
+    decisioni prende un giocatore e perche' l'acquisto extra si apre 14 volte
+    e si usa 2,7. Risposta: il 14 non e' il ⊕ (che scatta 2,2 volte a
+    partita) ma la finestra del potenziamento insieme alla costruzione
+    (registro 160), aperta dopo ognuna delle 14,7 costruzioni; il 2,7 sono i
+    potenziamenti comprati li', 2,7 dei 3,9 a partita, cioe' quanto spesso
+    dopo aver costruito resta qualcosa in mano (ere 1-2 quasi sempre, ere 3-5
+    una volta su dieci: il potenziamento costa 2 e manca la Costruzione). Il
+    rapporto distingue ora le aperture da carta ⊕ da quelle dopo la
+    costruzione (`extra_aperti_carta`, `extra_usati_carta`). La Lampo
+    (quarantaduesima misura): `lampo_zero` da -1 a 0 nella tabella
+    `SPINTE_V3`; la penalita' sulle carte senza Lampo le faceva scartare le
+    carte a Rendita. Dal 25 al 31% con 71 PV, e resta una Lampo. Vittorie fra
+    29 e 38.
