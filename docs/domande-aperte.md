@@ -2691,14 +2691,22 @@ dato è stato importato da lì. Ma due confronti fra ciò che è stampato e
 169. **Gli sconti sugli edifici.** Il designer: "quando si mette un lavoratore
     l'azione e' un acquisto, edificio, potenziamento o entrambi in base alle
     risorse" (e' cosi' nel codice, registro 160); "il ⊕ se serve deve stare su
-    piu' Personaggi e/o edifici" (si decide col contatore nuovo
-    `extra_usati_carta`); "mancano gli sconti, che sono essenziali". Variante
+    piu' Personaggi e/o edifici": il contatore nuovo dice che il ⊕ si apre
+    2,1 volte a partita a giocatore e si usa 0,8 (il 39%), la finestra dopo
+    la costruzione si apre 12,2 e si usa 2,0 (il 16%): il ⊕ rende il doppio
+    della finestra ma resta a meta' per mancanza di risorse, quindi prima di
+    moltiplicarlo va reso piu' utile (uno sconto dentro, o i potenziamenti
+    delle ere 4-5 meno cari). "Mancano gli sconti, che sono essenziali". Variante
     `sconti_edifici`: sette azioni "+1 risorsa" o cambio diventano sconti
     (Trappole su fiume, Insulae Civico, Mulino e Banco Costruzione, Bottega
     potenziamento, Officina Ingegneria, Caffe' Arte), validi per l'acquisto del
     turno, quindi solo quando attiva il padrone: chiave nuova `chi: proprio`,
     perche' `se` nello sconto e' la condizione. Il Lampo +1 e la tessera che si
-    rigira restano sui Personaggi. Misura nella quarantatreesima.
+    rigira restano sui Personaggi. Quarantatreesima misura: niente si muove
+    (sconti usati 1,45 → 1,68 a partita, morto e vittorie uguali), perche' lo
+    sconto scatta solo se il padrone attiva quella colonna e compra in quel
+    turno. **Il file base non cambia**; la decisione dipende dalla "scelta"
+    (registro 170), dove lo sconto va a chi sta per comprare.
 170. **"Stile Caylus": chi attiva usa un edificio della colonna.** Il
     designer: "se quando si attiva una colonna un giocatore possa scegliere
     qualunque edificio, anche quelli non suoi, e brucia quell'effetto per il

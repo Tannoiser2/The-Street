@@ -169,8 +169,11 @@ Come si misura: `--fino_era N` nell'audit, `--rapporto 1`, poi `python3 tools/mi
 Prossimi passi: il morto e' 2,0-2,2 in tutte le ere (registro 167: Lampo pari al costo, Fondaco e
 Periferia in Costruzione), il budget del metro (1-2) e' a un passo; le vittorie stanno fra 29
 (Scavo) e 38 (Obiettivi) dopo `lampo_zero` a zero nella tabella `SPINTE_V3` (registro 168); la
-Scavo e' ora la piu' debole; il ⊕ si misura con i contatori nuovi `extra_aperti_carta` e
-`extra_usati_carta` (scatta 2,2 volte a partita, quante si usino e' da leggere nel prossimo lotto);
+Scavo e' ora la piu' debole; il ⊕ si apre 2,1 volte a partita a giocatore e si usa 0,8 (39%), la finestra dopo la costruzione
+12,2 e 2,0 (16%): da rendere piu' utile prima di metterlo su altre carte (registro 169); gli sconti
+sugli edifici (variante `sconti_edifici`) non muovono nulla finche' scattano solo per il padrone
+(quarantatreesima misura); la "scelta" stile Caylus (registro 170, varianti `scelta` e `scelta_pv`)
+e' in misura: cambierebbe tutto questo, decisione del designer sui numeri;
 le carte ancora rare
 (Fortezza, Grattacielo, Stazione per terreno e forma; Conceria, Arsenale, Ponte in acciaio); il ⊕
 che nessuno vuole al draft; l'interfaccia a schermo per la v3 (il file di prova non e' fra quelli

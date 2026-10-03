@@ -2279,9 +2279,45 @@ PV, e la Lampo resta una Lampo (22 PV dal canale). La taratura bassa vince
 uguale ma gioca come la Bilanciata (18 di Lampo, 10 di Rendita); quella alta
 non rende. Vittorie ora fra 29 (Scavo) e 38 (Obiettivi); PV a testa 72,7.
 
+## Quarantatreesima misura: gli sconti sugli edifici
+
+Il designer (registro 169): "mancano gli sconti, che sono essenziali".
+Variante `sconti_edifici`: sette azioni "+1 risorsa" o cambio diventano sconti
+(Trappole da pesca su fiume, Insulae Civico, Mulino e Banco -1 Costruzione,
+Bottega d'artista potenziamento, Officina Ingegneria, Caffe' letterario Arte),
+validi per l'acquisto del turno e quindi solo quando attiva il padrone. Stessi
+300 semi del file base (quarantaduesima: Lampo pari al costo, tessere in
+Costruzione, `lampo_zero` 0).
+
+| a giocatore | base | sconti_edifici |
+|---|---|---|
+| sconti usati a partita | 1,45 | 1,68 |
+| morto per era | 2,0 / 2,0 / 2,2 / 2,2 / 2,2 | 2,0 / 2,0 / 2,2 / 2,2 / 2,1 |
+| costruzioni per era | 3,56 / 3,28 / 2,83 / 2,58 / 2,41 | 3,56 / 3,27 / 2,80 / 2,55 / 2,44 |
+| potenziamenti per era | 0,72 / 0,96 / 0,99 / 0,63 / 0,66 | 0,72 / 0,96 / 0,97 / 0,57 / 0,59 |
+| PV a testa | 72,7 | 72,2 |
+| vittorie Bil / Cont / Lampo / Obi / Rend / Scavo | 36 / 31 / 31 / 38 / 35 / 29 | 35 / 30 / 29 / 41 / 35 / 31 |
+
+Niente si muove oltre l'errore. Il motivo e' nel ritmo: uno sconto sull'edificio
+scatta solo se il padrone attiva quella colonna **e** compra in quel turno
+una cosa che lo sconto copre; le sette carte si costruiscono 0,04-0,76 volte
+a partita e insieme aggiungono 0,23 sconti usati. I potenziamenti delle ere
+4-5 calano anzi di 0,06, perche' Bottega e Caffe' non danno piu' l'Idea con
+cui li si pagava. **Il file base non cambia**: la decisione e' legata alla
+quarantaquattresima (la "scelta"), dove lo sconto di un edificio va a chi lo
+usa, cioe' a chi sta per comprare, e dovrebbe pesare molto di piu'.
+
+Dal lotto base, con i contatori nuovi: il ⊕ da carta si apre 2,1 volte a
+partita a giocatore e si usa 0,8 (39%); la finestra dopo la costruzione si
+apre 12,2 e si usa 2,0 (16%).
+
 ## Come rifare il conto
 
 ```bash
+# quarantatreesima misura: gli sconti sugli edifici (registro 169), controprova sul file base
+python3 tools/genera_cards_v3.py --variante sconti_edifici
+godot --headless res://scenes/audit_partita.tscn -- --players 3 --games 300 --seed 700000 --giro tutte \
+  --dati data/proposte/cards-v3-era1-sconti_edifici.json --rapporto 1 > s.csv 2> s.err
 # quarantaduesima misura: le spinte della Lampo (registro 168); la tabella SPINTE_V3 ha ora lampo_zero=0,
 #   `--spinta lampo_zero=-1` rifa' la base della quarantunesima
 godot --headless res://scenes/audit_partita.tscn -- --players 3 --games 300 --seed 700000 --giro tutte \
