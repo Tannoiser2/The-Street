@@ -380,7 +380,8 @@ static func end_era_after_event(gs: GameState) -> void:
 	# quel che l'era ha dato. `bump` somma, quindi si parte da zero.
 	for p in gs.players:
 		for k in ["az_costruisci", "az_potenzia", "az_passa", "potenziamenti_piazzati", "extra_aperti",
-				"extra_usati", "scavo_scavato", "cambi", "sconti_v3"]:
+				"extra_usati", "scavo_scavato", "cambi", "sconti_v3", "az3_scelta_propri", "az3_scelta_altrui",
+				"az3_scelta_nessuna", "compensi"]:
 			p.bump("snap_e%d_%s" % [gs.era, k], int(p.counters.get(k, 0)))
 		# Anche le entrate per fonte (`in_<fonte>_<risorsa>`, registro 166): per
 		# sapere da dove vengono le risorse che muoiono, era per era.

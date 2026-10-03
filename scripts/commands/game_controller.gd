@@ -453,6 +453,27 @@ func place_worker(col: int, protect: Building = null, personaggio := "") -> bool
 	EraRules.activate(gs, p.index, col, a_mano)
 	gs.colonna_attivata = col
 	p.bump("az_colonna")
+	# V3 "scelta" (registro 170): chi attiva usa UN edificio della colonna, di
+	# chiunque, e lo brucia per il giro. Con uno solo non c'e' da scegliere;
+	# con piu' d'uno e' una domanda (per i bot la risolve StrategyBot). La
+	# scelta della tessera a mano (umani) non convive ancora con questa.
+	if PersonaggiV3.scelta_attiva() and not a_mano:
+		var ops: Array = PersonaggiV3.opzioni_edificio(gs, col)
+		if ops.size() == 1:
+			PersonaggiV3.usa_edificio(gs, p.index, ops[0], col)
+		elif ops.size() > 1:
+			var uids: Array[int] = []
+			var testi: Array[String] = []
+			for b in ops:
+				uids.append(b.uid)
+				testi.append("%s (giocatore %d): %s" % [b.data["name"], b.owner, str(b.data.get("effect_text", ""))])
+			gs.phase = Enums.Phase.AZIONE
+			gs.pending_choice = {"player": p.index, "kind": "edificio", "col": col,
+				"prompt": "Quale edificio usi?", "options": uids, "etichette": testi}
+			choice_required.emit(gs.pending_choice)
+			return true
+		else:
+			p.bump("az3_scelta_nessuna")
 	if a_mano:
 		var te := TessereEra.tessera(gs, col)
 		var ops := TessereEra.opzioni_scelta(gs, p.index, col)
@@ -1075,6 +1096,13 @@ func choose(uid: int) -> bool:
 			TessereEra.applica_scelta(gs, int(gs.pending_choice["player"]),
 				int(gs.pending_choice["col"]), uid)
 			gs.pending_choice = {}
+			state_changed.emit()
+			return true
+		"edificio":
+			PersonaggiV3.usa_edificio(gs, int(gs.pending_choice["player"]), _per_uid(uid),
+				int(gs.pending_choice["col"]))
+			gs.pending_choice = {}
+			gs.phase = Enums.Phase.AZIONE
 			state_changed.emit()
 			return true
 	var o: Dictionary = _omaggi_da_piazzare.pop_front()

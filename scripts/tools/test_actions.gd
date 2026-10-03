@@ -54,6 +54,7 @@ func _ready() -> void:
 	_run("v2: le carte restituite e i token riscattati (registro 131)", _test_carte_restituite)
 	_run("v2: i Personaggi e l'arte ritoccati (registro 138)", _test_personaggi_e_arte)
 	_run("v3: il draft a passaggio, i Personaggi lavoratori, le risorse che muoiono", _test_v3_era1)
+	_run("v3 scelta: chi attiva usa un edificio della colonna, di chiunque, e lo brucia", _test_v3_scelta)
 	print("\n%d superati, %d falliti" % [_passed, _failed])
 	get_tree().quit(0 if _failed == 0 else 1)
 
@@ -2198,4 +2199,45 @@ func _test_v3_era1() -> void:
 	for p in gs.players:
 		_eq("  fine era: giocatore %d a zero risorse" % p.index, p.total_resources(), 0)
 	_ok("  e la morte e' contata", int(p2.counters.get("morte_e1_pietra", 0)) >= 5)
+	CardDB.load_db(CardDB.DB_PATH)
+
+# LA "SCELTA" (registro 170): con `azione_edificio` = "scelta" chi attiva usa
+# UN edificio della colonna, anche altrui, e lo brucia fino a fine giro; con
+# `azione_edificio_compenso` = "pv" il padrone prende 1 PV quando lo usa un altro.
+func _test_v3_scelta() -> void:
+	if not FileAccess.file_exists("res://data/proposte/cards-v3-era1-scelta_pv.json"): return
+	CardDB.load_db("res://data/proposte/cards-v3-era1-scelta_pv.json")
+	_ok("il file accende la scelta", PersonaggiV3.scelta_attiva())
+	var ctl := _game(3, 4321)
+	var gs := ctl.gs
+	while not gs.pending_choice.is_empty():
+		ctl.choose(int((gs.pending_choice["options"] as Array)[0]))
+	var p0 := gs.current_player()
+	var p1: PlayerState = gs.players[(p0.index + 1) % 3]
+	var focolare := _put(gs, p0.index, "ed_focolare_comune", 3)     # +1 Costruzione
+	var menhir := _put(gs, p1.index, "ed_menhir", 3)                # +1 Idea, di un altro
+	_ok("  senza bruciati la colonna 3 offre due edifici", PersonaggiV3.opzioni_edificio(gs, 3).size() == 2)
+	var liberi := ctl.personaggi_liberi(p0)
+	_ok("  il primo attiva la colonna 3", ctl.place_worker(3, null, liberi[0]))
+	_eq("  e il gioco chiede quale edificio usare", str(gs.pending_choice.get("kind", "")), "edificio")
+	_eq("  con due opzioni", (gs.pending_choice["options"] as Array).size(), 2)
+	var idee_prima := p0.idee
+	var vp_p1 := p1.vp
+	_ok("  usa il Menhir dell'altro", ctl.choose(menhir.uid))
+	_eq("  +1 Idea a chi attiva", p0.idee - idee_prima, 1)
+	_eq("  +1 PV di compenso al padrone", p1.vp - vp_p1, 1)
+	_eq("  il Menhir e' bruciato: resta solo il Focolare", PersonaggiV3.opzioni_edificio(gs, 3).size(), 1)
+	_eq("  e si e' in fase azione", gs.phase, Enums.Phase.AZIONE)
+	ctl.pass_action()
+	_eq("  tocca al secondo", gs.current_player().index, p1.index)
+	var pietra_p1 := p1.pietra
+	var vp_p0 := p0.vp
+	var lib1 := ctl.personaggi_liberi(p1)
+	_ok("  il secondo attiva la stessa colonna", ctl.place_worker(3, null, lib1[0]))
+	_ok("  con un edificio solo non c'e' domanda", gs.pending_choice.is_empty())
+	_ok("  e il Focolare del primo gli ha dato almeno 1 Costruzione in piu' della produzione",
+		p1.pietra - pietra_p1 >= 1 + int(CardDB.characters[lib1[0]]["produzione"]["pietra"]))
+	_eq("  +1 PV di compenso al primo", p0.vp - vp_p0, 1)
+	_ok("  ora la colonna 3 non offre niente fino a fine giro", PersonaggiV3.opzioni_edificio(gs, 3).is_empty())
+	_ok("  il Focolare e' segnato bruciato in questo giro", str(gs.bruciati.get(focolare.uid, "")) == PersonaggiV3.giro_corrente(gs))
 	CardDB.load_db(CardDB.DB_PATH)

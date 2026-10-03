@@ -734,7 +734,25 @@ def sconti_edifici(v):
             az, testo = SCONTI_EDIFICI[b["id"]]
             b["azione"] = dict(az); b["azione"]["chi"] = "proprio"; b["effect_text"] = testo
             if b["id"] == "ed_bottega_dartista": b["effects"] = []   # lo sconto permanente della v2 diventa l'azione
-VARIANTI = {"sconti_edifici": sconti_edifici, "lampo_vecchio": lampo_vecchio, "chiunque": chiunque, "extra_sempre": extra_sempre, "senza_extra": senza_extra, "costi_vecchi": costi_vecchi,
+#   --variante scelta       "stile Caylus" (registro 170): chi attiva usa UN edificio della colonna, di chiunque,
+#                           e lo brucia fino a fine giro; niente al padrone. Le condizioni "a ogni tua
+#                           attivazione" / "di un avversario" non hanno piu' senso e cadono: ogni carta dice "Usa:".
+#   --variante scelta_pv    come sopra, con 1 PV al padrone quando lo usa un altro
+def scelta(v):
+    v["constants"]["azione_edificio"] = "scelta"
+    v["constants"]["azione_edificio_compenso"] = "nessuno"
+    for b in v["buildings"]:
+        az = b.get("azione") or {}
+        if az.get("tipo") in ("risorsa", "altri") and az.get("se") in ("proprio", "altrui"): del az["se"]
+        az.pop("chi", None)
+        t = b.get("effect_text", "")
+        for vecchio in ("A ogni tua attivazione:", "A ogni attivazione di un avversario:", "A ogni attivazione:"):
+            t = t.replace(vecchio, "Usa:")
+        if t: b["effect_text"] = t
+def scelta_pv(v):
+    scelta(v)
+    v["constants"]["azione_edificio_compenso"] = "pv"
+VARIANTI = {"scelta": scelta, "scelta_pv": scelta_pv, "sconti_edifici": sconti_edifici, "lampo_vecchio": lampo_vecchio, "chiunque": chiunque, "extra_sempre": extra_sempre, "senza_extra": senza_extra, "costi_vecchi": costi_vecchi,
             "case_seconda": case_seconda, "case_lampo1": case_lampo1, "senza_tuning": senza_tuning,
             "terreno_produce": terreno_produce, "senza_potenziamento_insieme": senza_potenziamento_insieme}
 if variante:

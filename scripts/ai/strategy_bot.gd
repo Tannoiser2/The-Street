@@ -138,6 +138,9 @@ static func play_turn(ctl: GameController, strategia := "bilanciata") -> void:
 		ctl.pass_action()
 		return
 	if racconta: taccuino["col"] = col
+	# "scelta" (registro 170): l'edificio da usare, con lo stesso conto fatto in classifica.
+	if str(gs.pending_choice.get("kind", "")) == "edificio":
+		ctl.choose(_scelta_edificio(gs, strategia))
 
 	# Il Mercante di ossidiana: si converte solo se manca l'oro per la mossa
 	# che si vuole fare, non per abitudine.
@@ -275,6 +278,9 @@ static func classifica_colonne(gs: GameState, p: PlayerState,
 				ctl.gs = copia
 				var protetto: Building = _per_uid(copia, da_salvare.uid) if da_salvare != null else null
 				if not ctl.place_worker(c, protetto, pid): continue
+				# "scelta" (registro 170): sulla copia si sceglie l'edificio come si fara' davvero.
+				if str(copia.pending_choice.get("kind", "")) == "edificio":
+					ctl.choose(_scelta_edificio(copia, strategia))
 				var pc: PlayerState = copia.players[p.index]
 				var mossa := 0.0
 				for v in _opzioni(copia, p.index, c):
@@ -356,6 +362,9 @@ static func _produzione_colonna(gs: GameState, p: PlayerState, col: int) -> floa
 	var q := 0.6 if t == Enums.Terrain.PIANURA or t == Enums.Terrain.COLLINA else 0.5
 	# "attivando arricchite anche i proprietari che ci sono": una colonna dove
 	# ho gia' qualcosa di vivo rende di piu' a me che agli altri.
+	# Con la "scelta" (registro 170) gli edifici altrui si usano come i propri:
+	# il guadagno vero lo misura la simulazione, qui niente pregiudizio.
+	if PersonaggiV3.scelta_attiva(): return q
 	for b in gs.grid.alive_in_column(col):
 		if b.owner == p.index: q += 0.8
 		else: q -= 0.2
@@ -1041,10 +1050,35 @@ static func _scelta_draft(gs: GameState, strategia: String) -> int:
 			meglio = int(i)
 	return meglio
 
+# V3 "scelta" (registro 170): quale edificio usare. Si prova ciascuno su una
+# copia e si tiene quello che rende di piu', con lo stesso conto del
+# piazzamento (`_guadagno_v3`) piu' la mossa migliore che apre.
+static func _scelta_edificio(gs: GameState, strategia: String) -> int:
+	var opzioni: Array = gs.pending_choice["options"]
+	var p: PlayerState = gs.players[int(gs.pending_choice["player"])]
+	var col := int(gs.pending_choice["col"])
+	var meglio := int(opzioni[0])
+	var punteggio := -INF
+	for uid in opzioni:
+		var copia := gs.duplica()
+		var ctl := GameController.new()
+		ctl.gs = copia
+		if not ctl.choose(int(uid)): continue
+		var pc: PlayerState = copia.players[p.index]
+		var mossa := 0.0
+		for v in _opzioni(copia, p.index, col):
+			mossa = maxf(mossa, _valore(copia, pc, v, strategia, col))
+		var q := mossa + _guadagno_v3(gs, p, copia, pc, col, strategia)
+		if q > punteggio:
+			punteggio = q
+			meglio = int(uid)
+	return meglio
+
 static func _scelta(gs: GameState, strategia := "bilanciata") -> int:
 	var opzioni: Array = gs.pending_choice.get("options", [])
 	if opzioni.is_empty(): return 0
 	if str(gs.pending_choice.get("kind", "")) == "draft": return _scelta_draft(gs, strategia)
+	if str(gs.pending_choice.get("kind", "")) == "edificio": return _scelta_edificio(gs, strategia)
 	var meglio := int(opzioni[0])
 	var punteggio := -INF
 	for uid in opzioni:

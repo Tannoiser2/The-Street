@@ -52,6 +52,10 @@ var personaggio_attivo: String = ""
 var acquisto_extra_aperto: bool = false
 # ...e se e' aperto da una costruzione senza carta (registro 160), compra solo potenziamenti.
 var extra_solo_potenziamenti: bool = false
+# V3 "scelta" (registro 170): gli edifici gia' usati in questo giro di
+# piazzamenti, uid -> "era:giro". Chi attiva usa un edificio della colonna e lo
+# brucia fino alla fine del giro.
+var bruciati: Dictionary = {}
 # LE TESSERE USATE NELL'ERA (v2, registro 100): l'effetto di ogni tessera vale
 # una volta per era; qui, colonna per colonna, se e' gia' scattato.
 var tessere_usate: Array[bool] = []
@@ -113,6 +117,7 @@ func duplica() -> GameState:
 	g.personaggio_attivo = personaggio_attivo
 	g.acquisto_extra_aperto = acquisto_extra_aperto
 	g.extra_solo_potenziamenti = extra_solo_potenziamenti
+	g.bruciati = bruciati.duplicate()
 	g.tessere_usate = tessere_usate.duplicate()
 	g.tessere_colonna = tessere_colonna.duplicate()
 	g.tessere_scattate = tessere_scattate.duplicate()

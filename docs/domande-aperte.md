@@ -2688,3 +2688,35 @@ dato è stato importato da lì. Ma due confronti fra ciò che è stampato e
     `SPINTE_V3`; la penalita' sulle carte senza Lampo le faceva scartare le
     carte a Rendita. Dal 25 al 31% con 71 PV, e resta una Lampo. Vittorie fra
     29 e 38.
+169. **Gli sconti sugli edifici.** Il designer: "quando si mette un lavoratore
+    l'azione e' un acquisto, edificio, potenziamento o entrambi in base alle
+    risorse" (e' cosi' nel codice, registro 160); "il ⊕ se serve deve stare su
+    piu' Personaggi e/o edifici" (si decide col contatore nuovo
+    `extra_usati_carta`); "mancano gli sconti, che sono essenziali". Variante
+    `sconti_edifici`: sette azioni "+1 risorsa" o cambio diventano sconti
+    (Trappole su fiume, Insulae Civico, Mulino e Banco Costruzione, Bottega
+    potenziamento, Officina Ingegneria, Caffe' Arte), validi per l'acquisto del
+    turno, quindi solo quando attiva il padrone: chiave nuova `chi: proprio`,
+    perche' `se` nello sconto e' la condizione. Il Lampo +1 e la tessera che si
+    rigira restano sui Personaggi. Misura nella quarantatreesima.
+170. **"Stile Caylus": chi attiva usa un edificio della colonna.** Il
+    designer: "se quando si attiva una colonna un giocatore possa scegliere
+    qualunque edificio, anche quelli non suoi, e brucia quell'effetto per il
+    turno? Quanti cambierebbe in meglio o in peggio?" Poi "Vai". Costante
+    `azione_edificio` = "scelta" (era gia' prevista, letta solo come
+    "proprietario"): dopo tessera e Personaggio chi attiva usa UN edificio
+    vivo della colonna con un'azione, di chiunque; l'edificio e' bruciato fino
+    alla fine del giro di piazzamenti (`gs.bruciati`, uid -> "era:giro"); con
+    uno solo non c'e' domanda, con piu' d'uno e' una `pending_choice` di tipo
+    "edificio" (per i bot la risolve `StrategyBot._scelta_edificio`, provando
+    ciascuno su una copia con lo stesso conto del piazzamento). Compenso al
+    padrone quando lo usa un altro: `azione_edificio_compenso` = "nessuno" |
+    "pv" (1 PV, canale `compenso`). Le condizioni "a ogni tua attivazione" e
+    "di un avversario" non hanno piu' senso e nelle varianti `scelta` e
+    `scelta_pv` cadono: ogni carta dice "Usa:". Il bot non ha pregiudizio sugli
+    edifici altrui (`_produzione_colonna`). Contatori `az3_scelta_propri`,
+    `az3_scelta_altrui`, `az3_scelta_nessuna`, `compensi`. A ragionamento: una
+    decisione vera in piu' a turno, meno morto, interazione diretta, regole
+    piu' semplici; contro, il padrone non guadagna dal suo edificio, fuga sulle
+    carte forti, la Rendita perde le ★ degli altri, il bot costa il triplo.
+    Misura nella quarantaquattresima.

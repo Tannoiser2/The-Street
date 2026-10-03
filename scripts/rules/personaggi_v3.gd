@@ -20,6 +20,48 @@ static func attivo() -> bool:
 static func risorse_muoiono() -> bool:
 	return bool(CardDB.constants.get("risorse_muoiono", false))
 
+# ---- "scelta": chi attiva usa UN edificio della colonna (registro 170) ------
+# Il designer: "quando si attiva una colonna un giocatore possa scegliere
+# qualunque edificio, anche quelli non suoi (stile Caylus), e brucia quell'
+# effetto per il turno". Costante `azione_edificio` = "scelta": l'azione di un
+# solo edificio, a chi attiva, e l'edificio e' bruciato fino alla fine del
+# giro di piazzamenti (ogni giocatore ha piazzato un lavoratore). Compenso al
+# padrone quando lo usa un altro: `azione_edificio_compenso` = "nessuno" | "pv".
+static func scelta_attiva() -> bool:
+	return attivo() and str(CardDB.constants.get("azione_edificio", "proprietario")) == "scelta"
+
+# Il giro di piazzamenti in corso, "era:giro": i lavoratori piazzati finora
+# nell'era (questo compreso) divisi per i giocatori.
+static func giro_corrente(gs: GameState) -> String:
+	var tot := 0
+	for p in gs.players: tot += int(p.workers_used)
+	return "%d:%d" % [gs.era, int(maxi(tot - 1, 0) / gs.n_players)]
+
+# Gli edifici che chi attiva puo' usare: vivi nella colonna, con un'azione,
+# non ancora bruciati in questo giro.
+static func opzioni_edificio(gs: GameState, col: int) -> Array:
+	var out := []
+	if not scelta_attiva(): return out
+	var giro := giro_corrente(gs)
+	for b in gs.grid.alive_in_column(col):
+		var az: Dictionary = b.data.get("azione", {})
+		if az.is_empty() or str(az.get("tipo", "nessuna")) == "nessuna": continue
+		if str(gs.bruciati.get(b.uid, "")) == giro: continue
+		out.append(b)
+	return out
+
+static func usa_edificio(gs: GameState, attivatore: int, b: Building, col: int) -> void:
+	var p: PlayerState = gs.players[attivatore]
+	gs.log_line("Giocatore %d usa %s (di giocatore %d) in colonna %d" % [attivatore, b.data["name"], b.owner, col])
+	esegui_azione(gs, attivatore, b.data.get("azione", {}), col, b.data, attivatore, b)
+	gs.bruciati[b.uid] = giro_corrente(gs)
+	p.bump("az3_scelta_propri" if b.owner == attivatore else "az3_scelta_altrui")
+	if b.owner != attivatore and str(CardDB.constants.get("azione_edificio_compenso", "nessuno")) == "pv":
+		var padrone: PlayerState = gs.players[b.owner]
+		padrone.add_vp("compenso", 1, "azioni")
+		padrone.bump("compensi")
+		gs.log_line("  +1 PV di compenso a giocatore %d" % b.owner)
+
 # ---- il Personaggio piazzato -----------------------------------------
 # Dopo la tessera della colonna e dopo gli edifici: la sua produzione e la
 # sua azione, a chi lo ha piazzato.
@@ -41,7 +83,7 @@ static func attiva_personaggio(gs: GameState, player: int, col: int) -> void:
 # Ogni edificio vivo nella colonna, di chiunque: l'azione al proprietario
 # (costante `azione_edificio` = "proprietario", l'unica letta per ora).
 static func azioni_edifici(gs: GameState, attivatore: int, col: int) -> void:
-	if not attivo(): return
+	if not attivo() or scelta_attiva(): return     # "scelta": lo fa il controller, con la domanda
 	for b in gs.grid.alive_in_column(col):
 		var az: Dictionary = b.data.get("azione", {})
 		if az.is_empty(): continue
