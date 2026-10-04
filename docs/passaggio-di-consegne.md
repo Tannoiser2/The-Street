@@ -59,6 +59,12 @@ scelgono nella schermata di gioco (`godot res://scenes/gioca.tscn`) o con `--dat
   due), che non stanno nel mazzo dell'era. Le misure 1–18 in `docs/la-terza-risorsa.md` dicono
   perché ogni scelta è quella.
 
+- **v3 di prova** (`data/proposte/cards-v3-era1.json`, generato da `tools/genera_cards_v3.py`;
+  `docs/passaggio-v3.md` e `docs/proposte/v3-*.md`): i Personaggi sono i lavoratori, le risorse
+  muoiono a fine era, chi attiva una colonna usa un edificio della colonna ("stile Caylus"). Tutto
+  acceso dalla costante `turno_v3`; la schermata di gioco non la offre ancora (solo l'audit).
+  Registri 153-175, misure 31-48.
+
 **I bot.** `StrategyBot` versione 2, sei strategie (Rendita, Lampo, Scavo, Bilanciata, Obiettivi,
 Continuità) sullo stesso valutatore con **spinte** che sono handicap, non aiuti (registro 114).
 Le tabelle sono in `scripts/ai/strategy_bot.gd`: `SPINTE_V1` (non si tocca), `SPINTE_V2` e
@@ -67,8 +73,8 @@ Le tabelle sono in `scripts/ai/strategy_bot.gd`: `SPINTE_V1` (non si tocca), `SP
 2, 3 e 4 (diciottesima misura): a 2 Rendita 56 e a 3 Rendita 38 sono sul bordo alto.
 `--spinta k=v,...` prova una taratura senza toccare le tabelle.
 
-**I test** (scene headless, sempre con `timeout` e l'output su file): `test_actions` 279,
-`test_effects` 503, `test_schema_validator` 13, `test_view` 492. `test_view` ha bisogno della
+**I test** (scene headless, sempre con `timeout` e l'output su file): `test_actions` 435 (tre per
+la v3), `test_effects` 503, `test_schema_validator` 13, `test_view` 528. `test_view` ha bisogno della
 grafica importata (`python3 tools/estrai_grafica.py` e poi `godot --headless --import`): senza,
 due test sul piano della tessera falliscono ("profondo quanto la tessera", "uno per colonna")
 e non sono regressioni.
@@ -158,6 +164,9 @@ container può ripartire.
 
 ## Cosa resta aperto
 
+- **La v3** e' su main come file di prova (PR #73): quel che resta e' in `docs/passaggio-v3.md`,
+  "Prossimi passi" (l'interfaccia a schermo non conosce la v3, con la domanda "quale edificio
+  usi?"; le decisioni del designer sui numeri delle ultime misure).
 - **La grafica della v2.** Le carte degli edifici v2 ci sono (registro 120, cinque PDF per era):
   a schermo la v2 le usa. Da correggere nel PDF tre case col Lampo vecchio e le Case operaie da
   togliere. Mancano ancora le sagome v2, i Personaggi del draft e le tessere con l'effetto: il

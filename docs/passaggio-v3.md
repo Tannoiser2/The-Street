@@ -43,7 +43,21 @@ quello che è cambiato da allora e la nuova direzione che il designer vuole pren
   --dati <file> --rapporto 1`; ogni partita è una riga `J {json}` nello stderr con canali di PV,
   contatori (`cnt`) e lo stato finale degli edifici.
 
-## Cosa è su main (fino alla PR #69)
+## Cosa è su main con la PR #73 (4 ottobre 2026): la v3 di prova
+
+Tutto acceso dalla costante `turno_v3` del file `data/proposte/cards-v3-era1.json` (generato da
+`tools/genera_cards_v3.py`, mai a mano); la v1.5 e la v2 non cambiano. In breve (registri 153-175,
+misure 31-48): draft a passaggio (mano di 4, se ne tiene una), i Personaggi sono i lavoratori e
+hanno produzione e azione, ogni edificio ha un'azione, le risorse muoiono a fine era (ere 1-4),
+catena di costi (terreni a zero, spianare caro, non si spiana la stessa era), potenziamento insieme
+alla costruzione, acquisto extra ⊕ solo da carta e con lo sconto dentro, sconti senza condizione su
+dieci carte, le cinque carte grandi "a terra oppure sopra", il Lampo del mazzo pari al costo, e la
+regola "stile Caylus": chi attiva una colonna usa UN edificio fra quelli in piedi, suo o altrui, e
+lo brucia fino a fine giro. Il bot (`SPINTE_V3`, sette strategie con la Ritrovamenti) sceglie
+Personaggio, colonna ed edificio sulla copia della partita. Le misure: `--fino_era N`, le
+fotografie di fine era con le entrate per fonte, `tools/misura_era.py --era N`.
+
+## Cosa era su main prima (fino alla PR #69)
 
 Registri 140-147, in breve:
 - 140 menu e riepilogo ingranditi (lente); 141 posto del giocatore in due colonne;
@@ -57,21 +71,14 @@ Registri 140-147, in breve:
 
 ## Cosa è aperto
 
-- **PR #71** (bozza, ramo `claude/evento-finale`): evento finale *Il giudizio del tempo* (forza 4,
-  registro 149), gilde dell'era 5 (Condominio, Officina, Ponte in acciaio, Stazione, registro
-  150), **regole semplici dello scavo** (registro 151: spianare = terrapieno senza tessere; su una
-  rovina 1 PV per tessera sotto il nuovo edificio; nell'era 5 si girano le tessere sotto e solo
-  quelle contano a fine partita), le varianti `scavo_due`, `tessere_doppie`, `spianare_caro`,
-  `strada_corta`, `caro_e_corta` (registro 152), i contatori della produzione per era (148) e
-  la trentesima misura. Test verdi, v1.5 identica. **Non mergiata**: il designer non ha ancora
-  scelto, e con la v3 molte di queste cose vanno ripensate.
-- **PR #70** (bozza): i soli contatori della produzione, superata dalla #71: si può chiudere.
+Le PR #70 e #71 (evento finale, gilde dell'era 5, regole semplici dello scavo, varianti
+`scavo_due`, `tessere_doppie`, `spianare_caro`, `strada_corta`, contatori per era) sono state
+mergiate il 1° ottobre: sono la base da cui la v3 è partita. Con la PR #73 (4 ottobre) la v3 di
+prova è su main; quel che resta è nei "Prossimi passi" dello stato qui sotto.
 
-I numeri chiave dell'ultima misura (3 giocatori, regole semplici + evento finale + gilde):
+I numeri chiave della v2 prima della v3 (3 giocatori, regole semplici + evento finale + gilde):
 Scavo 7 PV a testa (bonus 2,6 + riscoperta 4,7), Lampo 16,5, Rendita 13,5, Continuità 17,9;
-si spianano 21 edifici propri a partita, si riscoprono solo ~5 rovine (nell'era 5 si costruiscono
-6-7 edifici in tutto). Spianare caro (1 Costruzione per casella) porta gli spianati a 9 e la
-Rendita a 20. La strada corta da sola non aiuta.
+si spianano 21 edifici propri a partita, si riscoprono solo ~5 rovine.
 
 ## La produzione oggi (la base per la v3)
 

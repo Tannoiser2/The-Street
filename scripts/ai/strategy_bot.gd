@@ -57,7 +57,16 @@ const STRATEGIE_V2: Array[String] = ["rendita", "lampo", "scavo", "continuita", 
 static func e_v2() -> bool:
 	return (str(CardDB.ruleset).begins_with("v2") or str(CardDB.ruleset).begins_with("v3"))
 
+# IL CANONE DELLA V3 (registro 173): le sei della v2 piu' la Ritrovamenti, la
+# strategia "scheletri e arte" chiesta dal designer fin dall'inizio della v3:
+# Personaggi con lo Scavo alto in ogni era (gli scheletri), token Arte, edifici
+# larghi che lasciano tessere, e nell'era 5 costruire sopra le proprie rovine
+# per riportarle alla luce (le tessere valgono per intero, con scheletri e arte).
+const STRATEGIE_V3: Array[String] = ["rendita", "lampo", "scavo", "continuita", "bilanciata",
+	"obiettivi", "ritrovamenti"]
+
 static func canone() -> Array[String]:
+	if PersonaggiV3.attivo(): return STRATEGIE_V3
 	return STRATEGIE_V2 if e_v2() else STRATEGIE
 
 static func tutte() -> Array[String]:
@@ -673,7 +682,10 @@ static var spinte_override := {}
 # -0,2 di `scavo_terra` la Scavo scende a 27).
 const SPINTE_V3 := {"rendita_per_era": 1.3, "rendita_zero": -1.5, "lampo": 0.8, "lampo_zero": 0.0,
 	"scavo_premio": 0.8, "scavo_terra": -0.5, "scavo_terra_scavo": 0.5, "protezione_attesa": 2.0,
-	"lampo_potenzia": 1.5, "lampo_sopra": 0.0, "obiettivi_peso": 1.0, "continuita_peso": 1.0}
+	"lampo_potenzia": 1.5, "lampo_sopra": 0.0, "obiettivi_peso": 1.0, "continuita_peso": 1.0,
+	# la Ritrovamenti (registro 173): lo scheletro del Personaggio al draft, le caselle che
+	# lasceranno tessere, la riscoperta delle proprie rovine nell'era 5 (per tessera), l'Arte
+	"ritro_scheletro": 0.5, "ritro_caselle": 0.6, "ritro_riscoperta": 1.2, "ritro_arte": 0.6}
 
 static func spinte() -> Dictionary:
 	var base := SPINTE_V2 if e_v2() else SPINTE_V1
@@ -803,6 +815,20 @@ static func _valore_costruzione(gs: GameState, p: PlayerState, v, strategia: Str
 		"verticale":
 			if sopra: q += 3.0 + 1.2 * float(par.get("level", 1))
 			else: q -= 1.5
+		"ritrovamenti":
+			# Ogni casella di un edificio lascera' una tessera quando cadra':
+			# le carte larghe valgono di piu'. Nell'era 5 costruire sopra le
+			# proprie rovine mai scavate le riporta alla luce: le tessere
+			# passano da meta' a intero, con scheletri e arte.
+			q += float(int(d["width"]) * int(d.get("depth", 1))) * float(sp["ritro_caselle"])
+			if sopra and gs.era >= int(CardDB.constants["eras"]) and TessereScavo.attive():
+				var q3 := BuildRules.quote_above(gs, p.index, d, col_from)
+				var tessere := 0
+				for b in q3.bases:
+					if b.owner == p.index and not b.scavata: tessere += TessereScavo.quante(b)
+				if tessere > 0:
+					dett["rovine mie riportate alla luce (tessere)"] = float(tessere) * float(sp["ritro_riscoperta"])
+					q += float(tessere) * float(sp["ritro_riscoperta"])
 		"continuita":
 			var catena := _premio_collezione(mie, d) if collezione else _premio_catena(mie, d)
 			q += catena * float(sp["continuita_peso"])
@@ -883,6 +909,13 @@ static func _valore_potenziamento(gs: GameState, p: PlayerState, v, dett := {}, 
 	# conta sempre sono punti sicuri) le da' il canale che le mancava.
 	var spinta_lampo := float(spinte()["lampo_potenzia"]) if strategia == "lampo" else 0.0
 	if spinta_lampo != 0.0: dett["spinta della strategia lampo"] = spinta_lampo
+	# La Ritrovamenti (registro 173): un token Arte vale il suo Scavo quando
+	# un'icona arte lo ritrova.
+	if strategia == "ritrovamenti":
+		var upg: Dictionary = CardDB.upgrades.get(str(par.get("upg_id", "")), {})
+		if str(upg.get("family", "")) == "arte":
+			spinta_lampo += float(upg.get("scavo", 0)) * float(spinte()["ritro_arte"])
+			dett["arte da ritrovare"] = float(upg.get("scavo", 0)) * float(spinte()["ritro_arte"])
 	# Una carta infilata sotto dura quanto l'edificio che la ospita.
 	var vive := b.effective_resistance() >= gs.era + 1
 	dett["l'ospite regge l'evento" if vive else "l'ospite rischia di crollare"] = \
@@ -939,7 +972,7 @@ static func _valore_personaggio_v3(gs: GameState, p: PlayerState, d: Dictionary,
 			if strategia == "lampo": a += 0.5
 		"resistenza": a = 0.5 * float(az.get("n", 1)) + (0.6 if strategia == "rendita" else 0.0)
 		"sconto": a = 0.8 if not az.has("se") else 0.5
-		"scavo": a = 0.3 * float(az.get("n", 1)) + (0.8 if strategia == "scavo" else 0.0)
+		"scavo": a = 0.3 * float(az.get("n", 1)) + (0.8 if strategia == "scavo" or strategia == "ritrovamenti" else 0.0)
 		"lampo": a = 1.0 + (0.5 if strategia == "lampo" else 0.0)
 		"altri": a = 0.6
 		"acquisto": a = 0.4     # si usa poco: quando si apre, spesso non resta niente da spendere (registro 159)
@@ -953,6 +986,10 @@ static func _valore_personaggio_v3(gs: GameState, p: PlayerState, d: Dictionary,
 			if b.owner != p.index: continue
 			for cl in b.data["classes"]: mia[cl] = int(mia.get(cl, 0)) + 1
 		if int(mia.get(str(d.get("class", "")), 0)) >= 2: a += 0.4
+	# La Ritrovamenti (registro 173): lo scheletro vale lo Scavo stampato sul
+	# Personaggio, uno per era, quando un'icona lo ritrova.
+	if strategia == "ritrovamenti" and d.has("scavo"):
+		a += float(d["scavo"]) * float(spinte()["ritro_scheletro"])
 	dett["la sua azione"] = a
 	return q + a + 0.5
 

@@ -2769,3 +2769,25 @@ dato è stato importato da lì. Ma due confronti fra ciò che è stampato e
     Scavo e' un canale di tutti; il suo margine sono i ritrovamenti, che nei
     bot non ci sono ancora.
 
+173. **La strategia Ritrovamenti nei bot.** Il designer: "Ok procedi e poi
+    mergia" (i tre punti aperti: Ritrovamenti, carte grandi rare, la domanda
+    per le persone). La Ritrovamenti e' la "scheletri e arte" chiesta fin
+    dall'inizio della v3: nel file v3 le tessere scavo valgono solo se
+    riportate alla luce nell'era 5 (`riscoperta: solo_scavate`), con lo
+    scheletro del Personaggio dell'era e i token Arte, e chi costruisce sopra
+    incassa 1 PV per tessera (`premio: sotto`). La strategia (settima del
+    canone v3, `STRATEGIE_V3`): al draft lo Scavo stampato del Personaggio
+    (`ritro_scheletro` 0,5), le caselle dell'edificio che lasceranno tessere
+    (`ritro_caselle` 0,6), nell'era 5 costruire sopra le proprie rovine mai
+    scavate (`ritro_riscoperta` 1,2 per tessera), i token Arte (`ritro_arte`
+    0,6 per Scavo), l'azione ⚱ come la Scavo. Misura nella quarantottesima.
+174. **Le tre carte grandi rare.** Fortezza (⚒4, collina 2x2), Grattacielo
+    (3 binari) e Stazione (3 colonne di pianura) si costruivano 0,03-0,14
+    volte a partita per terreno e forma. Variante `grandi`: Stazione su
+    qualunque terreno, Grattacielo a 2 binari, Fortezza ⚒3 🪙1. Misura nella
+    quarantottesima.
+175. **La domanda "quale edificio usi?" per le persone.** Non fatta:
+    l'interfaccia a schermo non conosce la v3 (il file di prova non e' fra
+    quelli offerti), e la scelta e' una `pending_choice` di tipo "edificio"
+    con `options` (uid) ed `etichette`, pronta per un pannello come quello
+    del draft. Resta nel passaggio.
