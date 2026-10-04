@@ -2706,7 +2706,10 @@ dato è stato importato da lì. Ma due confronti fra ciò che è stampato e
     (sconti usati 1,45 → 1,68 a partita, morto e vittorie uguali), perche' lo
     sconto scatta solo se il padrone attiva quella colonna e compra in quel
     turno. **Il file base non cambia**; la decisione dipende dalla "scelta"
-    (registro 170), dove lo sconto va a chi sta per comprare.
+    (registro 170), dove lo sconto va a chi sta per comprare. Misurato anche
+    quello (quarantacinquesima): sconti usati 1,57 → 1,92, il resto uguale.
+    Per pesare, gli sconti vanno su piu' carte e senza condizione, o dentro
+    il ⊕: **da decidere**.
 170. **"Stile Caylus": chi attiva usa un edificio della colonna.** Il
     designer: "se quando si attiva una colonna un giocatore possa scegliere
     qualunque edificio, anche quelli non suoi, e brucia quell'effetto per il

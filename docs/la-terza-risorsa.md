@@ -2368,6 +2368,29 @@ sui numeri. In corso la controprova `scelta_sconti`, la "scelta" con i sette
 sconti sugli edifici (quarantatreesima), dove lo sconto va a chi sta per
 comprare.
 
+## Quarantacinquesima misura: la "scelta" con gli sconti sugli edifici
+
+Controprova `scelta_sconti`: la "scelta" della quarantaquattresima piu' i sette
+sconti della quarantatreesima, che qui vanno a chi usa l'edificio, cioe' a chi
+sta per comprare. Stessi 300 semi.
+
+| a giocatore | scelta | scelta_sconti |
+|---|---|---|
+| azioni sconto scattate / sconti usati a partita | 5,1 / 1,57 | 6,0 / 1,92 |
+| morto per era | 2,5 / 2,2 / 2,4 / 2,4 / 2,1 | 2,5 / 2,2 / 2,3 / 2,3 / 2,0 |
+| speso per era | 8,3 / 9,0 / 7,5 / 7,1 / 7,1 | 8,3 / 8,8 / 7,2 / 7,0 / 6,9 |
+| costruzioni / potenziamenti a partita | 15,1 / 4,5 | 15,0 / 4,4 |
+| PV a testa | 74,8 | 74,2 |
+| vittorie Bil / Cont / Lampo / Obi / Rend / Scavo | 34 / 28 / 33 / 44 / 30 / 31 | 33 / 28 / 33 / 43 / 31 / 32 |
+
+Anche qui poco: le sette carte vengono usate circa una volta a partita e lo
+sconto si spende 0,35 volte in piu'. Chi sceglie preferisce una risorsa, che
+si tiene, a uno sconto che vale solo se nel turno compra la cosa giusta. Il
+morto cala di 0,1 nelle ere 3-5 e la spesa di 0,1-0,3: lo sconto ha sostituito
+una risorsa che a volte si spendeva. **Per pesare, gli sconti dovrebbero stare
+su piu' carte ed essere senza condizione** ("-1 a quel che compri in questo
+turno"), oppure stare dentro il ⊕; da decidere con il designer.
+
 ## Come rifare il conto
 
 ```bash
