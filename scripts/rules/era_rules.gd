@@ -67,9 +67,13 @@ static func activate(gs: GameState, player: int, col: int, tessera_a_mano := fal
 
 	for b in g.alive_in_column(col):
 		paga_edificio(gs, b)
+	# V3: dopo la produzione, l'azione di ogni edificio vivo nella colonna, al
+	# suo proprietario; e in coda il Personaggio piazzato, produzione e azione.
+	PersonaggiV3.azioni_edifici(gs, player, col)
 
 	Effects.apply_on_activate(gs, player, col)
 	if not tessera_a_mano: TessereEra.all_attivazione(gs, player, col)
+	PersonaggiV3.attiva_personaggio(gs, player, col)
 
 	# UNA VOLTA PER ERA (manopola `once_per_era`, spenta nei dati): la prima
 	# attivazione di un Centro Urbano in un'era paga, le altre nella stessa
@@ -354,10 +358,13 @@ static func end_era_after_event(gs: GameState) -> void:
 			var tot := 0
 			for k in p.counters:
 				var chiave := str(k)
-				if chiave.begins_with("in_") and chiave.ends_with("_" + r) and not chiave.begins_with("in_avanzo"):
+				# Ne' l'avanzo ne' il cambio 1:1 (v3) sono produzione: sono conversioni.
+				if chiave.begins_with("in_") and chiave.ends_with("_" + r) and not chiave.begins_with("in_avanzo") \
+						and not chiave.begins_with("in_cambio"):
 					tot += int(p.counters[k])
 			p.bump("cum_e%d_%s" % [gs.era, r], tot)
 		p.bump("resta_e%d_pietra" % gs.era, p.pietra)
+		p.bump("resta_e%d_oro" % gs.era, p.oro)
 		p.bump("resta_e%d_idee" % gs.era, p.idee)
 	Effects.era_end_resources(gs)
 	Effects.apply_era_end_characters(gs)
@@ -368,12 +375,33 @@ static func end_era_after_event(gs: GameState) -> void:
 	if gs.era < 5:
 		census(gs)
 	bury_characters(gs)
+	# La misura per era (v3, registro 162): dopo il censimento si fotografano i
+	# contatori cumulativi e i punti per canale; la differenza fra due ere e'
+	# quel che l'era ha dato. `bump` somma, quindi si parte da zero.
+	for p in gs.players:
+		for k in ["az_costruisci", "az_potenzia", "az_passa", "potenziamenti_piazzati", "extra_aperti",
+				"extra_usati", "scavo_scavato", "cambi", "sconti_v3", "az3_scelta_propri", "az3_scelta_altrui",
+				"az3_scelta_nessuna", "compensi"]:
+			p.bump("snap_e%d_%s" % [gs.era, k], int(p.counters.get(k, 0)))
+		# Anche le entrate per fonte (`in_<fonte>_<risorsa>`, registro 166): per
+		# sapere da dove vengono le risorse che muoiono, era per era.
+		for k in p.counters:
+			var chiave := str(k)
+			if chiave.begins_with("in_") and not chiave.begins_with("in_avanzo"):
+				p.bump("snap_e%d_%s" % [gs.era, chiave], int(p.counters[k]))
+		p.bump("pv_e%d" % gs.era, p.vp)
+		for ch in p.vp_breakdown:
+			p.bump("pv_e%d_%s" % [gs.era, str(ch)], int(p.vp_breakdown[ch]))
 	# "Fra un'era e l'altra passano generazioni": la dispersione prepara l'era
 	# successiva, e dopo l'era 5 non ce n'e' una. Decisione del designer
 	# (domande-aperte punto 17): le risorse residue restano, perche' sono il
 	# secondo criterio di spareggio.
+	# V3: le risorse nascono e muoiono nell'era (costante `risorse_muoiono`):
+	# al posto della dispersione, tutto a zero. Nell'era 5 restano come
+	# sempre: sono il secondo criterio di spareggio.
 	if gs.era < 5:
-		disperse(gs)
+		if PersonaggiV3.risorse_muoiono(): PersonaggiV3.azzera(gs)
+		else: disperse(gs)
 	for b in gs.grid.buildings:
 		b.protection = 0
 		b.protected_by = -1

@@ -143,3 +143,42 @@ Prima mossa proposta per la sessione nuova: scrivere con il designer la scheda d
 prova** (16 Personaggi con produzione e azione, gli edifici di quell'era con produzione e
 azione), simularla e guardare la tabella della produzione per giro, prima di toccare tutte le
 cinque ere.
+
+
+## Stato al 3 ottobre 2026 (ramo `claude/v3-era-1`, PR #73 in bozza)
+
+La v3 e' nel codice, accesa dalla costante `turno_v3` del file dati (`data/proposte/cards-v3-era1.json`,
+generato da `tools/genera_cards_v3.py` dalla v2; la v1.5 e la v2 non cambiano, `verifica_riferimento`
+identico). Le cinque ere sono scritte (registri 153-163, misure dalla trentunesima alla trentasettesima): le ere
+1 e 2 misurate e nel metro, le ere 3-5 in prima stesura da uno stampo, misurate una volta sulla partita
+intera e da ritarare. I documenti di lavoro: `docs/proposte/v3-metro.md` (il metro), `v3-era-1.md`,
+`v3-era-2.md`, `v3-ere-3-5.md`.
+
+Le regole decise dal designer lungo la strada, tutte nel file base: risorse che muoiono a fine era,
+draft a passaggio alternato, Personaggi lavoratori con produzione e azione, azioni degli edifici al
+proprietario, terreno di base che non produce, spianare caro e mai nella stessa era, costi con la
+regola "l'edificio chiede la risorsa che i suoi potenziamenti non chiedono", una casa sempre
+comprabile (Ripari, Tuguri a costo flessibile), potenziamento insieme alla costruzione e nelle
+colonne adiacenti, acquisto extra solo dall'azione ⊕ di una carta, sconti per classe e per
+potenziamento, bot che sa che le risorse muoiono e che tiene le risorse per comprare meglio.
+
+Come si misura: `--fino_era N` nell'audit, `--rapporto 1`, poi `python3 tools/misura_era.py e.err --era N`
+(dall'era 2 l'era e' la differenza fra le fotografie di fine era). 300 partite a 3 giocatori, seme 700000,
+`--giro tutte`; ogni lotto fino all'era 2 dura circa 12 minuti su questo container.
+
+Prossimi passi: il morto e' 2,0-2,2 in tutte le ere (registro 167: Lampo pari al costo, Fondaco e
+Periferia in Costruzione), il budget del metro (1-2) e' a un passo; le vittorie stanno fra 29
+(Scavo) e 38 (Obiettivi) dopo `lampo_zero` a zero nella tabella `SPINTE_V3` (registro 168); la
+Scavo e' ora la piu' debole; il ⊕ si apre 2,1 volte a partita a giocatore e si usa 0,8 (39%), la finestra dopo la costruzione
+12,2 e 2,0 (16%): da rendere piu' utile prima di metterlo su altre carte (registro 169); gli sconti
+sugli edifici (varianti `sconti_edifici`, `scelta_sconti`) non muovono nulla ne' per il padrone ne'
+con la "scelta" (quarantatreesima e quarantacinquesima): sette carte condizionate sono poche, servono
+su piu' carte e senza condizione, o dentro il ⊕; la "scelta" stile Caylus (registro 170, varianti `scelta`, `scelta_pv`, `scelta_sconti`) e'
+misurata nella quarantaquattresima: una decisione in piu' a turno, piu' spesa, meno passi, +0,2-0,5
+di morto, Obiettivi 44 e Continuita' 28, il compenso a 1 PV troppo forte; decisione del designer;
+le carte ancora rare
+(Fortezza, Grattacielo, Stazione per terreno e forma; Conceria, Arsenale, Ponte in acciaio); il ⊕
+che nessuno vuole al draft; l'interfaccia a schermo per la v3 (il file di prova non e' fra quelli
+che la schermata di gioco offre) e la strategia Ritrovamenti nei bot. Dal registro 166 le azioni
+degli edifici che danno risorse scattano solo quando attiva il proprietario ("A ogni tua
+attivazione"), e le cinque carte grandi vanno "a terra oppure sopra" (`a_terra_o_sopra`).

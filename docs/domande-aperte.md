@@ -2421,3 +2421,321 @@ dato è stato importato da lì. Ma due confronti fra ciò che è stampato e
     valgono 0. Scelte del designer: si girano solo le tessere sotto
     l'edificio dell'era 5, e le non girate valgono niente. Misura insieme a
     evento finale e gilde.
+153. **La v3: il metro e la scheda dell'era 1.** Il designer (1 ottobre): "Troppe
+    risorse vanno sprecate [...] Le risorse nascono e muoiono nell'era"; i
+    Personaggi si prendono con un draft a passaggio (4 a testa, se ne tiene uno
+    e si passa a destra) e sono gli unici lavoratori, con produzione e azione;
+    ogni edificio ha produzione e azione; "si puo' lavorare per ere quasi a
+    compartimenti", con lo scopo di "piu' strategie [...] equilibrate fra di
+    loro e che nessuna sia palesemente dominante" (Lampo, Rendita, Scavo,
+    ritrovamenti, generi). Si parte dall'era 1, non dalla 2: si simula dalla
+    strada vuota, e quel che si costruisce li' e' il materiale dello Scavo
+    dopo. Due proposte da leggere e correggere: `docs/proposte/v3-metro.md`
+    (il cambio in PV, il budget di un'era, il vocabolario di dieci azioni, la
+    sagoma delle carte) e `docs/proposte/v3-era-1.md` (16 Personaggi, 15
+    edifici con l'azione, le costanti della prova). Il limite noto: nell'era 1
+    Scavo e scheletri non si vedono, si misurano con la coppia 1-2.
+154. **Le regole della prova (provvisorie, da confermare).** Nel file generato
+    `data/proposte/cards-v3-era1.json` (`tools/genera_cards_v3.py`): draft a
+    passaggio con direzione **alternata** (ere 1, 3, 5 a destra; 2 e 4 a
+    sinistra), **senza Dinastia**, azione degli edifici **al proprietario** a
+    ogni attivazione della colonna di chiunque, **nessun tetto** alle risorse
+    dentro l'era, si parte da **zero** risorse, le risorse muoiono a fine
+    era (nell'era 5 restano: spareggio). Le scelte che un'azione richiede
+    (quale risorsa cambiare, quale edificio proteggere) le fanno i bot con
+    una regola fissa scritta in `scripts/rules/personaggi_v3.gd`. Dolmen e
+    Menhir a Rendita 1 (da misurare contro il 2 di oggi). La v1.5 e la v2
+    non cambiano: tutto e' acceso dalla costante `turno_v3`.
+155. **La prima misura dell'era 1 della v3 (trentunesima misura).** Trecento
+    ere 1 giocate da sole (`--fino_era 1`), 3 giocatori: si producono 14
+    risorse a testa (budget del metro 10-12: terreno 4, tessera 3, Personaggi
+    4, edifici 1,6, azioni 1,1), se ne spendono 5,4 e ne **muoiono 8,7**
+    (budget 1-2); quattro costruzioni e zero potenziamenti a testa. La Lampo
+    vince il 73% delle ere giocate da sole (atteso: e' l'unico canale che paga
+    nell'era), Lampo 5,6 PV e Rendita 1,2 di censimento, tutte sotto il metro.
+    Il Guerriero e' preso quasi sempre per primo (giro 1,11), il Custode delle
+    ossa per ultimo (3,77). Il pozzo manca ed e' la prima cosa da decidere:
+    potenziamenti nella colonna adiacente (controprova nella misura), meno
+    produzione dal tabellone (il terreno di base potrebbe non produrre piu'),
+    piu' azioni di cambio e di PV. La controprova con i potenziamenti nella
+    colonna adiacente non sposta il morto (8,6): si potenzia al posto di
+    costruire, con quattro azioni si spende lo stesso (circa 6 su 14). Il
+    bot non sa ancora che le risorse muoiono
+    e non potenzia nell'era 1: una parte del morto e' sua. **Da decidere con
+    il designer** prima di toccare le carte.
+156. **Mancanza, non surplus: le leve del pozzo.** Il designer, letta la prima
+    misura: "si puo' ricalibrare tutto, anche gli edifici potrebbero costare
+    di piu'"; la catena dei Castelli di Borgogna ("quando si comprano edifici
+    ti permette di prenderne o comprarne altri"); "trova modi per spendere piu'
+    risorse o far fare piu' azioni o acquisti oltre i 4 consentiti [...] Ci
+    deve essere una mancanza di risorse non un surplus" (Dune Imperium). Tre
+    leve misurate da sole e insieme (trentunesima misura, "Le leve del
+    pozzo"): costi +1, terreno che non produce, l'**acquisto extra** (costante
+    `acquisto_extra`: dopo l'azione del turno si compra ancora un
+    potenziamento o una casa della riserva, pagando, senza lavoratore). Il
+    bot usava l'extra per spianare i propri Dolmen con una casa (Circolo
+    spianato nell'81% delle partite): serve lo spianare caro del registro
+    152. La **catena** (terreno a zero, acquisto extra, spianare caro) e' la
+    prima in cui si spende piu' di quanto muore (7,0 contro 3,1); con i
+    **costi misti** (+1 della seconda risorsa della classe) il morto scende a
+    2,3 su tutte e tre le risorse e la Lampo al 55%, ma l'era si fa povera
+    (2,8 costruzioni a testa). Proposta: la catena come base dell'era 1 e una
+    via di mezzo sui costi. **Da decidere con il designer.**
+157. **L'acquisto extra solo dalle carte; catena e costi misti nel file base;
+    i bot sanno che le risorse muoiono; una casa sempre comprabile.** Il
+    designer, letta la misura delle leve: "L'acquisto extra non si fa sempre,
+    ci vuole un effetto di una carta o personaggio o edificio o tessera
+    terreno; catena si' e costi misti; poi si' i bot devono sapere che le
+    risorse si perdono; inoltre i giocatori devono poter comprare sempre
+    almeno un edificio, magari le case di fango o qualcosa che costa poco".
+    Nel file base dell'era 1: terreno di base a zero (resta la tessera),
+    spianare caro, +1 della seconda risorsa della classe sugli edifici del
+    mazzo (le case come sono), i Ripari a costo 1 pagabile in Costruzione o
+    Denaro. L'acquisto extra e' l'azione ⊕ del vocabolario: la danno il
+    Capotribu' e il Mercante di ossidiana (al posto di 🛡 e ⇄), le Capanne
+    e la Cava a chi le possiede quando le attiva (al posto di ⇄), e la
+    tessera Sentiero dei pastori (al posto di +1 Denaro). Il bot sconta le
+    risorse che non potra' spendere nei piazzamenti rimasti (circa 2,5
+    l'uno): all'ultimo lavoratore spendere non costa niente e tenere non
+    vale niente (`StrategyBot._fattore_morte`). Controprove: `extra_sempre`,
+    `senza_extra`, `costi_vecchi`. Le otto varianti del primo giro sono
+    state tolte: le rigenera il generatore al commit 2db6223.
+158. **La trentaduesima misura: la mancanza c'e', l'era e' di case.** Con il
+    file base del registro 157 e il bot che sa che le risorse muoiono: si
+    produce 8,7 a testa, si spende 7,2, muore 1,5 (mezza risorsa per tipo,
+    dentro il budget). Ma si costruiscono 5 case a partita su 11 edifici
+    (Ripari in tutte le partite, Dolmen 0,5, Grotte 0,25, Tumulo 0,1): le
+    case costano una risorsa sola, le carte del mazzo due. I potenziamenti
+    spariscono (0,03 a testa) e l'acquisto extra si apre 0,74 volte e si usa
+    0,25: quando si apre non c'e' piu' niente in mano. Lampo 61%. Proposte
+    da misurare una per volta: le case con la seconda risorsa (Ripari a 1 ◈
+    come salvataggio) o il Lampo delle case a 1; l'extra con lo sconto (o il
+    potenziamento nell'extra gratis); potenziamenti a 0 o in Costruzione
+    nell'era 1; il bot che valuta l'azione ⊕ per quel che rende. **Da
+    decidere con il designer.**
+159. **Il tuning delle risorse e i potenziamenti.** Il designer: "E' questo
+    quello che devi fare, un tuning delle risorse, se Idee e Denaro sono poco
+    bisogna alzarle, poi i potenziamenti devono essere comprati, anche questo
+    e' un difetto da riparare". Perche' prima si comprava tutto: si
+    producevano 14 risorse, di cui 8 Costruzione, e le carte costavano 1-2
+    Costruzione; con i costi misti le carte del mazzo chiedono Denaro o Idee,
+    che si producevano 1,5 e 1,7 a testa, e le case restavano l'unica cosa
+    pagabile. Nel file base: le quattro tessere dell'era 1 senza produzione
+    danno Denaro (Sentiero, Terra di nessuno) o Idee (Radura, Luogo sacro);
+    Guardiano del fuoco 💡, Anziana 🪙, Barattatore 🪙💡 (fra i 16, in unita':
+    5 Costruzione, 6 Denaro, 7 Idee; erano 10/4/5);
+    `potenzia_adiacente` acceso. Nel bot le Idee contano nella domanda del
+    mercato (solo nella v3) e l'azione ⊕ vale 0,4. Trentatreesima misura:
+    Denaro 2,6 e Idee 3,0 prodotti, potenziamenti 0,46 a testa, case 3,6 a
+    partita, morto 2,2, Lampo al 37% con le strategie fra 19 e 41. Restano:
+    l'acquisto extra che si usa un quarto delle volte (sconto o potenziamenti
+    piu' economici), il Guerriero sempre primo, le Trappole da pesca mai
+    costruite, la Rendita sul bordo basso. Controprova `case_seconda` (le
+    case con +1 Denaro tranne i Ripari): un po' meglio su tutto, Rendita al 19.
+160. **Il potenziamento insieme alla costruzione.** Il designer: "E se i
+    potenziamenti non sono un'azione a parte ma possono essere presi insieme
+    agli edifici se il giocatore ha risorse sufficienti? Se non bastano
+    rimetterei la produzione base dei terreni". Costante
+    `potenziamento_con_costruzione` nel file base: dopo ogni costruzione si
+    puo' comprare un potenziamento, pagandolo, senza consumare il lavoratore
+    (l'acquisto extra limitato ai potenziamenti, aperto da ogni costruzione;
+    con una carta ⊕ si compra anche una casa). Trentaquattresima misura: i
+    potenziamenti da 0,46 a 0,71 a testa, morto 2,0, il resto fermo;
+    l'occasione si apre 3,6 volte e si usa una su sette, perche' dopo
+    l'edificio resta di rado la risorsa giusta. Con il terreno che produce
+    (variante `terreno_produce`) si arriva a 1,07 potenziamenti ma si torna
+    al surplus: morto 3,9, Lampo 51%, spianati di nuovo. Da misurare la via
+    di mezzo: terreno a meta' produzione, o potenziamento scontato di 1
+    nell'extra. **Da decidere con il designer.**
+161. **I costi rimodulati, le risorse che si tengono, gli sconti, lo spianare
+    solo del passato.** Il designer: "dovresti rimodulare i costi tu in modo
+    da rendere risorse prodotte e spese nella giusta proporzione, le risorse
+    possono essere tenute per poter comprare meglio con il lavoratore
+    successivo. Inoltre alcuni effetti potrebbero scontare dei tipi di
+    potenziamenti o edifici, possiamo poi mettere la regola che non si
+    possono spianare edifici della stessa era, ma solo ere precedenti". Nel
+    file base: costante `spiana_solo_ere_precedenti`; il Guardiano del fuoco
+    sconta l'edificio Religione del turno e il Custode delle ossa il
+    potenziamento del turno (azione `sconto` con `se` "classe:religione" o
+    "potenziamento"); i costi dell'era 1 nella tabella `COSTI_E1` del
+    generatore con la regola trovata misurando: **l'edificio chiede la
+    risorsa che i suoi potenziamenti non chiedono** (Civico e Commercio
+    Costruzione e Idea, Religione e Cultura Costruzione e Denaro, Focolare e
+    Trappole 1 Costruzione), Radura e Anziana tornano a Costruzione. Nel bot
+    `_valore_attesa`: si passa e si tiene se una carta oggi non pagabile ma
+    pagabile al prossimo incasso vale di piu' (sconto 0,4, margine 1).
+    Trentacinquesima misura, tre giri: prodotto 10,1, speso 7,8, morto 2,3
+    (0,7/0,8/0,9), 3,6 costruzioni, 0,77 potenziamenti, 2,2 case a partita,
+    zero spianati. Il bot che aspetta passa 0,5 turni a testa e nell'era 1 da
+    sola regala vittorie alla Lampo (54%): da rileggere sulla coppia 1-2.
+162. **La coppia di ere 1-2.** Il designer: "Vai pure". L'era 2 scritta nello
+    schema dell'era 1 (`docs/proposte/v3-era-2.md`): 16 Personaggi (cinque
+    della v2 riscritti, undici nuovi), 15 edifici con azione, costi a due
+    risorse con la regola del registro 161 e un gradino in piu' solo alle
+    carte grandi, Rendita 2 solo dove si paga 4 o piu', Cambiavalute a
+    Denaro, Via consolare, Cantiere e Necropoli senza produzione, i Tuguri a
+    costo flessibile. I Personaggi della v3 hanno uno **Scavo da scheletro**
+    (registro 135), piu' alto per chi il draft lascia per ultimo. Nel
+    rapporto le fotografie di fine era (`snap_e<N>_*`, `pv_e<N>*`), e
+    `tools/misura_era.py --era N` misura un'era come differenza.
+    Trentaseiesima misura, tre giri sull'era 2: prodotto 12,0, speso 8,5,
+    morto 3,5 (0,9/1,3/1,4), 3,3 costruzioni, 1,07 potenziamenti, 4,1 rovine
+    dell'era 1 coperte a partita; a fine era 2 le sei strategie fra il 27 e
+    il 41%. Restano: il morto dell'era 2 sopra il budget (Denaro e Idee),
+    Sacello, Torre di vedetta e Anfiteatro quasi mai costruiti, il ⊕ sempre
+    ultimo nel draft. **Prossimo passo**: le ere 3-5 nello stesso schema, per
+    vedere Scavo, scheletri e riscoperta sulla partita intera.
+163. **Le ere 3-5 e la partita intera.** Il designer: "Procedi". Le tre ere
+    scritte con uno stampo uguale per i 16 Personaggi (le stesse sedici
+    azioni, produzione 9/4/4, i cinque della v2 di ogni era al posto del loro
+    ruolo, nomi segnaposto) e gli edifici con la regola dei costi, Rendita 2
+    solo dove si paga 4 o piu', le case piu' piccole a 1 flessibile, cinque
+    tessere su sette che producono (`docs/proposte/v3-ere-3-5.md`). Non
+    servono piu' riempitivi: le cinque ere hanno i loro 16. Trentasettesima
+    misura, la prima partita intera della v3: 74,7 PV a testa (v2: 69,5),
+    Lampo 17,4, Continuita' 15,8, Rendita 11,7, Scavo 11,6 (v2: 7,7), PV
+    prodotti 10,5; vittorie Bilanciata 39, Rendita 38, Obiettivi 37,
+    Continuita' 35, Scavo 27, Lampo 23. Le ere 1-2 tengono il metro, le ere
+    3-5 producono 13-14,5 e ne lasciano morire 5,6-6,3; le case delle ere 4-5
+    (costi in Denaro e Idee) dominano; nell'era 5 il mazzo "solo sopra" non
+    si costruisce e quel che sta a terra crolla al Giudizio del tempo.
+    **Prossimo passo**: il tuning delle ere 3-5 come per l'era 2, poi
+    resistenza dell'era 3 e carte dell'era 5.
+164. **Il tuning delle ere 3-5.** Il designer: "Vai". Due giri sulla partita
+    intera (trentottesima misura). Il primo (tessere a tre su sette,
+    Personaggi 11/3/3, case in Costruzione, +1 resistenza alle carte fragili
+    delle ere 3 e 5) non ha mosso il morto: il Denaro veniva per 7 dalle
+    azioni degli edifici e per 4,4 dalla produzione della v2 rimasta sulle
+    carte, che si sommava all'azione. Il secondo: produzione della v2 a zero
+    dall'era 2 in su (l'azione e' la produzione), sette azioni "+1 Denaro"
+    cambiate (Terme, Banco ⇄; Borgo, Condominio, Villa ★; Ospedale 🛡;
+    Stazione ⚒), le case delle ere 4-5 a 2 e 3 Costruzione. Le ere 3-5
+    scendono da 14 prodotte e 6 morte a 11 e 3,5-4,0; la partita intera
+    72,7 PV a testa, vittorie fra 30 e 41 tranne la Lampo al 23. Restano: il
+    morto delle ere 3-5 sopra il budget (le azioni degli edifici delle ere
+    passate), le carte mai costruite (Conceria, Castello, Arsenale,
+    Fortezza, Stazione, Grattacielo, Ponte in acciaio), le case piccole a 2
+    a partita, la Lampo da ritarare nel bot. **Da decidere con il designer**
+    la via per il morto: azioni "risorsa" solo per chi attiva, o costi in
+    Denaro e Idee sulle carte delle ere 3-5.
+165. **Costi delle ere 3-4, le carte "solo sopra", la Lampo nel bot.** Il
+    designer: "Le carte ere 3-4 vanno rimodulate per costare un po' di piu'.
+    Le grandi 'solo sopra' che vuol dire? Prima si trovava il modo di
+    costruire perche' ora no? Le case piccole le teniamo cosi', per ora vanno
+    bene. Ritara bot per strategia lampo." Fatto (trentanovesima misura): le
+    carte da due risorse delle ere 3 e 4 ne prendono una terza (Denaro o
+    Idee); il morto non si muove (3,4) e la spesa passa dal mazzo alle case
+    medie. Le "solo sopra" sono le carte della v2 che non vanno a terra
+    (Anfiteatro, Castello, Fortezza 2x2; Grattacielo e Duomo al livello 2;
+    Piazza, Museo, Stazione, Universita' al livello 1): nella v2 un 2x2 si
+    poggiava spianando due propri edifici dell'era stessa con lo sconto, nella
+    v3 spianare costa e non si spiana la stessa era, quindi servono due
+    colonne adiacenti con rovine vecchie e capita di rado. **Da decidere**:
+    carte rare cosi' come sono, o riscritte a una colonna / "a terra oppure
+    sopra". Il bot: tabella `SPINTE_V3` (lampo 0,8, lampo_potenzia 1,5): la
+    Lampo vince il 30% con 69 PV (era 23% con 66); la piu' debole ora e' la
+    Scavo (25%).
+166. **"A terra oppure sopra", e da dove vengono le Idee che muoiono.** Il
+    designer: "A terra oppure sopra, vai con la seconda" (la seconda via del
+    registro 165: il morto delle ere 2-5). Le cinque carte grandi (Anfiteatro,
+    Castello, Fortezza, Grattacielo, Stazione) prendono il campo
+    `a_terra_o_sopra`: a terra con le regole di tutti, sopra con quelle della
+    v2 (e sopra di loro si costruisce ancora solo quando sono in rovina).
+    Duomo, Piazza, Museo e Universita' (una colonna, livello 1-2) restano come
+    sono. Per il morto, prima la diagnosi: il rapporto ora distingue le
+    entrate per fonte era per era (`snap_e<N>_in_<fonte>_<risorsa>`, e le
+    azioni degli edifici in piedi sono `in_edifici_azione_*`, distinte dal
+    Personaggio). Sulla trentanovesima misura chi aveva l'Acquedotto (tre
+    colonne, in piedi dall'era 2 alla 5, "+1 Idea a ogni attivazione di
+    chiunque") incassava 19,8 Idee dalle azioni contro 2,6 di chi non lo
+    aveva: una carta da 17 Idee a partita, e il Foro 5,4 Denaro, la Piazza
+    monumentale 9 Idee. Senza le azioni degli edifici, Idee e Denaro prodotti
+    (7 e 8 a partita) pareggiano quasi quel che se ne spende (6,4 e 8,4): il
+    surplus e' tutto li'. Due controprove sugli stessi semi: le azioni degli
+    edifici che danno Denaro o Idee scattano solo quando attivi tu
+    (`--variante proprio_morte`), oppure tutte quelle che danno risorse
+    (`proprio_tutte`). Risultato (quarantesima misura): il morto scende da
+    2,7-3,8 a 2,0-2,5 a testa in ogni era e la spesa quasi non cala; le carte
+    grandi a terra si costruiscono (Anfiteatro 0,46, Castello 0,12 a
+    partita). **Deciso**: la regola semplice, "le azioni degli edifici che
+    danno risorse scattano solo a ogni TUA attivazione" (PV, resistenza,
+    cambio e scavo restano a ogni attivazione di chiunque), e' il file base;
+    `--variante chiunque` rifa' la regola di prima. Vittorie 26-39; la piu'
+    debole e' ora la Lampo (26%), da riguardare nel bot.
+167. **Il Lampo vale il costo; Fondaco e Periferia in Costruzione.** Il
+    designer: "Continua". Restavano il morto delle ere 4-5 (2,5) e la Lampo al
+    26%. Nelle ere 4-5 tutte le carte Lampo del mazzo valevano 1 anche a costo
+    3, contro il metro ("rende in Lampo il suo costo"): ora il Lampo delle
+    carte Lampo del mazzo delle ere 3-5 vale almeno il costo in Costruzione
+    (Osservatorio, Villa, Officina, Museo, Biblioteca... 2; Grattacielo, Ponte
+    in acciaio, Stazione 3). Le case restano come sono. Il Fondaco (era 4) e la
+    Periferia (era 5), uniche tessere a produrre Denaro nella loro era,
+    producono Costruzione. Quarantunesima misura: +2 PV a testa per tutti, le
+    carte tarde costruite il doppio, il morto delle ere 4-5 da 2,5 a 2,2 e
+    2,1, le costruzioni +0,15 a era. La Lampo resta la piu' debole (25%): il
+    Lampo lo prendono tutti; si cercano le spinte del bot con `--spinta`.
+168. **La Lampo nel bot, e il ⊕ nel rapporto.** Il designer chiede quante
+    decisioni prende un giocatore e perche' l'acquisto extra si apre 14 volte
+    e si usa 2,7. Risposta: il 14 non e' il ⊕ (che scatta 2,2 volte a
+    partita) ma la finestra del potenziamento insieme alla costruzione
+    (registro 160), aperta dopo ognuna delle 14,7 costruzioni; il 2,7 sono i
+    potenziamenti comprati li', 2,7 dei 3,9 a partita, cioe' quanto spesso
+    dopo aver costruito resta qualcosa in mano (ere 1-2 quasi sempre, ere 3-5
+    una volta su dieci: il potenziamento costa 2 e manca la Costruzione). Il
+    rapporto distingue ora le aperture da carta ⊕ da quelle dopo la
+    costruzione (`extra_aperti_carta`, `extra_usati_carta`). La Lampo
+    (quarantaduesima misura): `lampo_zero` da -1 a 0 nella tabella
+    `SPINTE_V3`; la penalita' sulle carte senza Lampo le faceva scartare le
+    carte a Rendita. Dal 25 al 31% con 71 PV, e resta una Lampo. Vittorie fra
+    29 e 38.
+169. **Gli sconti sugli edifici.** Il designer: "quando si mette un lavoratore
+    l'azione e' un acquisto, edificio, potenziamento o entrambi in base alle
+    risorse" (e' cosi' nel codice, registro 160); "il ⊕ se serve deve stare su
+    piu' Personaggi e/o edifici": il contatore nuovo dice che il ⊕ si apre
+    2,1 volte a partita a giocatore e si usa 0,8 (il 39%), la finestra dopo
+    la costruzione si apre 12,2 e si usa 2,0 (il 16%): il ⊕ rende il doppio
+    della finestra ma resta a meta' per mancanza di risorse, quindi prima di
+    moltiplicarlo va reso piu' utile (uno sconto dentro, o i potenziamenti
+    delle ere 4-5 meno cari). "Mancano gli sconti, che sono essenziali". Variante
+    `sconti_edifici`: sette azioni "+1 risorsa" o cambio diventano sconti
+    (Trappole su fiume, Insulae Civico, Mulino e Banco Costruzione, Bottega
+    potenziamento, Officina Ingegneria, Caffe' Arte), validi per l'acquisto del
+    turno, quindi solo quando attiva il padrone: chiave nuova `chi: proprio`,
+    perche' `se` nello sconto e' la condizione. Il Lampo +1 e la tessera che si
+    rigira restano sui Personaggi. Quarantatreesima misura: niente si muove
+    (sconti usati 1,45 → 1,68 a partita, morto e vittorie uguali), perche' lo
+    sconto scatta solo se il padrone attiva quella colonna e compra in quel
+    turno. **Il file base non cambia**; la decisione dipende dalla "scelta"
+    (registro 170), dove lo sconto va a chi sta per comprare. Misurato anche
+    quello (quarantacinquesima): sconti usati 1,57 → 1,92, il resto uguale.
+    Per pesare, gli sconti vanno su piu' carte e senza condizione, o dentro
+    il ⊕: **da decidere**.
+170. **"Stile Caylus": chi attiva usa un edificio della colonna.** Il
+    designer: "se quando si attiva una colonna un giocatore possa scegliere
+    qualunque edificio, anche quelli non suoi, e brucia quell'effetto per il
+    turno? Quanti cambierebbe in meglio o in peggio?" Poi "Vai". Costante
+    `azione_edificio` = "scelta" (era gia' prevista, letta solo come
+    "proprietario"): dopo tessera e Personaggio chi attiva usa UN edificio
+    vivo della colonna con un'azione, di chiunque; l'edificio e' bruciato fino
+    alla fine del giro di piazzamenti (`gs.bruciati`, uid -> "era:giro"); con
+    uno solo non c'e' domanda, con piu' d'uno e' una `pending_choice` di tipo
+    "edificio" (per i bot la risolve `StrategyBot._scelta_edificio`, provando
+    ciascuno su una copia con lo stesso conto del piazzamento). Compenso al
+    padrone quando lo usa un altro: `azione_edificio_compenso` = "nessuno" |
+    "pv" (1 PV, canale `compenso`). Le condizioni "a ogni tua attivazione" e
+    "di un avversario" non hanno piu' senso e nelle varianti `scelta` e
+    `scelta_pv` cadono: ogni carta dice "Usa:". Il bot non ha pregiudizio sugli
+    edifici altrui (`_produzione_colonna`). Contatori `az3_scelta_propri`,
+    `az3_scelta_altrui`, `az3_scelta_nessuna`, `compensi`. A ragionamento: una
+    decisione vera in piu' a turno, meno morto, interazione diretta, regole
+    piu' semplici; contro, il padrone non guadagna dal suo edificio, fuga sulle
+    carte forti, la Rendita perde le ★ degli altri, il bot costa il triplo.
+    Quarantaquattresima misura: 16 usi a partita a giocatore, due terzi su
+    edifici altrui; si spende di piu' e si passa di meno in tutte le ere,
+    costruzioni 15,1 e potenziamenti 4,5 (da 14,7 e 3,9); il morto sale di
+    0,2-0,5 nelle ere 1-4; PV 74,8 (da 72,7). Vittorie Obiettivi 44, Lampo 33,
+    Bilanciata 34, Scavo 31, Rendita 30, Continuita' 28: la forbice da 9 a 16,
+    le due che vivevano delle ★ dei propri edifici perdono. Il compenso a 1 PV
+    vale 10 PV a testa (14%) e il bot non lo valuta: troppo, se serve va piu'
+    piccolo. **Il file base non cambia: decisione del designer sui numeri.**
+    In corso `scelta_sconti`.

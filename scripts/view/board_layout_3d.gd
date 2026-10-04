@@ -659,7 +659,7 @@ const CARTELLE_CARTE := {
 const CARTELLA_EDIFICI_V2 := "res://assets/carte/edifici_v2/%s.png"
 
 static func e_v2() -> bool:
-	return str(CardDB.ruleset).begins_with("v2")
+	return (str(CardDB.ruleset).begins_with("v2") or str(CardDB.ruleset).begins_with("v3"))
 
 static func carta_path(tipo: String, id: String) -> String:
 	if not CARTELLE_CARTE.has(tipo): return ""
