@@ -666,8 +666,13 @@ static var spinte_override := {}
 # 10-16 delle altre). A zero la Lampo passa dal 25 al 31% con 71 PV e resta
 # una Lampo (22 PV dal canale); abbassare `lampo` a 0,4 la fa giocare come la
 # Bilanciata, alzarlo a 1,2 non rende.
-const SPINTE_V3 := {"rendita_per_era": 0.9, "rendita_zero": -1.5, "lampo": 0.8, "lampo_zero": 0.0,
-	"scavo_premio": 0.4, "scavo_terra": -0.5, "scavo_terra_scavo": 0.25, "protezione_attesa": 2.0,
+# Registro 172, con la "scelta" stile Caylus nel file base: la Rendita era al
+# 27% e la Scavo al 28. `rendita_per_era` a 1,3 porta la Rendita al 33-37;
+# `scavo_premio` 0,8 e `scavo_terra_scavo` 0,5 non alzano la Scavo (29) ma
+# stringono la forbice di tutte a 29-37, la piu' stretta misurata (a 1,2 e
+# -0,2 di `scavo_terra` la Scavo scende a 27).
+const SPINTE_V3 := {"rendita_per_era": 1.3, "rendita_zero": -1.5, "lampo": 0.8, "lampo_zero": 0.0,
+	"scavo_premio": 0.8, "scavo_terra": -0.5, "scavo_terra_scavo": 0.5, "protezione_attesa": 2.0,
 	"lampo_potenzia": 1.5, "lampo_sopra": 0.0, "obiettivi_peso": 1.0, "continuita_peso": 1.0}
 
 static func spinte() -> Dictionary:

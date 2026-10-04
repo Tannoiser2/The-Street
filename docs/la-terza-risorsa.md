@@ -2427,9 +2427,43 @@ piu' che la regola promette. Le strategie: Bilanciata 40 e Continuita' 38 in
 testa, Rendita 27 e Scavo 28 in coda. Le spinte della Rendita e della Scavo
 sono tarate sulla regola di prima: quarantasettesima misura.
 
+## Quarantasettesima misura: Rendita e Scavo nel bot, sulla regola nuova
+
+Con la "scelta", gli sconti e il ⊕ nel file base (quarantaseiesima) la Rendita
+era al 27% e la Scavo al 28, Bilanciata 40 e Continuita' 38. Cinque tarature
+con `--spinta`, stessi 300 semi:
+
+| | base | `rendita_per_era=1.3` | + `scavo_premio=0.8, scavo_terra_scavo=0.5` | + `scavo_premio=1.2, scavo_terra_scavo=0.5, scavo_terra=-0.2` |
+|---|---|---|---|---|
+| Bil / Cont / Lampo / Obi / Rend / Scavo | 40 / 38 / 33 / 33 / 27 / 28 | 38 / 37 / 31 / 33 / 33 / 27 | **35 / 35 / 33 / 31 / 37 / 29** | 36 / 33 / 33 / 32 / 38 / 27 |
+| forbice | 27-40 | 27-38 | **29-37** | 27-38 |
+| PV della Rendita / della Scavo | 75,2 / 75,6 | 74,9 / 75,2 | 76,8 / 74,0 | 76,7 / 74,1 |
+
+(Un primo lotto con pesi "v1" della Scavo era identico alla base: con la v3 il
+bot usa il ramo v2, `scavo_premio` e compagni; quei pesi erano codice morto e
+sono stati tolti.)
+
+La Rendita a 1,3 vale +6-10 punti alla Rendita. Le spinte della Scavo non
+alzano la Scavo (29, e 1,5 PV in meno: insegue le pile ricche e lascia la
+Rendita), ma cambiano le partite di tutti e stringono la forbice a **29-37**,
+la piu' stretta misurata: otto punti, due volte l'errore. E' la tabella
+`SPINTE_V3` da questa misura. La Scavo resta l'ultima perche' lo Scavo e' un
+canale che prendono tutti (11-12 PV a testa), come il Lampo: la strategia non
+ha un vantaggio suo, e il suo margine sta nei ritrovamenti, che nei bot non
+ci sono ancora.
+
+Il file base oggi, partita intera: 76,8 PV a testa, Lampo 18,9, Continuita'
+14,8, Rendita 12,5, Scavo 11,5, PV prodotti 9,1; 16 usi di edifici a partita
+a giocatore (10 con una scelta vera), 15,6 costruzioni, 4,6 potenziamenti,
+5,0 sconti, il ⊕ usato il 68% delle volte.
+
 ## Come rifare il conto
 
 ```bash
+# quarantasettesima misura: Rendita e Scavo nel bot (registro 172); la tabella SPINTE_V3 ha ora
+#   rendita_per_era 1,3, scavo_premio 0,8, scavo_terra_scavo 0,5; questo rifa' la base della quarantaseiesima
+godot --headless res://scenes/audit_partita.tscn -- --players 3 --games 300 --seed 700000 --giro tutte \
+  --dati data/proposte/cards-v3-era1.json --rapporto 1 --spinta rendita_per_era=0.9,scavo_premio=0.4,scavo_terra_scavo=0.25 > x.csv 2> x.err
 # quarantaseiesima misura: sconti senza condizione e ⊕ con lo sconto (registro 171); il file base e'
 #   quello nuovo, `--variante senza_sconti` rifa' la quarantaquattresima
 python3 tools/genera_cards_v3.py && python3 tools/genera_cards_v3.py --variante senza_sconti

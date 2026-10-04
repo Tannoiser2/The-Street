@@ -175,8 +175,8 @@ sugli edifici (varianti `sconti_edifici`, `scelta_sconti`) non muovono nulla ne'
 con la "scelta" (quarantatreesima e quarantacinquesima): sette carte condizionate sono poche, servono
 su piu' carte e senza condizione, o dentro il ⊕; la "scelta" stile Caylus (registri 170-171) e' il file base dalla quarantaquattresima misura
 (`--variante proprietario` rifa' la regola di prima), con gli sconti senza condizione su dieci carte
-e il ⊕ con lo sconto (quarantaseiesima, `--variante senza_sconti` li toglie); Rendita (27) e Scavo
-(28) da ritarare nel bot (`SPINTE_V3`, i pesi della Scavo v3 ora nella tabella; quarantasettesima);
+e il ⊕ con lo sconto (quarantaseiesima, `--variante senza_sconti` li toglie); la tabella `SPINTE_V3`
+ritarata (quarantasettesima: Rendita 1,3, Scavo 0,8/0,5), vittorie fra 29 (Scavo) e 37 (Rendita);
 le carte ancora rare
 (Fortezza, Grattacielo, Stazione per terreno e forma; Conceria, Arsenale, Ponte in acciaio); il ⊕
 che nessuno vuole al draft; l'interfaccia a schermo per la v3 (il file di prova non e' fra quelli

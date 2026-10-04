@@ -2762,6 +2762,10 @@ dato è stato importato da lì. Ma due confronti fra ciò che è stampato e
     Rendita dal 27 al 33% (forbice 27-38). I pesi "v1" della Scavo che avevo
     messo in tabella erano codice morto: con la v3 il bot usa il ramo v2
     (`scavo_premio`, `scavo_terra`, `scavo_terra_scavo`), e il lotto era
-    identico alla base; tolti. Secondo giro: `scavo_premio` 0,8 e 1,2 con
-    `scavo_terra_scavo` 0,5, insieme alla Rendita a 1,3.
+    identico alla base; tolti. Secondo giro: `scavo_premio` 0,8 e
+    `scavo_terra_scavo` 0,5 insieme alla Rendita a 1,3 danno la forbice piu'
+    stretta misurata, 29-37 (Bil 35, Cont 35, Lampo 33, Obi 31, Rend 37,
+    Scavo 29): **e' la tabella `SPINTE_V3`**. La Scavo resta ultima perche' lo
+    Scavo e' un canale di tutti; il suo margine sono i ritrovamenti, che nei
+    bot non ci sono ancora.
 
