@@ -468,6 +468,7 @@ func place_worker(col: int, protect: Building = null, personaggio := "") -> bool
 				uids.append(b.uid)
 				testi.append("%s (giocatore %d): %s" % [b.data["name"], b.owner, str(b.data.get("effect_text", ""))])
 			gs.phase = Enums.Phase.AZIONE
+			p.bump("az3_scelta_domanda")      # per il rapporto: le volte in cui c'era davvero da scegliere
 			gs.pending_choice = {"player": p.index, "kind": "edificio", "col": col,
 				"prompt": "Quale edificio usi?", "options": uids, "etichette": testi}
 			choice_required.emit(gs.pending_choice)

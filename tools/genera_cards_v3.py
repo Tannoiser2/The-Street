@@ -752,7 +752,10 @@ def scelta(v):
 def scelta_pv(v):
     scelta(v)
     v["constants"]["azione_edificio_compenso"] = "pv"
-VARIANTI = {"scelta": scelta, "scelta_pv": scelta_pv, "sconti_edifici": sconti_edifici, "lampo_vecchio": lampo_vecchio, "chiunque": chiunque, "extra_sempre": extra_sempre, "senza_extra": senza_extra, "costi_vecchi": costi_vecchi,
+#   --variante scelta_sconti  la "scelta" piu' gli sconti sugli edifici: lo sconto va a chi usa l'edificio, cioe' a chi sta per comprare
+def scelta_sconti(v):
+    sconti_edifici(v); scelta(v)
+VARIANTI = {"scelta": scelta, "scelta_pv": scelta_pv, "scelta_sconti": scelta_sconti, "sconti_edifici": sconti_edifici, "lampo_vecchio": lampo_vecchio, "chiunque": chiunque, "extra_sempre": extra_sempre, "senza_extra": senza_extra, "costi_vecchi": costi_vecchi,
             "case_seconda": case_seconda, "case_lampo1": case_lampo1, "senza_tuning": senza_tuning,
             "terreno_produce": terreno_produce, "senza_potenziamento_insieme": senza_potenziamento_insieme}
 if variante:

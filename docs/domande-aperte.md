@@ -2727,4 +2727,12 @@ dato è stato importato da lì. Ma due confronti fra ciò che è stampato e
     decisione vera in piu' a turno, meno morto, interazione diretta, regole
     piu' semplici; contro, il padrone non guadagna dal suo edificio, fuga sulle
     carte forti, la Rendita perde le ★ degli altri, il bot costa il triplo.
-    Misura nella quarantaquattresima.
+    Quarantaquattresima misura: 16 usi a partita a giocatore, due terzi su
+    edifici altrui; si spende di piu' e si passa di meno in tutte le ere,
+    costruzioni 15,1 e potenziamenti 4,5 (da 14,7 e 3,9); il morto sale di
+    0,2-0,5 nelle ere 1-4; PV 74,8 (da 72,7). Vittorie Obiettivi 44, Lampo 33,
+    Bilanciata 34, Scavo 31, Rendita 30, Continuita' 28: la forbice da 9 a 16,
+    le due che vivevano delle ★ dei propri edifici perdono. Il compenso a 1 PV
+    vale 10 PV a testa (14%) e il bot non lo valuta: troppo, se serve va piu'
+    piccolo. **Il file base non cambia: decisione del designer sui numeri.**
+    In corso `scelta_sconti`.

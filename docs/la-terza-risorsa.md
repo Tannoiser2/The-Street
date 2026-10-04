@@ -2311,9 +2311,71 @@ Dal lotto base, con i contatori nuovi: il ⊕ da carta si apre 2,1 volte a
 partita a giocatore e si usa 0,8 (39%); la finestra dopo la costruzione si
 apre 12,2 e si usa 2,0 (16%).
 
+## Quarantaquattresima misura: "stile Caylus", chi attiva usa un edificio della colonna
+
+Il designer (registro 170): "se quando si attiva una colonna un giocatore possa
+scegliere qualunque edificio, anche quelli non suoi, e brucia quell'effetto per
+il turno? Quanti cambierebbe in meglio o in peggio?" Varianti `scelta` (niente
+al padrone) e `scelta_pv` (1 PV al padrone quando lo usa un altro), stessi 300
+semi del file base (quarantaduesima). Le condizioni "a ogni tua attivazione" e
+"di un avversario" cadono: ogni carta dice "Usa:".
+
+| a giocatore | base | scelta | scelta_pv |
+|---|---|---|---|
+| edifici usati a partita (propri / altrui) | 20 azioni ai padroni | 16,3 (6,1 / **10,2**) | uguale |
+| attivazioni senza niente da usare | | 3,75 | uguale |
+| azioni scattate: ★ / 🛡 / risorsa / ⚱ / ⇄ / ⊕ | 8,5 / 8,5 / 4,7 / 3,4 / 2,4 / 2,2 | 6,5 / 6,0 / 6,1 / 2,2 / 1,6 / 2,6 | uguale |
+| prodotto per era | 9,8 / 10,2 / 9,5 / 9,1 / 8,9 | 10,8 / 11,2 / 9,9 / 9,5 / 9,2 | uguale |
+| speso per era | 7,8 / 8,2 / 7,3 / 6,9 / 6,7 | 8,3 / 9,0 / 7,5 / 7,1 / 7,1 | uguale |
+| morto per era | 2,0 / 2,0 / 2,2 / 2,2 / 2,2 | 2,5 / 2,2 / 2,4 / 2,4 / 2,1 | uguale |
+| passi per era | 0,55 / 0,67 / 0,72 / 1,07 / 1,17 | 0,40 / 0,57 / 0,65 / 1,00 / 1,05 | uguale |
+| costruzioni / potenziamenti a partita | 14,7 / 3,9 | 15,1 / 4,5 | uguale |
+| PV a testa | 72,7 | 74,8 | **85,0** (10,2 di compenso) |
+| canali: Lampo / Cont / Rendita / ★ / Scavo | 17,6 / 13,6 / 11,4 / 11,2 / 10,0 | 18,1 / 14,2 / 12,8 / 9,5 / 11,0 | + compenso 10,2 |
+| vittorie Bil / Cont / Lampo / Obi / Rend / Scavo | 36 / 31 / 31 / 38 / 35 / 29 | 34 / **28** / 33 / **44** / 30 / 31 | 39 / **23** / 31 / 41 / 32 / 34 |
+
+**Che cosa succede.** Si usano gli edifici degli altri due volte su tre (10,2
+contro 6,1 propri): la colonna piena e' un menu per tutti. Chi attiva sceglie
+risorse e ⊕ (da 4,7 a 6,1 e da 2,2 a 2,6) e lascia ★, 🛡, ⚱ e ⇄: si spende di
+piu' (+0,5 a era nelle prime due, +0,4 nell'ultima), si costruisce e si
+potenzia di piu' (15,1 e 4,5 contro 14,7 e 3,9), si passa di meno in tutte le
+ere. Il morto sale di 0,2-0,5 nelle ere 1-4, perche' si producono piu' risorse
+di quante il mercato ne assorba nel turno. La Rendita del censimento sale per
+tutti (12,8 contro 11,4: piu' carte a Rendita costruite), i PV dalle ★ scendono
+(9,5 contro 11,2). Il bot gioca la regola fino in fondo: 3,75 attivazioni a
+partita trovano la colonna senza niente da usare (le prime dell'era 1, e le
+colonne bruciate).
+
+**Le strategie.** La Obiettivi sale a 44 e la Continuita' scende a 28 (la
+Rendita a 30): la forbice da 9 punti diventa 16. Le due che perdono sono quelle
+che vivevano delle ★ dei propri edifici in piedi, come previsto; la Scavo
+guadagna 4 PV e la Lampo 1. Non e' ancora un giudizio sulla regola: le spinte
+del bot sono tarate sulla regola di prima.
+
+**Il compenso a 1 PV** non cambia una sola scelta dei bot (i numeri sono
+identici: il bot non lo valuta, ne' quando usa ne' quando costruisce) e vale
+10,2 PV a testa, il 14% del punteggio, distribuiti a chi ha gli edifici che
+gli altri usano: la Continuita' scende a 23. Cosi' e' troppo. Se un compenso
+serve, va piu' piccolo (1 PV ogni due usi, o 1 risorsa) e il bot deve
+impararlo.
+
+**In breve.** La regola funziona e fa quel che prometteva: una decisione in
+piu' a turno (16 usi a partita, due terzi su edifici altrui), piu' spesa, meno
+passi, interazione diretta. Costa 0,2-0,5 di morto a era e sposta
+l'equilibrio verso Obiettivi e Scavo e via da Continuita' e Rendita, che si
+ritarano nel bot. **Il file base non cambia**: la decisione e' del designer,
+sui numeri. In corso la controprova `scelta_sconti`, la "scelta" con i sette
+sconti sugli edifici (quarantatreesima), dove lo sconto va a chi sta per
+comprare.
+
 ## Come rifare il conto
 
 ```bash
+# quarantaquattresima misura: la "scelta" stile Caylus (registro 170), tre controprove sul file base
+for v in scelta scelta_pv scelta_sconti; do python3 tools/genera_cards_v3.py --variante $v; done
+godot --headless res://scenes/audit_partita.tscn -- --players 3 --games 300 --seed 700000 --giro tutte \
+  --dati data/proposte/cards-v3-era1-scelta.json --rapporto 1 > u.csv 2> u.err      # e scelta_pv, scelta_sconti
+for e in 1 2 3 4 5; do python3 tools/misura_era.py u.err --era $e; done
 # quarantatreesima misura: gli sconti sugli edifici (registro 169), controprova sul file base
 python3 tools/genera_cards_v3.py --variante sconti_edifici
 godot --headless res://scenes/audit_partita.tscn -- --players 3 --games 300 --seed 700000 --giro tutte \

@@ -172,8 +172,9 @@ Periferia in Costruzione), il budget del metro (1-2) e' a un passo; le vittorie 
 Scavo e' ora la piu' debole; il ⊕ si apre 2,1 volte a partita a giocatore e si usa 0,8 (39%), la finestra dopo la costruzione
 12,2 e 2,0 (16%): da rendere piu' utile prima di metterlo su altre carte (registro 169); gli sconti
 sugli edifici (variante `sconti_edifici`) non muovono nulla finche' scattano solo per il padrone
-(quarantatreesima misura); la "scelta" stile Caylus (registro 170, varianti `scelta` e `scelta_pv`)
-e' in misura: cambierebbe tutto questo, decisione del designer sui numeri;
+(quarantatreesima misura); la "scelta" stile Caylus (registro 170, varianti `scelta`, `scelta_pv`, `scelta_sconti`) e'
+misurata nella quarantaquattresima: una decisione in piu' a turno, piu' spesa, meno passi, +0,2-0,5
+di morto, Obiettivi 44 e Continuita' 28, il compenso a 1 PV troppo forte; decisione del designer;
 le carte ancora rare
 (Fortezza, Grattacielo, Stazione per terreno e forma; Conceria, Arsenale, Ponte in acciaio); il ⊕
 che nessuno vuole al draft; l'interfaccia a schermo per la v3 (il file di prova non e' fra quelli
