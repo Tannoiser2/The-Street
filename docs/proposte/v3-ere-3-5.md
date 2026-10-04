@@ -123,3 +123,7 @@ padrone). Il morto delle ere 3-5 scende da 3,4-3,8 a 2,2-2,5, la spesa quasi non
 Quinto giro (registro 167, quarantunesima misura): il Lampo delle carte del mazzo pari al costo e
 Fondaco e Periferia in Costruzione. +2 PV a testa per tutti, le carte delle ere 4-5 costruite il
 doppio, il morto delle ere 4-5 a 2,2 e 2,1. La Lampo resta al 25%: il Lampo lo prendono tutti.
+
+Sesto giro (registro 171, dalla quarantaquattresima misura): la regola "stile Caylus" e' il file
+base, chi attiva usa un edificio della colonna e lo brucia; in misura gli sconti senza condizione su
+dieci carte e il ⊕ con lo sconto dentro.

@@ -515,7 +515,9 @@ func _sconto_vale_per_edificio(se: String, data: Dictionary, col_from: int) -> b
 # "struttura", "altro") o qualunque ("potenziamento"); e si applica alla
 # risorsa che il potenziamento chiede, quale che sia.
 func _sconto_vale_per_potenziamento(se: String, upg: Dictionary) -> bool:
-	if se == "potenziamento": return true
+	# Registro 171: lo sconto senza condizione e' "-1 a quel che compri in
+	# questo turno", edificio o potenziamento che sia.
+	if se == "" or se == "potenziamento": return true
 	return se != "" and se == str(upg.get("family", ""))
 
 # I Personaggi del giocatore ancora da piazzare (v3).

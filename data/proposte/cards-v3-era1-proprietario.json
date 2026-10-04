@@ -1,7 +1,7 @@
 {
   "meta": {
     "game": "La Strada delle Ere",
-    "ruleset": "v3-era1-prova-scelta_sconti",
+    "ruleset": "v3-era1-prova-proprietario",
     "language": "it",
     "source": "distinta-carte (fonte unica)",
     "origine": "generato da tools/genera_cards_v3.py da data/cards-v2.json: non modificare a mano"
@@ -204,12 +204,11 @@
     },
     "personaggi_per_era": 16,
     "risorse_muoiono": true,
-    "azione_edificio": "scelta",
+    "azione_edificio": "proprietario",
     "spianare_costo": 1,
     "spiana_solo_ere_precedenti": true,
     "potenzia_adiacente": true,
-    "potenziamento_con_costruzione": true,
-    "azione_edificio_compenso": "nessuno"
+    "potenziamento_con_costruzione": true
   },
   "terrains": [
     {
@@ -410,7 +409,7 @@
         "n": 1
       },
       "effects": [],
-      "effect_text": "Usa: puoi comprare ancora un potenziamento o una casa."
+      "effect_text": "A ogni tua attivazione: puoi comprare ancora un potenziamento o una casa."
     },
     {
       "id": "ed_dolmen",
@@ -439,7 +438,7 @@
         "idee": 0
       },
       "exhaustible": 0,
-      "effect_text": "Usa: +1 resistenza fino a fine era a un tuo edificio adiacente.",
+      "effect_text": "A ogni attivazione: +1 resistenza fino a fine era a un tuo edificio adiacente.",
       "azione": {
         "tipo": "resistenza",
         "n": 1,
@@ -478,10 +477,11 @@
         "tipo": "risorsa",
         "pietra": 0,
         "oro": 0,
-        "idee": 1
+        "idee": 1,
+        "se": "proprio"
       },
       "effects": [],
-      "effect_text": "Usa: +1 Idea."
+      "effect_text": "A ogni tua attivazione: +1 Idea."
     },
     {
       "id": "ed_approdo",
@@ -514,10 +514,11 @@
         "tipo": "risorsa",
         "pietra": 0,
         "oro": 1,
-        "idee": 0
+        "idee": 0,
+        "se": "altrui"
       },
       "effects": [],
-      "effect_text": "Usa: +1 Denaro."
+      "effect_text": "A ogni attivazione di un avversario: +1 Denaro."
     },
     {
       "id": "ed_menhir",
@@ -546,12 +547,13 @@
         "idee": 0
       },
       "exhaustible": 0,
-      "effect_text": "Usa: +1 Idea.",
+      "effect_text": "A ogni tua attivazione: +1 Idea.",
       "azione": {
         "tipo": "risorsa",
         "pietra": 0,
         "oro": 0,
-        "idee": 1
+        "idee": 1,
+        "se": "proprio"
       },
       "effects": []
     },
@@ -586,10 +588,11 @@
         "tipo": "risorsa",
         "pietra": 0,
         "oro": 1,
-        "idee": 0
+        "idee": 0,
+        "se": "proprio"
       },
       "effects": [],
-      "effect_text": "Usa: +1 Denaro."
+      "effect_text": "A ogni tua attivazione: +1 Denaro."
     },
     {
       "id": "ed_cava",
@@ -623,7 +626,7 @@
         "n": 1
       },
       "effects": [],
-      "effect_text": "Usa: puoi comprare ancora un potenziamento o una casa."
+      "effect_text": "A ogni tua attivazione: puoi comprare ancora un potenziamento o una casa."
     },
     {
       "id": "ed_focolare_comune",
@@ -652,13 +655,14 @@
         "idee": 0
       },
       "exhaustible": 0,
-      "effect_text": "Usa: +1 Costruzione.",
+      "effect_text": "A ogni tua attivazione: +1 Costruzione.",
       "effects": [],
       "azione": {
         "tipo": "risorsa",
         "pietra": 1,
         "oro": 0,
-        "idee": 0
+        "idee": 0,
+        "se": "proprio"
       }
     },
     {
@@ -689,12 +693,14 @@
       },
       "exhaustible": 0,
       "azione": {
-        "tipo": "sconto",
-        "n": 1,
-        "se": "fiume"
+        "tipo": "risorsa",
+        "pietra": 1,
+        "oro": 0,
+        "idee": 0,
+        "se": "proprio"
       },
       "effects": [],
-      "effect_text": "Usa: -1 Costruzione all'edificio che costruisci su fiume in questo turno."
+      "effect_text": "A ogni tua attivazione: +1 Costruzione."
     },
     {
       "id": "ed_circolo_di_pietre",
@@ -723,7 +729,7 @@
         "idee": 0
       },
       "exhaustible": 0,
-      "effect_text": "Usa: +1 PV se hai 2+ edifici Religione in piedi.",
+      "effect_text": "A ogni attivazione: +1 PV se hai 2+ edifici Religione in piedi.",
       "depth": 2,
       "azione": {
         "tipo": "pv",
@@ -763,7 +769,7 @@
         "idee": 0
       },
       "exhaustible": 0,
-      "effect_text": "Usa: +1 resistenza fino a fine era ai tuoi edifici adiacenti.",
+      "effect_text": "A ogni attivazione: +1 resistenza fino a fine era ai tuoi edifici adiacenti.",
       "effects": [],
       "depth": 2,
       "azione": {
@@ -806,7 +812,7 @@
         "a": "adiacente"
       },
       "effects": [],
-      "effect_text": "Usa: +1 Scavo permanente a un tuo edificio adiacente."
+      "effect_text": "A ogni attivazione: +1 Scavo permanente a un tuo edificio adiacente."
     },
     {
       "id": "ed_teatro",
@@ -835,7 +841,7 @@
         "idee": 0
       },
       "exhaustible": 0,
-      "effect_text": "Usa: +1 PV.",
+      "effect_text": "A ogni attivazione: +1 PV.",
       "azione": {
         "tipo": "pv",
         "n": 1
@@ -868,7 +874,7 @@
         "idee": 0
       },
       "exhaustible": 0,
-      "effect_text": "Usa: +1 Idea.",
+      "effect_text": "A ogni tua attivazione: +1 Idea.",
       "effects": [
         {
           "hook": "on_final_scoring",
@@ -896,7 +902,8 @@
         "tipo": "risorsa",
         "pietra": 0,
         "oro": 0,
-        "idee": 1
+        "idee": 1,
+        "se": "proprio"
       }
     },
     {
@@ -926,7 +933,7 @@
         "idee": 0
       },
       "exhaustible": 0,
-      "effect_text": "Usa: cambia 1 risorsa in un'altra.",
+      "effect_text": "A ogni attivazione: cambia 1 risorsa in un'altra.",
       "azione": {
         "tipo": "cambio",
         "n": 1
@@ -959,7 +966,7 @@
         "idee": 0
       },
       "exhaustible": 0,
-      "effect_text": "Usa: +1 resistenza fino a fine era a un tuo edificio adiacente.",
+      "effect_text": "A ogni attivazione: +1 resistenza fino a fine era a un tuo edificio adiacente.",
       "azione": {
         "tipo": "resistenza",
         "n": 1,
@@ -993,7 +1000,7 @@
         "idee": 0
       },
       "exhaustible": 0,
-      "effect_text": "Usa: +1 resistenza fino a fine era ai tuoi edifici adiacenti.",
+      "effect_text": "A ogni attivazione: +1 resistenza fino a fine era ai tuoi edifici adiacenti.",
       "effects": [],
       "azione": {
         "tipo": "resistenza",
@@ -1028,7 +1035,7 @@
         "idee": 0
       },
       "exhaustible": 0,
-      "effect_text": "Usa: +1 PV se hai 2+ edifici Religione in piedi.",
+      "effect_text": "A ogni attivazione: +1 PV se hai 2+ edifici Religione in piedi.",
       "azione": {
         "tipo": "pv",
         "n": 1,
@@ -1066,13 +1073,14 @@
         "idee": 0
       },
       "exhaustible": 0,
-      "effect_text": "Usa: +1 Costruzione.",
+      "effect_text": "A ogni tua attivazione: +1 Costruzione.",
       "effects": [],
       "azione": {
         "tipo": "risorsa",
         "pietra": 1,
         "oro": 0,
-        "idee": 0
+        "idee": 0,
+        "se": "proprio"
       }
     },
     {
@@ -1106,9 +1114,10 @@
         "tipo": "risorsa",
         "pietra": 0,
         "oro": 1,
-        "idee": 0
+        "idee": 0,
+        "se": "altrui"
       },
-      "effect_text": "Usa: +1 Denaro."
+      "effect_text": "A ogni attivazione di un avversario: +1 Denaro."
     },
     {
       "id": "ed_insulae",
@@ -1138,11 +1147,13 @@
       },
       "exhaustible": 0,
       "azione": {
-        "tipo": "sconto",
-        "n": 1,
-        "se": "classe:civico"
+        "tipo": "risorsa",
+        "pietra": 1,
+        "oro": 0,
+        "idee": 0,
+        "se": "proprio"
       },
-      "effect_text": "Usa: -1 al costo dell'edificio Civico che costruisci in questo turno."
+      "effect_text": "A ogni tua attivazione: +1 Costruzione."
     },
     {
       "id": "ed_foro",
@@ -1176,9 +1187,10 @@
       "azione": {
         "tipo": "altri",
         "oro": 1,
-        "max": 2
+        "max": 2,
+        "se": "proprio"
       },
-      "effect_text": "Usa: +1 Denaro per ogni altro giocatore con un edificio in questa colonna (max 2)."
+      "effect_text": "A ogni tua attivazione: +1 Denaro per ogni altro giocatore con un edificio in questa colonna (max 2)."
     },
     {
       "id": "ed_anfiteatro",
@@ -1207,7 +1219,7 @@
         "idee": 0
       },
       "exhaustible": 0,
-      "effect_text": "Usa: +1 PV.",
+      "effect_text": "A ogni attivazione: +1 PV.",
       "effects": [
         {
           "hook": "on_build",
@@ -1250,7 +1262,7 @@
         "idee": 0
       },
       "exhaustible": 0,
-      "effect_text": "Usa: +1 resistenza fino a fine era ai tuoi edifici in questa colonna.",
+      "effect_text": "A ogni attivazione: +1 resistenza fino a fine era ai tuoi edifici in questa colonna.",
       "effects": [],
       "depth": 2,
       "azione": {
@@ -1295,7 +1307,7 @@
           "min": 1
         }
       },
-      "effect_text": "Usa: +1 PV se hai un altro Civico in piedi in questa colonna."
+      "effect_text": "A ogni attivazione: +1 PV se hai un altro Civico in piedi in questa colonna."
     },
     {
       "id": "ed_mura",
@@ -1324,7 +1336,7 @@
         "idee": 0
       },
       "exhaustible": 0,
-      "effect_text": "Usa: +1 resistenza fino a fine era ai tuoi edifici adiacenti.",
+      "effect_text": "A ogni attivazione: +1 resistenza fino a fine era ai tuoi edifici adiacenti.",
       "effects": [],
       "azione": {
         "tipo": "resistenza",
@@ -1359,7 +1371,7 @@
         "idee": 0
       },
       "exhaustible": 0,
-      "effect_text": "Usa: +1 resistenza fino a fine era a un tuo edificio adiacente.",
+      "effect_text": "A ogni attivazione: +1 resistenza fino a fine era a un tuo edificio adiacente.",
       "azione": {
         "tipo": "resistenza",
         "n": 1,
@@ -1393,7 +1405,7 @@
         "idee": 0
       },
       "exhaustible": 0,
-      "effect_text": "Usa: +1 PV se hai un altro Civico in piedi in questa colonna.",
+      "effect_text": "A ogni attivazione: +1 PV se hai un altro Civico in piedi in questa colonna.",
       "azione": {
         "tipo": "pv",
         "n": 1,
@@ -1435,9 +1447,10 @@
         "tipo": "risorsa",
         "pietra": 0,
         "oro": 1,
-        "idee": 0
+        "idee": 0,
+        "se": "altrui"
       },
-      "effect_text": "Usa: +1 Denaro."
+      "effect_text": "A ogni attivazione di un avversario: +1 Denaro."
     },
     {
       "id": "ed_mulino",
@@ -1469,10 +1482,13 @@
       "exhaustible": 0,
       "terrain_adjacent": "fiume",
       "azione": {
-        "tipo": "sconto",
-        "n": 1
+        "tipo": "risorsa",
+        "pietra": 1,
+        "oro": 0,
+        "idee": 0,
+        "se": "proprio"
       },
-      "effect_text": "Usa: -1 Costruzione alla costruzione di questo turno."
+      "effect_text": "A ogni tua attivazione: +1 Costruzione."
     },
     {
       "id": "ed_chiesa",
@@ -1512,7 +1528,7 @@
           "min": 2
         }
       },
-      "effect_text": "Usa: +1 PV se hai 2+ edifici Religione in piedi."
+      "effect_text": "A ogni attivazione: +1 PV se hai 2+ edifici Religione in piedi."
     },
     {
       "id": "ed_mercato",
@@ -1544,9 +1560,10 @@
       "azione": {
         "tipo": "altri",
         "oro": 1,
-        "max": 2
+        "max": 2,
+        "se": "proprio"
       },
-      "effect_text": "Usa: +1 Denaro per ogni altro giocatore con un edificio qui (max 2)."
+      "effect_text": "A ogni tua attivazione: +1 Denaro per ogni altro giocatore con un edificio qui (max 2)."
     },
     {
       "id": "ed_ospedale_dei_pellegrini",
@@ -1575,7 +1592,7 @@
         "idee": 0
       },
       "exhaustible": 0,
-      "effect_text": "Usa: +1 resistenza fino a fine era a un tuo edificio adiacente.",
+      "effect_text": "A ogni attivazione: +1 resistenza fino a fine era a un tuo edificio adiacente.",
       "effects": [
         {
           "hook": "on_activate",
@@ -1621,7 +1638,7 @@
       "exhaustible": 0,
       "depth": 2,
       "solo_su_rovine": true,
-      "effect_text": "Usa: +1 resistenza fino a fine era ai tuoi edifici in questa colonna.",
+      "effect_text": "A ogni attivazione: +1 resistenza fino a fine era ai tuoi edifici in questa colonna.",
       "azione": {
         "tipo": "resistenza",
         "n": 1,
@@ -1663,9 +1680,10 @@
         "tipo": "risorsa",
         "pietra": 0,
         "oro": 0,
-        "idee": 1
+        "idee": 1,
+        "se": "proprio"
       },
-      "effect_text": "Usa: +1 Idea."
+      "effect_text": "A ogni tua attivazione: +1 Idea."
     },
     {
       "id": "ed_arsenale",
@@ -1694,7 +1712,7 @@
         "idee": 0
       },
       "exhaustible": 0,
-      "effect_text": "Usa: +1 resistenza fino a fine era ai tuoi edifici adiacenti.",
+      "effect_text": "A ogni attivazione: +1 resistenza fino a fine era ai tuoi edifici adiacenti.",
       "effects": [],
       "depth": 2,
       "azione": {
@@ -1730,12 +1748,24 @@
         "idee": 0
       },
       "exhaustible": 0,
-      "effect_text": "Usa: il potenziamento che compri in questo turno costa 1 in meno.",
-      "effects": [],
+      "effect_text": "A ogni tua attivazione: +1 Idea. I tuoi potenziamenti costano 1 in meno.",
+      "effects": [
+        {
+          "hook": "on_build",
+          "op": "cost_delta",
+          "what": "upgrade",
+          "target": {
+            "owner": "self"
+          },
+          "propria": -1
+        }
+      ],
       "azione": {
-        "tipo": "sconto",
-        "n": 1,
-        "se": "potenziamento"
+        "tipo": "risorsa",
+        "pietra": 0,
+        "oro": 0,
+        "idee": 1,
+        "se": "proprio"
       }
     },
     {
@@ -1765,7 +1795,7 @@
         "idee": 0
       },
       "exhaustible": 0,
-      "effect_text": "Usa: +1 PV.",
+      "effect_text": "A ogni attivazione: +1 PV.",
       "azione": {
         "tipo": "pv",
         "n": 1
@@ -1798,7 +1828,7 @@
         "idee": 0
       },
       "exhaustible": 0,
-      "effect_text": "Usa: cambia 1 risorsa in un'altra.",
+      "effect_text": "A ogni attivazione: cambia 1 risorsa in un'altra.",
       "azione": {
         "tipo": "cambio",
         "n": 1
@@ -1831,7 +1861,7 @@
         "idee": 0
       },
       "exhaustible": 0,
-      "effect_text": "Usa: +1 Idea. A fine partita, se e' in piedi: +2 PV.",
+      "effect_text": "A ogni tua attivazione: +1 Idea. A fine partita, se e' in piedi: +2 PV.",
       "effects": [
         {
           "hook": "on_final_scoring",
@@ -1854,7 +1884,8 @@
         "tipo": "risorsa",
         "pietra": 0,
         "oro": 0,
-        "idee": 1
+        "idee": 1,
+        "se": "proprio"
       }
     },
     {
@@ -1885,10 +1916,10 @@
       },
       "exhaustible": 0,
       "azione": {
-        "tipo": "sconto",
+        "tipo": "cambio",
         "n": 1
       },
-      "effect_text": "Usa: -1 Costruzione alla costruzione di questo turno."
+      "effect_text": "A ogni attivazione: cambia 1 risorsa in un'altra."
     },
     {
       "id": "ed_villa",
@@ -1917,7 +1948,7 @@
         "idee": 0
       },
       "exhaustible": 0,
-      "effect_text": "Usa: +1 PV.",
+      "effect_text": "A ogni attivazione: +1 PV.",
       "azione": {
         "tipo": "pv",
         "n": 1
@@ -1959,7 +1990,7 @@
           "min": 1
         }
       },
-      "effect_text": "Usa: +1 PV se hai un altro Civico in piedi in questa colonna."
+      "effect_text": "A ogni attivazione: +1 PV se hai un altro Civico in piedi in questa colonna."
     },
     {
       "id": "ed_ponte_monumentale",
@@ -1988,12 +2019,13 @@
         "idee": 0
       },
       "exhaustible": 0,
-      "effect_text": "Usa: +1 Costruzione.",
+      "effect_text": "A ogni tua attivazione: +1 Costruzione.",
       "azione": {
         "tipo": "risorsa",
         "pietra": 1,
         "oro": 0,
-        "idee": 0
+        "idee": 0,
+        "se": "proprio"
       }
     },
     {
@@ -2029,7 +2061,7 @@
         "n": 1,
         "a": "uno"
       },
-      "effect_text": "Usa: +1 Scavo permanente a un tuo edificio in questa colonna."
+      "effect_text": "A ogni attivazione: +1 Scavo permanente a un tuo edificio in questa colonna."
     },
     {
       "id": "ed_duomo",
@@ -2061,7 +2093,7 @@
       "exhaustible": 0,
       "upgrade_slots": 3,
       "depth": 2,
-      "effect_text": "Usa: +1 PV se hai 2+ edifici Religione in piedi.",
+      "effect_text": "A ogni attivazione: +1 PV se hai 2+ edifici Religione in piedi.",
       "azione": {
         "tipo": "pv",
         "n": 1,
@@ -2102,7 +2134,7 @@
       "exhaustible": 0,
       "depth": 2,
       "solo_su_rovine": true,
-      "effect_text": "Usa: +1 resistenza fino a fine era ai tuoi edifici in questa colonna.",
+      "effect_text": "A ogni attivazione: +1 resistenza fino a fine era ai tuoi edifici in questa colonna.",
       "azione": {
         "tipo": "resistenza",
         "n": 1,
@@ -2137,7 +2169,7 @@
         "idee": 0
       },
       "exhaustible": 0,
-      "effect_text": "Usa: +1 Denaro per ogni altro giocatore con un edificio qui (max 2). A fine partita: +1 PV per ogni tuo edificio in piedi nelle sue colonne.",
+      "effect_text": "A ogni tua attivazione: +1 Denaro per ogni altro giocatore con un edificio qui (max 2). A fine partita: +1 PV per ogni tuo edificio in piedi nelle sue colonne.",
       "effects": [
         {
           "hook": "on_final_scoring",
@@ -2154,7 +2186,8 @@
       "azione": {
         "tipo": "altri",
         "oro": 1,
-        "max": 2
+        "max": 2,
+        "se": "proprio"
       }
     },
     {
@@ -2184,7 +2217,7 @@
         "idee": 0
       },
       "exhaustible": 0,
-      "effect_text": "Usa: +1 PV. A fine partita: +1 PV per ogni tuo potenziamento.",
+      "effect_text": "A ogni attivazione: +1 PV. A fine partita: +1 PV per ogni tuo potenziamento.",
       "effects": [
         {
           "hook": "on_final_scoring",
@@ -2228,7 +2261,7 @@
         "idee": 0
       },
       "exhaustible": 0,
-      "effect_text": "Usa: +1 PV se hai un altro Civico in piedi in questa colonna. A fine partita: +1 PV per ogni tuo Civico in piedi (max 4).",
+      "effect_text": "A ogni attivazione: +1 PV se hai un altro Civico in piedi in questa colonna. A fine partita: +1 PV per ogni tuo Civico in piedi (max 4).",
       "effects": [
         {
           "hook": "on_final_scoring",
@@ -2284,7 +2317,7 @@
         "idee": 0
       },
       "exhaustible": 0,
-      "effect_text": "Usa: il potenziamento Arte che compri in questo turno costa 1 in meno. A fine partita: +1 PV se e' adiacente a un edificio Cultura.",
+      "effect_text": "A ogni tua attivazione: +1 Idea. A fine partita: +1 PV se e' adiacente a un edificio Cultura.",
       "effects": [
         {
           "hook": "on_final_scoring",
@@ -2303,9 +2336,11 @@
         }
       ],
       "azione": {
-        "tipo": "sconto",
-        "n": 1,
-        "se": "arte"
+        "tipo": "risorsa",
+        "pietra": 0,
+        "oro": 0,
+        "idee": 1,
+        "se": "proprio"
       }
     },
     {
@@ -2350,11 +2385,13 @@
           }
         }
       ],
-      "effect_text": "Usa: -1 al costo dell'edificio Ingegneria che costruisci in questo turno. A fine partita: +1 PV per ogni altro tuo Ingegneria (max 4).",
+      "effect_text": "A ogni tua attivazione: +1 Costruzione. A fine partita: +1 PV per ogni altro tuo Ingegneria (max 4).",
       "azione": {
-        "tipo": "sconto",
-        "n": 1,
-        "se": "classe:ingegneria"
+        "tipo": "risorsa",
+        "pietra": 1,
+        "oro": 0,
+        "idee": 0,
+        "se": "proprio"
       }
     },
     {
@@ -2385,7 +2422,7 @@
         "idee": 0
       },
       "exhaustible": 0,
-      "effect_text": "Usa: +1 resistenza fino a fine era ai tuoi edifici adiacenti. A fine partita: +1 PV per ogni altro tuo Militare.",
+      "effect_text": "A ogni attivazione: +1 resistenza fino a fine era ai tuoi edifici adiacenti. A fine partita: +1 PV per ogni altro tuo Militare.",
       "effects": [
         {
           "hook": "on_final_scoring",
@@ -2433,7 +2470,7 @@
         "idee": 0
       },
       "exhaustible": 0,
-      "effect_text": "Usa: +1 Scavo permanente a un tuo edificio in questa colonna. A fine partita: +2 PV per ogni tua rovina riscoperta.",
+      "effect_text": "A ogni attivazione: +1 Scavo permanente a un tuo edificio in questa colonna. A fine partita: +2 PV per ogni tua rovina riscoperta.",
       "effects": [
         {
           "hook": "on_final_scoring",
@@ -2478,7 +2515,7 @@
         "idee": 0
       },
       "exhaustible": 0,
-      "effect_text": "Usa: +1 Denaro per ogni altro giocatore con un edificio qui (max 2). A fine partita: come nella v2.",
+      "effect_text": "A ogni tua attivazione: +1 Denaro per ogni altro giocatore con un edificio qui (max 2). A fine partita: come nella v2.",
       "effects": [
         {
           "hook": "on_final_scoring",
@@ -2506,7 +2543,8 @@
       "azione": {
         "tipo": "altri",
         "oro": 1,
-        "max": 2
+        "max": 2,
+        "se": "proprio"
       },
       "a_terra_o_sopra": true
     },
@@ -2537,7 +2575,7 @@
         "idee": 0
       },
       "exhaustible": 0,
-      "effect_text": "Usa: +1 PV. A fine partita: +1 PV per ogni classe diversa fra i tuoi edifici.",
+      "effect_text": "A ogni attivazione: +1 PV. A fine partita: +1 PV per ogni classe diversa fra i tuoi edifici.",
       "effects": [
         {
           "hook": "on_final_scoring",
@@ -2582,7 +2620,7 @@
         "idee": 0
       },
       "exhaustible": 0,
-      "effect_text": "Usa: +1 Costruzione. A fine partita: +2 PV per ogni tua rovina riportata alla luce nelle sue colonne.",
+      "effect_text": "A ogni tua attivazione: +1 Costruzione. A fine partita: +2 PV per ogni tua rovina riportata alla luce nelle sue colonne.",
       "effects": [
         {
           "hook": "on_final_scoring",
@@ -2602,7 +2640,8 @@
         "tipo": "risorsa",
         "pietra": 1,
         "oro": 0,
-        "idee": 0
+        "idee": 0,
+        "se": "proprio"
       }
     },
     {
@@ -2633,7 +2672,7 @@
         "idee": 0
       },
       "exhaustible": 0,
-      "effect_text": "Usa: +1 Costruzione. A fine partita: +1 PV per ogni edificio in piedi nelle sue colonne (max 5).",
+      "effect_text": "A ogni tua attivazione: +1 Costruzione. A fine partita: +1 PV per ogni edificio in piedi nelle sue colonne (max 5).",
       "effects": [
         {
           "hook": "on_build",
@@ -2659,7 +2698,8 @@
         "tipo": "risorsa",
         "pietra": 1,
         "oro": 0,
-        "idee": 0
+        "idee": 0,
+        "se": "proprio"
       },
       "a_terra_o_sopra": true
     },
@@ -2690,7 +2730,7 @@
         "idee": 0
       },
       "exhaustible": 0,
-      "effect_text": "Usa: +1 Scavo permanente a un tuo edificio adiacente. A fine partita: come nella v2.",
+      "effect_text": "A ogni attivazione: +1 Scavo permanente a un tuo edificio adiacente. A fine partita: come nella v2.",
       "effects": [
         {
           "hook": "on_final_scoring",
@@ -2739,7 +2779,7 @@
         "idee": 0
       },
       "exhaustible": 0,
-      "effect_text": "Usa: +1 PV. Solo sopra, al livello 1 o piu'. A fine partita: +1 PV per ogni tuo Personaggio reclutato.",
+      "effect_text": "A ogni attivazione: +1 PV. Solo sopra, al livello 1 o piu'. A fine partita: +1 PV per ogni tuo Personaggio reclutato.",
       "effects": [
         {
           "hook": "on_final_scoring",

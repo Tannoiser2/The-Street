@@ -2175,8 +2175,8 @@ func _test_v3_era1() -> void:
 	_ok("  ha prodotto almeno la sua produzione (%s)" % str(minimo),
 		dopo.x - prima.x >= minimo.x and dopo.y - prima.y >= minimo.y and dopo.z - prima.z >= minimo.z)
 	_ok("  non si ripiazza lo stesso Personaggio", ctl.personaggi_liberi(p0).size() == 3 and not cid in ctl.personaggi_liberi(p0))
-	# L'azione di un edificio scatta per il proprietario a ogni attivazione;
-	# se da' risorse, solo quando attiva lui (registro 166).
+	# L'azione di un edificio la usa chi attiva la colonna (registro 171, la
+	# "scelta"): con un edificio solo si usa quello, e resta bruciato per il giro.
 	ctl.pass_action()
 	var p1 := gs.current_player()
 	var focolare := _put(gs, p1.index, "ed_focolare_comune", 3)
@@ -2184,14 +2184,15 @@ func _test_v3_era1() -> void:
 	var pietra1 := p1.pietra
 	var lib1 := ctl.personaggi_liberi(p1)
 	_ok("  il secondo attiva la colonna 3 col suo primo Personaggio", ctl.place_worker(3, null, lib1[0]))
-	_ok("  e il Focolare gli ha dato almeno 1 Costruzione in piu' della produzione",
+	_ok("  e usa il Focolare: almeno 1 Costruzione in piu' della produzione",
 		p1.pietra - pietra1 >= 1 + int(CardDB.characters[lib1[0]]["produzione"]["pietra"]))
 	ctl.pass_action()
 	var p2 := gs.current_player()
 	var pietra_p1 := p1.pietra
 	var lib2 := ctl.personaggi_liberi(p2)
 	_ok("  il terzo attiva la stessa colonna 3", ctl.place_worker(3, null, lib2[0]))
-	_eq("  e il Focolare NON paga il suo proprietario: le risorse solo a ogni sua attivazione", p1.pietra - pietra_p1, 0)
+	_eq("  il Focolare e' bruciato: niente al suo padrone", p1.pietra - pietra_p1, 0)
+	_ok("  e niente da usare per il terzo", PersonaggiV3.opzioni_edificio(gs, 3).is_empty())
 	# A fine era le risorse muoiono.
 	p2.pietra += 5
 	p2.oro += 2
@@ -2205,8 +2206,8 @@ func _test_v3_era1() -> void:
 # UN edificio della colonna, anche altrui, e lo brucia fino a fine giro; con
 # `azione_edificio_compenso` = "pv" il padrone prende 1 PV quando lo usa un altro.
 func _test_v3_scelta() -> void:
-	if not FileAccess.file_exists("res://data/proposte/cards-v3-era1-scelta_pv.json"): return
-	CardDB.load_db("res://data/proposte/cards-v3-era1-scelta_pv.json")
+	if not FileAccess.file_exists("res://data/proposte/cards-v3-era1-compenso_pv.json"): return
+	CardDB.load_db("res://data/proposte/cards-v3-era1-compenso_pv.json")
 	_ok("il file accende la scelta", PersonaggiV3.scelta_attiva())
 	var ctl := _game(3, 4321)
 	var gs := ctl.gs

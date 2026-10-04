@@ -139,6 +139,12 @@ static func esegui_azione(gs: GameState, chi: int, az: Dictionary, col: int, car
 			if attivatore != chi: return
 			p.extra_turno += n
 			gs.log_line("%s: %d acquisto extra in questo turno a giocatore %d" % [nome, n, chi])
+			# Registro 171: il ⊕ puo' portare anche lo sconto ("compri una cosa in
+			# piu' e paghi 1 in meno"), perche' da solo si usava a meta' per
+			# mancanza di risorse.
+			if int(az.get("sconto", 0)) > 0:
+				p.sconto_turno += int(az["sconto"])
+				p.sconto_se = ""
 		"lampo":
 			p.lampo_turno += n
 			gs.log_line("%s: +%d Lampo all'edificio costruito in questo turno" % [nome, n])

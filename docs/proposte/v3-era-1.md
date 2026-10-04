@@ -24,7 +24,8 @@ Le costanti nuove del file dati, tutte spente nella v2 e nella v1.5:
 | `risorse_muoiono` | vero | a fine era le risorse vanno a 0 al posto della dispersione; si parte da 0 anche nell'era 1 |
 | `resource_cap`, `resource_cap_per_resource` | 0 (nessun tetto) | il tetto serviva a limitare gli avanzi, che ora muoiono da soli |
 | `dinastia` | spenta | niente quinto lavoratore nella prova |
-| `azione_edificio` | `"proprietario"` | l'azione speciale di un edificio scatta per chi lo possiede, a ogni attivazione della colonna, di chiunque; se da' risorse, solo quando attiva lui (registro 166) |
+| `azione_edificio` | `"scelta"` | chi attiva la colonna usa UN edificio in piedi, di chiunque, e lo brucia fino a fine giro (registro 171); `"proprietario"` era la regola fino al registro 170: l'azione al padrone a ogni attivazione, le risorse solo quando attivava lui |
+| `azione_edificio_compenso` | `"nessuno"` | niente al padrone quando un altro usa il suo edificio (`"pv"`: 1 PV, misurato troppo forte) |
 | `event_force_by_era.1` | 2 | come oggi |
 | terreni, `produzione_base` | 0 | il terreno di base non produce: resta la tessera dell'era (registro 157) |
 | `spianare_costo` | 1 | spianare caro (registro 152): niente sconto a chi spiana il proprio edificio |
@@ -106,8 +107,10 @@ Focolare e Trappole ⚒1; Dolmen, Menhir, Grotte dipinte, Tumulo ⚒1 🪙1; Cir
 Villaggio ⚒2; case come in tabella; la **produzione** resta (quasi tutta a zero) e
 l'**azione** è nuova. L'azione scatta per il proprietario a ogni attivazione della
 colonna, di chiunque: circa due volte per era. Dalla quarantesima misura (registro 166) le
-azioni che danno risorse (⚒ 🪙 💡 e 👥) scattano solo quando attiva il proprietario: "A ogni
-tua attivazione". PV, resistenza, cambio e scavo restano a ogni attivazione di chiunque.
+azioni che danno risorse (⚒ 🪙 💡 e 👥) scattavano solo quando attivava il proprietario. **Dal
+registro 171 la regola e' un'altra**: chi attiva la colonna usa UN edificio fra quelli in piedi,
+suo o altrui, e lo brucia fino alla fine del giro di piazzamenti; ogni carta dice "Usa:". Le
+schede qui sotto descrivono le azioni, che restano le stesse.
 
 | edificio | classe | terreno | costo | res | Lampo | Rendita | Scavo | produce | azione | nota |
 |---|---|---|---|---|---|---|---|---|---|---|

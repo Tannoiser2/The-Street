@@ -173,9 +173,10 @@ Scavo e' ora la piu' debole; il ⊕ si apre 2,1 volte a partita a giocatore e si
 12,2 e 2,0 (16%): da rendere piu' utile prima di metterlo su altre carte (registro 169); gli sconti
 sugli edifici (varianti `sconti_edifici`, `scelta_sconti`) non muovono nulla ne' per il padrone ne'
 con la "scelta" (quarantatreesima e quarantacinquesima): sette carte condizionate sono poche, servono
-su piu' carte e senza condizione, o dentro il ⊕; la "scelta" stile Caylus (registro 170, varianti `scelta`, `scelta_pv`, `scelta_sconti`) e'
-misurata nella quarantaquattresima: una decisione in piu' a turno, piu' spesa, meno passi, +0,2-0,5
-di morto, Obiettivi 44 e Continuita' 28, il compenso a 1 PV troppo forte; decisione del designer;
+su piu' carte e senza condizione, o dentro il ⊕; la "scelta" stile Caylus (registri 170-171) e' il file base dalla quarantaquattresima misura
+(`--variante proprietario` rifa' la regola di prima); in misura `sconti` (dieci carte, "-1 a quel
+che compri") e `sconti_extra` (il ⊕ con lo sconto), poi Continuita' e Rendita da ritarare nel bot
+(`SPINTE_V3`, oggi Obiettivi 44 e Continuita' 28);
 le carte ancora rare
 (Fortezza, Grattacielo, Stazione per terreno e forma; Conceria, Arsenale, Ponte in acciaio); il ⊕
 che nessuno vuole al draft; l'interfaccia a schermo per la v3 (il file di prova non e' fra quelli

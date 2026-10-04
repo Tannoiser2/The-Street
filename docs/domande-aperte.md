@@ -2739,3 +2739,17 @@ dato è stato importato da lì. Ma due confronti fra ciò che è stampato e
     vale 10 PV a testa (14%) e il bot non lo valuta: troppo, se serve va piu'
     piccolo. **Il file base non cambia: decisione del designer sui numeri.**
     In corso `scelta_sconti`.
+171. **La "scelta" e' il file base; sconti senza condizione; il ⊕ con lo
+    sconto.** Il designer, ai numeri della quarantaquattresima e
+    quarantacinquesima: "Ok vai". Tre cose, una alla volta. (1) La regola
+    stile Caylus senza compenso al padrone e' il file base
+    (`azione_edificio` = "scelta"): ogni carta dice "Usa:", `--variante
+    proprietario` rifa' la regola di prima, `compenso_pv` quella con 1 PV al
+    padrone. (2) Gli sconti: dieci carte con lo sconto senza condizione, "-1
+    a quel che compri in questo turno" (Trappole, Terme, Insulae, Mulino,
+    Mercato, Bottega, Loggia, Banco, Officina, Caffe'); lo sconto "" vale
+    ora anche per il potenziamento (`_sconto_vale_per_potenziamento`).
+    Variante `sconti`. (3) Il ⊕ porta anche lo sconto, "compri una cosa in
+    piu' e paghi 1 in meno" (chiave `sconto` nell'azione acquisto): variante
+    `sconti_extra`. Poi la ritaratura di Continuita' e Rendita nel bot. Le
+    misure dalla quarantaseiesima.

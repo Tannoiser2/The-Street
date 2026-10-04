@@ -691,8 +691,6 @@ def _proprio(v, anche_pietra=True, togli=False):
 _proprio(v3)
 
 # ---- le controprove ----------------------------------------------------------
-#   --variante chiunque       le azioni degli edifici che danno risorse a ogni attivazione di chiunque (com'era fino alla trentanovesima misura)
-def chiunque(v): _proprio(v, togli=True)
 # IL LAMPO VALE IL COSTO, E DUE TESSERE IN COSTRUZIONE (registro 167, quarantunesima
 # misura). Il metro: "un edificio a una casella rende in Lampo il suo costo in
 # Costruzione"; nelle ere 4-5 tutte le carte Lampo del mazzo valevano 1 anche a
@@ -716,46 +714,75 @@ def lampo_vecchio(v):
         if b["id"] in LAMPO_VECCHIO: b["lampo"] = LAMPO_VECCHIO[b["id"]]
     for t in v["tessere_era"]:
         if t["id"] in ("te_fondaco", "te_periferia"): t["produzione"] = prod(oro=1)
-#   --variante sconti_edifici  sette azioni "+1 risorsa" o cambio diventano sconti (registro 169: il designer,
-#                              "mancano gli sconti, che sono essenziali"); valgono per l'acquisto del turno,
-#                              quindi solo quando attiva il proprietario (`chi: proprio`)
-SCONTI_EDIFICI = {
-    "ed_trappole_da_pesca": (sconto(1, "fiume"), "A ogni tua attivazione: -1 Costruzione all'edificio che costruisci su fiume in questo turno."),
-    "ed_insulae":           (sconto(1, "classe:civico"), "A ogni tua attivazione: -1 al costo dell'edificio Civico che costruisci in questo turno."),
-    "ed_mulino":            (sconto(1), "A ogni tua attivazione: -1 Costruzione alla costruzione di questo turno."),
-    "ed_bottega_dartista":  (sconto(1, "potenziamento"), "A ogni tua attivazione: il potenziamento che compri in questo turno costa 1 in meno."),
-    "ed_banco":             (sconto(1), "A ogni tua attivazione: -1 Costruzione alla costruzione di questo turno."),
-    "ed_officina":          (sconto(1, "classe:ingegneria"), "A ogni tua attivazione: -1 al costo dell'edificio Ingegneria che costruisci in questo turno. A fine partita: +1 PV per ogni altro tuo Ingegneria (max 4)."),
-    "ed_caffe_letterario":  (sconto(1, "arte"), "A ogni tua attivazione: il potenziamento Arte che compri in questo turno costa 1 in meno. A fine partita: +1 PV se e' adiacente a un edificio Cultura."),
-}
-def sconti_edifici(v):
-    for b in v["buildings"]:
-        if b["id"] in SCONTI_EDIFICI:
-            az, testo = SCONTI_EDIFICI[b["id"]]
-            b["azione"] = dict(az); b["azione"]["chi"] = "proprio"; b["effect_text"] = testo
-            if b["id"] == "ed_bottega_dartista": b["effects"] = []   # lo sconto permanente della v2 diventa l'azione
-#   --variante scelta       "stile Caylus" (registro 170): chi attiva usa UN edificio della colonna, di chiunque,
-#                           e lo brucia fino a fine giro; niente al padrone. Le condizioni "a ogni tua
-#                           attivazione" / "di un avversario" non hanno piu' senso e cadono: ogni carta dice "Usa:".
-#   --variante scelta_pv    come sopra, con 1 PV al padrone quando lo usa un altro
+# LA "SCELTA" STILE CAYLUS E' IL FILE BASE (registro 171, dalla quarantaquattresima
+# misura). Chi attiva usa UN edificio della colonna, di chiunque, e lo brucia
+# fino a fine giro; niente al padrone. Le condizioni "a ogni tua attivazione" e
+# "di un avversario" non hanno piu' senso e cadono: ogni carta dice "Usa:".
+# `--variante proprietario` rifa' la regola di prima (l'azione al padrone).
+SE_VECCHI = {}
 def scelta(v):
     v["constants"]["azione_edificio"] = "scelta"
     v["constants"]["azione_edificio_compenso"] = "nessuno"
     for b in v["buildings"]:
         az = b.get("azione") or {}
-        if az.get("tipo") in ("risorsa", "altri") and az.get("se") in ("proprio", "altrui"): del az["se"]
+        if az.get("tipo") in ("risorsa", "altri") and az.get("se") in ("proprio", "altrui"):
+            SE_VECCHI[b["id"]] = az["se"]; del az["se"]
         az.pop("chi", None)
         t = b.get("effect_text", "")
         for vecchio in ("A ogni tua attivazione:", "A ogni attivazione di un avversario:", "A ogni attivazione:"):
             t = t.replace(vecchio, "Usa:")
         if t: b["effect_text"] = t
-def scelta_pv(v):
-    scelta(v)
+scelta(v3)
+
+#   --variante proprietario  l'azione di ogni edificio al suo padrone a ogni attivazione (fino alla quarantatreesima misura)
+#   --variante compenso_pv   la scelta con 1 PV al padrone quando lo usa un altro (quarantaquattresima: troppo)
+def proprietario(v):
+    v["constants"]["azione_edificio"] = "proprietario"
+    del v["constants"]["azione_edificio_compenso"]
+    TESTI_SE = {"proprio": "A ogni tua attivazione:", "altrui": "A ogni attivazione di un avversario:"}
+    for b in v["buildings"]:
+        az = b.get("azione") or {}
+        if b["id"] in SE_VECCHI:
+            az["se"] = SE_VECCHI[b["id"]]
+            b["effect_text"] = b["effect_text"].replace("Usa:", TESTI_SE[az["se"]], 1)
+        elif az.get("tipo") == "acquisto":       # il ⊕ scatta solo per chi attiva anche con il padrone
+            b["effect_text"] = b["effect_text"].replace("Usa:", "A ogni tua attivazione:", 1)
+        elif az and az.get("tipo") != "nessuna" and "effect_text" in b:
+            b["effect_text"] = b["effect_text"].replace("Usa:", "A ogni attivazione:", 1)
+def compenso_pv(v):
     v["constants"]["azione_edificio_compenso"] = "pv"
-#   --variante scelta_sconti  la "scelta" piu' gli sconti sugli edifici: lo sconto va a chi usa l'edificio, cioe' a chi sta per comprare
-def scelta_sconti(v):
-    sconti_edifici(v); scelta(v)
-VARIANTI = {"scelta": scelta, "scelta_pv": scelta_pv, "scelta_sconti": scelta_sconti, "sconti_edifici": sconti_edifici, "lampo_vecchio": lampo_vecchio, "chiunque": chiunque, "extra_sempre": extra_sempre, "senza_extra": senza_extra, "costi_vecchi": costi_vecchi,
+
+#   --variante sconti        dieci carte con lo sconto senza condizione, "-1 a quel che compri in questo turno"
+#                            (registro 171: sette sconti condizionati non muovevano nulla, quarantatreesima e
+#                            quarantacinquesima); con la scelta lo sconto va a chi usa l'edificio, cioe' a chi compra
+#   --variante sconti_extra  come sopra, e il ⊕ porta anche lo sconto: "compri una cosa in piu' e paghi 1 in meno"
+SCONTI_EDIFICI = {
+    "ed_trappole_da_pesca": "Usa: -1 a quel che compri in questo turno.",
+    "ed_terme":             "Usa: -1 a quel che compri in questo turno.",
+    "ed_insulae":           "Usa: -1 a quel che compri in questo turno.",
+    "ed_mulino":            "Usa: -1 a quel che compri in questo turno.",
+    "ed_mercato":           "Usa: -1 a quel che compri in questo turno.",
+    "ed_bottega_dartista":  "Usa: -1 a quel che compri in questo turno.",
+    "ed_loggia":            "Usa: -1 a quel che compri in questo turno.",
+    "ed_banco":             "Usa: -1 a quel che compri in questo turno.",
+    "ed_officina":          "Usa: -1 a quel che compri in questo turno. A fine partita: +1 PV per ogni altro tuo Ingegneria (max 4).",
+    "ed_caffe_letterario":  "Usa: -1 a quel che compri in questo turno. A fine partita: +1 PV se e' adiacente a un edificio Cultura.",
+}
+def sconti(v):
+    for b in v["buildings"]:
+        if b["id"] in SCONTI_EDIFICI:
+            b["azione"] = sconto(1); b["effect_text"] = SCONTI_EDIFICI[b["id"]]
+            if b["id"] == "ed_bottega_dartista": b["effects"] = []   # lo sconto permanente della v2 diventa l'azione
+def sconti_extra(v):
+    sconti(v)
+    for carta in v["characters"] + v["buildings"]:
+        az = carta.get("azione") or {}
+        if az.get("tipo") == "acquisto":
+            az["sconto"] = 1
+            carta["effect_text" if "effect_text" in carta else "testo"] = str(carta.get("effect_text", carta.get("testo", ""))).replace(
+                "puoi comprare ancora un potenziamento o una casa", "puoi comprare ancora un potenziamento o una casa, e paghi 1 in meno")
+VARIANTI = {"proprietario": proprietario, "compenso_pv": compenso_pv, "sconti": sconti, "sconti_extra": sconti_extra,
+            "lampo_vecchio": lampo_vecchio, "extra_sempre": extra_sempre, "senza_extra": senza_extra, "costi_vecchi": costi_vecchi,
             "case_seconda": case_seconda, "case_lampo1": case_lampo1, "senza_tuning": senza_tuning,
             "terreno_produce": terreno_produce, "senza_potenziamento_insieme": senza_potenziamento_insieme}
 if variante:
