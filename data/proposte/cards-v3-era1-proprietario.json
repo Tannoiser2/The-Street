@@ -406,10 +406,11 @@
       "exhaustible": 0,
       "azione": {
         "tipo": "acquisto",
-        "n": 1
+        "n": 1,
+        "sconto": 1
       },
       "effects": [],
-      "effect_text": "A ogni tua attivazione: puoi comprare ancora un potenziamento o una casa."
+      "effect_text": "A ogni tua attivazione: puoi comprare ancora un potenziamento o una casa, e paghi 1 in meno."
     },
     {
       "id": "ed_dolmen",
@@ -623,10 +624,11 @@
       "exhaustible": 4,
       "azione": {
         "tipo": "acquisto",
-        "n": 1
+        "n": 1,
+        "sconto": 1
       },
       "effects": [],
-      "effect_text": "A ogni tua attivazione: puoi comprare ancora un potenziamento o una casa."
+      "effect_text": "A ogni tua attivazione: puoi comprare ancora un potenziamento o una casa, e paghi 1 in meno."
     },
     {
       "id": "ed_focolare_comune",
@@ -693,14 +695,12 @@
       },
       "exhaustible": 0,
       "azione": {
-        "tipo": "risorsa",
-        "pietra": 1,
-        "oro": 0,
-        "idee": 0,
+        "tipo": "sconto",
+        "n": 1,
         "se": "proprio"
       },
       "effects": [],
-      "effect_text": "A ogni tua attivazione: +1 Costruzione."
+      "effect_text": "A ogni tua attivazione: -1 a quel che compri in questo turno."
     },
     {
       "id": "ed_circolo_di_pietre",
@@ -933,9 +933,9 @@
         "idee": 0
       },
       "exhaustible": 0,
-      "effect_text": "A ogni attivazione: cambia 1 risorsa in un'altra.",
+      "effect_text": "A ogni attivazione: -1 a quel che compri in questo turno.",
       "azione": {
-        "tipo": "cambio",
+        "tipo": "sconto",
         "n": 1
       }
     },
@@ -1147,13 +1147,11 @@
       },
       "exhaustible": 0,
       "azione": {
-        "tipo": "risorsa",
-        "pietra": 1,
-        "oro": 0,
-        "idee": 0,
+        "tipo": "sconto",
+        "n": 1,
         "se": "proprio"
       },
-      "effect_text": "A ogni tua attivazione: +1 Costruzione."
+      "effect_text": "A ogni tua attivazione: -1 a quel che compri in questo turno."
     },
     {
       "id": "ed_foro",
@@ -1482,13 +1480,11 @@
       "exhaustible": 0,
       "terrain_adjacent": "fiume",
       "azione": {
-        "tipo": "risorsa",
-        "pietra": 1,
-        "oro": 0,
-        "idee": 0,
+        "tipo": "sconto",
+        "n": 1,
         "se": "proprio"
       },
-      "effect_text": "A ogni tua attivazione: +1 Costruzione."
+      "effect_text": "A ogni tua attivazione: -1 a quel che compri in questo turno."
     },
     {
       "id": "ed_chiesa",
@@ -1558,12 +1554,11 @@
       },
       "exhaustible": 0,
       "azione": {
-        "tipo": "altri",
-        "oro": 1,
-        "max": 2,
+        "tipo": "sconto",
+        "n": 1,
         "se": "proprio"
       },
-      "effect_text": "A ogni tua attivazione: +1 Denaro per ogni altro giocatore con un edificio qui (max 2)."
+      "effect_text": "A ogni tua attivazione: -1 a quel che compri in questo turno."
     },
     {
       "id": "ed_ospedale_dei_pellegrini",
@@ -1748,23 +1743,11 @@
         "idee": 0
       },
       "exhaustible": 0,
-      "effect_text": "A ogni tua attivazione: +1 Idea. I tuoi potenziamenti costano 1 in meno.",
-      "effects": [
-        {
-          "hook": "on_build",
-          "op": "cost_delta",
-          "what": "upgrade",
-          "target": {
-            "owner": "self"
-          },
-          "propria": -1
-        }
-      ],
+      "effect_text": "A ogni tua attivazione: -1 a quel che compri in questo turno.",
+      "effects": [],
       "azione": {
-        "tipo": "risorsa",
-        "pietra": 0,
-        "oro": 0,
-        "idee": 1,
+        "tipo": "sconto",
+        "n": 1,
         "se": "proprio"
       }
     },
@@ -1828,9 +1811,9 @@
         "idee": 0
       },
       "exhaustible": 0,
-      "effect_text": "A ogni attivazione: cambia 1 risorsa in un'altra.",
+      "effect_text": "A ogni attivazione: -1 a quel che compri in questo turno.",
       "azione": {
-        "tipo": "cambio",
+        "tipo": "sconto",
         "n": 1
       }
     },
@@ -1916,10 +1899,10 @@
       },
       "exhaustible": 0,
       "azione": {
-        "tipo": "cambio",
+        "tipo": "sconto",
         "n": 1
       },
-      "effect_text": "A ogni attivazione: cambia 1 risorsa in un'altra."
+      "effect_text": "A ogni attivazione: -1 a quel che compri in questo turno."
     },
     {
       "id": "ed_villa",
@@ -2317,7 +2300,7 @@
         "idee": 0
       },
       "exhaustible": 0,
-      "effect_text": "A ogni tua attivazione: +1 Idea. A fine partita: +1 PV se e' adiacente a un edificio Cultura.",
+      "effect_text": "A ogni tua attivazione: -1 a quel che compri in questo turno. A fine partita: +1 PV se e' adiacente a un edificio Cultura.",
       "effects": [
         {
           "hook": "on_final_scoring",
@@ -2336,10 +2319,8 @@
         }
       ],
       "azione": {
-        "tipo": "risorsa",
-        "pietra": 0,
-        "oro": 0,
-        "idee": 1,
+        "tipo": "sconto",
+        "n": 1,
         "se": "proprio"
       }
     },
@@ -2385,12 +2366,10 @@
           }
         }
       ],
-      "effect_text": "A ogni tua attivazione: +1 Costruzione. A fine partita: +1 PV per ogni altro tuo Ingegneria (max 4).",
+      "effect_text": "A ogni tua attivazione: -1 a quel che compri in questo turno. A fine partita: +1 PV per ogni altro tuo Ingegneria (max 4).",
       "azione": {
-        "tipo": "risorsa",
-        "pietra": 1,
-        "oro": 0,
-        "idee": 0,
+        "tipo": "sconto",
+        "n": 1,
         "se": "proprio"
       }
     },
@@ -3269,7 +3248,7 @@
       "is_dynasty": false,
       "timing": "v3",
       "imprint": false,
-      "effect_text": "Produce 1 Costruzione. In questo turno puoi comprare ancora un potenziamento o una casa.",
+      "effect_text": "Produce 1 Costruzione. In questo turno puoi comprare ancora un potenziamento o una casa, e paghi 1 in meno.",
       "effects": [],
       "scavo": 3,
       "produzione": {
@@ -3279,7 +3258,8 @@
       },
       "azione": {
         "tipo": "acquisto",
-        "n": 1
+        "n": 1,
+        "sconto": 1
       }
     },
     {
@@ -3402,7 +3382,7 @@
       "is_dynasty": false,
       "timing": "v3",
       "imprint": false,
-      "effect_text": "Produce 1 Denaro. In questo turno puoi comprare ancora un potenziamento o una casa.",
+      "effect_text": "Produce 1 Denaro. In questo turno puoi comprare ancora un potenziamento o una casa, e paghi 1 in meno.",
       "effects": [],
       "scavo": 6,
       "produzione": {
@@ -3412,7 +3392,8 @@
       },
       "azione": {
         "tipo": "acquisto",
-        "n": 1
+        "n": 1,
+        "sconto": 1
       }
     },
     {
@@ -3677,7 +3658,7 @@
       "is_dynasty": false,
       "timing": "v3",
       "imprint": false,
-      "effect_text": "Produce 1 Costruzione. In questo turno puoi comprare ancora un potenziamento o una casa.",
+      "effect_text": "Produce 1 Costruzione. In questo turno puoi comprare ancora un potenziamento o una casa, e paghi 1 in meno.",
       "effects": [],
       "scavo": 3,
       "produzione": {
@@ -3687,7 +3668,8 @@
       },
       "azione": {
         "tipo": "acquisto",
-        "n": 1
+        "n": 1,
+        "sconto": 1
       }
     },
     {
@@ -3831,7 +3813,7 @@
       "is_dynasty": false,
       "timing": "v3",
       "imprint": false,
-      "effect_text": "Produce 1 Denaro. In questo turno puoi comprare ancora un potenziamento o una casa.",
+      "effect_text": "Produce 1 Denaro. In questo turno puoi comprare ancora un potenziamento o una casa, e paghi 1 in meno.",
       "effects": [],
       "scavo": 6,
       "produzione": {
@@ -3841,7 +3823,8 @@
       },
       "azione": {
         "tipo": "acquisto",
-        "n": 1
+        "n": 1,
+        "sconto": 1
       }
     },
     {
@@ -4028,7 +4011,7 @@
       "is_dynasty": false,
       "timing": "v3",
       "imprint": false,
-      "effect_text": "Produce 1 Costruzione. In questo turno puoi comprare ancora un potenziamento o una casa.",
+      "effect_text": "Produce 1 Costruzione. In questo turno puoi comprare ancora un potenziamento o una casa, e paghi 1 in meno.",
       "effects": [],
       "scavo": 3,
       "produzione": {
@@ -4038,7 +4021,8 @@
       },
       "azione": {
         "tipo": "acquisto",
-        "n": 1
+        "n": 1,
+        "sconto": 1
       }
     },
     {
@@ -4380,7 +4364,7 @@
       "is_dynasty": false,
       "timing": "v3",
       "imprint": false,
-      "effect_text": "Produce 1 Costruzione. In questo turno puoi comprare ancora un potenziamento o una casa.",
+      "effect_text": "Produce 1 Costruzione. In questo turno puoi comprare ancora un potenziamento o una casa, e paghi 1 in meno.",
       "effects": [],
       "scavo": 3,
       "produzione": {
@@ -4390,7 +4374,8 @@
       },
       "azione": {
         "tipo": "acquisto",
-        "n": 1
+        "n": 1,
+        "sconto": 1
       }
     },
     {
@@ -4732,7 +4717,7 @@
       "is_dynasty": false,
       "timing": "v3",
       "imprint": false,
-      "effect_text": "Produce 1 Costruzione. In questo turno puoi comprare ancora un potenziamento o una casa.",
+      "effect_text": "Produce 1 Costruzione. In questo turno puoi comprare ancora un potenziamento o una casa, e paghi 1 in meno.",
       "effects": [],
       "scavo": 3,
       "produzione": {
@@ -4742,7 +4727,8 @@
       },
       "azione": {
         "tipo": "acquisto",
-        "n": 1
+        "n": 1,
+        "sconto": 1
       }
     },
     {

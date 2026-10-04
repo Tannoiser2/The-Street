@@ -752,10 +752,15 @@ def proprietario(v):
 def compenso_pv(v):
     v["constants"]["azione_edificio_compenso"] = "pv"
 
-#   --variante sconti        dieci carte con lo sconto senza condizione, "-1 a quel che compri in questo turno"
-#                            (registro 171: sette sconti condizionati non muovevano nulla, quarantatreesima e
-#                            quarantacinquesima); con la scelta lo sconto va a chi usa l'edificio, cioe' a chi compra
-#   --variante sconti_extra  come sopra, e il ⊕ porta anche lo sconto: "compri una cosa in piu' e paghi 1 in meno"
+# GLI SCONTI SENZA CONDIZIONE E IL ⊕ CON LO SCONTO (registro 171, quarantaseiesima
+# misura). Il designer: "mancano gli sconti, che sono essenziali"; sette sconti
+# condizionati non muovevano nulla (quarantatreesima e quarantacinquesima).
+# Dieci carte hanno lo sconto senza condizione, "-1 a quel che compri in questo
+# turno", che con la scelta va a chi usa l'edificio, cioe' a chi compra: usati
+# 2,9 a partita invece di 1,6, forbice delle vittorie da 28-44 a 29-40. Il ⊕
+# porta anche lo sconto ("compri una cosa in piu' e paghi 1 in meno"): si usa
+# il 68% delle volte invece del 39%, costruzioni 15,6 a partita invece di 15,1.
+# `--variante senza_sconti` rifa' il file della quarantaquattresima.
 SCONTI_EDIFICI = {
     "ed_trappole_da_pesca": "Usa: -1 a quel che compri in questo turno.",
     "ed_terme":             "Usa: -1 a quel che compri in questo turno.",
@@ -768,20 +773,31 @@ SCONTI_EDIFICI = {
     "ed_officina":          "Usa: -1 a quel che compri in questo turno. A fine partita: +1 PV per ogni altro tuo Ingegneria (max 4).",
     "ed_caffe_letterario":  "Usa: -1 a quel che compri in questo turno. A fine partita: +1 PV se e' adiacente a un edificio Cultura.",
 }
-def sconti(v):
+PRIMA_DEGLI_SCONTI = {}
+TESTO_EXTRA = ("puoi comprare ancora un potenziamento o una casa", "puoi comprare ancora un potenziamento o una casa, e paghi 1 in meno")
+for b in v3["buildings"]:
+    if b["id"] in SCONTI_EDIFICI:
+        PRIMA_DEGLI_SCONTI[b["id"]] = (json.loads(json.dumps(b["azione"])), b["effect_text"], json.loads(json.dumps(b.get("effects"))))
+        b["azione"] = sconto(1); b["effect_text"] = SCONTI_EDIFICI[b["id"]]
+        if b["id"] == "ed_bottega_dartista": b["effects"] = []   # lo sconto permanente della v2 diventa l'azione
+for carta in v3["characters"] + v3["buildings"]:
+    az = carta.get("azione") or {}
+    if az.get("tipo") == "acquisto":
+        az["sconto"] = 1
+        carta["effect_text"] = str(carta.get("effect_text", "")).replace(TESTO_EXTRA[0], TESTO_EXTRA[1])
+
+#   --variante senza_sconti  le dieci carte con l'azione di prima e il ⊕ senza sconto (quarantaquattresima)
+def senza_sconti(v):
     for b in v["buildings"]:
-        if b["id"] in SCONTI_EDIFICI:
-            b["azione"] = sconto(1); b["effect_text"] = SCONTI_EDIFICI[b["id"]]
-            if b["id"] == "ed_bottega_dartista": b["effects"] = []   # lo sconto permanente della v2 diventa l'azione
-def sconti_extra(v):
-    sconti(v)
+        if b["id"] in PRIMA_DEGLI_SCONTI:
+            b["azione"], b["effect_text"], eff = PRIMA_DEGLI_SCONTI[b["id"]]
+            if eff is not None: b["effects"] = eff
     for carta in v["characters"] + v["buildings"]:
         az = carta.get("azione") or {}
         if az.get("tipo") == "acquisto":
-            az["sconto"] = 1
-            carta["effect_text" if "effect_text" in carta else "testo"] = str(carta.get("effect_text", carta.get("testo", ""))).replace(
-                "puoi comprare ancora un potenziamento o una casa", "puoi comprare ancora un potenziamento o una casa, e paghi 1 in meno")
-VARIANTI = {"proprietario": proprietario, "compenso_pv": compenso_pv, "sconti": sconti, "sconti_extra": sconti_extra,
+            az.pop("sconto", None)
+            carta["effect_text"] = str(carta.get("effect_text", "")).replace(TESTO_EXTRA[1], TESTO_EXTRA[0])
+VARIANTI = {"proprietario": proprietario, "compenso_pv": compenso_pv, "senza_sconti": senza_sconti,
             "lampo_vecchio": lampo_vecchio, "extra_sempre": extra_sempre, "senza_extra": senza_extra, "costi_vecchi": costi_vecchi,
             "case_seconda": case_seconda, "case_lampo1": case_lampo1, "senza_tuning": senza_tuning,
             "terreno_produce": terreno_produce, "senza_potenziamento_insieme": senza_potenziamento_insieme}

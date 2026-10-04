@@ -2391,9 +2391,50 @@ una risorsa che a volte si spendeva. **Per pesare, gli sconti dovrebbero stare
 su piu' carte ed essere senza condizione** ("-1 a quel che compri in questo
 turno"), oppure stare dentro il ⊕; da decidere con il designer.
 
+## Quarantaseiesima misura: sconti senza condizione su dieci carte, e il ⊕ con lo sconto
+
+Il designer (registro 171): "Ok vai". Il file base e' la "scelta" senza
+compenso (= il lotto `scelta` della quarantaquattresima). Due controprove, una
+sopra l'altra, stessi 300 semi: `sconti` (dieci carte con "-1 a quel che compri
+in questo turno": Trappole, Terme, Insulae, Mulino, Mercato, Bottega, Loggia,
+Banco, Officina, Caffe'; lo sconto vale per l'edificio o per il potenziamento)
+e `sconti_extra` (anche il ⊕ porta lo sconto: "compri una cosa in piu' e paghi
+1 in meno").
+
+| a giocatore | base (scelta) | sconti | sconti_extra |
+|---|---|---|---|
+| sconti usati a partita | 1,57 | 2,88 | **5,02** |
+| ⊕ aperto / usato a partita | 2,29 / 0,99 (43%) | 2,28 / 1,00 | 2,54 / **1,72 (68%)** |
+| scelte vere (2+ edifici fra cui scegliere) | | 9,8 | 10,0 |
+| costruzioni / potenziamenti a partita | 15,1 / 4,5 | 15,0 / 4,5 | **15,6** / 4,6 |
+| speso per era | 8,3 / 9,0 / 7,5 / 7,1 / 7,1 | 8,3 / 8,6 / 7,2 / 6,9 / 6,7 | 8,0 / 8,2 / 6,9 / 6,7 / 6,6 |
+| morto per era | 2,5 / 2,2 / 2,4 / 2,4 / 2,1 | 2,5 / 2,4 / 2,3 / 2,4 / 2,1 | 3,0 / 2,7 / 2,6 / 2,5 / 2,2 |
+| PV a testa | 74,8 | 74,1 | 76,7 |
+| vittorie Bil / Cont / Lampo / Obi / Rend / Scavo | 34 / 28 / 33 / 44 / 30 / 31 | 35 / 33 / 29 / 40 / 34 / 29 | 40 / 38 / 33 / 33 / 27 / 28 |
+
+Gli sconti senza condizione si usano: 2,9 a partita invece di 1,6, e la
+forbice delle vittorie si stringe da 28-44 a 29-40 (la Continuita' risale a
+33, la Obiettivi scende a 40). Il ⊕ con lo sconto dentro e' la cosa che
+mancava al ⊕: si usa il 68% delle volte invece del 43%, le costruzioni salgono a
+15,6 (0,45 in piu' nell'era 1) e i PV a 76,7. Il "morto" sale di 0,1-0,5 ma per
+un motivo contabile: con gli sconti si compra di piu' pagando di meno, e quel
+che non si paga resta in mano a fine era. Il numero giusto da guardare e'
+quello delle costruzioni e dei potenziamenti, che salgono. **Tutte e due nel
+file base**; `--variante senza_sconti` rifa' la quarantaquattresima.
+
+Le scelte vere sono 10 a partita a giocatore (su 16 usi): e' la decisione in
+piu' che la regola promette. Le strategie: Bilanciata 40 e Continuita' 38 in
+testa, Rendita 27 e Scavo 28 in coda. Le spinte della Rendita e della Scavo
+sono tarate sulla regola di prima: quarantasettesima misura.
+
 ## Come rifare il conto
 
 ```bash
+# quarantaseiesima misura: sconti senza condizione e ⊕ con lo sconto (registro 171); il file base e'
+#   quello nuovo, `--variante senza_sconti` rifa' la quarantaquattresima
+python3 tools/genera_cards_v3.py && python3 tools/genera_cards_v3.py --variante senza_sconti
+godot --headless res://scenes/audit_partita.tscn -- --players 3 --games 300 --seed 700000 --giro tutte \
+  --dati data/proposte/cards-v3-era1.json --rapporto 1 > w.csv 2> w.err
 # quarantaquattresima misura: la "scelta" stile Caylus (registro 170), tre controprove sul file base
 for v in scelta scelta_pv scelta_sconti; do python3 tools/genera_cards_v3.py --variante $v; done
 godot --headless res://scenes/audit_partita.tscn -- --players 3 --games 300 --seed 700000 --giro tutte \

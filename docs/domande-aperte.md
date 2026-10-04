@@ -2751,5 +2751,15 @@ dato è stato importato da lì. Ma due confronti fra ciò che è stampato e
     ora anche per il potenziamento (`_sconto_vale_per_potenziamento`).
     Variante `sconti`. (3) Il ⊕ porta anche lo sconto, "compri una cosa in
     piu' e paghi 1 in meno" (chiave `sconto` nell'azione acquisto): variante
-    `sconti_extra`. Poi la ritaratura di Continuita' e Rendita nel bot. Le
-    misure dalla quarantaseiesima.
+    `sconti_extra`. Quarantaseiesima misura: gli sconti si usano 2,9 volte
+    a partita invece di 1,6 e la forbice va da 28-44 a 29-40; il ⊕ con lo
+    sconto si usa il 68% delle volte invece del 43%, costruzioni 15,6 invece di
+    15,1. **Tutte e due nel file base** (`--variante senza_sconti` rifa' la
+    quarantaquattresima). Le scelte vere sono 10 a partita a giocatore. Ora in
+    coda Rendita 27 e Scavo 28: ritaratura nel bot (registro 172).
+172. **Rendita e Scavo nel bot, sulla regola nuova.** I pesi della Scavo v3
+    passano nella tabella `SPINTE_V3` (`scavo_v3` 0,9, `scavo_v3_sopra` 2,0,
+    `scavo_v3_zero` -1) per cercarli con `--spinta`. Tre lotti:
+    `rendita_per_era` 1,3; Scavo 1,3 e sopra 3,0; entrambi. Quarantasettesima
+    misura.
+

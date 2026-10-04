@@ -125,5 +125,6 @@ Fondaco e Periferia in Costruzione. +2 PV a testa per tutti, le carte delle ere 
 doppio, il morto delle ere 4-5 a 2,2 e 2,1. La Lampo resta al 25%: il Lampo lo prendono tutti.
 
 Sesto giro (registro 171, dalla quarantaquattresima misura): la regola "stile Caylus" e' il file
-base, chi attiva usa un edificio della colonna e lo brucia; in misura gli sconti senza condizione su
-dieci carte e il ⊕ con lo sconto dentro.
+base, chi attiva usa un edificio della colonna e lo brucia; dieci carte hanno lo sconto senza
+condizione ("Usa: -1 a quel che compri in questo turno": Trappole, Terme, Insulae, Mulino, Mercato,
+Bottega, Loggia, Banco, Officina, Caffe') e il ⊕ porta anche lo sconto (quarantaseiesima misura).
