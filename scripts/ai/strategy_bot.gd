@@ -668,8 +668,7 @@ static var spinte_override := {}
 # Bilanciata, alzarlo a 1,2 non rende.
 const SPINTE_V3 := {"rendita_per_era": 0.9, "rendita_zero": -1.5, "lampo": 0.8, "lampo_zero": 0.0,
 	"scavo_premio": 0.4, "scavo_terra": -0.5, "scavo_terra_scavo": 0.25, "protezione_attesa": 2.0,
-	"lampo_potenzia": 1.5, "lampo_sopra": 0.0, "obiettivi_peso": 1.0, "continuita_peso": 1.0,
-	"scavo_v3": 0.9, "scavo_v3_sopra": 2.0, "scavo_v3_zero": -1.0}
+	"lampo_potenzia": 1.5, "lampo_sopra": 0.0, "obiettivi_peso": 1.0, "continuita_peso": 1.0}
 
 static func spinte() -> Dictionary:
 	var base := SPINTE_V2 if e_v2() else SPINTE_V1
@@ -794,9 +793,8 @@ static func _valore_costruzione(gs: GameState, p: PlayerState, v, strategia: Str
 				q += premio_stimato * float(sp["scavo_premio"])
 				if not sopra: q += float(sp["scavo_terra"]) + float(d["scavo"]) * float(sp["scavo_terra_scavo"])
 			else:
-				# V3: i pesi stanno nella tabella (registro 172), per cercarli con `--spinta`.
-				q += float(d["scavo"]) * float(sp.get("scavo_v3", 0.9)) + (float(sp.get("scavo_v3_sopra", 2.0)) if sopra else 0.0)
-				if int(d["scavo"]) == 0: q += float(sp.get("scavo_v3_zero", -1.0))
+				q += float(d["scavo"]) * 0.9 + (2.0 if sopra else 0.0)
+				if int(d["scavo"]) == 0: q -= 1.0
 		"verticale":
 			if sopra: q += 3.0 + 1.2 * float(par.get("level", 1))
 			else: q -= 1.5

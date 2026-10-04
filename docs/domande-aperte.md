@@ -2757,9 +2757,11 @@ dato è stato importato da lì. Ma due confronti fra ciò che è stampato e
     15,1. **Tutte e due nel file base** (`--variante senza_sconti` rifa' la
     quarantaquattresima). Le scelte vere sono 10 a partita a giocatore. Ora in
     coda Rendita 27 e Scavo 28: ritaratura nel bot (registro 172).
-172. **Rendita e Scavo nel bot, sulla regola nuova.** I pesi della Scavo v3
-    passano nella tabella `SPINTE_V3` (`scavo_v3` 0,9, `scavo_v3_sopra` 2,0,
-    `scavo_v3_zero` -1) per cercarli con `--spinta`. Tre lotti:
-    `rendita_per_era` 1,3; Scavo 1,3 e sopra 3,0; entrambi. Quarantasettesima
-    misura.
+172. **Rendita e Scavo nel bot, sulla regola nuova.** Primo giro
+    (quarantasettesima misura): `rendita_per_era` da 0,9 a 1,3 porta la
+    Rendita dal 27 al 33% (forbice 27-38). I pesi "v1" della Scavo che avevo
+    messo in tabella erano codice morto: con la v3 il bot usa il ramo v2
+    (`scavo_premio`, `scavo_terra`, `scavo_terra_scavo`), e il lotto era
+    identico alla base; tolti. Secondo giro: `scavo_premio` 0,8 e 1,2 con
+    `scavo_terra_scavo` 0,5, insieme alla Rendita a 1,3.
 
