@@ -2850,3 +2850,10 @@ dato è stato importato da lì. Ma due confronti fra ciò che è stampato e
     vista disegna sollevata su tutta la colonna. **Aperto**: si rigioca col
     seme quando il designer lo ha; nel riquadro manca "poggia su ... ·
     binario N".
+179. **Il Grattacielo: tre binari, livello 1, qualunque terreno.** Il
+    designer, dopo la spiegazione dei tre vincoli (tre binari liberi in una
+    colonna nell'era 5, il livello 2 che vuole una pila gia' alta, la sola
+    pianura): "prova con tre binari e livello 1 e misura, terreno qualunque".
+    Nel file base il Grattacielo resta a tre binari com'e' stampato, va su
+    qualunque terreno e chiede il livello 1; `--variante grandi_vecchie` lo
+    rimette in pianura al livello 2. Misura nella cinquantesima.

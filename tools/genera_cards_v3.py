@@ -803,15 +803,25 @@ def senza_sconti(v):
 # su qualunque terreno e la Fortezza costa ⚒3 🪙1 (Fortezza 0,11, la Stazione
 # resta a 0,03: sono le tre colonne). Il Grattacielo era passato a 2 binari
 # (0,26 a partita): il designer lo rivuole a tre, com'e' stampato (registro 178).
+# Il Grattacielo (registro 179): tre binari com'e' stampato, ma su qualunque
+# terreno e al livello 1 invece di 2; il designer, "prova con tre binari e
+# livello 1 e misura, terreno qualunque".
 for b in v3["buildings"]:
     if b["id"] == "ed_stazione": b["terrain"] = None
     if b["id"] == "ed_fortezza_bastionata": b["cost"] = prod(pietra=3, oro=1)
+    if b["id"] == "ed_grattacielo":
+        b["terrain"] = None; b["level_required"] = 1
+        b["effect_text"] = b["effect_text"].replace("A fine partita: come nella v2.", "Richiede livello 1. A fine partita: come nella v2.")
 
-#   --variante grandi_vecchie  le due carte grandi ritoccate come nella v2 (Stazione in pianura, Fortezza ⚒4)
+#   --variante grandi_vecchie  le tre carte grandi ritoccate come nella v2 (Stazione in pianura, Fortezza ⚒4,
+#                              Grattacielo in pianura al livello 2)
 def grandi_vecchie(v):
     for b in v["buildings"]:
         if b["id"] == "ed_stazione": b["terrain"] = "pianura"
         if b["id"] == "ed_fortezza_bastionata": b["cost"] = prod(pietra=4)
+        if b["id"] == "ed_grattacielo":
+            b["terrain"] = "pianura"; b["level_required"] = 2
+            b["effect_text"] = b["effect_text"].replace("Richiede livello 1. ", "")
 VARIANTI = {"grandi_vecchie": grandi_vecchie, "proprietario": proprietario, "compenso_pv": compenso_pv, "senza_sconti": senza_sconti,
             "lampo_vecchio": lampo_vecchio, "extra_sempre": extra_sempre, "senza_extra": senza_extra, "costi_vecchi": costi_vecchi,
             "case_seconda": case_seconda, "case_lampo1": case_lampo1, "senza_tuning": senza_tuning,

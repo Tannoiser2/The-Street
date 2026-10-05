@@ -2454,7 +2454,7 @@
       "classes": [
         "commercio"
       ],
-      "terrain": "pianura",
+      "terrain": null,
       "width": 1,
       "cost": {
         "pietra": 3,
@@ -2466,7 +2466,7 @@
       "rendita": 0,
       "lampo": 1,
       "scavo": 0,
-      "level_required": 2,
+      "level_required": 1,
       "production": {
         "pietra": 0,
         "oro": 0,
@@ -2474,7 +2474,7 @@
         "idee": 0
       },
       "exhaustible": 0,
-      "effect_text": "Usa: +1 Denaro per ogni altro giocatore con un edificio qui (max 2). A fine partita: come nella v2.",
+      "effect_text": "Usa: +1 Denaro per ogni altro giocatore con un edificio qui (max 2). Richiede livello 1. A fine partita: come nella v2.",
       "effects": [
         {
           "hook": "on_final_scoring",
