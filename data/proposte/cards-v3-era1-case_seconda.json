@@ -2081,8 +2081,8 @@
       "terrain": "collina",
       "width": 2,
       "cost": {
-        "pietra": 4,
-        "oro": 0,
+        "pietra": 3,
+        "oro": 1,
         "idee": 0
       },
       "flexible": false,
@@ -2497,7 +2497,7 @@
           }
         }
       ],
-      "depth": 3,
+      "depth": 2,
       "solo_su_rovine": true,
       "azione": {
         "tipo": "altri",
@@ -2609,7 +2609,7 @@
         "commercio",
         "ingegneria"
       ],
-      "terrain": "pianura",
+      "terrain": null,
       "width": 3,
       "cost": {
         "pietra": 3,

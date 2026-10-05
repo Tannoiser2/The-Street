@@ -2780,12 +2780,17 @@ dato è stato importato da lì. Ma due confronti fra ciò che è stampato e
     (`ritro_scheletro` 0,5), le caselle dell'edificio che lasceranno tessere
     (`ritro_caselle` 0,6), nell'era 5 costruire sopra le proprie rovine mai
     scavate (`ritro_riscoperta` 1,2 per tessera), i token Arte (`ritro_arte`
-    0,6 per Scavo), l'azione ⚱ come la Scavo. Misura nella quarantottesima.
+    0,6 per Scavo), l'azione ⚱ come la Scavo. Quarantottesima misura, prima
+    taratura: vince il 43% con 79 PV, ma con la Rendita (14,2) delle carte
+    larghe piu' che con gli scheletri (Scavo 12,5 contro 11,5): il peso sulle
+    caselle la fa giocare da Rendita. Seconda taratura al ribasso in corso.
 174. **Le tre carte grandi rare.** Fortezza (⚒4, collina 2x2), Grattacielo
     (3 binari) e Stazione (3 colonne di pianura) si costruivano 0,03-0,14
-    volte a partita per terreno e forma. Variante `grandi`: Stazione su
-    qualunque terreno, Grattacielo a 2 binari, Fortezza ⚒3 🪙1. Misura nella
-    quarantottesima.
+    volte a partita per terreno e forma. Stazione su qualunque terreno,
+    Grattacielo a 2 binari, Fortezza ⚒3 🪙1 (quarantottesima misura):
+    Grattacielo 0,26, Fortezza 0,11, la Stazione resta a 0,03 per le tre
+    colonne. **Nel file base**, `--variante grandi_vecchie` le rifa' come
+    nella v2.
 175. **La domanda "quale edificio usi?" per le persone.** Non fatta:
     l'interfaccia a schermo non conosce la v3 (il file di prova non e' fra
     quelli offerti), e la scelta e' una `pending_choice` di tipo "edificio"

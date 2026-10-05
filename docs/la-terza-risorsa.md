@@ -2457,9 +2457,45 @@ Il file base oggi, partita intera: 76,8 PV a testa, Lampo 18,9, Continuita'
 a giocatore (10 con una scelta vera), 15,6 costruzioni, 4,6 potenziamenti,
 5,0 sconti, il ⊕ usato il 68% delle volte.
 
+## Quarantottesima misura: la Ritrovamenti nel bot, e le tre carte grandi
+
+Il designer: "Ok procedi e poi mergia". Due cose, stessi 300 semi del file base
+(quarantasettesima).
+
+**La Ritrovamenti** (registro 173), settima strategia del canone v3: lo Scavo
+stampato del Personaggio al draft (gli scheletri), le caselle dell'edificio che
+lasceranno tessere, nell'era 5 costruire sopra le proprie rovine mai scavate (le
+tessere valgono solo riportate alla luce), i token Arte, l'azione ⚱. Con sette
+strategie e tre posti il torneo cambia combinazioni: i numeri delle altre non
+si confrontano uno a uno con la quarantasettesima.
+
+| vittorie (7 strategie) | Bil | Cont | Lampo | Obi | Rend | Ritro | Scavo |
+|---|---|---|---|---|---|---|---|
+| prima taratura (`ritro_caselle` 0,6) | 25 | 36 | 31 | 44 | 27 | **43** | 27 |
+| PV | 76,7 | 78,2 | 75,5 | 79,5 | 74,1 | **78,9** | 73,6 |
+
+La Ritrovamenti vince il 43% con 78,9 PV, ma non con gli scheletri: il suo
+Scavo e' 12,5 contro 11,5 della Scavo, mentre la sua Rendita e' 14,2 (le altre
+11-13) e i finali 5,7. Il peso sulle caselle (0,6 a casella) la porta sulle
+carte larghe, che sono quelle a Rendita 2 (Castello, Anfiteatro, Fortezza...):
+una Rendita con un nome diverso. La Bilanciata scende a 25 e la Rendita a 27,
+perche' la Ritrovamenti compra le loro carte. Seconda taratura al ribasso in
+coda a questa misura.
+
+**Le tre carte grandi** (registro 174): la Stazione su qualunque terreno, il
+Grattacielo a 2 binari, la Fortezza ⚒3 🪙1. Costruite a partita, prima → ora:
+Fortezza 0,08 → 0,11, Grattacielo 0,17 → 0,26, Stazione 0,03 → 0,03 (le tre
+colonne restano la sua forma, il terreno non era il collo). Vittorie uguali
+entro l'errore. **Nel file base**; `--variante grandi_vecchie` rifa' le carte
+della v2.
+
 ## Come rifare il conto
 
 ```bash
+# quarantottesima misura: la Ritrovamenti (registro 173) e le carte grandi (174); il canone v3 ha sette
+#   strategie, `--variante grandi_vecchie` rifa' le carte della v2
+godot --headless res://scenes/audit_partita.tscn -- --players 3 --games 300 --seed 700000 --giro tutte \
+  --dati data/proposte/cards-v3-era1.json --rapporto 1 > z.csv 2> z.err
 # quarantasettesima misura: Rendita e Scavo nel bot (registro 172); la tabella SPINTE_V3 ha ora
 #   rendita_per_era 1,3, scavo_premio 0,8, scavo_terra_scavo 0,5; questo rifa' la base della quarantaseiesima
 godot --headless res://scenes/audit_partita.tscn -- --players 3 --games 300 --seed 700000 --giro tutte \
