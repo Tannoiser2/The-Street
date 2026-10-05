@@ -349,7 +349,9 @@ static func _quote_sopra_binario(gs: GameState, player: int, data: Dictionary, c
 				Enums.BuildingState.ROVINA:
 					if top.owner != player or not bool(CardDB.constants.get("sconto_macerie_solo_altrui", false)):
 						rubble_discount = true
-					if TessereScavo.quante(top) > 0: q.tessere_sotto += 1
+					# Casella per casella: di uno spianato in parte (registro
+					# 180) contano solo le caselle rimaste rovina.
+					if TessereScavo.casella_ha_tessera(top, c, r): q.tessere_sotto += 1
 			if not top in q.bases: q.bases.append(top)
 			real_bases += 1
 			top_level = max(top_level, top.level + 1)

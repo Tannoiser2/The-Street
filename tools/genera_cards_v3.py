@@ -618,6 +618,14 @@ A_TERRA = {"ed_anfiteatro", "ed_castello", "ed_fortezza_bastionata", "ed_grattac
 for b in v3["buildings"]:
     if b["id"] in A_TERRA: b["a_terra_o_sopra"] = True
 
+# LO SPIANAMENTO PARZIALE (registro 180). Nella v2 un proprio intatto spianato
+# andava in rovina tutto intero, Scavo 0 e senza tessere, anche se la carta
+# nuova ne copriva una casella sola: le altre restavano Terrapieni a vista
+# (una volta a partita). Il designer: le caselle coperte sono terrapieno
+# ("stai usando il suo materiale e lo stai coprendo"), quelle rimaste libere
+# restano rovina con le loro tessere ("NON ci hai costruito sopra").
+c["tessere_scavo"]["spianato"] = "parziale"
+
 #   --variante extra_sempre   l'acquisto extra a ogni turno, senza carte (la "catena" del registro 156)
 #   --variante senza_extra    nessun acquisto extra: le quattro carte tornano com'erano nella scheda
 #   --variante costi_vecchi   i costi della scheda, senza il +1 della seconda risorsa
@@ -822,7 +830,10 @@ def grandi_vecchie(v):
         if b["id"] == "ed_grattacielo":
             b["terrain"] = "pianura"; b["level_required"] = 2
             b["effect_text"] = b["effect_text"].replace("Richiede livello 1. ", "")
-VARIANTI = {"grandi_vecchie": grandi_vecchie, "proprietario": proprietario, "compenso_pv": compenso_pv, "senza_sconti": senza_sconti,
+#   --variante spianato_intero  lo spianato di prima: tutta la carta terrapieno, Scavo 0, niente tessere
+def spianato_intero(v):
+    v["constants"]["tessere_scavo"].pop("spianato", None)
+VARIANTI = {"spianato_intero": spianato_intero, "grandi_vecchie": grandi_vecchie, "proprietario": proprietario, "compenso_pv": compenso_pv, "senza_sconti": senza_sconti,
             "lampo_vecchio": lampo_vecchio, "extra_sempre": extra_sempre, "senza_extra": senza_extra, "costi_vecchi": costi_vecchi,
             "case_seconda": case_seconda, "case_lampo1": case_lampo1, "senza_tuning": senza_tuning,
             "terreno_produce": terreno_produce, "senza_potenziamento_insieme": senza_potenziamento_insieme}

@@ -55,6 +55,7 @@ func _ready() -> void:
 	_run("v2: i Personaggi e l'arte ritoccati (registro 138)", _test_personaggi_e_arte)
 	_run("v3: il draft a passaggio, i Personaggi lavoratori, le risorse che muoiono", _test_v3_era1)
 	_run("v3 scelta: chi attiva usa un edificio della colonna, di chiunque, e lo brucia", _test_v3_scelta)
+	_run("v3: lo spianamento parziale, terrapieno sotto e rovina accanto (registro 180)", _test_v3_spianato_parziale)
 	print("\n%d superati, %d falliti" % [_passed, _failed])
 	get_tree().quit(0 if _failed == 0 else 1)
 
@@ -2241,4 +2242,61 @@ func _test_v3_scelta() -> void:
 	_eq("  +1 PV di compenso al primo", p0.vp - vp_p0, 1)
 	_ok("  ora la colonna 3 non offre niente fino a fine giro", PersonaggiV3.opzioni_edificio(gs, 3).is_empty())
 	_ok("  il Focolare e' segnato bruciato in questo giro", str(gs.bruciati.get(focolare.uid, "")) == PersonaggiV3.giro_corrente(gs))
+	CardDB.load_db(CardDB.DB_PATH)
+
+# LO SPIANAMENTO PARZIALE (registro 180): un Acquedotto di tre colonne spianato
+# da una Cappella di una casella. La casella coperta diventa terrapieno, le
+# altre due restano rovina con la tessera, e chi ci costruisce sopra le conta
+# nel bonus scavo. Spianato per intero, come prima: niente tessere.
+func _test_v3_spianato_parziale() -> void:
+	if not FileAccess.file_exists("res://data/proposte/cards-v3-era1.json"): return
+	CardDB.load_db("res://data/proposte/cards-v3-era1.json")
+	_ok("il file base accende lo spianamento parziale", TessereScavo.spianato_parziale())
+	var ctl := _game(3, 4573)
+	var gs := ctl.gs
+	while not gs.pending_choice.is_empty():
+		ctl.choose(int((gs.pending_choice["options"] as Array)[0]))
+	gs.grid.buildings.clear()
+	for i in gs.grid.n_cols: gs.grid.terrains[i] = Enums.Terrain.PIANURA
+	var p0 := gs.current_player()
+	var p1: PlayerState = gs.players[(p0.index + 1) % 3]
+	# L'Acquedotto dell'era 2 in colonna 3-5, sul binario dell'era 2; siamo nell'era 3.
+	var acq := _put(gs, p0.index, "ed_acquedotto", 3)
+	acq.era_built = 2
+	acq.binario = 2
+	gs.era = 3
+	gs.market = ["ed_cappella"]
+	var cappella: Dictionary = CardDB.buildings["ed_cappella"]
+	var q := BuildRules.quote_above(gs, p0.index, cappella, 5)
+	_ok("sopra il proprio Acquedotto si spiana (%s)" % q.reason, q.legal and acq in q.razed)
+	_eq("  sul binario dell'Acquedotto", q.binario, 2)
+	_eq("  la Cappella copre una casella sola dell'Acquedotto",
+		TessereScavo.caselle_coperte(acq, 5, 6, q.binario, 1), [Vector2i(5, 2)])
+	var liberi := ctl.personaggi_liberi(p0)
+	_ok("  si attiva la colonna 5", ctl.place_worker(5, null, liberi[0]))
+	while not gs.pending_choice.is_empty():
+		ctl.choose(int((gs.pending_choice["options"] as Array)[0]))
+	_give(p0, 9, 9)
+	p0.idee = 9
+	_ok("  e si costruisce la Cappella sopra", ctl.build("ed_cappella", 5, true))
+	_ok("l'Acquedotto e' spianato", acq.state == Enums.BuildingState.ROVINA and acq.was_razed)
+	_eq("  la casella coperta e' terrapieno", acq.caselle_terrapieno, [Vector2i(5, 2)])
+	_eq("  le altre due restano rovina con la tessera", TessereScavo.quante(acq), 2)
+	_eq("  sulle colonne 3 e 4", TessereScavo.caselle_con_tessera(acq), [Vector2i(3, 2), Vector2i(4, 2)])
+	_ok("  non e' sepolto: due caselle sono all'aria", not acq.is_buried)
+	_eq("  e pesca due tessere", TessereScavo.tessere(gs, acq).size(), 2)
+	_eq("  il proprietario ha spianato in parte", int(p0.counters.get("spianati_in_parte", 0)), 1)
+	# Un altro costruisce sopra la casella rimasta rovina: una tessera sotto.
+	var q1 := BuildRules.quote_above(gs, p1.index, cappella, 3)
+	_ok("un altro puo' costruire sulla rovina rimasta (%s)" % q1.reason, q1.legal)
+	_eq("  e trova una tessera sotto", q1.tessere_sotto, 1)
+	# Spianato per intero: niente tessere, come prima.
+	var dolmen := _put(gs, p0.index, "ed_capanne", 0)
+	dolmen.era_built = 1
+	dolmen.binario = 1
+	for cas in TessereScavo.caselle_coperte(dolmen, 0, 1, 1, 1): dolmen.caselle_terrapieno.append(cas)
+	dolmen.state = Enums.BuildingState.ROVINA
+	dolmen.was_razed = true
+	_eq("spianato per intero: nessuna tessera", TessereScavo.quante(dolmen), 0)
+	_ok("  e nessuna casella con la tessera", TessereScavo.caselle_con_tessera(dolmen).is_empty())
 	CardDB.load_db(CardDB.DB_PATH)

@@ -48,6 +48,45 @@ static func carte_restituite() -> bool:
 static func fuori(b: Building) -> bool:
 	return carte_restituite() and b.state == Enums.BuildingState.ROVINA
 
+# LO SPIANAMENTO PARZIALE (registro 180, `spianato: "parziale"`). Il
+# designer, davanti a due Terrapieni soli lasciati da un Acquedotto spianato
+# da una Palazzina di una casella: "le caselle dove effettivamente costruisci
+# [sono] dei terrapieni, perche' stai effettivamente usando il suo materiale e
+# lo stai coprendo, mentre le caselle rimaste libere diventano rovine perche'
+# NON ci hai costruito sopra. In questo modo si formano nuove rovine che
+# possono valere qualcosa". Le caselle coperte dalla carta nuova sono
+# terrapieno (niente tessera, Scavo 0); le altre restano rovina del
+# proprietario con la loro tessera, come ogni rovina. Vuole la griglia a
+# caselle: senza, l'impronta e' per colonna e non si saprebbe cosa e' coperto.
+static func spianato_parziale() -> bool:
+	return attive() and Grid.caselle() \
+		and str(CardDB.constants["tessere_scavo"].get("spianato", "")) == "parziale"
+
+# Le caselle di `b` che un'impronta (colonne da `col_from` a `col_to` esclusa,
+# binari da `binario` per `prof`) copre: quelle che lo spianamento rende
+# terrapieno. Serve a chi costruisce (per segnarle) e al bot (per pesare
+# quanto Scavo perde spianando).
+static func caselle_coperte(b: Building, col_from: int, col_to: int, binario: int, prof: int) -> Array[Vector2i]:
+	var out: Array[Vector2i] = []
+	for c in range(col_from, col_to):
+		for r in range(binario, binario + prof):
+			if b.copre_casella(c, r): out.append(Vector2i(c, r))
+	return out
+
+# La casella (col, r) di una rovina porta una tessera? No se la rovina non ne
+# ha, no se e' una delle caselle diventate terrapieno.
+static func casella_ha_tessera(b: Building, c: int, r: int) -> bool:
+	return quante(b) > 0 and not b.caselle_terrapieno.has(Vector2i(c, r))
+
+# Le caselle con la tessera, nell'ordine delle caselle della carta: e' l'ordine
+# in cui `tessere()` le pesca e in cui la vista le posa.
+static func caselle_con_tessera(b: Building) -> Array[Vector2i]:
+	var out: Array[Vector2i] = []
+	if quante(b) == 0: return out
+	for cas in b.caselle():
+		if not b.caselle_terrapieno.has(cas): out.append(cas)
+	return out
+
 # I POTENZIAMENTI COME TOKEN (registro 131): quando l'edificio va in rovina il
 # proprietario riscatta i token che portava. L'effetto sull'edificio finisce
 # (si tolgono i bonus che il token gli dava); i token ARTE, tenuti davanti a
@@ -98,8 +137,13 @@ static func quante(b: Building) -> int:
 	# proprietario e non lascia tessere, come un terrapieno. Con
 	# `spianato_lascia_tessere` lascia le tessere del proprietario come ogni
 	# rovina (ma non paga il premio: chi spiana costruisce sopra il proprio).
-	if b.was_razed and not (attive() and bool(CardDB.constants["tessere_scavo"].get("spianato_lascia_tessere", false))):
-		return 0
+	# Con lo spianamento parziale (registro 180) le tessere restano sulle
+	# caselle che la carta nuova non ha coperto.
+	if b.was_razed:
+		if spianato_parziale():
+			return max(0, b.width() * b.profondita() - b.caselle_terrapieno.size())
+		if not (attive() and bool(CardDB.constants["tessere_scavo"].get("spianato_lascia_tessere", false))):
+			return 0
 	return b.width() * b.profondita()
 
 # Lo Scavo su cui si paga il premio di chi costruisce sopra. Di regola quello
@@ -107,7 +151,7 @@ static func quante(b: Building) -> int:
 # contano le tessere coperte sotto (una per casella), `per_tessera` PV l'una.
 static func scavo_per_premio(b: Building) -> int:
 	if attive() and str(CardDB.constants["tessere_scavo"].get("premio", "")) == "tessere":
-		if b.was_razed: return 0
+		if b.was_razed and not spianato_parziale(): return 0
 		return quante(b) * int(CardDB.constants["tessere_scavo"].get("per_tessera", 1))
 	return b.scavo_value()
 

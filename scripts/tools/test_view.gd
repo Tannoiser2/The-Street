@@ -2997,6 +2997,15 @@ func _test_tessere_scavo_vista() -> void:
 		_ok("nella v2 lo spianato non lascia tessere", BoardLayout3D.tessere_scavo_box(gs, r).is_empty())
 		_eq("  ma il terrapieno, una tessera per casella", BoardLayout3D.terrapieni_spianato_box(gs, r).size(),
 			int(r.data["width"]) * int(r.data.get("depth", 1)))
+		# Lo spianamento parziale (registro 180): la terra solo sulla casella
+		# coperta, le tessere sulle altre.
+		CardDB.constants["tessere_scavo"]["spianato"] = "parziale"
+		r.caselle_terrapieno = [Vector2i(r.col_from + 2, r.binario_effettivo())]
+		_eq("spianato in parte: la terra sulla casella coperta", BoardLayout3D.terrapieni_spianato_box(gs, r).size(), 1)
+		_eq("  e le tessere sulle altre due", BoardLayout3D.tessere_scavo_box(gs, r).size(), 2)
+		var terra := BoardLayout3D.terrapieni_spianato_box(gs, r)[0]
+		var tutte := BoardLayout3D._caselle_della_carta(gs, r)
+		_ok("  la terra sta nella terza casella", terra.is_equal_approx(tutte[2]))
 	CardDB.load_db(CardDB.DB_PATH)
 
 # Con le carte restituite la carta edificio e' la sua tessera: sul mercato ha

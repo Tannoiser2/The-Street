@@ -34,6 +34,12 @@ var basi: Array[int] = []
 # c'era niente e si e' pagato un terrapieno. Serve alla vista per riempire
 # il vuoto sotto l'edificio, che altrimenti resta sospeso.
 var terrapieno_cols: Array[int] = []
+# LE CASELLE DIVENTATE TERRAPIENO (registro 180): quando un proprio intatto
+# viene spianato per costruirci sopra, le caselle che la carta nuova copre
+# davvero sono terra riportata (il materiale e' servito li'); quelle che
+# restano libere restano rovina, con le loro tessere. Si segnano allo
+# spianamento e non cambiano piu'. Vuota per tutto il resto.
+var caselle_terrapieno: Array[Vector2i] = []
 var bonus_res: int = 0        # cubetti neri: collina, continuità, potenziamenti Struttura
 var bonus_scavo: int = 0      # Impronte e potenziamenti che alzano lo Scavo
 var bonus_rendita: int = 0    # Stalli mercantili: "l'affitto incassato da questo edificio e' +1"
@@ -102,6 +108,7 @@ func duplica() -> Building:
 	b.buried_era = buried_era
 	b.basi = basi.duplicate()
 	b.terrapieno_cols = terrapieno_cols.duplicate()
+	b.caselle_terrapieno = caselle_terrapieno.duplicate()
 	b.bonus_res = bonus_res
 	b.bonus_scavo = bonus_scavo
 	b.bonus_rendita = bonus_rendita
@@ -143,6 +150,15 @@ func copre_binario(r: int) -> bool:
 
 func copre_casella(col: int, r: int) -> bool:
 	return covers(col) and copre_binario(r)
+
+# Le caselle che occupa, colonna per colonna e binario per binario, nell'ordine
+# in cui la vista le disegna e in cui le tessere scavo si contano.
+func caselle() -> Array[Vector2i]:
+	var out: Array[Vector2i] = []
+	for i in width():
+		for j in profondita():
+			out.append(Vector2i(col_from + i, binario_effettivo() + j))
+	return out
 
 func solo_su_rovine() -> bool:
 	return bool(data.get("solo_su_rovine", false))
