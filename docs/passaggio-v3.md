@@ -37,8 +37,9 @@ quello che è cambiato da allora e la nuova direzione che il designer vuole pren
   lanciati. Le misure lunghe si lanciano con `setsid nohup ... &` e si riprendono con
   `--da N --games G`: attenzione, `--da N` parte dalla partita N e ne gioca **G** (non fino a G).
   Le partite fatte sono le righe `J ` nello stderr.
-- Non usare `pkill -f` con un testo che compare nel proprio comando: uccide la shell. Si
-  uccide per PID.
+- Non usare `pkill -f` o `pgrep -f` con un testo che compare nel proprio comando: uccide la
+  shell, anche col trucco `[G]odot` se il comando contiene altrove il testo cercato (il nome di
+  una scena in un heredoc). Si uccide per PID, cercato in un comando a parte.
 - Le misure: `audit_partita.tscn -- --games N --seed 700000 --players N --giro tutte
   --dati <file> --rapporto 1`; ogni partita è una riga `J {json}` nello stderr con canali di PV,
   contatori (`cnt`) e lo stato finale degli edifici.
@@ -187,8 +188,8 @@ ritarata (quarantasettesima: Rendita 1,3, Scavo 0,8/0,5; quarantottesima: la Rit
 settima strategia del canone v3, al 33%; `obiettivi_peso` 0,8), vittorie fra 27 (Scavo) e 40
 (Obiettivi) nel torneo a sette;
 le carte ancora rare
-(Fortezza, Grattacielo, Stazione per terreno e forma; Conceria, Arsenale, Ponte in acciaio); il ⊕
-che nessuno vuole al draft; l'interfaccia a schermo per la v3 (il file di prova non e' fra quelli
-che la schermata di gioco offre) e la strategia Ritrovamenti nei bot. Dal registro 166 le azioni
-degli edifici che danno risorse scattano solo quando attiva il proprietario ("A ogni tua
-attivazione"), e le cinque carte grandi vanno "a terra oppure sopra" (`a_terra_o_sopra`).
+(la Stazione per le tre colonne; Conceria, Arsenale, Ponte in acciaio); il ⊕ ancora ultimo al draft
+anche con lo sconto dentro. L'interfaccia a schermo conosce la v3 (registro 176: il tasto "v3" nella
+schermata d'inizio, il Personaggio da piazzare, la domanda "quale edificio usi?"); il tavolo 3D non
+segna gli edifici gia' usati nel giro, lo dice solo il riquadro. La strategia Ritrovamenti e' nei bot
+(registro 173). Le cinque carte grandi vanno "a terra oppure sopra" (`a_terra_o_sopra`).

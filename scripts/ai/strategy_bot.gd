@@ -125,14 +125,22 @@ static var taccuino := {}
 static func play_turn(ctl: GameController, strategia := "bilanciata") -> void:
 	var gs := ctl.gs
 	var chi := gs.current_index
+	var draft_fatto := false
 	while not gs.pending_choice.is_empty():
 		# Il draft e' una scelta PER GIOCATORE: risolta la propria, la
 		# prossima e' di un altro, con la sua strategia (il chiamante lo sa).
 		if str(gs.pending_choice.get("kind", "")).begins_with("draft") \
 				and int(gs.pending_choice["player"]) != chi: return
+		if str(gs.pending_choice.get("kind", "")).begins_with("draft"): draft_fatto = true
 		if not ctl.choose(_scelta(gs, strategia)): break
 	if gs.phase == Enums.Phase.FINE_PARTITA: return
 	if not gs.pending_choice.is_empty(): return
+	# REGISTRO 177: se l'ultima presa del draft era di questo bot, il draft
+	# finisce qui dentro e il turno passa al primo dell'ordine, che puo' essere
+	# un altro (anche l'umano a schermo): la sua mossa non e' di questo bot.
+	# Solo dopo un draft (v2 e v3): nella v1.5 la stessa cosa succede con gli
+	# omaggi di fine era, ma li' il comportamento e' il riferimento congelato.
+	if draft_fatto and gs.current_index != chi: return
 	giocatori = gs.n_players
 	var p := gs.current_player()
 	if bool(CardDB.constants.get("turno_v2", false)):
