@@ -534,11 +534,11 @@ EDIFICI_345 = {
     "ed_officina":                (prod(pietra=2),                 None, risorsa(pietra=1),            "A ogni attivazione: +1 Costruzione. A fine partita: +1 PV per ogni altro tuo Ingegneria (max 4)."),
     "ed_monumento_ai_caduti":     (prod(pietra=2, oro=1),          None, resistenza(1, "adiacenti"),   "A ogni attivazione: +1 resistenza fino a fine era ai tuoi edifici adiacenti. A fine partita: +1 PV per ogni altro tuo Militare."),
     "ed_museo":                   (prod(pietra=2, oro=1),          None, scavo(1, "uno"),              "A ogni attivazione: +1 Scavo permanente a un tuo edificio in questa colonna. A fine partita: +2 PV per ogni tua rovina riscoperta."),
-    "ed_grattacielo":             (prod(pietra=3, idee=1),         None, altri(1, 2),                  "A ogni attivazione: +1 Denaro per ogni altro giocatore con un edificio qui (max 2). A fine partita: come nella v2."),
+    "ed_grattacielo":             (prod(pietra=3, idee=1),         None, altri(1, 2),                  "A ogni attivazione: +1 Denaro per ogni altro giocatore con un edificio qui (max 2). A fine partita: +1 PV per ogni livello a cui e' costruito; ogni edificio altrui in cima a una colonna adiacente toglie 1 PV al suo proprietario."),
     "ed_biblioteca":              (prod(pietra=2, oro=1),          None, pv(1),                        "A ogni attivazione: +1 PV. A fine partita: +1 PV per ogni classe diversa fra i tuoi edifici."),
     "ed_ponte_in_acciaio":        (prod(pietra=3),                 None, risorsa(pietra=1),            "A ogni attivazione: +1 Costruzione. A fine partita: +2 PV per ogni tua rovina riportata alla luce nelle sue colonne."),
     "ed_stazione":                (prod(pietra=3, idee=1),         None, risorsa(pietra=1),            "A ogni attivazione: +1 Costruzione. A fine partita: +1 PV per ogni edificio in piedi nelle sue colonne (max 5)."),
-    "ed_parco_archeologico":      (prod(pietra=2, oro=1),          None, scavo(1, "adiacente"),        "A ogni attivazione: +1 Scavo permanente a un tuo edificio adiacente. A fine partita: come nella v2."),
+    "ed_parco_archeologico":      (prod(pietra=2, oro=1),          None, scavo(1, "adiacente"),        "A ogni attivazione: +1 Scavo permanente a un tuo edificio adiacente. A fine partita: fino a 2 tuoi edifici non sotterrati nelle colonne adiacenti valgono il loro Scavo come se fossero sotterrati."),
     "ed_universita":              (prod(pietra=2, oro=1, idee=1),  None, pv(1),                        "A ogni attivazione: +1 PV. Solo sopra, al livello 1 o piu'. A fine partita: +1 PV per ogni tuo Personaggio reclutato."),
 }
 # Terzo giro (registro 164): sulla partita intera il Denaro moriva 10 a testa, e
@@ -803,15 +803,25 @@ def senza_sconti(v):
 # su qualunque terreno e la Fortezza costa ⚒3 🪙1 (Fortezza 0,11, la Stazione
 # resta a 0,03: sono le tre colonne). Il Grattacielo era passato a 2 binari
 # (0,26 a partita): il designer lo rivuole a tre, com'e' stampato (registro 178).
+# Il Grattacielo (registro 179): tre binari com'e' stampato, ma su qualunque
+# terreno e al livello 1 invece di 2; il designer, "prova con tre binari e
+# livello 1 e misura, terreno qualunque".
 for b in v3["buildings"]:
     if b["id"] == "ed_stazione": b["terrain"] = None
     if b["id"] == "ed_fortezza_bastionata": b["cost"] = prod(pietra=3, oro=1)
+    if b["id"] == "ed_grattacielo":
+        b["terrain"] = None; b["level_required"] = 1
+        b["effect_text"] = b["effect_text"].replace("A fine partita: come nella v2.", "Richiede livello 1. A fine partita: come nella v2.")
 
-#   --variante grandi_vecchie  le due carte grandi ritoccate come nella v2 (Stazione in pianura, Fortezza ⚒4)
+#   --variante grandi_vecchie  le tre carte grandi ritoccate come nella v2 (Stazione in pianura, Fortezza ⚒4,
+#                              Grattacielo in pianura al livello 2)
 def grandi_vecchie(v):
     for b in v["buildings"]:
         if b["id"] == "ed_stazione": b["terrain"] = "pianura"
         if b["id"] == "ed_fortezza_bastionata": b["cost"] = prod(pietra=4)
+        if b["id"] == "ed_grattacielo":
+            b["terrain"] = "pianura"; b["level_required"] = 2
+            b["effect_text"] = b["effect_text"].replace("Richiede livello 1. ", "")
 VARIANTI = {"grandi_vecchie": grandi_vecchie, "proprietario": proprietario, "compenso_pv": compenso_pv, "senza_sconti": senza_sconti,
             "lampo_vecchio": lampo_vecchio, "extra_sempre": extra_sempre, "senza_extra": senza_extra, "costi_vecchi": costi_vecchi,
             "case_seconda": case_seconda, "case_lampo1": case_lampo1, "senza_tuning": senza_tuning,

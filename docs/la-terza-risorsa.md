@@ -2538,9 +2538,61 @@ che il difetto non toccava. Sulle vittorie la tabella va riguardata con questa
 misura come base, se il designer vuole stringere ancora: le leve sono
 `obiettivi_peso` (0,8) e la Scavo, che ha il suo margine nei ritrovamenti.
 
+## Cinquantesima misura: il Grattacielo a tre binari, livello 1, qualunque terreno
+
+Il registro 179: il designer, "prova con tre binari e livello 1 e misura,
+terreno qualunque". Nel file base il Grattacielo passa da pianura/livello 2 a
+terreno qualunque/livello 1, sempre tre binari (la carta stampata). Stessi 300
+semi della quarantanovesima, stesso bot.
+
+| a partita | 49ª (pianura, liv. 2) | ora (qualunque, liv. 1) |
+|---|---|---|
+| Grattacieli costruiti | 85 (0,28) | 85 (0,28) |
+| partite con Grattacielo | 85 | 85, di cui 55 le stesse |
+| terreno sotto: pianura / bosco / fiume / collina | 38 / 32 / 10 / 5 | 25 / 40 / 13 / 7 |
+| livello: 0 / 1 / 2 / 3 / 4 | 42 / 0 / 22 / 12 / 9 | 50 / 6 / 16 / 7 / 6 |
+| PV resi da ogni Grattacielo | 3,2 | 3,2 |
+| PV a testa | 75,6 | 75,5 |
+| vittorie Bil / Cont / Lampo / Obi / Rend / Ritro / Scavo | 36 / 38 / 27 / 42 / 29 / 37 / 26 | 32 / 37 / 27 / 43 / 29 / 39 / 27 |
+
+Il numero non si muove: 85 Grattacieli in entrambi i lotti. Si muove solo
+dove sta: meno in pianura (il terreno non e' piu' obbligato), un po' piu'
+spesso a terra, qualche volta al livello 1 che prima era vietato. Economia e
+canali di PV identici, vittorie entro l'errore.
+
+Perche' non cambia nulla: i tre vincoli che spiegavamo al designer (tre binari
+liberi, livello 2, pianura) non erano il collo di bottiglia. Con
+`a_terra_o_sopra` (registro 166) il Grattacielo andava gia' a terra senza
+guardare il livello, e la pianura e' il terreno piu' comune. Il freno e'
+altrove: costa 3 Costruzione e 1 Idea, con la Stazione la carta piu' cara
+dell'era 5, in un'era in cui un giocatore produce 8,7 risorse e ne spende
+6,6; e il bot valuta Lampo (il Grattacielo non ne ha) e rendita (3) piu' del
+suo finale. Fra le quattordici carte dell'era 5 sta a meta' classifica:
+
+| carta dell'era 5 | costruite in 300 partite |
+|---|---|
+| Case piccole (riserva) | 599 |
+| Officina | 221 |
+| Condominio, Monumento ai caduti | 186, 181 |
+| Caffe' letterario, Parco archeologico, Case grandi | 150, 147, 141 |
+| Fondazione d'arte, Biblioteca | 139, 137 |
+| Museo, **Grattacielo** | 87, **85** |
+| Ponte in acciaio, Universita' | 58, 53 |
+| Stazione | 16 |
+
+Il mercato dell'era 5 mostra 6 carte su 14 e si rifornisce a ogni acquisto:
+con 7,3 costruzioni a partita quasi tutto il mazzo passa in vetrina, quindi
+il Grattacielo si vede in gran parte delle partite e si compra in una su
+quattro. La modifica non costa niente e non rende niente: la decisione se
+tenerla (carta piu' libera) o tornare alla stampa (pianura, livello 2) e' del
+designer. Se si vuole vederlo di piu', la leva e' il costo o il suo finale,
+non il terreno.
+
 ## Come rifare il conto
 
 ```bash
+# cinquantesima misura: il Grattacielo a tre binari, livello 1, qualunque terreno (registro 179);
+#   stesso comando della quarantanovesima col file base rigenerato (`python3 tools/genera_cards_v3.py`)
 # quarantanovesima misura: il file base col bot corretto (registro 177), stesso comando della quarantottesima
 # quarantottesima misura: la Ritrovamenti (registro 173) e le carte grandi (174); il canone v3 ha sette
 #   strategie, `--variante grandi_vecchie` rifa' le carte della v2
