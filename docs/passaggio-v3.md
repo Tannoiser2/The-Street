@@ -192,4 +192,8 @@ le carte ancora rare
 anche con lo sconto dentro. L'interfaccia a schermo conosce la v3 (registro 176: il tasto "v3" nella
 schermata d'inizio, il Personaggio da piazzare, la domanda "quale edificio usi?"); il tavolo 3D non
 segna gli edifici gia' usati nel giro, lo dice solo il riquadro. La strategia Ritrovamenti e' nei bot
-(registro 173). Le cinque carte grandi vanno "a terra oppure sopra" (`a_terra_o_sopra`).
+(registro 173). Le cinque carte grandi vanno "a terra oppure sopra" (`a_terra_o_sopra`). Il Grattacielo
+libero (livello 1, terreno qualunque, cinquantesima misura) non si costruisce di piu' (85 su 300 prima e
+dopo): il freno e' il costo, non il terreno. Lo spianamento parziale (registro 180, `spianato:
+"parziale"`): le caselle coperte dalla carta nuova sono terrapieno, quelle libere restano rovina con la
+tessera; `--variante spianato_intero` rifa' lo spianato di prima; misura nella cinquantunesima.

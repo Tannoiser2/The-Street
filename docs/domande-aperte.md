@@ -2877,4 +2877,10 @@ dato è stato importato da lì. Ma due confronti fra ciò che è stampato e
     una a partita: 202 carte 1x2, 72 2x1, 41 3x1). Regola nuova: le caselle
     coperte dalla carta nuova sono terrapieno (niente tessere, Scavo 0); le
     caselle non coperte restano rovina del proprietario, con le loro tessere
-    e il loro Scavo, come ogni rovina. Da fare e misurare (cinquantunesima).
+    e il loro Scavo, come ogni rovina. Fatto: `tessere_scavo.spianato:
+    "parziale"` nel file base; `Building.caselle_terrapieno` segnato allo
+    spianamento, `TessereScavo.quante` toglie quelle caselle, il preventivo
+    conta le tessere sotto casella per casella, la vista posa la terra sulle
+    caselle coperte e le tessere sulle altre, il bot pesa lo Scavo perso solo
+    per la parte coperta; `--variante spianato_intero` rifa' lo spianato di
+    prima. Misura nella cinquantunesima.

@@ -73,8 +73,8 @@ Le tabelle sono in `scripts/ai/strategy_bot.gd`: `SPINTE_V1` (non si tocca), `SP
 2, 3 e 4 (diciottesima misura): a 2 Rendita 56 e a 3 Rendita 38 sono sul bordo alto.
 `--spinta k=v,...` prova una taratura senza toccare le tabelle.
 
-**I test** (scene headless, sempre con `timeout` e l'output su file): `test_actions` 435 (tre per
-la v3), `test_effects` 503, `test_schema_validator` 13, `test_view` 528. `test_view` ha bisogno della
+**I test** (scene headless, sempre con `timeout` e l'output su file): `test_actions` 452 (quattro per
+la v3), `test_effects` 503, `test_schema_validator` 13, `test_view` 552. `test_view` ha bisogno della
 grafica importata (`python3 tools/estrai_grafica.py` e poi `godot --headless --import`): senza,
 due test sul piano della tessera falliscono ("profondo quanto la tessera", "uno per colonna")
 e non sono regressioni.
