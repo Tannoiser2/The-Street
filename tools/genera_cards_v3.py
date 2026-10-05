@@ -534,11 +534,11 @@ EDIFICI_345 = {
     "ed_officina":                (prod(pietra=2),                 None, risorsa(pietra=1),            "A ogni attivazione: +1 Costruzione. A fine partita: +1 PV per ogni altro tuo Ingegneria (max 4)."),
     "ed_monumento_ai_caduti":     (prod(pietra=2, oro=1),          None, resistenza(1, "adiacenti"),   "A ogni attivazione: +1 resistenza fino a fine era ai tuoi edifici adiacenti. A fine partita: +1 PV per ogni altro tuo Militare."),
     "ed_museo":                   (prod(pietra=2, oro=1),          None, scavo(1, "uno"),              "A ogni attivazione: +1 Scavo permanente a un tuo edificio in questa colonna. A fine partita: +2 PV per ogni tua rovina riscoperta."),
-    "ed_grattacielo":             (prod(pietra=3, idee=1),         None, altri(1, 2),                  "A ogni attivazione: +1 Denaro per ogni altro giocatore con un edificio qui (max 2). A fine partita: come nella v2."),
+    "ed_grattacielo":             (prod(pietra=3, idee=1),         None, altri(1, 2),                  "A ogni attivazione: +1 Denaro per ogni altro giocatore con un edificio qui (max 2). A fine partita: +1 PV per ogni livello a cui e' costruito; ogni edificio altrui in cima a una colonna adiacente toglie 1 PV al suo proprietario."),
     "ed_biblioteca":              (prod(pietra=2, oro=1),          None, pv(1),                        "A ogni attivazione: +1 PV. A fine partita: +1 PV per ogni classe diversa fra i tuoi edifici."),
     "ed_ponte_in_acciaio":        (prod(pietra=3),                 None, risorsa(pietra=1),            "A ogni attivazione: +1 Costruzione. A fine partita: +2 PV per ogni tua rovina riportata alla luce nelle sue colonne."),
     "ed_stazione":                (prod(pietra=3, idee=1),         None, risorsa(pietra=1),            "A ogni attivazione: +1 Costruzione. A fine partita: +1 PV per ogni edificio in piedi nelle sue colonne (max 5)."),
-    "ed_parco_archeologico":      (prod(pietra=2, oro=1),          None, scavo(1, "adiacente"),        "A ogni attivazione: +1 Scavo permanente a un tuo edificio adiacente. A fine partita: come nella v2."),
+    "ed_parco_archeologico":      (prod(pietra=2, oro=1),          None, scavo(1, "adiacente"),        "A ogni attivazione: +1 Scavo permanente a un tuo edificio adiacente. A fine partita: fino a 2 tuoi edifici non sotterrati nelle colonne adiacenti valgono il loro Scavo come se fossero sotterrati."),
     "ed_universita":              (prod(pietra=2, oro=1, idee=1),  None, pv(1),                        "A ogni attivazione: +1 PV. Solo sopra, al livello 1 o piu'. A fine partita: +1 PV per ogni tuo Personaggio reclutato."),
 }
 # Terzo giro (registro 164): sulla partita intera il Denaro moriva 10 a testa, e

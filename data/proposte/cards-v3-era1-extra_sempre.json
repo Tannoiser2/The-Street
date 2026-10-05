@@ -2475,7 +2475,7 @@
         "idee": 0
       },
       "exhaustible": 0,
-      "effect_text": "Usa: +1 Denaro per ogni altro giocatore con un edificio qui (max 2). Richiede livello 1. A fine partita: come nella v2.",
+      "effect_text": "Usa: +1 Denaro per ogni altro giocatore con un edificio qui (max 2). A fine partita: +1 PV per ogni livello a cui e' costruito; ogni edificio altrui in cima a una colonna adiacente toglie 1 PV al suo proprietario.",
       "effects": [
         {
           "hook": "on_final_scoring",
@@ -2687,7 +2687,7 @@
         "idee": 0
       },
       "exhaustible": 0,
-      "effect_text": "Usa: +1 Scavo permanente a un tuo edificio adiacente. A fine partita: come nella v2.",
+      "effect_text": "Usa: +1 Scavo permanente a un tuo edificio adiacente. A fine partita: fino a 2 tuoi edifici non sotterrati nelle colonne adiacenti valgono il loro Scavo come se fossero sotterrati.",
       "effects": [
         {
           "hook": "on_final_scoring",
