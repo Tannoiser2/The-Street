@@ -708,9 +708,48 @@ func _muovi(ctl: GameController, g: int) -> void:
 			return
 		StrategyBot.racconta = _perche
 		StrategyBot.taccuino = {}
+		if _perche: _vetrina(ctl.gs)
 		StrategyBot.play_turn(ctl, strategia_di(chi, g))
 		if _perche: _ragiona(ctl.gs)
 	else: RandomBot.play_turn(ctl)
+
+# ---- la vetrina: cosa c'era da comprare e dove ci stava --------------
+# Con `--perche`, prima di ogni mossa: le risorse di chi muove e, per ogni
+# carta in vendita, quanti posti legali ha sulla strada e il meno caro;
+# per quelle senza posto, i motivi piu' frequenti del rifiuto. "Perche' non
+# ha costruito il Grattacielo" si risponde solo cosi': o non c'era, o non ci
+# stava, o costava troppo, o valeva meno di un'altra (quello lo dice _ragiona).
+func _vetrina(gs: GameState) -> void:
+	# Solo nei turni senza colonna attivata (v2 e v3), dove si costruisce ovunque.
+	if not (bool(CardDB.constants.get("turno_v2", false)) or bool(CardDB.constants.get("turno_v3", false))): return
+	if gs.phase == Enums.Phase.FINE_PARTITA: return
+	var p := gs.current_player()
+	var righe: PackedStringArray = []
+	for card_id in gs.in_vendita():
+		if not CardDB.buildings.has(card_id): continue
+		var d: Dictionary = CardDB.buildings[card_id]
+		var voci := AvailableActions.piazzamenti_ovunque(gs, p.index, str(card_id))
+		if voci.is_empty():
+			var motivi := {}
+			for c in range(0, gs.grid.n_cols - int(d["width"]) + 1):
+				for sopra in [false, true]:
+					var q = BuildRules.quote_above(gs, p.index, d, c) if sopra else BuildRules.quote_rail(gs, p.index, d, c)
+					if not q.legal and q.reason != "":
+						motivi[q.reason] = int(motivi.get(q.reason, 0)) + 1
+			var elenco: Array = motivi.keys()
+			elenco.sort_custom(func(a, b): return int(motivi[a]) > int(motivi[b]))
+			var testo := ""
+			for i in mini(2, elenco.size()):
+				testo += ("; " if i > 0 else "") + "%s x%d" % [elenco[i], int(motivi[elenco[i]])]
+			righe.append("%s: nessun posto (%s)" % [d["name"], testo])
+			continue
+		var meno = null
+		for v in voci:
+			if meno == null or v.pietra + v.oro + v.idee < meno.pietra + meno.oro + meno.idee: meno = v
+		righe.append("%s: %d post%s, il meno caro col %d liv %d per %d⚒ %d🪙 %d💡" % [d["name"], voci.size(),
+			"o" if voci.size() == 1 else "i", int(meno.parametri["col_from"]), int(meno.parametri.get("level", 0)),
+			meno.pietra, meno.oro, meno.idee])
+	_dì("    vetrina (g%d ha %d⚒ %d🪙 %d💡): %s" % [p.index, p.pietra, p.oro, p.idee, " · ".join(righe)])
 
 # ---- perche' ha fatto quella mossa ---------------------------------
 # Il bot sceglie prima la colonna e poi, fra le mosse che quella colonna gli
