@@ -2883,4 +2883,11 @@ dato è stato importato da lì. Ma due confronti fra ciò che è stampato e
     conta le tessere sotto casella per casella, la vista posa la terra sulle
     caselle coperte e le tessere sulle altre, il bot pesa lo Scavo perso solo
     per la parte coperta; `--variante spianato_intero` rifa' lo spianato di
-    prima. Misura nella cinquantunesima.
+    prima. Misurato (cinquantunesima): gli spianamenti parziali sono 2,9 a
+    partita (le 315 "a vista" erano quelli non coperti da altro a fine
+    partita); 3,2 caselle a partita restano rovina e rendono 2,6 PV a
+    giocatore; il canale Scavo sale da 11,2 a 14,7 (+3,5 a testa, tutto
+    il guadagno), gli altri canali fermi; vittorie Bil 34, Cont 42, Lampo
+    23, Obi 37, Rend 28, Ritro 39, Scavo 31: la Scavo non e' piu' ultima,
+    la Lampo lo diventa. Da decidere se tenere lo Scavo a 14,7 o ritarare
+    le tessere.

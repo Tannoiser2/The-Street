@@ -196,4 +196,5 @@ segna gli edifici gia' usati nel giro, lo dice solo il riquadro. La strategia Ri
 libero (livello 1, terreno qualunque, cinquantesima misura) non si costruisce di piu' (85 su 300 prima e
 dopo): il freno e' il costo, non il terreno. Lo spianamento parziale (registro 180, `spianato:
 "parziale"`): le caselle coperte dalla carta nuova sono terrapieno, quelle libere restano rovina con la
-tessera; `--variante spianato_intero` rifa' lo spianato di prima; misura nella cinquantunesima.
+tessera; `--variante spianato_intero` rifa' lo spianato di prima; cinquantunesima misura: +3,5 PV a testa
+tutti nel canale Scavo (11,2 -> 14,7), vittorie 23 (Lampo) - 42 (Continuita'), la Scavo risale a 31.
