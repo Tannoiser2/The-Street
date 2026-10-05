@@ -62,8 +62,8 @@ scelgono nella schermata di gioco (`godot res://scenes/gioca.tscn`) o con `--dat
 - **v3 di prova** (`data/proposte/cards-v3-era1.json`, generato da `tools/genera_cards_v3.py`;
   `docs/passaggio-v3.md` e `docs/proposte/v3-*.md`): i Personaggi sono i lavoratori, le risorse
   muoiono a fine era, chi attiva una colonna usa un edificio della colonna ("stile Caylus"). Tutto
-  acceso dalla costante `turno_v3`; la schermata di gioco non la offre ancora (solo l'audit).
-  Registri 153-175, misure 31-48.
+  acceso dalla costante `turno_v3`; nella schermata di gioco e' il tasto "v3", quello di partenza.
+  Registri 153-176, misure 31-48.
 
 **I bot.** `StrategyBot` versione 2, sei strategie (Rendita, Lampo, Scavo, Bilanciata, Obiettivi,
 Continuità) sullo stesso valutatore con **spinte** che sono handicap, non aiuti (registro 114).
@@ -164,9 +164,10 @@ container può ripartire.
 
 ## Cosa resta aperto
 
-- **La v3** e' su main come file di prova (PR #73): quel che resta e' in `docs/passaggio-v3.md`,
-  "Prossimi passi" (l'interfaccia a schermo non conosce la v3, con la domanda "quale edificio
-  usi?"; le decisioni del designer sui numeri delle ultime misure).
+- **La v3** e' su main come file di prova (PR #73) e si gioca a schermo dal tasto "v3" della
+  schermata d'inizio (registro 176): quel che resta e' in `docs/passaggio-v3.md`, "Prossimi
+  passi" (le decisioni del designer sui numeri delle ultime misure; il tavolo 3D non segna gli
+  edifici gia' usati nel giro).
 - **La grafica della v2.** Le carte degli edifici v2 ci sono (registro 120, cinque PDF per era):
   a schermo la v2 le usa. Da correggere nel PDF tre case col Lampo vecchio e le Case operaie da
   togliere. Mancano ancora le sagome v2, i Personaggi del draft e le tessere con l'effetto: il

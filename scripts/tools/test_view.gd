@@ -62,6 +62,7 @@ func _ready() -> void:
 	_run("il cartellino della Prosperita' Urbana", _test_cartello_prosperita)
 	_run("il cartellino si spegne dopo il pagamento", _test_cartello_pagato)
 	_run("l'interruttore del regolamento e il draft a schermo (v2)", _test_regolamento_e_draft)
+	_run("la v3 a schermo: il Personaggio da piazzare e quale edificio usare", _test_v3_a_schermo)
 	_run("la tessera girata (v2)", _test_tessera_girata)
 	_run("il quarto lavoratore sulla bacchetta (v2)", _test_quarto_lavoratore)
 	_run("v2: attivare una colonna e basta, e la cronaca del turno (registro 146)", _test_attiva_e_cronaca)
@@ -3215,4 +3216,75 @@ func _test_tocco_e_voli() -> void:
 		_ok("quando un edificio crolla le tessere volano dal mazzetto", s.vista._scavo_in_volo.has(vittima.uid))
 	remove_child(s)
 	s.queue_free()
+	CardDB.load_db(CardDB.DB_PATH)
+
+# Registro 176: la v3 a schermo. Il regolamento si sceglie dalla schermata
+# d'inizio (ed e' quello di partenza nel gioco); il draft a passaggio si fa
+# cliccando la fila, che e' la propria mano; prima di piazzare si sceglie il
+# Personaggio; con due edifici nella colonna il gioco chiede quale usare, e si
+# risponde con un tasto o cliccando l'edificio.
+func _test_v3_a_schermo() -> void:
+	if not FileAccess.file_exists("res://data/proposte/cards-v3-era1.json"): return
+	var scena := ResourceLoader.load("res://scenes/gioca.tscn") as PackedScene
+	if scena == null: return
+	ScelteInizio.predefinito = 2
+	var fresco := ScelteInizio.new()
+	_eq("nel gioco la scelta parte dalla v3", fresco.nome_regolamento(), "v3")
+	_ok("  e la riga la spiega", fresco.descrizione_regolamento().begins_with("v3"))
+	ScelteInizio.predefinito = 0
+	var n := scena.instantiate()
+	add_child(n)
+	n.inizio.con_regolamento(2)
+	_eq("si passa alla v3 con un clic", n.inizio.nome_regolamento(), "v3")
+	n.inizio.con_giocatori(3)
+	n.inizio.con_bot(2)
+	n.inizio.con_velocita(4)
+	n.comincia()
+	var gs: GameState = n.ctl.gs
+	_ok("cominciando con la v3 il motore gioca la v3", PersonaggiV3.attivo())
+	_ok("  e la partita si apre sul draft dell'umano", str(gs.pending_choice.get("kind", "")) == "draft"
+		and int(gs.pending_choice["player"]) == 0)
+	_eq("  con una mano di 4", (gs.pending_choice.get("options", []) as Array).size(), 4)
+	_ok("  e l'invito dice che la fila e' la mano", n._invito(gs).contains("mano"))
+	# Il draft a passaggio: quattro prese dell'umano, e fra l'una e l'altra i
+	# bot fanno le loro.
+	var giri := 0
+	while not gs.pending_choice.is_empty() and giri < 12:
+		if int(gs.pending_choice["player"]) != 0: break
+		n.ctl.choose(int((gs.pending_choice["options"] as Array)[0]))
+		n._turni_dei_bot()
+		giri += 1
+	_ok("finito il draft si gioca e tocca all'umano", gs.phase == Enums.Phase.PIAZZA and n._io() == 0)
+	_eq("  con 4 Personaggi", (gs.players[0] as PlayerState).specialized_characters.size(), 4)
+	var liberi: Array[String] = n.ctl.personaggi_liberi(gs.players[0])
+	# Registro 177: nessun bot deve aver giocato il turno dell'umano quando il
+	# draft finisce dentro il suo turno.
+	_eq("  tutti da piazzare", liberi.size(), 4)
+	if liberi.size() < 2: return
+	_eq("senza scegliere si piazza il primo", n._lavoratore(), liberi[0])
+	_ok("  e l'invito lo dice", n._invito(gs).begins_with("Piazzi " + n._nome_personaggio(liberi[0])))
+	n._applica_scelta({"che": "personaggio", "id": liberi[1]})
+	_eq("  scelto il secondo, si piazza il secondo", n._lavoratore(), liberi[1])
+	var scelto: String = liberi[1]
+	# Due edifici con un'azione nella colonna 2, uno mio e uno altrui: la
+	# domanda "quale edificio usi?" deve arrivare.
+	var mio := _metti(gs, "ed_focolare_comune", 2, 1, 0, 0)
+	var suo := _metti(gs, "ed_menhir", 2, 1, 0, 1)
+	n._applica_scelta({"che": "attiva_colonna", "n": 2})
+	_ok("  il Personaggio scelto e' piazzato", scelto in (gs.players[0] as PlayerState).personaggi_piazzati)
+	_eq("  e il gioco chiede quale edificio usare", str(gs.pending_choice.get("kind", "")), "edificio")
+	_ok("  con tutti e due fra le opzioni", mio.uid in (gs.pending_choice.get("options", []) as Array)
+		and suo.uid in (gs.pending_choice.get("options", []) as Array))
+	_ok("  e l'invito dice come", n._invito(gs).contains("tasto"))
+	var p0: PlayerState = gs.players[0]
+	var idee: int = p0.idee
+	n._applica_scelta({"che": "scelta_edificio", "n": suo.uid})
+	_ok("  col tasto si usa il Menhir dell'altro: +1 Idea", p0.idee - idee == 1
+		and gs.pending_choice.is_empty())
+	_eq("  e si e' in fase azione", gs.phase, Enums.Phase.AZIONE)
+	_ok("  il riquadro del Menhir dice che e' gia' usato",
+		" ".join(n._descrivi_sotto_edificio(suo)).contains("gia' usato"))
+	n.torna_alla_scelta()
+	remove_child(n)
+	n.queue_free()
 	CardDB.load_db(CardDB.DB_PATH)

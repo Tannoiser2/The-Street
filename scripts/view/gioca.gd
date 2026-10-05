@@ -40,6 +40,29 @@ func _io() -> int:
 func _v2() -> bool:
 	return (str(CardDB.ruleset).begins_with("v2") or str(CardDB.ruleset).begins_with("v3"))
 
+# LA V3 A SCHERMO (registro 176). Il lavoratore e' un Personaggio: prima di
+# piazzarlo si sceglie quale, fra quelli presi al draft e non ancora usati;
+# senza scegliere va il primo, come fa il controller. Dopo l'attivazione il
+# gioco puo' chiedere quale edificio della colonna usare (la "scelta" stile
+# Caylus, registro 170): e' una pending_choice di tipo "edificio", che si
+# risolve cliccando l'edificio sul tavolo o un tasto sotto la barra.
+func _v3() -> bool:
+	return PersonaggiV3.attivo()
+
+var _personaggio_scelto := ""
+
+# Il Personaggio che il prossimo piazzamento usera' (v3): quello scelto se e'
+# ancora libero, se no il primo libero; "" fuori dalla v3.
+func _lavoratore() -> String:
+	if ctl == null or not _v3() or _io() < 0: return ""
+	var liberi: Array[String] = ctl.personaggi_liberi(ctl.gs.players[_io()])
+	if liberi.is_empty(): return ""
+	if _personaggio_scelto in liberi: return _personaggio_scelto
+	return liberi[0]
+
+func _nome_personaggio(cid: String) -> String:
+	return str(CardDB.characters[cid]["name"]) if CardDB.characters.has(cid) else cid
+
 func _in_vetrina() -> int:
 	if ctl == null: return -1
 	# A partita finita si mostra il vincitore, non chi ha mosso per ultimo:
@@ -130,6 +153,7 @@ func comincia() -> void:
 		remove_child(vista)
 		vista.queue_free()
 	_deseleziona(false)
+	_personaggio_scelto = ""
 	_messaggio = ""
 	_cronaca = []
 	_orbita = null
@@ -461,8 +485,21 @@ func _edificio(uid: int) -> Building:
 # dai DATI e non dal disegno stampato: su 44 edifici su 60 lo Scavo del PDF
 # non e' quello della v1.5.
 func _descrivi_sotto(pixel: Vector2) -> PackedStringArray:
-	var out := PackedStringArray()
 	var b := _edificio_puntato(pixel)
+	if b != null: return _descrivi_sotto_edificio(b)
+	var out := PackedStringArray()
+	var c := _carta_puntata(pixel)
+	if c.is_empty():
+		# Ne' un edificio ne' una carta: se il mouse e' su una colonna, si
+		# descrive la tessera, con quel che produce in quest'era e la regola.
+		var col := _colonna_puntata(pixel)
+		if col >= 0: return descrivi_tessera(col)
+		return out
+	return _descrivi_sotto_carta(c)
+
+# Il riquadro di un edificio puntato.
+func _descrivi_sotto_edificio(b: Building) -> PackedStringArray:
+	var out := PackedStringArray()
 	if b != null:
 		var stato := "intatto"
 		match b.state:
@@ -494,15 +531,12 @@ func _descrivi_sotto(pixel: Vector2) -> PackedStringArray:
 				TessereScavo.quante(b), b.owner, "scoperte" if b.scavata else "coperte"])
 		var sc := descrivi_scheletro(b)
 		if sc != "": out.append(sc)
-		return out
-	var c := _carta_puntata(pixel)
-	if c.is_empty():
-		# Ne' un edificio ne' una carta: se il mouse e' su una colonna, si
-		# descrive la tessera, con quel che produce in quest'era e la regola.
-		var col := _colonna_puntata(pixel)
-		if col >= 0: return descrivi_tessera(col)
-		return out
-	return _descrivi_sotto_carta(c)
+		# V3: l'azione dell'edificio, e se in questo giro e' gia' stata usata.
+		if _v3() and str(b.data.get("effect_text", "")) != "":
+			out.append(str(b.data["effect_text"]))
+			if str(ctl.gs.bruciati.get(b.uid, "")) == PersonaggiV3.giro_corrente(ctl.gs):
+				out.append("gia' usato in questo giro")
+	return out
 
 # Chi sta sepolto sotto l'edificio e quanto vale: nella v2 il lavoratore del
 # potenziamento, nella v1.5 il Personaggio di fine era. Prima il riquadro
@@ -535,6 +569,12 @@ func _descrivi_sotto_carta(c: Dictionary) -> PackedStringArray:
 			out.append(str(pe["name"]))
 			out.append("personaggio · %s" % pe["class"])
 			if str(pe.get("effect_text", "")) != "": out.append(str(pe["effect_text"]))
+			# V3: e' un lavoratore; si dice se e' gia' stato piazzato in quest'era.
+			if _v3() and c.has("player") and int(c["player"]) == _io():
+				var mio: PlayerState = ctl.gs.players[_io()]
+				if id in mio.personaggi_piazzati: out.append("gia' piazzato in quest'era")
+				elif id == _lavoratore(): out.append("e' il prossimo che piazzerai")
+				else: out.append("da piazzare: clicca per sceglierlo")
 		"potenziamento":
 			var po: Dictionary = CardDB.upgrades[id]
 			out.append(str(po["name"]))
@@ -651,13 +691,30 @@ func _clic(pixel: Vector2) -> void:
 				_turni_dei_bot()
 				_aggiorna()
 			return
+		# LA SCELTA DELL'EDIFICIO (v3, registro 170): le opzioni sono uid di
+		# edifici della colonna, e si sceglie cliccandone uno (o un tasto).
 		var scelto := _edificio_puntato(pixel)
+		if scelto != null and str(gs.pending_choice.get("kind", "")) == "edificio" \
+				and not scelto.uid in (gs.pending_choice["options"] as Array):
+			_messaggio = "%s non si puo' usare ora: non e' in colonna, non ha un'azione o e' gia' stato usato in questo giro." % str(scelto.data["name"])
+			_aggiorna()
+			return
 		if scelto != null and _racconta(func(): return ctl.choose(scelto.uid)):
-			_messaggio = "Scelto."
+			_messaggio = "Scelto." if str(gs.pending_choice.get("kind", "")) != "" else "Hai usato %s." % str(scelto.data["name"])
 			_turni_dei_bot()
 			_aggiorna()
 		return
 	if _io() < 0: return
+
+	# V3: un clic su un proprio Personaggio ancora da piazzare lo sceglie come
+	# prossimo lavoratore (il piazzamento resta il clic sulla colonna o sul
+	# posto acceso).
+	if _v3() and gs.phase == Enums.Phase.PIAZZA:
+		var cp := _carta_puntata(pixel)
+		if not cp.is_empty() and str(cp["kind"]) == "personaggio" and cp.has("player") \
+				and int(cp["player"]) == _io() and str(cp["id"]) in ctl.personaggi_liberi(gs.players[_io()]):
+			_scegli_personaggio(str(cp["id"]))
+			return
 
 	# I pulsanti delle azioni che non hanno una carta sul tavolo.
 	for b in _bottoni:
@@ -705,8 +762,9 @@ func _da_abitare(col: int) -> Building:
 	return null
 
 func _piazza_in_colonna(col: int) -> void:
-	if _racconta(func(): return ctl.place_worker(col, _da_abitare(col))):
-		_messaggio = "Colonna %d attivata: ora puoi costruire o potenziare, oppure Fine turno." % (col + 1)
+	var chi := _lavoratore()
+	if _racconta(func(): return ctl.place_worker(col, _da_abitare(col), chi)):
+		_messaggio = _dopo_piazzamento(col, chi)
 	else:
 		_messaggio = "Non puoi piazzare un lavoratore nella colonna %d." % (col + 1)
 	_aggiorna()
@@ -714,10 +772,27 @@ func _piazza_in_colonna(col: int) -> void:
 func _piazza_lavoratore(pixel: Vector2) -> void:
 	var col := _colonna_puntata(pixel)
 	if col < 0: return
-	if _racconta(func(): return ctl.place_worker(col, _da_abitare(col))):
-		_messaggio = "Colonna %d attivata." % (col + 1)
+	var chi := _lavoratore()
+	if _racconta(func(): return ctl.place_worker(col, _da_abitare(col), chi)):
+		_messaggio = _dopo_piazzamento(col, chi)
 	else:
 		_messaggio = "Non puoi piazzare un lavoratore nella colonna %d." % (col + 1)
+	_aggiorna()
+
+# Il messaggio dopo il piazzamento: con la domanda "quale edificio usi?" in
+# sospeso si dice quella, se no si invita a comprare.
+func _dopo_piazzamento(col: int, chi: String) -> String:
+	var con := "" if chi == "" else " con %s" % _nome_personaggio(chi)
+	if str(ctl.gs.pending_choice.get("kind", "")) == "edificio":
+		return "Colonna %d attivata%s: scegli quale edificio usare." % [col + 1, con]
+	return "Colonna %d attivata%s: ora puoi costruire o potenziare, oppure Fine turno." % [col + 1, con]
+
+# V3: il Personaggio scelto per il prossimo piazzamento.
+func _scegli_personaggio(cid: String) -> void:
+	_personaggio_scelto = cid
+	var d: Dictionary = CardDB.characters.get(cid, {})
+	_messaggio = "Piazzerai %s (%s): clicca una colonna, o una carta e poi un posto acceso." % [
+		_nome_personaggio(cid), str(d.get("effect_text", ""))]
 	_aggiorna()
 
 # Il clic e' caduto su un bersaglio acceso? Allora l'azione si fa.
@@ -869,7 +944,8 @@ func _esegui(v) -> void:
 	# La mossa si racconta da sola (registro 146); i bot muovono dopo, e
 	# ognuno ha la sua voce nella cronaca.
 	_racconta(func(): _esegui_mossa(v))
-	_deseleziona(false)
+	# V3: con la domanda "quale edificio usi?" in sospeso la carta resta scelta.
+	if str(ctl.gs.pending_choice.get("kind", "")) != "edificio": _deseleziona(false)
 	_turni_dei_bot()
 	_aggiorna()
 
@@ -882,10 +958,16 @@ func _esegui_mossa(v) -> void:
 	# prima quale colonna gli aprira' la carta che vuole.
 	if ctl.gs.phase == Enums.Phase.PIAZZA and v.parametri.has("attiva"):
 		var dove := int(v.parametri["attiva"])
-		if not ctl.place_worker(dove, _da_abitare(dove)):
+		var chi := _lavoratore()
+		if not ctl.place_worker(dove, _da_abitare(dove), chi):
 			_messaggio = "Non puoi piazzare un lavoratore nella colonna %d." % (dove + 1)
 			return
-		_messaggio = "Colonna %d attivata. " % (dove + 1)
+		_messaggio = "Colonna %d attivata%s. " % [dove + 1, "" if chi == "" else " con " + _nome_personaggio(chi)]
+		# V3: se il gioco chiede quale edificio usare, la mossa aspetta la
+		# risposta; la carta scelta resta scelta e si eseguira' al prossimo clic.
+		if str(ctl.gs.pending_choice.get("kind", "")) == "edificio":
+			_messaggio += "Prima scegli quale edificio usare, poi la mossa."
+			return
 	match v.tipo:
 		"costruisci":
 			fatto = ctl.build(str(v.parametri["card_id"]), int(v.parametri["col_from"]),
@@ -948,6 +1030,11 @@ func _disegna_hud() -> void:
 	var testa := "Era %d · %s · %s: %d PV, %s, lavoratori %d/%d" % [
 		gs.era, str(gs.current_event.get("name", "nessun evento")), chi,
 		p.vp, risorse, p.workers_used, p.workers]
+	# V3: lo sconto, il Lampo e l'acquisto in piu' valgono solo in questo turno.
+	if _v3():
+		if p.sconto_turno > 0: testa += " · sconto %d%s" % [p.sconto_turno, "" if p.sconto_se == "" else " (" + p.sconto_se + ")"]
+		if p.lampo_turno > 0: testa += " · Lampo +%d" % p.lampo_turno
+		if p.extra_turno > 0 or gs.acquisto_extra_aperto: testa += " · acquisto in piu'"
 	# Le classi per la Continuita' (registro 139): edifici in piedi e carte
 	# restituite, contati per classe, al posto del mazzetto davanti al
 	# giocatore.
@@ -987,18 +1074,31 @@ func _disegna_hud() -> void:
 	# carta ha un posto valido.
 	if gs.phase == Enums.Phase.PIAZZA and _io() >= 0 and gs.pending_choice.is_empty():
 		_disegna_attiva_colonne(font, p)
+		if _v3(): _disegna_personaggi(font, p)
 	if not _scelta.is_empty() and _io() >= 0:
 		var schermo_a := _hud.get_viewport_rect().size
 		_tasto(font, "Annulla la scelta", Vector2(20.0, schermo_a.y - 96.0), false, {"che": "annulla"}, 170.0)
-	_disegna_cronaca(font, 82.0 if str(gs.pending_choice.get("kind", "")) != "tessera" else 116.0)
+	var kind := str(gs.pending_choice.get("kind", ""))
+	var con_tasti := kind in ["tessera", "edificio"] and int(gs.pending_choice.get("player", -1)) == _io()
+	_disegna_cronaca(font, 116.0 if con_tasti else 82.0)
 	# La scelta di una tessera dell'era: un tasto per opzione, sotto l'invito.
-	if str(gs.pending_choice.get("kind", "")) == "tessera" \
-			and int(gs.pending_choice["player"]) == _io():
+	if kind == "tessera" and con_tasti:
 		var tx := 20.0
 		var etichette: Array = gs.pending_choice.get("etichette", [])
 		for i in etichette.size():
 			var r := _tasto(font, str(etichette[i]), Vector2(tx, 72.0), i == 0,
 				{"che": "scelta_tessera", "n": i})
+			tx = r.end.x + 10.0
+	# V3, "quale edificio usi?": un tasto per edificio, col nome e l'azione.
+	if kind == "edificio" and con_tasti:
+		var tx := 20.0
+		var opzioni: Array = gs.pending_choice.get("options", [])
+		for i in opzioni.size():
+			var b := _edificio(int(opzioni[i]))
+			if b == null: continue
+			var testo := "%s%s: %s" % [str(b.data["name"]), "" if b.owner == _io() else " (G%d)" % b.owner,
+				str(b.data.get("effect_text", "")).trim_prefix("Usa: ")]
+			var r := _tasto(font, testo, Vector2(tx, 72.0), i == 0, {"che": "scelta_edificio", "n": int(opzioni[i])})
 			tx = r.end.x + 10.0
 
 	var schermo := _hud.get_viewport_rect().size
@@ -1066,13 +1166,21 @@ func _invito(gs: GameState) -> String:
 		invito = str(gs.pending_choice["prompt"])
 		if str(gs.pending_choice.get("kind", "")) == "draft":
 			invito += " — clicca una carta della fila dei Personaggi: e' gratis"
+			if _v3(): invito += "; la fila e' la tua mano, le altre passano al vicino"
 		elif str(gs.pending_choice.get("kind", "")) == "tessera":
 			invito += " — scegli qui sotto"
+		elif str(gs.pending_choice.get("kind", "")) == "edificio":
+			invito += " — clicca l'edificio sul tavolo, o un tasto qui sotto"
 		else:
 			invito += " — clicca l'edificio"
+	elif gs.acquisto_extra_aperto and _v3():
+		invito = "Acquisto in piu': un potenziamento%s, oppure Fine turno." % (
+			"" if gs.extra_solo_potenziamenti else " o una casa della riserva")
 	elif gs.phase == Enums.Phase.PIAZZA:
 		invito = "Scegli una carta e ti mostro dove puoi metterla, "
 		invito += "oppure clicca una colonna per attivarla e basta."
+		if _v3() and _lavoratore() != "":
+			invito = "Piazzi %s. " % _nome_personaggio(_lavoratore()) + invito
 	elif _scelta.is_empty():
 		invito = "Clicca una carta per vedere dove puoi metterla."
 	else:
@@ -1292,9 +1400,8 @@ func _disegna_scelta_dentro(font: Font) -> void:
 		var t := _tasto(font, str(ScelteInizio.REGOLAMENTI[i]["nome"]),
 			Vector2(rx, y), i == inizio.regolamento, {"che": "regolamento", "n": i}, 60.0)
 		rx += t.size.x + 8.0
-	_hud.draw_string(font, Vector2(rx + 8.0, y + 20.0),
-		"v2: tre risorse, quattro lavoratori, draft dei Personaggi" if inizio.regolamento == 1
-		else "v1.5: le regole congelate", HORIZONTAL_ALIGNMENT_LEFT, -1, 12, Color("#6f7683"))
+	_hud.draw_string(font, Vector2(rx + 8.0, y + 20.0), inizio.descrizione_regolamento(),
+		HORIZONTAL_ALIGNMENT_LEFT, SCELTA_LARGO - (rx + 8.0 - r.position.x) - 20.0, 12, Color("#6f7683"))
 	y += RIGA_ALTA
 	y = _riga_scelta(font, "Giocatori", x, y,
 		range(ScelteInizio.MIN_GIOCATORI, ScelteInizio.MAX_GIOCATORI + 1),
@@ -1383,6 +1490,17 @@ func _applica_scelta(d: Dictionary) -> void:
 				_messaggio = "Fatto."
 				_aggiorna()
 			return
+		"scelta_edificio":
+			if ctl != null:
+				var b := _edificio(int(d["n"]))
+				if _racconta(func(): return ctl.choose(int(d["n"]))):
+					_messaggio = "Hai usato %s." % (str(b.data["name"]) if b != null else "l'edificio")
+					_turni_dei_bot()
+					_aggiorna()
+			return
+		"personaggio":
+			if ctl != null: _scegli_personaggio(str(d["id"]))
+			return
 		"via":
 			comincia()
 			return
@@ -1417,6 +1535,22 @@ func _disegna_attiva_colonne(font: Font, p: PlayerState) -> void:
 		if c in p.worker_cols: continue
 		var r := _tasto(font, "%d %s" % [c + 1, Cronaca._terreno(ctl.gs, c)], Vector2(x, y),
 			false, {"che": "attiva_colonna", "n": c})
+		x = r.end.x + 8.0
+
+# V3: i Personaggi ancora da piazzare, un tasto ciascuno sopra la riga delle
+# colonne; quello che il prossimo piazzamento usera' e' acceso.
+func _disegna_personaggi(font: Font, p: PlayerState) -> void:
+	var liberi: Array[String] = ctl.personaggi_liberi(p)
+	if liberi.is_empty(): return
+	var schermo := _hud.get_viewport_rect().size
+	var y := schermo.y - 58.0 - 38.0
+	_hud.draw_string(font, Vector2(20.0, y + 20.0), "Piazza:",
+		HORIZONTAL_ALIGNMENT_LEFT, -1, 14, SPENTO)
+	var x := 150.0
+	var scelto := _lavoratore()
+	for cid in liberi:
+		var r := _tasto(font, _nome_personaggio(cid), Vector2(x, y), cid == scelto,
+			{"che": "personaggio", "id": cid})
 		x = r.end.x + 8.0
 
 # La cronaca sotto la barra: la mossa piu' recente per intero, le altre una

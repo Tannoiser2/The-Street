@@ -37,18 +37,21 @@ const VELOCITA_NORMALE := 2
 # v2, e a decidere e' il file dati che si carica. La v2 e' quella che si
 # sta disegnando, quindi e' la scelta di partenza; la v1.5 resta a portata
 # di clic, con le regole congelate. Se il file v2 non c'e' resta la v1.5.
+# La v3 di prova (registro 176): il file generato da tools/genera_cards_v3.py,
+# che si sta disegnando e misurando adesso; e' la scelta di partenza.
 const REGOLAMENTI: Array[Dictionary] = [
 	{"nome": "v1.5", "dati": "res://data/cards.json"},
 	{"nome": "v2", "dati": "res://data/cards-v2.json"},
+	{"nome": "v3", "dati": "res://data/proposte/cards-v3-era1.json"},
 ]
 
 var giocatori := 3
 var bot := 2
 var seme := 7
 var velocita := VELOCITA_NORMALE
-# Il regolamento con cui si apre la schermata: la v2 nel gioco; i test della
+# Il regolamento con cui si apre la schermata: la v3 nel gioco; i test della
 # vista, che descrivono la v1.5, lo mettono a 0 prima di cominciare.
-static var predefinito := 1
+static var predefinito := 2
 var regolamento := predefinito
 
 # Ogni scelta passa di qui, cosi' non esiste uno stato che il gioco non sappia
@@ -65,6 +68,13 @@ func percorso_dati() -> String:
 
 func nome_regolamento() -> String:
 	return str(REGOLAMENTI[regolamento]["nome"])
+
+# La riga sotto i tasti del regolamento, nella schermata d'inizio.
+func descrizione_regolamento() -> String:
+	match regolamento:
+		1: return "v2: tre risorse, quattro lavoratori, draft dei Personaggi"
+		2: return "v3: i Personaggi sono i lavoratori, le risorse muoiono a fine era, chi attiva usa un edificio della colonna"
+	return "v1.5: le regole congelate"
 
 func con_regolamento(i: int) -> void:
 	regolamento = i

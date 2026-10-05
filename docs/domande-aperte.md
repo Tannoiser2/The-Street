@@ -2801,3 +2801,34 @@ dato è stato importato da lì. Ma due confronti fra ciò che è stampato e
     quelli offerti), e la scelta e' una `pending_choice` di tipo "edificio"
     con `options` (uid) ed `etichette`, pronta per un pannello come quello
     del draft. Resta nel passaggio.
+176. **L'interfaccia a schermo per la v3.** Il designer: "Fai l'interfaccia a
+    schermo per la v3". Nella schermata d'inizio il regolamento ha il tasto
+    "v3" (il file `data/proposte/cards-v3-era1.json`) ed e' la scelta di
+    partenza; il draft a passaggio si fa cliccando la fila, che e' la propria
+    mano (l'invito lo dice); prima di piazzare si sceglie il Personaggio da un
+    tasto per ciascuno di quelli liberi ("Piazza: ...") o cliccando la sua
+    carta davanti a se', e senza scegliere va il primo; la domanda "quale
+    edificio usi?" (pending_choice "edificio") si risponde con un tasto per
+    edificio, col nome, il padrone e l'azione, oppure cliccando l'edificio sul
+    tavolo; con una carta gia' scelta la mossa aspetta la risposta e poi si fa
+    col clic sul posto acceso; la finestra dell'acquisto in piu' ha il suo
+    invito ("un potenziamento, o una casa"); in alto si leggono sconto, Lampo
+    e acquisto in piu' del turno; il riquadro di un edificio mostra "Usa: ..."
+    e "gia' usato in questo giro", quello di un proprio Personaggio se e' da
+    piazzare o gia' piazzato. Tutto in `scripts/view/gioca.gd` e
+    `scelte_inizio.gd`; il tavolo 3D non cambia. Test `test_view`: la v3 a
+    schermo dal draft alla scelta dell'edificio.
+177. **Il bot giocava il primo turno dell'era di un altro.** Trovato facendo
+    l'interfaccia v3 (il test a schermo: l'umano, primo nell'ordine, si
+    trovava un Personaggio gia' piazzato). In `StrategyBot.play_turn` il bot
+    risolve le scelte in sospeso e poi gioca il turno di `current_player()`:
+    se l'ultima presa del draft era sua, il draft finisce li' dentro e il
+    turno passa al primo dell'ordine, che il bot giocava con la propria
+    strategia, anche se era un altro bot o l'umano. Nella v3, con la quarta
+    presa obbligata, capitava in circa due ere su tre. Corretto: dopo un
+    draft, se il turno non e' piu' suo il bot si ferma. Nella v1.5 la stessa
+    cosa succede con gli omaggi di fine era (il bot che piazza l'ultimo omaggio
+    gioca il primo turno dell'era nuova per chi e' primo): li' resta com'e',
+    perche' e' il riferimento congelato (TORNEO e VITA cambiavano in 12 e 38
+    righe con la correzione larga). La v2 e la v3 possono spostarsi di poco:
+    il file base della v3 rimisurato nella quarantanovesima.
