@@ -2588,9 +2588,69 @@ tenerla (carta piu' libera) o tornare alla stampa (pianura, livello 2) e' del
 designer. Se si vuole vederlo di piu', la leva e' il costo o il suo finale,
 non il terreno.
 
+## Cinquantunesima misura: lo spianamento parziale, terrapieno sotto e rovina accanto
+
+Il registro 180: il designer, davanti a due Terrapieni soli lasciati da un
+Acquedotto spianato da una Palazzina di una casella, "le caselle dove
+effettivamente costruisci [sono] dei terrapieni, perche' stai effettivamente
+usando il suo materiale e lo stai coprendo, mentre le caselle rimaste libere
+diventano rovine perche' NON ci hai costruito sopra. In questo modo si formano
+nuove rovine che possono valere qualcosa". Nel file base `tessere_scavo.spianato:
+"parziale"`: le caselle coperte dalla carta nuova sono terrapieno, le altre
+restano rovina del proprietario con la loro tessera. Stessi 300 semi della
+quarantanovesima, stesso bot (che pesa lo Scavo perso solo per la parte
+coperta). `--variante spianato_intero` rifa' la regola di prima.
+
+| a partita | prima (49ª) | ora |
+|---|---|---|
+| spianamenti | 8,6 | 8,6 |
+| di cui parziali (carta piu' larga della nuova) | 2,9 (*) | 2,9: 806 carte da 2 caselle, 72 da 3 |
+| caselle rimaste rovina | 0 | 3,2 |
+| spianati ancora a vista a fine partita | 1,05 | 1,06 |
+| PV di Scavo resi dagli spianati parziali | 0 | 7,7 (2,6 a giocatore) |
+
+(*) Nella 49ª il conteggio non c'era: lo si deduce dal fatto che il bot spiana
+le stesse volte e lascia a vista lo stesso numero di carte (315 contro 317).
+La regola non cambia che cosa fa il bot: cambia quanto valgono quelle caselle.
+
+| a giocatore | prima (49ª) | ora |
+|---|---|---|
+| PV a testa | 75,6 | 78,7 |
+| canale Scavo | 11,2 | 14,7 |
+| di cui tessere / scheletri / arte / bonus in partita | 6,7 / 2,1 / 1,3 / 4,5 | 9,4 / 3,0 / 1,7 / 5,3 |
+| rovine riscoperte nell'era 5 | 2,14 | 2,87 |
+| canali Lampo / Cont / Rendita / ★ | 18,6 / 14,7 / 12,6 / 9,2 | 18,6 / 14,7 / 12,4 / 9,2 |
+| bonus scavo nell'era 5 | 1,20 | 1,51 |
+| prodotto / speso / morto nell'era 5 | 8,7 / 6,6 / 2,2 | 8,7 / 6,5 / 2,2 |
+| vittorie Bil / Cont / Lampo / Obi / Rend / Ritro / Scavo | 36 / 38 / 27 / 42 / 29 / 37 / 26 | 34 / 42 / 23 / 37 / 28 / 39 / 31 |
+
+Tutto il guadagno va nel canale Scavo: +3,5 PV a testa, e gli altri canali non
+si muovono di un decimo. Le caselle rimaste rovina (3,2 a partita) portano
+tessere che l'era 5 scopre (le rovine riscoperte salgono da 2,1 a 2,9 a
+giocatore) e su cui si costruisce col bonus (1,20 -> 1,51 nell'era 5). Il
+canale Scavo passa da 11,2 a 14,7 e raggiunge la Continuita'; il Lampo resta
+primo a 18,6.
+
+Per strategia il canale Scavo cresce per tutte (+2,5 la Continuita', +4,2 la
+Ritrovamenti, +4,1 la Scavo). Le vittorie si muovono di conseguenza: la Scavo
+risale da 26 a 31 e non e' piu' ultima, la Ritrovamenti 37 -> 39, la
+Continuita' 38 -> 42 (tutte le sue rovine 1x2 spianate restano per meta'
+sue); la Obiettivi scende 42 -> 37 e la Lampo 27 -> 23, ora la piu' debole.
+La forbice e' 23-42, contro 26-42 di prima: la stessa larghezza, con la coda
+spostata dalla Scavo alla Lampo.
+
+La regola fa quel che il designer chiedeva: le rovine accanto valgono
+qualcosa, lo spianamento di una carta larga per una stretta non e' piu'
+gratis per la mappa e non e' piu' un buco a vista. Il prezzo e' 3,5 PV a testa
+in piu' nel canale Scavo. Il designer: "tieni lo scavo a 14,7". Resta il
+Lampo a 23: e' il bot (`SPINTE_V3`, `lampo`) da riguardare, perche' il canale
+Lampo non e' cambiato.
+
 ## Come rifare il conto
 
 ```bash
+# cinquantunesima misura: lo spianamento parziale (registro 180); stesso comando della quarantanovesima col
+#   file base rigenerato (`python3 tools/genera_cards_v3.py`); `--variante spianato_intero` rifa' la regola di prima
 # cinquantesima misura: il Grattacielo a tre binari, livello 1, qualunque terreno (registro 179);
 #   stesso comando della quarantanovesima col file base rigenerato (`python3 tools/genera_cards_v3.py`)
 # quarantanovesima misura: il file base col bot corretto (registro 177), stesso comando della quarantottesima

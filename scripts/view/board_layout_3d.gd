@@ -503,17 +503,23 @@ static func terrapiano_path() -> String:
 
 static func tessere_scavo_box(gs: GameState, b: Building) -> Array[AABB]:
 	if not TessereScavo.fuori(b) or TessereScavo.quante(b) == 0: return []
-	return _caselle_della_carta(gs, b)
+	return _caselle_della_carta(gs, b, "tessere")
 
 # LO SPIANATO (registro 134): la carta torna al proprietario e non lascia
 # tessere scavo, ma chi ci ha costruito sopra poggia su qualcosa. Al suo
 # posto va il terrapieno, una tessera generica per casella. Senza, l'edificio
 # costruito sopra restava sospeso nel vuoto per un livello.
+# Con lo spianamento parziale (registro 180) la terra va solo sulle caselle
+# che la carta nuova ha coperto: le altre tengono la tessera.
 static func terrapieni_spianato_box(gs: GameState, b: Building) -> Array[AABB]:
-	if not TessereScavo.fuori(b) or TessereScavo.quante(b) > 0: return []
-	return _caselle_della_carta(gs, b)
+	if not TessereScavo.fuori(b): return []
+	if TessereScavo.quante(b) == 0: return _caselle_della_carta(gs, b)
+	return _caselle_della_carta(gs, b, "terra")
 
-static func _caselle_della_carta(gs: GameState, b: Building) -> Array[AABB]:
+# Le caselle della carta, come scatole sul tavolo: tutte, solo quelle diventate
+# terrapieno ("terra") o solo quelle con la tessera ("tessere"). L'ordine e'
+# quello di Building.caselle(), lo stesso con cui le tessere si pescano.
+static func _caselle_della_carta(gs: GameState, b: Building, quali := "tutte") -> Array[AABB]:
 	var out: Array[AABB] = []
 	var box := basetta_box(gs, b)
 	var w := b.width()
@@ -525,6 +531,9 @@ static func _caselle_della_carta(gs: GameState, b: Building) -> Array[AABB]:
 	var margine := 0.4
 	for i in w:
 		for j in d:
+			var terra := b.caselle_terrapieno.has(Vector2i(b.col_from + i, b.binario_effettivo() + j))
+			if quali == "terra" and not terra: continue
+			if quali == "tessere" and terra: continue
 			out.append(AABB(Vector3(box.position.x + i * cw + margine, box.position.y,
 				box.position.z + j * cd + margine), Vector3(cw - 2.0 * margine, box.size.y, cd - 2.0 * margine)))
 	return out

@@ -761,7 +761,14 @@ static func _valore_costruzione(gs: GameState, p: PlayerState, v, strategia: Str
 			# allora il suo Scavo e' gia' contato sopra fra "i miei che vanno
 			# sotto", e togliergli un quarto sarebbe giocare una regola vecchia.
 			if not bool(CardDB.constants.get("spianare_conserva_scavo", false)):
-				perso -= float(b.data["scavo"]) * 0.25
+				# Spianamento parziale (registro 180): si perde solo la parte
+				# coperta, le altre caselle restano rovina con le tessere.
+				var quota := 1.0
+				if TessereScavo.spianato_parziale():
+					var coperte := TessereScavo.caselle_coperte(b, col_from, col_from + larghezza,
+						q2.binario, int(d.get("depth", 1))).size()
+					quota = float(coperte) / float(max(1, b.width() * b.profondita()))
+				perso -= float(b.data["scavo"]) * 0.25 * quota
 		if sotto != 0.0: dett["Scavo dei miei che vanno sotto"] = sotto
 		if perso != 0.0: dett["quel che perdo spianando"] = perso
 		q += sotto + perso

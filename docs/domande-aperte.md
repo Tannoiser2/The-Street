@@ -2877,4 +2877,17 @@ dato è stato importato da lì. Ma due confronti fra ciò che è stampato e
     una a partita: 202 carte 1x2, 72 2x1, 41 3x1). Regola nuova: le caselle
     coperte dalla carta nuova sono terrapieno (niente tessere, Scavo 0); le
     caselle non coperte restano rovina del proprietario, con le loro tessere
-    e il loro Scavo, come ogni rovina. Da fare e misurare (cinquantunesima).
+    e il loro Scavo, come ogni rovina. Fatto: `tessere_scavo.spianato:
+    "parziale"` nel file base; `Building.caselle_terrapieno` segnato allo
+    spianamento, `TessereScavo.quante` toglie quelle caselle, il preventivo
+    conta le tessere sotto casella per casella, la vista posa la terra sulle
+    caselle coperte e le tessere sulle altre, il bot pesa lo Scavo perso solo
+    per la parte coperta; `--variante spianato_intero` rifa' lo spianato di
+    prima. Misurato (cinquantunesima): gli spianamenti parziali sono 2,9 a
+    partita (le 315 "a vista" erano quelli non coperti da altro a fine
+    partita); 3,2 caselle a partita restano rovina e rendono 2,6 PV a
+    giocatore; il canale Scavo sale da 11,2 a 14,7 (+3,5 a testa, tutto
+    il guadagno), gli altri canali fermi; vittorie Bil 34, Cont 42, Lampo
+    23, Obi 37, Rend 28, Ritro 39, Scavo 31: la Scavo non e' piu' ultima,
+    la Lampo lo diventa. Il designer: "tieni lo scavo a 14,7". Resta la
+    Lampo a 23, questione di bot (`SPINTE_V3`), da riguardare.

@@ -589,6 +589,20 @@ func build(card_id: String, col_from: int, above: bool, pay_option: int = 0, des
 			p.bump("spianati")
 			base.was_razed = true
 			base.state = Enums.BuildingState.ROVINA
+			# LO SPIANAMENTO PARZIALE (registro 180): le caselle che la carta
+			# nuova copre davvero diventano terrapieno; le altre restano
+			# rovina con la tessera. Si segnano qui, una volta per sempre:
+			# TessereScavo.quante le toglie dal conto e la vista ci posa la
+			# terra al posto della tessera.
+			if TessereScavo.spianato_parziale():
+				for cas in TessereScavo.caselle_coperte(base, col_from, col_from + int(data["width"]),
+						q.binario, int(data.get("depth", 1))):
+					if not base.caselle_terrapieno.has(cas): base.caselle_terrapieno.append(cas)
+				var libere := TessereScavo.quante(base)
+				if libere > 0:
+					p.bump("spianati_in_parte")
+					gs.log_line("%s spianato in parte: %d casell%s restano rovina" % [
+						base.data["name"], libere, "a" if libere == 1 else "e"])
 			TessereScavo.riscatta(gs, base)
 		elif base.state == Enums.BuildingState.RUDERE:
 			base.state = Enums.BuildingState.ROVINA
