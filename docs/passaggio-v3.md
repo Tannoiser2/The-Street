@@ -185,8 +185,8 @@ su piu' carte e senza condizione, o dentro il ⊕; la "scelta" stile Caylus (reg
 (`--variante proprietario` rifa' la regola di prima), con gli sconti senza condizione su dieci carte
 e il ⊕ con lo sconto (quarantaseiesima, `--variante senza_sconti` li toglie); la tabella `SPINTE_V3`
 ritarata (quarantasettesima: Rendita 1,3, Scavo 0,8/0,5; quarantottesima: la Ritrovamenti,
-settima strategia del canone v3, al 33%; `obiettivi_peso` 0,8), vittorie fra 27 (Scavo) e 40
-(Obiettivi) nel torneo a sette;
+settima strategia del canone v3, al 33%; `obiettivi_peso` 0,8), vittorie fra 26 (Scavo) e 42
+(Obiettivi) nel torneo a sette, rimisurate col bot corretto (quarantanovesima, registro 177);
 le carte ancora rare
 (la Stazione per le tre colonne; Conceria, Arsenale, Ponte in acciaio); il ⊕ ancora ultimo al draft
 anche con lo sconto dentro. L'interfaccia a schermo conosce la v3 (registro 176: il tasto "v3" nella
