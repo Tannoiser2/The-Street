@@ -769,9 +769,24 @@ static func _punti_vp_per(gs: GameState, e: Dictionary, owner: int, hits: Array[
 			pts += b.level if field == "level" else int(b.data["scavo"])
 	else:
 		var v := int(e.get("value", 0))
-		pts = v * _conta(gs, owner, hits, str(e.get("per", "building")))
+		var per := str(e.get("per", "building"))
+		# L'UNIVERSITA' DELLA V3 (registro 182): "+1 PV per ogni tuo Personaggio
+		# con Scavo `min_scavo` o piu'". Col draft tutti reclutano 20 Personaggi
+		# e "per ogni Personaggio reclutato" valeva +20 fissi; i Personaggi con
+		# Scavo alto sono 5-6 per era su 16, e prenderli e' una scelta al draft.
+		if per == "recruited_scavo_min":
+			pts = v * _reclutati_con_scavo(gs, owner, int(e.get("min_scavo", 5)))
+		else:
+			pts = v * _conta(gs, owner, hits, per)
 	if e.has("cap"): pts = min(pts, int(e["cap"]))
 	return pts
+
+static func _reclutati_con_scavo(gs: GameState, owner: int, minimo: int) -> int:
+	var n := 0
+	for voce in gs.players[owner].personaggi_storia:
+		var carta: Dictionary = CardDB.characters.get(str(voce[0]), {})
+		if int(carta.get("scavo", 0)) >= minimo: n += 1
+	return n
 
 # LA STIMA DEL FINALE DI UNA CARTA (registro 181), per il bot: quanti PV i
 # suoi effetti `on_final_scoring` darebbero al proprietario se la partita

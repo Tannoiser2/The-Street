@@ -618,6 +618,26 @@ A_TERRA = {"ed_anfiteatro", "ed_castello", "ed_fortezza_bastionata", "ed_grattac
 for b in v3["buildings"]:
     if b["id"] in A_TERRA: b["a_terra_o_sopra"] = True
 
+# L'UNIVERSITA' (registro 182): "+1 PV per ogni tuo Personaggio reclutato"
+# nella v3 vale +20 fissi, perche' col draft tutti ne reclutano 20 (nei replay
+# del seme 2530 chi la costruisce prende 20 PV e vince). Ora conta i
+# Personaggi con Scavo 5 o piu': sono 26 su 80, cinque o sei per era, e
+# prenderli al draft e' una scelta (sono anche gli scheletri che valgono).
+# IL GRATTACIELO (registro 183): costava 3 Costruzione e 1 Idea, meta' del
+# budget dell'era 5, e nessuno le aveva mai insieme (seme 2530 a quattro: in
+# vetrina tutta l'era con 3-4 posti, mai comprato). Ora 2 Costruzione e 1 Idea,
+# come l'Universita'; il finale stampato resta.
+for b in v3["buildings"]:
+    if b["id"] == "ed_universita":
+        for e in b["effects"]:
+            if e.get("hook") == "on_final_scoring" and e.get("per") == "recruited_character":
+                e["per"] = "recruited_scavo_min"
+                e["min_scavo"] = 5
+        b["effect_text"] = b["effect_text"].replace("+1 PV per ogni tuo Personaggio reclutato.",
+            "+1 PV per ogni tuo Personaggio con Scavo 5 o piu'.")
+    if b["id"] == "ed_grattacielo":
+        b["cost"] = prod(pietra=2, idee=1)
+
 # LO SPIANAMENTO PARZIALE (registro 180). Nella v2 un proprio intatto spianato
 # andava in rovina tutto intero, Scavo 0 e senza tessere, anche se la carta
 # nuova ne copriva una casella sola: le altre restavano Terrapieni a vista
@@ -833,7 +853,11 @@ def grandi_vecchie(v):
 #   --variante spianato_intero  lo spianato di prima: tutta la carta terrapieno, Scavo 0, niente tessere
 def spianato_intero(v):
     v["constants"]["tessere_scavo"].pop("spianato", None)
-VARIANTI = {"spianato_intero": spianato_intero, "grandi_vecchie": grandi_vecchie, "proprietario": proprietario, "compenso_pv": compenso_pv, "senza_sconti": senza_sconti,
+#   --variante grattacielo_caro  il Grattacielo a 3 Costruzione e 1 Idea, com'era prima del registro 183
+def grattacielo_caro(v):
+    for b in v["buildings"]:
+        if b["id"] == "ed_grattacielo": b["cost"] = prod(pietra=3, idee=1)
+VARIANTI = {"spianato_intero": spianato_intero, "grattacielo_caro": grattacielo_caro, "grandi_vecchie": grandi_vecchie, "proprietario": proprietario, "compenso_pv": compenso_pv, "senza_sconti": senza_sconti,
             "lampo_vecchio": lampo_vecchio, "extra_sempre": extra_sempre, "senza_extra": senza_extra, "costi_vecchi": costi_vecchi,
             "case_seconda": case_seconda, "case_lampo1": case_lampo1, "senza_tuning": senza_tuning,
             "terreno_produce": terreno_produce, "senza_potenziamento_insieme": senza_potenziamento_insieme}

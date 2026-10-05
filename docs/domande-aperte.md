@@ -2891,3 +2891,44 @@ dato è stato importato da lì. Ma due confronti fra ciò che è stampato e
     23, Obi 37, Rend 28, Ritro 39, Scavo 31: la Scavo non e' piu' ultima,
     la Lampo lo diventa. Il designer: "tieni lo scavo a 14,7". Resta la
     Lampo a 23, questione di bot (`SPINTE_V3`), da riguardare.
+
+181. **Il bot pesa i finali delle carte.** Il designer, sul seme 2530: "il
+    grattacielo dovrebbe essere una costruzione succulenta". Il bot non pesava
+    affatto gli effetti `on_final_scoring`: il Grattacielo ("+1 PV per
+    livello, -1 alle cime altrui adiacenti") valeva per lui il Lampo meno il
+    costo, e si costruiva solo quando seppelliva molte tessere. Ora posa la
+    carta su una copia dello stato e chiede a `Effects.stima_finale` quanto
+    renderebbe a fine partita (stessi conti dell'applicazione, senza segnare
+    punti); peso `finali_peso` 0,8 nell'era 5 e `finali_peso_prima` 0,4 nelle
+    altre, solo in `SPINTE_V3` (v1.5 e v2 com'erano). Nell'audit `--schermo`
+    assegna le strategie come la schermata d'inizio, per rigiocare la partita
+    vista a schermo, e `--perche` stampa la "vetrina" (risorse di chi muove,
+    posti legali e prezzo di ogni carta in vendita). Misura nella
+    cinquantatreesima.
+
+182. **L'Universita' vale +20 fissi.** Trovato rigiocando il seme 2530 col
+    bot che pesa i finali: "+1 PV per ogni tuo Personaggio reclutato" nella
+    v3 e' +20 per chiunque la costruisca, perche' col draft tutti reclutano
+    20 Personaggi; costa 2 Costruzione 1 Denaro 1 Idea e chi la prende vince
+    (97 PV a tre, 99 a quattro). Si costruiva 53 volte su 300 solo perche' il
+    bot era cieco ai finali. Il designer: "decidi tu la scelta piu' sensata".
+    Scelta: "+1 PV per ogni tuo Personaggio con Scavo 5 o piu'"
+    (`per: recruited_scavo_min`, `min_scavo: 5`): nella v3 tutti i
+    Personaggi hanno Scavo (2-6), quelli a 5-6 sono 26 su 80, cinque o sei
+    per era su sedici, e prenderli al draft e' una scelta che vale anche per
+    gli scheletri. Da misurare con la 183.
+
+183. **Il Grattacielo costa 2 Costruzione e 1 Idea.** Seme 2530 a quattro
+    giocatori, rigiocato con `--schermo` e la vetrina: il Grattacielo era in
+    vendita per tutta l'era 5 con 3-4 posti legali (il meno caro a terra in
+    colonna 4), e nessuno l'ha mai comprato perche' nessuno ha mai avuto 3
+    Costruzione e 1 Idea insieme: nell'era 5 si producono 1-2 risorse a turno
+    e muoiono a fine era; all'ultimo turno il posto 0 aveva 3 Costruzione e
+    nessuna Idea (il ◈ scambia Costruzione con Denaro, non con Idee). Tre
+    leve proposte (costo, finale che valga anche a terra, lasciarlo); il
+    designer: "decidi tu la scelta piu' sensata". Scelta: il costo a 2
+    Costruzione 1 Idea, come l'Universita'; il finale stampato resta, perche'
+    la carta e' succulenta in alto ed e' giusto che a terra valga il Lampo.
+    `--variante grattacielo_caro` rimette 3 e 1. Da misurare
+    (cinquantaquattresima, insieme alla 182 e alla taratura Lampo scelta).
+

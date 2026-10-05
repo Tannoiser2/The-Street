@@ -2409,3 +2409,23 @@ func _test_stima_finale() -> void:
 	Effects.apply_final_scoring(gs)
 	_eq("  l'applicazione da' gli stessi punti a me", gs.players[0].vp - prima0, 2)
 	_eq("  e toglie lo stesso all'altro", gs.players[1].vp - prima1, -1)
+	# L'Universita' della v3 (registro 182): conta i Personaggi con Scavo 5+.
+	if FileAccess.file_exists("res://data/proposte/cards-v3-era1.json"):
+		CardDB.load_db("res://data/proposte/cards-v3-era1.json")
+		var ctl3 := _game()
+		var gs3 := ctl3.gs
+		gs3.grid.buildings.clear()
+		gs3.era = 5
+		var uni := _put(gs3, "ed_universita", 2, 1)
+		var p3: PlayerState = gs3.players[0]
+		p3.personaggi_storia = []
+		var alti := 0
+		var bassi := 0
+		for cid in CardDB.characters:
+			var sc := int(CardDB.characters[cid].get("scavo", 0))
+			if sc >= 5 and alti < 3:
+				p3.personaggi_storia.append([cid, 1]); alti += 1
+			elif sc > 0 and sc < 5 and bassi < 4:
+				p3.personaggi_storia.append([cid, 2]); bassi += 1
+		_eq("l'Universita' v3 conta i Personaggi con Scavo 5+: tre su sette", Effects.stima_finale(gs3, uni), Vector2i(3, 0))
+		CardDB.load_db(CardDB.DB_PATH)
