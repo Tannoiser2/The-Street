@@ -2856,4 +2856,25 @@ dato è stato importato da lì. Ma due confronti fra ciò che è stampato e
     pianura): "prova con tre binari e livello 1 e misura, terreno qualunque".
     Nel file base il Grattacielo resta a tre binari com'e' stampato, va su
     qualunque terreno e chiede il livello 1; `--variante grandi_vecchie` lo
-    rimette in pianura al livello 2. Misura nella cinquantesima.
+    rimette in pianura al livello 2. Misurato (cinquantesima): 85 Grattacieli
+    in 300 partite prima e 85 dopo, economia e vittorie identiche; cambia
+    solo il terreno sotto (meno pianura, piu' bosco). Terreno e livello non
+    erano il freno: lo sono il costo (3 Costruzione 1 Idea, il piu' caro
+    dell'era con la Stazione) e il bot che non pesa il suo finale. Tenere la
+    carta libera o tornare alla stampa: decisione del designer.
+
+180. **Lo spianamento parziale: terrapieno sotto, rovina accanto.** Il
+    designer, davanti a due Terrapieni soli nel seme 4573 (un Acquedotto di
+    tre colonne spianato da una Palazzina di una casella): "se spiani un
+    edificio dovresti rendere le caselle dove effettivamente costruisci dei
+    terrapieni, perche' stai effettivamente usando il suo materiale e lo
+    stai coprendo, mentre le caselle rimaste libere diventano rovine perche'
+    NON ci hai costruito sopra. In questo modo si formano nuove rovine che
+    possono valere qualcosa. Il vantaggio e' avere uno sconto costruzione e
+    poter costruire qualcosa che potenzialmente vale di piu'". Oggi la carta
+    spianata va in rovina tutta intera con Scavo 0 e senza tessere, e le
+    caselle non coperte restano Terrapieni a vista (315 volte in 300 partite,
+    una a partita: 202 carte 1x2, 72 2x1, 41 3x1). Regola nuova: le caselle
+    coperte dalla carta nuova sono terrapieno (niente tessere, Scavo 0); le
+    caselle non coperte restano rovina del proprietario, con le loro tessere
+    e il loro Scavo, come ogni rovina. Da fare e misurare (cinquantunesima).
