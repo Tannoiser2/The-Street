@@ -46,6 +46,7 @@ func _ready() -> void:
 	_run("Artista di corte", _test_artista)
 	_run("  e il suo incasso", _test_artista_incasso)
 	_run("lo schema e' davvero chiuso", _test_schema_closed)
+	_run("la stima del finale di una carta (registro 181)", _test_stima_finale)
 	print("\n%d superati, %d falliti" % [_passed, _failed])
 	get_tree().quit(0 if _failed == 0 else 1)
 
@@ -2382,3 +2383,29 @@ func _test_premio_scavo() -> void:
 	CardDB.constants["premio_era5"] = era5_com_era
 	CardDB.constants["premio_scavo"] = com_era
 
+
+# LA STIMA DEL FINALE (registro 181): il Grattacielo al livello 2 con una cima
+# altrui in una colonna adiacente vale +2 per se' e -1 per l'altro; l'Osservatorio
+# in piedi +2; una carta senza finale 0. Stessi conti dell'applicazione: dopo
+# la stima, applicare il finale da' gli stessi punti.
+func _test_stima_finale() -> void:
+	var ctl := _game()
+	var gs := ctl.gs
+	gs.grid.buildings.clear()
+	gs.era = 5
+	var gratt := _put(gs, "ed_grattacielo", 3, 2)
+	var altrui := _put(gs, "ed_capanne", 4)
+	altrui.owner = 1
+	var mio := _put(gs, "ed_capanne", 2)
+	_eq("Grattacielo al livello 2, una cima altrui accanto: +2 a me, -1 a lui",
+		Effects.stima_finale(gs, gratt), Vector2i(2, -1))
+	_eq("  una carta senza finale vale 0", Effects.stima_finale(gs, mio), Vector2i(0, 0))
+	var oss := _put(gs, "ed_osservatorio", 0)
+	_eq("  l'Osservatorio in piedi +2", Effects.stima_finale(gs, oss), Vector2i(2, 0))
+	oss.state = Enums.BuildingState.ROVINA
+	_eq("  in rovina 0", Effects.stima_finale(gs, oss), Vector2i(0, 0))
+	var prima0: int = gs.players[0].vp
+	var prima1: int = gs.players[1].vp
+	Effects.apply_final_scoring(gs)
+	_eq("  l'applicazione da' gli stessi punti a me", gs.players[0].vp - prima0, 2)
+	_eq("  e toglie lo stesso all'altro", gs.players[1].vp - prima1, -1)

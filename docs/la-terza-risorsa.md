@@ -2566,8 +2566,9 @@ liberi, livello 2, pianura) non erano il collo di bottiglia. Con
 guardare il livello, e la pianura e' il terreno piu' comune. Il freno e'
 altrove: costa 3 Costruzione e 1 Idea, con la Stazione la carta piu' cara
 dell'era 5, in un'era in cui un giocatore produce 8,7 risorse e ne spende
-6,6; e il bot valuta Lampo (il Grattacielo non ne ha) e rendita (3) piu' del
-suo finale. Fra le quattordici carte dell'era 5 sta a meta' classifica:
+6,6; e il bot non pesa il suo finale (+1 PV per livello, -1 alle cime altrui
+adiacenti): per lui vale il Lampo 3 meno il costo, e con Rendita 0 e tre
+caselle da coprire conviene solo quando seppellisce molte tessere. Fra le quattordici carte dell'era 5 sta a meta' classifica:
 
 | carta dell'era 5 | costruite in 300 partite |
 |---|---|

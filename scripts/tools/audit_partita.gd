@@ -20,6 +20,12 @@ var _muto := false
 # entrate e uscite di risorse per fonte, punti per canale.
 var _rapporto := false
 var _perche := false
+# `--schermo`: le strategie dei bot assegnate come fa la schermata d'inizio
+# (`canone[(posto + seme) % n]`, scelte_inizio.gd), per rigiocare qui la
+# partita che il designer ha visto a schermo con lo stesso seme. Vale per la
+# partita singola; nei lotti il giro delle strategie resta quello di sempre.
+var _schermo := false
+var _seme_base := 1
 var _piano := false
 var _tutti := ""
 var _giro := "vicini"        # --giro vicini|tutte
@@ -65,6 +71,8 @@ func _ready() -> void:
 	_strategie = not args.has("caso")
 	_candidate = args.has("candidate")
 	_perche = args.has("perche")
+	_schermo = args.has("schermo")
+	_seme_base = seme
 	# IL TORNEO DEL PIANIFICATORE. `--piano` fa pianificare l'era a UN posto,
 	# che ruota di partita in partita cosi' nessuno siede sempre li';
 	# `--tutti rendita` fa giocare a tutti la stessa strategia. Insieme isolano
@@ -644,6 +652,9 @@ func _stampa_vita(acc: Dictionary, quante: int, players: int, seme: int) -> void
 # manca, cosi' i lotti vecchi si rigiocano uguali.
 func strategia_di(i: int, g: int) -> String:
 	if _tutti != "": return _tutti
+	if _schermo:
+		var canone := StrategyBot.canone()
+		return canone[(i + _seme_base + g) % canone.size()]
 	var lista := StrategyBot.tutte() if _candidate else StrategyBot.canone()
 	if _giro != "tutte": return lista[(i + g) % lista.size()]
 	var combo := _combinazioni(lista.size(), _posti)

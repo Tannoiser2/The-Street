@@ -696,7 +696,12 @@ const SPINTE_V3 := {"rendita_per_era": 1.3, "rendita_zero": -1.5, "lampo": 0.8, 
 	# lasceranno tessere, la riscoperta delle proprie rovine nell'era 5 (per tessera), l'Arte.
 	# Con le caselle a 0,6 vinceva il 43% giocando da Rendita (le carte larghe sono quelle a
 	# Rendita 2); a 0,2, con arte 0,4 e scheletro 0,3, sta al 33 (quarantottesima misura).
-	"ritro_scheletro": 0.3, "ritro_caselle": 0.2, "ritro_riscoperta": 1.2, "ritro_arte": 0.4}
+	"ritro_scheletro": 0.3, "ritro_caselle": 0.2, "ritro_riscoperta": 1.2, "ritro_arte": 0.4,
+	# I FINALI DELLE CARTE (registro 181): il bot non li pesava affatto, e il
+	# Grattacielo ("+1 PV per livello") valeva per lui il Lampo meno il costo.
+	# Peso dei PV che l'effetto finale darebbe se la partita finisse adesso,
+	# nell'era 5 (certi) e nelle ere prima (la carta deve arrivare in piedi).
+	"finali_peso": 0.8, "finali_peso_prima": 0.4}
 
 static func spinte() -> Dictionary:
 	var base := SPINTE_V2 if e_v2() else SPINTE_V1
@@ -707,6 +712,35 @@ static func spinte() -> Dictionary:
 	for k in tavolo: out[k] = tavolo[k]
 	for k in spinte_override: out[k] = spinte_override[k]
 	return out
+
+# Quanto vale l'effetto finale della carta `d` costruita dove dice `par`, in
+# PV pesati (`finali_peso` nell'ultima era, `finali_peso_prima` nelle altre).
+# Zero per le carte senza `on_final_scoring` e per i regolamenti senza il peso
+# (v1.5 e v2: il bot resta com'era). Si copia lo stato, si appende la carta
+# con livello e binario del preventivo e si ricalcolano i sepolti: le basi
+# non si spianano ne' si segnano, e' una stima.
+static func _stima_finali(gs: GameState, p: PlayerState, d: Dictionary, par: Dictionary) -> float:
+	var sp := spinte()
+	if not sp.has("finali_peso"): return 0.0
+	var ha_finale := false
+	for e in d.get("effects", []):
+		if e["hook"] == "on_final_scoring" and e["op"] != "scavo_delta": ha_finale = true
+	if not ha_finale: return 0.0
+	var copia := gs.duplica()
+	var b := Building.new()
+	b.uid = copia.new_uid()
+	b.data = d
+	b.owner = p.index
+	b.era_built = gs.era
+	b.col_from = int(par["col_from"])
+	b.col_to = b.col_from + int(d["width"])
+	b.level = int(par.get("level", 0))
+	b.binario = int(par.get("binario", 0))
+	copia.grid.buildings.append(b)
+	copia.grid.refresh_buried()
+	var stima := Effects.stima_finale(copia, b)
+	var peso := float(sp["finali_peso"]) if gs.era >= int(CardDB.constants["eras"]) else float(sp["finali_peso_prima"])
+	return (float(stima.x) - float(stima.y) * 0.5) * peso
 
 static func _valore_costruzione(gs: GameState, p: PlayerState, v, strategia: String,
 		r: Vector2, dett := {}) -> float:
@@ -729,6 +763,14 @@ static func _valore_costruzione(gs: GameState, p: PlayerState, v, strategia: Str
 		+ float(prod.get("idee", 0)) * r.y + float(prod.get("cultura", 0))) * float(rimaste) * 0.5
 	if pr != 0.0: dett["produzione"] = pr
 	q += pr
+
+	# I FINALI (registro 181): si posa la carta su una copia dello stato e si
+	# chiede a Effects quanto renderebbe a fine partita. Il malus agli altri
+	# vale meta': e' un punto tolto a uno, non un punto preso da tutti.
+	var finali := _stima_finali(gs, p, d, par)
+	if finali != 0.0:
+		dett["effetto finale"] = finali
+		q += finali
 
 	var larghezza := int(d["width"])
 	var premio_stimato := 0.0     # il premio di scavo di questa costruzione, per la strategia Scavo v2
