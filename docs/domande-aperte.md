@@ -2830,8 +2830,10 @@ dato è stato importato da lì. Ma due confronti fra ciò che è stampato e
     cosa succede con gli omaggi di fine era (il bot che piazza l'ultimo omaggio
     gioca il primo turno dell'era nuova per chi e' primo): li' resta com'e',
     perche' e' il riferimento congelato (TORNEO e VITA cambiavano in 12 e 38
-    righe con la correzione larga). La v2 e la v3 possono spostarsi di poco:
-    il file base della v3 rimisurato nella quarantanovesima.
+    righe con la correzione larga). Quarantanovesima misura: il file base
+    della v3 col bot corretto ha la stessa economia (entro un decimo) e
+    vittorie Bil 36, Cont 38, Lampo 27, Obi 42, Rend 29, Ritro 37, Scavo 26:
+    spostamenti entro l'errore, le conclusioni delle misure 44-48 restano.
 178. **Il Grattacielo a tre binari, il seme nel riepilogo, il terrapieno sul
     Colosseo.** Il designer, giocando la v3 a schermo: un Monumento ai caduti
     sopra un Colosseo intatto, e prima "un terrapieno da solo"; il Grattacielo

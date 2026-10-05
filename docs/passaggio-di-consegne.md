@@ -63,7 +63,7 @@ scelgono nella schermata di gioco (`godot res://scenes/gioca.tscn`) o con `--dat
   `docs/passaggio-v3.md` e `docs/proposte/v3-*.md`): i Personaggi sono i lavoratori, le risorse
   muoiono a fine era, chi attiva una colonna usa un edificio della colonna ("stile Caylus"). Tutto
   acceso dalla costante `turno_v3`; nella schermata di gioco e' il tasto "v3", quello di partenza.
-  Registri 153-176, misure 31-48.
+  Registri 153-177, misure 31-49.
 
 **I bot.** `StrategyBot` versione 2, sei strategie (Rendita, Lampo, Scavo, Bilanciata, Obiettivi,
 Continuità) sullo stesso valutatore con **spinte** che sono handicap, non aiuti (registro 114).

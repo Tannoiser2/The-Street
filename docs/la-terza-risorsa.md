@@ -2509,9 +2509,39 @@ entro l'errore. **Nel file base**; `--variante grandi_vecchie` rifa' le carte
 della v2. (Registro 178: il Grattacielo e' tornato a tre binari, com'e'
 stampato; restano la Stazione su qualunque terreno e la Fortezza ⚒3 🪙1.)
 
+## Quarantanovesima misura: il file base rimisurato col bot corretto
+
+Il registro 177 ha corretto il bot che, quando l'ultima presa del draft era
+sua, giocava il primo piazzamento dell'era di chi era primo nell'ordine. Le
+misure dalla quarantaquattresima alla quarantottesima erano state prese con
+quel difetto (circa due ere su tre, il primo turno di un giocatore giocato
+con la strategia di un altro). Stessi 300 semi, stesso file base e stessa
+tabella `SPINTE_V3` della quarantottesima.
+
+| a giocatore | prima (48ª) | ora |
+|---|---|---|
+| prodotto per era | 10,9 / 11,0 / 9,6 / 9,3 / 8,8 | 10,8 / 11,0 / 9,6 / 9,2 / 8,7 |
+| speso per era | 8,0 / 8,3 / 7,0 / 6,7 / 6,6 | 8,0 / 8,3 / 6,9 / 6,6 / 6,6 |
+| morto per era | 2,9 / 2,7 / 2,5 / 2,6 / 2,2 | 2,8 / 2,7 / 2,7 / 2,6 / 2,2 |
+| costruzioni per era | 4,32 / 3,41 / 2,85 / 2,52 / 2,48 | 4,35 / 3,40 / 2,81 / 2,51 / 2,44 |
+| PV a testa | 76,1 | 75,6 |
+| canali Lampo / Cont / Rendita / Scavo / ★ | 18,7 / 14,9 / 12,6 / 11,3 / 9,3 | 18,6 / 14,7 / 12,6 / 11,2 / 9,2 |
+| vittorie Bil / Cont / Lampo / Obi / Rend / Ritro / Scavo | 31 / 38 / 30 / 40 / 33 / 34 / 27 | 36 / 38 / 27 / 42 / 29 / 37 / 26 |
+
+L'economia non si muove: produzione, spesa, morto, costruzioni e canali di PV
+sono gli stessi entro un decimo. Si muovono un poco le vittorie: la
+Bilanciata +5, la Rendita -4, la Ritrovamenti +3, la Lampo -3, tutte entro
+o sul bordo dell'errore (4). La forbice e' 26-42: la Obiettivi in testa e la
+Scavo in coda, come prima. Le conclusioni delle misure 44-48 (la "scelta", gli
+sconti, il ⊕, il Lampo pari al costo, le tessere) restano: erano sull'economia,
+che il difetto non toccava. Sulle vittorie la tabella va riguardata con questa
+misura come base, se il designer vuole stringere ancora: le leve sono
+`obiettivi_peso` (0,8) e la Scavo, che ha il suo margine nei ritrovamenti.
+
 ## Come rifare il conto
 
 ```bash
+# quarantanovesima misura: il file base col bot corretto (registro 177), stesso comando della quarantottesima
 # quarantottesima misura: la Ritrovamenti (registro 173) e le carte grandi (174); il canone v3 ha sette
 #   strategie, `--variante grandi_vecchie` rifa' le carte della v2
 godot --headless res://scenes/audit_partita.tscn -- --players 3 --games 300 --seed 700000 --giro tutte \
