@@ -684,8 +684,10 @@ const SPINTE_V3 := {"rendita_per_era": 1.3, "rendita_zero": -1.5, "lampo": 0.8, 
 	"scavo_premio": 0.8, "scavo_terra": -0.5, "scavo_terra_scavo": 0.5, "protezione_attesa": 2.0,
 	"lampo_potenzia": 1.5, "lampo_sopra": 0.0, "obiettivi_peso": 1.0, "continuita_peso": 1.0,
 	# la Ritrovamenti (registro 173): lo scheletro del Personaggio al draft, le caselle che
-	# lasceranno tessere, la riscoperta delle proprie rovine nell'era 5 (per tessera), l'Arte
-	"ritro_scheletro": 0.5, "ritro_caselle": 0.6, "ritro_riscoperta": 1.2, "ritro_arte": 0.6}
+	# lasceranno tessere, la riscoperta delle proprie rovine nell'era 5 (per tessera), l'Arte.
+	# Con le caselle a 0,6 vinceva il 43% giocando da Rendita (le carte larghe sono quelle a
+	# Rendita 2); a 0,2, con arte 0,4 e scheletro 0,3, sta al 33 (quarantottesima misura).
+	"ritro_scheletro": 0.3, "ritro_caselle": 0.2, "ritro_riscoperta": 1.2, "ritro_arte": 0.4}
 
 static func spinte() -> Dictionary:
 	var base := SPINTE_V2 if e_v2() else SPINTE_V1

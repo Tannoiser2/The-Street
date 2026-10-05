@@ -2479,8 +2479,21 @@ Scavo e' 12,5 contro 11,5 della Scavo, mentre la sua Rendita e' 14,2 (le altre
 11-13) e i finali 5,7. Il peso sulle caselle (0,6 a casella) la porta sulle
 carte larghe, che sono quelle a Rendita 2 (Castello, Anfiteatro, Fortezza...):
 una Rendita con un nome diverso. La Bilanciata scende a 25 e la Rendita a 27,
-perche' la Ritrovamenti compra le loro carte. Seconda taratura al ribasso in
-coda a questa misura.
+perche' la Ritrovamenti compra le loro carte. Seconda taratura al ribasso, sul
+file base con le carte grandi:
+
+| vittorie (7 strategie) | Bil | Cont | Lampo | Obi | Rend | Ritro | Scavo |
+|---|---|---|---|---|---|---|---|
+| caselle 0,6 (prima) | 29 | 36 | 27 | 44 | 25 | 44 | 28 |
+| caselle 0,3 | 30 | 38 | 27 | 42 | 25 | 42 | 30 |
+| **caselle 0,2, arte 0,4, scheletro 0,3** | 32 | 37 | 28 | 43 | 32 | **33** | 28 |
+
+Con le caselle quasi a zero la Ritrovamenti torna al 33% (76,8 PV) e restituisce
+alla Rendita i suoi punti (25 → 32): e' la tabella `SPINTE_V3`. I suoi canali,
+Scavo 12,4 e Rendita 14,0, dicono che e' ancora per meta' una Rendita: lo
+scheletro e l'arte valgono 2,4 e 1,6 PV a partita, troppo poco per fare una
+strategia da soli. La Obiettivi al 42-44 nel torneo a sette strategie (31-38 a
+sei) e' da riguardare: `obiettivi_peso` 0,8 in coda.
 
 **Le tre carte grandi** (registro 174): la Stazione su qualunque terreno, il
 Grattacielo a 2 binari, la Fortezza ⚒3 🪙1. Costruite a partita, prima → ora:
