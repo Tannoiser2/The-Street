@@ -33,6 +33,18 @@ var monuments_claimed: Array = []
 var specialized_characters: Array[String] = []
 # Colonne dove hai gia' un lavoratore: "al massimo un vostro lavoratore per colonna".
 var worker_cols: Array[int] = []
+# V3: i Personaggi gia' piazzati nell'era (ognuno e' un lavoratore e si piazza
+# una volta), e quel che un'azione lascia per il resto del turno: lo sconto
+# alla costruzione (`sconto_se` = "" sempre, "fiume" solo su fiume, "arte"
+# solo sul potenziamento Arte) e il Lampo in piu' all'edificio costruito.
+var personaggi_piazzati: Array[String] = []
+var sconto_turno: int = 0
+var sconto_se: String = ""
+var lampo_turno: int = 0
+# Gli acquisti extra guadagnati in questo turno da un'azione (registro 157):
+# ognuno apre, dopo l'azione del turno, l'acquisto di un potenziamento o di
+# una casa senza consumare il lavoratore.
+var extra_turno: int = 0
 # "Il primo terrapieno di ogni giocatore in quest'era costa 0" (ev_bonifiche).
 var terrapieno_free_used: bool = false
 # Personaggi reclutati in tutta la partita: non si azzera a fine era.
@@ -78,6 +90,11 @@ func duplica() -> PlayerState:
 	p.monuments_claimed = monuments_claimed.duplicate()
 	p.specialized_characters = specialized_characters.duplicate()
 	p.worker_cols = worker_cols.duplicate()
+	p.personaggi_piazzati = personaggi_piazzati.duplicate()
+	p.sconto_turno = sconto_turno
+	p.sconto_se = sconto_se
+	p.lampo_turno = lampo_turno
+	p.extra_turno = extra_turno
 	p.terrapieno_free_used = terrapieno_free_used
 	p.recruited_total = recruited_total
 	p.final_characters = final_characters.duplicate()
@@ -95,6 +112,7 @@ func reset_for_era() -> void:
 	workers_used = 0
 	specialized_characters.clear()
 	worker_cols.clear()
+	personaggi_piazzati.clear()
 	terrapieno_free_used = false
 	effect_used.clear()
 	character_targets.clear()

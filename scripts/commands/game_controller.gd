@@ -106,7 +106,9 @@ func _start_era(era: int) -> void:
 	var side := int(CardDB.constants["side_rows"])
 	# Con il draft (v2) in fila ci sono TUTTI i Personaggi dell'era: si
 	# sceglie fra quelli, gli avanzi si scartano a fine era (D7).
-	_refill(gs.char_row, gs.char_decks[era], gs.char_decks[era].size() if draft_v2() else side)
+	# Con il draft a passaggio (v3) la fila resta vuota: le carte vanno nelle mani.
+	if not draft_passaggio():
+		_refill(gs.char_row, gs.char_decks[era], gs.char_decks[era].size() if draft_v2() else side)
 	_refill(gs.upg_row, gs.upg_decks[era], side)
 	gs.upg_row.append_array(restano)
 
@@ -136,6 +138,9 @@ func _start_era(era: int) -> void:
 	gs.phase = Enums.Phase.PIAZZA
 	Conditions.claim_monuments(gs)      # il Pantheon guarda l'inizio dell'era Moderna
 	gs.log_line("Inizia l'era %d. Evento: %s" % [era, gs.current_event.get("name", "nessuno")])
+	if draft_passaggio():
+		_inizia_draft_passaggio()
+		return
 	if draft_v2():
 		gs.draft_pending.assign(gs.turn_order)
 		_prosegui_draft()
@@ -239,7 +244,93 @@ func _draft_prendi(chi: int, char_id: String, bersaglio: Building) -> void:
 	gs.log_line("Giocatore %d prende %s" % [chi, data["name"]])
 	gs.pending_choice = {}
 	gs.draft_pending.pop_front()
+	if draft_passaggio():
+		(gs.draft_mani[chi] as Array).erase(char_id)
+		# Per la misura: quante volte ogni carta e' presa, e a quale giro.
+		p.bump("draft_" + char_id)
+		p.bump("draft_g%d_%s" % [gs.draft_giro, char_id])
+		_prosegui_draft_passaggio()
+		return
 	_prosegui_draft()
+
+# ---- il draft a passaggio (v3) -----------------------------------------
+# Parole del designer: "ogni giocatore prende 4 personaggi, ne prende uno e
+# quelli rimasti li passa al giocatore alla sua destra, e si ripete finche'
+# tutti hanno scelto tre personaggi, piu' quello che rimane alla fine". I 16
+# dell'era sono gia' mescolati nel mazzo: 4 a testa, gli altri restano nel
+# mazzo e non si guardano (la regola non cambia col numero di giocatori). La
+# direzione: `destra` sempre, o `alternata` (ere 1, 3, 5 a destra, 2 e 4 a
+# sinistra). I 4 presi sono i 4 lavoratori dell'era.
+func draft_passaggio() -> bool:
+	return CardDB.constants.has("draft_passaggio") and bool(CardDB.constants.get("turno_v3", false))
+
+func _inizia_draft_passaggio() -> void:
+	var cfg: Dictionary = CardDB.constants["draft_passaggio"]
+	var mano := int(cfg.get("mano", 4))
+	gs.draft_mani = {}
+	var mazzo: Array = gs.char_decks[gs.era]
+	for i in gs.n_players:
+		var m := []
+		for k in mano:
+			if not mazzo.is_empty(): m.append(mazzo.pop_back())
+		gs.draft_mani[i] = m
+	gs.draft_giro = 1
+	gs.draft_pending.assign(gs.turn_order)
+	_prosegui_draft_passaggio()
+
+# Chi deve ancora scegliere in questo giro sta in `draft_pending`. Finito il
+# giro le mani passano; chi ha una carta sola la prende senza scegliere.
+func _prosegui_draft_passaggio() -> void:
+	while true:
+		if gs.draft_pending.is_empty():
+			var resta := false
+			for i in gs.n_players:
+				if not (gs.draft_mani[i] as Array).is_empty(): resta = true
+			if not resta: break
+			_passa_mani()
+			gs.draft_giro += 1
+			gs.draft_pending.assign(gs.turn_order)
+		var chi: int = gs.draft_pending[0]
+		var mano: Array = gs.draft_mani[chi]
+		if mano.is_empty():
+			gs.draft_pending.pop_front()
+			continue
+		# La fila mostra la mano di chi sceglie: le opzioni sono posizioni
+		# nella fila, come nel draft della v2, e il resto del codice non cambia.
+		gs.char_row = mano.duplicate()
+		var opzioni := _opzioni_draft(chi)
+		if mano.size() == 1 or opzioni.is_empty():
+			_draft_prendi(chi, str(mano[0]), null)
+			return          # _draft_prendi riprende da qui
+		gs.current_index = chi
+		gs.pending_choice = {
+			"player": chi,
+			"kind": "draft",
+			"prompt": "Era %d, giro %d: tieni un Personaggio, gli altri passano" % [gs.era, gs.draft_giro],
+			"options": opzioni,
+		}
+		choice_required.emit(gs.pending_choice)
+		return
+	gs.char_row.clear()
+	gs.pending_choice = {}
+	# I lavoratori dell'era sono i Personaggi presi: di norma 4, meno se il
+	# mazzo non bastava.
+	for p in gs.players:
+		p.workers = p.specialized_characters.size()
+	gs.draft_giro = 0
+	_primo_turno_dell_era()
+
+func _passa_mani() -> void:
+	var cfg: Dictionary = CardDB.constants["draft_passaggio"]
+	var dir := str(cfg.get("direzione", "destra"))
+	var verso := 1
+	if dir == "alternata" and gs.era % 2 == 0: verso = -1
+	elif dir == "sinistra": verso = -1
+	var nuove := {}
+	for i in gs.n_players:
+		nuove[(i + verso + gs.n_players) % gs.n_players] = gs.draft_mani[i]
+	gs.draft_mani = nuove
+	gs.log_line("Il draft passa a %s" % ("destra" if verso == 1 else "sinistra"))
 
 # Nel draft nessun lavoratore abita un edificio: la carta che parla di "questo
 # lavoratore" aspetta il primo edificio costruito nell'era e ci si lega.
@@ -328,7 +419,7 @@ func _lavoratore_su(b: Building, p: PlayerState) -> void:
 # soli (TessereEra). Lo imposta la schermata di gioco.
 var umani: Dictionary = {}
 
-func place_worker(col: int, protect: Building = null) -> bool:
+func place_worker(col: int, protect: Building = null, personaggio := "") -> bool:
 	if not gs.pending_choice.is_empty(): return false
 	if gs.phase != Enums.Phase.PIAZZA: return false
 	if col < 0 or col >= gs.grid.n_cols: return false
@@ -336,6 +427,17 @@ func place_worker(col: int, protect: Building = null) -> bool:
 	if p.workers_used >= p.workers: return false
 	# "Potete avere al massimo un vostro lavoratore per colonna."
 	if col in p.worker_cols: return false
+	# V3: il lavoratore E' un Personaggio, uno di quelli presi nel draft e non
+	# ancora piazzato. Chi non lo dice (i bot a caso, i test) prende il primo.
+	gs.personaggio_attivo = ""
+	if PersonaggiV3.attivo():
+		var liberi: Array[String] = personaggi_liberi(p)
+		if liberi.is_empty(): return false
+		if personaggio == "": personaggio = liberi[0]
+		elif not personaggio in liberi: return false
+		p.personaggi_piazzati.append(personaggio)
+		gs.personaggio_attivo = personaggio
+		gs.log_line("Giocatore %d piazza %s in colonna %d" % [p.index, CardDB.characters[personaggio]["name"], col])
 	p.workers_used += 1
 	p.worker_cols.append(col)
 	gs.protetto_uid = -1
@@ -351,6 +453,28 @@ func place_worker(col: int, protect: Building = null) -> bool:
 	EraRules.activate(gs, p.index, col, a_mano)
 	gs.colonna_attivata = col
 	p.bump("az_colonna")
+	# V3 "scelta" (registro 170): chi attiva usa UN edificio della colonna, di
+	# chiunque, e lo brucia per il giro. Con uno solo non c'e' da scegliere;
+	# con piu' d'uno e' una domanda (per i bot la risolve StrategyBot). La
+	# scelta della tessera a mano (umani) non convive ancora con questa.
+	if PersonaggiV3.scelta_attiva() and not a_mano:
+		var ops: Array = PersonaggiV3.opzioni_edificio(gs, col)
+		if ops.size() == 1:
+			PersonaggiV3.usa_edificio(gs, p.index, ops[0], col)
+		elif ops.size() > 1:
+			var uids: Array[int] = []
+			var testi: Array[String] = []
+			for b in ops:
+				uids.append(b.uid)
+				testi.append("%s (giocatore %d): %s" % [b.data["name"], b.owner, str(b.data.get("effect_text", ""))])
+			gs.phase = Enums.Phase.AZIONE
+			p.bump("az3_scelta_domanda")      # per il rapporto: le volte in cui c'era davvero da scegliere
+			gs.pending_choice = {"player": p.index, "kind": "edificio", "col": col,
+				"prompt": "Quale edificio usi?", "options": uids, "etichette": testi}
+			choice_required.emit(gs.pending_choice)
+			return true
+		else:
+			p.bump("az3_scelta_nessuna")
 	if a_mano:
 		var te := TessereEra.tessera(gs, col)
 		var ops := TessereEra.opzioni_scelta(gs, p.index, col)
@@ -378,6 +502,31 @@ func place_worker(col: int, protect: Building = null) -> bool:
 	state_changed.emit()
 	return true
 
+# Lo sconto del turno vale per questo edificio? "" sempre; "fiume" solo su
+# fiume; "classe:religione" solo per quella classe (registro 161). Gli sconti
+# dei potenziamenti ("arte", "struttura", "altro", "potenziamento") qui no.
+func _sconto_vale_per_edificio(se: String, data: Dictionary, col_from: int) -> bool:
+	if se == "": return true
+	if se == "fiume": return gs.grid.terrains[col_from] == Enums.Terrain.FIUME
+	if se.begins_with("classe:"): return se.substr(7) in (data["classes"] as Array)
+	return false
+
+# Lo sconto del turno vale per questo potenziamento? La famiglia ("arte",
+# "struttura", "altro") o qualunque ("potenziamento"); e si applica alla
+# risorsa che il potenziamento chiede, quale che sia.
+func _sconto_vale_per_potenziamento(se: String, upg: Dictionary) -> bool:
+	# Registro 171: lo sconto senza condizione e' "-1 a quel che compri in
+	# questo turno", edificio o potenziamento che sia.
+	if se == "" or se == "potenziamento": return true
+	return se != "" and se == str(upg.get("family", ""))
+
+# I Personaggi del giocatore ancora da piazzare (v3).
+func personaggi_liberi(p: PlayerState) -> Array[String]:
+	var out: Array[String] = []
+	for cid in p.specialized_characters:
+		if not cid in p.personaggi_piazzati: out.append(cid)
+	return out
+
 # ---- fase 3: azioni -------------------------------------------------
 # Costruire: nella colonna attivata o in una adiacente.
 # `despoil` e' il rudere opzionalmente depredato (spoliazione).
@@ -388,6 +537,9 @@ func build(card_id: String, col_from: int, above: bool, pay_option: int = 0, des
 	# V2: si costruisce in qualsiasi colonna legale (D9), non solo vicino alla attivata.
 	if not turno_v2() and abs(col_from - gs.colonna_attivata) > 1: return false
 	if not card_id in gs.market and not card_id in gs.riserva: return false
+	# L'acquisto extra (v3) compra solo dalla riserva delle case; dopo una
+	# costruzione senza carta (registro 160) nemmeno quelle.
+	if gs.acquisto_extra_aperto and (gs.extra_solo_potenziamenti or not card_id in gs.riserva): return false
 	var p := gs.current_player()
 	var data: Dictionary = CardDB.buildings[card_id]
 	# `binario`: con le caselle (registro 122) chi costruisce sceglie il
@@ -400,7 +552,17 @@ func build(card_id: String, col_from: int, above: bool, pay_option: int = 0, des
 		return false
 	var opts := BuildRules.flexible_options(data, q.pietra, q.oro)
 	var cost: Vector2i = opts[clamp(pay_option, 0, opts.size() - 1)]
+	# V3: lo sconto lasciato dall'azione del Personaggio piazzato in questo
+	# turno (Tagliapietre: sempre; Costruttore di zattere: solo su fiume).
+	var sconto := 0
+	if PersonaggiV3.attivo() and p.sconto_turno > 0 and _sconto_vale_per_edificio(p.sconto_se, data, col_from):
+		sconto = mini(p.sconto_turno, cost.x)
+		cost.x -= sconto
 	if not p.can_pay(cost.x, cost.y, q.idee): return false
+	if sconto > 0:
+		p.sconto_turno = 0
+		p.bump("sconti_v3", sconto)
+		gs.log_line("Sconto di %d Costruzione su %s" % [sconto, data["name"]])
 	p.pay(cost.x, cost.y, q.idee, "costruire")
 	if q.terrapieno_free_applied:
 		p.terrapieno_free_used = true
@@ -514,9 +676,15 @@ func build(card_id: String, col_from: int, above: bool, pay_option: int = 0, des
 	if above:
 		for c in range(b.col_from, b.col_to): gs.grid.risen_this_era[c] = true
 	p.buildings_built += 1
-	if int(data["lampo"]) > 0:
-		p.add_vp("lampo", int(data["lampo"]), "edifici costruiti")
-		b.rende("lampo", int(data["lampo"]))
+	var lampo := int(data["lampo"])
+	# V3: il Lampo in piu' lasciato dall'azione del Personaggio (Cacciatore).
+	if PersonaggiV3.attivo() and p.lampo_turno > 0:
+		lampo += p.lampo_turno
+		p.bump("lampo_v3", p.lampo_turno)
+		p.lampo_turno = 0
+	if lampo > 0:
+		p.add_vp("lampo", lampo, "edifici costruiti")
+		b.rende("lampo", lampo)
 	# Dal mercato si rimpiazza; dalla riserva se ne va una copia e basta.
 	if card_id in gs.market:
 		gs.market.erase(card_id)
@@ -532,7 +700,7 @@ func build(card_id: String, col_from: int, above: bool, pay_option: int = 0, des
 	# Con il draft i protettori aspettano il primo edificio costruito nell'era.
 	if draft_v2(): _protettori_sul_nuovo(b, p)
 	building_placed.emit(b)
-	_end_turn()
+	_dopo_azione("costruisci")
 	return true
 
 # Potenziare: carta dalla fila, sotto un tuo edificio in piedi della colonna attivata.
@@ -553,7 +721,22 @@ func upgrade(upg_id: String, target: Building) -> bool:
 	if not q.legal:
 		gs.log_line("Potenziamento rifiutato: %s" % q.reason)
 		return false
-	if not p.can_pay(q.pietra, q.oro, q.idee): return false
+	# V3: il Pittore delle grotte sconta di 1 Idea il potenziamento Arte del turno.
+	# V3: lo sconto del turno sui potenziamenti (Pittore delle grotte sull'Arte,
+	# registro 161 per famiglia o per qualunque), sulla risorsa che chiedono.
+	var sc_p := 0
+	var sc_o := 0
+	var sc_i := 0
+	if PersonaggiV3.attivo() and p.sconto_turno > 0 and _sconto_vale_per_potenziamento(p.sconto_se, CardDB.upgrades[upg_id]):
+		if q.idee > 0: sc_i = mini(p.sconto_turno, q.idee)
+		elif q.oro > 0: sc_o = mini(p.sconto_turno, q.oro)
+		elif q.pietra > 0: sc_p = mini(p.sconto_turno, q.pietra)
+	var sconto_arte := sc_p + sc_o + sc_i
+	if not p.can_pay(q.pietra - sc_p, q.oro - sc_o, q.idee - sc_i): return false
+	if sconto_arte > 0:
+		p.sconto_turno = 0
+		p.bump("sconti_v3", sconto_arte)
+		gs.log_line("Sconto di %d su %s" % [sconto_arte, CardDB.upgrades[upg_id]["name"]])
 	# Il Vescovo si consuma qui, non nel preventivo: il preventivo viene
 	# chiesto anche solo per sapere se l'azione e' legale.
 	var vescovo := Effects.player_override(gs, p.index, "free_upgrade_of_class", target)
@@ -574,7 +757,7 @@ func upgrade(upg_id: String, target: Building) -> bool:
 				target.patrons[p.index] = int(target.patrons.get(p.index, 0)) + rendita
 			gs.log_line("%s: giocatore %d firma %s e ne incassa %d oro a ogni attivazione" % [
 				artista[1]["name"], p.index, target.data["name"], rendita])
-	p.pay(q.pietra, q.oro, q.idee, "potenziare")
+	p.pay(q.pietra - sc_p, q.oro - sc_o, q.idee - sc_i, "potenziare")
 	TessereEra.dopo_potenziamento(gs, target)
 	target.upgrades.append(upg_id)
 	target.upgrades_storia.append(upg_id)
@@ -600,7 +783,7 @@ func upgrade(upg_id: String, target: Building) -> bool:
 			TessereEra.dopo_scheletro(gs, p.index, target)
 			gs.log_line("il lavoratore resta sotto %s come scheletro" % target.data["name"])
 	building_changed.emit(target)
-	_end_turn()
+	_dopo_azione("potenzia")
 	return true
 
 # Restaurare: stessa azione del potenziamento. Il rudere torna intatto,
@@ -608,6 +791,7 @@ func upgrade(upg_id: String, target: Building) -> bool:
 func restore(target: Building) -> bool:
 	if not gs.pending_choice.is_empty(): return false
 	if not _puo_agire(): return false
+	if gs.acquisto_extra_aperto: return false     # l'extra compra, non ristruttura
 	if target == null: return false
 	if not turno_v2() and not target.covers(gs.colonna_attivata): return false
 	var p := gs.current_player()
@@ -716,12 +900,58 @@ func _protetto() -> Building:
 	return null
 
 func pass_action(scelta := "pietra") -> void:
+	# Rinunciare all'acquisto extra (v3) chiude il turno e non e' un passa.
+	if gs.acquisto_extra_aperto and gs.phase == Enums.Phase.AZIONE:
+		_end_turn()
+		return
 	if passa_incasso():
 		passa(scelta)
 		return
 	if gs.phase == Enums.Phase.AZIONE:
 		gs.current_player().bump("az_passa")
 		_end_turn()
+
+# L'ACQUISTO EXTRA (v3, costante `acquisto_extra`, registro 156): fatta
+# l'azione del turno, si puo' ancora comprare un potenziamento o una casa
+# della riserva, pagando, senza consumare un lavoratore. E' la catena dei
+# Castelli di Borgogna, chiesta dal designer per spendere piu' di quanto quattro
+# azioni assorbono. Una volta per turno: chi compra nell'extra chiude il turno.
+func acquisto_extra() -> bool:
+	return PersonaggiV3.attivo() and bool(CardDB.constants.get("acquisto_extra", false))
+
+# IL POTENZIAMENTO INSIEME ALLA COSTRUZIONE (v3, costante
+# `potenziamento_con_costruzione`, registro 160). Il designer: "i potenziamenti
+# non sono un'azione a parte ma possono essere presi insieme agli edifici se il
+# giocatore ha risorse sufficienti". Chi costruisce puo' comprare subito un
+# potenziamento, pagandolo, senza consumare il lavoratore: e' l'acquisto extra
+# limitato ai potenziamenti, aperto da ogni costruzione.
+func potenziamento_con_costruzione() -> bool:
+	return PersonaggiV3.attivo() and bool(CardDB.constants.get("potenziamento_con_costruzione", false))
+
+func _dopo_azione(azione := "") -> void:
+	var p := gs.current_player()
+	# L'extra si apre se la costante lo da' sempre (variante di misura), se
+	# un'azione di Personaggio, edificio o tessera lo ha dato in questo turno
+	# (registro 157: "ci vuole un effetto di una carta"), o dopo una
+	# costruzione con il potenziamento insieme (registro 160).
+	var aperto_da_carta := PersonaggiV3.attivo() and p.extra_turno > 0
+	var dopo_costruzione := potenziamento_con_costruzione() and azione == "costruisci"
+	if (acquisto_extra() or aperto_da_carta or dopo_costruzione) and not gs.acquisto_extra_aperto \
+			and gs.phase == Enums.Phase.AZIONE:
+		if aperto_da_carta: p.extra_turno -= 1
+		gs.acquisto_extra_aperto = true
+		# Dopo una costruzione senza carta: solo potenziamenti, niente case.
+		gs.extra_solo_potenziamenti = dopo_costruzione and not aperto_da_carta and not acquisto_extra()
+		p.bump("extra_aperti")
+		# Solo per il rapporto (registro 168): quante aperture vengono da una
+		# carta ⊕ e quante dalla finestra dopo la costruzione.
+		p.bump("extra_aperti_carta" if aperto_da_carta else "extra_aperti_costruzione")
+		state_changed.emit()
+		return
+	if gs.acquisto_extra_aperto:
+		gs.current_player().bump("extra_usati")
+		gs.current_player().bump("extra_usati_costruzione" if gs.extra_solo_potenziamenti else "extra_usati_carta")
+	_end_turn()
 
 # L'INCASSO AL PASSAGGIO (registro 109, costante `passa_incasso`, spenta dove
 # manca): anche nel turno della v1.5 chi non fa l'azione dopo l'attivazione
@@ -779,6 +1009,16 @@ func _end_turn() -> void:
 	# I Monumenti si reclamano nell'istante in cui la condizione e' soddisfatta,
 	# quindi vanno controllati dopo ogni azione, non a fine partita.
 	Conditions.claim_monuments(gs)
+	# V3: lo sconto e il Lampo del turno non si portano al turno dopo.
+	if PersonaggiV3.attivo():
+		var p := gs.current_player()
+		p.sconto_turno = 0
+		p.sconto_se = ""
+		p.lampo_turno = 0
+		p.extra_turno = 0
+		gs.personaggio_attivo = ""
+	gs.acquisto_extra_aperto = false
+	gs.extra_solo_potenziamenti = false
 	gs.phase = Enums.Phase.PIAZZA
 	if _advance_to_next_player():
 		state_changed.emit()
@@ -859,6 +1099,13 @@ func choose(uid: int) -> bool:
 			TessereEra.applica_scelta(gs, int(gs.pending_choice["player"]),
 				int(gs.pending_choice["col"]), uid)
 			gs.pending_choice = {}
+			state_changed.emit()
+			return true
+		"edificio":
+			PersonaggiV3.usa_edificio(gs, int(gs.pending_choice["player"]), _per_uid(uid),
+				int(gs.pending_choice["col"]))
+			gs.pending_choice = {}
+			gs.phase = Enums.Phase.AZIONE
 			state_changed.emit()
 			return true
 	var o: Dictionary = _omaggi_da_piazzare.pop_front()

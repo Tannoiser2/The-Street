@@ -138,13 +138,17 @@ static func quote_rail(gs: GameState, player: int, data: Dictionary, col_from: i
 	# I colossali di forma nuova (registro 122) non vanno mai a terra: si
 	# costruiscono solo sopra, con le regole di sempre (rovine, propri attivi
 	# spianati, terrapieno sulle caselle vuote, almeno una base vera).
-	if bool(data.get("solo_su_rovine", false)):
+	# V3 (registro 166): le carte grandi con `a_terra_o_sopra` (nel file dati
+	# della v3) vanno anche a terra, con le regole di tutti; il designer, "a
+	# terra oppure sopra". Sopra restano le regole della v2.
+	var a_terra := bool(data.get("a_terra_o_sopra", false))
+	if bool(data.get("solo_su_rovine", false)) and not a_terra:
 		q.reason = "va costruito sopra: rovine o propri edifici da spianare"; return q
 	var binario := binario_per(gs, col_from, col_to, int(data.get("depth", 1)), voluto)
 	if binario == 0:
 		q.reason = "caselle occupate nel binario"; return q
 	q.binario = binario
-	if int(data["level_required"]) > 0:
+	if int(data["level_required"]) > 0 and not a_terra:
 		q.reason = "richiede livello %d: va costruito sopra" % data["level_required"]; return q
 	if not terrain_ok(gs, data, col_from, col_to, player):
 		q.reason = "terreno non adatto"; return q
@@ -210,6 +214,12 @@ static func quote_above(gs: GameState, player: int, data: Dictionary, col_from: 
 			Enums.BuildingState.INTATTO:
 				if top.owner != player:
 					q.reason = "un edificio intatto altrui blocca la colonna %d" % c; return q
+				# NON SI SPIANA LA STESSA ERA (v3, costante `spiana_solo_ere_precedenti`,
+				# registro 161): il designer, "non si possono spianare edifici della
+				# stessa era, ma solo ere precedenti". Toglie la casa messa sopra il
+				# proprio edificio appena costruito.
+				if bool(CardDB.constants.get("spiana_solo_ere_precedenti", false)) and top.era_built >= gs.era:
+					q.reason = "%s e' di quest'era: si spiana solo il passato" % top.data["name"]; return q
 				# SPIANARE CHE COSTA (registro 152, manopola `spianare_costo`):
 				# al posto dello sconto, 1 Costruzione per ogni casella demolita.
 				if CardDB.constants.has("spianare_costo"):
@@ -326,6 +336,8 @@ static func _quote_sopra_binario(gs: GameState, player: int, data: Dictionary, c
 				Enums.BuildingState.INTATTO:
 					if top.owner != player:
 						q.reason = "un edificio intatto altrui blocca la colonna %d" % c; return q
+					if bool(CardDB.constants.get("spiana_solo_ere_precedenti", false)) and top.era_built >= gs.era:
+						q.reason = "%s e' di quest'era: si spiana solo il passato" % top.data["name"]; return q
 					if CardDB.constants.has("spianare_costo"):
 						spolia -= int(CardDB.constants["spianare_costo"])
 						if not top in q.razed: q.razed.append(top)

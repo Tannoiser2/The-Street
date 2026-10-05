@@ -43,7 +43,21 @@ quello che è cambiato da allora e la nuova direzione che il designer vuole pren
   --dati <file> --rapporto 1`; ogni partita è una riga `J {json}` nello stderr con canali di PV,
   contatori (`cnt`) e lo stato finale degli edifici.
 
-## Cosa è su main (fino alla PR #69)
+## Cosa è su main con la PR #73 (4 ottobre 2026): la v3 di prova
+
+Tutto acceso dalla costante `turno_v3` del file `data/proposte/cards-v3-era1.json` (generato da
+`tools/genera_cards_v3.py`, mai a mano); la v1.5 e la v2 non cambiano. In breve (registri 153-175,
+misure 31-48): draft a passaggio (mano di 4, se ne tiene una), i Personaggi sono i lavoratori e
+hanno produzione e azione, ogni edificio ha un'azione, le risorse muoiono a fine era (ere 1-4),
+catena di costi (terreni a zero, spianare caro, non si spiana la stessa era), potenziamento insieme
+alla costruzione, acquisto extra ⊕ solo da carta e con lo sconto dentro, sconti senza condizione su
+dieci carte, le cinque carte grandi "a terra oppure sopra", il Lampo del mazzo pari al costo, e la
+regola "stile Caylus": chi attiva una colonna usa UN edificio fra quelli in piedi, suo o altrui, e
+lo brucia fino a fine giro. Il bot (`SPINTE_V3`, sette strategie con la Ritrovamenti) sceglie
+Personaggio, colonna ed edificio sulla copia della partita. Le misure: `--fino_era N`, le
+fotografie di fine era con le entrate per fonte, `tools/misura_era.py --era N`.
+
+## Cosa era su main prima (fino alla PR #69)
 
 Registri 140-147, in breve:
 - 140 menu e riepilogo ingranditi (lente); 141 posto del giocatore in due colonne;
@@ -57,21 +71,14 @@ Registri 140-147, in breve:
 
 ## Cosa è aperto
 
-- **PR #71** (bozza, ramo `claude/evento-finale`): evento finale *Il giudizio del tempo* (forza 4,
-  registro 149), gilde dell'era 5 (Condominio, Officina, Ponte in acciaio, Stazione, registro
-  150), **regole semplici dello scavo** (registro 151: spianare = terrapieno senza tessere; su una
-  rovina 1 PV per tessera sotto il nuovo edificio; nell'era 5 si girano le tessere sotto e solo
-  quelle contano a fine partita), le varianti `scavo_due`, `tessere_doppie`, `spianare_caro`,
-  `strada_corta`, `caro_e_corta` (registro 152), i contatori della produzione per era (148) e
-  la trentesima misura. Test verdi, v1.5 identica. **Non mergiata**: il designer non ha ancora
-  scelto, e con la v3 molte di queste cose vanno ripensate.
-- **PR #70** (bozza): i soli contatori della produzione, superata dalla #71: si può chiudere.
+Le PR #70 e #71 (evento finale, gilde dell'era 5, regole semplici dello scavo, varianti
+`scavo_due`, `tessere_doppie`, `spianare_caro`, `strada_corta`, contatori per era) sono state
+mergiate il 1° ottobre: sono la base da cui la v3 è partita. Con la PR #73 (4 ottobre) la v3 di
+prova è su main; quel che resta è nei "Prossimi passi" dello stato qui sotto.
 
-I numeri chiave dell'ultima misura (3 giocatori, regole semplici + evento finale + gilde):
+I numeri chiave della v2 prima della v3 (3 giocatori, regole semplici + evento finale + gilde):
 Scavo 7 PV a testa (bonus 2,6 + riscoperta 4,7), Lampo 16,5, Rendita 13,5, Continuità 17,9;
-si spianano 21 edifici propri a partita, si riscoprono solo ~5 rovine (nell'era 5 si costruiscono
-6-7 edifici in tutto). Spianare caro (1 Costruzione per casella) porta gli spianati a 9 e la
-Rendita a 20. La strada corta da sola non aiuta.
+si spianano 21 edifici propri a partita, si riscoprono solo ~5 rovine.
 
 ## La produzione oggi (la base per la v3)
 
@@ -143,3 +150,45 @@ Prima mossa proposta per la sessione nuova: scrivere con il designer la scheda d
 prova** (16 Personaggi con produzione e azione, gli edifici di quell'era con produzione e
 azione), simularla e guardare la tabella della produzione per giro, prima di toccare tutte le
 cinque ere.
+
+
+## Stato al 3 ottobre 2026 (ramo `claude/v3-era-1`, PR #73 in bozza)
+
+La v3 e' nel codice, accesa dalla costante `turno_v3` del file dati (`data/proposte/cards-v3-era1.json`,
+generato da `tools/genera_cards_v3.py` dalla v2; la v1.5 e la v2 non cambiano, `verifica_riferimento`
+identico). Le cinque ere sono scritte (registri 153-163, misure dalla trentunesima alla trentasettesima): le ere
+1 e 2 misurate e nel metro, le ere 3-5 in prima stesura da uno stampo, misurate una volta sulla partita
+intera e da ritarare. I documenti di lavoro: `docs/proposte/v3-metro.md` (il metro), `v3-era-1.md`,
+`v3-era-2.md`, `v3-ere-3-5.md`.
+
+Le regole decise dal designer lungo la strada, tutte nel file base: risorse che muoiono a fine era,
+draft a passaggio alternato, Personaggi lavoratori con produzione e azione, azioni degli edifici al
+proprietario, terreno di base che non produce, spianare caro e mai nella stessa era, costi con la
+regola "l'edificio chiede la risorsa che i suoi potenziamenti non chiedono", una casa sempre
+comprabile (Ripari, Tuguri a costo flessibile), potenziamento insieme alla costruzione e nelle
+colonne adiacenti, acquisto extra solo dall'azione ⊕ di una carta, sconti per classe e per
+potenziamento, bot che sa che le risorse muoiono e che tiene le risorse per comprare meglio.
+
+Come si misura: `--fino_era N` nell'audit, `--rapporto 1`, poi `python3 tools/misura_era.py e.err --era N`
+(dall'era 2 l'era e' la differenza fra le fotografie di fine era). 300 partite a 3 giocatori, seme 700000,
+`--giro tutte`; ogni lotto fino all'era 2 dura circa 12 minuti su questo container.
+
+Prossimi passi: il morto e' 2,0-2,2 in tutte le ere (registro 167: Lampo pari al costo, Fondaco e
+Periferia in Costruzione), il budget del metro (1-2) e' a un passo; le vittorie stanno fra 29
+(Scavo) e 38 (Obiettivi) dopo `lampo_zero` a zero nella tabella `SPINTE_V3` (registro 168); la
+Scavo e' ora la piu' debole; il ⊕ si apre 2,1 volte a partita a giocatore e si usa 0,8 (39%), la finestra dopo la costruzione
+12,2 e 2,0 (16%): da rendere piu' utile prima di metterlo su altre carte (registro 169); gli sconti
+sugli edifici (varianti `sconti_edifici`, `scelta_sconti`) non muovono nulla ne' per il padrone ne'
+con la "scelta" (quarantatreesima e quarantacinquesima): sette carte condizionate sono poche, servono
+su piu' carte e senza condizione, o dentro il ⊕; la "scelta" stile Caylus (registri 170-171) e' il file base dalla quarantaquattresima misura
+(`--variante proprietario` rifa' la regola di prima), con gli sconti senza condizione su dieci carte
+e il ⊕ con lo sconto (quarantaseiesima, `--variante senza_sconti` li toglie); la tabella `SPINTE_V3`
+ritarata (quarantasettesima: Rendita 1,3, Scavo 0,8/0,5; quarantottesima: la Ritrovamenti,
+settima strategia del canone v3, al 33%; `obiettivi_peso` 0,8), vittorie fra 27 (Scavo) e 40
+(Obiettivi) nel torneo a sette;
+le carte ancora rare
+(Fortezza, Grattacielo, Stazione per terreno e forma; Conceria, Arsenale, Ponte in acciaio); il ⊕
+che nessuno vuole al draft; l'interfaccia a schermo per la v3 (il file di prova non e' fra quelli
+che la schermata di gioco offre) e la strategia Ritrovamenti nei bot. Dal registro 166 le azioni
+degli edifici che danno risorse scattano solo quando attiva il proprietario ("A ogni tua
+attivazione"), e le cinque carte grandi vanno "a terra oppure sopra" (`a_terra_o_sopra`).

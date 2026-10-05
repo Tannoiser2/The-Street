@@ -55,9 +55,18 @@ const STRATEGIE_V2: Array[String] = ["rendita", "lampo", "scavo", "continuita", 
 	"obiettivi"]
 
 static func e_v2() -> bool:
-	return str(CardDB.ruleset).begins_with("v2")
+	return (str(CardDB.ruleset).begins_with("v2") or str(CardDB.ruleset).begins_with("v3"))
+
+# IL CANONE DELLA V3 (registro 173): le sei della v2 piu' la Ritrovamenti, la
+# strategia "scheletri e arte" chiesta dal designer fin dall'inizio della v3:
+# Personaggi con lo Scavo alto in ogni era (gli scheletri), token Arte, edifici
+# larghi che lasciano tessere, e nell'era 5 costruire sopra le proprie rovine
+# per riportarle alla luce (le tessere valgono per intero, con scheletri e arte).
+const STRATEGIE_V3: Array[String] = ["rendita", "lampo", "scavo", "continuita", "bilanciata",
+	"obiettivi", "ritrovamenti"]
 
 static func canone() -> Array[String]:
+	if PersonaggiV3.attivo(): return STRATEGIE_V3
 	return STRATEGIE_V2 if e_v2() else STRATEGIE
 
 static func tutte() -> Array[String]:
@@ -78,13 +87,18 @@ const VALORE_MEDIO := 0.8
 static func valore_risorse(gs: GameState, p: PlayerState) -> Vector2:
 	var chiede_p := 0.0
 	var chiede_o := 0.0
+	# V3 (registro 159): le Idee sono una risorsa chiesta dal mercato come il
+	# Denaro, e si contano con lui (il valutatore ha due componenti, e le Idee
+	# si pagano al valore del Denaro). Fuori dalla v3 il conto non cambia.
+	var v3 := PersonaggiV3.attivo()
+	var stock_o := p.oro + (p.idee if v3 else 0)
 	for id in gs.in_vendita():
 		var c: Dictionary = CardDB.buildings[id]["cost"]
 		chiede_p += float(c["pietra"])
-		chiede_o += float(c["oro"])
+		chiede_o += float(c["oro"]) + (float(c.get("idee", 0)) if v3 else 0.0)
 	if chiede_p + chiede_o <= 0.0: return Vector2(VALORE_MEDIO, VALORE_MEDIO)
 	var vp := chiede_p / float(p.pietra + 1)
-	var vo := chiede_o / float(p.oro + 1)
+	var vo := chiede_o / float(stock_o + 1)
 	if vp + vo <= 0.0: return Vector2(VALORE_MEDIO, VALORE_MEDIO)
 	# Si normalizza sulla media, cosi' a cambiare e' il RAPPORTO fra le due e
 	# non la scala: se no un mercato caro farebbe sembrare tutto impagabile.
@@ -129,10 +143,13 @@ static func play_turn(ctl: GameController, strategia := "bilanciata") -> void:
 	var colonne := classifica_colonne(gs, p, strategia)
 	if racconta: taccuino["colonne"] = colonne
 	var col := _colonna(gs, p, strategia, colonne)
-	if col < 0 or not ctl.place_worker(col, _da_proteggere(gs, p, col)):
+	if col < 0 or not ctl.place_worker(col, _da_proteggere(gs, p, col), _personaggio_di(colonne, col)):
 		ctl.pass_action()
 		return
 	if racconta: taccuino["col"] = col
+	# "scelta" (registro 170): l'edificio da usare, con lo stesso conto fatto in classifica.
+	if str(gs.pending_choice.get("kind", "")) == "edificio":
+		ctl.choose(_scelta_edificio(gs, strategia))
 
 	# Il Mercante di ossidiana: si converte solo se manca l'oro per la mossa
 	# che si vuole fare, non per abitudine.
@@ -144,11 +161,33 @@ static func play_turn(ctl: GameController, strategia := "bilanciata") -> void:
 	if racconta:
 		taccuino["mosse"] = lista
 		taccuino["scelta"] = scelta
+	# V3 (registro 161): "le risorse possono essere tenute per poter comprare
+	# meglio con il lavoratore successivo". Se una carta che oggi non si puo'
+	# pagare, ma che il prossimo incasso rende pagabile, vale piu' della
+	# mossa di adesso, si tiene e si passa.
+	var attesa := _valore_attesa(gs, p, col, strategia)
+	if racconta: taccuino["attesa"] = attesa
+	if not scelta.is_empty() and attesa > float(scelta["valore"]) + MARGINE_ATTESA:
+		scelta = {}
 	if scelta.is_empty():
 		_passa(ctl, gs, p)
 		return
 	if not _esegui(ctl, scelta["mossa"]):
 		_passa(ctl, gs, p)
+		return
+	# V3, l'acquisto extra: dopo la mossa si puo' ancora comprare un
+	# potenziamento o una casa. Stessa testa: la voce che vale di piu', se vale
+	# piu' di zero, altrimenti si chiude il turno.
+	if gs.acquisto_extra_aperto and gs.current_index == p.index and gs.pending_choice.is_empty():
+		var extra: Array[Dictionary] = []
+		for v in _opzioni(gs, p.index, col):
+			if v.tipo == "potenzia" or (not gs.extra_solo_potenziamenti and v.tipo == "costruisci" \
+					and str(v.parametri.get("card_id", "")) in gs.riserva):
+				extra.append({"mossa": v, "valore": _valore(gs, p, v, strategia, col)})
+		var ex := migliore(extra)
+		if racconta: taccuino["extra"] = ex
+		if ex.is_empty() or not _esegui(ctl, ex["mossa"]):
+			ctl.pass_action()
 
 # Passare nel turno v1: con l'incasso al passaggio (`passa_incasso`) si
 # sceglie la risorsa che vale di piu', come nel turno a un'azione; senza, si
@@ -227,29 +266,114 @@ static func classifica_colonne(gs: GameState, p: PlayerState,
 		var prot := _valore_protezione(gs, p, c)
 		var da_salvare := _da_proteggere(gs, p, c)
 		var migliore := 0.0
+		var meglio_pers := ""
 		if versione_in_uso <= 1:
 			# Versione 1: le mosse sullo stato di PRIMA, senza attivare.
 			for v in _opzioni(gs, p.index, c):
 				migliore = maxf(migliore, _valore(gs, p, v, strategia, c))
 		else:
-			var copia := gs.duplica()
-			var ctl := GameController.new()
-			ctl.gs = copia
-			var protetto: Building = _per_uid(copia, da_salvare.uid) if da_salvare != null else null
-			if ctl.place_worker(c, protetto):
+			# V3: il lavoratore e' un Personaggio, e quale si piazza cambia
+			# cosa si incassa e cosa si puo' fare dopo: si prova ciascuno di
+			# quelli liberi e si tiene il migliore, col suo guadagno.
+			var candidati: Array[String] = [""]
+			if PersonaggiV3.attivo():
+				candidati = []
+				for cid in p.specialized_characters:
+					if not cid in p.personaggi_piazzati: candidati.append(cid)
+			var meglio_tot := -INF
+			for pid in candidati:
+				var copia := gs.duplica()
+				var ctl := GameController.new()
+				ctl.gs = copia
+				var protetto: Building = _per_uid(copia, da_salvare.uid) if da_salvare != null else null
+				if not ctl.place_worker(c, protetto, pid): continue
+				# "scelta" (registro 170): sulla copia si sceglie l'edificio come si fara' davvero.
+				if str(copia.pending_choice.get("kind", "")) == "edificio":
+					ctl.choose(_scelta_edificio(copia, strategia))
 				var pc: PlayerState = copia.players[p.index]
+				var mossa := 0.0
 				for v in _opzioni(copia, p.index, c):
-					migliore = maxf(migliore, _valore(copia, pc, v, strategia, c))
+					mossa = maxf(mossa, _valore(copia, pc, v, strategia, c))
+				var tot := mossa + (_guadagno_v3(gs, p, copia, pc, c, strategia) if pid != "" else 0.0)
+				if tot > meglio_tot:
+					meglio_tot = tot
+					meglio_pers = pid
+					migliore = tot
 		out.append({"col": c, "valore": prod + prot + migliore,
 			"produzione": prod, "protezione": prot, "mossa": migliore,
-			"salva": da_salvare})
+			"salva": da_salvare, "pers": meglio_pers})
 	return out
+
+# Quanto vale ASPETTARE (v3): la migliore carta del mazzo che non si puo'
+# pagare adesso ma si potrebbe pagare al prossimo lavoratore, con l'incasso
+# di un'attivazione (circa 1 Costruzione, 1 Denaro o Idea), valutata come le
+# altre mosse e scontata, perche' il mercato puo' cambiare e la carta sparire.
+# Zero se non restano lavoratori o fuori dalla v3.
+const SCONTO_ATTESA := 0.4
+# Si aspetta solo se conviene chiaramente: con lo sconto a 0,6 e senza margine il
+# bot passava un turno su quattro, con 0,5 e margine 0,5 uno su sei.
+const MARGINE_ATTESA := 1.0
+const INCASSO_ATTESO := Vector3i(1, 1, 1)
+
+static func _valore_attesa(gs: GameState, p: PlayerState, col: int, strategia: String) -> float:
+	if not PersonaggiV3.risorse_muoiono(): return 0.0
+	if p.workers - p.workers_used <= 0: return 0.0
+	var best := 0.0
+	for card_id in gs.market:
+		var c: Dictionary = CardDB.buildings[card_id]["cost"]
+		if p.can_pay(int(c["pietra"]), int(c["oro"]), int(c.get("idee", 0))): continue
+		if int(c["pietra"]) > p.pietra + INCASSO_ATTESO.x or int(c["oro"]) > p.oro + INCASSO_ATTESO.y \
+				or int(c.get("idee", 0)) > p.idee + INCASSO_ATTESO.z: continue
+		for v in AvailableActions.piazzamenti_ovunque(gs, p.index, card_id):
+			best = maxf(best, _valore(gs, p, v, strategia, int(v.parametri["col_from"])) * SCONTO_ATTESA)
+			break          # un piazzamento basta: si decide se aspettare, non dove
+	return best
+
+# Il Personaggio scelto per la colonna (v3): sta nella voce della classifica.
+static func _personaggio_di(colonne: Array[Dictionary], col: int) -> String:
+	for e in colonne:
+		if int(e["col"]) == col: return str(e.get("pers", ""))
+	return ""
+
+# Quanto ha reso piazzare QUEL Personaggio su quella colonna (v3): si guarda
+# la copia dopo l'attivazione e si conta cio' che e' cambiato per il
+# giocatore: risorse (al valore di mercato), punti, resistenza data ai propri
+# edifici, Scavo aggiunto, lo sconto e il Lampo lasciati per l'azione del turno.
+static func _guadagno_v3(gs: GameState, p: PlayerState, copia: GameState, pc: PlayerState,
+		col: int, strategia: String) -> float:
+	var r := valore_risorse(gs, p)
+	var q := float(pc.pietra - p.pietra) * r.x + float(pc.oro - p.oro) * r.y + float(pc.idee - p.idee) * r.y
+	# Le risorse che non si potranno spendere prima della fine dell'era non
+	# valgono: si guarda la copia, dove il piazzamento e' gia' fatto.
+	q *= _fattore_morte(copia, pc)
+	q += float(pc.vp - p.vp) * 0.9
+	# L'acquisto extra guadagnato vale qualcosa solo se resta con che comprare.
+	q += 0.4 * float(pc.extra_turno - p.extra_turno)
+	var prima := {}
+	for b in gs.grid.buildings: prima[b.uid] = [b.protection, b.bonus_scavo]
+	for b in copia.grid.buildings:
+		if b.owner != p.index or not prima.has(b.uid): continue
+		var dp: int = b.protection - int(prima[b.uid][0])
+		var ds: int = b.bonus_scavo - int(prima[b.uid][1])
+		if dp > 0:
+			# vale se serve: l'edificio che senza non passerebbe l'evento
+			var forza := gs.era + 1
+			var res_prima: int = b.effective_resistance() - dp
+			q += (1.0 + float(b.rendita_value()) if res_prima < forza and res_prima + dp >= forza else 0.2) * float(dp)
+			if strategia == "rendita": q += 0.3 * float(dp)
+		if ds > 0:
+			q += (0.8 if strategia == "scavo" else 0.3) * float(ds)
+	q += 0.8 * float(pc.sconto_turno) + 1.0 * float(pc.lampo_turno)
+	return q
 
 static func _produzione_colonna(gs: GameState, p: PlayerState, col: int) -> float:
 	var t: int = gs.grid.terrains[col]
 	var q := 0.6 if t == Enums.Terrain.PIANURA or t == Enums.Terrain.COLLINA else 0.5
 	# "attivando arricchite anche i proprietari che ci sono": una colonna dove
 	# ho gia' qualcosa di vivo rende di piu' a me che agli altri.
+	# Con la "scelta" (registro 170) gli edifici altrui si usano come i propri:
+	# il guadagno vero lo misura la simulazione, qui niente pregiudizio.
+	if PersonaggiV3.scelta_attiva(): return q
 	for b in gs.grid.alive_in_column(col):
 		if b.owner == p.index: q += 0.8
 		else: q -= 0.2
@@ -422,6 +546,9 @@ static func _valore(gs: GameState, p: PlayerState, v, strategia: String, col: in
 	var r := valore_risorse(gs, p)
 	# Le Idee (v2) si contano come l'oro: una risorsa che non si scava.
 	var speso := float(v.pietra) * r.x + float(v.oro) * r.y + float(v.idee) * r.y
+	# V3: le risorse muoiono a fine era. Quel che non si potra' spendere nei
+	# piazzamenti rimasti non costa niente spenderlo adesso.
+	speso *= _fattore_morte(gs, p)
 	if speso != 0.0: dett["costo"] = -speso
 	match v.tipo:
 		"passa":
@@ -440,6 +567,25 @@ static func _valore(gs: GameState, p: PlayerState, v, strategia: String, col: in
 		"recluta": return _valore_reclutamento(gs, p, v, strategia, r, dett) - speso
 		"dinastia": return _valore_dinastia(gs, dett) - speso
 	return 0.0
+
+# LE RISORSE MUOIONO (v3, costante `risorse_muoiono`, registro 157). Un
+# giocatore vero, all'ultimo lavoratore dell'era, spende tutto quel che ha:
+# tenere non vale niente. Qui si stima quanto si potra' ancora spendere nei
+# piazzamenti rimasti (circa 2,5 risorse l'uno, un po' di piu' se le carte
+# danno acquisti extra) e si confronta con quel che si ha in mano: la quota di
+# risorse che non si potra' spendere vale zero, sia come costo di una mossa
+# sia come guadagno di un'attivazione. Vale 1 (nessuno sconto) fuori dalla v3.
+# Lo stato guardato e' quello DOPO il piazzamento di questo turno, quindi i
+# lavoratori rimasti sono quelli che restano dopo questo.
+const SPESA_PER_PIAZZAMENTO := 2.5
+
+static func _fattore_morte(gs: GameState, p: PlayerState) -> float:
+	if not PersonaggiV3.risorse_muoiono(): return 1.0
+	var rimasti := maxi(0, p.workers - p.workers_used)
+	var capacita := float(rimasti) * SPESA_PER_PIAZZAMENTO + (1.5 if p.extra_turno > 0 or gs.acquisto_extra_aperto else 0.0)
+	var stock := float(p.total_resources())
+	if stock <= 0.0: return 1.0
+	return clampf(capacita / stock, 0.0, 1.0)
 
 static func _ere_rimaste(gs: GameState) -> int:
 	return 5 - gs.era
@@ -518,8 +664,35 @@ const SPINTE_V2_PER_GIOCATORI := {2: {"lampo": 2.0, "obiettivi_peso": 0.6, "rend
 static var giocatori := 0
 static var spinte_override := {}
 
+# LA TABELLA V3 (registro 165). Sulla partita intera della v3 la Lampo vinceva
+# il 23% con 66 PV contro 71-77 delle altre: il Lampo e' il canale che tutti
+# prendono (16 PV a testa) e inseguirlo di piu' non rende. Con la spinta a 0,8
+# e i potenziamenti a 1,5 (misurati con `--spinta` sugli stessi 300 semi) la
+# Lampo fa 69 PV e vince il 30%, come con 1,0 e come la base: le tre tarature
+# stanno nell'errore sulle vittorie, questa da' i punti migliori.
+# Registro 168: la penalita' sulle carte senza Lampo (`lampo_zero` -1) le
+# faceva scartare le carte a Rendita, le piu' forti (5,6 PV di Rendita contro
+# 10-16 delle altre). A zero la Lampo passa dal 25 al 31% con 71 PV e resta
+# una Lampo (22 PV dal canale); abbassare `lampo` a 0,4 la fa giocare come la
+# Bilanciata, alzarlo a 1,2 non rende.
+# Registro 172, con la "scelta" stile Caylus nel file base: la Rendita era al
+# 27% e la Scavo al 28. `rendita_per_era` a 1,3 porta la Rendita al 33-37;
+# `scavo_premio` 0,8 e `scavo_terra_scavo` 0,5 non alzano la Scavo (29) ma
+# stringono la forbice di tutte a 29-37, la piu' stretta misurata (a 1,2 e
+# -0,2 di `scavo_terra` la Scavo scende a 27).
+const SPINTE_V3 := {"rendita_per_era": 1.3, "rendita_zero": -1.5, "lampo": 0.8, "lampo_zero": 0.0,
+	"scavo_premio": 0.8, "scavo_terra": -0.5, "scavo_terra_scavo": 0.5, "protezione_attesa": 2.0,
+	# `obiettivi_peso` 0,8: nel torneo a sette strategie la Obiettivi stava al 42-44 (quarantottesima).
+	"lampo_potenzia": 1.5, "lampo_sopra": 0.0, "obiettivi_peso": 0.8, "continuita_peso": 1.0,
+	# la Ritrovamenti (registro 173): lo scheletro del Personaggio al draft, le caselle che
+	# lasceranno tessere, la riscoperta delle proprie rovine nell'era 5 (per tessera), l'Arte.
+	# Con le caselle a 0,6 vinceva il 43% giocando da Rendita (le carte larghe sono quelle a
+	# Rendita 2); a 0,2, con arte 0,4 e scheletro 0,3, sta al 33 (quarantottesima misura).
+	"ritro_scheletro": 0.3, "ritro_caselle": 0.2, "ritro_riscoperta": 1.2, "ritro_arte": 0.4}
+
 static func spinte() -> Dictionary:
 	var base := SPINTE_V2 if e_v2() else SPINTE_V1
+	if PersonaggiV3.attivo(): base = SPINTE_V3
 	var tavolo: Dictionary = SPINTE_V2_PER_GIOCATORI.get(giocatori, {}) if e_v2() else {}
 	if spinte_override.is_empty() and tavolo.is_empty(): return base
 	var out := base.duplicate()
@@ -645,6 +818,20 @@ static func _valore_costruzione(gs: GameState, p: PlayerState, v, strategia: Str
 		"verticale":
 			if sopra: q += 3.0 + 1.2 * float(par.get("level", 1))
 			else: q -= 1.5
+		"ritrovamenti":
+			# Ogni casella di un edificio lascera' una tessera quando cadra':
+			# le carte larghe valgono di piu'. Nell'era 5 costruire sopra le
+			# proprie rovine mai scavate le riporta alla luce: le tessere
+			# passano da meta' a intero, con scheletri e arte.
+			q += float(int(d["width"]) * int(d.get("depth", 1))) * float(sp["ritro_caselle"])
+			if sopra and gs.era >= int(CardDB.constants["eras"]) and TessereScavo.attive():
+				var q3 := BuildRules.quote_above(gs, p.index, d, col_from)
+				var tessere := 0
+				for b in q3.bases:
+					if b.owner == p.index and not b.scavata: tessere += TessereScavo.quante(b)
+				if tessere > 0:
+					dett["rovine mie riportate alla luce (tessere)"] = float(tessere) * float(sp["ritro_riscoperta"])
+					q += float(tessere) * float(sp["ritro_riscoperta"])
 		"continuita":
 			var catena := _premio_collezione(mie, d) if collezione else _premio_catena(mie, d)
 			q += catena * float(sp["continuita_peso"])
@@ -725,6 +912,13 @@ static func _valore_potenziamento(gs: GameState, p: PlayerState, v, dett := {}, 
 	# conta sempre sono punti sicuri) le da' il canale che le mancava.
 	var spinta_lampo := float(spinte()["lampo_potenzia"]) if strategia == "lampo" else 0.0
 	if spinta_lampo != 0.0: dett["spinta della strategia lampo"] = spinta_lampo
+	# La Ritrovamenti (registro 173): un token Arte vale il suo Scavo quando
+	# un'icona arte lo ritrova.
+	if strategia == "ritrovamenti":
+		var upg: Dictionary = CardDB.upgrades.get(str(par.get("upg_id", "")), {})
+		if str(upg.get("family", "")) == "arte":
+			spinta_lampo += float(upg.get("scavo", 0)) * float(spinte()["ritro_arte"])
+			dett["arte da ritrovare"] = float(upg.get("scavo", 0)) * float(spinte()["ritro_arte"])
 	# Una carta infilata sotto dura quanto l'edificio che la ospita.
 	var vive := b.effective_resistance() >= gs.era + 1
 	dett["l'ospite regge l'evento" if vive else "l'ospite rischia di crollare"] = \
@@ -762,9 +956,50 @@ static func _valore_restauro(gs: GameState, p: PlayerState, v, dett := {}) -> fl
 # numero: il Capotribu' che da' 2 pietra subito non vale come lo Sciamano che
 # da' +1 resistenza agli edifici Religione, e lo Sciamano vale qualcosa solo
 # se di edifici Religione ne ho.
+# Un Personaggio della v3 (ha `produzione` e `azione`): vale la sua produzione
+# al valore di mercato piu' l'azione, pesata dalla strategia. Al draft non si
+# sa ancora su quale colonna andra', quindi le azioni con una condizione
+# valgono meno di quelle secche.
+static func _valore_personaggio_v3(gs: GameState, p: PlayerState, d: Dictionary, strategia: String,
+		r: Vector2, dett := {}) -> float:
+	var pr: Dictionary = d.get("produzione", {})
+	var q := float(pr.get("pietra", 0)) * r.x + float(pr.get("oro", 0)) * r.y + float(pr.get("idee", 0)) * r.y
+	dett["produce"] = q
+	var az: Dictionary = d.get("azione", {})
+	var a := 0.0
+	match str(az.get("tipo", "nessuna")):
+		"risorsa": a = 0.8
+		"cambio": a = 0.5 + (0.3 if strategia == "bilanciata" else 0.0)
+		"pv":
+			a = 0.9 if not az.has("se") else 0.5
+			if strategia == "lampo": a += 0.5
+		"resistenza": a = 0.5 * float(az.get("n", 1)) + (0.6 if strategia == "rendita" else 0.0)
+		"sconto": a = 0.8 if not az.has("se") else 0.5
+		"scavo": a = 0.3 * float(az.get("n", 1)) + (0.8 if strategia == "scavo" or strategia == "ritrovamenti" else 0.0)
+		"lampo": a = 1.0 + (0.5 if strategia == "lampo" else 0.0)
+		"altri": a = 0.6
+		"acquisto": a = 0.4     # si usa poco: quando si apre, spesso non resta niente da spendere (registro 159)
+		"adiacente": a = 0.6
+		"tessera": a = 0.4
+	# La collezione (Continuita'): un Personaggio della classe che si sta
+	# raccogliendo vale un po' di piu'.
+	if strategia == "continuita":
+		var mia := {}
+		for b in gs.grid.buildings:
+			if b.owner != p.index: continue
+			for cl in b.data["classes"]: mia[cl] = int(mia.get(cl, 0)) + 1
+		if int(mia.get(str(d.get("class", "")), 0)) >= 2: a += 0.4
+	# La Ritrovamenti (registro 173): lo scheletro vale lo Scavo stampato sul
+	# Personaggio, uno per era, quando un'icona lo ritrova.
+	if strategia == "ritrovamenti" and d.has("scavo"):
+		a += float(d["scavo"]) * float(spinte()["ritro_scheletro"])
+	dett["la sua azione"] = a
+	return q + a + 0.5
+
 static func _valore_reclutamento(gs: GameState, p: PlayerState, v, strategia: String,
 		r: Vector2, dett := {}) -> float:
 	var d: Dictionary = CardDB.characters[str(v.parametri["char_id"])]
+	if d.has("produzione"): return _valore_personaggio_v3(gs, p, d, strategia, r, dett)
 	var q := 0.5                                   # il lavoratore specializzato in se'
 	dett["un lavoratore in piu'"] = 0.5
 	var abilita := 0.0
@@ -860,10 +1095,35 @@ static func _scelta_draft(gs: GameState, strategia: String) -> int:
 			meglio = int(i)
 	return meglio
 
+# V3 "scelta" (registro 170): quale edificio usare. Si prova ciascuno su una
+# copia e si tiene quello che rende di piu', con lo stesso conto del
+# piazzamento (`_guadagno_v3`) piu' la mossa migliore che apre.
+static func _scelta_edificio(gs: GameState, strategia: String) -> int:
+	var opzioni: Array = gs.pending_choice["options"]
+	var p: PlayerState = gs.players[int(gs.pending_choice["player"])]
+	var col := int(gs.pending_choice["col"])
+	var meglio := int(opzioni[0])
+	var punteggio := -INF
+	for uid in opzioni:
+		var copia := gs.duplica()
+		var ctl := GameController.new()
+		ctl.gs = copia
+		if not ctl.choose(int(uid)): continue
+		var pc: PlayerState = copia.players[p.index]
+		var mossa := 0.0
+		for v in _opzioni(copia, p.index, col):
+			mossa = maxf(mossa, _valore(copia, pc, v, strategia, col))
+		var q := mossa + _guadagno_v3(gs, p, copia, pc, col, strategia)
+		if q > punteggio:
+			punteggio = q
+			meglio = int(uid)
+	return meglio
+
 static func _scelta(gs: GameState, strategia := "bilanciata") -> int:
 	var opzioni: Array = gs.pending_choice.get("options", [])
 	if opzioni.is_empty(): return 0
 	if str(gs.pending_choice.get("kind", "")) == "draft": return _scelta_draft(gs, strategia)
+	if str(gs.pending_choice.get("kind", "")) == "edificio": return _scelta_edificio(gs, strategia)
 	var meglio := int(opzioni[0])
 	var punteggio := -INF
 	for uid in opzioni:
