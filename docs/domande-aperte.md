@@ -2834,3 +2834,19 @@ dato è stato importato da lì. Ma due confronti fra ciò che è stampato e
     della v3 col bot corretto ha la stessa economia (entro un decimo) e
     vittorie Bil 36, Cont 38, Lampo 27, Obi 42, Rend 29, Ritro 37, Scavo 26:
     spostamenti entro l'errore, le conclusioni delle misure 44-48 restano.
+178. **Il Grattacielo a tre binari, il seme nel riepilogo, il terrapieno sul
+    Colosseo.** Il designer, giocando la v3 a schermo: un Monumento ai caduti
+    sopra un Colosseo intatto, e prima "un terrapieno da solo"; il Grattacielo
+    "sono tre slot in verticale, qui sono solo due"; "metti il seme della
+    partita come promemoria nel riepilogo". Fatto: il Grattacielo torna a 3
+    binari com'e' stampato (il registro 174 lo aveva portato a 2 per farlo
+    costruire di piu', 0,17 → 0,26 a partita; Stazione e Fortezza restano
+    ritoccate); il riepilogo finale porta in alto a destra "seme N · v3 · N
+    giocatori". Il terrapieno sul Colosseo: dal codice una carta non puo'
+    poggiare su una casella del Colosseo intatto (2x2, "sopra di lui solo
+    quando e' in rovina"), e il terrapieno e' solo il riempimento delle
+    caselle vuote di una carta larga; la spiegazione piu' probabile e' una
+    carta su un altro binario della stessa colonna, al livello 1, che la
+    vista disegna sollevata su tutta la colonna. **Aperto**: si rigioca col
+    seme quando il designer lo ha; nel riquadro manca "poggia su ... ·
+    binario N".

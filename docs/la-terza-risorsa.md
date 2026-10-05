@@ -2506,7 +2506,8 @@ Grattacielo a 2 binari, la Fortezza ⚒3 🪙1. Costruite a partita, prima → o
 Fortezza 0,08 → 0,11, Grattacielo 0,17 → 0,26, Stazione 0,03 → 0,03 (le tre
 colonne restano la sua forma, il terreno non era il collo). Vittorie uguali
 entro l'errore. **Nel file base**; `--variante grandi_vecchie` rifa' le carte
-della v2.
+della v2. (Registro 178: il Grattacielo e' tornato a tre binari, com'e'
+stampato; restano la Stazione su qualunque terreno e la Fortezza ⚒3 🪙1.)
 
 ## Quarantanovesima misura: il file base rimisurato col bot corretto
 

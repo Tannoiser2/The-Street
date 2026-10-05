@@ -800,18 +800,17 @@ def senza_sconti(v):
 # LE TRE CARTE GRANDI RARE (registro 174, quarantottesima misura): Fortezza (⚒4 su
 # collina, 2x2), Grattacielo (3 binari) e Stazione (3 colonne di pianura) si
 # costruivano 0,03-0,17 volte a partita per terreno e forma. Ora la Stazione va
-# su qualunque terreno, il Grattacielo occupa 2 binari, la Fortezza costa ⚒3 🪙1:
-# Grattacielo 0,26, Fortezza 0,11, la Stazione resta a 0,03 (sono le tre colonne).
+# su qualunque terreno e la Fortezza costa ⚒3 🪙1 (Fortezza 0,11, la Stazione
+# resta a 0,03: sono le tre colonne). Il Grattacielo era passato a 2 binari
+# (0,26 a partita): il designer lo rivuole a tre, com'e' stampato (registro 178).
 for b in v3["buildings"]:
     if b["id"] == "ed_stazione": b["terrain"] = None
-    if b["id"] == "ed_grattacielo": b["depth"] = 2
     if b["id"] == "ed_fortezza_bastionata": b["cost"] = prod(pietra=3, oro=1)
 
-#   --variante grandi_vecchie  le tre carte grandi come nella v2 (Stazione in pianura, Grattacielo 3 binari, Fortezza ⚒4)
+#   --variante grandi_vecchie  le due carte grandi ritoccate come nella v2 (Stazione in pianura, Fortezza ⚒4)
 def grandi_vecchie(v):
     for b in v["buildings"]:
         if b["id"] == "ed_stazione": b["terrain"] = "pianura"
-        if b["id"] == "ed_grattacielo": b["depth"] = 3
         if b["id"] == "ed_fortezza_bastionata": b["cost"] = prod(pietra=4)
 VARIANTI = {"grandi_vecchie": grandi_vecchie, "proprietario": proprietario, "compenso_pv": compenso_pv, "senza_sconti": senza_sconti,
             "lampo_vecchio": lampo_vecchio, "extra_sempre": extra_sempre, "senza_extra": senza_extra, "costi_vecchi": costi_vecchi,
