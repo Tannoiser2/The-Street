@@ -2493,7 +2493,13 @@ alla Rendita i suoi punti (25 → 32): e' la tabella `SPINTE_V3`. I suoi canali,
 Scavo 12,4 e Rendita 14,0, dicono che e' ancora per meta' una Rendita: lo
 scheletro e l'arte valgono 2,4 e 1,6 PV a partita, troppo poco per fare una
 strategia da soli. La Obiettivi al 42-44 nel torneo a sette strategie (31-38 a
-sei) e' da riguardare: `obiettivi_peso` 0,8 in coda.
+sei): con `obiettivi_peso` 0,8 scende a 40 (Bil 31, Cont 38, Lampo 30, Rend 33,
+Ritro 34, Scavo 27), forbice 27-40. E' la tabella `SPINTE_V3` con cui la v3
+va su main: sette strategie fra 27 e 40, con l'errore a 4.
+
+Il file base alla chiusura della PR #73, partita intera a tre: 76,1 PV a testa,
+Lampo 18,7, Continuita' 14,9, Rendita 12,6, Scavo 11,3, PV prodotti 9,3,
+finali 4,7.
 
 **Le tre carte grandi** (registro 174): la Stazione su qualunque terreno, il
 Grattacielo a 2 binari, la Fortezza ⚒3 🪙1. Costruite a partita, prima → ora:

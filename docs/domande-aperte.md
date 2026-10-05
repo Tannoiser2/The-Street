@@ -2787,7 +2787,8 @@ dato è stato importato da lì. Ma due confronti fra ciò che è stampato e
     scheletro 0,3: al 33% con 76,8 PV, la Rendita risale da 25 a 32. **E' la
     tabella.** Scheletri e arte valgono 2,4 e 1,6 PV a partita: da soli non
     fanno una strategia, il margine della Ritrovamenti resta la riscoperta.
-    La Obiettivi al 42-44 nel torneo a sette: `obiettivi_peso` 0,8 in misura.
+    La Obiettivi al 42-44 nel torneo a sette: con `obiettivi_peso` 0,8 scende a
+    40, forbice 27-40. Tabella chiusa, la v3 va su main (PR #73).
 174. **Le tre carte grandi rare.** Fortezza (⚒4, collina 2x2), Grattacielo
     (3 binari) e Stazione (3 colonne di pianura) si costruivano 0,03-0,14
     volte a partita per terreno e forma. Stazione su qualunque terreno,

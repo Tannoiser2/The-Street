@@ -682,7 +682,8 @@ static var spinte_override := {}
 # -0,2 di `scavo_terra` la Scavo scende a 27).
 const SPINTE_V3 := {"rendita_per_era": 1.3, "rendita_zero": -1.5, "lampo": 0.8, "lampo_zero": 0.0,
 	"scavo_premio": 0.8, "scavo_terra": -0.5, "scavo_terra_scavo": 0.5, "protezione_attesa": 2.0,
-	"lampo_potenzia": 1.5, "lampo_sopra": 0.0, "obiettivi_peso": 1.0, "continuita_peso": 1.0,
+	# `obiettivi_peso` 0,8: nel torneo a sette strategie la Obiettivi stava al 42-44 (quarantottesima).
+	"lampo_potenzia": 1.5, "lampo_sopra": 0.0, "obiettivi_peso": 0.8, "continuita_peso": 1.0,
 	# la Ritrovamenti (registro 173): lo scheletro del Personaggio al draft, le caselle che
 	# lasceranno tessere, la riscoperta delle proprie rovine nell'era 5 (per tessera), l'Arte.
 	# Con le caselle a 0,6 vinceva il 43% giocando da Rendita (le carte larghe sono quelle a
