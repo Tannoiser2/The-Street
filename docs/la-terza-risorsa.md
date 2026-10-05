@@ -2642,10 +2642,9 @@ spostata dalla Scavo alla Lampo.
 La regola fa quel che il designer chiedeva: le rovine accanto valgono
 qualcosa, lo spianamento di una carta larga per una stretta non e' piu'
 gratis per la mappa e non e' piu' un buco a vista. Il prezzo e' 3,5 PV a testa
-in piu' nel canale Scavo. Se il designer vuole tenerlo sui 12 di prima, le
-leve sono il valore delle tessere (mazzetto) o il bonus scavo per tessera, non
-la regola; se invece il Lampo a 23 e' il problema, e' il bot (`SPINTE_V3`,
-`lampo`) da riguardare, perche' il canale Lampo non e' cambiato.
+in piu' nel canale Scavo. Il designer: "tieni lo scavo a 14,7". Resta il
+Lampo a 23: e' il bot (`SPINTE_V3`, `lampo`) da riguardare, perche' il canale
+Lampo non e' cambiato.
 
 ## Come rifare il conto
 

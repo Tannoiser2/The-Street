@@ -2889,5 +2889,5 @@ dato è stato importato da lì. Ma due confronti fra ciò che è stampato e
     giocatore; il canale Scavo sale da 11,2 a 14,7 (+3,5 a testa, tutto
     il guadagno), gli altri canali fermi; vittorie Bil 34, Cont 42, Lampo
     23, Obi 37, Rend 28, Ritro 39, Scavo 31: la Scavo non e' piu' ultima,
-    la Lampo lo diventa. Da decidere se tenere lo Scavo a 14,7 o ritarare
-    le tessere.
+    la Lampo lo diventa. Il designer: "tieni lo scavo a 14,7". Resta la
+    Lampo a 23, questione di bot (`SPINTE_V3`), da riguardare.
