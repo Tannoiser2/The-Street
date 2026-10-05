@@ -3284,6 +3284,9 @@ func _test_v3_a_schermo() -> void:
 	_eq("  e si e' in fase azione", gs.phase, Enums.Phase.AZIONE)
 	_ok("  il riquadro del Menhir dice che e' gia' usato",
 		" ".join(n._descrivi_sotto_edificio(suo)).contains("gia' usato"))
+	# Registro 178: il seme resta in vista anche nel riepilogo finale.
+	_ok("il promemoria del riepilogo porta il seme e il regolamento",
+		n.promemoria_seme().begins_with("seme %d" % n.inizio.seme) and n.promemoria_seme().contains("v3"))
 	n.torna_alla_scelta()
 	remove_child(n)
 	n.queue_free()

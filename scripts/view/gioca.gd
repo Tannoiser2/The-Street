@@ -1268,6 +1268,10 @@ func _disegna_riepilogo_dentro(font: Font, gs: GameState) -> void:
 	var y := r.position.y + 46.0
 	_hud.draw_string(font, Vector2(x, y), "Riepilogo finale",
 		HORIZONTAL_ALIGNMENT_LEFT, -1, 24, CHIARO)
+	# Il seme, come promemoria (registro 178): con lo stesso seme la partita si
+	# rigioca uguale, e un difetto visto al tavolo si racconta col suo numero.
+	_hud.draw_string(font, Vector2(x, y), promemoria_seme(),
+		HORIZONTAL_ALIGNMENT_RIGHT, r.size.x - 48.0, 13, SPENTO)
 	y += 36.0
 
 	# In alto i giocatori, in ordine di arrivo: posto, colore e nome, e sotto
@@ -1351,6 +1355,10 @@ func _disegna_riepilogo_dentro(font: Font, gs: GameState) -> void:
 		{"che": "menu"}, 150.0)
 	_tasto(font, "Guarda il tavolo", Vector2(t.end.x + 10.0, t.position.y),
 		false, {"che": "tavolo"}, 160.0)
+
+# "seme 1234 · v3 · 3 giocatori": la riga che il riepilogo mette in alto a destra.
+func promemoria_seme() -> String:
+	return "seme %d · %s · %d giocatori" % [inizio.seme, inizio.nome_regolamento(), inizio.giocatori]
 
 # Il nome senza la strategia, per la colonna stretta del riepilogo.
 func _nome_corto(i: int) -> String:
