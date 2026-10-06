@@ -2478,14 +2478,14 @@
       "terrain": null,
       "width": 1,
       "cost": {
-        "pietra": 3,
+        "pietra": 2,
         "oro": 0,
         "idee": 1
       },
       "flexible": true,
       "resistance": 3,
       "rendita": 0,
-      "lampo": 3,
+      "lampo": 2,
       "scavo": 0,
       "level_required": 1,
       "production": {
@@ -2759,16 +2759,17 @@
         "idee": 0
       },
       "exhaustible": 0,
-      "effect_text": "A ogni attivazione: +1 PV. Solo sopra, al livello 1 o piu'. A fine partita: +1 PV per ogni tuo Personaggio reclutato.",
+      "effect_text": "A ogni attivazione: +1 PV. Solo sopra, al livello 1 o piu'. A fine partita: +1 PV per ogni tuo Personaggio con Scavo 5 o piu'.",
       "effects": [
         {
           "hook": "on_final_scoring",
           "op": "vp_per",
           "value": 1,
-          "per": "recruited_character",
+          "per": "recruited_scavo_min",
           "target": {
             "owner": "self"
-          }
+          },
+          "min_scavo": 5
         }
       ],
       "depth": 2,

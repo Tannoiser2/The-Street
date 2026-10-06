@@ -2566,8 +2566,9 @@ liberi, livello 2, pianura) non erano il collo di bottiglia. Con
 guardare il livello, e la pianura e' il terreno piu' comune. Il freno e'
 altrove: costa 3 Costruzione e 1 Idea, con la Stazione la carta piu' cara
 dell'era 5, in un'era in cui un giocatore produce 8,7 risorse e ne spende
-6,6; e il bot valuta Lampo (il Grattacielo non ne ha) e rendita (3) piu' del
-suo finale. Fra le quattordici carte dell'era 5 sta a meta' classifica:
+6,6; e il bot non pesa il suo finale (+1 PV per livello, -1 alle cime altrui
+adiacenti): per lui vale il Lampo 3 meno il costo, e con Rendita 0 e tre
+caselle da coprire conviene solo quando seppellisce molte tessere. Fra le quattordici carte dell'era 5 sta a meta' classifica:
 
 | carta dell'era 5 | costruite in 300 partite |
 |---|---|
@@ -2646,9 +2647,136 @@ in piu' nel canale Scavo. Il designer: "tieni lo scavo a 14,7". Resta il
 Lampo a 23: e' il bot (`SPINTE_V3`, `lampo`) da riguardare, perche' il canale
 Lampo non e' cambiato.
 
+## Cinquantaduesima misura: la taratura della Lampo nel bot
+
+Dopo lo spianamento parziale (cinquantunesima) la Lampo era l'ultima, al 23%.
+Il designer: "vai con la taratura della Lampo nel bot". Tre tarature con
+`--spinta` sugli stessi 300 semi, file base della 51ª, bot senza i finali.
+
+| vittorie | 51ª (`lampo` 0,8) | `lampo` 0,5 | `lampo` 1,1 | `lampo_potenzia` 0,5 |
+|---|---|---|---|---|
+| Bil / Cont / Lampo / Obi / Rend / Ritro / Scavo | 34 / 42 / 23 / 37 / 28 / 39 / 31 | 28 / 39 / **35** / 34 / 28 / 40 / 29 | 32 / 42 / 24 / 41 / 25 / 40 / 30 | 32 / 42 / 22 / 36 / 30 / 39 / 33 |
+| PV della Lampo | 76,3 | 78,4 | 77,9 | 77,8 |
+| canali della Lampo: Lampo / Rendita / Scavo | 24,2 / 7,1 / 13,0 | 20,7 / 11,0 / 13,0 | — | — |
+| PV a testa | 78,7 | 78,6 | 79,0 | 78,9 |
+
+`lampo` 0,5 porta la Lampo dal 23 al 35% e dai 76,3 ai 78,4 PV, la media del
+tavolo. Resta una Lampo: 20,7 PV dal canale contro i 18-19 delle altre, ma
+non butta piu' le carte a Rendita (11,0 contro 7,1 di prima). Spingere di
+piu' (1,1) o frenare i potenziamenti (`lampo_potenzia` 0,5) non muove nulla.
+La forbice passa da 23-42 a 28-40. Scelta: `lampo` 0,5 nella tabella
+`SPINTE_V3` (registro 184).
+
+## Cinquantatreesima misura: il bot che pesa i finali, a carte vecchie
+
+Il registro 181: il bot non pesava gli effetti `on_final_scoring`. Stesso
+file base della 51ª, bot coi finali (`finali_peso` 0,8, `finali_peso_prima`
+0,4), tabella della 51ª.
+
+| a giocatore | 51ª (bot cieco) | bot coi finali |
+|---|---|---|
+| PV a testa | 78,7 | 84,0 |
+| canale effetti finali | 4,6 | 10,0 |
+| altri canali Lampo / Cont / Scavo / Rendita | 18,6 / 14,7 / 14,7 / 12,4 | 18,8 / 14,6 / 14,8 / 12,4 |
+| Universita' costruite in 300 partite | 46 | 185 |
+| Grattacieli | 80 | 52 |
+| vittorie Bil / Cont / Lampo / Obi / Rend / Ritro / Scavo | 34 / 42 / 23 / 37 / 28 / 39 / 31 | 40 / 26 / 19 / 37 / 39 / 42 / 29 |
+
+Il canale dei finali raddoppia e i PV salgono di 5,3 a testa: e' quasi tutta
+l'Universita', costruita in 185 partite su 300 appena il bot ne vede il
+valore ("+1 PV per ogni tuo Personaggio reclutato": nella v3 tutti ne
+reclutano 20, quindi +20 fissi a chi arriva primo, registro 182). Le
+vittorie si rimescolano intorno a chi la prende: la Rendita sale a 39, la
+Continuita' crolla a 26, la Lampo a 19. Il Grattacielo scende (80 -> 52):
+coi finali il bot preferisce l'Universita' allo stesso prezzo. La misura non
+vale come taratura, vale come prova: la carta era rotta e il bot cieco la
+nascondeva. Da qui le decisioni dei registri 182 (Universita' sui Personaggi
+con Scavo 5+) e 183 (Grattacielo a 2 Costruzione 1 Idea), misurate insieme
+nella cinquantaquattresima.
+
+## Cinquantaquattresima misura: tutto insieme, e la tabella che non entrava in gioco
+
+Lampo 0,5 in tabella (registro 184), bot coi finali (181), Universita' sui
+Personaggi con Scavo 5+ (182), Grattacielo a 2 Costruzione 1 Idea (183);
+stessi 300 semi della 51ª. Due lotti: la tabella com'e', e `--spinta
+lampo=0.8` per separare la taratura dalle carte.
+
+| a giocatore | 51ª | tutto (tabella) | tutto, `--spinta lampo=0.8` |
+|---|---|---|---|
+| PV a testa | 78,7 | 81,1 | 81,0 |
+| canale effetti finali | 4,6 | 6,9 | 6,8 |
+| Lampo / Cont / Scavo / Rendita | 18,6 / 14,7 / 14,7 / 12,4 | 18,8 / 14,6 / 15,0 / 12,4 | 18,7 / 14,5 / 14,9 / 12,5 |
+| Universita' costruite | 46 | 111 | 112 |
+| Grattacieli costruiti, di cui al livello 2+ | 80, 30 | 106, 55 | 101, 51 |
+| vittorie Bil / Cont / Lampo / Obi / Rend / Ritro / Scavo | 34 / 42 / 23 / 37 / 28 / 39 / 31 | 31 / 32 / 22 / 37 / 33 / 45 / 33 | 27 / 32 / 36 / 36 / 31 / 42 / 29 |
+| canali della Lampo: Lampo / Rendita | 24,2 / 7,1 | 24,3 / 7,1 | 22,4 / 9,7 |
+
+Le carte: l'Universita' nuova si costruisce 111 volte (46 prima, 185 col
++20) e il canale dei finali sale di 2,3 PV a testa, non piu' di 5,4; il
+Grattacielo a 2 e 1 si costruisce 106 volte, e per la prima volta piu'
+spesso in alto che a terra (55 al livello 2 o piu' contro 30), come lo
+voleva il designer. Il resto dell'economia non si muove.
+
+La sorpresa e' la Lampo: col lotto "tutto" sta al 22 e gioca ancora come a
+0,8 (24,3 PV dal canale, 7,1 di Rendita), mentre `--spinta lampo=0.8` la
+porta al 36 giocando piu' morbida (22,4 / 9,7). Due lotti identici nelle
+carte e diversi solo nel modo di dare la spinta non potevano dare questo:
+qualcosa leggeva la tabella in un altro modo. Era la tabella per numero di
+giocatori della v2 (`SPINTE_V2_PER_GIOCATORI`), che entrava anche nella v3 e
+a tre giocatori copriva quattro voci di `SPINTE_V3`: `lampo` 1,2,
+`obiettivi_peso` 1,5, `rendita_zero` 0, `scavo_premio` 0. Le tarature
+scritte in tabella dalla 47ª in poi non erano mai entrate in gioco; quelle
+misurate con `--spinta` si' (vince su tutto). Quindi il lotto "tutto" ha
+giocato la Lampo a 1,2, e tutte le misure dalla 49ª alla 53ª hanno giocato
+con quei quattro valori, non con quelli scritti (registro 185). Corretto:
+la tabella per giocatori resta alla v2. La misura con la tabella vera e' la
+cinquantacinquesima.
+
+## Cinquantacinquesima misura: la tabella `SPINTE_V3` senza coperture
+
+Dopo il registro 185 la tabella scritta e' quella che gioca. Due lotti con
+finali, Universita' e Grattacielo nuovi: la tabella com'era scritta
+(`lampo` 0,5, `obiettivi_peso` 0,8, `rendita_zero` -1,5, `scavo_premio`
+0,8) e la stessa con `--spinta lampo=0.8`. Confronto con la 54ª "spinta
+0,8", che aveva i valori coperti (`obiettivi_peso` 1,5, `rendita_zero` 0,
+`scavo_premio` 0) e lo stesso `lampo` 0,8.
+
+| vittorie | 54ª, `lampo` 0,8 coi valori coperti | tabella scritta | tabella scritta, `lampo` 0,8 |
+|---|---|---|---|
+| Bil / Cont / Lampo / Obi / Rend / Ritro / Scavo | 27 / 32 / 36 / 36 / 31 / 42 / 29 | 36 / 39 / 35 / 37 / **22** / 48 / **18** | 34 / 36 / 36 / 36 / 26 / 45 / 21 |
+| PV a testa | 81,0 | 80,5 | 80,3 |
+| PV della Rendita, canali Lampo / Rendita / Cont | 80,6 · 15,9 / 15,9 / 13,3 | 74,7 · 11,9 / 17,9 / 9,9 | 75,2 |
+| PV della Scavo | 79,1 | 77,2 | 76,9 |
+
+I valori scritti e mai giocati fanno male: `rendita_zero` -1,5 fa scartare
+alla Rendita ogni carta che non rende (Lampo 11,9 e Continuita' 9,9 contro
+15,9 e 13,3) e la porta al 22% con 74,7 PV; `scavo_premio` 0,8 porta la
+Scavo al 18. `lampo` 0,5 o 0,8 e' lo stesso (35-36): il 22-23% delle misure
+51-54 veniva dall'1,2 coperto, non dallo 0,8 scritto. `obiettivi_peso` 0,8 o
+1,5 non muove la Obiettivi (36-37).
+
+Scelta (registro 186): in tabella vanno i valori davvero misurati, quelli
+della 54ª "spinta 0,8": `lampo` 0,8, `obiettivi_peso` 1,5, `rendita_zero`
+0, `scavo_premio` 0; restano `rendita_per_era` 1,3, `scavo_terra_scavo` 0,5,
+`lampo_zero` 0 e i finali. E' la configurazione del lotto 54ª "spinta 0,8",
+che diventa la base: vittorie 27 (Bil) - 42 (Ritro), PV 81,0, canali Lampo
+18,7 / Scavo 14,9 / Cont 14,5 / Rendita 12,5 / ★ 9,1 / finali 6,8. Il
+registro 184 (Lampo 0,5) e' superato: a 0,8 la Lampo sta al 36.
+
+Quel che resta: la Ritrovamenti e' la piu' forte (42-48 in tutti i lotti
+coi finali: i suoi 8,4 PV di finali sono i piu' alti, Museo e Parco
+archeologico sono carte sue), la Bilanciata e la Scavo le piu' deboli
+(27-29). Le leve sono `ritro_*` e il peso dei finali per strategia.
+
 ## Come rifare il conto
 
 ```bash
+# cinquantacinquesima misura: la tabella senza coperture (registro 185), stesso comando della quarantanovesima;
+#   la base e' il lotto della 54ª con `--spinta lampo=0.8`, ora uguale alla tabella (registro 186)
+# cinquantaquattresima misura: tutto insieme (registri 181-184), stesso comando della quarantanovesima,
+#   e lo stesso con `--spinta lampo=0.8`; la tabella per giocatori copriva ancora SPINTE_V3 (registro 185)
+# cinquantaduesima e cinquantatreesima misura: tarature Lampo (`--spinta lampo=0.5`, `lampo=1.1`,
+#   `lampo_potenzia=0.5`) e il bot coi finali (registro 181), stesso comando della quarantanovesima
 # cinquantunesima misura: lo spianamento parziale (registro 180); stesso comando della quarantanovesima col
 #   file base rigenerato (`python3 tools/genera_cards_v3.py`); `--variante spianato_intero` rifa' la regola di prima
 # cinquantesima misura: il Grattacielo a tre binari, livello 1, qualunque terreno (registro 179);

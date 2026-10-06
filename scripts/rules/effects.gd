@@ -743,19 +743,25 @@ static func _condition_met(gs: GameState, src: Building, cond: Dictionary,
 
 static func _apply_vp_per(gs: GameState, src: Building, e: Dictionary,
 		owner: int, carta: Dictionary) -> void:
-	var hits: Array[Building] = []
-	for b in gs.grid.buildings:
-		if matches(gs, b, e.get("target", {}), src, owner): hits.append(b)
-	# `times` limita QUANTI bersagli si contano ("fino a 2 tuoi edifici").
-	# `cap` limita i PUNTI totali ("max +4"). Sono due cose diverse.
-	if e.has("times"): hits = hits.slice(0, int(e["times"]))
-
+	var hits := _bersagli_vp_per(gs, src, e, owner)
 	# A chi vanno i punti: di norma al proprietario della carta; col malus del
 	# Grattacielo vanno invece a ciascun proprietario colpito.
 	if str(e.get("to", "self")) == "target_owner":
 		for b in hits: _award(gs, b.owner, int(e.get("value", 0)), carta)
 		return
+	_award(gs, owner, _punti_vp_per(gs, e, owner, hits), carta)
 
+# I bersagli di un `vp_per`. `times` limita QUANTI bersagli si contano ("fino
+# a 2 tuoi edifici"); `cap`, sotto, limita i PUNTI totali ("max +4"). Sono due
+# cose diverse.
+static func _bersagli_vp_per(gs: GameState, src: Building, e: Dictionary, owner: int) -> Array[Building]:
+	var hits: Array[Building] = []
+	for b in gs.grid.buildings:
+		if matches(gs, b, e.get("target", {}), src, owner): hits.append(b)
+	if e.has("times"): hits = hits.slice(0, int(e["times"]))
+	return hits
+
+static func _punti_vp_per(gs: GameState, e: Dictionary, owner: int, hits: Array[Building]) -> int:
 	var pts := 0
 	if e.has("value_from"):
 		var field := str(e["value_from"])
@@ -763,9 +769,48 @@ static func _apply_vp_per(gs: GameState, src: Building, e: Dictionary,
 			pts += b.level if field == "level" else int(b.data["scavo"])
 	else:
 		var v := int(e.get("value", 0))
-		pts = v * _conta(gs, owner, hits, str(e.get("per", "building")))
+		var per := str(e.get("per", "building"))
+		# L'UNIVERSITA' DELLA V3 (registro 182): "+1 PV per ogni tuo Personaggio
+		# con Scavo `min_scavo` o piu'". Col draft tutti reclutano 20 Personaggi
+		# e "per ogni Personaggio reclutato" valeva +20 fissi; i Personaggi con
+		# Scavo alto sono 5-6 per era su 16, e prenderli e' una scelta al draft.
+		if per == "recruited_scavo_min":
+			pts = v * _reclutati_con_scavo(gs, owner, int(e.get("min_scavo", 5)))
+		else:
+			pts = v * _conta(gs, owner, hits, per)
 	if e.has("cap"): pts = min(pts, int(e["cap"]))
-	_award(gs, owner, pts, carta)
+	return pts
+
+static func _reclutati_con_scavo(gs: GameState, owner: int, minimo: int) -> int:
+	var n := 0
+	for voce in gs.players[owner].personaggi_storia:
+		var carta: Dictionary = CardDB.characters.get(str(voce[0]), {})
+		if int(carta.get("scavo", 0)) >= minimo: n += 1
+	return n
+
+# LA STIMA DEL FINALE DI UNA CARTA (registro 181), per il bot: quanti PV i
+# suoi effetti `on_final_scoring` darebbero al proprietario se la partita
+# finisse adesso (x), e quanti ne toglierebbero agli altri (y, negativo: il
+# malus del Grattacielo). Legge lo stato cosi' com'e', senza segnare niente:
+# stessi conti dell'applicazione, senza `_award`. Il bot la usa su una copia
+# dello stato con la carta gia' posata, per sapere quanto vale costruirla.
+static func stima_finale(gs: GameState, src: Building) -> Vector2i:
+	var miei := 0
+	var altrui := 0
+	for e in src.data.get("effects", []):
+		if e["hook"] != "on_final_scoring" or e["op"] == "scavo_delta": continue
+		if not _condition_met(gs, src, e.get("condition", {})): continue
+		match str(e["op"]):
+			"vp": miei += int(e.get("value", 0))
+			"vp_per":
+				var hits := _bersagli_vp_per(gs, src, e, src.owner)
+				if str(e.get("to", "self")) == "target_owner":
+					for b in hits:
+						if b.owner != src.owner: altrui += int(e.get("value", 0))
+						else: miei += int(e.get("value", 0))
+				else:
+					miei += _punti_vp_per(gs, e, src.owner, hits)
+	return Vector2i(miei, altrui)
 
 static func _conta(gs: GameState, owner: int, hits: Array[Building], per: String) -> int:
 	match per:

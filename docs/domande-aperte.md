@@ -2891,3 +2891,82 @@ dato è stato importato da lì. Ma due confronti fra ciò che è stampato e
     23, Obi 37, Rend 28, Ritro 39, Scavo 31: la Scavo non e' piu' ultima,
     la Lampo lo diventa. Il designer: "tieni lo scavo a 14,7". Resta la
     Lampo a 23, questione di bot (`SPINTE_V3`), da riguardare.
+
+181. **Il bot pesa i finali delle carte.** Il designer, sul seme 2530: "il
+    grattacielo dovrebbe essere una costruzione succulenta". Il bot non pesava
+    affatto gli effetti `on_final_scoring`: il Grattacielo ("+1 PV per
+    livello, -1 alle cime altrui adiacenti") valeva per lui il Lampo meno il
+    costo, e si costruiva solo quando seppelliva molte tessere. Ora posa la
+    carta su una copia dello stato e chiede a `Effects.stima_finale` quanto
+    renderebbe a fine partita (stessi conti dell'applicazione, senza segnare
+    punti); peso `finali_peso` 0,8 nell'era 5 e `finali_peso_prima` 0,4 nelle
+    altre, solo in `SPINTE_V3` (v1.5 e v2 com'erano). Nell'audit `--schermo`
+    assegna le strategie come la schermata d'inizio, per rigiocare la partita
+    vista a schermo, e `--perche` stampa la "vetrina" (risorse di chi muove,
+    posti legali e prezzo di ogni carta in vendita). Misurato
+    (cinquantatreesima): a carte vecchie il canale dei finali raddoppia
+    (4,6 -> 10,0) e l'Universita' si costruisce in 185 partite su 300: era
+    il bot cieco a nascondere la carta rotta (182).
+
+182. **L'Universita' vale +20 fissi.** Trovato rigiocando il seme 2530 col
+    bot che pesa i finali: "+1 PV per ogni tuo Personaggio reclutato" nella
+    v3 e' +20 per chiunque la costruisca, perche' col draft tutti reclutano
+    20 Personaggi; costa 2 Costruzione 1 Denaro 1 Idea e chi la prende vince
+    (97 PV a tre, 99 a quattro). Si costruiva 53 volte su 300 solo perche' il
+    bot era cieco ai finali. Il designer: "decidi tu la scelta piu' sensata".
+    Scelta: "+1 PV per ogni tuo Personaggio con Scavo 5 o piu'"
+    (`per: recruited_scavo_min`, `min_scavo: 5`): nella v3 tutti i
+    Personaggi hanno Scavo (2-6), quelli a 5-6 sono 26 su 80, cinque o sei
+    per era su sedici, e prenderli al draft e' una scelta che vale anche per
+    gli scheletri. Da misurare con la 183.
+
+183. **Il Grattacielo costa 2 Costruzione e 1 Idea.** Seme 2530 a quattro
+    giocatori, rigiocato con `--schermo` e la vetrina: il Grattacielo era in
+    vendita per tutta l'era 5 con 3-4 posti legali (il meno caro a terra in
+    colonna 4), e nessuno l'ha mai comprato perche' nessuno ha mai avuto 3
+    Costruzione e 1 Idea insieme: nell'era 5 si producono 1-2 risorse a turno
+    e muoiono a fine era; all'ultimo turno il posto 0 aveva 3 Costruzione e
+    nessuna Idea (il ◈ scambia Costruzione con Denaro, non con Idee). Tre
+    leve proposte (costo, finale che valga anche a terra, lasciarlo); il
+    designer: "decidi tu la scelta piu' sensata". Scelta: il costo a 2
+    Costruzione 1 Idea, come l'Universita'; il finale stampato resta, perche'
+    la carta e' succulenta in alto ed e' giusto che a terra valga il Lampo.
+    `--variante grattacielo_caro` rimette 3 e 1. Da misurare
+    (cinquantaquattresima, insieme alla 182 e alla taratura Lampo scelta).
+
+184. **La Lampo nel bot: `lampo` 0,5.** Il designer: "vai con la taratura
+    della Lampo nel bot". Dopo lo spianamento parziale la Lampo era ultima
+    al 23%. Cinquantaduesima misura: `lampo` 0,5 la porta al 35% con 78,4 PV
+    (la media), e resta una Lampo (20,7 PV dal canale contro 18-19) che non
+    butta piu' le carte a Rendita (11,0 contro 7,1); `lampo` 1,1 e
+    `lampo_potenzia` 0,5 non muovono nulla. Superato dal 185-186: il 23%
+    veniva dall'1,2 che la tabella per giocatori imponeva, non dallo 0,8
+    scritto; a 0,5 e a 0,8 la Lampo sta al 35-36, in tabella resta 0,8.
+
+185. **La tabella per giocatori della v2 copriva `SPINTE_V3`.** Trovato nella
+    cinquantaquattresima: due lotti uguali nelle carte, uno con `lampo` 0,5
+    in tabella e uno con `--spinta lampo=0.8`, davano la Lampo al 22 e al 36,
+    al contrario del previsto. `StrategyBot.spinte()` applicava
+    `SPINTE_V2_PER_GIOCATORI` anche nella v3 (`e_v2()` e' vero per la v3), e
+    a tre giocatori copriva `lampo` (1,2), `obiettivi_peso` (1,5),
+    `rendita_zero` (0) e `scavo_premio` (0). Le tarature scritte in tabella
+    dalla 47ª alla 53ª non erano mai entrate in gioco; quelle passate con
+    `--spinta` si', perche' vince su tutto: le misure "con --spinta" sono
+    buone, i lotti "da tabella" hanno giocato con quei quattro valori. La
+    regola del progetto ("le regole non dipendono dal numero di giocatori")
+    valeva gia' per le carte; ora vale anche per il bot della v3. Corretto:
+    la tabella per giocatori resta alla v2. Misura con la tabella vera nella
+    cinquantacinquesima.
+
+186. **I valori di `SPINTE_V3` dopo la scoperta.** Cinquantacinquesima: la
+    tabella com'era scritta, giocata davvero per la prima volta, porta la
+    Rendita al 22% (74,7 PV: `rendita_zero` -1,5 le fa scartare ogni carta
+    che non rende) e la Scavo al 18 (`scavo_premio` 0,8); `lampo` 0,5 o 0,8
+    e `obiettivi_peso` 0,8 o 1,5 non cambiano nulla. In tabella vanno i
+    valori davvero misurati (quelli che la copertura imponeva e che le
+    misure 49-54 hanno giocato, col `lampo` a 0,8): `lampo` 0,8,
+    `obiettivi_peso` 1,5, `rendita_zero` 0, `scavo_premio` 0. La base da qui
+    e' il lotto 54ª "spinta 0,8": vittorie 27-42, PV 81,0. Aperto: la
+    Ritrovamenti al 42-48 (i finali di Museo e Parco archeologico sono suoi),
+    Bilanciata e Scavo al 27-29.
+
