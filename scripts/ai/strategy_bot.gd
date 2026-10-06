@@ -704,6 +704,7 @@ const SPINTE_V3 := {"rendita_per_era": 1.3, "rendita_zero": 0.0, "lampo": 0.8, "
 	# Con le caselle a 0,6 vinceva il 43% giocando da Rendita (le carte larghe sono quelle a
 	# Rendita 2); a 0,2, con arte 0,4 e scheletro 0,3, sta al 33 (quarantottesima misura).
 	"ritro_scheletro": 0.3, "ritro_caselle": 0.2, "ritro_riscoperta": 1.2, "ritro_arte": 0.4,
+	"ritro_azione_scavo": 0.8,
 	# I FINALI DELLE CARTE (registro 181): il bot non li pesava affatto, e il
 	# Grattacielo ("+1 PV per livello") valeva per lui il Lampo meno il costo.
 	# Peso dei PV che l'effetto finale darebbe se la partita finisse adesso,
@@ -1044,7 +1045,11 @@ static func _valore_personaggio_v3(gs: GameState, p: PlayerState, d: Dictionary,
 			if strategia == "lampo": a += 0.5
 		"resistenza": a = 0.5 * float(az.get("n", 1)) + (0.6 if strategia == "rendita" else 0.0)
 		"sconto": a = 0.8 if not az.has("se") else 0.5
-		"scavo": a = 0.3 * float(az.get("n", 1)) + (0.8 if strategia == "scavo" or strategia == "ritrovamenti" else 0.0)
+		"scavo":
+			a = 0.3 * float(az.get("n", 1))
+			if strategia == "scavo": a += 0.8
+			# La Ritrovamenti: la stessa spinta, come manopola (`ritro_azione_scavo`, registro 187).
+			elif strategia == "ritrovamenti": a += float(spinte().get("ritro_azione_scavo", 0.8))
 		"lampo": a = 1.0 + (0.5 if strategia == "lampo" else 0.0)
 		"altri": a = 0.6
 		"acquisto": a = 0.4     # si usa poco: quando si apre, spesso non resta niente da spendere (registro 159)
