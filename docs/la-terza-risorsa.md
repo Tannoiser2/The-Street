@@ -2694,9 +2694,49 @@ nascondeva. Da qui le decisioni dei registri 182 (Universita' sui Personaggi
 con Scavo 5+) e 183 (Grattacielo a 2 Costruzione 1 Idea), misurate insieme
 nella cinquantaquattresima.
 
+## Cinquantaquattresima misura: tutto insieme, e la tabella che non entrava in gioco
+
+Lampo 0,5 in tabella (registro 184), bot coi finali (181), Universita' sui
+Personaggi con Scavo 5+ (182), Grattacielo a 2 Costruzione 1 Idea (183);
+stessi 300 semi della 51ª. Due lotti: la tabella com'e', e `--spinta
+lampo=0.8` per separare la taratura dalle carte.
+
+| a giocatore | 51ª | tutto (tabella) | tutto, `--spinta lampo=0.8` |
+|---|---|---|---|
+| PV a testa | 78,7 | 81,1 | 81,0 |
+| canale effetti finali | 4,6 | 6,9 | 6,8 |
+| Lampo / Cont / Scavo / Rendita | 18,6 / 14,7 / 14,7 / 12,4 | 18,8 / 14,6 / 15,0 / 12,4 | 18,7 / 14,5 / 14,9 / 12,5 |
+| Universita' costruite | 46 | 111 | 112 |
+| Grattacieli costruiti, di cui al livello 2+ | 80, 30 | 106, 55 | 101, 51 |
+| vittorie Bil / Cont / Lampo / Obi / Rend / Ritro / Scavo | 34 / 42 / 23 / 37 / 28 / 39 / 31 | 31 / 32 / 22 / 37 / 33 / 45 / 33 | 27 / 32 / 36 / 36 / 31 / 42 / 29 |
+| canali della Lampo: Lampo / Rendita | 24,2 / 7,1 | 24,3 / 7,1 | 22,4 / 9,7 |
+
+Le carte: l'Universita' nuova si costruisce 111 volte (46 prima, 185 col
++20) e il canale dei finali sale di 2,3 PV a testa, non piu' di 5,4; il
+Grattacielo a 2 e 1 si costruisce 106 volte, e per la prima volta piu'
+spesso in alto che a terra (55 al livello 2 o piu' contro 30), come lo
+voleva il designer. Il resto dell'economia non si muove.
+
+La sorpresa e' la Lampo: col lotto "tutto" sta al 22 e gioca ancora come a
+0,8 (24,3 PV dal canale, 7,1 di Rendita), mentre `--spinta lampo=0.8` la
+porta al 36 giocando piu' morbida (22,4 / 9,7). Due lotti identici nelle
+carte e diversi solo nel modo di dare la spinta non potevano dare questo:
+qualcosa leggeva la tabella in un altro modo. Era la tabella per numero di
+giocatori della v2 (`SPINTE_V2_PER_GIOCATORI`), che entrava anche nella v3 e
+a tre giocatori copriva quattro voci di `SPINTE_V3`: `lampo` 1,2,
+`obiettivi_peso` 1,5, `rendita_zero` 0, `scavo_premio` 0. Le tarature
+scritte in tabella dalla 47ª in poi non erano mai entrate in gioco; quelle
+misurate con `--spinta` si' (vince su tutto). Quindi il lotto "tutto" ha
+giocato la Lampo a 1,2, e tutte le misure dalla 49ª alla 53ª hanno giocato
+con quei quattro valori, non con quelli scritti (registro 185). Corretto:
+la tabella per giocatori resta alla v2. La misura con la tabella vera e' la
+cinquantacinquesima.
+
 ## Come rifare il conto
 
 ```bash
+# cinquantaquattresima misura: tutto insieme (registri 181-184), stesso comando della quarantanovesima,
+#   e lo stesso con `--spinta lampo=0.8`; la tabella per giocatori copriva ancora SPINTE_V3 (registro 185)
 # cinquantaduesima e cinquantatreesima misura: tarature Lampo (`--spinta lampo=0.5`, `lampo=1.1`,
 #   `lampo_potenzia=0.5`) e il bot coi finali (registro 181), stesso comando della quarantanovesima
 # cinquantunesima misura: lo spianamento parziale (registro 180); stesso comando della quarantanovesima col

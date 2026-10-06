@@ -2941,3 +2941,18 @@ dato è stato importato da lì. Ma due confronti fra ciò che è stampato e
     butta piu' le carte a Rendita (11,0 contro 7,1); `lampo` 1,1 e
     `lampo_potenzia` 0,5 non muovono nulla. Nella tabella `SPINTE_V3`.
 
+185. **La tabella per giocatori della v2 copriva `SPINTE_V3`.** Trovato nella
+    cinquantaquattresima: due lotti uguali nelle carte, uno con `lampo` 0,5
+    in tabella e uno con `--spinta lampo=0.8`, davano la Lampo al 22 e al 36,
+    al contrario del previsto. `StrategyBot.spinte()` applicava
+    `SPINTE_V2_PER_GIOCATORI` anche nella v3 (`e_v2()` e' vero per la v3), e
+    a tre giocatori copriva `lampo` (1,2), `obiettivi_peso` (1,5),
+    `rendita_zero` (0) e `scavo_premio` (0). Le tarature scritte in tabella
+    dalla 47ª alla 53ª non erano mai entrate in gioco; quelle passate con
+    `--spinta` si', perche' vince su tutto: le misure "con --spinta" sono
+    buone, i lotti "da tabella" hanno giocato con quei quattro valori. La
+    regola del progetto ("le regole non dipendono dal numero di giocatori")
+    valeva gia' per le carte; ora vale anche per il bot della v3. Corretto:
+    la tabella per giocatori resta alla v2. Misura con la tabella vera nella
+    cinquantacinquesima.
+

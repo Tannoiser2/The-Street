@@ -710,7 +710,12 @@ const SPINTE_V3 := {"rendita_per_era": 1.3, "rendita_zero": -1.5, "lampo": 0.5, 
 static func spinte() -> Dictionary:
 	var base := SPINTE_V2 if e_v2() else SPINTE_V1
 	if PersonaggiV3.attivo(): base = SPINTE_V3
-	var tavolo: Dictionary = SPINTE_V2_PER_GIOCATORI.get(giocatori, {}) if e_v2() else {}
+	# LA TABELLA PER NUMERO DI GIOCATORI E' DELLA V2 (registro 185). Entrava
+	# anche nella v3 e a tre giocatori copriva quattro voci di SPINTE_V3
+	# (`lampo` 1,2, `obiettivi_peso` 1,5, `rendita_zero` 0, `scavo_premio` 0):
+	# le tarature scritte in tabella dalla 47ª alla 53ª non erano mai entrate
+	# in gioco, solo quelle passate con `--spinta`, che vince su tutto.
+	var tavolo: Dictionary = SPINTE_V2_PER_GIOCATORI.get(giocatori, {}) if e_v2() and not PersonaggiV3.attivo() else {}
 	if spinte_override.is_empty() and tavolo.is_empty(): return base
 	var out := base.duplicate()
 	for k in tavolo: out[k] = tavolo[k]
