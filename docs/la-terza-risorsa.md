@@ -2732,9 +2732,47 @@ con quei quattro valori, non con quelli scritti (registro 185). Corretto:
 la tabella per giocatori resta alla v2. La misura con la tabella vera e' la
 cinquantacinquesima.
 
+## Cinquantacinquesima misura: la tabella `SPINTE_V3` senza coperture
+
+Dopo il registro 185 la tabella scritta e' quella che gioca. Due lotti con
+finali, Universita' e Grattacielo nuovi: la tabella com'era scritta
+(`lampo` 0,5, `obiettivi_peso` 0,8, `rendita_zero` -1,5, `scavo_premio`
+0,8) e la stessa con `--spinta lampo=0.8`. Confronto con la 54ª "spinta
+0,8", che aveva i valori coperti (`obiettivi_peso` 1,5, `rendita_zero` 0,
+`scavo_premio` 0) e lo stesso `lampo` 0,8.
+
+| vittorie | 54ª, `lampo` 0,8 coi valori coperti | tabella scritta | tabella scritta, `lampo` 0,8 |
+|---|---|---|---|
+| Bil / Cont / Lampo / Obi / Rend / Ritro / Scavo | 27 / 32 / 36 / 36 / 31 / 42 / 29 | 36 / 39 / 35 / 37 / **22** / 48 / **18** | 34 / 36 / 36 / 36 / 26 / 45 / 21 |
+| PV a testa | 81,0 | 80,5 | 80,3 |
+| PV della Rendita, canali Lampo / Rendita / Cont | 80,6 · 15,9 / 15,9 / 13,3 | 74,7 · 11,9 / 17,9 / 9,9 | 75,2 |
+| PV della Scavo | 79,1 | 77,2 | 76,9 |
+
+I valori scritti e mai giocati fanno male: `rendita_zero` -1,5 fa scartare
+alla Rendita ogni carta che non rende (Lampo 11,9 e Continuita' 9,9 contro
+15,9 e 13,3) e la porta al 22% con 74,7 PV; `scavo_premio` 0,8 porta la
+Scavo al 18. `lampo` 0,5 o 0,8 e' lo stesso (35-36): il 22-23% delle misure
+51-54 veniva dall'1,2 coperto, non dallo 0,8 scritto. `obiettivi_peso` 0,8 o
+1,5 non muove la Obiettivi (36-37).
+
+Scelta (registro 186): in tabella vanno i valori davvero misurati, quelli
+della 54ª "spinta 0,8": `lampo` 0,8, `obiettivi_peso` 1,5, `rendita_zero`
+0, `scavo_premio` 0; restano `rendita_per_era` 1,3, `scavo_terra_scavo` 0,5,
+`lampo_zero` 0 e i finali. E' la configurazione del lotto 54ª "spinta 0,8",
+che diventa la base: vittorie 27 (Bil) - 42 (Ritro), PV 81,0, canali Lampo
+18,7 / Scavo 14,9 / Cont 14,5 / Rendita 12,5 / ★ 9,1 / finali 6,8. Il
+registro 184 (Lampo 0,5) e' superato: a 0,8 la Lampo sta al 36.
+
+Quel che resta: la Ritrovamenti e' la piu' forte (42-48 in tutti i lotti
+coi finali: i suoi 8,4 PV di finali sono i piu' alti, Museo e Parco
+archeologico sono carte sue), la Bilanciata e la Scavo le piu' deboli
+(27-29). Le leve sono `ritro_*` e il peso dei finali per strategia.
+
 ## Come rifare il conto
 
 ```bash
+# cinquantacinquesima misura: la tabella senza coperture (registro 185), stesso comando della quarantanovesima;
+#   la base e' il lotto della 54ª con `--spinta lampo=0.8`, ora uguale alla tabella (registro 186)
 # cinquantaquattresima misura: tutto insieme (registri 181-184), stesso comando della quarantanovesima,
 #   e lo stesso con `--spinta lampo=0.8`; la tabella per giocatori copriva ancora SPINTE_V3 (registro 185)
 # cinquantaduesima e cinquantatreesima misura: tarature Lampo (`--spinta lampo=0.5`, `lampo=1.1`,

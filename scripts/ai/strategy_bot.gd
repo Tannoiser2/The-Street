@@ -688,14 +688,17 @@ static var spinte_override := {}
 # `scavo_premio` 0,8 e `scavo_terra_scavo` 0,5 non alzano la Scavo (29) ma
 # stringono la forbice di tutte a 29-37, la piu' stretta misurata (a 1,2 e
 # -0,2 di `scavo_terra` la Scavo scende a 27).
-# Registro 184 (cinquantaduesima misura): dopo lo spianamento parziale la Lampo
-# era al 23%, ultima; `lampo` a 0,5 la porta al 35 con 78,4 PV, e resta una
-# Lampo (20,7 PV dal canale contro 18-19 delle altre) che non butta piu' le
-# carte a Rendita (11,0 contro 7,1); a 1,1 e con `lampo_potenzia` 0,5 nulla.
-const SPINTE_V3 := {"rendita_per_era": 1.3, "rendita_zero": -1.5, "lampo": 0.5, "lampo_zero": 0.0,
-	"scavo_premio": 0.8, "scavo_terra": -0.5, "scavo_terra_scavo": 0.5, "protezione_attesa": 2.0,
-	# `obiettivi_peso` 0,8: nel torneo a sette strategie la Obiettivi stava al 42-44 (quarantottesima).
-	"lampo_potenzia": 1.5, "lampo_sopra": 0.0, "obiettivi_peso": 0.8, "continuita_peso": 1.0,
+# Registri 184-186. Fino alla cinquantaquattresima la tabella per giocatori
+# della v2 copriva quattro voci di questa (a tre giocatori: `lampo` 1,2,
+# `obiettivi_peso` 1,5, `rendita_zero` 0, `scavo_premio` 0), e le misure
+# "da tabella" giocavano quei valori. Tolta la copertura, qui ci sono i
+# valori davvero misurati: `lampo` 0,8 (a 1,2 la Lampo stava al 22-23%, a
+# 0,5 e 0,8 al 35-36), `rendita_zero` 0 (a -1,5 la Rendita crolla al 22% con
+# 74,7 PV: scarta tutto quel che non rende), `scavo_premio` 0 (a 0,8 la Scavo
+# scende al 18), `obiettivi_peso` 1,5 (a 0,8 la Obiettivi non si muove, 37).
+const SPINTE_V3 := {"rendita_per_era": 1.3, "rendita_zero": 0.0, "lampo": 0.8, "lampo_zero": 0.0,
+	"scavo_premio": 0.0, "scavo_terra": -0.5, "scavo_terra_scavo": 0.5, "protezione_attesa": 2.0,
+	"lampo_potenzia": 1.5, "lampo_sopra": 0.0, "obiettivi_peso": 1.5, "continuita_peso": 1.0,
 	# la Ritrovamenti (registro 173): lo scheletro del Personaggio al draft, le caselle che
 	# lasceranno tessere, la riscoperta delle proprie rovine nell'era 5 (per tessera), l'Arte.
 	# Con le caselle a 0,6 vinceva il 43% giocando da Rendita (le carte larghe sono quelle a

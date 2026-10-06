@@ -2939,7 +2939,9 @@ dato è stato importato da lì. Ma due confronti fra ciò che è stampato e
     al 23%. Cinquantaduesima misura: `lampo` 0,5 la porta al 35% con 78,4 PV
     (la media), e resta una Lampo (20,7 PV dal canale contro 18-19) che non
     butta piu' le carte a Rendita (11,0 contro 7,1); `lampo` 1,1 e
-    `lampo_potenzia` 0,5 non muovono nulla. Nella tabella `SPINTE_V3`.
+    `lampo_potenzia` 0,5 non muovono nulla. Superato dal 185-186: il 23%
+    veniva dall'1,2 che la tabella per giocatori imponeva, non dallo 0,8
+    scritto; a 0,5 e a 0,8 la Lampo sta al 35-36, in tabella resta 0,8.
 
 185. **La tabella per giocatori della v2 copriva `SPINTE_V3`.** Trovato nella
     cinquantaquattresima: due lotti uguali nelle carte, uno con `lampo` 0,5
@@ -2955,4 +2957,16 @@ dato è stato importato da lì. Ma due confronti fra ciò che è stampato e
     valeva gia' per le carte; ora vale anche per il bot della v3. Corretto:
     la tabella per giocatori resta alla v2. Misura con la tabella vera nella
     cinquantacinquesima.
+
+186. **I valori di `SPINTE_V3` dopo la scoperta.** Cinquantacinquesima: la
+    tabella com'era scritta, giocata davvero per la prima volta, porta la
+    Rendita al 22% (74,7 PV: `rendita_zero` -1,5 le fa scartare ogni carta
+    che non rende) e la Scavo al 18 (`scavo_premio` 0,8); `lampo` 0,5 o 0,8
+    e `obiettivi_peso` 0,8 o 1,5 non cambiano nulla. In tabella vanno i
+    valori davvero misurati (quelli che la copertura imponeva e che le
+    misure 49-54 hanno giocato, col `lampo` a 0,8): `lampo` 0,8,
+    `obiettivi_peso` 1,5, `rendita_zero` 0, `scavo_premio` 0. La base da qui
+    e' il lotto 54ª "spinta 0,8": vittorie 27-42, PV 81,0. Aperto: la
+    Ritrovamenti al 42-48 (i finali di Museo e Parco archeologico sono suoi),
+    Bilanciata e Scavo al 27-29.
 

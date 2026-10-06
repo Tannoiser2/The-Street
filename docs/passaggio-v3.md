@@ -198,3 +198,10 @@ dopo): il freno e' il costo, non il terreno. Lo spianamento parziale (registro 1
 "parziale"`): le caselle coperte dalla carta nuova sono terrapieno, quelle libere restano rovina con la
 tessera; `--variante spianato_intero` rifa' lo spianato di prima; cinquantunesima misura: +3,5 PV a testa
 tutti nel canale Scavo (11,2 -> 14,7), vittorie 23 (Lampo) - 42 (Continuita'), la Scavo risale a 31.
+Il bot pesa i finali delle carte (registro 181, `finali_peso`); l'Universita' conta i Personaggi con
+Scavo 5+ (182, valeva +20 fissi); il Grattacielo costa 2 Costruzione 1 Idea (183) e si costruisce
+piu' spesso in alto che a terra. La tabella per giocatori della v2 copriva quattro voci di `SPINTE_V3`
+(185): le misure 49-54 "da tabella" giocavano `lampo` 1,2, `obiettivi_peso` 1,5, `rendita_zero` 0,
+`scavo_premio` 0; ora la tabella scritta e' quella che gioca e porta quei valori col `lampo` a 0,8
+(186). Base attuale (54ª, "spinta 0,8"): vittorie 27 (Bil) - 42 (Ritro), 81,0 PV; la Ritrovamenti e'
+la piu' forte. Nell'audit `--schermo` rigioca il seme visto a schermo e `--perche` stampa la vetrina.
