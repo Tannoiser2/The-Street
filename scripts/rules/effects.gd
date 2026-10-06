@@ -699,14 +699,16 @@ static func apply_final_scoring(gs: GameState) -> void:
 				if e["hook"] != "on_final_scoring": continue
 				if e["op"] == "scavo_delta": continue      # gia' applicato nel pre-passo
 				if not _condition_met(gs, src, e.get("condition", {})): continue
-				# Il libro mastro della carta (Building.vp_reso): quanto ha reso
-				# il suo finale al proprietario, per l'audit. I malus agli altri
-				# (il Grattacielo) non sono "resi" a nessuno e non si segnano.
+				# Quanto ha reso il suo finale al proprietario, per l'audit
+				# (Building.finale_reso). Non va in vp_reso: quel libro mastro
+				# entra nella "vita delle carte" del riferimento v1.5, che deve
+				# restare identico. I malus agli altri (il Grattacielo) non sono
+				# "resi" a nessuno e non si segnano.
 				var prima: int = gs.players[src.owner].vp
 				match str(e["op"]):
 					"vp": _award(gs, src.owner, int(e.get("value", 0)), src.data)
 					"vp_per": _apply_vp_per(gs, src, e, src.owner, src.data)
-				src.rende(VP_CHANNEL, gs.players[src.owner].vp - prima)
+				src.finale_reso += gs.players[src.owner].vp - prima
 
 # La carta dell'edificio piu' i potenziamenti che porta: per tutte, la sorgente
 # dei selettori e' l'edificio stesso.
