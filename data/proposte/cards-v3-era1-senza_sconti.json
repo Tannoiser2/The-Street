@@ -2451,7 +2451,7 @@
         "idee": 0
       },
       "exhaustible": 0,
-      "effect_text": "Usa: +1 Scavo permanente a un tuo edificio in questa colonna. A fine partita: +2 PV per ogni tua rovina riscoperta.",
+      "effect_text": "Usa: +1 Scavo permanente a un tuo edificio in questa colonna. A fine partita: +2 PV per ogni tua rovina riscoperta (max 6).",
       "effects": [
         {
           "hook": "on_final_scoring",
@@ -2460,7 +2460,8 @@
           "target": {
             "buried": true,
             "below_self": true
-          }
+          },
+          "cap": 6
         }
       ],
       "azione": {
@@ -2757,7 +2758,7 @@
         "idee": 0
       },
       "exhaustible": 0,
-      "effect_text": "Usa: +1 PV. Solo sopra, al livello 1 o piu'. A fine partita: +1 PV per ogni tuo Personaggio con Scavo 5 o piu'.",
+      "effect_text": "Usa: +1 PV. Solo sopra, al livello 1 o piu'. A fine partita: +1 PV per ogni tuo Personaggio con Scavo 5 o piu' (max 5).",
       "effects": [
         {
           "hook": "on_final_scoring",
@@ -2767,7 +2768,8 @@
           "target": {
             "owner": "self"
           },
-          "min_scavo": 5
+          "min_scavo": 5,
+          "cap": 5
         }
       ],
       "depth": 2,

@@ -75,6 +75,9 @@ var upgrades_storia: Array[String] = []
 # partita vera" e' una domanda da designer a cui lo stato sapeva rispondere
 # solo a meta'. Non cambia niente di quello che succede: e' un libro mastro.
 var vp_reso: Dictionary = {}      # canale -> punti fruttati al proprietario
+# I PV del suo effetto finale, per l'audit (registro 187): fuori da vp_reso
+# perche' quel libro mastro entra nella vita delle carte del riferimento v1.5.
+var finale_reso: int = 0
 
 func rende(canale: String, quanti: int) -> void:
 	if quanti == 0: return
@@ -109,6 +112,7 @@ func duplica() -> Building:
 	b.basi = basi.duplicate()
 	b.terrapieno_cols = terrapieno_cols.duplicate()
 	b.caselle_terrapieno = caselle_terrapieno.duplicate()
+	b.finale_reso = finale_reso
 	b.bonus_res = bonus_res
 	b.bonus_scavo = bonus_scavo
 	b.bonus_rendita = bonus_rendita
