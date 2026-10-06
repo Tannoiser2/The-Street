@@ -116,12 +116,12 @@ Domanda del mazzo per era (C / D / I): era 1: 14 / 5 / 5 · era 2: 19 / 7 / 6 ·
 | Fondazione d'arte | Cultura | qualsiasi | 1 | 1 C 1 D | 3 | 1 | 0 | 0 | a terra o sopra | Usa: +1 PV. A fine partita: +1 PV per ogni tuo potenziamento. |
 | Grattacielo | Commercio | qualsiasi | 1 col. x 3 bin. | 2 C 1 I ◈ | 3 | 2 | 0 | 0 | a terra o sopra | Usa: +1 Denaro per ogni altro giocatore con un edificio qui (max 2). A fine partita: +1 PV per ogni livello a cui e' costruito; ogni edificio altrui in cima a una colonna adiacente toglie 1 PV al suo proprietario. |
 | Monumento ai caduti | Militare, Religione | qualsiasi | 1 | 2 C 1 D | 3 | 2 | 0 | 0 | a terra o sopra | Usa: +1 resistenza fino a fine era ai tuoi edifici adiacenti. A fine partita: +1 PV per ogni altro tuo Militare. |
-| Museo | Cultura | qualsiasi | 1 | 2 C 1 D | 3 | 2 | 0 | 0 | solo sopra, liv. 1 | Usa: +1 Scavo permanente a un tuo edificio in questa colonna. A fine partita: +2 PV per ogni tua rovina riscoperta. |
+| Museo | Cultura | qualsiasi | 1 | 2 C 1 D | 3 | 2 | 0 | 0 | solo sopra, liv. 1 | Usa: +1 Scavo permanente a un tuo edificio in questa colonna. A fine partita: +2 PV per ogni tua rovina riscoperta (max 6). |
 | Officina | Ingegneria | qualsiasi | 1 | 2 C ◈ | 3 | 2 | 0 | 0 | a terra o sopra | Usa: -1 a quel che compri in questo turno. A fine partita: +1 PV per ogni altro tuo Ingegneria (max 4). |
 | Parco archeologico | Cultura | qualsiasi | 1 col. x 2 bin. | 2 C 1 D | 3 | 2 | 0 | 0 | a terra o sopra | Usa: +1 Scavo permanente a un tuo edificio adiacente. A fine partita: fino a 2 tuoi edifici non sotterrati nelle colonne adiacenti valgono il loro Scavo come se fossero sotterrati. |
 | Ponte in acciaio | Ingegneria | Fiume | 2 col. x 1 bin. | 3 C ◈ | 4 | 3 | 0 | 0 | a terra o sopra | Usa: +1 Costruzione. A fine partita: +2 PV per ogni tua rovina riportata alla luce nelle sue colonne. |
 | Stazione | Commercio, Ingegneria | qualsiasi | 3 col. x 1 bin. | 3 C 1 I | 4 | 3 | 0 | 0 | a terra o sopra | Usa: +1 Costruzione. A fine partita: +1 PV per ogni edificio in piedi nelle sue colonne (max 5). |
-| Università | Cultura, Civico | qualsiasi | 1 col. x 2 bin. | 2 C 1 D 1 I | 3 | 2 | 0 | 0 | solo sopra, liv. 1 | Usa: +1 PV. Solo sopra, al livello 1 o piu'. A fine partita: +1 PV per ogni tuo Personaggio con Scavo 5 o piu'. |
+| Università | Cultura, Civico | qualsiasi | 1 col. x 2 bin. | 2 C 1 D 1 I | 3 | 2 | 0 | 0 | solo sopra, liv. 1 | Usa: +1 PV. Solo sopra, al livello 1 o piu'. A fine partita: +1 PV per ogni tuo Personaggio con Scavo 5 o piu' (max 5). |
 | Condominio popolare **RIS** | Civico | qualsiasi | 1 | 3 C | 4 | 1 | 0 | 1 | a terra o sopra | — |
 | Palazzina **RIS** | Civico | qualsiasi | 1 | 1 C ◈ | 3 | 1 | 0 | 1 | a terra o sopra | — |
 

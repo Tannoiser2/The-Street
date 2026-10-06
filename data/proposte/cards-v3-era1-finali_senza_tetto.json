@@ -1,7 +1,7 @@
 {
   "meta": {
     "game": "La Strada delle Ere",
-    "ruleset": "v3-era1-prova-senza_extra",
+    "ruleset": "v3-era1-prova-finali_senza_tetto",
     "language": "it",
     "source": "distinta-carte (fonte unica)",
     "origine": "generato da tools/genera_cards_v3.py da data/cards-v2.json: non modificare a mano"
@@ -407,8 +407,9 @@
       },
       "exhaustible": 0,
       "azione": {
-        "tipo": "cambio",
-        "n": 1
+        "tipo": "acquisto",
+        "n": 1,
+        "sconto": 1
       },
       "effects": [],
       "effect_text": "Usa: puoi comprare ancora un potenziamento o una casa, e paghi 1 in meno."
@@ -620,10 +621,9 @@
       },
       "exhaustible": 4,
       "azione": {
-        "tipo": "cambio",
+        "tipo": "acquisto",
         "n": 1,
-        "da": "pietra",
-        "a": "oro"
+        "sconto": 1
       },
       "effects": [],
       "effect_text": "Usa: puoi comprare ancora un potenziamento o una casa, e paghi 1 in meno."
@@ -2430,7 +2430,7 @@
         "idee": 0
       },
       "exhaustible": 0,
-      "effect_text": "Usa: +1 Scavo permanente a un tuo edificio in questa colonna. A fine partita: +2 PV per ogni tua rovina riscoperta (max 6).",
+      "effect_text": "Usa: +1 Scavo permanente a un tuo edificio in questa colonna. A fine partita: +2 PV per ogni tua rovina riscoperta.",
       "effects": [
         {
           "hook": "on_final_scoring",
@@ -2439,8 +2439,7 @@
           "target": {
             "buried": true,
             "below_self": true
-          },
-          "cap": 6
+          }
         }
       ],
       "azione": {
@@ -2737,7 +2736,7 @@
         "idee": 0
       },
       "exhaustible": 0,
-      "effect_text": "Usa: +1 PV. Solo sopra, al livello 1 o piu'. A fine partita: +1 PV per ogni tuo Personaggio con Scavo 5 o piu' (max 5).",
+      "effect_text": "Usa: +1 PV. Solo sopra, al livello 1 o piu'. A fine partita: +1 PV per ogni tuo Personaggio con Scavo 5 o piu'.",
       "effects": [
         {
           "hook": "on_final_scoring",
@@ -2747,8 +2746,7 @@
           "target": {
             "owner": "self"
           },
-          "min_scavo": 5,
-          "cap": 5
+          "min_scavo": 5
         }
       ],
       "depth": 2,
@@ -3238,9 +3236,9 @@
         "idee": 0
       },
       "azione": {
-        "tipo": "resistenza",
+        "tipo": "acquisto",
         "n": 1,
-        "a": "uno"
+        "sconto": 1
       }
     },
     {
@@ -3372,8 +3370,9 @@
         "idee": 0
       },
       "azione": {
-        "tipo": "cambio",
-        "n": 2
+        "tipo": "acquisto",
+        "n": 1,
+        "sconto": 1
       }
     },
     {
@@ -7381,9 +7380,7 @@
       "testo": "Chi attiva per primo puo' comprare ancora un potenziamento o una casa in quel turno.",
       "effetto": {
         "quando": "attiva",
-        "guadagno": {
-          "oro": 1
-        }
+        "extra": 1
       },
       "copie": 2
     },

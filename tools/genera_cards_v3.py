@@ -633,8 +633,19 @@ for b in v3["buildings"]:
             if e.get("hook") == "on_final_scoring" and e.get("per") == "recruited_character":
                 e["per"] = "recruited_scavo_min"
                 e["min_scavo"] = 5
+                e["cap"] = 5
         b["effect_text"] = b["effect_text"].replace("+1 PV per ogni tuo Personaggio reclutato.",
-            "+1 PV per ogni tuo Personaggio con Scavo 5 o piu'.")
+            "+1 PV per ogni tuo Personaggio con Scavo 5 o piu' (max 5).")
+    # IL TETTO AI DUE FINALI PIU' GRASSI (registro 187): con lo spianamento
+    # parziale le rovine riscoperte sono 2,9 a giocatore e il Museo ("+2 PV
+    # per ogni tua rovina riscoperta") rendeva 6,9 PV a costruzione,
+    # l'Universita' 7,4; le altre carte con finale stanno fra 1 e 4,8 e la
+    # Stazione ha gia' il suo tetto (max 5). Museo max 6, Universita' max 5.
+    if b["id"] == "ed_museo":
+        for e in b["effects"]:
+            if e.get("hook") == "on_final_scoring": e["cap"] = 6
+        b["effect_text"] = b["effect_text"].replace("+2 PV per ogni tua rovina riscoperta.",
+            "+2 PV per ogni tua rovina riscoperta (max 6).")
     if b["id"] == "ed_grattacielo":
         b["cost"] = prod(pietra=2, idee=1)
 
@@ -853,11 +864,18 @@ def grandi_vecchie(v):
 #   --variante spianato_intero  lo spianato di prima: tutta la carta terrapieno, Scavo 0, niente tessere
 def spianato_intero(v):
     v["constants"]["tessere_scavo"].pop("spianato", None)
+#   --variante finali_senza_tetto  Museo e Universita' senza il tetto del registro 187
+def finali_senza_tetto(v):
+    for b in v["buildings"]:
+        if b["id"] in ("ed_museo", "ed_universita"):
+            for e in b["effects"]:
+                if e.get("hook") == "on_final_scoring": e.pop("cap", None)
+            b["effect_text"] = b["effect_text"].replace(" (max 6)", "").replace(" (max 5)", "")
 #   --variante grattacielo_caro  il Grattacielo a 3 Costruzione e 1 Idea, com'era prima del registro 183
 def grattacielo_caro(v):
     for b in v["buildings"]:
         if b["id"] == "ed_grattacielo": b["cost"] = prod(pietra=3, idee=1)
-VARIANTI = {"spianato_intero": spianato_intero, "grattacielo_caro": grattacielo_caro, "grandi_vecchie": grandi_vecchie, "proprietario": proprietario, "compenso_pv": compenso_pv, "senza_sconti": senza_sconti,
+VARIANTI = {"finali_senza_tetto": finali_senza_tetto, "spianato_intero": spianato_intero, "grattacielo_caro": grattacielo_caro, "grandi_vecchie": grandi_vecchie, "proprietario": proprietario, "compenso_pv": compenso_pv, "senza_sconti": senza_sconti,
             "lampo_vecchio": lampo_vecchio, "extra_sempre": extra_sempre, "senza_extra": senza_extra, "costi_vecchi": costi_vecchi,
             "case_seconda": case_seconda, "case_lampo1": case_lampo1, "senza_tuning": senza_tuning,
             "terreno_produce": terreno_produce, "senza_potenziamento_insieme": senza_potenziamento_insieme}
