@@ -56,6 +56,7 @@ func _ready() -> void:
 	_run("v3: il draft a passaggio, i Personaggi lavoratori, le risorse che muoiono", _test_v3_era1)
 	_run("v3 scelta: chi attiva usa un edificio della colonna, di chiunque, e lo brucia", _test_v3_scelta)
 	_run("v3: lo spianamento parziale, terrapieno sotto e rovina accanto (registro 180)", _test_v3_spianato_parziale)
+	_run("v3: gli scheletri sono i Personaggi, il sacchetto dei reclutati (registro 188)", _test_v3_scheletri_personaggi)
 	print("\n%d superati, %d falliti" % [_passed, _failed])
 	get_tree().quit(0 if _failed == 0 else 1)
 
@@ -2299,4 +2300,46 @@ func _test_v3_spianato_parziale() -> void:
 	dolmen.was_razed = true
 	_eq("spianato per intero: nessuna tessera", TessereScavo.quante(dolmen), 0)
 	_ok("  e nessuna casella con la tessera", TessereScavo.caselle_con_tessera(dolmen).is_empty())
+	CardDB.load_db(CardDB.DB_PATH)
+
+# GLI SCHELETRI SONO I PERSONAGGI (registro 188): il sacchetto si riempie al
+# draft con i soli reclutati, la rovina pesca al crollo, la tessera riportata
+# alla luce paga il suo Scavo a chi ha quel Personaggio e a nessun altro.
+func _test_v3_scheletri_personaggi() -> void:
+	if not FileAccess.file_exists("res://data/proposte/cards-v3-era1-scheletri_personaggi.json"): return
+	CardDB.load_db("res://data/proposte/cards-v3-era1-scheletri_personaggi.json")
+	_ok("la variante accende il sacchetto", TessereScavo.scheletri_personaggi())
+	var ctl := _game(3, 188)
+	var gs := ctl.gs
+	while not gs.pending_choice.is_empty():
+		ctl.choose(int((gs.pending_choice["options"] as Array)[0]))
+	_eq("dopo il draft nel sacchetto ci sono i 12 reclutati", gs.sacchetto.size(), 12)
+	var scartati := 0
+	for cid in gs.sacchetto:
+		if TessereScavo.proprietario_personaggio(gs, str(cid)) < 0: scartati += 1
+	_eq("  e ognuno ha un padrone", scartati, 0)
+	gs.grid.buildings.clear()
+	var r := _put(gs, 0, "ed_tumulo_funerario", 0, 0, Enums.BuildingState.ROVINA)   # 2 caselle
+	TessereScavo.al_crollo(gs, r)
+	_eq("al crollo la rovina pesca una tessera per casella", r.tessere.size(), 2)
+	_eq("  e il sacchetto cala di altrettanto", gs.sacchetto.size(), 10)
+	_ok("  ogni tessera e' lo scheletro di un Personaggio", r.tessere.all(func(t): return t.has("chi")))
+	var atteso := {}
+	for t in r.tessere:
+		var chi := TessereScavo.proprietario_personaggio(gs, str(t["chi"]))
+		atteso[chi] = int(atteso.get(chi, 0)) + int(t["v"])
+	var prima := gs.players.map(func(p): return p.vp)
+	TessereScavo.conta(gs)
+	_ok("coperte non pagano nessuno", gs.players.map(func(p): return p.vp) == prima)
+	r.scavata = true
+	TessereScavo.conta(gs)
+	var giusto := true
+	for i in 3:
+		if gs.players[i].vp - int(prima[i]) != int(atteso.get(i, 0)): giusto = false
+	_ok("scoperte pagano lo Scavo del Personaggio a chi lo ha reclutato", giusto)
+	# Sacchetto vuoto: la casella resta senza tessera.
+	gs.sacchetto.clear()
+	var r2 := _put(gs, 1, "ed_capanne", 3, 0, Enums.BuildingState.ROVINA)
+	TessereScavo.al_crollo(gs, r2)
+	_ok("a sacchetto vuoto la tessera vale 0 e non ha nome", r2.tessere.size() == 1 and not r2.tessere[0].has("chi"))
 	CardDB.load_db(CardDB.DB_PATH)

@@ -229,6 +229,7 @@ func _draft_prendi(chi: int, char_id: String, bersaglio: Building) -> void:
 	p.personaggi_storia.append([char_id, gs.era])
 	p.recruited_total += 1
 	p.bump("draftati")
+	TessereScavo.recluta(gs, char_id)
 	if Effects.requires_designation(data) and bersaglio != null:
 		p.character_targets[char_id] = bersaglio.uid
 		gs.log_line("%s: designato %s" % [data["name"], bersaglio.data["name"]])
@@ -574,6 +575,7 @@ func build(card_id: String, col_from: int, above: bool, pay_option: int = 0, des
 	if q.despoiled != null:
 		q.despoiled.state = Enums.BuildingState.ROVINA
 		q.despoiled.upgrades.clear()
+		TessereScavo.al_crollo(gs, q.despoiled)
 		gs.log_line("%s depredato: diventa rovina" % q.despoiled.data["name"])
 		building_changed.emit(q.despoiled)
 
@@ -604,8 +606,10 @@ func build(card_id: String, col_from: int, above: bool, pay_option: int = 0, des
 					gs.log_line("%s spianato in parte: %d casell%s restano rovina" % [
 						base.data["name"], libere, "a" if libere == 1 else "e"])
 			TessereScavo.riscatta(gs, base)
+			TessereScavo.al_crollo(gs, base)
 		elif base.state == Enums.BuildingState.RUDERE:
 			base.state = Enums.BuildingState.ROVINA
+			TessereScavo.al_crollo(gs, base)
 		building_changed.emit(base)
 
 	var b := Building.new()
@@ -855,6 +859,7 @@ func recruit(char_id: String, imprint_target: Building = null) -> bool:
 	p.specialized_characters.append(char_id)
 	p.personaggi_storia.append([char_id, gs.era])
 	p.recruited_total += 1
+	TessereScavo.recluta(gs, char_id)
 	# Il lavoratore appena piazzato si specializza: l'edificio che abita e' il
 	# bersaglio degli effetti che parlano di "questo lavoratore".
 	var data: Dictionary = CardDB.characters[char_id]

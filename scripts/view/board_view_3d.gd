@@ -690,6 +690,9 @@ func _tessere_scavo(b: Building) -> void:
 		if b.scavata and i < b.tessere.size():
 			var v: Dictionary = b.tessere[i]
 			var testo := str(int(v.get("v", 0))) + (" +scheletro" if bool(v.get("s", false)) else "")
+			# Col sacchetto (registro 188) la tessera e' lo scheletro di un Personaggio.
+			if v.has("chi") and CardDB.characters.has(str(v["chi"])):
+				testo = "%s %d" % [CardDB.characters[str(v["chi"])]["name"], int(v.get("v", 0))]
 			_scritta(t.position + Vector3(t.size.x / 2.0, t.size.y + 0.5, t.size.z / 2.0), testo, 0.05, Color.WHITE)
 
 # Il valore di Scavo scritto sulla basetta, davanti e dietro: la striscia di

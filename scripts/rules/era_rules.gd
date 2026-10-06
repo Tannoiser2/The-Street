@@ -134,6 +134,7 @@ static func paga_edificio(gs: GameState, b: Building) -> void:
 				b.state = Enums.BuildingState.ROVINA
 				TessereScavo.riscatta(gs, b)
 				b.upgrades.clear()
+				TessereScavo.al_crollo(gs, b)
 				gs.log_line("%s si esaurisce e crolla in rovina" % b.data["name"])
 			else:
 				b.state = Enums.BuildingState.RUDERE
@@ -183,6 +184,7 @@ static func resolve_event(gs: GameState) -> Array[int]:
 			b.state = Enums.BuildingState.ROVINA
 			TessereScavo.riscatta(gs, b)
 			b.upgrades.clear()
+			TessereScavo.al_crollo(gs, b)
 			if not b.owner in persi: persi.append(b.owner)
 			gs.log_line("%s crolla in rovina" % b.data["name"])
 	# Crollare puo' voler dire finire sotterrati: un edificio gia' coperto

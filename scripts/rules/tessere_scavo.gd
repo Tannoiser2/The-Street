@@ -44,6 +44,55 @@ static func solo_scavate() -> bool:
 static func carte_restituite() -> bool:
 	return attive() and bool(CardDB.constants["tessere_scavo"].get("carte_restituite", false))
 
+# GLI SCHELETRI SONO I PERSONAGGI (registro 188, `scheletri: "personaggi"`).
+# Il designer: 80 Personaggi e 80 tessere, "un match perfetto"; "il
+# ritrovamento e' un valore per tutti e di chi ha quello scheletro"; "prendo
+# il Personaggio che vale piu' punti nella speranza che sia ritrovato". Una
+# tessera per Personaggio, in un sacchetto unico in cui entra quando il
+# Personaggio viene reclutato (gli scartati del draft restano fuori, cosi'
+# ogni scheletro ha un padrone e la quota di ognuno non dipende dal numero
+# di giocatori). Le rovine pescano dal sacchetto al crollo; la tessera
+# riportata alla luce paga il suo Scavo a chi ha reclutato quel Personaggio,
+# chiunque abbia scavato, e a nessun altro: il proprietario della rovina non
+# incassa (niente cubetto da ricordare sotto le carte), chi costruisce sopra
+# prende il bonus scavo come sempre. Niente valore 0-3, niente era, niente
+# icona arte: un numero solo, lo Scavo del Personaggio.
+static func scheletri_personaggi() -> bool:
+	return attive() and str(CardDB.constants["tessere_scavo"].get("scheletri", "")) == "personaggi"
+
+# Il Personaggio reclutato: la sua tessera entra nel sacchetto.
+static func recluta(gs: GameState, cid: String) -> void:
+	if not scheletri_personaggi() or not CardDB.characters.has(cid): return
+	if bool(CardDB.characters[cid].get("is_dynasty", false)): return
+	gs.sacchetto.append(cid)
+
+# Al crollo si pesca subito: dal sacchetto di quel momento, con dentro solo i
+# Personaggi reclutati fin li'. Coi mazzetti colorati si pesca quando serve.
+static func al_crollo(gs: GameState, b: Building) -> void:
+	if scheletri_personaggi() and quante(b) > 0: tessere(gs, b)
+
+# Chi ha reclutato il Personaggio, -1 se nessuno (il sacchetto era vuoto).
+static func proprietario_personaggio(gs: GameState, cid: String) -> int:
+	for p in gs.players:
+		for voce in p.personaggi_storia:
+			if str(voce[0]) == cid: return p.index
+	return -1
+
+# Quanto vale, in attesa, scoprire `n` tessere coperte per il giocatore `p`:
+# la sua quota di scheletri nel sacchetto per lo Scavo medio dei suoi. Per il bot.
+static func scheletri_attesi(gs: GameState, p: PlayerState, n: int) -> float:
+	if n <= 0 or p.personaggi_storia.is_empty(): return 0.0
+	var tot := 0
+	var miei := 0
+	var scavo := 0
+	for q in gs.players:
+		tot += q.personaggi_storia.size()
+	for voce in p.personaggi_storia:
+		miei += 1
+		scavo += int(CardDB.characters.get(str(voce[0]), {}).get("scavo", 0))
+	if tot == 0: return 0.0
+	return float(n) * float(miei) / float(tot) * float(scavo) / float(miei)
+
 # La rovina la cui carta e' tornata al proprietario: fuori dalla mappa.
 static func fuori(b: Building) -> bool:
 	return carte_restituite() and b.state == Enums.BuildingState.ROVINA
@@ -168,6 +217,17 @@ static func _mazzo(gs: GameState, player: int) -> Array:
 # mazzetto e' finito, le caselle restano senza tessera (valgono 0).
 static func tessere(gs: GameState, b: Building) -> Array:
 	var n := quante(b)
+	if scheletri_personaggi():
+		# Dal sacchetto, a caso; vuoto, la casella resta senza tessera (vale 0).
+		while b.tessere.size() < n:
+			if gs.sacchetto.is_empty():
+				b.tessere.append({"v": 0})
+				gs.players[b.owner].bump("sacchetto_vuoto")
+				continue
+			var i := gs.rng.randi_range(0, gs.sacchetto.size() - 1)
+			var cid := str(gs.sacchetto.pop_at(i))
+			b.tessere.append({"v": int(CardDB.characters[cid].get("scavo", 0)), "chi": cid})
+		return b.tessere
 	if b.tessere.size() < n:
 		var m := _mazzo(gs, b.owner)
 		while b.tessere.size() < n and not m.is_empty():
@@ -197,9 +257,32 @@ static func scava(gs: GameState, costruito: Building) -> void:
 				gs.log_line("Scavo dell'era moderna: %s riporta alla luce %s" % [costruito.data["name"], b.data["name"]])
 			coda.append_array(b.basi)
 
+# Gli scheletri sono i Personaggi (registro 188): ogni tessera riportata
+# alla luce paga il suo Scavo a chi ha reclutato quel Personaggio. Le
+# tessere mai scoperte non valgono niente; il proprietario della rovina non
+# incassa dalle tessere.
+static func _conta_personaggi(gs: GameState) -> void:
+	for b in gs.grid.buildings:
+		if quante(b) == 0 or not b.scavata: continue
+		for t in tessere(gs, b):
+			if not t.has("chi"): continue
+			var chi := proprietario_personaggio(gs, str(t["chi"]))
+			var v := int(t.get("v", 0))
+			if chi < 0 or v <= 0: continue
+			var p: PlayerState = gs.players[chi]
+			p.add_vp("scavo", v, "scheletri ritrovati")
+			p.bump("scavo_scheletri", v)
+			p.bump("scavo_tessere", v)
+			b.rende("scavo", v)
+			gs.log_line("%s riportato alla luce: lo scheletro di %s vale %d a giocatore %d" % [
+				b.data["name"], CardDB.characters[str(t["chi"])]["name"], v, chi])
+
 # A fine partita: il proprietario incassa le sue tessere, per intero se
 # scoperte, a meta' se ancora coperte; le icone valgono solo se scoperte.
 static func conta(gs: GameState) -> void:
+	if scheletri_personaggi():
+		_conta_personaggi(gs)
+		return
 	for p in gs.players:
 		# Lo scheletro vale lo Scavo stampato sul Personaggio (registro 133);
 		# senza valore stampato, 6 meno l'era, per i Personaggi delle ere 1-4.

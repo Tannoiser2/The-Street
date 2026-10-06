@@ -2983,3 +2983,29 @@ dato è stato importato da lì. Ma due confronti fra ciò che è stampato e
     che il designer ha voluto tenere a 14,7; forbice 28-40, la piu' stretta
     misurata. Cinquantaseiesima misura.
 
+188. **Gli scheletri sono i Personaggi, il sacchetto dei reclutati.** Il
+    designer: "i personaggi sono 80 e le tessere scavo pure, se ogni tessera
+    scavo ha lo scheletro di un personaggio abbiamo un match perfetto";
+    "narrativamente il ritrovamento e' un valore per tutti e di chi ha
+    quello scheletro"; "prendo il personaggio che vale piu' punti nella
+    speranza che sia ritrovato". Oggi (lotti a 2, 3 e 4 giocatori, parziali):
+    ogni giocatore pesca 7,5 tessere dal suo mazzetto da 20 e ne riporta alla
+    luce 3, il 40%; gli scheletri (4 su 20) danno 3 PV a testa. Regola
+    provata (`tessere_scavo.scheletri: "personaggi"`, variante
+    `scheletri_personaggi`): una tessera per Personaggio, in un sacchetto
+    unico in cui entra quando il Personaggio viene reclutato (gli scartati del
+    draft restano fuori: ogni scheletro ha un padrone e la quota di ognuno
+    non dipende dal numero di giocatori); la rovina pesca al crollo; la
+    tessera riportata alla luce paga il suo Scavo a chi ha reclutato quel
+    Personaggio, chiunque abbia scavato; il proprietario della rovina non
+    incassa dalle tessere (niente cubetto da ricordare sotto le carte: il
+    designer, "se ci costruisco sopra un altro edificio dove metto il
+    cubetto?"); chi costruisce sopra prende il bonus scavo come sempre. Un
+    numero solo per tessera: niente valore 0-3, niente era, niente arte.
+    Coi valori di oggi (Scavo da 2 a 6, media 3,9) 3 tessere a testa
+    valgono circa 12 PV, quanto tessere e scheletri insieme oggi. Il bot:
+    al draft lo Scavo vale 0,15 a punto per tutti (`scheletro_atteso`), la
+    Ritrovamenti conta la quota di scheletri suoi nella pila. Il designer
+    chiede di controllare se cambia lo spianare e il costruire sopra le
+    rovine. Misura nella cinquantasettesima.
+

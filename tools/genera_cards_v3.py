@@ -864,6 +864,10 @@ def grandi_vecchie(v):
 #   --variante spianato_intero  lo spianato di prima: tutta la carta terrapieno, Scavo 0, niente tessere
 def spianato_intero(v):
     v["constants"]["tessere_scavo"].pop("spianato", None)
+#   --variante scheletri_personaggi  gli scheletri sono i Personaggi (registro 188): una tessera per
+#                                    Personaggio nel sacchetto dei reclutati, paga il suo Scavo a chi lo ha
+def scheletri_personaggi(v):
+    v["constants"]["tessere_scavo"]["scheletri"] = "personaggi"
 #   --variante finali_senza_tetto  Museo e Universita' senza il tetto del registro 187
 def finali_senza_tetto(v):
     for b in v["buildings"]:
@@ -875,7 +879,7 @@ def finali_senza_tetto(v):
 def grattacielo_caro(v):
     for b in v["buildings"]:
         if b["id"] == "ed_grattacielo": b["cost"] = prod(pietra=3, idee=1)
-VARIANTI = {"finali_senza_tetto": finali_senza_tetto, "spianato_intero": spianato_intero, "grattacielo_caro": grattacielo_caro, "grandi_vecchie": grandi_vecchie, "proprietario": proprietario, "compenso_pv": compenso_pv, "senza_sconti": senza_sconti,
+VARIANTI = {"scheletri_personaggi": scheletri_personaggi, "finali_senza_tetto": finali_senza_tetto, "spianato_intero": spianato_intero, "grattacielo_caro": grattacielo_caro, "grandi_vecchie": grandi_vecchie, "proprietario": proprietario, "compenso_pv": compenso_pv, "senza_sconti": senza_sconti,
             "lampo_vecchio": lampo_vecchio, "extra_sempre": extra_sempre, "senza_extra": senza_extra, "costi_vecchi": costi_vecchi,
             "case_seconda": case_seconda, "case_lampo1": case_lampo1, "senza_tuning": senza_tuning,
             "terreno_produce": terreno_produce, "senza_potenziamento_insieme": senza_potenziamento_insieme}
