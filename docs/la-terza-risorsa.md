@@ -2647,9 +2647,58 @@ in piu' nel canale Scavo. Il designer: "tieni lo scavo a 14,7". Resta il
 Lampo a 23: e' il bot (`SPINTE_V3`, `lampo`) da riguardare, perche' il canale
 Lampo non e' cambiato.
 
+## Cinquantaduesima misura: la taratura della Lampo nel bot
+
+Dopo lo spianamento parziale (cinquantunesima) la Lampo era l'ultima, al 23%.
+Il designer: "vai con la taratura della Lampo nel bot". Tre tarature con
+`--spinta` sugli stessi 300 semi, file base della 51ª, bot senza i finali.
+
+| vittorie | 51ª (`lampo` 0,8) | `lampo` 0,5 | `lampo` 1,1 | `lampo_potenzia` 0,5 |
+|---|---|---|---|---|
+| Bil / Cont / Lampo / Obi / Rend / Ritro / Scavo | 34 / 42 / 23 / 37 / 28 / 39 / 31 | 28 / 39 / **35** / 34 / 28 / 40 / 29 | 32 / 42 / 24 / 41 / 25 / 40 / 30 | 32 / 42 / 22 / 36 / 30 / 39 / 33 |
+| PV della Lampo | 76,3 | 78,4 | 77,9 | 77,8 |
+| canali della Lampo: Lampo / Rendita / Scavo | 24,2 / 7,1 / 13,0 | 20,7 / 11,0 / 13,0 | — | — |
+| PV a testa | 78,7 | 78,6 | 79,0 | 78,9 |
+
+`lampo` 0,5 porta la Lampo dal 23 al 35% e dai 76,3 ai 78,4 PV, la media del
+tavolo. Resta una Lampo: 20,7 PV dal canale contro i 18-19 delle altre, ma
+non butta piu' le carte a Rendita (11,0 contro 7,1 di prima). Spingere di
+piu' (1,1) o frenare i potenziamenti (`lampo_potenzia` 0,5) non muove nulla.
+La forbice passa da 23-42 a 28-40. Scelta: `lampo` 0,5 nella tabella
+`SPINTE_V3` (registro 184).
+
+## Cinquantatreesima misura: il bot che pesa i finali, a carte vecchie
+
+Il registro 181: il bot non pesava gli effetti `on_final_scoring`. Stesso
+file base della 51ª, bot coi finali (`finali_peso` 0,8, `finali_peso_prima`
+0,4), tabella della 51ª.
+
+| a giocatore | 51ª (bot cieco) | bot coi finali |
+|---|---|---|
+| PV a testa | 78,7 | 84,0 |
+| canale effetti finali | 4,6 | 10,0 |
+| altri canali Lampo / Cont / Scavo / Rendita | 18,6 / 14,7 / 14,7 / 12,4 | 18,8 / 14,6 / 14,8 / 12,4 |
+| Universita' costruite in 300 partite | 46 | 185 |
+| Grattacieli | 80 | 52 |
+| vittorie Bil / Cont / Lampo / Obi / Rend / Ritro / Scavo | 34 / 42 / 23 / 37 / 28 / 39 / 31 | 40 / 26 / 19 / 37 / 39 / 42 / 29 |
+
+Il canale dei finali raddoppia e i PV salgono di 5,3 a testa: e' quasi tutta
+l'Universita', costruita in 185 partite su 300 appena il bot ne vede il
+valore ("+1 PV per ogni tuo Personaggio reclutato": nella v3 tutti ne
+reclutano 20, quindi +20 fissi a chi arriva primo, registro 182). Le
+vittorie si rimescolano intorno a chi la prende: la Rendita sale a 39, la
+Continuita' crolla a 26, la Lampo a 19. Il Grattacielo scende (80 -> 52):
+coi finali il bot preferisce l'Universita' allo stesso prezzo. La misura non
+vale come taratura, vale come prova: la carta era rotta e il bot cieco la
+nascondeva. Da qui le decisioni dei registri 182 (Universita' sui Personaggi
+con Scavo 5+) e 183 (Grattacielo a 2 Costruzione 1 Idea), misurate insieme
+nella cinquantaquattresima.
+
 ## Come rifare il conto
 
 ```bash
+# cinquantaduesima e cinquantatreesima misura: tarature Lampo (`--spinta lampo=0.5`, `lampo=1.1`,
+#   `lampo_potenzia=0.5`) e il bot coi finali (registro 181), stesso comando della quarantanovesima
 # cinquantunesima misura: lo spianamento parziale (registro 180); stesso comando della quarantanovesima col
 #   file base rigenerato (`python3 tools/genera_cards_v3.py`); `--variante spianato_intero` rifa' la regola di prima
 # cinquantesima misura: il Grattacielo a tre binari, livello 1, qualunque terreno (registro 179);

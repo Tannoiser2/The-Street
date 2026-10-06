@@ -2903,8 +2903,10 @@ dato è stato importato da lì. Ma due confronti fra ciò che è stampato e
     altre, solo in `SPINTE_V3` (v1.5 e v2 com'erano). Nell'audit `--schermo`
     assegna le strategie come la schermata d'inizio, per rigiocare la partita
     vista a schermo, e `--perche` stampa la "vetrina" (risorse di chi muove,
-    posti legali e prezzo di ogni carta in vendita). Misura nella
-    cinquantatreesima.
+    posti legali e prezzo di ogni carta in vendita). Misurato
+    (cinquantatreesima): a carte vecchie il canale dei finali raddoppia
+    (4,6 -> 10,0) e l'Universita' si costruisce in 185 partite su 300: era
+    il bot cieco a nascondere la carta rotta (182).
 
 182. **L'Universita' vale +20 fissi.** Trovato rigiocando il seme 2530 col
     bot che pesa i finali: "+1 PV per ogni tuo Personaggio reclutato" nella
@@ -2931,4 +2933,11 @@ dato è stato importato da lì. Ma due confronti fra ciò che è stampato e
     la carta e' succulenta in alto ed e' giusto che a terra valga il Lampo.
     `--variante grattacielo_caro` rimette 3 e 1. Da misurare
     (cinquantaquattresima, insieme alla 182 e alla taratura Lampo scelta).
+
+184. **La Lampo nel bot: `lampo` 0,5.** Il designer: "vai con la taratura
+    della Lampo nel bot". Dopo lo spianamento parziale la Lampo era ultima
+    al 23%. Cinquantaduesima misura: `lampo` 0,5 la porta al 35% con 78,4 PV
+    (la media), e resta una Lampo (20,7 PV dal canale contro 18-19) che non
+    butta piu' le carte a Rendita (11,0 contro 7,1); `lampo` 1,1 e
+    `lampo_potenzia` 0,5 non muovono nulla. Nella tabella `SPINTE_V3`.
 

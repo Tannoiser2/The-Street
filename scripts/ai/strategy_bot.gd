@@ -688,7 +688,11 @@ static var spinte_override := {}
 # `scavo_premio` 0,8 e `scavo_terra_scavo` 0,5 non alzano la Scavo (29) ma
 # stringono la forbice di tutte a 29-37, la piu' stretta misurata (a 1,2 e
 # -0,2 di `scavo_terra` la Scavo scende a 27).
-const SPINTE_V3 := {"rendita_per_era": 1.3, "rendita_zero": -1.5, "lampo": 0.8, "lampo_zero": 0.0,
+# Registro 184 (cinquantaduesima misura): dopo lo spianamento parziale la Lampo
+# era al 23%, ultima; `lampo` a 0,5 la porta al 35 con 78,4 PV, e resta una
+# Lampo (20,7 PV dal canale contro 18-19 delle altre) che non butta piu' le
+# carte a Rendita (11,0 contro 7,1); a 1,1 e con `lampo_potenzia` 0,5 nulla.
+const SPINTE_V3 := {"rendita_per_era": 1.3, "rendita_zero": -1.5, "lampo": 0.5, "lampo_zero": 0.0,
 	"scavo_premio": 0.8, "scavo_terra": -0.5, "scavo_terra_scavo": 0.5, "protezione_attesa": 2.0,
 	# `obiettivi_peso` 0,8: nel torneo a sette strategie la Obiettivi stava al 42-44 (quarantottesima).
 	"lampo_potenzia": 1.5, "lampo_sopra": 0.0, "obiettivi_peso": 0.8, "continuita_peso": 1.0,
