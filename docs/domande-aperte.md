@@ -2970,3 +2970,16 @@ dato è stato importato da lì. Ma due confronti fra ciò che è stampato e
     Ritrovamenti al 42-48 (i finali di Museo e Parco archeologico sono suoi),
     Bilanciata e Scavo al 27-29.
 
+187. **La Ritrovamenti, e il tetto ai finali.** Il designer: "vai con la
+    taratura della Ritrovamenti", poi "scegli tu". Stava al 42-44% con 3 PV
+    sopra gli altri; le sue manopole (`ritro_riscoperta`, `ritro_caselle`,
+    `ritro_arte`, la nuova `ritro_azione_scavo`) la spostano di 2-3 punti.
+    L'audit ora rende il finale carta per carta (`finale` nella riga J):
+    Universita' 7,4 PV a costruzione e Museo 6,9, le altre 0-4,8; la Ritro
+    prendeva 2,3 PV a partita dall'Universita' col draft dei Personaggi con
+    Scavo alto. Scelta: Museo max 6 e Universita' max 5 (come la Stazione;
+    `--variante finali_senza_tetto` li toglie) e `ritro_scheletro` 0. La
+    Ritro resta la piu' forte di poco (40, +1,1 PV) per via delle rovine,
+    che il designer ha voluto tenere a 14,7; forbice 28-40, la piu' stretta
+    misurata. Cinquantaseiesima misura.
+

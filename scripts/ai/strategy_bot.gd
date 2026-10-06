@@ -703,7 +703,12 @@ const SPINTE_V3 := {"rendita_per_era": 1.3, "rendita_zero": 0.0, "lampo": 0.8, "
 	# lasceranno tessere, la riscoperta delle proprie rovine nell'era 5 (per tessera), l'Arte.
 	# Con le caselle a 0,6 vinceva il 43% giocando da Rendita (le carte larghe sono quelle a
 	# Rendita 2); a 0,2, con arte 0,4 e scheletro 0,3, sta al 33 (quarantottesima misura).
-	"ritro_scheletro": 0.3, "ritro_caselle": 0.2, "ritro_riscoperta": 1.2, "ritro_arte": 0.4,
+	# Registro 187 (cinquantaseiesima misura): la Ritrovamenti stava al 42-44%
+	# con 3 PV piu' degli altri; le sue manopole la spostavano di 2-3 punti.
+	# Il vantaggio era nei finali senza tetto di Universita' e Museo (ora max
+	# 5 e 6) e nel draft dei Personaggi con Scavo alto: `ritro_scheletro` a 0
+	# la porta al 40 con 1 PV sopra la media, la forbice piu' stretta (28-40).
+	"ritro_scheletro": 0.0, "ritro_caselle": 0.2, "ritro_riscoperta": 1.2, "ritro_arte": 0.4,
 	"ritro_azione_scavo": 0.8,
 	# I FINALI DELLE CARTE (registro 181): il bot non li pesava affatto, e il
 	# Grattacielo ("+1 PV per livello") valeva per lui il Lampo meno il costo.

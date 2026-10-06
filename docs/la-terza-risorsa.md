@@ -2768,9 +2768,66 @@ coi finali: i suoi 8,4 PV di finali sono i piu' alti, Museo e Parco
 archeologico sono carte sue), la Bilanciata e la Scavo le piu' deboli
 (27-29). Le leve sono `ritro_*` e il peso dei finali per strategia.
 
+## Cinquantaseiesima misura: la taratura della Ritrovamenti
+
+Il designer: "vai con la taratura della Ritrovamenti", poi "scegli tu".
+Base: la 54ª "spinta 0,8" (tabella del registro 186): Ritro al 42% con
+84,4 PV contro 79-81 delle altre. Tre giri sugli stessi 300 semi.
+
+**Primo giro, le sue manopole.** `ritro_riscoperta` 0,8: 44 (84,8 PV);
+con `ritro_caselle` 0,1: 43 (84,2); draft tiepido (`ritro_scheletro` 0,2,
+`ritro_arte` 0,3, riscoperta 1,0): 42 (84,5). Niente.
+
+**Secondo giro, piu' largo.** "Stretta" (caselle 0, riscoperta 0,8,
+`ritro_azione_scavo` 0, nuova manopola per la spinta che era fissa): 40
+(83,5). Finali pesati meno per tutti (0,6 / 0,3): 42 (84,0).
+`ritro_scheletro` 0: 39 (82,1). Intanto l'audit ha il finale reso carta
+per carta (`finale` nella riga J, campo `Building.finale_reso`):
+
+| carta | finale medio a costruzione | costruite in 300 partite |
+|---|---|---|
+| Universita' | 7,4 | 112 |
+| Museo | 6,9 | 183 |
+| Stazione (max 5) | 4,8 | 14 |
+| Parco archeologico | 4,4 | 185 |
+| Condominio (max 4), Fondazione d'arte | 3,2 / 3,2 | 256 / 222 |
+| le altre | 0 - 3,0 | |
+
+La Ritro prendeva dall'Universita' 2,3 PV a partita contro 0,6-0,8 delle
+altre (col draft archeologico ha 7-8 Personaggi con Scavo 5+) e dal Museo
+1,3-2,0 (con lo spianamento parziale le rovine riscoperte sono 2,9 a
+giocatore, e "+2 per rovina riscoperta" e' diventato grasso).
+
+**Terzo giro, il tetto.** Museo max 6, Universita' max 5 (registro 187),
+come la Stazione; `--variante finali_senza_tetto` li toglie.
+
+| | base | tetto | tetto + `ritro_scheletro` 0 |
+|---|---|---|---|
+| finale medio Universita' / Museo | 7,4 / 6,9 | 4,6 / 5,8 | 4,9 / 5,7 |
+| finali della Ritro / della Bilanciata | 7,9 / 6,4 | 6,3 / 6,0 | 6,2 / 6,0 |
+| PV a testa, canale finali | 81,0 · 6,8 | 80,4 · 6,2 | 80,2 · 6,2 |
+| PV della Ritro | 84,4 | 83,4 | 81,3 |
+| vittorie Bil / Cont / Lampo / Obi / Rend / Ritro / Scavo | 27 / 32 / 36 / 36 / 31 / 42 / 29 | 28 / 32 / 34 / 33 / 30 / 44 / 31 | 29 / 36 / 32 / 38 / 28 / 40 / 30 |
+
+Col tetto il vantaggio nei finali sparisce (6,3 contro 6,0) ma la Ritro
+resta al 44 con 3 PV di margine: li prende dallo Scavo (16,3 contro 14,9)
+e dalla Rendita (14,2 contro 12,5, le carte larghe sono quelle a Rendita
+2). E' la strategia fatta per il canale che lo spianamento parziale ha
+ingrassato, e che il designer ha voluto tenere a 14,7. Col draft a zero
+scende al 40 con 1,1 PV sopra la media: forbice 28-40, la piu' stretta
+misurata nel torneo a sette.
+
+Scelta: tetti e `ritro_scheletro` 0 in tabella. La Ritro resta la piu'
+forte di poco e lo e' per via delle rovine, non di una carta; il draft dei
+Personaggi con Scavo alto torna a tutti, e l'Universita' smette di essere
+la carta di una strategia sola (0,5 PV a partita per tutte). Base da qui:
+il lotto "tetto + scheletro 0", 80,2 PV a testa.
+
 ## Come rifare il conto
 
 ```bash
+# cinquantaseiesima misura: la Ritrovamenti (registro 187); stesso comando della quarantanovesima con
+#   `--spinta ritro_...`; il tetto ai finali e' nel file base rigenerato, `--variante finali_senza_tetto` lo toglie
 # cinquantacinquesima misura: la tabella senza coperture (registro 185), stesso comando della quarantanovesima;
 #   la base e' il lotto della 54ª con `--spinta lampo=0.8`, ora uguale alla tabella (registro 186)
 # cinquantaquattresima misura: tutto insieme (registri 181-184), stesso comando della quarantanovesima,
