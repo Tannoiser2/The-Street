@@ -585,6 +585,11 @@ func _descrivi_sotto_carta(c: Dictionary) -> PackedStringArray:
 			out.append(str(pe["name"]))
 			out.append("personaggio · %s" % pe["class"])
 			if str(pe.get("effect_text", "")) != "": out.append(str(pe["effect_text"]))
+			# Girato (registro 194): e' uno scheletro, la tessera e' nel
+			# sacchetto o sotto una rovina; a fine partita, mai ritrovato.
+			if bool(c.get("coperta", false)):
+				out.append("scheletro mai ritrovato" if ctl.gs.phase == Enums.Phase.FINE_PARTITA
+					else "era passata: e' uno scheletro, la sua tessera (Scavo %d) e' nel sacchetto o sotto una rovina" % int(pe.get("scavo", 0)))
 			# V3: e' un lavoratore; si dice se e' gia' stato piazzato in quest'era.
 			if _v3() and c.has("player") and int(c["player"]) == _io():
 				var mio: PlayerState = ctl.gs.players[_io()]

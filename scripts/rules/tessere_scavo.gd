@@ -71,6 +71,18 @@ static func recluta(gs: GameState, cid: String) -> void:
 static func al_crollo(gs: GameState, b: Building) -> void:
 	if scheletri_personaggi() and quante(b) > 0: tessere(gs, b)
 
+# I Personaggi il cui scheletro e' stato riportato alla luce: la tessera sta
+# sotto una rovina scoperta dallo scavo dell'era moderna. Per la vista, che a
+# fine partita rigira sul verso attivo solo questi (registro 194).
+static func scheletri_scoperti(gs: GameState) -> Dictionary:
+	var out := {}
+	if not scheletri_personaggi(): return out
+	for b in gs.grid.buildings:
+		if not b.scavata: continue
+		for t in b.tessere:
+			if t.has("chi"): out[str(t["chi"])] = true
+	return out
+
 # Chi ha reclutato il Personaggio, -1 se nessuno (il sacchetto era vuoto).
 static func proprietario_personaggio(gs: GameState, cid: String) -> int:
 	for p in gs.players:

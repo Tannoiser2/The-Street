@@ -58,6 +58,7 @@ func _ready() -> void:
 	_run("v3: lo spianamento parziale, terrapieno sotto e rovina accanto (registro 180)", _test_v3_spianato_parziale)
 	_run("v3: gli scheletri sono i Personaggi, il sacchetto dei reclutati (registro 188)", _test_v3_scheletri_personaggi)
 	_run("v3: l'evento coperto fino a fine era (registro 190)", _test_v3_evento_coperto)
+	_run("v3: il soffio non vale per la resistenza 1 (registro 193)", _test_v3_soffio_resistenza_1)
 	print("\n%d superati, %d falliti" % [_passed, _failed])
 	get_tree().quit(0 if _failed == 0 else 1)
 
@@ -2361,3 +2362,44 @@ func _test_v3_evento_coperto() -> void:
 	_eq("a fine era si scopre quello vero", str(gs.current_event.get("id", "")), vero)
 	_ok("  e il coperto si svuota", gs.evento_coperto.is_empty())
 	CardDB.load_db(CardDB.DB_PATH)
+
+# Il soffio non e' per tutti (registro 193): con `soffio_resistenza_min` 2 un
+# edificio con resistenza stampata 1 che fallisce l'evento crolla, anche di 1
+# solo, mentre uno da 2 che fallisce di 1 regge per un soffio come prima. Con
+# la manopola a 0 (la variante `soffio_per_tutti`) il soffio torna a tutti.
+func _test_v3_soffio_resistenza_1() -> void:
+	if not FileAccess.file_exists("res://data/proposte/cards-v3-era1.json"): return
+	CardDB.load_db("res://data/proposte/cards-v3-era1.json")
+	_eq("il file base esclude dal soffio la resistenza 1", int(CardDB.constants.get("soffio_resistenza_min", 0)), 2)
+	var ctl := _game(3, 925)
+	var gs := ctl.gs
+	while not gs.pending_choice.is_empty():
+		ctl.choose(int((gs.pending_choice["options"] as Array)[0]))
+	gs.grid.buildings.clear()
+	for i in gs.grid.n_cols: gs.grid.terrains[i] = Enums.Terrain.PIANURA
+	var trappole := _put(gs, 0, "ed_trappole_da_pesca", 1)
+	var palafitte := _put(gs, 1, "ed_palafitte", 3)
+	_eq("le Trappole da pesca hanno resistenza 1", trappole.effective_resistance(), 1)
+	_eq("le Palafitte hanno resistenza 2", palafitte.effective_resistance(), 2)
+	gs.current_event = {"id": "ev_prova", "name": "Prova", "force": 2, "effects": []}
+	EraRules.resolve_event(gs)
+	_eq("forza 2: le Trappole (1) falliscono di 1 e crollano, niente soffio", trappole.state, Enums.BuildingState.ROVINA)
+	_eq("  le Palafitte (2) reggono", palafitte.state, Enums.BuildingState.INTATTO)
+	gs.current_event = {"id": "ev_prova", "name": "Prova", "force": 3, "effects": []}
+	EraRules.resolve_event(gs)
+	_eq("forza 3: le Palafitte falliscono di 1 e reggono per un soffio", palafitte.state, Enums.BuildingState.INTATTO)
+	# Con l'Argine le Trappole arrivano a 2 effettiva, ma la stampata resta 1:
+	# fallire e' crollare lo stesso.
+	var trappole2 := _put(gs, 0, "ed_trappole_da_pesca", 5)
+	trappole2.bonus_res = 1
+	_eq("con l'Argine le Trappole hanno 2 effettiva", trappole2.effective_resistance(), 2)
+	EraRules.resolve_event(gs)
+	_eq("  ma a forza 3 crollano: conta la resistenza stampata", trappole2.state, Enums.BuildingState.ROVINA)
+	# La manopola a 0: il soffio torna a tutti.
+	CardDB.constants["soffio_resistenza_min"] = 0
+	var trappole3 := _put(gs, 0, "ed_trappole_da_pesca", 6)
+	gs.current_event = {"id": "ev_prova", "name": "Prova", "force": 2, "effects": []}
+	EraRules.resolve_event(gs)
+	_eq("manopola a 0: le Trappole a forza 2 reggono per un soffio", trappole3.state, Enums.BuildingState.INTATTO)
+	CardDB.load_db(CardDB.DB_PATH)
+
