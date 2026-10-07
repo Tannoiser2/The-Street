@@ -2864,6 +2864,11 @@ Se la regola piace, le due strategie vanno ripensate attorno al draft dei
 Personaggi con Scavo alto (il bot oggi lo pesa 0,15 a punto per tutti) e
 allo scavare le pile altrui.
 
+Controllo a 2 e 4 giocatori (100 partite ciascuno): tessere pescate 7,4 /
+7,6 / 7,0 e scoperte 3,0 / 3,0 / 2,9 a giocatore a 2 / 3 / 4; scheletri
+11,1 / 11,4 / 11,1 PV a testa; il sacchetto non e' mai vuoto. La quota di
+ognuno non dipende dal numero di giocatori, com'era voluto.
+
 ## Come rifare il conto
 
 ```bash
