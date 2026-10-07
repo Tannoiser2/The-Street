@@ -708,10 +708,14 @@ const SPINTE_V3 := {"rendita_per_era": 1.3, "rendita_zero": 0.0, "lampo": 0.8, "
 	# Il vantaggio era nei finali senza tetto di Universita' e Museo (ora max
 	# 5 e 6) e nel draft dei Personaggi con Scavo alto: `ritro_scheletro` a 0
 	# la porta al 40 con 1 PV sopra la media, la forbice piu' stretta (28-40).
-	"ritro_scheletro": 0.0, "ritro_caselle": 0.2, "ritro_riscoperta": 1.2, "ritro_arte": 0.4,
+	# Registro 189 (cinquantottesima): col sacchetto le due strategie delle
+	# rovine puntano sugli scheletri al draft, ognuna con la sua misura:
+	# Ritrovamenti 0,15 (a 0,3 saliva al 43), Scavo 0,6 (a 0,3 restava al 29).
+	# Vittorie 30-37, la forbice piu' stretta misurata.
+	"ritro_scheletro": 0.15, "ritro_caselle": 0.2, "ritro_riscoperta": 1.2, "ritro_arte": 0.4,
 	"ritro_azione_scavo": 0.8,
 	# Registro 188 (`scheletri: "personaggi"`): lo Scavo del Personaggio al draft, per tutti.
-	"scheletro_atteso": 0.15, "scavo_scheletro": 0.0,
+	"scheletro_atteso": 0.15, "scavo_scheletro": 0.6,
 	# I FINALI DELLE CARTE (registro 181): il bot non li pesava affatto, e il
 	# Grattacielo ("+1 PV per livello") valeva per lui il Lampo meno il costo.
 	# Peso dei PV che l'effetto finale darebbe se la partita finisse adesso,

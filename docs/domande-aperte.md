@@ -3019,6 +3019,21 @@ dato è stato importato da lì. Ma due confronti fra ciò che è stampato e
     chi ha i Personaggi, le due strategie delle rovine hanno perso la
     nicchia (27% entrambe nella 57ª). Manopola `scavo_scheletro`: al draft
     lo Scavo del Personaggio vale per loro `scavo_scheletro` a punto in piu'
-    dello 0,15 di tutti. Da misurare: 0,3, 0,6, e 0,3 con la riscoperta a
-    2,0 (cinquantottesima).
+    dello 0,15 di tutti. Misurato (cinquantottesima): a 0,3 per tutte e
+    due la Ritrovamenti vola al 43 e la Scavo resta al 29; manopole
+    separate, Scavo 0,6 e Ritrovamenti 0,15 danno vittorie 30-37, la
+    forbice piu' stretta misurata. In tabella.
+
+190. **Due varianti del designer: il mercato intero e l'evento coperto.**
+    "Cosa cambia se durante un'era tutti gli edifici sono disponibili
+    all'acquisto, senza pescarli di volta in volta? E la variante che
+    l'evento viene scoperto a fine era e non all'inizio". Varianti
+    `tutto_in_vendita` (12 carte in vetrina) ed `evento_coperto` (manopola
+    `evento_a_fine_era`: durante l'era si sa solo la forza, l'evento vero si
+    scopre quando colpisce). Misurate (59ª e 60ª): col mercato intero +3,5
+    PV a testa, vincono di piu' chi pianifica (Continuita' 42) e perde la
+    Scavo (22), forbice 22-42; con l'evento coperto 273 partite su 300
+    identiche alla base, perche' il bot difende sulla forza e non sul tipo;
+    si perdono gli effetti in-era. Nessuna delle due nel file base:
+    decisione del designer.
 
