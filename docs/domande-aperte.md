@@ -3037,3 +3037,32 @@ dato è stato importato da lì. Ma due confronti fra ciò che è stampato e
     si perdono gli effetti in-era. Nessuna delle due nel file base:
     decisione del designer.
 
+
+191. **Il sacchetto a schermo e' uno solo; i Personaggi su piu' colonne.**
+    Il designer: "nella vista 3D non c'e' il sacchetto unico, ma sono
+    ancora una pila a giocatore, poi puoi ridistribuire meglio i personaggi
+    su piu' file, in modo da non avere una fila infinita". Il sacchetto
+    (registro 188) stava davanti a ogni giocatore come il mazzetto rovine
+    della v2: adesso e' uno, in cima alla fila dei Personaggi a fianco della
+    Dinastia, e le tessere volano da li' chiunque sia il proprietario che
+    crolla. Nel posto del giocatore i Personaggi stavano in una colonna
+    sola di fianco all'Eredita' (quindici carte a fine partita, piu' lunga
+    della strada): ora in alto stanno Eredita', Monumenti e token, e sotto
+    i Personaggi a ventaglio su quante colonne ci stanno nel posto (due in
+    tre e in quattro, con una stretta di 0,95 in quattro; tre in due),
+    riempite a giro cosi' una carta non si sposta quando ne arriva un'altra.
+
+192. **Seme 925: le Trappole da pesca dell'era 1 arrivano alla fine.**
+    Il designer: "ha delle cose sopravvissute dalla prima era come le
+    trappole da pesca, come e' stato possibile?". Non e' un bug, sono tre
+    regole che si sommano. Resistenza 1. Era 1, Inverno lungo (forza 2):
+    fallisce di 1, e con `rovina_gap` 2 e `senza_rudere` "regge per un
+    soffio", resta intatto. Era 2: Dolmen +1 per l'era, Argine +1 per
+    sempre (2), e il Personaggio piazzato in colonna 6 protegge l'edificio
+    proprio che rende di piu' nella colonna (+2, `protection_bonus`): 5
+    contro Invasione. Era 3, Guerra (forza 4): il Podesta' in colonna 6 da'
+    di nuovo +2, 2+2 = 4, regge e prende Vetusta'. Era 4, Speculazione
+    (forza 3): nessuno in colonna 6 del proprietario, 2 contro 3, regge per
+    un soffio. Era 5: il proprietario torna in colonna 6, +2. Le manopole
+    sono `rovina_gap`, `senza_rudere`, `protection_bonus` nei dati: se un
+    edificio da 1 che vive cinque ere non va bene, e' li' che si agisce.

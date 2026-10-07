@@ -599,7 +599,7 @@ func _descrivi_sotto_carta(c: Dictionary) -> PackedStringArray:
 		"mazzetto":
 			if TessereScavo.scheletri_personaggi():
 				out.append("Il sacchetto delle tessere scavo")
-				out.append("%d dentro: una per Personaggio reclutato, pescate quando un edificio crolla" % TessereScavo.rimaste(ctl.gs, int(id)))
+				out.append("%d dentro: una per Personaggio reclutato, pescate quando un edificio crolla" % TessereScavo.rimaste(ctl.gs, id.to_int()))
 			else:
 				out.append("Mazzetto rovine del giocatore %s" % id)
 				out.append("%d tessere scavo ancora da pescare" % TessereScavo.rimaste(ctl.gs, int(id)))

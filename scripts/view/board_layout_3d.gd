@@ -1166,6 +1166,16 @@ static func _fila_destra(gs: GameState) -> Array[Dictionary]:
 
 	out.append({"kind": "dinastia", "id": "dinastia_1",
 		"aabb": AABB(Vector3(x, 0.0, z), Vector3(m_din.x, TESSERA_Y, m_din.y))})
+	# IL SACCHETTO DELLE TESSERE SCAVO (registro 188): uno solo, di tutti.
+	# Le tessere dentro sono gli scheletri dei Personaggi reclutati, quindi
+	# sta in cima alla loro fila, a fianco della Dinastia, dove nessun
+	# giocatore puo' crederlo suo. Prima stava davanti a ogni giocatore come
+	# il mazzetto rovine della v2, e a schermo sembravano tre sacchetti.
+	if grandezza_vera() and TessereScavo.scheletri_personaggi():
+		var m_sac := misura_carta("mazzetto")
+		out.append({"kind": "mazzetto", "id": "sacchetto",
+			"aabb": AABB(Vector3(x + m_din.x + CARTA_GAP, 0.0, z + (m_din.y - m_sac.y) / 2.0),
+				Vector3(m_sac.x, TESSERA_Y, m_sac.y))})
 	z += m_din.y + CARTA_GAP * 3.0
 
 	for i in righe:
@@ -1253,7 +1263,11 @@ static func carte_giocatore(gs: GameState, player: int, umano := -1) -> Array[Di
 	if grandezza_vera():
 		# IL MAZZETTO ROVINE (registro 139) sta davanti al giocatore, primo
 		# della riga: da li' volano le tessere quando un suo edificio crolla.
-		out.append({"kind": "mazzetto", "id": str(player)})
+		# Col sacchetto (registro 188) le tessere sono una per Personaggio
+		# reclutato e stanno in un sacchetto COMUNE: non c'e' niente di suo da
+		# mettere qui, il sacchetto sta in cima alla fila dei Personaggi.
+		if not TessereScavo.scheletri_personaggi():
+			out.append({"kind": "mazzetto", "id": str(player)})
 		for voce in p.personaggi_storia:
 			var cid := str(voce[0])
 			if visti.has(cid): continue
@@ -1450,12 +1464,25 @@ static func player_cards(gs: GameState, umano := -1) -> Array[Dictionary]:
 # IL POSTO DEL GIOCATORE CON LE CARTE RESTITUITE (registro 141). Il
 # designer: "i personaggi impilati uno sopra l'altro leggermente sfasati in
 # modo da lasciare leggere il Nome, i potenziamenti sotto i personaggi uno
-# sotto l'altro, le milestone acquisite sotto l'obiettivo segreto". Due
-# colonne: a sinistra il mazzetto rovine e sotto l'Eredita' con i Monumenti,
-# a destra i Personaggi a ventaglio con sotto i token riscattati. In riga
-# ognuno si stendeva di fianco all'altro, andava a capo e a fine partita non
-# si capiva piu' cosa fosse di chi. Una terza colonna per l'Eredita' non ci
-# sta: a tre giocatori restava larga due dita.
+# sotto l'altro, le milestone acquisite sotto l'obiettivo segreto".
+#
+# In alto, una riga: a sinistra il mazzetto rovine (v2) e sotto l'Eredita'
+# con i Monumenti, a destra i token riscattati uno sotto l'altro. Sotto, per
+# tutta la larghezza del posto, i Personaggi a ventaglio su PIU' COLONNE.
+# Prima stavano in una colonna sola di fianco all'Eredita': con la v3 se ne
+# prendono tre a era, e a fine partita quindici carte a passo 20 facevano
+# una fila piu' lunga della strada ("una fila infinita", il designer). Le
+# colonne sono quante ce ne stanno nella larghezza del posto, mai meno di
+# due: in quattro il posto e' stretto e le carte si stringono quel poco che
+# serve (0,95), come fa il mazzetto degli edifici.
+#
+# Le carte si distribuiscono a giro (la prima nella colonna 1, la seconda
+# nella 2, poi daccapo) e non a blocchi: cosi' la carta che c'e' gia' non si
+# sposta quando ne arriva una nuova, e si legge per righe, da sinistra a
+# destra, nell'ordine in cui i Personaggi sono stati presi - quelli di
+# quest'era in fondo, i piu' vicini a chi guarda.
+const PERSONAGGI_COLONNE_MIN := 2
+
 static func _tavolo_giocatore(carte: Array, player: int, x0: float, spazio: float,
 		z0: float) -> Array[Dictionary]:
 	var out: Array[Dictionary] = []
@@ -1467,11 +1494,9 @@ static func _tavolo_giocatore(carte: Array, player: int, x0: float, spazio: floa
 	var voce := func(j: int, box: AABB) -> Dictionary:
 		return {"kind": str(carte[j]["kind"]), "id": str(carte[j]["id"]),
 			"player": player, "ordine": j, "aabb": box}
-	var mp := misura_carta("personaggio")
 	var mt := misura_carta("token")
 	var largo_destra := 0.0
-	if not (colonne["personaggio"] as Array).is_empty(): largo_destra = mp.x
-	if not (colonne["token"] as Array).is_empty(): largo_destra = maxf(largo_destra, mt.x)
+	if not (colonne["token"] as Array).is_empty(): largo_destra = mt.x
 	# La colonna di sinistra prende il posto che resta, mai piu' larga
 	# dell'Eredita' vera: le carte troppo larghe si stringono in scala.
 	var largo_sinistra := minf(misura_carta("eredita").x,
@@ -1485,21 +1510,31 @@ static func _tavolo_giocatore(carte: Array, player: int, x0: float, spazio: floa
 			if m.x > largo_sinistra: m *= largo_sinistra / m.x
 			out.append(voce.call(j, AABB(Vector3(x0, 0.0, z), Vector3(m.x, TESSERA_Y, m.y))))
 			z += m.y + CARTE_GIOCATORE_GAP
-	var x := x0 + maxf(largo_sinistra, misura_carta("mazzetto").x) + CARTE_GIOCATORE_GAP
-	# A destra i Personaggi a ventaglio: ognuno copre il precedente lasciandone
-	# fuori il nome e l'era, e sta un filo piu' in alto (chi copre sta sopra).
-	# Sotto l'ultimo, i token riscattati, uno sotto l'altro e tutti scoperti.
-	z = z0
-	var n := 0
-	for j in colonne["personaggio"]:
-		out.append(voce.call(j, AABB(Vector3(x, float(n) * VENTAGLIO_Y, z),
-			Vector3(mp.x, TESSERA_Y, mp.y))))
-		z += VENTAGLIO_Z
-		n += 1
-	if n > 0: z += mp.y - VENTAGLIO_Z + CARTE_GIOCATORE_GAP
+	# A destra i token riscattati, uno sotto l'altro e tutti scoperti.
+	var x_token := x0 + maxf(largo_sinistra, misura_carta("mazzetto").x) + CARTE_GIOCATORE_GAP
+	var z_t := z0
 	for j in colonne["token"]:
-		out.append(voce.call(j, AABB(Vector3(x, 0.0, z), Vector3(mt.x, TESSERA_Y, mt.y))))
-		z += mt.y + CARTE_GIOCATORE_GAP
+		out.append(voce.call(j, AABB(Vector3(x_token, 0.0, z_t), Vector3(mt.x, TESSERA_Y, mt.y))))
+		z_t += mt.y + CARTE_GIOCATORE_GAP
+	z = maxf(z, z_t)
+	# Sotto, i Personaggi a ventaglio su piu' colonne: ognuno copre quello
+	# sopra di lui lasciandone fuori il nome e l'era, e sta un filo piu' in
+	# alto (chi copre sta sopra).
+	var pers: Array = colonne["personaggio"]
+	if pers.is_empty(): return out
+	var piena := misura_carta("personaggio")
+	var quante: int = maxi(PERSONAGGI_COLONNE_MIN,
+		int(floor((spazio + CARTE_GIOCATORE_GAP) / (piena.x + CARTE_GIOCATORE_GAP))))
+	var posto := (spazio - CARTE_GIOCATORE_GAP * (quante - 1)) / float(quante)
+	var scala: float = minf(1.0, posto / piena.x)
+	var mp := piena * scala
+	var passo := VENTAGLIO_Z * scala
+	for n in pers.size():
+		var colonna := n % quante
+		var riga := n / quante
+		out.append(voce.call(int(pers[n]), AABB(
+			Vector3(x0 + colonna * (mp.x + CARTE_GIOCATORE_GAP), float(riga) * VENTAGLIO_Y, z + riga * passo),
+			Vector3(mp.x, TESSERA_Y, mp.y))))
 	return out
 
 # Il mazzetto delle carte edificio, in DUE COLONNE CHE VOGLIONO DIRE
