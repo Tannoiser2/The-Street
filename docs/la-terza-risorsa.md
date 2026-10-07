@@ -2996,6 +2996,35 @@ dell'era 5 pensava a forza 6 e non ha mai messo un lavoratore a protezione
 (con 6 in testa nessuna protezione basta), ne' guardato i modificatori. Un
 giocatore vero legge la carta e protegge il Museo. Per questo la 63ª.
 
+## Sessantatreesima misura: il bot legge la forza dell'evento
+
+Registro 197: il bot sapeva la forza a memoria (`era + 1`, niente nell'era
+5) e nella v3 sbagliava di 2 nelle ere 4 e 5. Ora legge la carta girata, i
+dati per le ere a venire e i modificatori dell'evento. Stessi 300 semi; due
+lotti, col solo Giudizio del tempo (variante `giudizio_solo`) e coi sei
+eventi dell'era 5, da confrontare con la 61ª e la 62ª (bot a memoria).
+
+| a giocatore | Giudizio, bot a memoria (61ª) | Giudizio, bot legge | sei eventi, bot a memoria (62ª) | sei eventi, bot legge |
+|---|---|---|---|---|
+| PV a testa | 82,3 | 83,3 | 79,6 | 80,6 |
+| finali / Rendita / Scavo | 6,0 / 12,3 / 17,4 | 6,4 / 12,7 / 17,9 | 3,4 / 12,1 / 17,6 | 3,6 / 12,6 / 18,0 |
+| era 5: costruiti / in rovina (a partita) | 7,8 / 0,45 | 7,4 / 0,39 | 7,8 / 3,6 | 7,6 / 3,6 |
+| vittorie Bil / Cont / Lampo / Obi / Rend / Ritro / Scavo | 29 / 37 / 34 / 36 / 27 / 36 / 35 | 26 / 29 / 35 / 36 / 34 / 36 / 37 | 24 / 35 / 39 / 37 / 24 / 38 / 36 | 27 / 36 / 36 / 38 / 32 / 33 / 32 |
+
+Il bot che legge vale un punto a testa e rimette in piedi la Rendita (dal
+27 al 34 col Giudizio: nell'era 4 non spreca piu' protezioni contro una
+forza 5 che non c'e', e nell'era 5 protegge quello che rende). Coi sei
+eventi la forbice torna a 27-38 e la Rendita al 32, ma il conto dell'era 5
+non cambia: 3,6 edifici su 7,6 in rovina, i finali dimezzati, -2,7 PV a
+testa rispetto al Giudizio. Non e' il bot: le carte dell'era 5 hanno quasi
+tutte resistenza 3, contro la forza 4 vivono solo per il soffio, e qualunque
+-1 di classe o di terreno le fa crollare. Con sei eventi che portano tutti
+almeno un -1 a qualcuno, meta' dell'era Moderna cade; protezioni per
+tutte non ce ne sono (tre Personaggi, quattro turni, e l'ultimo edificio
+costruito non si protegge piu'). L'era 4 aveva lo stesso problema a forza
+5 ed e' stata portata a 3 (misura 127). Variante `eventi5_forza3`: i sei
+eventi a forza 3, misura sotto.
+
 ## Come rifare il conto
 
 ```bash

@@ -74,6 +74,13 @@ EVENTI_ERA_5 = [
                  {"hook": "on_event", "op": "resistance", "value": -1, "target": {"class": ["militare"]}}]},
 ]
 v3["events"].extend(EVENTI_ERA_5)
+#   --variante eventi5_forza3  i sei eventi dell'era 5 a forza 3, come l'era 4 (misura 63: a forza 4 meta' dell'era 5 crolla)
+def eventi5_forza3(v):
+    v["constants"]["event_force_by_era"]["5"] = 3
+    for e in v["events"]:
+        if int(e["era"]) == 5:
+            e["force"] = 3
+            e["effect_text"] = e["effect_text"].replace("Forza 4.", "Forza 3.")
 #   --variante giudizio_solo  l'era 5 col solo Giudizio del tempo (forza 4, nessun effetto), com'era prima del registro 196
 def giudizio_solo(v):
     v["events"] = [e for e in v["events"] if int(e["era"]) != 5]
@@ -941,7 +948,7 @@ def finali_senza_tetto(v):
 def grattacielo_caro(v):
     for b in v["buildings"]:
         if b["id"] == "ed_grattacielo": b["cost"] = prod(pietra=3, idee=1)
-VARIANTI = {"giudizio_solo": giudizio_solo, "soffio_per_tutti": soffio_per_tutti, "tutto_in_vendita": tutto_in_vendita, "evento_coperto": evento_coperto, "scheletri_personaggi": scheletri_personaggi, "mazzetti_colorati": mazzetti_colorati, "finali_senza_tetto": finali_senza_tetto, "spianato_intero": spianato_intero, "grattacielo_caro": grattacielo_caro, "grandi_vecchie": grandi_vecchie, "proprietario": proprietario, "compenso_pv": compenso_pv, "senza_sconti": senza_sconti,
+VARIANTI = {"eventi5_forza3": eventi5_forza3, "giudizio_solo": giudizio_solo, "soffio_per_tutti": soffio_per_tutti, "tutto_in_vendita": tutto_in_vendita, "evento_coperto": evento_coperto, "scheletri_personaggi": scheletri_personaggi, "mazzetti_colorati": mazzetti_colorati, "finali_senza_tetto": finali_senza_tetto, "spianato_intero": spianato_intero, "grattacielo_caro": grattacielo_caro, "grandi_vecchie": grandi_vecchie, "proprietario": proprietario, "compenso_pv": compenso_pv, "senza_sconti": senza_sconti,
             "lampo_vecchio": lampo_vecchio, "extra_sempre": extra_sempre, "senza_extra": senza_extra, "costi_vecchi": costi_vecchi,
             "case_seconda": case_seconda, "case_lampo1": case_lampo1, "senza_tuning": senza_tuning,
             "terreno_produce": terreno_produce, "senza_potenziamento_insieme": senza_potenziamento_insieme}
