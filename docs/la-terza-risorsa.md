@@ -2823,9 +2823,52 @@ Personaggi con Scavo alto torna a tutti, e l'Universita' smette di essere
 la carta di una strategia sola (0,5 PV a partita per tutte). Base da qui:
 il lotto "tetto + scheletro 0", 80,2 PV a testa.
 
+## Cinquantasettesima misura: gli scheletri sono i Personaggi (il sacchetto)
+
+Il registro 188: una tessera per Personaggio, nel sacchetto quando viene
+reclutato; la rovina pesca al crollo; la tessera riportata alla luce paga il
+suo Scavo a chi ha quel Personaggio, chiunque scavi; il proprietario della
+rovina non incassa dalle tessere. Variante `scheletri_personaggi` contro la
+base della 56ª, stessi 300 semi a 3 giocatori. Il designer chiedeva se cambia
+lo spianare e il costruire sopra le rovine.
+
+| a giocatore | base (56ª) | sacchetto |
+|---|---|---|
+| spianamenti / di cui parziali | 2,9 / 0,9 | 2,8 / 0,9 |
+| costruzioni sopra rovine proprie / altrui | 5,1 / 3,0 | 5,0 / 3,1 |
+| rovine riscoperte nell'era 5 | 2,93 | 2,81 |
+| bonus scavo di chi costruisce sopra (PV) | 5,3 | 5,4 |
+| tessere pescate / riportate alla luce | 7,5 / 3,0 | 7,6 / 3,0 |
+| volte in cui il sacchetto era vuoto | - | 0 |
+| PV a testa | 80,2 | 83,1 |
+| canale Scavo, di cui dalle tessere | 14,8 · 9,5 | 16,9 · 11,4 |
+| Lampo / Cont / Rendita / ★ / finali | 18,8 / 14,5 / 12,5 / 9,0 / 6,2 | 18,8 / 14,7 / 13,0 / 9,2 / 6,3 |
+| vittorie Bil / Cont / Lampo / Obi / Rend / Ritro / Scavo | 29 / 36 / 32 / 38 / 28 / 40 / 30 | 41 / 32 / 30 / 37 / 39 / 27 / 27 |
+
+Spianare e costruire sopra non cambiano di un decimo: il bot spiana e sale
+sulle rovine come prima, perche' quel che lo muove e' il bonus scavo di chi
+costruisce e il posto, non le tessere future del padrone della rovina. Il
+sacchetto non resta mai vuoto, nemmeno nell'era 1. Le tessere scoperte sono
+3 a testa come prima, e rendono 11,4 PV invece di 9,5 (lo Scavo medio dei
+Personaggi e' 3,9 contro 1,5 delle tessere di oggi piu' gli scheletri): il
+canale Scavo sale di 2 e i PV di 3 a testa.
+
+La cosa che cambia davvero e' chi incassa: prima le tessere pagavano il
+padrone della rovina, e la Ritrovamenti ci costruiva sopra la sua
+strategia (riscoprire le proprie rovine); ora pagano chi ha i Personaggi, a
+tutti allo stesso modo (canale Scavo fra 15,8 e 17,7 per ogni strategia).
+La Ritrovamenti scende dal 40 al 27, la Scavo resta al 27, la Bilanciata
+sale al 41 e la Rendita al 39: forbice 27-41, come prima ma con la coda
+spostata sulle due strategie delle rovine, che hanno perso la loro nicchia.
+Se la regola piace, le due strategie vanno ripensate attorno al draft dei
+Personaggi con Scavo alto (il bot oggi lo pesa 0,15 a punto per tutti) e
+allo scavare le pile altrui.
+
 ## Come rifare il conto
 
 ```bash
+# cinquantasettesima misura: gli scheletri sono i Personaggi (registro 188), stesso comando della
+#   quarantanovesima con `--dati data/proposte/cards-v3-era1-scheletri_personaggi.json`
 # cinquantaseiesima misura: la Ritrovamenti (registro 187); stesso comando della quarantanovesima con
 #   `--spinta ritro_...`; il tetto ai finali e' nel file base rigenerato, `--variante finali_senza_tetto` lo toglie
 # cinquantacinquesima misura: la tabella senza coperture (registro 185), stesso comando della quarantanovesima;

@@ -3007,5 +3007,9 @@ dato è stato importato da lì. Ma due confronti fra ciò che è stampato e
     al draft lo Scavo vale 0,15 a punto per tutti (`scheletro_atteso`), la
     Ritrovamenti conta la quota di scheletri suoi nella pila. Il designer
     chiede di controllare se cambia lo spianare e il costruire sopra le
-    rovine. Misura nella cinquantasettesima.
+    rovine. Misurato (cinquantasettesima): spianamenti e costruzioni sopra
+    identici alla base, sacchetto mai vuoto, 3 tessere scoperte a testa che
+    rendono 11,4 PV invece di 9,5; +3 PV a testa; la Ritrovamenti scende
+    dal 40 al 27 perche' le tessere non pagano piu' il padrone della rovina.
+    Decisione del designer: tenerla e ripensare Ritrovamenti e Scavo, o no.
 
