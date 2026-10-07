@@ -78,6 +78,22 @@ EVENTI_ERA_5 = [
                  {"hook": "on_event", "op": "resistance", "value": -1, "target": {"class": ["militare"]}}]},
 ]
 v3["events"].extend(EVENTI_ERA_5)
+#   --variante senza_soffio  o dentro o fuori (registro 199): resistenza sotto la forza = crolla, anche di 1;
+#                            niente "regge per un soffio", forze com'erano
+def senza_soffio(v):
+    v["constants"]["rovina_gap"] = 1
+    v["constants"].pop("soffio_resistenza_min", None)
+#   --variante senza_soffio_forze  come senza_soffio, ma ogni evento scende di 1 di forza: e' il conto di oggi
+#                                  scritto pulito (chi reggeva per un soffio regge, chi crollava crolla)
+def senza_soffio_forze(v):
+    senza_soffio(v)
+    for k in list(v["constants"]["event_force_by_era"]):
+        v["constants"]["event_force_by_era"][k] = int(v["constants"]["event_force_by_era"][k]) - 1
+    for e in v["events"]:
+        if "force" in e and int(e["force"]) > 0:
+            nuova = int(e["force"]) - 1
+            e["effect_text"] = e["effect_text"].replace("Forza %d." % int(e["force"]), "Forza %d." % nuova)
+            e["force"] = nuova
 #   --variante eventi5_forza4  i sei eventi dell'era 5 a forza 4, la forza del Giudizio (misure 62-63: meta' dell'era 5 crolla)
 def eventi5_forza4(v):
     v["constants"]["event_force_by_era"]["5"] = 4
@@ -953,7 +969,7 @@ def finali_senza_tetto(v):
 def grattacielo_caro(v):
     for b in v["buildings"]:
         if b["id"] == "ed_grattacielo": b["cost"] = prod(pietra=3, idee=1)
-VARIANTI = {"eventi5_forza4": eventi5_forza4, "giudizio_solo": giudizio_solo, "soffio_per_tutti": soffio_per_tutti, "tutto_in_vendita": tutto_in_vendita, "evento_coperto": evento_coperto, "scheletri_personaggi": scheletri_personaggi, "mazzetti_colorati": mazzetti_colorati, "finali_senza_tetto": finali_senza_tetto, "spianato_intero": spianato_intero, "grattacielo_caro": grattacielo_caro, "grandi_vecchie": grandi_vecchie, "proprietario": proprietario, "compenso_pv": compenso_pv, "senza_sconti": senza_sconti,
+VARIANTI = {"senza_soffio": senza_soffio, "senza_soffio_forze": senza_soffio_forze, "eventi5_forza4": eventi5_forza4, "giudizio_solo": giudizio_solo, "soffio_per_tutti": soffio_per_tutti, "tutto_in_vendita": tutto_in_vendita, "evento_coperto": evento_coperto, "scheletri_personaggi": scheletri_personaggi, "mazzetti_colorati": mazzetti_colorati, "finali_senza_tetto": finali_senza_tetto, "spianato_intero": spianato_intero, "grattacielo_caro": grattacielo_caro, "grandi_vecchie": grandi_vecchie, "proprietario": proprietario, "compenso_pv": compenso_pv, "senza_sconti": senza_sconti,
             "lampo_vecchio": lampo_vecchio, "extra_sempre": extra_sempre, "senza_extra": senza_extra, "costi_vecchi": costi_vecchi,
             "case_seconda": case_seconda, "case_lampo1": case_lampo1, "senza_tuning": senza_tuning,
             "terreno_produce": terreno_produce, "senza_potenziamento_insieme": senza_potenziamento_insieme}
