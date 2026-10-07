@@ -90,6 +90,61 @@ EVENTI_ERA_5 = [
 ]
 v3["events"].extend(EVENTI_ERA_5)
 _forze(v3, FORZE_V3)
+#   --variante erosione  IL TEMPO LOGORA (registro 200). Il designer: "1 sono le capanne, 10 i dolmen; al passaggio
+#                        di era tutti gli edifici soffrono un'erosione, 2 se mai abitato, 1 se abitato, 0 col lavoratore;
+#                        eventi deboli e forti che salgono di intensita'". Scala 1-10 delle resistenze, tutti i
+#                        modificatori raddoppiati, erosione 2/1/0, eventi lievi 3-7 per era e gravi +2.
+RESISTENZE_1_10 = {   # le eccezioni alla mappa 1->1, 2->3, 3->5, 4->7, 5->9: i megaliti e il cemento armato
+    "ed_dolmen": 10, "ed_menhir": 10, "ed_circolo_di_pietre": 10, "ed_tumulo_funerario": 9,
+    "ed_acquedotto": 8, "ed_anfiteatro": 9, "ed_castello": 8, "ed_mura": 8, "ed_fortezza_bastionata": 9,
+    "ed_duomo": 8, "ed_ponte_monumentale": 8,
+    "ed_grattacielo": 10, "ed_stazione": 9, "ed_ponte_in_acciaio": 9, "ed_condominio": 7, "ed_casa_e5_g": 8,
+    "ed_biblioteca": 6, "ed_museo": 6, "ed_universita": 6, "ed_officina": 6, "ed_fondazione_darte": 6,
+    "ed_parco_archeologico": 6, "ed_monumento_ai_caduti": 7, "ed_casa_e5_p": 6, "ed_caffe_letterario": 4,
+}
+EROSIONE_FORZE = {"lieve": {"1": 3, "2": 4, "3": 5, "4": 6, "5": 7}, "grave_in_piu": 2}
+def erosione(v):
+    c2 = v["constants"]
+    c2["erosione"] = {"non_usato": 2, "usato": 1, "protetto": 0}
+    c2["protection_bonus"] = int(c2["protection_bonus"]) * 2
+    c2["spolia_divisore"] = 4
+    for b in v["buildings"]:
+        b["resistance"] = RESISTENZE_1_10.get(b["id"], int(b["resistance"]) * 2 - 1)
+        if "resistance_text" in b: b.pop("resistance_text")
+    # tutti i +1/-1 della scala vecchia raddoppiano: potenziamenti, eventi, Personaggi, tessere dell'era
+    for grp in ("upgrades", "events", "characters", "buildings"):
+        for card in v[grp]:
+            for e in card.get("effects", []):
+                if e.get("op") in ("resistance", "protection_delta"):
+                    e["value"] = int(e["value"]) * 2
+    for ch in v["characters"]:
+        az = ch.get("azione")
+        if isinstance(az, dict) and az.get("tipo") == "resistenza":
+            az["n"] = int(az["n"]) * 2
+            ch["effect_text"] = ch["effect_text"].replace("+%d resistenza" % (az["n"] // 2), "+%d resistenza" % az["n"])
+    for t in v["tessere_era"]:
+        ef = t.get("effetto", {})
+        if "resistenza_era" in ef:
+            ef["resistenza_era"] = int(ef["resistenza_era"]) * 2
+            t["testo"] = t["testo"].replace("+%d resistenza" % (ef["resistenza_era"] // 2), "+%d resistenza" % ef["resistenza_era"])
+    for u in v["upgrades"]:
+        for e in u.get("effects", []):
+            if e.get("op") == "resistance":
+                u["effect_text"] = u["effect_text"].replace("+%d Resistenza" % (e["value"] // 2), "+%d Resistenza" % e["value"])
+    # gli eventi: lievi per era, gravi due punti sopra; i testi dicono la forza nuova e i modificatori raddoppiati
+    import re
+    for e in v["events"]:
+        if "force" not in e or int(e["force"]) <= 0: continue
+        nuova = EROSIONE_FORZE["lieve"][str(e["era"])] + (EROSIONE_FORZE["grave_in_piu"] if e.get("severity") == "grave" else 0)
+        e["effect_text"] = re.sub(r"Forza \d+\.", "Forza %d." % nuova, e["effect_text"])
+        e["effect_text"] = re.sub(r"([+\u2212-])(\d) res", lambda m: "%s%d res" % (m.group(1), int(m.group(2)) * 2), e["effect_text"])
+        e["force"] = nuova
+    # la forza che il bot si aspetta per le ere a venire: fra il lieve e il grave
+    c2["event_force_by_era"] = {k: f + 1 for k, f in EROSIONE_FORZE["lieve"].items()}
+#   --variante erosione_lieve  come erosione, ma il logorio e' 1 se non usato e 0 se usato o protetto
+def erosione_lieve(v):
+    erosione(v)
+    v["constants"]["erosione"] = {"non_usato": 1, "usato": 0, "protetto": 0}
 #   --variante soffio  il conto di prima del registro 199: "regge per un soffio" (rovina_gap 2) tranne la
 #                      resistenza stampata 1 (soffio_resistenza_min 2), forze 2, 3, 4, 3, 3
 def soffio(v):
@@ -977,7 +1032,7 @@ def finali_senza_tetto(v):
 def grattacielo_caro(v):
     for b in v["buildings"]:
         if b["id"] == "ed_grattacielo": b["cost"] = prod(pietra=3, idee=1)
-VARIANTI = {"soffio": soffio, "senza_soffio": senza_soffio, "senza_soffio_forze": senza_soffio_forze, "eventi5_forza4": eventi5_forza4, "giudizio_solo": giudizio_solo, "soffio_per_tutti": soffio_per_tutti, "tutto_in_vendita": tutto_in_vendita, "evento_coperto": evento_coperto, "scheletri_personaggi": scheletri_personaggi, "mazzetti_colorati": mazzetti_colorati, "finali_senza_tetto": finali_senza_tetto, "spianato_intero": spianato_intero, "grattacielo_caro": grattacielo_caro, "grandi_vecchie": grandi_vecchie, "proprietario": proprietario, "compenso_pv": compenso_pv, "senza_sconti": senza_sconti,
+VARIANTI = {"erosione": erosione, "erosione_lieve": erosione_lieve, "soffio": soffio, "senza_soffio": senza_soffio, "senza_soffio_forze": senza_soffio_forze, "eventi5_forza4": eventi5_forza4, "giudizio_solo": giudizio_solo, "soffio_per_tutti": soffio_per_tutti, "tutto_in_vendita": tutto_in_vendita, "evento_coperto": evento_coperto, "scheletri_personaggi": scheletri_personaggi, "mazzetti_colorati": mazzetti_colorati, "finali_senza_tetto": finali_senza_tetto, "spianato_intero": spianato_intero, "grattacielo_caro": grattacielo_caro, "grandi_vecchie": grandi_vecchie, "proprietario": proprietario, "compenso_pv": compenso_pv, "senza_sconti": senza_sconti,
             "lampo_vecchio": lampo_vecchio, "extra_sempre": extra_sempre, "senza_extra": senza_extra, "costi_vecchi": costi_vecchi,
             "case_seconda": case_seconda, "case_lampo1": case_lampo1, "senza_tuning": senza_tuning,
             "terreno_produce": terreno_produce, "senza_potenziamento_insieme": senza_potenziamento_insieme}

@@ -60,6 +60,7 @@ func _ready() -> void:
 	_run("v3: l'evento coperto fino a fine era (registro 190)", _test_v3_evento_coperto)
 	_run("v3: o dentro o fuori, niente soffio (registro 199)", _test_v3_senza_soffio)
 	_run("v3: anche l'era 5 ha i suoi sei eventi (registro 196)", _test_v3_eventi_era_5)
+	_run("v3: il tempo logora, variante erosione (registro 200)", _test_v3_erosione)
 	print("\n%d superati, %d falliti" % [_passed, _failed])
 	get_tree().quit(0 if _failed == 0 else 1)
 
@@ -2449,3 +2450,48 @@ func _test_v3_eventi_era_5() -> void:
 		_eq("variante giudizio_solo: torna il Giudizio del tempo", str(c2.gs.current_event.get("id", "")), "ev_giudizio_del_tempo")
 	CardDB.load_db(CardDB.DB_PATH)
 
+
+
+# Il tempo logora (registro 200, variante `erosione`): scala 1-10, e a fine
+# era ogni edificio intatto perde 2 se nessuno lo ha usato, 1 se usato, 0 se
+# il padrone ci aveva il lavoratore. Senza la costante niente si logora.
+func _test_v3_erosione() -> void:
+	if not FileAccess.file_exists("res://data/proposte/cards-v3-era1-erosione.json"): return
+	CardDB.load_db("res://data/proposte/cards-v3-era1-erosione.json")
+	_eq("le Capanne restano a 1", int(CardDB.buildings["ed_capanne"]["resistance"]), 1)
+	_eq("il Dolmen va a 10", int(CardDB.buildings["ed_dolmen"]["resistance"]), 10)
+	_eq("il Grattacielo va a 10", int(CardDB.buildings["ed_grattacielo"]["resistance"]), 10)
+	_eq("la protezione del lavoratore raddoppia", int(CardDB.constants["protection_bonus"]), 4)
+	_eq("l'Argine vale +2", int(CardDB.upgrades["po_argine"]["effects"][0]["value"]), 2)
+	var ctl := _game(3, 925)
+	var gs := ctl.gs
+	while not gs.pending_choice.is_empty():
+		ctl.choose(int((gs.pending_choice["options"] as Array)[0]))
+	gs.grid.buildings.clear()
+	for i in gs.grid.n_cols: gs.grid.terrains[i] = Enums.Terrain.PIANURA
+	var fermo := _put(gs, 0, "ed_dolmen", 1)
+	var usato := _put(gs, 0, "ed_dolmen", 2)
+	var protetto := _put(gs, 0, "ed_dolmen", 3)
+	var rovina := _put(gs, 1, "ed_dolmen", 4, 0, Enums.BuildingState.ROVINA)
+	gs.bruciati[usato.uid] = "%d:1" % gs.era
+	protetto.protection = 4
+	protetto.protected_by = 0
+	gs.current_event = {"id": "ev_prova", "name": "Prova", "force": 0, "effects": []}
+	EraRules.end_era(gs)
+	_eq("a fine era chi nessuno ha usato perde 2", fermo.effective_resistance(), 8)
+	_eq("  chi e' stato usato perde 1", usato.effective_resistance(), 9)
+	_eq("  chi aveva il lavoratore del padrone non perde niente", protetto.effective_resistance(), 10)
+	_eq("  la rovina non si logora", rovina.bonus_res, 0)
+	_eq("  il contatore dice quanto si e' perso", int(gs.players[0].counters.get("erosione", 0)), 3)
+	# Nel file base niente erosione.
+	CardDB.load_db("res://data/proposte/cards-v3-era1.json")
+	var c2 := _game(3, 925)
+	var g2 := c2.gs
+	while not g2.pending_choice.is_empty():
+		c2.choose(int((g2.pending_choice["options"] as Array)[0]))
+	g2.grid.buildings.clear()
+	var d2 := _put(g2, 0, "ed_dolmen", 1)
+	g2.current_event = {"id": "ev_prova", "name": "Prova", "force": 0, "effects": []}
+	EraRules.end_era(g2)
+	_eq("nel file base niente si logora", d2.bonus_res, 0)
+	CardDB.load_db(CardDB.DB_PATH)

@@ -3155,3 +3155,32 @@ dato è stato importato da lì. Ma due confronti fra ciò che è stampato e
     le forze dai dati (197), quindi non cambia. Sulle carte evento va
     stampata la forza nuova. Conferma: misura 66.
 
+200. **Il tempo logora (proposta del designer, variante `erosione`).** "Mi
+    rende perplesso che non si possa alzare la robustezza degli edifici e la
+    violenza degli eventi, siamo sempre su 1, 2 o 3 punti. 1 sono le
+    capanne, 10 sono i dolmen (e infatti resistono fino a noi); un evento
+    debole da 3 che spazza via le capanne ma non i dolmen, oppure da 7. Al
+    passaggio di era tutti gli edifici soffrono un'erosione, 2 se mai
+    abitato, 1 se abitato o 0; poi gli eventi salgono di intensita'. Un
+    grattacielo avra' un valore molto alto. Torna importante la
+    ristrutturazione. Solo poche cose della preistoria ci sono pervenute;
+    l'acquedotto resistito come rovina, un suo pezzo diventato casa
+    medievale, i pezzi del Colosseo nelle ville: questo spirito vorrei che
+    emergesse." La risposta: le mura ci sono (spianamento parziale,
+    costruire sopra, spoglie, tessere scavo), manca il tempo: con
+    resistenze 1-5 e forze 2-3 ogni +1 e' una svolta, e l'eta' non conta.
+    Variante misurabile, base intatta: (a) scala 1-10 (`RESISTENZE_1_10`
+    nel generatore: 1->1, 2->3, 3->5, 4->7, 5->9 con eccezioni: megaliti
+    9-10, cemento armato 6-10, Grattacielo 10); (b) tutti i modificatori
+    raddoppiati (lavoratore +4, Argine +2, eventi +-2/-4, Personaggi,
+    tessere), spoglie a un quarto della resistenza (`spolia_divisore` 4);
+    (c) erosione a fine era (`erosione`: non usato 2, usato 1, protetto
+    0), permanente in `bonus_res`, dopo l'evento e prima dell'azzeramento
+    delle protezioni, mai dopo l'era 5; (d) eventi lievi 3, 4, 5, 6, 7 per
+    era e gravi due punti sopra; il bot si aspetta il mezzo (`event_force_by_era`
+    lieve+1) e mette in conto l'erosione da usato nelle rendite future.
+    Variante `erosione_lieve` (1/0/0) per il logorio piu' tenero. La
+    ristrutturazione che ridà resistenza non c'e' ancora (con le carte
+    restituite non si ristruttura, registro 131): e' il passo dopo, se la
+    misura dice che il logorio morde. Misura 67.
+

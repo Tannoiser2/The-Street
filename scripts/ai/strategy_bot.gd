@@ -395,7 +395,7 @@ static func _valore_protezione(gs: GameState, p: PlayerState, col: int) -> float
 	var forza: int = _forza_evento(gs)
 	var res: int = b.effective_resistance() + _modifica_evento(gs, b)
 	if res >= forza: return 0.0            # regge da solo
-	if res + 2 < forza: return 0.0         # non basta comunque
+	if res + int(CardDB.constants.get("protection_bonus", 2)) < forza: return 0.0   # non basta comunque
 	return 1.5 + float(b.rendita_value()) * float(_ere_rimaste(gs))
 
 static func _da_proteggere(gs: GameState, p: PlayerState, col: int) -> Building:
@@ -630,12 +630,17 @@ static func rendite_future(res: int, rendita: int, era: int) -> float:
 	var vmax := int(CardDB.constants["vetusta_max"])
 	var vet := 0
 	var totale := 0.0
+	# Col tempo che logora (registro 200) ogni era passata costa resistenza:
+	# il bot mette in conto l'erosione di un edificio usato, la via di mezzo.
+	var logorio := int((CardDB.constants.get("erosione", {}) as Dictionary).get("usato", 0))
+	var r := res
 	for e in range(era, 6):
 		var forza := _forza_dell_era(e)
 		if forza > 0:
-			if res < forza: break           # l'evento lo butta giu' prima del censimento
+			if r < forza: break             # l'evento lo butta giu' prima del censimento
 			vet = mini(vet + 1, vmax)
 		totale += float(rendita + vet)
+		r -= logorio
 	return totale
 
 # LE SPINTE DELLE STRATEGIE, in tabella (registro 98): nella v1.5 sono
