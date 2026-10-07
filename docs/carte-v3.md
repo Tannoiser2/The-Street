@@ -373,12 +373,12 @@ era dalle 3 in su non producono: hanno l'effetto più forte.
 | 4 | Rivoluzione industriale | 3 | Forza 3. Edifici con Scavo 2+: −1 res. |
 | 4 | Secolarizzazioni | 3 | Forza 3. Religione −2 res. |
 | 4 | Speculazione edilizia | 3 | Forza 3. Ogni edificio con 2+ potenziamenti: −1 res. |
-| 5 | Crisi dello Stato | 4 | Forza 4. Civico −2 res · Militare −1 res · Ingegneria +1 res. |
-| 5 | Crisi energetica | 4 | Forza 4. Edifici non protetti che producono risorse: −1 res. |
-| 5 | Globalizzazione | 4 | Forza 4. Commercio +1 res · Cultura −1 res. |
-| 5 | Guerra mondiale | 4 | Forza 4. Nelle colonne con edifici di 2+ giocatori: tutti −1 res. Militare −1 res. |
-| 5 | Innalzamento dei mari | 4 | Forza 4. Edifici su fiume: −2 res · su pianura: −1 res. |
-| 5 | Subsidenza | 4 | Forza 4. Edifici su pianura e fiume: −1 res. |
+| 5 | Crisi dello Stato | 3 | Forza 3. Civico −2 res · Militare −1 res · Ingegneria +1 res. |
+| 5 | Crisi energetica | 3 | Forza 3. Edifici non protetti che producono risorse: −1 res. |
+| 5 | Globalizzazione | 3 | Forza 3. Commercio +1 res · Cultura −1 res. |
+| 5 | Guerra mondiale | 3 | Forza 3. Nelle colonne con edifici di 2+ giocatori: tutti −1 res. Militare −1 res. |
+| 5 | Innalzamento dei mari | 3 | Forza 3. Edifici su fiume: −2 res · su pianura: −1 res. |
+| 5 | Subsidenza | 3 | Forza 3. Edifici su pianura e fiume: −1 res. |
 
 ## I Monumenti
 

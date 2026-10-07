@@ -3126,3 +3126,15 @@ dato è stato importato da lì. Ma due confronti fra ciò che è stampato e
     il bot resta a memoria: partite identiche (verifica di riferimento).
     Misura 63: il bot che legge, col Giudizio e con i sei eventi.
 
+198. **Gli eventi dell'era 5 a forza 3.** Il Giudizio del tempo era di forza
+    4 senza effetti; i sei eventi (196) nascevano a forza 4 e con i loro
+    modificatori buttavano giu' meta' dell'era Moderna (misure 62-63: 3,6
+    edifici su 7,6, finali da 6,4 a 3,6, -2,7 PV a testa), anche col bot
+    che legge la carta (197). Le carte dell'era 5 hanno quasi tutte
+    resistenza 3: contro la forza 4 vivono per il soffio e un -1 qualunque le
+    fa cadere. A forza 3, come l'era 4 (che aveva lo stesso problema a 5,
+    misura 127), crolla un edificio su sette e i finali restano (64ª: 83,6
+    PV, forbice 30-40). Scelta di chi misura, "scegli tu": forza 3 nel file
+    base, `event_force_by_era` "5": 3; `--variante eventi5_forza4` per
+    tornare alla forza del Giudizio.
+

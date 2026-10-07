@@ -1,7 +1,7 @@
 {
   "meta": {
     "game": "La Strada delle Ere",
-    "ruleset": "v3-era1-prova-eventi5_forza3",
+    "ruleset": "v3-era1-prova-eventi5_forza4",
     "language": "it",
     "source": "distinta-carte (fonte unica)",
     "origine": "generato da tools/genera_cards_v3.py da data/cards-v2.json: non modificare a mano"
@@ -48,7 +48,7 @@
       "2": 3,
       "3": 4,
       "4": 3,
-      "5": 3
+      "5": 4
     },
     "resource_cap": 99,
     "protection_bonus": 2,
@@ -6851,10 +6851,10 @@
       "id": "ev_subsidenza",
       "name": "Subsidenza",
       "era": 5,
-      "force": 3,
+      "force": 4,
       "severity": "lieve",
       "kind": "geografico",
-      "effect_text": "Forza 3. Edifici su pianura e fiume: −1 res.",
+      "effect_text": "Forza 4. Edifici su pianura e fiume: −1 res.",
       "effects": [
         {
           "hook": "on_event",
@@ -6873,10 +6873,10 @@
       "id": "ev_globalizzazione",
       "name": "Globalizzazione",
       "era": 5,
-      "force": 3,
+      "force": 4,
       "severity": "lieve",
       "kind": "classe",
-      "effect_text": "Forza 3. Commercio +1 res · Cultura −1 res.",
+      "effect_text": "Forza 4. Commercio +1 res · Cultura −1 res.",
       "effects": [
         {
           "hook": "on_event",
@@ -6904,10 +6904,10 @@
       "id": "ev_crisi_energetica",
       "name": "Crisi energetica",
       "era": 5,
-      "force": 3,
+      "force": 4,
       "severity": "lieve",
       "kind": "comportamentale",
-      "effect_text": "Forza 3. Edifici non protetti che producono risorse: −1 res.",
+      "effect_text": "Forza 4. Edifici non protetti che producono risorse: −1 res.",
       "effects": [
         {
           "hook": "on_event",
@@ -6924,10 +6924,10 @@
       "id": "ev_innalzamento_dei_mari",
       "name": "Innalzamento dei mari",
       "era": 5,
-      "force": 3,
+      "force": 4,
       "severity": "grave",
       "kind": "geografico",
-      "effect_text": "Forza 3. Edifici su fiume: −2 res · su pianura: −1 res.",
+      "effect_text": "Forza 4. Edifici su fiume: −2 res · su pianura: −1 res.",
       "effects": [
         {
           "hook": "on_event",
@@ -6955,10 +6955,10 @@
       "id": "ev_crisi_dello_stato",
       "name": "Crisi dello Stato",
       "era": 5,
-      "force": 3,
+      "force": 4,
       "severity": "grave",
       "kind": "classe",
-      "effect_text": "Forza 3. Civico −2 res · Militare −1 res · Ingegneria +1 res.",
+      "effect_text": "Forza 4. Civico −2 res · Militare −1 res · Ingegneria +1 res.",
       "effects": [
         {
           "hook": "on_event",
@@ -6996,10 +6996,10 @@
       "id": "ev_guerra_mondiale",
       "name": "Guerra mondiale",
       "era": 5,
-      "force": 3,
+      "force": 4,
       "severity": "grave",
       "kind": "comportamentale",
-      "effect_text": "Forza 3. Nelle colonne con edifici di 2+ giocatori: tutti −1 res. Militare −1 res.",
+      "effect_text": "Forza 4. Nelle colonne con edifici di 2+ giocatori: tutti −1 res. Militare −1 res.",
       "effects": [
         {
           "hook": "on_event",

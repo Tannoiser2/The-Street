@@ -2415,13 +2415,13 @@ func _test_v3_eventi_era_5() -> void:
 	_ok("  e non ha piu' l'evento finale unico", not CardDB.constants.has("evento_finale"))
 	var forze := {}
 	for e in CardDB.events_of_era(5): forze[int(e["force"])] = true
-	_eq("  tutti di forza 4", forze.keys(), [4])
+	_eq("  tutti di forza 3, come l'era 4 (registro 198)", forze.keys(), [3])
 	var ctl := _game(3, 990)
 	ctl._start_era(5)
 	var gs := ctl.gs
 	_ok("a inizio era 5 si pesca uno dei sei", int(gs.current_event.get("era", 0)) == 5 and str(gs.current_event["id"]).begins_with("ev_"))
-	# La Crisi dello Stato: Civico -2. Un Civico da 3 scende a 1 e crolla, un
-	# Ingegneria da 3 sale a 4 e regge.
+	# La Crisi dello Stato (forza 3): Civico -2. Un Civico da 3 scende a 1 e
+	# crolla, un Ingegneria da 3 sale a 4 e regge.
 	gs.grid.buildings.clear()
 	for i in gs.grid.n_cols: gs.grid.terrains[i] = Enums.Terrain.COLLINA
 	var civico := ""

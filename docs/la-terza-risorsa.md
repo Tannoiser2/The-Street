@@ -3025,6 +3025,28 @@ costruito non si protegge piu'). L'era 4 aveva lo stesso problema a forza
 5 ed e' stata portata a 3 (misura 127). Variante `eventi5_forza3`: i sei
 eventi a forza 3, misura sotto.
 
+## Sessantaquattresima misura: i sei eventi dell'era 5 a forza 3
+
+Registro 198. Stessi 300 semi, bot che legge (63ª); base il Giudizio del
+tempo col bot che legge.
+
+| a giocatore | Giudizio (F4, senza effetti) | sei eventi F4 | sei eventi F3 |
+|---|---|---|---|
+| PV a testa | 83,3 | 80,6 | 83,6 |
+| finali / Rendita / Scavo / Cont | 6,4 / 12,7 / 17,9 / 14,4 | 3,6 / 12,6 / 18,0 / 14,5 | 6,1 / 12,7 / 18,0 / 14,6 |
+| era 5: costruiti / in rovina (a partita) | 7,4 / 0,39 | 7,6 / 3,6 | 7,8 / 1,1 |
+| era 4 in rovina a fine partita | 4,4 | 5,3 | 3,6 |
+| vittorie Bil / Cont / Lampo / Obi / Rend / Ritro / Scavo | 26 / 29 / 35 / 36 / 34 / 36 / 37 | 27 / 36 / 36 / 38 / 32 / 33 / 32 | 31 / 31 / 34 / 40 / 30 / 31 / 36 |
+
+A forza 3 gli eventi dell'era Moderna mordono senza falciare: un edificio
+dell'era 5 su sette va in rovina (1,1 su 7,8, contro 0,4 col Giudizio e 3,6
+a forza 4), chi prende un -2 o un -1 senza protezione crolla e gli altri
+reggono; i finali tornano a 6,1 e i PV a 83,6. Le carte dell'era 4 in
+rovina scendono da 4,4 a 3,6, perche' la forza 3 e' quella che hanno gia'
+passato. Forbice 30-40 (Obiettivi 40, Rendita 30). Scelta: forza 3 nel
+file base, come l'era 4; `--variante eventi5_forza4` per la forza del
+Giudizio.
+
 ## Come rifare il conto
 
 ```bash

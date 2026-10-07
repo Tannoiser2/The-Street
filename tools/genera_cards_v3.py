@@ -43,47 +43,52 @@ c["soffio_resistenza_min"] = 2
 # per la 5 era, non mi piace che ce ne sia solo uno, bisogna allinearlo con le
 # altre ere". Al posto del solo Giudizio del tempo (registro 149: forza 4,
 # nessun effetto) sei eventi come nelle altre ere - tre lievi e tre gravi, uno
-# geografico, uno di classe e uno di comportamento per gruppo - tutti di forza
-# 4, la forza che l'era Moderna aveva gia'. Gli effetti usano solo i selettori
-# che il motore ha gia' (terreno, classe, protezione, produzione, colonna).
+# geografico, uno di classe e uno di comportamento per gruppo. FORZA 3, come
+# l'era 4 (registro 198): a forza 4 - quella che il Giudizio del tempo aveva -
+# le carte dell'era 5, quasi tutte da 3, vivevano solo per il soffio e con un
+# -1 qualunque crollava meta' dell'era Moderna (misure 62-63); a forza 3
+# crolla un edificio su sette e i finali restano (64ª). Gli effetti usano solo
+# i selettori che il motore ha gia' (terreno, classe, protezione, produzione,
+# colonna).
 c.pop("evento_finale", None)
-c["event_force_by_era"]["5"] = 4          # la forza che il bot si aspetta per l'era 5 (registro 197)
+c["event_force_by_era"]["5"] = 3          # la forza che il bot si aspetta per l'era 5 (registro 197)
 EVENTI_ERA_5 = [
-    {"id": "ev_subsidenza", "name": "Subsidenza", "era": 5, "force": 4, "severity": "lieve", "kind": "geografico",
-     "effect_text": "Forza 4. Edifici su pianura e fiume: −1 res.",
+    {"id": "ev_subsidenza", "name": "Subsidenza", "era": 5, "force": 3, "severity": "lieve", "kind": "geografico",
+     "effect_text": "Forza 3. Edifici su pianura e fiume: −1 res.",
      "effects": [{"hook": "on_event", "op": "resistance", "value": -1, "target": {"terrain": ["pianura", "fiume"]}}]},
-    {"id": "ev_globalizzazione", "name": "Globalizzazione", "era": 5, "force": 4, "severity": "lieve", "kind": "classe",
-     "effect_text": "Forza 4. Commercio +1 res · Cultura −1 res.",
+    {"id": "ev_globalizzazione", "name": "Globalizzazione", "era": 5, "force": 3, "severity": "lieve", "kind": "classe",
+     "effect_text": "Forza 3. Commercio +1 res · Cultura −1 res.",
      "effects": [{"hook": "on_event", "op": "resistance", "value": 1, "target": {"class": ["commercio"]}},
                  {"hook": "on_event", "op": "resistance", "value": -1, "target": {"class": ["cultura"]}}]},
-    {"id": "ev_crisi_energetica", "name": "Crisi energetica", "era": 5, "force": 4, "severity": "lieve", "kind": "comportamentale",
-     "effect_text": "Forza 4. Edifici non protetti che producono risorse: −1 res.",
+    {"id": "ev_crisi_energetica", "name": "Crisi energetica", "era": 5, "force": 3, "severity": "lieve", "kind": "comportamentale",
+     "effect_text": "Forza 3. Edifici non protetti che producono risorse: −1 res.",
      "effects": [{"hook": "on_event", "op": "resistance", "value": -1, "target": {"protected": False, "produces": True}}]},
-    {"id": "ev_innalzamento_dei_mari", "name": "Innalzamento dei mari", "era": 5, "force": 4, "severity": "grave", "kind": "geografico",
-     "effect_text": "Forza 4. Edifici su fiume: −2 res · su pianura: −1 res.",
+    {"id": "ev_innalzamento_dei_mari", "name": "Innalzamento dei mari", "era": 5, "force": 3, "severity": "grave", "kind": "geografico",
+     "effect_text": "Forza 3. Edifici su fiume: −2 res · su pianura: −1 res.",
      "effects": [{"hook": "on_event", "op": "resistance", "value": -2, "target": {"terrain": ["fiume"]}},
                  {"hook": "on_event", "op": "resistance", "value": -1, "target": {"terrain": ["pianura"]}}]},
-    {"id": "ev_crisi_dello_stato", "name": "Crisi dello Stato", "era": 5, "force": 4, "severity": "grave", "kind": "classe",
-     "effect_text": "Forza 4. Civico −2 res · Militare −1 res · Ingegneria +1 res.",
+    {"id": "ev_crisi_dello_stato", "name": "Crisi dello Stato", "era": 5, "force": 3, "severity": "grave", "kind": "classe",
+     "effect_text": "Forza 3. Civico −2 res · Militare −1 res · Ingegneria +1 res.",
      "effects": [{"hook": "on_event", "op": "resistance", "value": -2, "target": {"class": ["civico"]}},
                  {"hook": "on_event", "op": "resistance", "value": -1, "target": {"class": ["militare"]}},
                  {"hook": "on_event", "op": "resistance", "value": 1, "target": {"class": ["ingegneria"]}}]},
-    {"id": "ev_guerra_mondiale", "name": "Guerra mondiale", "era": 5, "force": 4, "severity": "grave", "kind": "comportamentale",
-     "effect_text": "Forza 4. Nelle colonne con edifici di 2+ giocatori: tutti −1 res. Militare −1 res.",
+    {"id": "ev_guerra_mondiale", "name": "Guerra mondiale", "era": 5, "force": 3, "severity": "grave", "kind": "comportamentale",
+     "effect_text": "Forza 3. Nelle colonne con edifici di 2+ giocatori: tutti −1 res. Militare −1 res.",
      "effects": [{"hook": "on_event", "op": "resistance", "value": -1, "target": {"column": {"min_owners": 2}}},
                  {"hook": "on_event", "op": "resistance", "value": -1, "target": {"class": ["militare"]}}]},
 ]
 v3["events"].extend(EVENTI_ERA_5)
-#   --variante eventi5_forza3  i sei eventi dell'era 5 a forza 3, come l'era 4 (misura 63: a forza 4 meta' dell'era 5 crolla)
-def eventi5_forza3(v):
-    v["constants"]["event_force_by_era"]["5"] = 3
+#   --variante eventi5_forza4  i sei eventi dell'era 5 a forza 4, la forza del Giudizio (misure 62-63: meta' dell'era 5 crolla)
+def eventi5_forza4(v):
+    v["constants"]["event_force_by_era"]["5"] = 4
     for e in v["events"]:
         if int(e["era"]) == 5:
-            e["force"] = 3
-            e["effect_text"] = e["effect_text"].replace("Forza 4.", "Forza 3.")
+            e["force"] = 4
+            e["effect_text"] = e["effect_text"].replace("Forza 3.", "Forza 4.")
 #   --variante giudizio_solo  l'era 5 col solo Giudizio del tempo (forza 4, nessun effetto), com'era prima del registro 196
 def giudizio_solo(v):
     v["events"] = [e for e in v["events"] if int(e["era"]) != 5]
+    v["constants"]["event_force_by_era"]["5"] = 4     # il Giudizio e' di forza 4
     v["constants"]["evento_finale"] = json.loads(json.dumps(base["constants"]["evento_finale"]))
 # Niente Dinastia nella prova: la carta resta (il motore la cerca) ma senza copie.
 for ch in v3["characters"]:
@@ -948,7 +953,7 @@ def finali_senza_tetto(v):
 def grattacielo_caro(v):
     for b in v["buildings"]:
         if b["id"] == "ed_grattacielo": b["cost"] = prod(pietra=3, idee=1)
-VARIANTI = {"eventi5_forza3": eventi5_forza3, "giudizio_solo": giudizio_solo, "soffio_per_tutti": soffio_per_tutti, "tutto_in_vendita": tutto_in_vendita, "evento_coperto": evento_coperto, "scheletri_personaggi": scheletri_personaggi, "mazzetti_colorati": mazzetti_colorati, "finali_senza_tetto": finali_senza_tetto, "spianato_intero": spianato_intero, "grattacielo_caro": grattacielo_caro, "grandi_vecchie": grandi_vecchie, "proprietario": proprietario, "compenso_pv": compenso_pv, "senza_sconti": senza_sconti,
+VARIANTI = {"eventi5_forza4": eventi5_forza4, "giudizio_solo": giudizio_solo, "soffio_per_tutti": soffio_per_tutti, "tutto_in_vendita": tutto_in_vendita, "evento_coperto": evento_coperto, "scheletri_personaggi": scheletri_personaggi, "mazzetti_colorati": mazzetti_colorati, "finali_senza_tetto": finali_senza_tetto, "spianato_intero": spianato_intero, "grattacielo_caro": grattacielo_caro, "grandi_vecchie": grandi_vecchie, "proprietario": proprietario, "compenso_pv": compenso_pv, "senza_sconti": senza_sconti,
             "lampo_vecchio": lampo_vecchio, "extra_sempre": extra_sempre, "senza_extra": senza_extra, "costi_vecchi": costi_vecchi,
             "case_seconda": case_seconda, "case_lampo1": case_lampo1, "senza_tuning": senza_tuning,
             "terreno_produce": terreno_produce, "senza_potenziamento_insieme": senza_potenziamento_insieme}
