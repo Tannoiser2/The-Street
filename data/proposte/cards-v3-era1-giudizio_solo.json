@@ -1,7 +1,7 @@
 {
   "meta": {
     "game": "La Strada delle Ere",
-    "ruleset": "v3-era1-prova",
+    "ruleset": "v3-era1-prova-giudizio_solo",
     "language": "it",
     "source": "distinta-carte (fonte unica)",
     "origine": "generato da tools/genera_cards_v3.py da data/cards-v2.json: non modificare a mano"
@@ -48,7 +48,7 @@
       "2": 3,
       "3": 4,
       "4": 3,
-      "5": 3
+      "5": 4
     },
     "resource_cap": 99,
     "protection_bonus": 2,
@@ -205,7 +205,15 @@
     "spiana_solo_ere_precedenti": true,
     "potenzia_adiacente": true,
     "potenziamento_con_costruzione": true,
-    "azione_edificio_compenso": "nessuno"
+    "azione_edificio_compenso": "nessuno",
+    "evento_finale": {
+      "id": "ev_giudizio_del_tempo",
+      "name": "Il giudizio del tempo",
+      "era": 5,
+      "force": 4,
+      "effects": [],
+      "text": "Fine dell'era Moderna: ogni edificio in piedi affronta la forza 4, poi si contano i punti."
+    }
   },
   "terrains": [
     {
@@ -6843,182 +6851,6 @@
             "upgrades": {
               "min": 2
             }
-          }
-        }
-      ]
-    },
-    {
-      "id": "ev_subsidenza",
-      "name": "Subsidenza",
-      "era": 5,
-      "force": 3,
-      "severity": "lieve",
-      "kind": "geografico",
-      "effect_text": "Forza 3. Edifici su pianura e fiume: −1 res.",
-      "effects": [
-        {
-          "hook": "on_event",
-          "op": "resistance",
-          "value": -1,
-          "target": {
-            "terrain": [
-              "pianura",
-              "fiume"
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "id": "ev_globalizzazione",
-      "name": "Globalizzazione",
-      "era": 5,
-      "force": 3,
-      "severity": "lieve",
-      "kind": "classe",
-      "effect_text": "Forza 3. Commercio +1 res · Cultura −1 res.",
-      "effects": [
-        {
-          "hook": "on_event",
-          "op": "resistance",
-          "value": 1,
-          "target": {
-            "class": [
-              "commercio"
-            ]
-          }
-        },
-        {
-          "hook": "on_event",
-          "op": "resistance",
-          "value": -1,
-          "target": {
-            "class": [
-              "cultura"
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "id": "ev_crisi_energetica",
-      "name": "Crisi energetica",
-      "era": 5,
-      "force": 3,
-      "severity": "lieve",
-      "kind": "comportamentale",
-      "effect_text": "Forza 3. Edifici non protetti che producono risorse: −1 res.",
-      "effects": [
-        {
-          "hook": "on_event",
-          "op": "resistance",
-          "value": -1,
-          "target": {
-            "protected": false,
-            "produces": true
-          }
-        }
-      ]
-    },
-    {
-      "id": "ev_innalzamento_dei_mari",
-      "name": "Innalzamento dei mari",
-      "era": 5,
-      "force": 3,
-      "severity": "grave",
-      "kind": "geografico",
-      "effect_text": "Forza 3. Edifici su fiume: −2 res · su pianura: −1 res.",
-      "effects": [
-        {
-          "hook": "on_event",
-          "op": "resistance",
-          "value": -2,
-          "target": {
-            "terrain": [
-              "fiume"
-            ]
-          }
-        },
-        {
-          "hook": "on_event",
-          "op": "resistance",
-          "value": -1,
-          "target": {
-            "terrain": [
-              "pianura"
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "id": "ev_crisi_dello_stato",
-      "name": "Crisi dello Stato",
-      "era": 5,
-      "force": 3,
-      "severity": "grave",
-      "kind": "classe",
-      "effect_text": "Forza 3. Civico −2 res · Militare −1 res · Ingegneria +1 res.",
-      "effects": [
-        {
-          "hook": "on_event",
-          "op": "resistance",
-          "value": -2,
-          "target": {
-            "class": [
-              "civico"
-            ]
-          }
-        },
-        {
-          "hook": "on_event",
-          "op": "resistance",
-          "value": -1,
-          "target": {
-            "class": [
-              "militare"
-            ]
-          }
-        },
-        {
-          "hook": "on_event",
-          "op": "resistance",
-          "value": 1,
-          "target": {
-            "class": [
-              "ingegneria"
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "id": "ev_guerra_mondiale",
-      "name": "Guerra mondiale",
-      "era": 5,
-      "force": 3,
-      "severity": "grave",
-      "kind": "comportamentale",
-      "effect_text": "Forza 3. Nelle colonne con edifici di 2+ giocatori: tutti −1 res. Militare −1 res.",
-      "effects": [
-        {
-          "hook": "on_event",
-          "op": "resistance",
-          "value": -1,
-          "target": {
-            "column": {
-              "min_owners": 2
-            }
-          }
-        },
-        {
-          "hook": "on_event",
-          "op": "resistance",
-          "value": -1,
-          "target": {
-            "class": [
-              "militare"
-            ]
           }
         }
       ]

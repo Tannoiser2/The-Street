@@ -217,4 +217,8 @@ soffio, Argine e Personaggio in colonna (+2). Da li' il soffio non vale per la r
 `soffio_resistenza_min` 2, 61ª: nessun resistenza-1 arriva alla fine, Scavo 17,4, la Rendita scende al 27,
 forbice 27-37; `--variante soffio_per_tutti`). A fine era i Personaggi si girano col dorso e a fine partita si
 rigirano solo quelli riportati alla luce (194; il dorso disegnato va in `assets/carte/dorsi/personaggio_scheletro.png`).
-La Vetusta' nella v3 e' a 0 (195): la manopola resta solo per la v1.5.
+La Vetusta' nella v3 e' a 0 (195): la manopola resta solo per la v1.5. Anche l'era 5 ha sei eventi (196: Subsidenza, Globalizzazione, Crisi energetica, Innalzamento dei mari,
+Crisi dello Stato, Guerra mondiale; `--variante giudizio_solo` per il Giudizio del tempo di prima). Il bot legge la
+forza dell'evento dalla carta e da `event_force_by_era` invece di `era + 1` (197, vale un punto a testa e rimette la
+Rendita al 34). I sei eventi sono a forza 3 come l'era 4 (198, 64ª: 83,6 PV, un edificio dell'era 5 su sette in rovina,
+forbice 30-40; a forza 4 ne crollava meta', `--variante eventi5_forza4`).

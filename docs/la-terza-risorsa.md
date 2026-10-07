@@ -2969,6 +2969,84 @@ contro il 30-37 della 58ª. Decisione del designer gia' presa ("non dovrebbero
 sopravvivere"): la regola e' nel file base; se la Rendita va risollevata, si
 ritara il bot (`rendita_per_era`) in una misura a parte, non la regola.
 
+## Sessantaduesima misura: gli eventi dell'era 5
+
+Il designer: "vorrei gli eventi anche per la 5 era, non mi piace che ce ne
+sia solo uno, bisogna allinearlo con le altre ere". Sei eventi di forza 4
+(registro 196) al posto del solo Giudizio del tempo. Stessi 300 semi, base
+la 61ª (soffio). Il bot e' quello di sempre, che per l'era 5 si aspetta
+forza 6 e non protegge niente (registro 197).
+
+| a giocatore | Giudizio del tempo | sei eventi |
+|---|---|---|
+| PV a testa | 82,3 | 79,6 |
+| Scavo / Cont / Rendita / Lampo / finali | 17,4 / 14,4 / 12,3 / 18,7 / 6,0 | 17,6 / 14,4 / 12,1 / 18,7 / **3,4** |
+| edifici dell'era 5 a partita: costruiti / in rovina | 7,8 / 0,45 | 7,8 / **3,6** |
+| in rovina per era (2 / 3 / 4) | 6,0 / 5,8 / 4,7 | 6,6 / 6,5 / 5,4 |
+| vittorie Bil / Cont / Lampo / Obi / Rend / Ritro / Scavo | 29 / 37 / 34 / 36 / 27 / 36 / 35 | 24 / 35 / 39 / 37 / 24 / 38 / 36 |
+
+I sei escono in parti uguali (40-60 volte ciascuno su 300). Con i
+modificatori quasi la meta' degli edifici dell'era 5 crolla (3,6 su 7,8,
+contro 0,45 col Giudizio senza effetti): le carte dell'era 5 hanno quasi
+tutte resistenza 3, e un -1 di classe o di terreno le porta sotto la forza
+4. Il canale che paga e' quello dei finali (Museo, Universita', Grattacielo:
+6,0 -> 3,4), perche' il finale si incassa solo in piedi; -2,8 PV a testa,
+forbice 24-39. Ma la misura dice piu' del bot che della regola: il bot
+dell'era 5 pensava a forza 6 e non ha mai messo un lavoratore a protezione
+(con 6 in testa nessuna protezione basta), ne' guardato i modificatori. Un
+giocatore vero legge la carta e protegge il Museo. Per questo la 63ª.
+
+## Sessantatreesima misura: il bot legge la forza dell'evento
+
+Registro 197: il bot sapeva la forza a memoria (`era + 1`, niente nell'era
+5) e nella v3 sbagliava di 2 nelle ere 4 e 5. Ora legge la carta girata, i
+dati per le ere a venire e i modificatori dell'evento. Stessi 300 semi; due
+lotti, col solo Giudizio del tempo (variante `giudizio_solo`) e coi sei
+eventi dell'era 5, da confrontare con la 61ª e la 62ª (bot a memoria).
+
+| a giocatore | Giudizio, bot a memoria (61ª) | Giudizio, bot legge | sei eventi, bot a memoria (62ª) | sei eventi, bot legge |
+|---|---|---|---|---|
+| PV a testa | 82,3 | 83,3 | 79,6 | 80,6 |
+| finali / Rendita / Scavo | 6,0 / 12,3 / 17,4 | 6,4 / 12,7 / 17,9 | 3,4 / 12,1 / 17,6 | 3,6 / 12,6 / 18,0 |
+| era 5: costruiti / in rovina (a partita) | 7,8 / 0,45 | 7,4 / 0,39 | 7,8 / 3,6 | 7,6 / 3,6 |
+| vittorie Bil / Cont / Lampo / Obi / Rend / Ritro / Scavo | 29 / 37 / 34 / 36 / 27 / 36 / 35 | 26 / 29 / 35 / 36 / 34 / 36 / 37 | 24 / 35 / 39 / 37 / 24 / 38 / 36 | 27 / 36 / 36 / 38 / 32 / 33 / 32 |
+
+Il bot che legge vale un punto a testa e rimette in piedi la Rendita (dal
+27 al 34 col Giudizio: nell'era 4 non spreca piu' protezioni contro una
+forza 5 che non c'e', e nell'era 5 protegge quello che rende). Coi sei
+eventi la forbice torna a 27-38 e la Rendita al 32, ma il conto dell'era 5
+non cambia: 3,6 edifici su 7,6 in rovina, i finali dimezzati, -2,7 PV a
+testa rispetto al Giudizio. Non e' il bot: le carte dell'era 5 hanno quasi
+tutte resistenza 3, contro la forza 4 vivono solo per il soffio, e qualunque
+-1 di classe o di terreno le fa crollare. Con sei eventi che portano tutti
+almeno un -1 a qualcuno, meta' dell'era Moderna cade; protezioni per
+tutte non ce ne sono (tre Personaggi, quattro turni, e l'ultimo edificio
+costruito non si protegge piu'). L'era 4 aveva lo stesso problema a forza
+5 ed e' stata portata a 3 (misura 127). Variante `eventi5_forza3`: i sei
+eventi a forza 3, misura sotto.
+
+## Sessantaquattresima misura: i sei eventi dell'era 5 a forza 3
+
+Registro 198. Stessi 300 semi, bot che legge (63ª); base il Giudizio del
+tempo col bot che legge.
+
+| a giocatore | Giudizio (F4, senza effetti) | sei eventi F4 | sei eventi F3 |
+|---|---|---|---|
+| PV a testa | 83,3 | 80,6 | 83,6 |
+| finali / Rendita / Scavo / Cont | 6,4 / 12,7 / 17,9 / 14,4 | 3,6 / 12,6 / 18,0 / 14,5 | 6,1 / 12,7 / 18,0 / 14,6 |
+| era 5: costruiti / in rovina (a partita) | 7,4 / 0,39 | 7,6 / 3,6 | 7,8 / 1,1 |
+| era 4 in rovina a fine partita | 4,4 | 5,3 | 3,6 |
+| vittorie Bil / Cont / Lampo / Obi / Rend / Ritro / Scavo | 26 / 29 / 35 / 36 / 34 / 36 / 37 | 27 / 36 / 36 / 38 / 32 / 33 / 32 | 31 / 31 / 34 / 40 / 30 / 31 / 36 |
+
+A forza 3 gli eventi dell'era Moderna mordono senza falciare: un edificio
+dell'era 5 su sette va in rovina (1,1 su 7,8, contro 0,4 col Giudizio e 3,6
+a forza 4), chi prende un -2 o un -1 senza protezione crolla e gli altri
+reggono; i finali tornano a 6,1 e i PV a 83,6. Le carte dell'era 4 in
+rovina scendono da 4,4 a 3,6, perche' la forza 3 e' quella che hanno gia'
+passato. Forbice 30-40 (Obiettivi 40, Rendita 30). Scelta: forza 3 nel
+file base, come l'era 4; `--variante eventi5_forza4` per la forza del
+Giudizio.
+
 ## Come rifare il conto
 
 ```bash

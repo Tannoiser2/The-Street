@@ -3098,3 +3098,43 @@ dato è stato importato da lì. Ma due confronti fra ciò che è stampato e
     usa ancora (3 e 4) e quel regolamento non si tocca. Nella spiegazione
     del seme 925 "prende Vetusta'" era un errore di chi scriveva: regge e
     basta.
+
+196. **Anche l'era 5 ha i suoi sei eventi.** Il designer: "vorrei gli
+    eventi anche per la 5 era, non mi piace che ce ne sia solo uno, bisogna
+    allinearlo con le altre ere". Al posto del Giudizio del tempo (registro
+    149: forza 4, nessun effetto) sei eventi di forza 4 come nelle altre
+    ere, tre lievi e tre gravi, uno geografico, uno di classe e uno di
+    comportamento per gruppo: Subsidenza (pianura e fiume -1), Globalizzazione
+    (Commercio +1, Cultura -1), Crisi energetica (non protetti che producono
+    -1); Innalzamento dei mari (fiume -2, pianura -1), Crisi dello Stato
+    (Civico -2, Militare -1, Ingegneria +1), Guerra mondiale (colonne con
+    2+ giocatori -1, Militare -1). Solo selettori che il motore ha gia'. Si
+    pescano a inizio era come gli altri; la costante `evento_finale` sparisce
+    dal file v3 (resta nel v2). Variante `giudizio_solo`. Misura 62: col bot
+    cieco -2,8 PV a testa e meta' dell'era 5 in rovina; vedi 197.
+
+197. **Il bot legge la forza dell'evento dalla carta.** Nella v1.5 la forza
+    era `era + 1` e l'era 5 non aveva evento: il bot lo sapeva a memoria, in
+    quattro punti (`gs.era + 1`) e in `rendite_future`. Nella v3 non e' piu'
+    vero da tempo (era 4 a forza 3 dalla misura 127, era 5 a forza 4) e il
+    bot sbagliava di 2: proteggeva troppo nell'era 4 e nell'era 5 non
+    proteggeva mai, perche' con 6 in testa nessuna protezione bastava. Ora
+    `_forza_evento` legge la carta girata, `_forza_dell_era` legge
+    `event_force_by_era` (con la voce "5": 4 nel file v3) per le ere a
+    venire, e `_modifica_evento` somma i modificatori dell'evento (classe,
+    terreno, aura) come farebbe un giocatore che legge la carta. Nella v1.5
+    il bot resta a memoria: partite identiche (verifica di riferimento).
+    Misura 63: il bot che legge, col Giudizio e con i sei eventi.
+
+198. **Gli eventi dell'era 5 a forza 3.** Il Giudizio del tempo era di forza
+    4 senza effetti; i sei eventi (196) nascevano a forza 4 e con i loro
+    modificatori buttavano giu' meta' dell'era Moderna (misure 62-63: 3,6
+    edifici su 7,6, finali da 6,4 a 3,6, -2,7 PV a testa), anche col bot
+    che legge la carta (197). Le carte dell'era 5 hanno quasi tutte
+    resistenza 3: contro la forza 4 vivono per il soffio e un -1 qualunque le
+    fa cadere. A forza 3, come l'era 4 (che aveva lo stesso problema a 5,
+    misura 127), crolla un edificio su sette e i finali restano (64ª: 83,6
+    PV, forbice 30-40). Scelta di chi misura, "scegli tu": forza 3 nel file
+    base, `event_force_by_era` "5": 3; `--variante eventi5_forza4` per
+    tornare alla forza del Giudizio.
+
