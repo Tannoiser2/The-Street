@@ -3138,3 +3138,20 @@ dato è stato importato da lì. Ma due confronti fra ciò che è stampato e
     base, `event_force_by_era` "5": 3; `--variante eventi5_forza4` per
     tornare alla forza del Giudizio.
 
+199. **O dentro o fuori: via il soffio.** Il designer: "che senso ha fallire
+    di un soffio, abbassa la resistenza di 1 oppure aumenta il danno. O sei
+    dentro o sei fuori". Il "regge per un soffio" (`senza_rudere` con
+    `rovina_gap` 2) era l'avanzo del rudere tolto nel registro 95: fallire di
+    1 doveva finire da qualche parte e fini' in "resta intatto". Misura 65:
+    toglierlo con le forze di prima alza il danno a tutti e il gioco diventa
+    un fiume di rovine (+7 PV tutti di Scavo, nessuno spiana); scendere di 1
+    con tutte le forze rimette i numeri ma riapre la porta alla resistenza 1
+    (forza 1 nell'era 1: un edificio da 1 su quattro partite arriva alla
+    fine). Scelta: `rovina_gap` 1 e forze 2, 2, 3, 2, 2, cioe' -1 solo dove
+    il soffio attutiva; l'era 1 resta a 2 perche' la resistenza 1 non la deve
+    passare (193). Una regola sola: resistenza sotto la forza = crolla. Le
+    manopole `rovina_gap` 2 e `soffio_resistenza_min` escono dal file base
+    (restano nel codice per la v1.5 e per la variante `soffio`). Il bot legge
+    le forze dai dati (197), quindi non cambia. Sulle carte evento va
+    stampata la forza nuova. Conferma: misura 66.
+
