@@ -2869,9 +2869,79 @@ Controllo a 2 e 4 giocatori (100 partite ciascuno): tessere pescate 7,4 /
 11,1 / 11,4 / 11,1 PV a testa; il sacchetto non e' mai vuoto. La quota di
 ognuno non dipende dal numero di giocatori, com'era voluto.
 
+## Cinquantottesima misura: Scavo e Ritrovamenti col sacchetto
+
+Il registro 189: con le tessere che pagano chi ha i Personaggi, le due
+strategie delle rovine erano al 27%. Manopola al draft: lo Scavo del
+Personaggio vale per loro qualcosa in piu' dello 0,15 di tutti. Stessi 300
+semi, base la 57ª (sacchetto).
+
+| vittorie Bil / Cont / Lampo / Obi / Rend / Ritro / Scavo | PV a testa |
+|---|---|
+| base: 41 / 32 / 30 / 37 / 39 / 27 / 27 | 83,1 |
+| 0,3 a tutte e due: 35 / 35 / 29 / 29 / 33 / **43** / 29 | 83,3 |
+| 0,6 a tutte e due: 31 / 30 / 29 / 28 / 37 / **44** / 35 | 82,5 |
+| 0,3 a tutte e due + riscoperta 2,0: 35 / 35 / 28 / 29 / 33 / 44 / 29 | 83,3 |
+| Scavo 0,6, Ritro 0,15: **31 / 33 / 30 / 31 / 37 / 37 / 33** | 82,4 |
+| Scavo 0,6, Ritro 0,1: 32 / 32 / 31 / 33 / 41 / 29 / 35 | 82,7 |
+
+La leva del draft e' forte e asimmetrica: a 0,3 la Ritrovamenti passa dal 27
+al 43 (i suoi scheletri rendono 14,5 PV contro 10,7) perche' la sua
+valutazione della riscoperta si somma; la Scavo si muove poco (29 a 0,3, 35
+a 0,6). Separate le manopole (`ritro_scheletro`, `scavo_scheletro`), la
+coppia Scavo 0,6 e Ritro 0,15 da' 30-37: la forbice piu' stretta misurata
+nel torneo a sette, con tutte le strategie fra il 30 e il 37 e i PV fra
+81,5 e 83,2. Scelta: in tabella.
+
+## Cinquantanovesima misura: tutto il mazzo in vendita
+
+Il designer: "cosa cambia se durante un'era tutti gli edifici sono
+disponibili all'acquisto, senza pescarli di volta in volta?". Variante
+`tutto_in_vendita`: il mercato mostra le 12 carte dell'era. Base la 57ª.
+
+| a giocatore | base (6 in vetrina) | 12 in vetrina |
+|---|---|---|
+| PV a testa | 83,1 | 86,6 |
+| Scavo / Cont / Rendita / Lampo / finali | 16,9 / 14,7 / 13,0 / 18,8 / 6,3 | 18,2 / 15,1 / 13,9 / 18,5 / 7,1 |
+| spianamenti / riscoperte | 2,8 / 2,81 | 3,0 / 3,12 |
+| era 5: costruiti / passati / morto | 2,59 / 1,04 / 2,2 | 2,64 / 0,99 / 2,1 |
+| vittorie Bil / Cont / Lampo / Obi / Rend / Ritro / Scavo | 41 / 32 / 30 / 37 / 39 / 27 / 27 | 36 / 42 / 32 / 37 / 32 / 32 / 22 |
+
+Con tutto scoperto si gioca meglio: +3,5 PV a testa, un po' piu' di
+costruzioni sopra e di riscoperte, meno passi. Guadagnano chi pianifica
+(Continuita' 42, Obiettivi 37) e perde chi reagisce a quel che esce (Scavo
+22); la forbice si allarga a 22-42. Nel reale sono 12 carte sul tavolo
+invece di 6 per ogni era. Non e' nel file base: decisione del designer; la
+variante resta.
+
+## Sessantesima misura: l'evento scoperto a fine era
+
+Il designer: "la variante che l'evento viene scoperto a fine era e non
+all'inizio". Variante `evento_coperto` (manopola `evento_a_fine_era`):
+durante l'era si sa solo la forza, uguale per tutti gli eventi di
+quell'era; l'evento vero si scopre quando colpisce; nessun effetto in-era.
+Base la 57ª.
+
+| | base | evento coperto |
+|---|---|---|
+| partite identiche alla base, su 300 | - | 273 |
+| PV a testa, canali | 83,1 | 83,0, uguali al decimo |
+| crolli per era a partita | 10,3 / 6,2 / 6,1 / 4,7 / 0,5 | 10,4 / 6,2 / 6,1 / 4,8 / 0,4 |
+| spianamenti / sopra / riscoperte | 2,8 / 8,1 / 2,81 | 2,8 / 8,1 / 2,81 |
+| vittorie Bil / Cont / Lampo / Obi / Rend / Ritro / Scavo | 41 / 32 / 30 / 37 / 39 / 27 / 27 | 43 / 31 / 32 / 37 / 37 / 27 / 26 |
+
+Nel simulatore non cambia quasi nulla: il bot difende gli edifici guardando
+la forza, che e' la stessa per tutti gli eventi dell'era, non il tipo. Si
+perdono gli effetti in-era (Inverno lungo, Bonifiche, Anni della fame,
+Eruzione). Per i giocatori umani e' una scelta di gusto, piu' tensione e
+meno controllo, a costo zero sui numeri. Non e' nel file base: decisione
+del designer; la variante resta.
+
 ## Come rifare il conto
 
 ```bash
+# misure 58-60: `--spinta scavo_scheletro=0.6,ritro_scheletro=0.15` (e le altre coppie), `--dati
+#   data/proposte/cards-v3-era1-tutto_in_vendita.json`, `--dati data/proposte/cards-v3-era1-evento_coperto.json`
 # cinquantasettesima misura: gli scheletri sono i Personaggi (registro 188), stesso comando della
 #   quarantanovesima con `--dati data/proposte/cards-v3-era1-scheletri_personaggi.json`
 # cinquantaseiesima misura: la Ritrovamenti (registro 187); stesso comando della quarantanovesima con

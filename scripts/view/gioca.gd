@@ -527,8 +527,24 @@ func _descrivi_sotto_edificio(b: Building) -> PackedStringArray:
 			for u in b.upgrades: nomi.append(str(CardDB.upgrades[u]["name"]))
 			out.append("potenziamenti: " + ", ".join(nomi))
 		if TessereScavo.fuori(b) and TessereScavo.quante(b) > 0:
-			out.append("%d tessere scavo di G%d, %s; la carta e' tornata al proprietario" % [
-				TessereScavo.quante(b), b.owner, "scoperte" if b.scavata else "coperte"])
+			if TessereScavo.scheletri_personaggi():
+				# Col sacchetto (registro 188) le tessere sono scheletri di
+				# Personaggi: scoperte, dicono chi sono e chi incassa.
+				if b.scavata:
+					var nomi := PackedStringArray()
+					for t in b.tessere:
+						if not t.has("chi"): nomi.append("nessuno (sacchetto vuoto)"); continue
+						var cid := str(t["chi"])
+						var padrone := TessereScavo.proprietario_personaggio(ctl.gs, cid)
+						nomi.append("%s %d%s" % [str(CardDB.characters[cid]["name"]), int(t.get("v", 0)),
+							"" if padrone < 0 else " a G%d" % padrone])
+					out.append("scheletri riportati alla luce: " + ", ".join(nomi))
+				else:
+					out.append("%d tessere scavo coperte dal sacchetto; la carta e' tornata a G%d" % [
+						TessereScavo.quante(b), b.owner])
+			else:
+				out.append("%d tessere scavo di G%d, %s; la carta e' tornata al proprietario" % [
+					TessereScavo.quante(b), b.owner, "scoperte" if b.scavata else "coperte"])
 		var sc := descrivi_scheletro(b)
 		if sc != "": out.append(sc)
 		# V3: l'azione dell'edificio, e se in questo giro e' gia' stata usata.
@@ -581,8 +597,12 @@ func _descrivi_sotto_carta(c: Dictionary) -> PackedStringArray:
 			out.append("potenziamento · %s" % po["family"])
 			if str(po.get("effect_text", "")) != "": out.append(str(po["effect_text"]))
 		"mazzetto":
-			out.append("Mazzetto rovine del giocatore %s" % id)
-			out.append("%d tessere scavo ancora da pescare" % TessereScavo.rimaste(ctl.gs, int(id)))
+			if TessereScavo.scheletri_personaggi():
+				out.append("Il sacchetto delle tessere scavo")
+				out.append("%d dentro: una per Personaggio reclutato, pescate quando un edificio crolla" % TessereScavo.rimaste(ctl.gs, int(id)))
+			else:
+				out.append("Mazzetto rovine del giocatore %s" % id)
+				out.append("%d tessere scavo ancora da pescare" % TessereScavo.rimaste(ctl.gs, int(id)))
 		"token":
 			var tk: Dictionary = CardDB.upgrades[id]
 			out.append(str(tk["name"]))

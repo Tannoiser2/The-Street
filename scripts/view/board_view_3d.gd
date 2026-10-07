@@ -188,7 +188,8 @@ func _voli_del_crollo() -> void:
 		if mazzetto.size != Vector3.ZERO and not scatole.is_empty():
 			var uid: int = b.uid
 			_scavo_in_volo[uid] = true
-			var tinta: Color = COLORI_GIOCATORE[b.owner % COLORI_GIOCATORE.size()].darkened(0.5)
+			var tinta: Color = TERRAPIENO.darkened(0.3) if TessereScavo.scheletri_personaggi() \
+				else COLORI_GIOCATORE[b.owner % COLORI_GIOCATORE.size()].darkened(0.5)
 			var cima := AABB(mazzetto.position + Vector3(0.0, mazzetto.size.y, 0.0), Vector3(mazzetto.size.x, 1.0, mazzetto.size.z))
 			for t in scatole:
 				_vola(cima, t, BoardLayout3D.tessera_rovina_path({}, false), tinta, func(): _scavo_in_volo.erase(uid))
@@ -675,7 +676,8 @@ func _basetta(b: Building) -> void:
 # colore del proprietario ma scure, come il dorso di una tessera. Scoperte
 # dall'era moderna, mostrano il loro valore.
 func _tessere_scavo(b: Building) -> void:
-	var tinta: Color = COLORI_GIOCATORE[b.owner % COLORI_GIOCATORE.size()].darkened(0.5)
+	var tinta: Color = TERRAPIENO.darkened(0.3) if TessereScavo.scheletri_personaggi() \
+		else COLORI_GIOCATORE[b.owner % COLORI_GIOCATORE.size()].darkened(0.5)
 	# Lo spianato: il terrapieno generico al posto della carta.
 	for t in BoardLayout3D.terrapieni_spianato_box(gs, b):
 		_carta_stesa(t, BoardLayout3D.terrapiano_path(), TERRAPIENO, false, Color.WHITE, false)
@@ -978,9 +980,12 @@ func _file_laterali() -> void:
 		if str(c["kind"]) == "mazzetto":
 			var chi := int(str(c["id"]))
 			var rimaste := TessereScavo.rimaste(gs, chi)
-			var pila := AABB(r.position, Vector3(r.size.x, maxf(1.0, rimaste * 0.9), r.size.z))
+			# Col sacchetto (registro 188) la pila e' il sacchetto comune, neutra:
+			# le tessere non hanno colore di giocatore.
+			var pila := AABB(r.position, Vector3(r.size.x, maxf(1.0, minf(rimaste, 20) * 0.9), r.size.z))
 			_carta_stesa(pila, BoardLayout3D.tessera_rovina_path({}, false),
-				COLORI_GIOCATORE[chi % COLORI_GIOCATORE.size()].darkened(0.5), false, Color.WHITE, false)
+				TERRAPIENO.darkened(0.3) if TessereScavo.scheletri_personaggi() else COLORI_GIOCATORE[chi % COLORI_GIOCATORE.size()].darkened(0.5),
+				false, Color.WHITE, false)
 			_scritta(Vector3(pila.position.x + pila.size.x / 2.0, pila.end.y + 6.0, pila.position.z + pila.size.z / 2.0),
 				str(rimaste), 0.12, Color.WHITE)
 			continue

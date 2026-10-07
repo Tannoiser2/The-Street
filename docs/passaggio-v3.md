@@ -208,5 +208,7 @@ a costruzione), `ritro_scheletro` 0; l'audit rende il finale carta per carta (`f
 Gli scheletri sono i Personaggi (188, `scheletri: "personaggi"`, il designer "tienila"): una tessera per
 Personaggio nel sacchetto dei reclutati, pescata al crollo, che riportata alla luce paga il suo Scavo a chi
 ha quel Personaggio; il padrone della rovina non incassa dalle tessere. Spianare e costruire sopra non
-cambiano (57ª); +3 PV a testa nel canale Scavo (16,9); Scavo e Ritrovamenti da ritarare (189). Base
-attuale (57ª "sacchetto"): vittorie 27 (Ritro, Scavo) - 41 (Bil), 83,1 PV. Nell'audit `--schermo` rigioca il seme visto a schermo e `--perche` stampa la vetrina.
+cambiano (57ª); +3 PV a testa nel canale Scavo (16,9); Scavo e Ritrovamenti da ritarare (189). Scavo e
+Ritrovamenti ritarate al draft (189: `scavo_scheletro` 0,6, `ritro_scheletro` 0,15). Base attuale (58ª):
+vittorie 30-37, 82,4 PV, la forbice piu' stretta misurata. Varianti misurate e lasciate al designer (190):
+`tutto_in_vendita` (+3,5 PV, forbice 22-42) ed `evento_coperto` (quasi nulla cambia nel simulatore). Nell'audit `--schermo` rigioca il seme visto a schermo e `--perche` stampa la vetrina.

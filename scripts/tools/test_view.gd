@@ -52,6 +52,7 @@ func _ready() -> void:
 	_run("la Dinastia resta fuori dalle file", _test_dinastia)
 	_run("il personaggio sepolto sta sotto la carta del suo edificio", _test_sepolto)
 	_run("il terrapieno si paga e si vede", _test_terrapieni)
+	_run("v3: il sacchetto degli scheletri a schermo (registro 188)", _test_v3_sacchetto)
 	_run("sotto un edificio a scalino non resta un buco", _test_scalino)
 	_run("le carte stanno in piedi alla stessa altezza", _test_misure_carte)
 	_run("la sagoma e' un pezzo solo, spesso", _test_sagoma_estrusa)
@@ -3299,4 +3300,50 @@ func _test_v3_a_schermo() -> void:
 	n.torna_alla_scelta()
 	remove_child(n)
 	n.queue_free()
+	CardDB.load_db(CardDB.DB_PATH)
+
+# IL SACCHETTO A SCHERMO (registro 188): il riquadro della rovina scoperta dice
+# di chi sono gli scheletri e chi incassa; il mazzetto davanti al giocatore e'
+# il sacchetto comune, con le tessere ancora dentro.
+func _test_v3_sacchetto() -> void:
+	if not FileAccess.file_exists("res://data/proposte/cards-v3-era1.json"): return
+	var scena := ResourceLoader.load("res://scenes/gioca.tscn") as PackedScene
+	if scena == null: return
+	var n := scena.instantiate()
+	add_child(n)
+	n.inizio.con_regolamento(2)
+	n.inizio.con_giocatori(3)
+	n.inizio.con_bot(2)
+	n.inizio.con_velocita(4)
+	n.comincia()
+	var gs: GameState = n.ctl.gs
+	_ok("la v3 a schermo ha il sacchetto", TessereScavo.scheletri_personaggi())
+	var giri := 0
+	while not gs.pending_choice.is_empty() and giri < 12:
+		if int(gs.pending_choice["player"]) != 0: break
+		n.ctl.choose(int((gs.pending_choice["options"] as Array)[0]))
+		n._turni_dei_bot()
+		giri += 1
+	_eq("dopo il draft nel sacchetto ci sono 12 tessere", gs.sacchetto.size(), 12)
+	var riga: PackedStringArray = n._descrivi_sotto_carta({"kind": "mazzetto", "id": "0"})
+	_ok("  il riquadro del mazzetto dice che e' il sacchetto", riga.size() >= 2 and riga[0].contains("sacchetto") and riga[1].begins_with("12 dentro"))
+	var r := Building.new()
+	r.uid = 9188
+	r.data = CardDB.buildings["ed_tumulo_funerario"]
+	r.owner = 1
+	r.col_from = 0
+	r.col_to = 2
+	r.era_built = 1
+	r.state = Enums.BuildingState.ROVINA
+	gs.grid.buildings.append(r)
+	TessereScavo.al_crollo(gs, r)
+	var coperta: PackedStringArray = n._descrivi_sotto_edificio(r)
+	_ok("la rovina coperta dice le tessere dal sacchetto", "\n".join(coperta).contains("coperte dal sacchetto"))
+	r.scavata = true
+	var scoperta := "\n".join(n._descrivi_sotto_edificio(r))
+	var nome := str(CardDB.characters[str(r.tessere[0]["chi"])]["name"])
+	_ok("  scoperta, dice lo scheletro per nome", scoperta.contains("scheletri riportati alla luce") and scoperta.contains(nome))
+	_ok("  e a chi va", scoperta.contains(" a G"))
+	n.queue_free()
+	# Il resto dei test gira sulla v1.5: si rimette il file dati di sempre.
 	CardDB.load_db(CardDB.DB_PATH)

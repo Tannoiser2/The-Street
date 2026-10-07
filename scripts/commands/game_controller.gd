@@ -112,9 +112,17 @@ func _start_era(era: int) -> void:
 	_refill(gs.upg_row, gs.upg_decks[era], side)
 	gs.upg_row.append_array(restano)
 
+	gs.evento_coperto = {}
 	if era <= 4:
 		var evs := CardDB.events_of_era(era)
 		gs.current_event = evs[gs.rng.randi_range(0, evs.size() - 1)]
+		# L'EVENTO COPERTO (registro 190): si sa solo la forza dell'era, che e'
+		# la stessa per tutti gli eventi di quell'era; quale sia lo si scopre
+		# a fine era, quando colpisce. Nessun effetto durante l'era.
+		if bool(CardDB.constants.get("evento_a_fine_era", false)):
+			gs.evento_coperto = gs.current_event
+			gs.current_event = {"id": "ev_coperto", "name": "Evento coperto",
+				"force": int(gs.current_event.get("force", 0)), "effects": []}
 	elif CardDB.constants.has("evento_finale"):
 		# L'EVENTO FINALE (registro 149, solo nel file v2): anche l'era
 		# Moderna ha il suo evento, rivelato a inizio era e risolto prima del

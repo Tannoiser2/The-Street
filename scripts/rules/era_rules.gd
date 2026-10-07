@@ -147,6 +147,11 @@ static func paga_edificio(gs: GameState, b: Building) -> void:
 # dell'Eruzione va a loro, ma DOVE lo decide il giocatore, quindi qui non si
 # piazza nulla.
 static func resolve_event(gs: GameState) -> Array[int]:
+	# L'evento coperto (registro 190) si scopre adesso, e colpisce.
+	if not gs.evento_coperto.is_empty():
+		gs.current_event = gs.evento_coperto
+		gs.evento_coperto = {}
+		gs.log_line("Si scopre l'evento dell'era %d: %s" % [gs.era, gs.current_event.get("name", "")])
 	var force := int(gs.current_event.get("force", 0))
 	if force == 0: return [] as Array[int]
 	var persi: Array[int] = []       # chi ha perso un edificio: ev_eruzione

@@ -169,6 +169,9 @@ static func scavo_personaggio_di_era(p: PlayerState, era: int) -> int:
 # gia' posate sulle sue rovine (la vista ne disegna la pila).
 static func rimaste(gs: GameState, player: int) -> int:
 	if not attive(): return 0
+	# Col sacchetto (registro 188) non c'e' un mazzetto per giocatore: le
+	# tessere ancora dentro sono le stesse per tutti.
+	if scheletri_personaggi(): return gs.sacchetto.size()
 	var usate := 0
 	for b in gs.grid.buildings:
 		if b.owner == player: usate += quante(b)

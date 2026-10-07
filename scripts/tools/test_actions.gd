@@ -57,6 +57,7 @@ func _ready() -> void:
 	_run("v3 scelta: chi attiva usa un edificio della colonna, di chiunque, e lo brucia", _test_v3_scelta)
 	_run("v3: lo spianamento parziale, terrapieno sotto e rovina accanto (registro 180)", _test_v3_spianato_parziale)
 	_run("v3: gli scheletri sono i Personaggi, il sacchetto dei reclutati (registro 188)", _test_v3_scheletri_personaggi)
+	_run("v3: l'evento coperto fino a fine era (registro 190)", _test_v3_evento_coperto)
 	print("\n%d superati, %d falliti" % [_passed, _failed])
 	get_tree().quit(0 if _failed == 0 else 1)
 
@@ -2342,4 +2343,21 @@ func _test_v3_scheletri_personaggi() -> void:
 	var r2 := _put(gs, 1, "ed_capanne", 3, 0, Enums.BuildingState.ROVINA)
 	TessereScavo.al_crollo(gs, r2)
 	_ok("a sacchetto vuoto la tessera vale 0 e non ha nome", r2.tessere.size() == 1 and not r2.tessere[0].has("chi"))
+	CardDB.load_db(CardDB.DB_PATH)
+
+# L'EVENTO COPERTO (registro 190): durante l'era si vede solo la forza, a fine
+# era si scopre l'evento vero e colpisce con i suoi modificatori.
+func _test_v3_evento_coperto() -> void:
+	if not FileAccess.file_exists("res://data/proposte/cards-v3-era1-evento_coperto.json"): return
+	CardDB.load_db("res://data/proposte/cards-v3-era1-evento_coperto.json")
+	var ctl := _game(3, 190)
+	var gs := ctl.gs
+	_eq("a inizio era l'evento e' il segnaposto", str(gs.current_event.get("id", "")), "ev_coperto")
+	_eq("  con la forza dell'era 1", int(gs.current_event.get("force", 0)), 2)
+	_ok("  e senza effetti", (gs.current_event.get("effects", []) as Array).is_empty())
+	_ok("  mentre quello vero aspetta coperto", not gs.evento_coperto.is_empty() and str(gs.evento_coperto["id"]) != "ev_coperto")
+	var vero := str(gs.evento_coperto["id"])
+	EraRules.resolve_event(gs)
+	_eq("a fine era si scopre quello vero", str(gs.current_event.get("id", "")), vero)
+	_ok("  e il coperto si svuota", gs.evento_coperto.is_empty())
 	CardDB.load_db(CardDB.DB_PATH)
