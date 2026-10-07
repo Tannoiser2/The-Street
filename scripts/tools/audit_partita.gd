@@ -500,6 +500,7 @@ func _riga_rapporto(gs: GameState, g: int, t: Dictionary) -> Dictionary:
 			"sepolto": int(t["sepolto"].get(b.uid, 0)), "vp": b.vp_reso.duplicate(),
 			"upg": (t["upg"].get(b.uid, {}) as Dictionary).keys(), "spianato": b.was_razed,
 			"terrapieni": b.caselle_terrapieno.size(), "finale": b.finale_reso,
+			"tessere": TessereScavo.quante(b), "scavata": b.scavata,
 			"sepolto_da": b.buried_by, "scheletro": b.buried_character != ""})
 	return {"seme": g, "n": gs.n_players, "giocatori": giocatori, "edifici": edifici,
 		"eventi": t["eventi"], "rovine_era": t["rovine_era"], "tessere": gs.tessere_scattate.duplicate(),

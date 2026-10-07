@@ -205,5 +205,8 @@ piu' spesso in alto che a terra. La tabella per giocatori della v2 copriva quatt
 `scavo_premio` 0; ora la tabella scritta e' quella che gioca e porta quei valori col `lampo` a 0,8
 (186). La Ritrovamenti (187): Museo max 6 e Universita' max 5 (i due finali senza tetto rendevano 6,9 e 7,4 PV
 a costruzione), `ritro_scheletro` 0; l'audit rende il finale carta per carta (`finale` nella riga J).
-Base attuale (56ª, "tetto + scheletro 0"): vittorie 28 (Rend) - 40 (Ritro), 80,2 PV, la forbice piu'
-stretta misurata. Nell'audit `--schermo` rigioca il seme visto a schermo e `--perche` stampa la vetrina.
+Gli scheletri sono i Personaggi (188, `scheletri: "personaggi"`, il designer "tienila"): una tessera per
+Personaggio nel sacchetto dei reclutati, pescata al crollo, che riportata alla luce paga il suo Scavo a chi
+ha quel Personaggio; il padrone della rovina non incassa dalle tessere. Spianare e costruire sopra non
+cambiano (57ª); +3 PV a testa nel canale Scavo (16,9); Scavo e Ritrovamenti da ritarare (189). Base
+attuale (57ª "sacchetto"): vittorie 27 (Ritro, Scavo) - 41 (Bil), 83,1 PV. Nell'audit `--schermo` rigioca il seme visto a schermo e `--perche` stampa la vetrina.

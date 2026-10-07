@@ -65,6 +65,10 @@ var tessere_usate: Array[bool] = []
 var tessere_colonna: Array[String] = []
 var tessere_scattate: Dictionary = {}
 var mazzi_scavo: Dictionary = {}      # giocatore -> tessere scavo ancora da pescare (registro 130)
+# IL SACCHETTO (registro 188, `scheletri: "personaggi"`): una tessera per
+# Personaggio, che entra quando il Personaggio viene reclutato; le rovine
+# pescano da qui, non dai mazzetti colorati. Id dei Personaggi ancora dentro.
+var sacchetto: Array = []
 var next_uid: int = 1
 # LA COLONNA ATTIVATA IN QUESTO TURNO e l'edificio che il lavoratore abita.
 # Stavano nel controller, e sembravano dettagli del comando; invece decidono
@@ -122,6 +126,7 @@ func duplica() -> GameState:
 	g.tessere_colonna = tessere_colonna.duplicate()
 	g.tessere_scattate = tessere_scattate.duplicate()
 	g.mazzi_scavo = mazzi_scavo.duplicate(true)
+	g.sacchetto = sacchetto.duplicate()
 	g.next_uid = next_uid
 	g.colonna_attivata = colonna_attivata
 	g.protetto_uid = protetto_uid

@@ -649,6 +649,12 @@ for b in v3["buildings"]:
     if b["id"] == "ed_grattacielo":
         b["cost"] = prod(pietra=2, idee=1)
 
+# GLI SCHELETRI SONO I PERSONAGGI (registro 188). Il designer: "tienila". Una
+# tessera per Personaggio, nel sacchetto quando viene reclutato; la rovina
+# pesca al crollo; la tessera riportata alla luce paga il suo Scavo a chi ha
+# quel Personaggio. Il mazzetto da 20 per colore non serve piu'.
+c["tessere_scavo"]["scheletri"] = "personaggi"
+
 # LO SPIANAMENTO PARZIALE (registro 180). Nella v2 un proprio intatto spianato
 # andava in rovina tutto intero, Scavo 0 e senza tessere, anche se la carta
 # nuova ne copriva una casella sola: le altre restavano Terrapieni a vista
@@ -864,6 +870,13 @@ def grandi_vecchie(v):
 #   --variante spianato_intero  lo spianato di prima: tutta la carta terrapieno, Scavo 0, niente tessere
 def spianato_intero(v):
     v["constants"]["tessere_scavo"].pop("spianato", None)
+#   --variante scheletri_personaggi  gli scheletri sono i Personaggi (registro 188): una tessera per
+#                                    Personaggio nel sacchetto dei reclutati, paga il suo Scavo a chi lo ha
+def scheletri_personaggi(v):
+    v["constants"]["tessere_scavo"]["scheletri"] = "personaggi"
+#   --variante mazzetti_colorati  le tessere scavo di prima: mazzetto da 20 per colore, valore 0-3, scheletri con l'era
+def mazzetti_colorati(v):
+    v["constants"]["tessere_scavo"].pop("scheletri", None)
 #   --variante finali_senza_tetto  Museo e Universita' senza il tetto del registro 187
 def finali_senza_tetto(v):
     for b in v["buildings"]:
@@ -875,7 +888,7 @@ def finali_senza_tetto(v):
 def grattacielo_caro(v):
     for b in v["buildings"]:
         if b["id"] == "ed_grattacielo": b["cost"] = prod(pietra=3, idee=1)
-VARIANTI = {"finali_senza_tetto": finali_senza_tetto, "spianato_intero": spianato_intero, "grattacielo_caro": grattacielo_caro, "grandi_vecchie": grandi_vecchie, "proprietario": proprietario, "compenso_pv": compenso_pv, "senza_sconti": senza_sconti,
+VARIANTI = {"scheletri_personaggi": scheletri_personaggi, "mazzetti_colorati": mazzetti_colorati, "finali_senza_tetto": finali_senza_tetto, "spianato_intero": spianato_intero, "grattacielo_caro": grattacielo_caro, "grandi_vecchie": grandi_vecchie, "proprietario": proprietario, "compenso_pv": compenso_pv, "senza_sconti": senza_sconti,
             "lampo_vecchio": lampo_vecchio, "extra_sempre": extra_sempre, "senza_extra": senza_extra, "costi_vecchi": costi_vecchi,
             "case_seconda": case_seconda, "case_lampo1": case_lampo1, "senza_tuning": senza_tuning,
             "terreno_produce": terreno_produce, "senza_potenziamento_insieme": senza_potenziamento_insieme}

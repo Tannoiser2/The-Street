@@ -1,7 +1,7 @@
 {
   "meta": {
     "game": "La Strada delle Ere",
-    "ruleset": "v3-era1-prova-case_lampo1",
+    "ruleset": "v3-era1-prova-scheletri_personaggi",
     "language": "it",
     "source": "distinta-carte (fonte unica)",
     "origine": "generato da tools/genera_cards_v3.py da data/cards-v2.json: non modificare a mano"
@@ -2808,7 +2808,7 @@
       "flexible": false,
       "resistance": 2,
       "rendita": 0,
-      "lampo": 1,
+      "lampo": 2,
       "scavo": 1,
       "level_required": 0,
       "production": {
