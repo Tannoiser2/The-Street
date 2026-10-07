@@ -1,7 +1,7 @@
 {
   "meta": {
     "game": "La Strada delle Ere",
-    "ruleset": "v3-era1-prova",
+    "ruleset": "v3-era1-prova-soffio_per_tutti",
     "language": "it",
     "source": "distinta-carte (fonte unica)",
     "origine": "generato da tools/genera_cards_v3.py da data/cards-v2.json: non modificare a mano"
@@ -45,17 +45,17 @@
     },
     "event_force_by_era": {
       "1": 2,
-      "2": 2,
-      "3": 3,
-      "4": 2,
-      "5": 2
+      "2": 3,
+      "3": 4,
+      "4": 3,
+      "5": 3
     },
     "resource_cap": 99,
     "protection_bonus": 2,
     "vetusta_max": 0,
     "vetusta_max_bosco": 0,
     "rudere_penalty": 2,
-    "rovina_gap": 1,
+    "rovina_gap": 2,
     "senza_rudere": true,
     "spianare_conserva_scavo": false,
     "scavo_a_chi_scava": false,
@@ -204,7 +204,8 @@
     "spiana_solo_ere_precedenti": true,
     "potenzia_adiacente": true,
     "potenziamento_con_costruzione": true,
-    "azione_edificio_compenso": "nessuno"
+    "azione_edificio_compenso": "nessuno",
+    "soffio_resistenza_min": 0
   },
   "terrains": [
     {
@@ -6397,10 +6398,10 @@
       "id": "ev_terremoto",
       "name": "Terremoto",
       "era": 2,
-      "force": 2,
+      "force": 3,
       "severity": "lieve",
       "kind": "geografico",
-      "effect_text": "Forza 2. Edifici da 2 o 3 caselle: −1 res.",
+      "effect_text": "Forza 3. Edifici da 2 o 3 caselle: −1 res.",
       "effects": [
         {
           "hook": "on_event",
@@ -6418,10 +6419,10 @@
       "id": "ev_pax_imperiale",
       "name": "Pax imperiale",
       "era": 2,
-      "force": 2,
+      "force": 3,
       "severity": "lieve",
       "kind": "classe",
-      "effect_text": "Forza 2. Ingegneria +1 res · Militare −1 res.",
+      "effect_text": "Forza 3. Ingegneria +1 res · Militare −1 res.",
       "effects": [
         {
           "hook": "on_event",
@@ -6449,10 +6450,10 @@
       "id": "ev_invasione",
       "name": "Invasione",
       "era": 2,
-      "force": 2,
+      "force": 3,
       "severity": "lieve",
       "kind": "comportamentale",
-      "effect_text": "Forza 2. Edifici non protetti: −1 res extra.",
+      "effect_text": "Forza 3. Edifici non protetti: −1 res extra.",
       "effects": [
         {
           "hook": "on_event",
@@ -6468,10 +6469,10 @@
       "id": "ev_eruzione",
       "name": "Eruzione",
       "era": 2,
-      "force": 2,
+      "force": 3,
       "severity": "grave",
       "kind": "geografico",
-      "effect_text": "Forza 2. Edifici su collina: −2 res. Chi perde un edificio pesca un potenziamento gratis (massimo uno per giocatore).",
+      "effect_text": "Forza 3. Edifici su collina: −2 res. Chi perde un edificio pesca un potenziamento gratis (massimo uno per giocatore).",
       "effects": [
         {
           "hook": "on_event",
@@ -6495,10 +6496,10 @@
       "id": "ev_persecuzioni",
       "name": "Persecuzioni",
       "era": 2,
-      "force": 2,
+      "force": 3,
       "severity": "grave",
       "kind": "classe",
-      "effect_text": "Forza 2. Religione −2 res · Civico +1 res.",
+      "effect_text": "Forza 3. Religione −2 res · Civico +1 res.",
       "effects": [
         {
           "hook": "on_event",
@@ -6526,10 +6527,10 @@
       "id": "ev_guerra_civile",
       "name": "Guerra civile",
       "era": 2,
-      "force": 2,
+      "force": 3,
       "severity": "grave",
       "kind": "comportamentale",
-      "effect_text": "Forza 2. Nelle colonne con edifici di 2+ giocatori: tutti −1 res.",
+      "effect_text": "Forza 3. Nelle colonne con edifici di 2+ giocatori: tutti −1 res.",
       "effects": [
         {
           "hook": "on_event",
@@ -6547,10 +6548,10 @@
       "id": "ev_incursioni_fluviali",
       "name": "Incursioni fluviali",
       "era": 3,
-      "force": 3,
+      "force": 4,
       "severity": "lieve",
       "kind": "geografico",
-      "effect_text": "Forza 3. Edifici su colonne fiume: −1 res.",
+      "effect_text": "Forza 4. Edifici su colonne fiume: −1 res.",
       "effects": [
         {
           "hook": "on_event",
@@ -6568,10 +6569,10 @@
       "id": "ev_guerra",
       "name": "Guerra",
       "era": 3,
-      "force": 3,
+      "force": 4,
       "severity": "lieve",
       "kind": "classe",
-      "effect_text": "Forza 3. Militare +1 res · Civico −1 res.",
+      "effect_text": "Forza 4. Militare +1 res · Civico −1 res.",
       "effects": [
         {
           "hook": "on_event",
@@ -6599,10 +6600,10 @@
       "id": "ev_peste",
       "name": "Peste",
       "era": 3,
-      "force": 3,
+      "force": 4,
       "severity": "lieve",
       "kind": "comportamentale",
-      "effect_text": "Forza 3. Colonne con 3+ edifici in piedi: tutti −1 res.",
+      "effect_text": "Forza 4. Colonne con 3+ edifici in piedi: tutti −1 res.",
       "effects": [
         {
           "hook": "on_event",
@@ -6620,10 +6621,10 @@
       "id": "ev_grande_incendio",
       "name": "Grande incendio",
       "era": 3,
-      "force": 3,
+      "force": 4,
       "severity": "grave",
       "kind": "geografico",
-      "effect_text": "Forza 3. Edifici a livello 0 o 1: −1 res; a livello 2+: −2 res.",
+      "effect_text": "Forza 4. Edifici a livello 0 o 1: −1 res; a livello 2+: −2 res.",
       "effects": [
         {
           "hook": "on_event",
@@ -6651,10 +6652,10 @@
       "id": "ev_scisma",
       "name": "Scisma",
       "era": 3,
-      "force": 3,
+      "force": 4,
       "severity": "grave",
       "kind": "classe",
-      "effect_text": "Forza 3. Religione −2 res · Cultura −1 res · Commercio +1 res.",
+      "effect_text": "Forza 4. Religione −2 res · Cultura −1 res · Commercio +1 res.",
       "effects": [
         {
           "hook": "on_event",
@@ -6692,10 +6693,10 @@
       "id": "ev_anni_della_fame",
       "name": "Anni della fame",
       "era": 3,
-      "force": 3,
+      "force": 4,
       "severity": "grave",
       "kind": "comportamentale",
-      "effect_text": "Forza 3. Nessuna produzione durante l’ultimo round dell’era.",
+      "effect_text": "Forza 4. Nessuna produzione durante l’ultimo round dell’era.",
       "effects": [
         {
           "hook": "on_activate",
@@ -6708,10 +6709,10 @@
       "id": "ev_alluvione",
       "name": "Alluvione",
       "era": 4,
-      "force": 2,
+      "force": 3,
       "severity": "lieve",
       "kind": "geografico",
-      "effect_text": "Forza 2. Edifici su colonne fiume: −1 res.",
+      "effect_text": "Forza 3. Edifici su colonne fiume: −1 res.",
       "effects": [
         {
           "hook": "on_event",
@@ -6729,10 +6730,10 @@
       "id": "ev_controriforma",
       "name": "Controriforma",
       "era": 4,
-      "force": 2,
+      "force": 3,
       "severity": "lieve",
       "kind": "classe",
-      "effect_text": "Forza 2. Religione +1 res · Cultura −1 res.",
+      "effect_text": "Forza 3. Religione +1 res · Cultura −1 res.",
       "effects": [
         {
           "hook": "on_event",
@@ -6760,10 +6761,10 @@
       "id": "ev_rivoluzione_industriale",
       "name": "Rivoluzione industriale",
       "era": 4,
-      "force": 2,
+      "force": 3,
       "severity": "lieve",
       "kind": "comportamentale",
-      "effect_text": "Forza 2. Edifici con Scavo 2+: −1 res.",
+      "effect_text": "Forza 3. Edifici con Scavo 2+: −1 res.",
       "effects": [
         {
           "hook": "on_event",
@@ -6781,10 +6782,10 @@
       "id": "ev_bonifiche",
       "name": "Bonifiche",
       "era": 4,
-      "force": 2,
+      "force": 3,
       "severity": "grave",
       "kind": "geografico",
-      "effect_text": "Forza 2. Edifici su pianura: −2 res. Il primo terrapieno di ogni giocatore in quest’era costa 0.",
+      "effect_text": "Forza 3. Edifici su pianura: −2 res. Il primo terrapieno di ogni giocatore in quest’era costa 0.",
       "effects": [
         {
           "hook": "on_event",
@@ -6808,10 +6809,10 @@
       "id": "ev_secolarizzazioni",
       "name": "Secolarizzazioni",
       "era": 4,
-      "force": 2,
+      "force": 3,
       "severity": "grave",
       "kind": "classe",
-      "effect_text": "Forza 2. Religione −2 res.",
+      "effect_text": "Forza 3. Religione −2 res.",
       "effects": [
         {
           "hook": "on_event",
@@ -6829,10 +6830,10 @@
       "id": "ev_speculazione_edilizia",
       "name": "Speculazione edilizia",
       "era": 4,
-      "force": 2,
+      "force": 3,
       "severity": "grave",
       "kind": "comportamentale",
-      "effect_text": "Forza 2. Ogni edificio con 2+ potenziamenti: −1 res.",
+      "effect_text": "Forza 3. Ogni edificio con 2+ potenziamenti: −1 res.",
       "effects": [
         {
           "hook": "on_event",
@@ -6850,10 +6851,10 @@
       "id": "ev_subsidenza",
       "name": "Subsidenza",
       "era": 5,
-      "force": 2,
+      "force": 3,
       "severity": "lieve",
       "kind": "geografico",
-      "effect_text": "Forza 2. Edifici su pianura e fiume: −1 res.",
+      "effect_text": "Forza 3. Edifici su pianura e fiume: −1 res.",
       "effects": [
         {
           "hook": "on_event",
@@ -6872,10 +6873,10 @@
       "id": "ev_globalizzazione",
       "name": "Globalizzazione",
       "era": 5,
-      "force": 2,
+      "force": 3,
       "severity": "lieve",
       "kind": "classe",
-      "effect_text": "Forza 2. Commercio +1 res · Cultura −1 res.",
+      "effect_text": "Forza 3. Commercio +1 res · Cultura −1 res.",
       "effects": [
         {
           "hook": "on_event",
@@ -6903,10 +6904,10 @@
       "id": "ev_crisi_energetica",
       "name": "Crisi energetica",
       "era": 5,
-      "force": 2,
+      "force": 3,
       "severity": "lieve",
       "kind": "comportamentale",
-      "effect_text": "Forza 2. Edifici non protetti che producono risorse: −1 res.",
+      "effect_text": "Forza 3. Edifici non protetti che producono risorse: −1 res.",
       "effects": [
         {
           "hook": "on_event",
@@ -6923,10 +6924,10 @@
       "id": "ev_innalzamento_dei_mari",
       "name": "Innalzamento dei mari",
       "era": 5,
-      "force": 2,
+      "force": 3,
       "severity": "grave",
       "kind": "geografico",
-      "effect_text": "Forza 2. Edifici su fiume: −2 res · su pianura: −1 res.",
+      "effect_text": "Forza 3. Edifici su fiume: −2 res · su pianura: −1 res.",
       "effects": [
         {
           "hook": "on_event",
@@ -6954,10 +6955,10 @@
       "id": "ev_crisi_dello_stato",
       "name": "Crisi dello Stato",
       "era": 5,
-      "force": 2,
+      "force": 3,
       "severity": "grave",
       "kind": "classe",
-      "effect_text": "Forza 2. Civico −2 res · Militare −1 res · Ingegneria +1 res.",
+      "effect_text": "Forza 3. Civico −2 res · Militare −1 res · Ingegneria +1 res.",
       "effects": [
         {
           "hook": "on_event",
@@ -6995,10 +6996,10 @@
       "id": "ev_guerra_mondiale",
       "name": "Guerra mondiale",
       "era": 5,
-      "force": 2,
+      "force": 3,
       "severity": "grave",
       "kind": "comportamentale",
-      "effect_text": "Forza 2. Nelle colonne con edifici di 2+ giocatori: tutti −1 res. Militare −1 res.",
+      "effect_text": "Forza 3. Nelle colonne con edifici di 2+ giocatori: tutti −1 res. Militare −1 res.",
       "effects": [
         {
           "hook": "on_event",

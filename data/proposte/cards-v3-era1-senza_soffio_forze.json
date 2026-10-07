@@ -1,7 +1,7 @@
 {
   "meta": {
     "game": "La Strada delle Ere",
-    "ruleset": "v3-era1-prova",
+    "ruleset": "v3-era1-prova-senza_soffio_forze",
     "language": "it",
     "source": "distinta-carte (fonte unica)",
     "origine": "generato da tools/genera_cards_v3.py da data/cards-v2.json: non modificare a mano"
@@ -44,7 +44,7 @@
       "oro": 0
     },
     "event_force_by_era": {
-      "1": 2,
+      "1": 1,
       "2": 2,
       "3": 3,
       "4": 2,
@@ -6242,10 +6242,10 @@
       "id": "ev_diluvio",
       "name": "Diluvio",
       "era": 1,
-      "force": 2,
+      "force": 1,
       "severity": "lieve",
       "kind": "geografico",
-      "effect_text": "Forza 2. Edifici su colonne fiume: −1 res.",
+      "effect_text": "Forza 1. Edifici su colonne fiume: −1 res.",
       "effects": [
         {
           "hook": "on_event",
@@ -6263,10 +6263,10 @@
       "id": "ev_eta_degli_spiriti",
       "name": "Età degli spiriti",
       "era": 1,
-      "force": 2,
+      "force": 1,
       "severity": "lieve",
       "kind": "classe",
-      "effect_text": "Forza 2. Religione +1 res · Commercio −1 res.",
+      "effect_text": "Forza 1. Religione +1 res · Commercio −1 res.",
       "effects": [
         {
           "hook": "on_event",
@@ -6294,10 +6294,10 @@
       "id": "ev_migrazione",
       "name": "Migrazione",
       "era": 1,
-      "force": 2,
+      "force": 1,
       "severity": "lieve",
       "kind": "comportamentale",
-      "effect_text": "Forza 2. Edifici non protetti: −1 res extra.",
+      "effect_text": "Forza 1. Edifici non protetti: −1 res extra.",
       "effects": [
         {
           "hook": "on_event",
@@ -6313,10 +6313,10 @@
       "id": "ev_inverno_lungo",
       "name": "Inverno lungo",
       "era": 1,
-      "force": 2,
+      "force": 1,
       "severity": "grave",
       "kind": "geografico",
-      "effect_text": "Forza 2. Edifici su bosco e collina: −1 res. Tutti i giocatori perdono 1 pietra.",
+      "effect_text": "Forza 1. Edifici su bosco e collina: −1 res. Tutti i giocatori perdono 1 pietra.",
       "effects": [
         {
           "hook": "on_event",
@@ -6343,10 +6343,10 @@
       "id": "ev_faide_tribali",
       "name": "Faide tribali",
       "era": 1,
-      "force": 2,
+      "force": 1,
       "severity": "grave",
       "kind": "classe",
-      "effect_text": "Forza 2. Militare +1 res · Civico −2 res.",
+      "effect_text": "Forza 1. Militare +1 res · Civico −2 res.",
       "effects": [
         {
           "hook": "on_event",
@@ -6374,10 +6374,10 @@
       "id": "ev_carestia_primitiva",
       "name": "Carestia primitiva",
       "era": 1,
-      "force": 2,
+      "force": 1,
       "severity": "grave",
       "kind": "comportamentale",
-      "effect_text": "Forza 2. Edifici a livello 0 non protetti che producono risorse: −2 res.",
+      "effect_text": "Forza 1. Edifici a livello 0 non protetti che producono risorse: −2 res.",
       "effects": [
         {
           "hook": "on_event",

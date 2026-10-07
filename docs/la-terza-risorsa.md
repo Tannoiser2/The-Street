@@ -3047,6 +3047,67 @@ passato. Forbice 30-40 (Obiettivi 40, Rendita 30). Scelta: forza 3 nel
 file base, come l'era 4; `--variante eventi5_forza4` per la forza del
 Giudizio.
 
+## Sessantacinquesima misura: o dentro o fuori
+
+Il designer: "che senso ha fallire di un soffio, abbassa la resistenza di 1
+oppure aumenta il danno. O sei dentro o sei fuori" (registro 199). Due
+varianti pulite, `rovina_gap` 1 in tutte e due: `senza_soffio` con le forze
+di prima (2, 3, 4, 3, 3) e `senza_soffio_forze` con tutte le forze scese di
+1 (1, 2, 3, 2, 2). Stessi 300 semi, base la 64ª (soffio tranne la
+resistenza 1, eventi dell'era 5 a forza 3, bot che legge).
+
+| a giocatore | base (soffio) | senza soffio, forze di prima | senza soffio, forze -1 |
+|---|---|---|---|
+| PV a testa | 83,6 | **90,9** | 84,1 |
+| Scavo / Rendita / finali / cultura | 18,0 / 12,7 / 6,1 / 9,0 | **29,2** / 11,5 / 4,1 / 7,8 | 16,4 / 13,3 / 6,5 / 9,6 |
+| in rovina per era a fine partita (1-5) | 9,9 / 6,1 / 5,8 / 3,6 / 1,1 | 9,7 / 7,1 / 7,9 / 6,0 / 3,4 | 9,6 / 6,0 / 6,0 / 3,3 / 0,9 |
+| spianamenti / sopra / riscoperte | 3,2 / 8,0 / 3,0 | 1,7 / 8,7 / 5,3 | 3,9 / 8,0 / 2,8 |
+| resistenza 1 in piedi a fine partita (a partita) | 0,01 | 0,04 | **0,25** |
+| vittorie Bil / Cont / Lampo / Obi / Rend / Ritro / Scavo | 31 / 31 / 34 / 40 / 30 / 31 / 36 | 34 / 31 / 33 / 37 / 25 / 33 / 41 | 38 / 25 / 34 / 30 / 39 / 33 / 35 |
+
+Togliere il soffio e basta e' alzare il danno di 1 a tutti: le rovine
+arrivano a fiumi (era 4: 6,0 in rovina, era 5: 3,4), nessuno spiana piu'
+(1,7) perche' le rovine le fa l'evento, le riscoperte raddoppiano e lo Scavo
+va a 29 PV su 91: il gioco cambia natura e la Rendita scende al 25. Abbassare
+anche le forze di 1 rimette i numeri al loro posto (84,1 PV, canali come
+prima) ma riapre la porta che il registro 193 aveva chiuso: a forza 1
+l'era 1 la passano tutti, e un edificio a resistenza 1 su quattro partite
+arriva alla fine (0,25 contro 0,01); la Rendita risale al 39 per lo stesso
+motivo. Scelta di chi misura ("scegli tu"): niente soffio e forze 2, 2, 3,
+2, 2, cioe' -1 solo dove il soffio attutiva. L'era 1 resta a 2 perche' la
+resistenza 1 non deve passarla; le ere 2-5 scendono perche' li' chi reggeva
+per un soffio deve continuare a reggere. E' il conto di oggi scritto senza
+eccezioni: una regola sola, resistenza sotto la forza = crolla. Le manopole
+`rovina_gap` e `soffio_resistenza_min` non servono piu' nel file base;
+`--variante soffio` rifa' il conto di prima. La misura di conferma e' la
+66ª.
+
+## Sessantaseiesima misura: la conferma della base pulita
+
+Il file base del registro 199: `rovina_gap` 1, forze 2, 2, 3, 2, 2. Stessi
+300 semi, base la 64ª (soffio tranne la resistenza 1, forze 2, 3, 4, 3, 3).
+
+| a giocatore | 64ª (soffio) | 66ª (o dentro o fuori) |
+|---|---|---|
+| PV a testa | 83,6 | 83,3 |
+| Scavo / Cont / Rendita / Lampo / finali | 18,0 / 14,6 / 12,7 / 18,8 / 6,1 | 17,0 / 14,7 / 12,4 / 19,1 / 6,3 |
+| in rovina per era a fine partita (1-5) | 9,9 / 6,1 / 5,8 / 3,6 / 1,1 | 9,8 / 5,6 / 5,9 / 3,2 / 1,0 |
+| spianamenti / sopra / riscoperte | 3,2 / 8,0 / 3,0 | 3,3 / 7,9 / 2,8 |
+| resistenza 1 in piedi a fine partita (a partita) | 0,01 | 0,08 |
+| vittorie Bil / Cont / Lampo / Obi / Rend / Ritro / Scavo | 31 / 31 / 34 / 40 / 30 / 31 / 36 | 33 / 41 / 31 / 39 / 25 / 36 / 29 |
+
+Il conto e' lo stesso: punti, canali, rovine per era e spianamenti al
+decimo. Gli 0,08 edifici a resistenza 1 in piedi alla fine sono quelli con
+l'Argine (1 + 1 = 2 passa la forza 2): la regola nuova guarda la resistenza
+effettiva come tutto il resto, e l'Argine torna a valere anche su di loro;
+e' il valore che la 58ª aveva prima del registro 193. Quel che si muove sono
+le vittorie, 25-41 contro 30-40: la Continuita' sale al 41 e la Rendita
+scende al 25 senza che il motore abbia cambiato chi crolla. E' il bot, che
+ora legge forze esatte (197) dove prima ignorava il soffio e credeva morti
+edifici che vivevano: pianifica meglio le colonne lunghe e protegge con
+piu' giudizio. La ritaratura delle spinte (`rendita_per_era`,
+`continuita_peso`) e' la prossima misura, non questa regola.
+
 ## Come rifare il conto
 
 ```bash

@@ -200,12 +200,12 @@
     "personaggi_per_era": 16,
     "risorse_muoiono": true,
     "azione_edificio": "scelta",
-    "soffio_resistenza_min": 2,
     "spianare_costo": 1,
     "spiana_solo_ere_precedenti": true,
     "potenzia_adiacente": true,
     "potenziamento_con_costruzione": true,
     "azione_edificio_compenso": "nessuno",
+    "soffio_resistenza_min": 2,
     "evento_finale": {
       "id": "ev_giudizio_del_tempo",
       "name": "Il giudizio del tempo",

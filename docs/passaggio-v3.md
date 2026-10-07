@@ -221,4 +221,7 @@ La Vetusta' nella v3 e' a 0 (195): la manopola resta solo per la v1.5. Anche l'e
 Crisi dello Stato, Guerra mondiale; `--variante giudizio_solo` per il Giudizio del tempo di prima). Il bot legge la
 forza dell'evento dalla carta e da `event_force_by_era` invece di `era + 1` (197, vale un punto a testa e rimette la
 Rendita al 34). I sei eventi sono a forza 3 come l'era 4 (198, 64ª: 83,6 PV, un edificio dell'era 5 su sette in rovina,
-forbice 30-40; a forza 4 ne crollava meta', `--variante eventi5_forza4`).
+forbice 30-40; a forza 4 ne crollava meta', `--variante eventi5_forza4`). Via il soffio (199, "o dentro o fuori"): `rovina_gap` 1, resistenza sotto la forza = crolla, forze 2, 2, 3, 2, 2
+(-1 dove il soffio attutiva, l'era 1 resta a 2 per la resistenza 1); `--variante soffio` rifa' il conto di prima; misura
+65 le due alternative pulite, 66 la conferma: 83,3 PV, canali al decimo come la 64ª, vittorie 25-41 (Continuita' 41,
+Rendita 25) perche' il bot ora legge forze esatte; da ritarare le spinte, non la regola.
