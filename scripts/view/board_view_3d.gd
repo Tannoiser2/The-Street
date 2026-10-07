@@ -961,6 +961,9 @@ const PLANCIA_SFONDO := Color("#2d323c")
 # destra, e li' si spegne del tutto.
 const CARTA_SPENTA := Color(0.45, 0.45, 0.47)
 const CARTA_SEPOLTA := Color(0.30, 0.28, 0.26)
+# Il dorso del Personaggio girato (registro 194), finche' non c'e' il disegno:
+# terra scura, come la tessera coperta del suo scheletro.
+const CARTA_COPERTA := Color("#4a3f33")
 
 # I token dei potenziamenti sopra l'edificio (registro 133): un quadrotto con
 # la faccia del potenziamento, uno per casella.
@@ -995,8 +998,11 @@ func _file_laterali() -> void:
 				str(rimaste), 0.12, Color.WHITE)
 			continue
 		var percorso := BoardLayout3D.carta_path(str(c["kind"]), str(c["id"]))
+		# Il Personaggio girato (registro 194): il dorso, non la faccia.
+		if bool(c.get("coperta", false)): percorso = BoardLayout3D.DORSO_PERSONAGGIO
 		var sfondo := CARTA_SFONDO
 		if percorso != "" and ResourceLoader.exists(percorso): sfondo = Color("#1d1b17")
+		elif bool(c.get("coperta", false)): sfondo = CARTA_COPERTA
 		var stampa := Color.WHITE
 		if bool(c.get("sepolta", false)): stampa = CARTA_SEPOLTA
 		elif bool(c.get("spenta", false)): stampa = CARTA_SPENTA

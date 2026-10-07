@@ -673,6 +673,11 @@ const CARTELLA_EDIFICI_V2 := "res://assets/carte/edifici_v2/%s.png"
 static func e_v2() -> bool:
 	return (str(CardDB.ruleset).begins_with("v2") or str(CardDB.ruleset).begins_with("v3"))
 
+# Il dorso del Personaggio girato (registro 194): il designer ne disegnera'
+# uno ad hoc, con lo scheletro; finche' non c'e', la vista stende un
+# riquadro scuro senza immagine.
+const DORSO_PERSONAGGIO := "res://assets/carte/dorsi/personaggio_scheletro.png"
+
 static func carta_path(tipo: String, id: String) -> String:
 	if not CARTELLE_CARTE.has(tipo): return ""
 	# Nella v2 i potenziamenti hanno le facce del loro PDF (registro 128), e
@@ -1243,14 +1248,26 @@ static func carte_giocatore(gs: GameState, player: int, umano := -1) -> Array[Di
 	for b in gs.grid.buildings:
 		if b.owner == player and b.buried_character != "": sepolti[b.buried_character] = true
 	var visti := {}
+	# A FINE ERA I PERSONAGGI SI GIRANO (registro 194). Col sacchetto il
+	# Personaggio di un'era passata e' uno scheletro: la carta sta
+	# sottosopra, col dorso, finche' a fine partita si rigirano solo quelli
+	# che lo scavo ha riportato alla luce. Il designer: "gira i personaggi
+	# sottosopra per indicare che sono scheletri, quando alla fine del gioco
+	# vengono scoperti puoi rigirare sul verso attivo solo quelli scoperti".
+	var finita := gs.phase == Enums.Phase.FINE_PARTITA
+	var scoperti := TessereScavo.scheletri_scoperti(gs) if finita else {}
+	var coperta := func(cid: String) -> bool:
+		if not TessereScavo.scheletri_personaggi(): return false
+		if finita: return not scoperti.has(cid)
+		return not cid in p.specialized_characters
 	for c in p.specialized_characters:
 		if sepolti.has(str(c)): continue
 		visti[str(c)] = true
-		out.append({"kind": "personaggio", "id": str(c)})
+		out.append({"kind": "personaggio", "id": str(c), "coperta": coperta.call(str(c))})
 	for c in p.final_characters:
 		if visti.has(str(c)) or sepolti.has(str(c)): continue
 		visti[str(c)] = true
-		out.append({"kind": "personaggio", "id": str(c)})
+		out.append({"kind": "personaggio", "id": str(c), "coperta": coperta.call(str(c))})
 	for m in p.monuments_claimed: out.append({"kind": "monumento", "id": str(m)})
 	# CON LE CARTE RESTITUITE (registri 131-133) davanti al giocatore non c'e'
 	# il mazzetto degli edifici: quelli in piedi stanno sulla mappa, e
@@ -1272,7 +1289,7 @@ static func carte_giocatore(gs: GameState, player: int, umano := -1) -> Array[Di
 			var cid := str(voce[0])
 			if visti.has(cid): continue
 			visti[cid] = true
-			out.append({"kind": "personaggio", "id": cid})
+			out.append({"kind": "personaggio", "id": cid, "coperta": coperta.call(cid)})
 		for u in p.potenziamenti_riscattati:
 			out.append({"kind": "token", "id": str(u)})
 		return out

@@ -2937,6 +2937,38 @@ Eruzione). Per i giocatori umani e' una scelta di gusto, piu' tensione e
 meno controllo, a costo zero sui numeri. Non e' nel file base: decisione
 del designer; la variante resta.
 
+## Sessantunesima misura: il soffio non vale per la resistenza 1
+
+Il designer, dopo il seme 925 (registro 192): "misura il soffio solo per
+resistenza 1, questi edifici a resistenza 1 nell'era preistorica non
+dovrebbero sopravvivere all'era moderna". Manopola `soffio_resistenza_min`
+2 (registro 193): chi ha resistenza stampata 1 e fallisce l'evento crolla,
+anche di 1 solo. Stessi 300 semi, base la 58ª.
+
+| a giocatore | base (soffio a tutti) | soffio da 2 in su |
+|---|---|---|
+| PV a testa | 82,4 | 82,3 |
+| Scavo / Cont / Rendita / Lampo / finali | 16,6 / 14,5 / 12,6 / 18,8 / 6,2 | 17,4 / 14,4 / 12,3 / 18,7 / 6,0 |
+| spianamenti / riscoperte | 3,7 / 2,78 | 3,2 / 2,89 |
+| edifici dell'era 1 in piedi a fine partita (a partita) | 2,51 | 2,70 |
+| di cui a resistenza 1 | 0,08 | 0 |
+| era 1: costruiti / in rovina / sotterrati (a partita) | 12,9 / 10,4 / 9,1 | 12,9 / 10,2 / 9,1 |
+| vittorie Bil / Cont / Lampo / Obi / Rend / Ritro / Scavo | 31 / 33 / 30 / 31 / 37 / 37 / 33 | 29 / 37 / 34 / 36 / **27** / 36 / 35 |
+
+Quello che il designer chiedeva c'e': nessun edificio a resistenza 1 arriva
+alla fine (erano gia' pochi, 0,08 a partita: il seme 925 era un caso raro).
+Dei 5,2 edifici a resistenza 1 costruiti nell'era 1 a partita, prima ne
+reggeva qualcuno all'Inverno lungo per un soffio e viveva finche' il
+proprietario passava in colonna; adesso crollano tutti al primo evento che
+li supera, a meno di una protezione. Le rovine arrivano prima, e lo Scavo
+sale di 0,8 (piu' tessere coperte nelle colonne giuste). Il costo lo paga la
+Rendita: dal 37 al 27, perche' le sue carte dell'era 1 che rendono (Capanne,
+Cava, Focolare, Trappole, Approdo) hanno tutte resistenza 1 e non
+sopravvivono piu' all'era 1 senza il lavoratore sopra. La forbice e' 27-37,
+contro il 30-37 della 58ª. Decisione del designer gia' presa ("non dovrebbero
+sopravvivere"): la regola e' nel file base; se la Rendita va risollevata, si
+ritara il bot (`rendita_per_era`) in una misura a parte, non la regola.
+
 ## Come rifare il conto
 
 ```bash

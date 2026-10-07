@@ -3377,9 +3377,35 @@ func _test_v3_sacchetto() -> void:
 	TessereScavo.al_crollo(gs, r)
 	var coperta: PackedStringArray = n._descrivi_sotto_edificio(r)
 	_ok("la rovina coperta dice le tessere dal sacchetto", "\n".join(coperta).contains("coperte dal sacchetto"))
+	# I Personaggi girati (registro 194): nell'era in corso sono scoperti; a
+	# era finita stanno col dorso; a fine partita si rigirano solo quelli
+	# il cui scheletro e' stato riportato alla luce.
+	var scoperte_ora := 0
+	for c in BoardLayout3D.carte_giocatore(gs, 0, 0):
+		if str(c["kind"]) == "personaggio" and not bool(c.get("coperta", false)): scoperte_ora += 1
+	_eq("nell'era in corso i Personaggi presi stanno scoperti", scoperte_ora, gs.players[0].specialized_characters.size())
+	var fase_prima := gs.phase
+	for pl in gs.players: pl.specialized_characters.clear()   # e' finita l'era
+	var girati := 0
+	var pers := 0
+	for c in BoardLayout3D.carte_giocatore(gs, 0, 0):
+		if str(c["kind"]) != "personaggio": continue
+		pers += 1
+		if bool(c.get("coperta", false)): girati += 1
+	_ok("  a era finita stanno tutti sottosopra (%d su %d)" % [girati, pers], pers > 0 and girati == pers)
+	var riga_coperta: PackedStringArray = n._descrivi_sotto_carta({"kind": "personaggio", "id": str(gs.players[0].personaggi_storia[0][0]), "player": 0, "coperta": true})
+	_ok("  e il riquadro dice che e' uno scheletro", "\n".join(riga_coperta).contains("scheletro"))
 	r.scavata = true
+	var trovato := str(r.tessere[0]["chi"])
+	var di_chi := TessereScavo.proprietario_personaggio(gs, trovato)
+	gs.phase = Enums.Phase.FINE_PARTITA
+	var rigirati: Array = []
+	for c in BoardLayout3D.carte_giocatore(gs, di_chi, 0):
+		if str(c["kind"]) == "personaggio" and not bool(c.get("coperta", false)): rigirati.append(str(c["id"]))
+	_eq("  a fine partita si rigira solo quello riportato alla luce", rigirati, [trovato])
+	gs.phase = fase_prima
 	var scoperta := "\n".join(n._descrivi_sotto_edificio(r))
-	var nome := str(CardDB.characters[str(r.tessere[0]["chi"])]["name"])
+	var nome := str(CardDB.characters[trovato]["name"])
 	_ok("  scoperta, dice lo scheletro per nome", scoperta.contains("scheletri riportati alla luce") and scoperta.contains(nome))
 	_ok("  e a chi va", scoperta.contains(" a G"))
 	n.queue_free()

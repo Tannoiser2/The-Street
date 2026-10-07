@@ -173,7 +173,15 @@ static func resolve_event(gs: GameState) -> Array[int]:
 		# bilanciamento scritta nel codice non si puo' ne' leggere ne' provare
 		# senza ricompilare. Adesso sta nei dati come tutte le altre.
 		var soglia := int(CardDB.constants.get("rovina_gap", 2))
-		if b.state == Enums.BuildingState.INTATTO and gap < soglia:
+		# IL SOFFIO NON E' PER TUTTI (registro 193, manopola
+		# `soffio_resistenza_min`, 0 dove manca): con resistenza stampata 1
+		# le Trappole da pesca dell'era 1 arrivavano all'era moderna a forza
+		# di soffi, Argine e Personaggi in colonna (seme 925). Il designer:
+		# "non dovrebbero sopravvivere". Sotto la soglia chi fallisce crolla,
+		# anche di 1 solo; conta la resistenza stampata, perche' e' quella
+		# che il giocatore legge sulla carta quando decide di costruirla.
+		var fragile: bool = int(b.data["resistance"]) < int(CardDB.constants.get("soffio_resistenza_min", 0))
+		if b.state == Enums.BuildingState.INTATTO and gap < soglia and not fragile:
 			# SENZA RUDERE (manopola `senza_rudere`, spenta nei dati): la
 			# proposta della nuova meccanica toglie lo stato intermedio. Chi
 			# fallisce di meno della soglia resta intatto, ma senza Vetusta':

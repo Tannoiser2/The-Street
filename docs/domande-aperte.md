@@ -3066,3 +3066,35 @@ dato è stato importato da lì. Ma due confronti fra ciò che è stampato e
     un soffio. Era 5: il proprietario torna in colonna 6, +2. Le manopole
     sono `rovina_gap`, `senza_rudere`, `protection_bonus` nei dati: se un
     edificio da 1 che vive cinque ere non va bene, e' li' che si agisce.
+
+193. **Il soffio non vale per la resistenza 1.** Il designer, dopo il seme
+    925 (registro 192): "misura il soffio solo per resistenza 1, questi
+    edifici a resistenza 1 nell'era preistorica non dovrebbero sopravvivere
+    all'era moderna". Manopola `soffio_resistenza_min` (2 nel file base, 0
+    dove manca): sotto la soglia di resistenza STAMPATA chi fallisce
+    l'evento crolla, anche di 1 solo; gli altri reggono per un soffio come
+    prima. Conta la stampata e non l'effettiva perche' e' quella che il
+    giocatore legge quando decide di costruire: con l'Argine le Trappole
+    arrivano a 2, ma se l'evento le supera crollano. Variante
+    `soffio_per_tutti` per tornare indietro. Misura 61.
+
+194. **A fine era i Personaggi si girano.** Il designer: "una volta finita
+    l'era gira i personaggi sottosopra per indicare che sono scheletri
+    (metteremo un retro disegnato ad hoc), quando alla fine del gioco
+    vengono scoperti puoi rigirare sul verso attivo solo quelli scoperti".
+    Nella vista 3D il Personaggio di un'era passata sta col dorso
+    (`assets/carte/dorsi/personaggio_scheletro.png`, finche' non c'e' un
+    riquadro di terra scura); a fine partita si rigirano solo quelli la cui
+    tessera sta sotto una rovina scoperta dallo scavo dell'era moderna
+    (`TessereScavo.scheletri_scoperti`). Il riquadro lo dice: "e' uno
+    scheletro, la sua tessera e' nel sacchetto o sotto una rovina", e a
+    fine partita "scheletro mai ritrovato".
+
+195. **La Vetusta' nella v3 non c'e'.** Il designer: "ancora si fa
+    riferimento alla vetusta'? Non si era deciso di eliminarla?". Si':
+    `vetusta_max` e `vetusta_max_bosco` sono 0 nel file v3 (e nel v2,
+    registro 95), quindi nessun edificio ne prende, la vista non la mostra e
+    il bot non la conta. La manopola resta nel codice perche' la v1.5 la
+    usa ancora (3 e 4) e quel regolamento non si tocca. Nella spiegazione
+    del seme 925 "prende Vetusta'" era un errore di chi scriveva: regge e
+    basta.

@@ -211,4 +211,10 @@ ha quel Personaggio; il padrone della rovina non incassa dalle tessere. Spianare
 cambiano (57ª); +3 PV a testa nel canale Scavo (16,9); Scavo e Ritrovamenti da ritarare (189). Scavo e
 Ritrovamenti ritarate al draft (189: `scavo_scheletro` 0,6, `ritro_scheletro` 0,15). Base attuale (58ª):
 vittorie 30-37, 82,4 PV, la forbice piu' stretta misurata. Varianti misurate e lasciate al designer (190):
-`tutto_in_vendita` (+3,5 PV, forbice 22-42) ed `evento_coperto` (quasi nulla cambia nel simulatore). Nell'audit `--schermo` rigioca il seme visto a schermo e `--perche` stampa la vetrina.
+`tutto_in_vendita` (+3,5 PV, forbice 22-42) ed `evento_coperto` (quasi nulla cambia nel simulatore). Nell'audit `--schermo` rigioca il seme visto a schermo e `--perche` stampa la vetrina. La vista 3D col sacchetto (191): un sacchetto solo in cima alla fila dei Personaggi, e i Personaggi del
+giocatore a ventaglio su piu' colonne. Il seme 925 (192): le Trappole da pesca da 1 vivevano cinque ere per
+soffio, Argine e Personaggio in colonna (+2). Da li' il soffio non vale per la resistenza stampata 1 (193,
+`soffio_resistenza_min` 2, 61ª: nessun resistenza-1 arriva alla fine, Scavo 17,4, la Rendita scende al 27,
+forbice 27-37; `--variante soffio_per_tutti`). A fine era i Personaggi si girano col dorso e a fine partita si
+rigirano solo quelli riportati alla luce (194; il dorso disegnato va in `assets/carte/dorsi/personaggio_scheletro.png`).
+La Vetusta' nella v3 e' a 0 (195): la manopola resta solo per la v1.5.
