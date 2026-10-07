@@ -157,6 +157,12 @@ static func resolve_event(gs: GameState) -> Array[int]:
 	var persi: Array[int] = []       # chi ha perso un edificio: ev_eruzione
 	for b in gs.grid.buildings:
 		if not b.is_standing(): continue
+		# L'EVENTO CON BERSAGLIO (registro 201): colpisce solo gli edifici che
+		# il suo selettore descrive, gli altri non lo vedono nemmeno. Il
+		# designer: "la guerra colpisce gli edifici civili ma non quelli
+		# religiosi, i terremoti colpiscono tutti". Senza `bersaglio` vale per
+		# tutti come sempre.
+		if not Effects.evento_colpisce(gs, b): continue
 		var eff: int = b.effective_resistance() + Effects.event_resistance_modifier(gs, b)
 		if eff >= force:
 			# La Vetusta' cresce fino a `vetusta_max`; nella v2 e' 0, cioe'

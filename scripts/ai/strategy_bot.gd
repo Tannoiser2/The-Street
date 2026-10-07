@@ -620,6 +620,9 @@ static func _forza_dell_era(e: int) -> int:
 # aura): nella v3 il bot lo legge, come un giocatore legge la carta evento.
 static func _modifica_evento(gs: GameState, b: Building) -> int:
 	if not PersonaggiV3.attivo(): return 0
+	# L'evento con bersaglio (registro 201) non tocca chi non descrive: per
+	# quell'edificio vale come un +20, che nessuna forza raggiunge.
+	if not Effects.evento_colpisce(gs, b): return 20
 	return Effects.event_resistance_modifier(gs, b)
 
 # I censimenti che questo edificio incassera' se nessuno lo tocca. Non e' una
