@@ -1089,9 +1089,11 @@ static func _valore_personaggio_v3(gs: GameState, p: PlayerState, d: Dictionary,
 	# giochi; si trovano circa 3 tessere su 20 a testa (`scheletro_atteso`).
 	if TessereScavo.scheletri_personaggi() and d.has("scavo"):
 		a += float(d["scavo"]) * float(spinte().get("scheletro_atteso", 0.15))
-		# Le due strategie delle rovine (Scavo e Ritrovamenti) puntano sugli
-		# scheletri che valgono: `scavo_scheletro`, da tarare (registro 189).
-		if strategia == "scavo" or strategia == "ritrovamenti":
+		# Le due strategie delle rovine puntano sugli scheletri che valgono:
+		# la Scavo con `scavo_scheletro`, la Ritrovamenti con `ritro_scheletro`
+		# (sopra), ognuna con la sua misura (registro 189): a 0,3 per tutte e
+		# due la Ritrovamenti saliva al 43 e la Scavo restava al 29.
+		if strategia == "scavo":
 			a += float(d["scavo"]) * float(spinte().get("scavo_scheletro", 0.0))
 	dett["la sua azione"] = a
 	return q + a + 0.5
