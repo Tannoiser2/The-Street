@@ -3082,6 +3082,32 @@ eccezioni: una regola sola, resistenza sotto la forza = crolla. Le manopole
 `--variante soffio` rifa' il conto di prima. La misura di conferma e' la
 66ª.
 
+## Sessantaseiesima misura: la conferma della base pulita
+
+Il file base del registro 199: `rovina_gap` 1, forze 2, 2, 3, 2, 2. Stessi
+300 semi, base la 64ª (soffio tranne la resistenza 1, forze 2, 3, 4, 3, 3).
+
+| a giocatore | 64ª (soffio) | 66ª (o dentro o fuori) |
+|---|---|---|
+| PV a testa | 83,6 | 83,3 |
+| Scavo / Cont / Rendita / Lampo / finali | 18,0 / 14,6 / 12,7 / 18,8 / 6,1 | 17,0 / 14,7 / 12,4 / 19,1 / 6,3 |
+| in rovina per era a fine partita (1-5) | 9,9 / 6,1 / 5,8 / 3,6 / 1,1 | 9,8 / 5,6 / 5,9 / 3,2 / 1,0 |
+| spianamenti / sopra / riscoperte | 3,2 / 8,0 / 3,0 | 3,3 / 7,9 / 2,8 |
+| resistenza 1 in piedi a fine partita (a partita) | 0,01 | 0,08 |
+| vittorie Bil / Cont / Lampo / Obi / Rend / Ritro / Scavo | 31 / 31 / 34 / 40 / 30 / 31 / 36 | 33 / 41 / 31 / 39 / 25 / 36 / 29 |
+
+Il conto e' lo stesso: punti, canali, rovine per era e spianamenti al
+decimo. Gli 0,08 edifici a resistenza 1 in piedi alla fine sono quelli con
+l'Argine (1 + 1 = 2 passa la forza 2): la regola nuova guarda la resistenza
+effettiva come tutto il resto, e l'Argine torna a valere anche su di loro;
+e' il valore che la 58ª aveva prima del registro 193. Quel che si muove sono
+le vittorie, 25-41 contro 30-40: la Continuita' sale al 41 e la Rendita
+scende al 25 senza che il motore abbia cambiato chi crolla. E' il bot, che
+ora legge forze esatte (197) dove prima ignorava il soffio e credeva morti
+edifici che vivevano: pianifica meglio le colonne lunghe e protegge con
+piu' giudizio. La ritaratura delle spinte (`rendita_per_era`,
+`continuita_peso`) e' la prossima misura, non questa regola.
+
 ## Come rifare il conto
 
 ```bash
