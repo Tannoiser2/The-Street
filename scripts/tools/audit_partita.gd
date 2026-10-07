@@ -463,7 +463,10 @@ func _lotto(seme: int, players: int, quante: int) -> void:
 # a fine partita non si vedrebbero), quali personaggi ha avuto ciascuno e che
 # evento c'era in ogni era.
 func _osserva(gs: GameState, t: Dictionary, era: int) -> void:
-	if not t["eventi"].has(str(era)): t["eventi"][str(era)] = str(gs.current_event.get("id", ""))
+	# Con l'evento coperto (registro 190) `current_event` e' il segnaposto: si
+	# segna quello vero, che aspetta in `evento_coperto` fino a fine era.
+	var ev := gs.evento_coperto if not gs.evento_coperto.is_empty() else gs.current_event
+	if not t["eventi"].has(str(era)): t["eventi"][str(era)] = str(ev.get("id", ""))
 	for b in gs.grid.buildings:
 		if b.state == Enums.BuildingState.ROVINA and not t["rovina"].has(b.uid):
 			t["rovina"][b.uid] = era
