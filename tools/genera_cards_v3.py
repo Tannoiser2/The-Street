@@ -145,6 +145,19 @@ def erosione(v):
 def erosione_lieve(v):
     erosione(v)
     v["constants"]["erosione"] = {"non_usato": 1, "usato": 0, "protetto": 0}
+#   --variante erosione_calma  come erosione (logorio 2/1/0), ma gli eventi salgono piano: lievi 3, 3, 4, 4, 5 e gravi
+#                              due punti sopra (misura 67: con 3-7 e 5-9 l'era Moderna crollava per tre quarti)
+def erosione_calma(v):
+    erosione(v)
+    _forze_erosione(v, {"1": 3, "2": 3, "3": 4, "4": 4, "5": 5}, 2)
+def _forze_erosione(v, lievi, grave_in_piu):
+    import re
+    for e in v["events"]:
+        if "force" not in e or int(e["force"]) <= 0: continue
+        nuova = lievi[str(e["era"])] + (grave_in_piu if e.get("severity") == "grave" else 0)
+        e["effect_text"] = re.sub(r"Forza \d+\.", "Forza %d." % nuova, e["effect_text"])
+        e["force"] = nuova
+    v["constants"]["event_force_by_era"] = {k: f + 1 for k, f in lievi.items()}
 #   --variante soffio  il conto di prima del registro 199: "regge per un soffio" (rovina_gap 2) tranne la
 #                      resistenza stampata 1 (soffio_resistenza_min 2), forze 2, 3, 4, 3, 3
 def soffio(v):
@@ -1032,7 +1045,7 @@ def finali_senza_tetto(v):
 def grattacielo_caro(v):
     for b in v["buildings"]:
         if b["id"] == "ed_grattacielo": b["cost"] = prod(pietra=3, idee=1)
-VARIANTI = {"erosione": erosione, "erosione_lieve": erosione_lieve, "soffio": soffio, "senza_soffio": senza_soffio, "senza_soffio_forze": senza_soffio_forze, "eventi5_forza4": eventi5_forza4, "giudizio_solo": giudizio_solo, "soffio_per_tutti": soffio_per_tutti, "tutto_in_vendita": tutto_in_vendita, "evento_coperto": evento_coperto, "scheletri_personaggi": scheletri_personaggi, "mazzetti_colorati": mazzetti_colorati, "finali_senza_tetto": finali_senza_tetto, "spianato_intero": spianato_intero, "grattacielo_caro": grattacielo_caro, "grandi_vecchie": grandi_vecchie, "proprietario": proprietario, "compenso_pv": compenso_pv, "senza_sconti": senza_sconti,
+VARIANTI = {"erosione": erosione, "erosione_lieve": erosione_lieve, "erosione_calma": erosione_calma, "soffio": soffio, "senza_soffio": senza_soffio, "senza_soffio_forze": senza_soffio_forze, "eventi5_forza4": eventi5_forza4, "giudizio_solo": giudizio_solo, "soffio_per_tutti": soffio_per_tutti, "tutto_in_vendita": tutto_in_vendita, "evento_coperto": evento_coperto, "scheletri_personaggi": scheletri_personaggi, "mazzetti_colorati": mazzetti_colorati, "finali_senza_tetto": finali_senza_tetto, "spianato_intero": spianato_intero, "grattacielo_caro": grattacielo_caro, "grandi_vecchie": grandi_vecchie, "proprietario": proprietario, "compenso_pv": compenso_pv, "senza_sconti": senza_sconti,
             "lampo_vecchio": lampo_vecchio, "extra_sempre": extra_sempre, "senza_extra": senza_extra, "costi_vecchi": costi_vecchi,
             "case_seconda": case_seconda, "case_lampo1": case_lampo1, "senza_tuning": senza_tuning,
             "terreno_produce": terreno_produce, "senza_potenziamento_insieme": senza_potenziamento_insieme}

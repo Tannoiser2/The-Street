@@ -3108,6 +3108,35 @@ edifici che vivevano: pianifica meglio le colonne lunghe e protegge con
 piu' giudizio. La ritaratura delle spinte (`rendita_per_era`,
 `continuita_peso`) e' la prossima misura, non questa regola.
 
+## Sessantasettesima misura: il tempo logora, primo giro
+
+Registro 200, varianti `erosione` (logorio 2/1/0) ed `erosione_lieve`
+(1/0/0): scala 1-10, modificatori raddoppiati, eventi lievi 3-7 per era e
+gravi due punti sopra. Stessi 300 semi, base la 66ª.
+
+| a giocatore | base (66ª) | erosione 2/1/0 | erosione 1/0/0 |
+|---|---|---|---|
+| PV a testa | 83,3 | **91,1** | 91,0 |
+| Scavo / finali / Rendita / cultura | 17,0 / 6,3 / 12,4 / 9,3 | **34,0** / 1,7 / 9,9 / 7,5 | 33,5 / 1,8 / 10,4 / 7,4 |
+| in rovina per era a fine partita (1-5) | 9,8 / 5,6 / 5,9 / 3,2 / 1,0 | 10,2 / 8,6 / 8,1 / 7,4 / **6,4** | 9,9 / 8,2 / 8,1 / 7,5 / 6,3 |
+| spianamenti / sopra / riscoperte | 3,3 / 7,9 / 2,8 | 1,0 / 8,9 / 6,3 | 1,1 / 8,9 / 6,2 |
+| era 1 in piedi alla fine, di cui megaliti | 3,13 / - | 2,74 / 2,67 | 2,97 / 2,83 |
+| resistenza logorata in tutto, a giocatore | - | 7,1 | 2,8 |
+| vittorie Bil / Cont / Lampo / Obi / Rend / Ritro / Scavo | 33 / 41 / 31 / 39 / 25 / 36 / 29 | 33 / 28 / 21 / 37 / 36 / 34 / 45 | 28 / 28 / 25 / 38 / 33 / 32 / 48 |
+
+La parte che il designer chiedeva c'e': della preistoria arrivano alla fine
+quasi solo i megaliti (2,67 su 2,74), le capanne spariscono, e il logorio
+si vede (7 punti di resistenza persi a giocatore). Ma il resto e' un fiume
+di rovine: l'era Moderna crolla per tre quarti (6,4 su 8,2), i finali
+scendono a 1,7, nessuno spiana piu' (1,0: le rovine le fa l'evento), le
+riscoperte raddoppiano e lo Scavo vale 34 punti su 91, la Scavo vince il
+45-48 e la Lampo il 21. La differenza fra 2/1/0 e 1/0/0 e' piccola: non e'
+il logorio che falcia, sono le forze. Con la scala 1-10 le carte dell'era 5
+stanno a 6-7 (il Grattacielo a 10) e l'evento lieve dell'era 5 a 7, il grave
+a 9: muore tutto, cemento armato compreso. La curva 3-7 era troppo ripida
+per una scala in cui la pietra sta a 5-7. Secondo giro: `erosione_calma`,
+logorio 2/1/0 e forze lievi 3, 3, 4, 4, 5 con gravi due punti sopra (68ª).
+
 ## Come rifare il conto
 
 ```bash
