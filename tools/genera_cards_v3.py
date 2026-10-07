@@ -874,6 +874,12 @@ def spianato_intero(v):
 #                                    Personaggio nel sacchetto dei reclutati, paga il suo Scavo a chi lo ha
 def scheletri_personaggi(v):
     v["constants"]["tessere_scavo"]["scheletri"] = "personaggi"
+#   --variante tutto_in_vendita  il mercato mostra tutte le 12 carte del mazzo dell'era, senza pescare di volta in volta
+def tutto_in_vendita(v):
+    v["constants"]["market_size"] = 12
+#   --variante evento_coperto  l'evento dell'era si scopre a fine era, quando colpisce; durante l'era si sa solo la forza
+def evento_coperto(v):
+    v["constants"]["evento_a_fine_era"] = True
 #   --variante mazzetti_colorati  le tessere scavo di prima: mazzetto da 20 per colore, valore 0-3, scheletri con l'era
 def mazzetti_colorati(v):
     v["constants"]["tessere_scavo"].pop("scheletri", None)
@@ -888,7 +894,7 @@ def finali_senza_tetto(v):
 def grattacielo_caro(v):
     for b in v["buildings"]:
         if b["id"] == "ed_grattacielo": b["cost"] = prod(pietra=3, idee=1)
-VARIANTI = {"scheletri_personaggi": scheletri_personaggi, "mazzetti_colorati": mazzetti_colorati, "finali_senza_tetto": finali_senza_tetto, "spianato_intero": spianato_intero, "grattacielo_caro": grattacielo_caro, "grandi_vecchie": grandi_vecchie, "proprietario": proprietario, "compenso_pv": compenso_pv, "senza_sconti": senza_sconti,
+VARIANTI = {"tutto_in_vendita": tutto_in_vendita, "evento_coperto": evento_coperto, "scheletri_personaggi": scheletri_personaggi, "mazzetti_colorati": mazzetti_colorati, "finali_senza_tetto": finali_senza_tetto, "spianato_intero": spianato_intero, "grattacielo_caro": grattacielo_caro, "grandi_vecchie": grandi_vecchie, "proprietario": proprietario, "compenso_pv": compenso_pv, "senza_sconti": senza_sconti,
             "lampo_vecchio": lampo_vecchio, "extra_sempre": extra_sempre, "senza_extra": senza_extra, "costi_vecchi": costi_vecchi,
             "case_seconda": case_seconda, "case_lampo1": case_lampo1, "senza_tuning": senza_tuning,
             "terreno_produce": terreno_produce, "senza_potenziamento_insieme": senza_potenziamento_insieme}

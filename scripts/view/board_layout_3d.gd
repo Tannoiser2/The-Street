@@ -488,6 +488,9 @@ const ROVINA_DIR := "res://assets/tessere_rovina/"
 
 static func tessera_rovina_path(t: Dictionary, scoperta: bool) -> String:
 	if not scoperta: return ROVINA_DIR + "dorso.png"
+	# Col sacchetto (registro 188) la tessera e' lo scheletro di un Personaggio:
+	# una faccia sola, neutra; nome e Scavo li scrive la vista sopra.
+	if t.has("chi"): return ROVINA_DIR + "faccia_personaggio.png"
 	# Lo scheletro porta l'era (registro 135): "s2", e l'arte "p" ("s1p" tutte e due).
 	var s = t.get("s", false)
 	var icona := ""

@@ -69,6 +69,10 @@ var mazzi_scavo: Dictionary = {}      # giocatore -> tessere scavo ancora da pes
 # Personaggio, che entra quando il Personaggio viene reclutato; le rovine
 # pescano da qui, non dai mazzetti colorati. Id dei Personaggi ancora dentro.
 var sacchetto: Array = []
+# L'EVENTO COPERTO (registro 190, `evento_a_fine_era`): l'evento dell'era si
+# pesca a inizio era ma resta coperto fin qui, e si scopre quando colpisce. In
+# `current_event` intanto sta un segnaposto con la sola forza dell'era.
+var evento_coperto: Dictionary = {}
 var next_uid: int = 1
 # LA COLONNA ATTIVATA IN QUESTO TURNO e l'edificio che il lavoratore abita.
 # Stavano nel controller, e sembravano dettagli del comando; invece decidono
@@ -127,6 +131,7 @@ func duplica() -> GameState:
 	g.tessere_scattate = tessere_scattate.duplicate()
 	g.mazzi_scavo = mazzi_scavo.duplicate(true)
 	g.sacchetto = sacchetto.duplicate()
+	g.evento_coperto = evento_coperto.duplicate(true)
 	g.next_uid = next_uid
 	g.colonna_attivata = colonna_attivata
 	g.protetto_uid = protetto_uid
