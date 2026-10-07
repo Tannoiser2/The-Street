@@ -183,7 +183,10 @@ func _voli_del_crollo() -> void:
 		if not TessereScavo.fuori(b) or _fuori_prima.has(b.uid) or not _uid_prima.has(b.uid): continue
 		var mazzetto := AABB()
 		for c in laterali:
-			if str(c["kind"]) == "mazzetto" and int(c.get("player", -1)) == b.owner: mazzetto = c["aabb"]
+			if str(c["kind"]) != "mazzetto": continue
+			# Col sacchetto (registro 188) il mazzetto e' uno solo e di tutti:
+			# le tessere volano da li' chiunque sia il proprietario.
+			if TessereScavo.scheletri_personaggi() or int(c.get("player", -1)) == b.owner: mazzetto = c["aabb"]
 		var scatole := BoardLayout3D.tessere_scavo_box(gs, b)
 		if mazzetto.size != Vector3.ZERO and not scatole.is_empty():
 			var uid: int = b.uid
@@ -978,7 +981,9 @@ func _file_laterali() -> void:
 			continue
 		# Il mazzetto rovine: una pila alta quante tessere restano, col dorso.
 		if str(c["kind"]) == "mazzetto":
-			var chi := int(str(c["id"]))
+			# L'id e' il giocatore nella v2 e "sacchetto" col sacchetto comune,
+			# che non e' di nessuno: `rimaste` li' non guarda il giocatore.
+			var chi := str(c["id"]).to_int()
 			var rimaste := TessereScavo.rimaste(gs, chi)
 			# Col sacchetto (registro 188) la pila e' il sacchetto comune, neutra:
 			# le tessere non hanno colore di giocatore.

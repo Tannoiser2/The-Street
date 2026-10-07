@@ -3325,8 +3325,46 @@ func _test_v3_sacchetto() -> void:
 		n._turni_dei_bot()
 		giri += 1
 	_eq("dopo il draft nel sacchetto ci sono 12 tessere", gs.sacchetto.size(), 12)
-	var riga: PackedStringArray = n._descrivi_sotto_carta({"kind": "mazzetto", "id": "0"})
+	var riga: PackedStringArray = n._descrivi_sotto_carta({"kind": "mazzetto", "id": "sacchetto"})
 	_ok("  il riquadro del mazzetto dice che e' il sacchetto", riga.size() >= 2 and riga[0].contains("sacchetto") and riga[1].begins_with("12 dentro"))
+	# Registro 191: il sacchetto e' uno solo e di tutti. Sta in cima alla
+	# fila dei Personaggi, e davanti ai giocatori non c'e' piu' una pila a
+	# testa (il designer: "sono ancora una pila a giocatore").
+	var sacchetti := 0
+	var in_fila := false
+	for c in BoardLayout3D.side_cards(gs, 0):
+		if str(c["kind"]) != "mazzetto": continue
+		sacchetti += 1
+		if not c.has("player") and (c["aabb"] as AABB).position.x >= BoardLayout3D.board_w(gs): in_fila = true
+	_eq("col sacchetto il mazzetto a schermo e' uno solo", sacchetti, 1)
+	_ok("  e sta nella fila di destra, non davanti a un giocatore", in_fila)
+	# I Personaggi su piu' colonne (registro 191): quindici carte, cinque ere
+	# da tre, nel posto di un giocatore in tre stanno su due colonne, tutte
+	# dentro il posto, e il tavolo finisce prima di una fila sola.
+	var carte: Array = []
+	carte.append({"kind": "eredita", "id": "eredita_1"})
+	for k in 15: carte.append({"kind": "personaggio", "id": str(CardDB.characters.keys()[k])})
+	var spazio := BoardLayout3D.board_w(gs) / float(gs.n_players) - 8.0
+	var tavolo := BoardLayout3D._tavolo_giocatore(carte, 0, 0.0, spazio, 0.0)
+	var xs := {}
+	var dentro := true
+	var fondo := 0.0
+	var primo := Vector3.ZERO
+	var secondo := Vector3.ZERO
+	for c in tavolo:
+		if str(c["kind"]) != "personaggio": continue
+		var a: AABB = c["aabb"]
+		xs[snappedf(a.position.x, 0.1)] = true
+		if a.position.x < -0.01 or a.end.x > spazio + 0.01: dentro = false
+		fondo = maxf(fondo, a.end.z)
+		if int(c["ordine"]) == 1: primo = a.position
+		if int(c["ordine"]) == 2: secondo = a.position
+	_eq("quindici Personaggi stanno su due colonne", xs.size(), 2)
+	_ok("  tutte dentro il posto del giocatore", dentro)
+	var mp := BoardLayout3D.misura_carta("personaggio")
+	_ok("  e la fila finisce prima di una colonna sola (%.0f)" % fondo, fondo < 14.0 * BoardLayout3D.VENTAGLIO_Z + mp.y)
+	_ok("  si leggono per righe: il secondo sta a destra del primo, sulla stessa riga",
+		secondo.x > primo.x and is_equal_approx(secondo.z, primo.z))
 	var r := Building.new()
 	r.uid = 9188
 	r.data = CardDB.buildings["ed_tumulo_funerario"]
