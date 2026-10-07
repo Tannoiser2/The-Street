@@ -113,7 +113,10 @@ func _start_era(era: int) -> void:
 	gs.upg_row.append_array(restano)
 
 	gs.evento_coperto = {}
-	if era <= 4:
+	# GLI EVENTI DELL'ERA 5 (registro 196): nella v3 anche l'era Moderna ha
+	# le sue sei carte, e si pesca come nelle altre ere; dove non ci sono
+	# (v2) resta l'evento finale unico, e nella v1.5 niente.
+	if era <= 4 or not CardDB.events_of_era(era).is_empty():
 		var evs := CardDB.events_of_era(era)
 		gs.current_event = evs[gs.rng.randi_range(0, evs.size() - 1)]
 		# L'EVENTO COPERTO (registro 190): si sa solo la forza dell'era, che e'

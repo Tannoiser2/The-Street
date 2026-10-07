@@ -59,6 +59,7 @@ func _ready() -> void:
 	_run("v3: gli scheletri sono i Personaggi, il sacchetto dei reclutati (registro 188)", _test_v3_scheletri_personaggi)
 	_run("v3: l'evento coperto fino a fine era (registro 190)", _test_v3_evento_coperto)
 	_run("v3: il soffio non vale per la resistenza 1 (registro 193)", _test_v3_soffio_resistenza_1)
+	_run("v3: anche l'era 5 ha i suoi sei eventi (registro 196)", _test_v3_eventi_era_5)
 	print("\n%d superati, %d falliti" % [_passed, _failed])
 	get_tree().quit(0 if _failed == 0 else 1)
 
@@ -2401,5 +2402,47 @@ func _test_v3_soffio_resistenza_1() -> void:
 	gs.current_event = {"id": "ev_prova", "name": "Prova", "force": 2, "effects": []}
 	EraRules.resolve_event(gs)
 	_eq("manopola a 0: le Trappole a forza 2 reggono per un soffio", trappole3.state, Enums.BuildingState.INTATTO)
+	CardDB.load_db(CardDB.DB_PATH)
+
+# Gli eventi dell'era 5 (registro 196): sei carte di forza 4 come nelle altre
+# ere, pescate a inizio era al posto del Giudizio del tempo; gli effetti
+# contano nella risoluzione. Con la variante `giudizio_solo` torna l'evento
+# finale unico.
+func _test_v3_eventi_era_5() -> void:
+	if not FileAccess.file_exists("res://data/proposte/cards-v3-era1.json"): return
+	CardDB.load_db("res://data/proposte/cards-v3-era1.json")
+	_eq("il file base ha sei eventi per l'era 5", CardDB.events_of_era(5).size(), 6)
+	_ok("  e non ha piu' l'evento finale unico", not CardDB.constants.has("evento_finale"))
+	var forze := {}
+	for e in CardDB.events_of_era(5): forze[int(e["force"])] = true
+	_eq("  tutti di forza 4", forze.keys(), [4])
+	var ctl := _game(3, 990)
+	ctl._start_era(5)
+	var gs := ctl.gs
+	_ok("a inizio era 5 si pesca uno dei sei", int(gs.current_event.get("era", 0)) == 5 and str(gs.current_event["id"]).begins_with("ev_"))
+	# La Crisi dello Stato: Civico -2. Un Civico da 3 scende a 1 e crolla, un
+	# Ingegneria da 3 sale a 4 e regge.
+	gs.grid.buildings.clear()
+	for i in gs.grid.n_cols: gs.grid.terrains[i] = Enums.Terrain.COLLINA
+	var civico := ""
+	var ingegneria := ""
+	for id in CardDB.buildings:
+		var d: Dictionary = CardDB.buildings[id]
+		if int(d["era"]) != 5 or int(d["resistance"]) != 3 or int(d["width"]) != 1: continue
+		if civico == "" and "civico" in (d["classes"] as Array) and not "ingegneria" in (d["classes"] as Array): civico = str(id)
+		if ingegneria == "" and "ingegneria" in (d["classes"] as Array) and not "civico" in (d["classes"] as Array): ingegneria = str(id)
+	_ok("ci sono un Civico e un Ingegneria da 3 nell'era 5 (%s, %s)" % [civico, ingegneria], civico != "" and ingegneria != "")
+	if civico == "" or ingegneria == "": CardDB.load_db(CardDB.DB_PATH); return
+	var c := _put(gs, 0, civico, 1)
+	var ing := _put(gs, 1, ingegneria, 3)
+	gs.current_event = CardDB.events["ev_crisi_dello_stato"]
+	EraRules.resolve_event(gs)
+	_eq("Crisi dello Stato: il Civico da 3 (-2) crolla", c.state, Enums.BuildingState.ROVINA)
+	_eq("  l'Ingegneria da 3 (+1) regge", ing.state, Enums.BuildingState.INTATTO)
+	if FileAccess.file_exists("res://data/proposte/cards-v3-era1-giudizio_solo.json"):
+		CardDB.load_db("res://data/proposte/cards-v3-era1-giudizio_solo.json")
+		var c2 := _game(3, 990)
+		c2._start_era(5)
+		_eq("variante giudizio_solo: torna il Giudizio del tempo", str(c2.gs.current_event.get("id", "")), "ev_giudizio_del_tempo")
 	CardDB.load_db(CardDB.DB_PATH)
 

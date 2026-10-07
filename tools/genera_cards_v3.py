@@ -39,6 +39,44 @@ c["second_player_bonus_2p"] = {"oro": 0}
 # all'era moderna". Chi ha resistenza stampata sotto questa soglia, se
 # fallisce l'evento crolla, anche di 1 solo; gli altri reggono per un soffio.
 c["soffio_resistenza_min"] = 2
+# GLI EVENTI DELL'ERA 5 (registro 196). Il designer: "vorrei gli eventi anche
+# per la 5 era, non mi piace che ce ne sia solo uno, bisogna allinearlo con le
+# altre ere". Al posto del solo Giudizio del tempo (registro 149: forza 4,
+# nessun effetto) sei eventi come nelle altre ere - tre lievi e tre gravi, uno
+# geografico, uno di classe e uno di comportamento per gruppo - tutti di forza
+# 4, la forza che l'era Moderna aveva gia'. Gli effetti usano solo i selettori
+# che il motore ha gia' (terreno, classe, protezione, produzione, colonna).
+c.pop("evento_finale", None)
+EVENTI_ERA_5 = [
+    {"id": "ev_subsidenza", "name": "Subsidenza", "era": 5, "force": 4, "severity": "lieve", "kind": "geografico",
+     "effect_text": "Forza 4. Edifici su pianura e fiume: −1 res.",
+     "effects": [{"hook": "on_event", "op": "resistance", "value": -1, "target": {"terrain": ["pianura", "fiume"]}}]},
+    {"id": "ev_globalizzazione", "name": "Globalizzazione", "era": 5, "force": 4, "severity": "lieve", "kind": "classe",
+     "effect_text": "Forza 4. Commercio +1 res · Cultura −1 res.",
+     "effects": [{"hook": "on_event", "op": "resistance", "value": 1, "target": {"class": ["commercio"]}},
+                 {"hook": "on_event", "op": "resistance", "value": -1, "target": {"class": ["cultura"]}}]},
+    {"id": "ev_crisi_energetica", "name": "Crisi energetica", "era": 5, "force": 4, "severity": "lieve", "kind": "comportamentale",
+     "effect_text": "Forza 4. Edifici non protetti che producono risorse: −1 res.",
+     "effects": [{"hook": "on_event", "op": "resistance", "value": -1, "target": {"protected": False, "produces": True}}]},
+    {"id": "ev_innalzamento_dei_mari", "name": "Innalzamento dei mari", "era": 5, "force": 4, "severity": "grave", "kind": "geografico",
+     "effect_text": "Forza 4. Edifici su fiume: −2 res · su pianura: −1 res.",
+     "effects": [{"hook": "on_event", "op": "resistance", "value": -2, "target": {"terrain": ["fiume"]}},
+                 {"hook": "on_event", "op": "resistance", "value": -1, "target": {"terrain": ["pianura"]}}]},
+    {"id": "ev_crisi_dello_stato", "name": "Crisi dello Stato", "era": 5, "force": 4, "severity": "grave", "kind": "classe",
+     "effect_text": "Forza 4. Civico −2 res · Militare −1 res · Ingegneria +1 res.",
+     "effects": [{"hook": "on_event", "op": "resistance", "value": -2, "target": {"class": ["civico"]}},
+                 {"hook": "on_event", "op": "resistance", "value": -1, "target": {"class": ["militare"]}},
+                 {"hook": "on_event", "op": "resistance", "value": 1, "target": {"class": ["ingegneria"]}}]},
+    {"id": "ev_guerra_mondiale", "name": "Guerra mondiale", "era": 5, "force": 4, "severity": "grave", "kind": "comportamentale",
+     "effect_text": "Forza 4. Nelle colonne con edifici di 2+ giocatori: tutti −1 res. Militare −1 res.",
+     "effects": [{"hook": "on_event", "op": "resistance", "value": -1, "target": {"column": {"min_owners": 2}}},
+                 {"hook": "on_event", "op": "resistance", "value": -1, "target": {"class": ["militare"]}}]},
+]
+v3["events"].extend(EVENTI_ERA_5)
+#   --variante giudizio_solo  l'era 5 col solo Giudizio del tempo (forza 4, nessun effetto), com'era prima del registro 196
+def giudizio_solo(v):
+    v["events"] = [e for e in v["events"] if int(e["era"]) != 5]
+    v["constants"]["evento_finale"] = json.loads(json.dumps(base["constants"]["evento_finale"]))
 # Niente Dinastia nella prova: la carta resta (il motore la cerca) ma senza copie.
 for ch in v3["characters"]:
     if ch.get("is_dynasty"):
@@ -902,7 +940,7 @@ def finali_senza_tetto(v):
 def grattacielo_caro(v):
     for b in v["buildings"]:
         if b["id"] == "ed_grattacielo": b["cost"] = prod(pietra=3, idee=1)
-VARIANTI = {"soffio_per_tutti": soffio_per_tutti, "tutto_in_vendita": tutto_in_vendita, "evento_coperto": evento_coperto, "scheletri_personaggi": scheletri_personaggi, "mazzetti_colorati": mazzetti_colorati, "finali_senza_tetto": finali_senza_tetto, "spianato_intero": spianato_intero, "grattacielo_caro": grattacielo_caro, "grandi_vecchie": grandi_vecchie, "proprietario": proprietario, "compenso_pv": compenso_pv, "senza_sconti": senza_sconti,
+VARIANTI = {"giudizio_solo": giudizio_solo, "soffio_per_tutti": soffio_per_tutti, "tutto_in_vendita": tutto_in_vendita, "evento_coperto": evento_coperto, "scheletri_personaggi": scheletri_personaggi, "mazzetti_colorati": mazzetti_colorati, "finali_senza_tetto": finali_senza_tetto, "spianato_intero": spianato_intero, "grattacielo_caro": grattacielo_caro, "grandi_vecchie": grandi_vecchie, "proprietario": proprietario, "compenso_pv": compenso_pv, "senza_sconti": senza_sconti,
             "lampo_vecchio": lampo_vecchio, "extra_sempre": extra_sempre, "senza_extra": senza_extra, "costi_vecchi": costi_vecchi,
             "case_seconda": case_seconda, "case_lampo1": case_lampo1, "senza_tuning": senza_tuning,
             "terreno_produce": terreno_produce, "senza_potenziamento_insieme": senza_potenziamento_insieme}
