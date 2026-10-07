@@ -189,6 +189,7 @@
       "per_tessera": 1,
       "riscoperta": "solo_scavate",
       "carte_restituite": true,
+      "scheletri": "personaggi",
       "spianato": "parziale"
     },
     "potenziamenti_per_casella": true,

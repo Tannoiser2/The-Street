@@ -108,8 +108,10 @@ w("## I %d Personaggi (%d per era)" % (len(pers), int(K.get("personaggi_per_era"
 w("")
 w("Sono i lavoratori. Ogni Personaggio ha una **produzione** (quel che incassi quando lo piazzi) e")
 w("un'**azione** (scatta subito dopo, nella colonna attivata). Lo **Scavo** è il valore dello")
-w("scheletro: a fine partita una tessera scavo con lo scheletro ritrovata vale lo Scavo del Personaggio")
-w("preso in quell'era. Il ⊕ è l'acquisto in più, con lo sconto dentro.")
+w("scheletro: ogni Personaggio ha la sua tessera scavo, con nome e Scavo, che entra nel sacchetto quando")
+w("viene reclutato; quando un edificio va in rovina si pescano dal sacchetto tante tessere quante le sue")
+w("caselle, coperte; una tessera riportata alla luce nell'era 5 paga il suo Scavo a chi ha reclutato quel")
+w("Personaggio, chiunque abbia scavato. Il ⊕ è l'acquisto in più, con lo sconto dentro.")
 w("")
 for era in range(1, 6):
     w(f"### Era {era}")

@@ -129,8 +129,10 @@ Domanda del mazzo per era (C / D / I): era 1: 14 / 5 / 5 · era 2: 19 / 7 / 6 ·
 
 Sono i lavoratori. Ogni Personaggio ha una **produzione** (quel che incassi quando lo piazzi) e
 un'**azione** (scatta subito dopo, nella colonna attivata). Lo **Scavo** è il valore dello
-scheletro: a fine partita una tessera scavo con lo scheletro ritrovata vale lo Scavo del Personaggio
-preso in quell'era. Il ⊕ è l'acquisto in più, con lo sconto dentro.
+scheletro: ogni Personaggio ha la sua tessera scavo, con nome e Scavo, che entra nel sacchetto quando
+viene reclutato; quando un edificio va in rovina si pescano dal sacchetto tante tessere quante le sue
+caselle, coperte; una tessera riportata alla luce nell'era 5 paga il suo Scavo a chi ha reclutato quel
+Personaggio, chiunque abbia scavato. Il ⊕ è l'acquisto in più, con lo sconto dentro.
 
 ### Era 1
 

@@ -1,7 +1,7 @@
 {
   "meta": {
     "game": "La Strada delle Ere",
-    "ruleset": "v3-era1-prova-case_lampo1",
+    "ruleset": "v3-era1-prova-mazzetti_colorati",
     "language": "it",
     "source": "distinta-carte (fonte unica)",
     "origine": "generato da tools/genera_cards_v3.py da data/cards-v2.json: non modificare a mano"
@@ -189,7 +189,6 @@
       "per_tessera": 1,
       "riscoperta": "solo_scavate",
       "carte_restituite": true,
-      "scheletri": "personaggi",
       "spianato": "parziale"
     },
     "potenziamenti_per_casella": true,
@@ -2808,7 +2807,7 @@
       "flexible": false,
       "resistance": 2,
       "rendita": 0,
-      "lampo": 1,
+      "lampo": 2,
       "scavo": 1,
       "level_required": 0,
       "production": {

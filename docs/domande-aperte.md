@@ -3011,5 +3011,14 @@ dato è stato importato da lì. Ma due confronti fra ciò che è stampato e
     identici alla base, sacchetto mai vuoto, 3 tessere scoperte a testa che
     rendono 11,4 PV invece di 9,5; +3 PV a testa; la Ritrovamenti scende
     dal 40 al 27 perche' le tessere non pagano piu' il padrone della rovina.
-    Decisione del designer: tenerla e ripensare Ritrovamenti e Scavo, o no.
+    Il designer: "tienila". Nel file base; `--variante mazzetti_colorati`
+    rifa' le tessere di prima. Le due strategie delle rovine si ritarano al
+    draft con `scavo_scheletro` (cinquantottesima, registro 189).
+
+189. **Scavo e Ritrovamenti dopo il sacchetto.** Con le tessere che pagano
+    chi ha i Personaggi, le due strategie delle rovine hanno perso la
+    nicchia (27% entrambe nella 57ª). Manopola `scavo_scheletro`: al draft
+    lo Scavo del Personaggio vale per loro `scavo_scheletro` a punto in piu'
+    dello 0,15 di tutti. Da misurare: 0,3, 0,6, e 0,3 con la riscoperta a
+    2,0 (cinquantottesima).
 
