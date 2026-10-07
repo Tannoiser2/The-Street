@@ -47,6 +47,7 @@ c["soffio_resistenza_min"] = 2
 # 4, la forza che l'era Moderna aveva gia'. Gli effetti usano solo i selettori
 # che il motore ha gia' (terreno, classe, protezione, produzione, colonna).
 c.pop("evento_finale", None)
+c["event_force_by_era"]["5"] = 4          # la forza che il bot si aspetta per l'era 5 (registro 197)
 EVENTI_ERA_5 = [
     {"id": "ev_subsidenza", "name": "Subsidenza", "era": 5, "force": 4, "severity": "lieve", "kind": "geografico",
      "effect_text": "Forza 4. Edifici su pianura e fiume: −1 res.",

@@ -11,10 +11,11 @@
 # paga in piu' modi, ognuna tira verso il suo canale.
 #
 # IL CONTO DELLA SOPRAVVIVENZA NON E' UNA SCOMMESSA. La forza dell'evento e'
-# fissa per era - 2, 3, 4, 5, e nell'era 5 non c'e' evento - quindi "quante
-# ere resta in piedi questo edificio" si CALCOLA: sopravvive all'era `e` se la
-# sua resistenza efficace e' almeno `e + 1`. Un giocatore vero fa lo stesso
-# conto guardando la carta. Il simulatore di riferimento usava una probabilita'
+# scritta - nella v1.5 2, 3, 4, 5 e niente nell'era 5; nella v3 la dicono i
+# dati (`event_force_by_era`) e la carta girata - quindi "quante ere resta in
+# piedi questo edificio" si CALCOLA: sopravvive all'era `e` se la sua
+# resistenza efficace e' almeno la forza di quell'era. Un giocatore vero fa lo
+# stesso conto guardando la carta. Il simulatore di riferimento usava una probabilita'
 # perche' non aveva le regole vere sotto: qui ci sono, e si usano.
 class_name StrategyBot
 extends RefCounted
@@ -365,8 +366,8 @@ static func _guadagno_v3(gs: GameState, p: PlayerState, copia: GameState, pc: Pl
 		var ds: int = b.bonus_scavo - int(prima[b.uid][1])
 		if dp > 0:
 			# vale se serve: l'edificio che senza non passerebbe l'evento
-			var forza := gs.era + 1
-			var res_prima: int = b.effective_resistance() - dp
+			var forza := _forza_evento(gs)
+			var res_prima: int = b.effective_resistance() + _modifica_evento(copia, b) - dp
 			q += (1.0 + float(b.rendita_value()) if res_prima < forza and res_prima + dp >= forza else 0.2) * float(dp)
 			if strategia == "rendita": q += 0.3 * float(dp)
 		if ds > 0:
@@ -391,8 +392,8 @@ static func _produzione_colonna(gs: GameState, p: PlayerState, col: int) -> floa
 static func _valore_protezione(gs: GameState, p: PlayerState, col: int) -> float:
 	var b := _da_proteggere(gs, p, col)
 	if b == null: return 0.0
-	var forza: int = gs.era + 1
-	var res: int = b.effective_resistance()
+	var forza: int = _forza_evento(gs)
+	var res: int = b.effective_resistance() + _modifica_evento(gs, b)
 	if res >= forza: return 0.0            # regge da solo
 	if res + 2 < forza: return 0.0         # non basta comunque
 	return 1.5 + float(b.rendita_value()) * float(_ere_rimaste(gs))
@@ -598,16 +599,41 @@ static func _fattore_morte(gs: GameState, p: PlayerState) -> float:
 static func _ere_rimaste(gs: GameState) -> int:
 	return 5 - gs.era
 
+# LA FORZA DELL'EVENTO (registro 197). Nella v1.5 era `era + 1` e l'era 5 non
+# ne aveva: il bot lo sapeva a memoria. Nella v3 non e' piu' vero (l'era 4 ha
+# forza 3 dalla 127ª, l'era 5 ha i suoi eventi di forza 4 dal registro 196) e
+# il bot a memoria sbagliava di 2: proteggeva troppo nell'era 4 e nell'era 5
+# non proteggeva niente, perche' con forza 6 in testa nessuna protezione
+# bastava. Adesso legge la carta: la forza dell'evento in corso dalla carta
+# girata, quella delle ere a venire da `event_force_by_era`. La v1.5 resta a
+# memoria, cosi' le sue partite non cambiano.
+static func _forza_evento(gs: GameState) -> int:
+	if not PersonaggiV3.attivo(): return gs.era + 1
+	return int(gs.current_event.get("force", _forza_dell_era(gs.era)))
+
+# La forza che avra' l'era `e`: dai dati; 0 se quell'era non ha evento.
+static func _forza_dell_era(e: int) -> int:
+	if not PersonaggiV3.attivo(): return e + 1 if e < 5 else 0
+	return int((CardDB.constants.get("event_force_by_era", {}) as Dictionary).get(str(e), 0))
+
+# Il modificatore dell'evento in corso su questo edificio (classe, terreno,
+# aura): nella v3 il bot lo legge, come un giocatore legge la carta evento.
+static func _modifica_evento(gs: GameState, b: Building) -> int:
+	if not PersonaggiV3.attivo(): return 0
+	return Effects.event_resistance_modifier(gs, b)
+
 # I censimenti che questo edificio incassera' se nessuno lo tocca. Non e' una
-# stima: l'evento dell'era `e` ha forza `e + 1` e l'era 5 non ne ha.
+# stima: la forza di ogni era e' scritta (`_forza_dell_era`) e l'edificio
+# sopravvive all'era `e` se la sua resistenza e' almeno quella.
 static func rendite_future(res: int, rendita: int, era: int) -> float:
 	if rendita <= 0: return 0.0
 	var vmax := int(CardDB.constants["vetusta_max"])
 	var vet := 0
 	var totale := 0.0
 	for e in range(era, 6):
-		if e < 5:
-			if res < e + 1: break           # l'evento lo butta giu' prima del censimento
+		var forza := _forza_dell_era(e)
+		if forza > 0:
+			if res < forza: break           # l'evento lo butta giu' prima del censimento
 			vet = mini(vet + 1, vmax)
 		totale += float(rendita + vet)
 	return totale
@@ -1011,7 +1037,7 @@ static func _valore_potenziamento(gs: GameState, p: PlayerState, v, dett := {}, 
 			spinta_lampo += float(upg.get("scavo", 0)) * float(spinte()["ritro_arte"])
 			dett["arte da ritrovare"] = float(upg.get("scavo", 0)) * float(spinte()["ritro_arte"])
 	# Una carta infilata sotto dura quanto l'edificio che la ospita.
-	var vive := b.effective_resistance() >= gs.era + 1
+	var vive := b.effective_resistance() + _modifica_evento(gs, b) >= _forza_evento(gs)
 	dett["l'ospite regge l'evento" if vive else "l'ospite rischia di crollare"] = \
 		2.2 if vive else 0.8
 	if b.rendita_value() > 0:
@@ -1146,12 +1172,12 @@ static func _valore_effetto(gs: GameState, p: PlayerState, e: Dictionary, r: Vec
 		"resistance", "protection_delta":
 			# vale gli edifici che salva: quelli che senza questo punto in piu'
 			# non passerebbero l'evento di quest'era
-			var forza := gs.era + 1
+			var forza := _forza_evento(gs)
 			var salvati := 0.0
 			for b in gs.grid.buildings:
 				if not b.is_standing() or b.owner != p.index: continue
 				if not Effects.matches(gs, b, e.get("target", {}), null, p.index): continue
-				var res: int = b.effective_resistance()
+				var res: int = b.effective_resistance() + _modifica_evento(gs, b)
 				if res >= forza or res + int(e.get("value", 1)) < forza: continue
 				# Quanto vale salvarlo: le rendite che incassera' in piu'
 				# perche' non e' crollato, piu' il suo Scavo che resta buono.

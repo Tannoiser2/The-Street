@@ -2969,6 +2969,33 @@ contro il 30-37 della 58ª. Decisione del designer gia' presa ("non dovrebbero
 sopravvivere"): la regola e' nel file base; se la Rendita va risollevata, si
 ritara il bot (`rendita_per_era`) in una misura a parte, non la regola.
 
+## Sessantaduesima misura: gli eventi dell'era 5
+
+Il designer: "vorrei gli eventi anche per la 5 era, non mi piace che ce ne
+sia solo uno, bisogna allinearlo con le altre ere". Sei eventi di forza 4
+(registro 196) al posto del solo Giudizio del tempo. Stessi 300 semi, base
+la 61ª (soffio). Il bot e' quello di sempre, che per l'era 5 si aspetta
+forza 6 e non protegge niente (registro 197).
+
+| a giocatore | Giudizio del tempo | sei eventi |
+|---|---|---|
+| PV a testa | 82,3 | 79,6 |
+| Scavo / Cont / Rendita / Lampo / finali | 17,4 / 14,4 / 12,3 / 18,7 / 6,0 | 17,6 / 14,4 / 12,1 / 18,7 / **3,4** |
+| edifici dell'era 5 a partita: costruiti / in rovina | 7,8 / 0,45 | 7,8 / **3,6** |
+| in rovina per era (2 / 3 / 4) | 6,0 / 5,8 / 4,7 | 6,6 / 6,5 / 5,4 |
+| vittorie Bil / Cont / Lampo / Obi / Rend / Ritro / Scavo | 29 / 37 / 34 / 36 / 27 / 36 / 35 | 24 / 35 / 39 / 37 / 24 / 38 / 36 |
+
+I sei escono in parti uguali (40-60 volte ciascuno su 300). Con i
+modificatori quasi la meta' degli edifici dell'era 5 crolla (3,6 su 7,8,
+contro 0,45 col Giudizio senza effetti): le carte dell'era 5 hanno quasi
+tutte resistenza 3, e un -1 di classe o di terreno le porta sotto la forza
+4. Il canale che paga e' quello dei finali (Museo, Universita', Grattacielo:
+6,0 -> 3,4), perche' il finale si incassa solo in piedi; -2,8 PV a testa,
+forbice 24-39. Ma la misura dice piu' del bot che della regola: il bot
+dell'era 5 pensava a forza 6 e non ha mai messo un lavoratore a protezione
+(con 6 in testa nessuna protezione basta), ne' guardato i modificatori. Un
+giocatore vero legge la carta e protegge il Museo. Per questo la 63ª.
+
 ## Come rifare il conto
 
 ```bash
