@@ -3206,3 +3206,11 @@ dato è stato importato da lì. Ma due confronti fra ciò che è stampato e
     manca): la tessera vale lo Scavo del Personaggio per il fattore, per
     eccesso; la carta non cambia. Variante `erosione_scavo` a 0,5. Misura 69.
 
+203. **L'alternativa prudente: solo i bersagli.** Dal pacchetto del tempo
+    che logora si prende solo l'evento con bersaglio (201), sulla scala e
+    le forze di oggi, senza erosione. Varianti `bersaglio_classi` (forza
+    dell'era) e `bersaglio_classi_forte` (+1 agli eventi di classe: colpiscono
+    meno edifici ma piu' forte). Misura 70: con +1 il gioco resta quello
+    della base al decimo (82,8 PV, Scavo 16,8, crolli per era uguali); si
+    cambiano solo i testi delle dieci carte di classe. Decisione del designer.
+

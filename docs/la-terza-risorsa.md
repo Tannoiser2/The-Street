@@ -3213,6 +3213,31 @@ ristrutturazione che ridà resistenza, la ritaratura del bot sulle tessere e
 sulla Continuita', lo schema dati (resistenza massima 6 -> 10), le 74
 resistenze sulle carte e le 30 forze sugli eventi.
 
+## Settantesima misura: l'alternativa prudente, solo i bersagli di classe
+
+Registro 203. Scala, forze ed erosione come la base (66ª); i dieci eventi
+di classe colpiscono solo le classi che nominano, senza malus, alla forza
+dell'era (`bersaglio_classi`) o con +1 (`bersaglio_classi_forte`). Stessi
+300 semi.
+
+| a giocatore | base (66ª) | bersagli | bersagli +1 |
+|---|---|---|---|
+| PV a testa | 83,3 | 82,8 | 82,8 |
+| Scavo / finali / Rendita / Cont | 17,0 / 6,3 / 12,4 / 14,7 | 15,5 / 6,6 / 12,8 / 14,6 | 16,8 / 6,3 / 12,1 / 14,6 |
+| crolli per era a partita (1-5) | 6,3 / 2,7 / 9,0 / 2,5 / 5,0 | 5,5 / 2,7 / 8,0 / 3,2 / 4,0 | 6,8 / 2,2 / 8,5 / 2,7 / 4,6 |
+| spianamenti / riscoperte | 3,3 / 2,8 | 3,9 / 2,6 | 3,4 / 2,8 |
+| in piedi alla fine: Civico / Commercio / Cultura / Ingegneria / Militare / Religione | 38 / 35 / 64 / 68 / 63 / 53% | 45 / 33 / 67 / 66 / 61 / 54% | 41 / 30 / 63 / 66 / 63 / 54% |
+| vittorie Bil / Cont / Lampo / Obi / Rend / Ritro / Scavo | 33 / 41 / 31 / 39 / 25 / 36 / 29 | 31 / 40 / 28 / 41 / 27 / 38 / 27 | 30 / 34 / 35 / 44 / 26 / 38 / 27 |
+
+I bersagli da soli tolgono crolli (un evento su due ora non colpisce
+tutti) e lo Scavo scende a 15,5; con +1 i crolli tornano quelli della base
+e lo Scavo a 16,8: e' la versione che non sposta l'equilibrio. In tutte e
+due il gioco resta dov'era: punti, canali e forbice (26-44) a pochi decimi
+dalla base. L'effetto per classe a fine partita e' piccolo (pochi punti),
+perche' esce un evento per era e meta' sono di classe: si sente nella
+singola partita, non nella media. Scelta di chi misura: `bersaglio_classi_forte`
+se il designer vuole la regola senza toccare scala ed erosione.
+
 ## Come rifare il conto
 
 ```bash
