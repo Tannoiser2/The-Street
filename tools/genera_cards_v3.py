@@ -181,6 +181,22 @@ def erosione_classi(v):
 def erosione_scavo(v):
     erosione_classi(v)
     v["constants"]["scavo_tessera_fattore"] = 0.5
+#   --variante bersaglio_classi  L'ALTERNATIVA PRUDENTE (registro 203): scala, forze ed erosione come la base; solo i
+#                                dieci eventi di classe colpiscono SOLO le classi che nominano, alla forza dell'era, senza malus
+def _bersagli(v, piu):
+    nomi = {"commercio": "Commercio", "civico": "Civico", "militare": "Militare", "religione": "Religione", "cultura": "Cultura", "ingegneria": "Ingegneria"}
+    for e in v["events"]:
+        if e["id"] not in BERSAGLI_CLASSE: continue
+        e["force"] = int(e["force"]) + piu
+        e["bersaglio"] = {"class": BERSAGLI_CLASSE[e["id"]]}
+        e["effects"] = [ef for ef in e.get("effects", []) if not (ef.get("hook") == "on_event" and ef.get("op") == "resistance")]
+        e["effect_text"] = "Forza %d. Colpisce solo %s." % (int(e["force"]), ", ".join(nomi[c] for c in BERSAGLI_CLASSE[e["id"]]))
+def bersaglio_classi(v):
+    _bersagli(v, 0)
+#   --variante bersaglio_classi_forte  come bersaglio_classi, e gli eventi di classe hanno +1 di forza: colpiscono meno
+#                                      edifici ma piu' forte (registro 203)
+def bersaglio_classi_forte(v):
+    _bersagli(v, 1)
 def _forze_erosione(v, lievi, grave_in_piu):
     import re
     for e in v["events"]:
@@ -1076,7 +1092,7 @@ def finali_senza_tetto(v):
 def grattacielo_caro(v):
     for b in v["buildings"]:
         if b["id"] == "ed_grattacielo": b["cost"] = prod(pietra=3, idee=1)
-VARIANTI = {"erosione": erosione, "erosione_lieve": erosione_lieve, "erosione_calma": erosione_calma, "erosione_mod1": erosione_mod1, "erosione_classi": erosione_classi, "erosione_scavo": erosione_scavo, "soffio": soffio, "senza_soffio": senza_soffio, "senza_soffio_forze": senza_soffio_forze, "eventi5_forza4": eventi5_forza4, "giudizio_solo": giudizio_solo, "soffio_per_tutti": soffio_per_tutti, "tutto_in_vendita": tutto_in_vendita, "evento_coperto": evento_coperto, "scheletri_personaggi": scheletri_personaggi, "mazzetti_colorati": mazzetti_colorati, "finali_senza_tetto": finali_senza_tetto, "spianato_intero": spianato_intero, "grattacielo_caro": grattacielo_caro, "grandi_vecchie": grandi_vecchie, "proprietario": proprietario, "compenso_pv": compenso_pv, "senza_sconti": senza_sconti,
+VARIANTI = {"erosione": erosione, "erosione_lieve": erosione_lieve, "erosione_calma": erosione_calma, "erosione_mod1": erosione_mod1, "erosione_classi": erosione_classi, "erosione_scavo": erosione_scavo, "bersaglio_classi": bersaglio_classi, "bersaglio_classi_forte": bersaglio_classi_forte, "soffio": soffio, "senza_soffio": senza_soffio, "senza_soffio_forze": senza_soffio_forze, "eventi5_forza4": eventi5_forza4, "giudizio_solo": giudizio_solo, "soffio_per_tutti": soffio_per_tutti, "tutto_in_vendita": tutto_in_vendita, "evento_coperto": evento_coperto, "scheletri_personaggi": scheletri_personaggi, "mazzetti_colorati": mazzetti_colorati, "finali_senza_tetto": finali_senza_tetto, "spianato_intero": spianato_intero, "grattacielo_caro": grattacielo_caro, "grandi_vecchie": grandi_vecchie, "proprietario": proprietario, "compenso_pv": compenso_pv, "senza_sconti": senza_sconti,
             "lampo_vecchio": lampo_vecchio, "extra_sempre": extra_sempre, "senza_extra": senza_extra, "costi_vecchi": costi_vecchi,
             "case_seconda": case_seconda, "case_lampo1": case_lampo1, "senza_tuning": senza_tuning,
             "terreno_produce": terreno_produce, "senza_potenziamento_insieme": senza_potenziamento_insieme}
