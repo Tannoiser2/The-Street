@@ -3137,6 +3137,52 @@ a 9: muore tutto, cemento armato compreso. La curva 3-7 era troppo ripida
 per una scala in cui la pietra sta a 5-7. Secondo giro: `erosione_calma`,
 logorio 2/1/0 e forze lievi 3, 3, 4, 4, 5 con gravi due punti sopra (68ª).
 
+## Sessantottesima misura: il tempo logora, secondo e terzo giro
+
+Tre varianti sopra la 67ª, stessi 300 semi, base la 66ª: `erosione_calma`
+(forze lievi 3, 3, 4, 4, 5 e gravi due punti sopra, modificatori
+raddoppiati), `erosione_mod1` (stesse forze, modificatori di prima: -1, -2,
++1) ed `erosione_classi` (come mod1, e i dieci eventi di classe colpiscono
+solo le classi che nominano, registro 201).
+
+| a giocatore | base (66ª) | calma | mod1 | classi |
+|---|---|---|---|---|
+| PV a testa | 83,3 | 89,1 | 89,9 | **85,5** |
+| Scavo / finali / Rendita | 17,0 / 6,3 / 12,4 | 29,4 / 3,0 / 11,0 | 27,7 / 4,1 / 11,5 | 23,4 / 4,5 / 11,4 |
+| in rovina per era a fine partita (1-5) | 9,8 / 5,6 / 5,9 / 3,2 / 1,0 | 10,1 / 7,5 / 7,9 / 7,0 / 4,1 | 10,1 / 7,2 / 7,5 / 6,9 / 3,3 | 10,2 / 7,2 / 7,2 / 6,5 / **2,4** |
+| spianamenti / riscoperte | 3,3 / 2,8 | 1,6 / 5,4 | 1,8 / 5,1 | 2,2 / 4,2 |
+| era 1 in piedi alla fine, di cui megaliti | 3,13 / - | 2,75 / 2,57 | 2,80 / - | 2,65 / - |
+| vittorie Bil / Cont / Lampo / Obi / Rend / Ritro / Scavo | 33 / 41 / 31 / 39 / 25 / 36 / 29 | 27 / 29 / 25 / 33 / 36 / 33 / 51 | 30 / 28 / 28 / 32 / 36 / 38 / 41 | 27 / 24 / 32 / 36 / 36 / 34 / 45 |
+
+La vita delle carte (120 partite, seme 100000), in piedi a fine partita:
+
+| carta | res base -> 1-10 | base | calma | mod1 | classi |
+|---|---|---|---|---|---|
+| Capanne | 1 -> 1 | 5% | 0% | 0% | 0% |
+| Palafitte | 2 -> 3 | 7% | 1% | 3% | 4% |
+| Dolmen | 3 -> 10 | 64% | 77% | 79% | 76% |
+| Menhir | 4 -> 10 | 70% | 73% | 77% | 76% |
+| Acquedotto | 4 -> 8 | 57% | 64% | 75% | 62% |
+| Anfiteatro | 5 -> 9 | 100% | 100% | 100% | 100% |
+| Castrum | 4 -> 7 | 45% | 64% | 61% | 56% |
+| Chiesa | 3 -> 5 | 45% | 14% | 25% | 30% |
+| Villa | 3 -> 5 | 92% | 18% | 24% | 33% |
+| Duomo | 4 -> 8 | 71% | 54% | 82% | 69% |
+| Grattacielo | 3 -> 10 | 96% | 97% | 100% | 100% |
+| Museo | 3 -> 6 | 94% | 29% | 39% | 77% |
+| Condominio | 3 -> 7 | 87% | 66% | 50% | 80% |
+
+Le forze calme da sole non bastano (89 PV, Scavo 29, la Scavo vince una su
+due). I modificatori singoli spostano poco. I bersagli di classe sono il
+passo che conta: l'era Moderna torna quasi intera (2,4 in rovina su 7,6, il
+Museo al 77%, il Condominio all'80%), i punti a 85,5, e la preistoria resta
+quella voluta (megaliti al 76%, capanne zero). Il prezzo che resta e' lo
+Scavo: con le rovine quasi raddoppiate (7,2 per era invece di 5,6-5,9) le
+tessere valgono 23 punti invece di 17 e la Scavo vince il 45%. Il valore
+della tessera era tarato su meta' delle rovine. Quarto giro:
+`erosione_scavo`, come classi e la tessera vale meta' dello Scavo del
+Personaggio (`scavo_tessera_fattore` 0,5, registro 202).
+
 ## Come rifare il conto
 
 ```bash

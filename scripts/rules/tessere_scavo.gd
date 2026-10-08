@@ -241,7 +241,12 @@ static func tessere(gs: GameState, b: Building) -> Array:
 				continue
 			var i := gs.rng.randi_range(0, gs.sacchetto.size() - 1)
 			var cid := str(gs.sacchetto.pop_at(i))
-			b.tessere.append({"v": int(CardDB.characters[cid].get("scavo", 0)), "chi": cid})
+			# Col tempo che logora (registro 202) le rovine raddoppiano e lo
+			# Scavo gonfia: `scavo_tessera_fattore` (1 dove manca) scala il
+			# valore della tessera, per eccesso, senza toccare la carta.
+			var fattore := float(CardDB.constants.get("scavo_tessera_fattore", 1.0))
+			var valore := int(ceil(float(int(CardDB.characters[cid].get("scavo", 0))) * fattore))
+			b.tessere.append({"v": valore, "chi": cid})
 		return b.tessere
 	if b.tessere.size() < n:
 		var m := _mazzo(gs, b.owner)

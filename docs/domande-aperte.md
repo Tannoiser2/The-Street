@@ -3184,3 +3184,25 @@ dato è stato importato da lì. Ma due confronti fra ciò che è stampato e
     restituite non si ristruttura, registro 131): e' il passo dopo, se la
     misura dice che il logorio morde. Misura 67.
 
+201. **L'evento con bersaglio.** Il designer: "alcuni eventi possono essere
+    dannosi per alcune classi ma indifferenti per altre: i terremoti
+    colpiscono tutti, la globalizzazione no, la guerra colpisce gli edifici
+    civili ma non quelli religiosi". Campo `bersaglio` sulla carta evento
+    (un selettore come quelli degli effetti): chi non corrisponde non vede
+    l'evento; senza, vale per tutti come sempre. Il bot lo legge
+    (`_modifica_evento` da +20 a chi non e' bersaglio). Nella variante
+    `erosione_classi` i dieci eventi di classe colpiscono solo le loro
+    classi a forza piena, senza malus: Eta' degli spiriti e Faide
+    (Commercio, Civico), Pax imperiale (Militare), Persecuzioni e Scisma
+    (Religione, Cultura), Guerra (Civico, Commercio, Ingegneria),
+    Controriforma (Cultura, Commercio), Secolarizzazioni (Religione),
+    Globalizzazione (Cultura, Civico), Crisi dello Stato (Civico, Militare).
+    Misura 68: e' il passo che rimette in piedi l'era Moderna (Museo dal 29
+    al 77%) tenendo la preistoria ai megaliti.
+
+202. **Lo Scavo con le rovine raddoppiate.** Col tempo che logora le rovine
+    per era passano da 5,6-5,9 a 7,2 e le tessere valgono 23 punti invece
+    di 17; la Scavo vince il 45%. Manopola `scavo_tessera_fattore` (1 dove
+    manca): la tessera vale lo Scavo del Personaggio per il fattore, per
+    eccesso; la carta non cambia. Variante `erosione_scavo` a 0,5. Misura 69.
+
