@@ -1,7 +1,7 @@
 {
   "meta": {
     "game": "La Strada delle Ere",
-    "ruleset": "v3-era1-prova",
+    "ruleset": "v3-era1-prova-erosione_scavo",
     "language": "it",
     "source": "distinta-carte (fonte unica)",
     "origine": "generato da tools/genera_cards_v3.py da data/cards-v2.json: non modificare a mano"
@@ -44,14 +44,14 @@
       "oro": 0
     },
     "event_force_by_era": {
-      "1": 2,
-      "2": 2,
-      "3": 3,
-      "4": 2,
-      "5": 2
+      "1": 4,
+      "2": 4,
+      "3": 5,
+      "4": 5,
+      "5": 6
     },
     "resource_cap": 99,
-    "protection_bonus": 2,
+    "protection_bonus": 4,
     "vetusta_max": 0,
     "vetusta_max_bosco": 0,
     "rudere_penalty": 2,
@@ -204,7 +204,14 @@
     "spiana_solo_ere_precedenti": true,
     "potenzia_adiacente": true,
     "potenziamento_con_costruzione": true,
-    "azione_edificio_compenso": "nessuno"
+    "azione_edificio_compenso": "nessuno",
+    "erosione": {
+      "non_usato": 2,
+      "usato": 1,
+      "protetto": 0
+    },
+    "spolia_divisore": 4,
+    "scavo_tessera_fattore": 0.5
   },
   "terrains": [
     {
@@ -423,7 +430,7 @@
         "idee": 0
       },
       "flexible": false,
-      "resistance": 3,
+      "resistance": 10,
       "rendita": 1,
       "lampo": 0,
       "scavo": 3,
@@ -458,7 +465,7 @@
         "idee": 0
       },
       "flexible": false,
-      "resistance": 2,
+      "resistance": 3,
       "rendita": 0,
       "lampo": 0,
       "scavo": 6,
@@ -530,7 +537,7 @@
         "idee": 0
       },
       "flexible": false,
-      "resistance": 4,
+      "resistance": 10,
       "rendita": 1,
       "lampo": 0,
       "scavo": 3,
@@ -566,7 +573,7 @@
         "idee": 1
       },
       "flexible": false,
-      "resistance": 2,
+      "resistance": 3,
       "rendita": 0,
       "lampo": 1,
       "scavo": 2,
@@ -707,7 +714,7 @@
         "idee": 1
       },
       "flexible": false,
-      "resistance": 4,
+      "resistance": 10,
       "rendita": 2,
       "lampo": 0,
       "scavo": 5,
@@ -747,7 +754,7 @@
         "idee": 0
       },
       "flexible": false,
-      "resistance": 2,
+      "resistance": 3,
       "rendita": 0,
       "lampo": 2,
       "scavo": 3,
@@ -784,7 +791,7 @@
         "idee": 0
       },
       "flexible": false,
-      "resistance": 3,
+      "resistance": 9,
       "rendita": 0,
       "lampo": 1,
       "scavo": 5,
@@ -819,7 +826,7 @@
         "idee": 0
       },
       "flexible": false,
-      "resistance": 3,
+      "resistance": 5,
       "rendita": 0,
       "lampo": 2,
       "scavo": 5,
@@ -852,7 +859,7 @@
         "idee": 1
       },
       "flexible": true,
-      "resistance": 4,
+      "resistance": 8,
       "rendita": 2,
       "lampo": 0,
       "scavo": 3,
@@ -910,7 +917,7 @@
         "idee": 1
       },
       "flexible": false,
-      "resistance": 2,
+      "resistance": 3,
       "rendita": 0,
       "lampo": 2,
       "scavo": 3,
@@ -943,7 +950,7 @@
         "idee": 0
       },
       "flexible": false,
-      "resistance": 2,
+      "resistance": 3,
       "rendita": 0,
       "lampo": 1,
       "scavo": 3,
@@ -977,7 +984,7 @@
         "idee": 0
       },
       "flexible": false,
-      "resistance": 3,
+      "resistance": 5,
       "rendita": 0,
       "lampo": 2,
       "scavo": 2,
@@ -1012,7 +1019,7 @@
         "idee": 0
       },
       "flexible": false,
-      "resistance": 3,
+      "resistance": 5,
       "rendita": 1,
       "lampo": 0,
       "scavo": 3,
@@ -1050,7 +1057,7 @@
         "idee": 0
       },
       "flexible": true,
-      "resistance": 3,
+      "resistance": 5,
       "rendita": 1,
       "lampo": 0,
       "scavo": 3,
@@ -1086,7 +1093,7 @@
         "idee": 1
       },
       "flexible": true,
-      "resistance": 2,
+      "resistance": 3,
       "rendita": 0,
       "lampo": 2,
       "scavo": 2,
@@ -1121,7 +1128,7 @@
         "idee": 1
       },
       "flexible": false,
-      "resistance": 2,
+      "resistance": 3,
       "rendita": 0,
       "lampo": 2,
       "scavo": 2,
@@ -1155,7 +1162,7 @@
         "idee": 1
       },
       "flexible": false,
-      "resistance": 3,
+      "resistance": 5,
       "rendita": 2,
       "lampo": 0,
       "scavo": 5,
@@ -1190,7 +1197,7 @@
         "idee": 1
       },
       "flexible": false,
-      "resistance": 5,
+      "resistance": 9,
       "rendita": 2,
       "lampo": 0,
       "scavo": 6,
@@ -1233,7 +1240,7 @@
         "idee": 0
       },
       "flexible": false,
-      "resistance": 4,
+      "resistance": 7,
       "rendita": 0,
       "lampo": 2,
       "scavo": 3,
@@ -1269,7 +1276,7 @@
         "idee": 1
       },
       "flexible": false,
-      "resistance": 3,
+      "resistance": 5,
       "rendita": 0,
       "lampo": 2,
       "scavo": 2,
@@ -1307,7 +1314,7 @@
         "idee": 0
       },
       "flexible": false,
-      "resistance": 4,
+      "resistance": 8,
       "rendita": 0,
       "lampo": 2,
       "scavo": 2,
@@ -1342,7 +1349,7 @@
         "idee": 1
       },
       "flexible": false,
-      "resistance": 3,
+      "resistance": 5,
       "rendita": 0,
       "lampo": 2,
       "scavo": 3,
@@ -1376,7 +1383,7 @@
         "idee": 1
       },
       "flexible": false,
-      "resistance": 3,
+      "resistance": 5,
       "rendita": 0,
       "lampo": 2,
       "scavo": 2,
@@ -1414,7 +1421,7 @@
         "idee": 1
       },
       "flexible": true,
-      "resistance": 2,
+      "resistance": 3,
       "rendita": 0,
       "lampo": 1,
       "scavo": 0,
@@ -1450,7 +1457,7 @@
         "idee": 1
       },
       "flexible": false,
-      "resistance": 3,
+      "resistance": 5,
       "rendita": 0,
       "lampo": 1,
       "scavo": 2,
@@ -1485,7 +1492,7 @@
         "idee": 0
       },
       "flexible": false,
-      "resistance": 3,
+      "resistance": 5,
       "rendita": 1,
       "lampo": 0,
       "scavo": 3,
@@ -1524,7 +1531,7 @@
         "idee": 1
       },
       "flexible": true,
-      "resistance": 3,
+      "resistance": 5,
       "rendita": 0,
       "lampo": 1,
       "scavo": 2,
@@ -1557,7 +1564,7 @@
         "idee": 1
       },
       "flexible": false,
-      "resistance": 3,
+      "resistance": 5,
       "rendita": 0,
       "lampo": 2,
       "scavo": 2,
@@ -1601,7 +1608,7 @@
         "idee": 0
       },
       "flexible": false,
-      "resistance": 4,
+      "resistance": 8,
       "rendita": 2,
       "lampo": 0,
       "scavo": 3,
@@ -1639,7 +1646,7 @@
         "idee": 1
       },
       "flexible": false,
-      "resistance": 3,
+      "resistance": 5,
       "rendita": 2,
       "lampo": 0,
       "scavo": 5,
@@ -1676,7 +1683,7 @@
         "idee": 0
       },
       "flexible": false,
-      "resistance": 3,
+      "resistance": 5,
       "rendita": 0,
       "lampo": 3,
       "scavo": 2,
@@ -1712,7 +1719,7 @@
         "idee": 1
       },
       "flexible": false,
-      "resistance": 2,
+      "resistance": 3,
       "rendita": 0,
       "lampo": 1,
       "scavo": 2,
@@ -1779,7 +1786,7 @@
         "idee": 1
       },
       "flexible": false,
-      "resistance": 2,
+      "resistance": 3,
       "rendita": 0,
       "lampo": 1,
       "scavo": 2,
@@ -1812,7 +1819,7 @@
         "idee": 0
       },
       "flexible": true,
-      "resistance": 2,
+      "resistance": 3,
       "rendita": 0,
       "lampo": 2,
       "scavo": 2,
@@ -1865,7 +1872,7 @@
         "idee": 1
       },
       "flexible": true,
-      "resistance": 2,
+      "resistance": 3,
       "rendita": 0,
       "lampo": 1,
       "scavo": 0,
@@ -1898,7 +1905,7 @@
         "idee": 1
       },
       "flexible": false,
-      "resistance": 3,
+      "resistance": 5,
       "rendita": 0,
       "lampo": 2,
       "scavo": 3,
@@ -1931,7 +1938,7 @@
         "idee": 1
       },
       "flexible": false,
-      "resistance": 3,
+      "resistance": 5,
       "rendita": 0,
       "lampo": 2,
       "scavo": 3,
@@ -1969,7 +1976,7 @@
         "idee": 0
       },
       "flexible": true,
-      "resistance": 4,
+      "resistance": 8,
       "rendita": 2,
       "lampo": 0,
       "scavo": 3,
@@ -2004,7 +2011,7 @@
         "idee": 0
       },
       "flexible": false,
-      "resistance": 2,
+      "resistance": 3,
       "rendita": 0,
       "lampo": 2,
       "scavo": 3,
@@ -2040,7 +2047,7 @@
         "idee": 0
       },
       "flexible": false,
-      "resistance": 4,
+      "resistance": 8,
       "rendita": 2,
       "lampo": 0,
       "scavo": 5,
@@ -2081,7 +2088,7 @@
         "idee": 0
       },
       "flexible": false,
-      "resistance": 5,
+      "resistance": 9,
       "rendita": 2,
       "lampo": 0,
       "scavo": 2,
@@ -2118,7 +2125,7 @@
         "idee": 2
       },
       "flexible": false,
-      "resistance": 3,
+      "resistance": 5,
       "rendita": 2,
       "lampo": 0,
       "scavo": 3,
@@ -2165,7 +2172,7 @@
         "idee": 0
       },
       "flexible": false,
-      "resistance": 3,
+      "resistance": 6,
       "rendita": 0,
       "lampo": 1,
       "scavo": 0,
@@ -2209,7 +2216,7 @@
         "idee": 1
       },
       "flexible": false,
-      "resistance": 3,
+      "resistance": 7,
       "rendita": 0,
       "lampo": 1,
       "scavo": 0,
@@ -2265,7 +2272,7 @@
         "idee": 0
       },
       "flexible": false,
-      "resistance": 2,
+      "resistance": 4,
       "rendita": 0,
       "lampo": 1,
       "scavo": 0,
@@ -2315,7 +2322,7 @@
         "idee": 0
       },
       "flexible": true,
-      "resistance": 3,
+      "resistance": 6,
       "rendita": 0,
       "lampo": 2,
       "scavo": 0,
@@ -2364,7 +2371,7 @@
         "idee": 0
       },
       "flexible": false,
-      "resistance": 3,
+      "resistance": 7,
       "rendita": 0,
       "lampo": 2,
       "scavo": 0,
@@ -2412,7 +2419,7 @@
         "idee": 0
       },
       "flexible": false,
-      "resistance": 3,
+      "resistance": 6,
       "rendita": 0,
       "lampo": 2,
       "scavo": 0,
@@ -2458,7 +2465,7 @@
         "idee": 1
       },
       "flexible": true,
-      "resistance": 3,
+      "resistance": 10,
       "rendita": 0,
       "lampo": 2,
       "scavo": 0,
@@ -2517,7 +2524,7 @@
         "idee": 0
       },
       "flexible": false,
-      "resistance": 3,
+      "resistance": 6,
       "rendita": 0,
       "lampo": 2,
       "scavo": 0,
@@ -2562,7 +2569,7 @@
         "idee": 0
       },
       "flexible": true,
-      "resistance": 4,
+      "resistance": 9,
       "rendita": 0,
       "lampo": 3,
       "scavo": 0,
@@ -2613,7 +2620,7 @@
         "idee": 1
       },
       "flexible": false,
-      "resistance": 4,
+      "resistance": 9,
       "rendita": 0,
       "lampo": 3,
       "scavo": 0,
@@ -2670,7 +2677,7 @@
         "idee": 0
       },
       "flexible": false,
-      "resistance": 3,
+      "resistance": 6,
       "rendita": 0,
       "lampo": 2,
       "scavo": 0,
@@ -2719,7 +2726,7 @@
         "idee": 1
       },
       "flexible": false,
-      "resistance": 3,
+      "resistance": 6,
       "rendita": 0,
       "lampo": 2,
       "scavo": 0,
@@ -2766,7 +2773,7 @@
         "idee": 0
       },
       "flexible": false,
-      "resistance": 2,
+      "resistance": 3,
       "rendita": 0,
       "lampo": 1,
       "scavo": 1,
@@ -2799,7 +2806,7 @@
         "idee": 0
       },
       "flexible": false,
-      "resistance": 2,
+      "resistance": 3,
       "rendita": 0,
       "lampo": 2,
       "scavo": 1,
@@ -2865,7 +2872,7 @@
         "idee": 0
       },
       "flexible": false,
-      "resistance": 3,
+      "resistance": 5,
       "rendita": 0,
       "lampo": 1,
       "scavo": 1,
@@ -2898,7 +2905,7 @@
         "idee": 0
       },
       "flexible": false,
-      "resistance": 3,
+      "resistance": 5,
       "rendita": 0,
       "lampo": 2,
       "scavo": 1,
@@ -2931,7 +2938,7 @@
         "idee": 0
       },
       "flexible": true,
-      "resistance": 2,
+      "resistance": 3,
       "rendita": 0,
       "lampo": 1,
       "scavo": 2,
@@ -2964,7 +2971,7 @@
         "idee": 0
       },
       "flexible": false,
-      "resistance": 2,
+      "resistance": 3,
       "rendita": 0,
       "lampo": 1,
       "scavo": 1,
@@ -2997,7 +3004,7 @@
         "idee": 0
       },
       "flexible": false,
-      "resistance": 3,
+      "resistance": 5,
       "rendita": 0,
       "lampo": 2,
       "scavo": 1,
@@ -3030,7 +3037,7 @@
         "idee": 0
       },
       "flexible": true,
-      "resistance": 2,
+      "resistance": 3,
       "rendita": 0,
       "lampo": 1,
       "scavo": 2,
@@ -3063,7 +3070,7 @@
         "idee": 0
       },
       "flexible": false,
-      "resistance": 2,
+      "resistance": 3,
       "rendita": 0,
       "lampo": 1,
       "scavo": 1,
@@ -3096,7 +3103,7 @@
         "idee": 0
       },
       "flexible": false,
-      "resistance": 3,
+      "resistance": 5,
       "rendita": 0,
       "lampo": 1,
       "scavo": 1,
@@ -3129,7 +3136,7 @@
         "idee": 0
       },
       "flexible": true,
-      "resistance": 2,
+      "resistance": 3,
       "rendita": 0,
       "lampo": 1,
       "scavo": 2,
@@ -3162,7 +3169,7 @@
         "idee": 0
       },
       "flexible": true,
-      "resistance": 3,
+      "resistance": 6,
       "rendita": 0,
       "lampo": 1,
       "scavo": 1,
@@ -3195,7 +3202,7 @@
         "idee": 0
       },
       "flexible": false,
-      "resistance": 4,
+      "resistance": 8,
       "rendita": 0,
       "lampo": 1,
       "scavo": 1,
@@ -3529,7 +3536,7 @@
       "is_dynasty": false,
       "timing": "v3",
       "imprint": false,
-      "effect_text": "Produce 1 Costruzione. +2 resistenza fino a fine era all'edificio su cui sta.",
+      "effect_text": "Produce 1 Costruzione. +4 resistenza fino a fine era all'edificio su cui sta.",
       "effects": [],
       "scavo": 2,
       "produzione": {
@@ -3539,7 +3546,7 @@
       },
       "azione": {
         "tipo": "resistenza",
-        "n": 2,
+        "n": 4,
         "a": "abitato"
       }
     },
@@ -3551,7 +3558,7 @@
       "is_dynasty": false,
       "timing": "v3",
       "imprint": false,
-      "effect_text": "Produce 1 Denaro. +1 resistenza fino a fine era a ogni tuo edificio in questa colonna.",
+      "effect_text": "Produce 1 Denaro. +2 resistenza fino a fine era a ogni tuo edificio in questa colonna.",
       "effects": [],
       "scavo": 4,
       "produzione": {
@@ -3561,7 +3568,7 @@
       },
       "azione": {
         "tipo": "resistenza",
-        "n": 1,
+        "n": 2,
         "a": "tutti"
       }
     },
@@ -3698,7 +3705,7 @@
       "is_dynasty": false,
       "timing": "v3",
       "imprint": false,
-      "effect_text": "Produce 1 Costruzione. +1 resistenza fino a fine era a un tuo edificio in questa colonna.",
+      "effect_text": "Produce 1 Costruzione. +2 resistenza fino a fine era a un tuo edificio in questa colonna.",
       "effects": [],
       "scavo": 4,
       "produzione": {
@@ -3708,7 +3715,7 @@
       },
       "azione": {
         "tipo": "resistenza",
-        "n": 1,
+        "n": 2,
         "a": "uno"
       }
     },
@@ -3916,7 +3923,7 @@
       "is_dynasty": false,
       "timing": "v3",
       "imprint": false,
-      "effect_text": "Produce 1 Costruzione. +2 resistenza fino a fine era all'edificio su cui sta.",
+      "effect_text": "Produce 1 Costruzione. +4 resistenza fino a fine era all'edificio su cui sta.",
       "effects": [],
       "scavo": 2,
       "produzione": {
@@ -3926,7 +3933,7 @@
       },
       "azione": {
         "tipo": "resistenza",
-        "n": 2,
+        "n": 4,
         "a": "abitato"
       }
     },
@@ -3938,7 +3945,7 @@
       "is_dynasty": false,
       "timing": "v3",
       "imprint": false,
-      "effect_text": "Produce 1 Costruzione. +1 resistenza fino a fine era a ogni tuo edificio in questa colonna.",
+      "effect_text": "Produce 1 Costruzione. +2 resistenza fino a fine era a ogni tuo edificio in questa colonna.",
       "effects": [],
       "scavo": 4,
       "produzione": {
@@ -3948,7 +3955,7 @@
       },
       "azione": {
         "tipo": "resistenza",
-        "n": 1,
+        "n": 2,
         "a": "tutti"
       }
     },
@@ -4051,7 +4058,7 @@
       "is_dynasty": false,
       "timing": "v3",
       "imprint": false,
-      "effect_text": "Produce 1 Costruzione. +1 resistenza fino a fine era a un tuo edificio in questa colonna.",
+      "effect_text": "Produce 1 Costruzione. +2 resistenza fino a fine era a un tuo edificio in questa colonna.",
       "effects": [],
       "scavo": 4,
       "produzione": {
@@ -4061,7 +4068,7 @@
       },
       "azione": {
         "tipo": "resistenza",
-        "n": 1,
+        "n": 2,
         "a": "uno"
       }
     },
@@ -4269,7 +4276,7 @@
       "is_dynasty": false,
       "timing": "v3",
       "imprint": false,
-      "effect_text": "Produce 1 Costruzione. +2 resistenza fino a fine era all'edificio su cui sta.",
+      "effect_text": "Produce 1 Costruzione. +4 resistenza fino a fine era all'edificio su cui sta.",
       "effects": [],
       "scavo": 2,
       "produzione": {
@@ -4279,7 +4286,7 @@
       },
       "azione": {
         "tipo": "resistenza",
-        "n": 2,
+        "n": 4,
         "a": "abitato"
       }
     },
@@ -4291,7 +4298,7 @@
       "is_dynasty": false,
       "timing": "v3",
       "imprint": false,
-      "effect_text": "Produce 1 Costruzione. +1 resistenza fino a fine era a ogni tuo edificio in questa colonna.",
+      "effect_text": "Produce 1 Costruzione. +2 resistenza fino a fine era a ogni tuo edificio in questa colonna.",
       "effects": [],
       "scavo": 4,
       "produzione": {
@@ -4301,7 +4308,7 @@
       },
       "azione": {
         "tipo": "resistenza",
-        "n": 1,
+        "n": 2,
         "a": "tutti"
       }
     },
@@ -4404,7 +4411,7 @@
       "is_dynasty": false,
       "timing": "v3",
       "imprint": false,
-      "effect_text": "Produce 1 Costruzione. +1 resistenza fino a fine era a un tuo edificio in questa colonna.",
+      "effect_text": "Produce 1 Costruzione. +2 resistenza fino a fine era a un tuo edificio in questa colonna.",
       "effects": [],
       "scavo": 4,
       "produzione": {
@@ -4414,7 +4421,7 @@
       },
       "azione": {
         "tipo": "resistenza",
-        "n": 1,
+        "n": 2,
         "a": "uno"
       }
     },
@@ -4622,7 +4629,7 @@
       "is_dynasty": false,
       "timing": "v3",
       "imprint": false,
-      "effect_text": "Produce 1 Costruzione. +2 resistenza fino a fine era all'edificio su cui sta.",
+      "effect_text": "Produce 1 Costruzione. +4 resistenza fino a fine era all'edificio su cui sta.",
       "effects": [],
       "scavo": 2,
       "produzione": {
@@ -4632,7 +4639,7 @@
       },
       "azione": {
         "tipo": "resistenza",
-        "n": 2,
+        "n": 4,
         "a": "abitato"
       }
     },
@@ -4644,7 +4651,7 @@
       "is_dynasty": false,
       "timing": "v3",
       "imprint": false,
-      "effect_text": "Produce 1 Costruzione. +1 resistenza fino a fine era a ogni tuo edificio in questa colonna.",
+      "effect_text": "Produce 1 Costruzione. +2 resistenza fino a fine era a ogni tuo edificio in questa colonna.",
       "effects": [],
       "scavo": 4,
       "produzione": {
@@ -4654,7 +4661,7 @@
       },
       "azione": {
         "tipo": "resistenza",
-        "n": 1,
+        "n": 2,
         "a": "tutti"
       }
     },
@@ -4757,7 +4764,7 @@
       "is_dynasty": false,
       "timing": "v3",
       "imprint": false,
-      "effect_text": "Produce 1 Costruzione. +1 resistenza fino a fine era a un tuo edificio in questa colonna.",
+      "effect_text": "Produce 1 Costruzione. +2 resistenza fino a fine era a un tuo edificio in questa colonna.",
       "effects": [],
       "scavo": 4,
       "produzione": {
@@ -4767,7 +4774,7 @@
       },
       "azione": {
         "tipo": "resistenza",
-        "n": 1,
+        "n": 2,
         "a": "uno"
       }
     },
@@ -4975,7 +4982,7 @@
       "is_dynasty": false,
       "timing": "v3",
       "imprint": false,
-      "effect_text": "Produce 1 Costruzione. +2 resistenza fino a fine era all'edificio su cui sta.",
+      "effect_text": "Produce 1 Costruzione. +4 resistenza fino a fine era all'edificio su cui sta.",
       "effects": [],
       "scavo": 2,
       "produzione": {
@@ -4985,7 +4992,7 @@
       },
       "azione": {
         "tipo": "resistenza",
-        "n": 2,
+        "n": 4,
         "a": "abitato"
       }
     },
@@ -4997,7 +5004,7 @@
       "is_dynasty": false,
       "timing": "v3",
       "imprint": false,
-      "effect_text": "Produce 1 Costruzione. +1 resistenza fino a fine era a ogni tuo edificio in questa colonna.",
+      "effect_text": "Produce 1 Costruzione. +2 resistenza fino a fine era a ogni tuo edificio in questa colonna.",
       "effects": [],
       "scavo": 4,
       "produzione": {
@@ -5007,7 +5014,7 @@
       },
       "azione": {
         "tipo": "resistenza",
-        "n": 1,
+        "n": 2,
         "a": "tutti"
       }
     }
@@ -5054,12 +5061,12 @@
         "idee": 0
       },
       "family": "struttura",
-      "effect_text": "L'edificio ha +1 Resistenza.",
+      "effect_text": "L'edificio ha +2 Resistenza.",
       "effects": [
         {
           "hook": "on_acquire",
           "op": "resistance",
-          "value": 1,
+          "value": 2,
           "duration": "permanent",
           "target": {
             "is_self": true
@@ -5122,12 +5129,12 @@
         "idee": 0
       },
       "family": "struttura",
-      "effect_text": "L'edificio ha +1 Resistenza.",
+      "effect_text": "L'edificio ha +2 Resistenza.",
       "effects": [
         {
           "hook": "on_acquire",
           "op": "resistance",
-          "value": 1,
+          "value": 2,
           "duration": "permanent",
           "target": {
             "is_self": true
@@ -5197,12 +5204,12 @@
         "idee": 0
       },
       "family": "struttura",
-      "effect_text": "L'edificio ha +1 Resistenza.",
+      "effect_text": "L'edificio ha +2 Resistenza.",
       "effects": [
         {
           "hook": "on_acquire",
           "op": "resistance",
-          "value": 1,
+          "value": 2,
           "duration": "permanent",
           "target": {
             "is_self": true
@@ -5278,12 +5285,12 @@
         "idee": 0
       },
       "family": "struttura",
-      "effect_text": "L'edificio ha +1 Resistenza.",
+      "effect_text": "L'edificio ha +2 Resistenza.",
       "effects": [
         {
           "hook": "on_acquire",
           "op": "resistance",
-          "value": 1,
+          "value": 2,
           "duration": "permanent",
           "target": {
             "is_self": true
@@ -5302,7 +5309,7 @@
         "idee": 0
       },
       "family": "altro",
-      "effect_text": "Subito: +1 PV. L'edificio ha +1 Resistenza.",
+      "effect_text": "Subito: +1 PV. L'edificio ha +2 Resistenza.",
       "effects": [
         {
           "hook": "on_acquire",
@@ -5312,7 +5319,7 @@
         {
           "hook": "on_acquire",
           "op": "resistance",
-          "value": 1,
+          "value": 2,
           "duration": "permanent",
           "target": {
             "is_self": true
@@ -5331,12 +5338,12 @@
         "idee": 0
       },
       "family": "struttura",
-      "effect_text": "L'edificio ha +1 Resistenza e conta anche come Militare.",
+      "effect_text": "L'edificio ha +2 Resistenza e conta anche come Militare.",
       "effects": [
         {
           "hook": "on_acquire",
           "op": "resistance",
-          "value": 1,
+          "value": 2,
           "duration": "permanent",
           "target": {
             "is_self": true
@@ -5453,7 +5460,7 @@
         "idee": 0
       },
       "family": "altro",
-      "effect_text": "Subito: +2 PV. L'edificio ha +1 Resistenza.",
+      "effect_text": "Subito: +2 PV. L'edificio ha +2 Resistenza.",
       "effects": [
         {
           "hook": "on_acquire",
@@ -5463,7 +5470,7 @@
         {
           "hook": "on_acquire",
           "op": "resistance",
-          "value": 1,
+          "value": 2,
           "duration": "permanent",
           "target": {
             "is_self": true
@@ -5503,12 +5510,12 @@
         "idee": 0
       },
       "family": "struttura",
-      "effect_text": "L'edificio ha +1 Resistenza.",
+      "effect_text": "L'edificio ha +2 Resistenza.",
       "effects": [
         {
           "hook": "on_acquire",
           "op": "resistance",
-          "value": 1,
+          "value": 2,
           "duration": "permanent",
           "target": {
             "is_self": true
@@ -5656,12 +5663,12 @@
         "idee": 0
       },
       "family": "struttura",
-      "effect_text": "L'edificio ha +1 Resistenza.",
+      "effect_text": "L'edificio ha +2 Resistenza.",
       "effects": [
         {
           "hook": "on_acquire",
           "op": "resistance",
-          "value": 1,
+          "value": 2,
           "duration": "permanent",
           "target": {
             "is_self": true
@@ -5794,12 +5801,12 @@
         "idee": 0
       },
       "family": "struttura",
-      "effect_text": "L'edificio ha +1 Resistenza.",
+      "effect_text": "L'edificio ha +2 Resistenza.",
       "effects": [
         {
           "hook": "on_acquire",
           "op": "resistance",
-          "value": 1,
+          "value": 2,
           "duration": "permanent",
           "target": {
             "is_self": true
@@ -5905,12 +5912,12 @@
         "idee": 0
       },
       "family": "struttura",
-      "effect_text": "L'edificio ha +1 Resistenza e conta anche come Religione.",
+      "effect_text": "L'edificio ha +2 Resistenza e conta anche come Religione.",
       "effects": [
         {
           "hook": "on_acquire",
           "op": "resistance",
-          "value": 1,
+          "value": 2,
           "duration": "permanent",
           "target": {
             "is_self": true
@@ -5963,12 +5970,12 @@
         "idee": 0
       },
       "family": "struttura",
-      "effect_text": "L'edificio ha +1 Resistenza.",
+      "effect_text": "L'edificio ha +2 Resistenza.",
       "effects": [
         {
           "hook": "on_acquire",
           "op": "resistance",
-          "value": 1,
+          "value": 2,
           "duration": "permanent",
           "target": {
             "is_self": true
@@ -6058,12 +6065,12 @@
         "idee": 0
       },
       "family": "struttura",
-      "effect_text": "L'edificio ha +2 Resistenza.",
+      "effect_text": "L'edificio ha +4 Resistenza.",
       "effects": [
         {
           "hook": "on_acquire",
           "op": "resistance",
-          "value": 2,
+          "value": 4,
           "duration": "permanent",
           "target": {
             "is_self": true
@@ -6179,12 +6186,12 @@
         "idee": 0
       },
       "family": "struttura",
-      "effect_text": "L'edificio ha +2 Resistenza.",
+      "effect_text": "L'edificio ha +4 Resistenza.",
       "effects": [
         {
           "hook": "on_acquire",
           "op": "resistance",
-          "value": 2,
+          "value": 4,
           "duration": "permanent",
           "target": {
             "is_self": true
@@ -6242,10 +6249,10 @@
       "id": "ev_diluvio",
       "name": "Diluvio",
       "era": 1,
-      "force": 2,
+      "force": 3,
       "severity": "lieve",
       "kind": "geografico",
-      "effect_text": "Forza 2. Edifici su colonne fiume: −1 res.",
+      "effect_text": "Forza 3. Edifici su colonne fiume: −1 res.",
       "effects": [
         {
           "hook": "on_event",
@@ -6266,7 +6273,7 @@
       "force": 3,
       "severity": "lieve",
       "kind": "classe",
-      "effect_text": "Forza 3. Colpisce solo Commercio, Civico.",
+      "effect_text": "Forza 3. Colpisce solo Commercio e Civico.",
       "effects": [],
       "bersaglio": {
         "class": [
@@ -6279,10 +6286,10 @@
       "id": "ev_migrazione",
       "name": "Migrazione",
       "era": 1,
-      "force": 2,
+      "force": 3,
       "severity": "lieve",
       "kind": "comportamentale",
-      "effect_text": "Forza 2. Edifici non protetti: −1 res extra.",
+      "effect_text": "Forza 3. Edifici non protetti: −1 res extra.",
       "effects": [
         {
           "hook": "on_event",
@@ -6298,10 +6305,10 @@
       "id": "ev_inverno_lungo",
       "name": "Inverno lungo",
       "era": 1,
-      "force": 2,
+      "force": 5,
       "severity": "grave",
       "kind": "geografico",
-      "effect_text": "Forza 2. Edifici su bosco e collina: −1 res. Tutti i giocatori perdono 1 pietra.",
+      "effect_text": "Forza 5. Edifici su bosco e collina: −1 res. Tutti i giocatori perdono 1 pietra.",
       "effects": [
         {
           "hook": "on_event",
@@ -6328,10 +6335,10 @@
       "id": "ev_faide_tribali",
       "name": "Faide tribali",
       "era": 1,
-      "force": 3,
+      "force": 5,
       "severity": "grave",
       "kind": "classe",
-      "effect_text": "Forza 3. Colpisce solo Civico, Commercio.",
+      "effect_text": "Forza 5. Colpisce solo Civico e Commercio.",
       "effects": [],
       "bersaglio": {
         "class": [
@@ -6344,10 +6351,10 @@
       "id": "ev_carestia_primitiva",
       "name": "Carestia primitiva",
       "era": 1,
-      "force": 2,
+      "force": 5,
       "severity": "grave",
       "kind": "comportamentale",
-      "effect_text": "Forza 2. Edifici a livello 0 non protetti che producono risorse: −2 res.",
+      "effect_text": "Forza 5. Edifici a livello 0 non protetti che producono risorse: −2 res.",
       "effects": [
         {
           "hook": "on_event",
@@ -6367,10 +6374,10 @@
       "id": "ev_terremoto",
       "name": "Terremoto",
       "era": 2,
-      "force": 2,
+      "force": 3,
       "severity": "lieve",
       "kind": "geografico",
-      "effect_text": "Forza 2. Edifici da 2 o 3 caselle: −1 res.",
+      "effect_text": "Forza 3. Edifici da 2 o 3 caselle: −1 res.",
       "effects": [
         {
           "hook": "on_event",
@@ -6403,10 +6410,10 @@
       "id": "ev_invasione",
       "name": "Invasione",
       "era": 2,
-      "force": 2,
+      "force": 3,
       "severity": "lieve",
       "kind": "comportamentale",
-      "effect_text": "Forza 2. Edifici non protetti: −1 res extra.",
+      "effect_text": "Forza 3. Edifici non protetti: −1 res extra.",
       "effects": [
         {
           "hook": "on_event",
@@ -6422,10 +6429,10 @@
       "id": "ev_eruzione",
       "name": "Eruzione",
       "era": 2,
-      "force": 2,
+      "force": 5,
       "severity": "grave",
       "kind": "geografico",
-      "effect_text": "Forza 2. Edifici su collina: −2 res. Chi perde un edificio pesca un potenziamento gratis (massimo uno per giocatore).",
+      "effect_text": "Forza 5. Edifici su collina: −2 res. Chi perde un edificio pesca un potenziamento gratis (massimo uno per giocatore).",
       "effects": [
         {
           "hook": "on_event",
@@ -6449,10 +6456,10 @@
       "id": "ev_persecuzioni",
       "name": "Persecuzioni",
       "era": 2,
-      "force": 3,
+      "force": 5,
       "severity": "grave",
       "kind": "classe",
-      "effect_text": "Forza 3. Colpisce solo Religione, Cultura.",
+      "effect_text": "Forza 5. Colpisce solo Religione e Cultura.",
       "effects": [],
       "bersaglio": {
         "class": [
@@ -6465,10 +6472,10 @@
       "id": "ev_guerra_civile",
       "name": "Guerra civile",
       "era": 2,
-      "force": 2,
+      "force": 5,
       "severity": "grave",
       "kind": "comportamentale",
-      "effect_text": "Forza 2. Nelle colonne con edifici di 2+ giocatori: tutti −1 res.",
+      "effect_text": "Forza 5. Nelle colonne con edifici di 2+ giocatori: tutti −1 res.",
       "effects": [
         {
           "hook": "on_event",
@@ -6486,10 +6493,10 @@
       "id": "ev_incursioni_fluviali",
       "name": "Incursioni fluviali",
       "era": 3,
-      "force": 3,
+      "force": 4,
       "severity": "lieve",
       "kind": "geografico",
-      "effect_text": "Forza 3. Edifici su colonne fiume: −1 res.",
+      "effect_text": "Forza 4. Edifici su colonne fiume: −1 res.",
       "effects": [
         {
           "hook": "on_event",
@@ -6510,7 +6517,7 @@
       "force": 4,
       "severity": "lieve",
       "kind": "classe",
-      "effect_text": "Forza 4. Colpisce solo Civico, Commercio, Ingegneria.",
+      "effect_text": "Forza 4. Colpisce solo Civico e Commercio e Ingegneria.",
       "effects": [],
       "bersaglio": {
         "class": [
@@ -6524,10 +6531,10 @@
       "id": "ev_peste",
       "name": "Peste",
       "era": 3,
-      "force": 3,
+      "force": 4,
       "severity": "lieve",
       "kind": "comportamentale",
-      "effect_text": "Forza 3. Colonne con 3+ edifici in piedi: tutti −1 res.",
+      "effect_text": "Forza 4. Colonne con 3+ edifici in piedi: tutti −1 res.",
       "effects": [
         {
           "hook": "on_event",
@@ -6545,10 +6552,10 @@
       "id": "ev_grande_incendio",
       "name": "Grande incendio",
       "era": 3,
-      "force": 3,
+      "force": 6,
       "severity": "grave",
       "kind": "geografico",
-      "effect_text": "Forza 3. Edifici a livello 0 o 1: −1 res; a livello 2+: −2 res.",
+      "effect_text": "Forza 6. Edifici a livello 0 o 1: −1 res; a livello 2+: −2 res.",
       "effects": [
         {
           "hook": "on_event",
@@ -6576,10 +6583,10 @@
       "id": "ev_scisma",
       "name": "Scisma",
       "era": 3,
-      "force": 4,
+      "force": 6,
       "severity": "grave",
       "kind": "classe",
-      "effect_text": "Forza 4. Colpisce solo Religione, Cultura.",
+      "effect_text": "Forza 6. Colpisce solo Religione e Cultura.",
       "effects": [],
       "bersaglio": {
         "class": [
@@ -6592,10 +6599,10 @@
       "id": "ev_anni_della_fame",
       "name": "Anni della fame",
       "era": 3,
-      "force": 3,
+      "force": 6,
       "severity": "grave",
       "kind": "comportamentale",
-      "effect_text": "Forza 3. Nessuna produzione durante l’ultimo round dell’era.",
+      "effect_text": "Forza 6. Nessuna produzione durante l’ultimo round dell’era.",
       "effects": [
         {
           "hook": "on_activate",
@@ -6608,10 +6615,10 @@
       "id": "ev_alluvione",
       "name": "Alluvione",
       "era": 4,
-      "force": 2,
+      "force": 4,
       "severity": "lieve",
       "kind": "geografico",
-      "effect_text": "Forza 2. Edifici su colonne fiume: −1 res.",
+      "effect_text": "Forza 4. Edifici su colonne fiume: −1 res.",
       "effects": [
         {
           "hook": "on_event",
@@ -6629,10 +6636,10 @@
       "id": "ev_controriforma",
       "name": "Controriforma",
       "era": 4,
-      "force": 3,
+      "force": 4,
       "severity": "lieve",
       "kind": "classe",
-      "effect_text": "Forza 3. Colpisce solo Cultura, Commercio.",
+      "effect_text": "Forza 4. Colpisce solo Cultura e Commercio.",
       "effects": [],
       "bersaglio": {
         "class": [
@@ -6645,10 +6652,10 @@
       "id": "ev_rivoluzione_industriale",
       "name": "Rivoluzione industriale",
       "era": 4,
-      "force": 2,
+      "force": 4,
       "severity": "lieve",
       "kind": "comportamentale",
-      "effect_text": "Forza 2. Edifici con Scavo 2+: −1 res.",
+      "effect_text": "Forza 4. Edifici con Scavo 2+: −1 res.",
       "effects": [
         {
           "hook": "on_event",
@@ -6666,10 +6673,10 @@
       "id": "ev_bonifiche",
       "name": "Bonifiche",
       "era": 4,
-      "force": 2,
+      "force": 6,
       "severity": "grave",
       "kind": "geografico",
-      "effect_text": "Forza 2. Edifici su pianura: −2 res. Il primo terrapieno di ogni giocatore in quest’era costa 0.",
+      "effect_text": "Forza 6. Edifici su pianura: −2 res. Il primo terrapieno di ogni giocatore in quest’era costa 0.",
       "effects": [
         {
           "hook": "on_event",
@@ -6693,10 +6700,10 @@
       "id": "ev_secolarizzazioni",
       "name": "Secolarizzazioni",
       "era": 4,
-      "force": 3,
+      "force": 6,
       "severity": "grave",
       "kind": "classe",
-      "effect_text": "Forza 3. Colpisce solo Religione.",
+      "effect_text": "Forza 6. Colpisce solo Religione.",
       "effects": [],
       "bersaglio": {
         "class": [
@@ -6708,10 +6715,10 @@
       "id": "ev_speculazione_edilizia",
       "name": "Speculazione edilizia",
       "era": 4,
-      "force": 2,
+      "force": 6,
       "severity": "grave",
       "kind": "comportamentale",
-      "effect_text": "Forza 2. Ogni edificio con 2+ potenziamenti: −1 res.",
+      "effect_text": "Forza 6. Ogni edificio con 2+ potenziamenti: −1 res.",
       "effects": [
         {
           "hook": "on_event",
@@ -6729,10 +6736,10 @@
       "id": "ev_subsidenza",
       "name": "Subsidenza",
       "era": 5,
-      "force": 2,
+      "force": 5,
       "severity": "lieve",
       "kind": "geografico",
-      "effect_text": "Forza 2. Edifici su pianura e fiume: −1 res.",
+      "effect_text": "Forza 5. Edifici su pianura e fiume: −1 res.",
       "effects": [
         {
           "hook": "on_event",
@@ -6751,10 +6758,10 @@
       "id": "ev_globalizzazione",
       "name": "Globalizzazione",
       "era": 5,
-      "force": 3,
+      "force": 5,
       "severity": "lieve",
       "kind": "classe",
-      "effect_text": "Forza 3. Colpisce solo Cultura, Civico.",
+      "effect_text": "Forza 5. Colpisce solo Cultura e Civico.",
       "effects": [],
       "bersaglio": {
         "class": [
@@ -6767,10 +6774,10 @@
       "id": "ev_crisi_energetica",
       "name": "Crisi energetica",
       "era": 5,
-      "force": 2,
+      "force": 5,
       "severity": "lieve",
       "kind": "comportamentale",
-      "effect_text": "Forza 2. Edifici non protetti che producono risorse: −1 res.",
+      "effect_text": "Forza 5. Edifici non protetti che producono risorse: −1 res.",
       "effects": [
         {
           "hook": "on_event",
@@ -6787,10 +6794,10 @@
       "id": "ev_innalzamento_dei_mari",
       "name": "Innalzamento dei mari",
       "era": 5,
-      "force": 2,
+      "force": 7,
       "severity": "grave",
       "kind": "geografico",
-      "effect_text": "Forza 2. Edifici su fiume: −2 res · su pianura: −1 res.",
+      "effect_text": "Forza 7. Edifici su fiume: −2 res · su pianura: −1 res.",
       "effects": [
         {
           "hook": "on_event",
@@ -6818,10 +6825,10 @@
       "id": "ev_crisi_dello_stato",
       "name": "Crisi dello Stato",
       "era": 5,
-      "force": 3,
+      "force": 7,
       "severity": "grave",
       "kind": "classe",
-      "effect_text": "Forza 3. Colpisce solo Civico, Militare.",
+      "effect_text": "Forza 7. Colpisce solo Civico e Militare.",
       "effects": [],
       "bersaglio": {
         "class": [
@@ -6834,10 +6841,10 @@
       "id": "ev_guerra_mondiale",
       "name": "Guerra mondiale",
       "era": 5,
-      "force": 2,
+      "force": 7,
       "severity": "grave",
       "kind": "comportamentale",
-      "effect_text": "Forza 2. Nelle colonne con edifici di 2+ giocatori: tutti −1 res. Militare −1 res.",
+      "effect_text": "Forza 7. Nelle colonne con edifici di 2+ giocatori: tutti −1 res. Militare −1 res.",
       "effects": [
         {
           "hook": "on_event",
@@ -7420,10 +7427,10 @@
         "oro": 0,
         "idee": 0
       },
-      "testo": "Il primo edificio costruito qui ha +1 resistenza fino a fine era.",
+      "testo": "Il primo edificio costruito qui ha +2 resistenza fino a fine era.",
       "effetto": {
         "quando": "costruisci",
-        "resistenza_era": 1
+        "resistenza_era": 2
       },
       "copie": 2
     },
@@ -7675,7 +7682,7 @@
         "oro": 0,
         "idee": 0
       },
-      "testo": "Il primo edificio Militare costruito qui ha +2 resistenza fino a fine era.",
+      "testo": "Il primo edificio Militare costruito qui ha +4 resistenza fino a fine era.",
       "effetto": {
         "quando": "costruisci",
         "se": {
@@ -7683,7 +7690,7 @@
             "militare"
           ]
         },
-        "resistenza_era": 2
+        "resistenza_era": 4
       },
       "copie": 2
     },
@@ -7850,10 +7857,10 @@
         "oro": 0,
         "idee": 0
       },
-      "testo": "Il primo edificio costruito qui ha +2 resistenza fino a fine era.",
+      "testo": "Il primo edificio costruito qui ha +4 resistenza fino a fine era.",
       "effetto": {
         "quando": "costruisci",
-        "resistenza_era": 2
+        "resistenza_era": 4
       },
       "copie": 2
     },

@@ -3155,3 +3155,71 @@ dato è stato importato da lì. Ma due confronti fra ciò che è stampato e
     le forze dai dati (197), quindi non cambia. Sulle carte evento va
     stampata la forza nuova. Conferma: misura 66.
 
+200. **Il tempo logora (proposta del designer, variante `erosione`).** "Mi
+    rende perplesso che non si possa alzare la robustezza degli edifici e la
+    violenza degli eventi, siamo sempre su 1, 2 o 3 punti. 1 sono le
+    capanne, 10 sono i dolmen (e infatti resistono fino a noi); un evento
+    debole da 3 che spazza via le capanne ma non i dolmen, oppure da 7. Al
+    passaggio di era tutti gli edifici soffrono un'erosione, 2 se mai
+    abitato, 1 se abitato o 0; poi gli eventi salgono di intensita'. Un
+    grattacielo avra' un valore molto alto. Torna importante la
+    ristrutturazione. Solo poche cose della preistoria ci sono pervenute;
+    l'acquedotto resistito come rovina, un suo pezzo diventato casa
+    medievale, i pezzi del Colosseo nelle ville: questo spirito vorrei che
+    emergesse." La risposta: le mura ci sono (spianamento parziale,
+    costruire sopra, spoglie, tessere scavo), manca il tempo: con
+    resistenze 1-5 e forze 2-3 ogni +1 e' una svolta, e l'eta' non conta.
+    Variante misurabile, base intatta: (a) scala 1-10 (`RESISTENZE_1_10`
+    nel generatore: 1->1, 2->3, 3->5, 4->7, 5->9 con eccezioni: megaliti
+    9-10, cemento armato 6-10, Grattacielo 10); (b) tutti i modificatori
+    raddoppiati (lavoratore +4, Argine +2, eventi +-2/-4, Personaggi,
+    tessere), spoglie a un quarto della resistenza (`spolia_divisore` 4);
+    (c) erosione a fine era (`erosione`: non usato 2, usato 1, protetto
+    0), permanente in `bonus_res`, dopo l'evento e prima dell'azzeramento
+    delle protezioni, mai dopo l'era 5; (d) eventi lievi 3, 4, 5, 6, 7 per
+    era e gravi due punti sopra; il bot si aspetta il mezzo (`event_force_by_era`
+    lieve+1) e mette in conto l'erosione da usato nelle rendite future.
+    Variante `erosione_lieve` (1/0/0) per il logorio piu' tenero. La
+    ristrutturazione che ridà resistenza non c'e' ancora (con le carte
+    restituite non si ristruttura, registro 131): e' il passo dopo, se la
+    misura dice che il logorio morde. Misura 67.
+
+201. **L'evento con bersaglio.** Il designer: "alcuni eventi possono essere
+    dannosi per alcune classi ma indifferenti per altre: i terremoti
+    colpiscono tutti, la globalizzazione no, la guerra colpisce gli edifici
+    civili ma non quelli religiosi". Campo `bersaglio` sulla carta evento
+    (un selettore come quelli degli effetti): chi non corrisponde non vede
+    l'evento; senza, vale per tutti come sempre. Il bot lo legge
+    (`_modifica_evento` da +20 a chi non e' bersaglio). Nella variante
+    `erosione_classi` i dieci eventi di classe colpiscono solo le loro
+    classi a forza piena, senza malus: Eta' degli spiriti e Faide
+    (Commercio, Civico), Pax imperiale (Militare), Persecuzioni e Scisma
+    (Religione, Cultura), Guerra (Civico, Commercio, Ingegneria),
+    Controriforma (Cultura, Commercio), Secolarizzazioni (Religione),
+    Globalizzazione (Cultura, Civico), Crisi dello Stato (Civico, Militare).
+    Misura 68: e' il passo che rimette in piedi l'era Moderna (Museo dal 29
+    al 77%) tenendo la preistoria ai megaliti.
+
+202. **Lo Scavo con le rovine raddoppiate.** Col tempo che logora le rovine
+    per era passano da 5,6-5,9 a 7,2 e le tessere valgono 23 punti invece
+    di 17; la Scavo vince il 45%. Manopola `scavo_tessera_fattore` (1 dove
+    manca): la tessera vale lo Scavo del Personaggio per il fattore, per
+    eccesso; la carta non cambia. Variante `erosione_scavo` a 0,5. Misura 69.
+
+203. **L'alternativa prudente: solo i bersagli.** Dal pacchetto del tempo
+    che logora si prende solo l'evento con bersaglio (201), sulla scala e
+    le forze di oggi, senza erosione. Varianti `bersaglio_classi` (forza
+    dell'era) e `bersaglio_classi_forte` (+1 agli eventi di classe: colpiscono
+    meno edifici ma piu' forte). Misura 70: con +1 il gioco resta quello
+    della base al decimo (82,8 PV, Scavo 16,8, crolli per era uguali); si
+    cambiano solo i testi delle dieci carte di classe. Decisione del designer.
+
+204. **Gli eventi di classe con bersaglio sono la base.** Il designer:
+    "porta bersaglio_classi_forte nella base". Nel file base i dieci eventi
+    di classe colpiscono solo le classi che nominano, con +1 di forza e
+    senza malus; i testi delle carte dicono "Forza N. Colpisce solo ...".
+    Scala, resistenze, eventi geografici e di comportamento invariati. Le
+    varianti nate prima restano costruite sulla base di prima (i loro file
+    non cambiano); `--variante senza_bersagli` e' la base di prima. Il
+    pacchetto del tempo che logora (200-202) resta in variante.
+

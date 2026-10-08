@@ -1,7 +1,7 @@
 {
   "meta": {
     "game": "La Strada delle Ere",
-    "ruleset": "v3-era1-prova",
+    "ruleset": "v3-era1-prova-bersaglio_classi_forte",
     "language": "it",
     "source": "distinta-carte (fonte unica)",
     "origine": "generato da tools/genera_cards_v3.py da data/cards-v2.json: non modificare a mano"

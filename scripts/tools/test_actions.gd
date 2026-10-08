@@ -60,6 +60,8 @@ func _ready() -> void:
 	_run("v3: l'evento coperto fino a fine era (registro 190)", _test_v3_evento_coperto)
 	_run("v3: o dentro o fuori, niente soffio (registro 199)", _test_v3_senza_soffio)
 	_run("v3: anche l'era 5 ha i suoi sei eventi (registro 196)", _test_v3_eventi_era_5)
+	_run("v3: il tempo logora, variante erosione (registro 200)", _test_v3_erosione)
+	_run("v3: l'evento con bersaglio colpisce solo le sue classi (registro 201)", _test_v3_evento_bersaglio)
 	print("\n%d superati, %d falliti" % [_passed, _failed])
 	get_tree().quit(0 if _failed == 0 else 1)
 
@@ -2418,34 +2420,98 @@ func _test_v3_eventi_era_5() -> void:
 	_ok("  e non ha piu' l'evento finale unico", not CardDB.constants.has("evento_finale"))
 	var forze := {}
 	for e in CardDB.events_of_era(5): forze[int(e["force"])] = true
-	_eq("  tutti di forza 2, come l'era 4 (registri 198-199)", forze.keys(), [2])
+	var fk: Array = forze.keys()
+	fk.sort()
+	_eq("  forza 2, e 3 per i due di classe (registri 199 e 204)", fk, [2, 3])
 	var ctl := _game(3, 990)
 	ctl._start_era(5)
 	var gs := ctl.gs
 	_ok("a inizio era 5 si pesca uno dei sei", int(gs.current_event.get("era", 0)) == 5 and str(gs.current_event["id"]).begins_with("ev_"))
-	# La Crisi dello Stato (forza 2): Civico -2. Un Civico da 3 scende a 1 e
-	# crolla, un Ingegneria da 3 sale a 4 e regge.
+	# La Crisi dello Stato (registro 204): forza 3, colpisce solo Civico e
+	# Militare. Una casa civica da 2 crolla, l'Osservatorio (Ingegneria, 2)
+	# non e' un bersaglio e resta in piedi.
 	gs.grid.buildings.clear()
 	for i in gs.grid.n_cols: gs.grid.terrains[i] = Enums.Terrain.COLLINA
-	var civico := ""
-	var ingegneria := ""
-	for id in CardDB.buildings:
-		var d: Dictionary = CardDB.buildings[id]
-		if int(d["era"]) != 5 or int(d["resistance"]) != 3 or int(d["width"]) != 1: continue
-		if civico == "" and "civico" in (d["classes"] as Array) and not "ingegneria" in (d["classes"] as Array): civico = str(id)
-		if ingegneria == "" and "ingegneria" in (d["classes"] as Array) and not "civico" in (d["classes"] as Array): ingegneria = str(id)
-	_ok("ci sono un Civico e un Ingegneria da 3 nell'era 5 (%s, %s)" % [civico, ingegneria], civico != "" and ingegneria != "")
-	if civico == "" or ingegneria == "": CardDB.load_db(CardDB.DB_PATH); return
-	var c := _put(gs, 0, civico, 1)
-	var ing := _put(gs, 1, ingegneria, 3)
+	var c := _put(gs, 0, "ed_casa_e4_p", 1)
+	var ing := _put(gs, 1, "ed_osservatorio", 3)
 	gs.current_event = CardDB.events["ev_crisi_dello_stato"]
+	_eq("la Crisi dello Stato ha forza 3", int(gs.current_event["force"]), 3)
 	EraRules.resolve_event(gs)
-	_eq("Crisi dello Stato: il Civico da 3 (-2) crolla", c.state, Enums.BuildingState.ROVINA)
-	_eq("  l'Ingegneria da 3 (+1) regge", ing.state, Enums.BuildingState.INTATTO)
+	_eq("  la casa civica da 2 crolla", c.state, Enums.BuildingState.ROVINA)
+	_eq("  l'Osservatorio da 2 non e' un bersaglio e regge", ing.state, Enums.BuildingState.INTATTO)
 	if FileAccess.file_exists("res://data/proposte/cards-v3-era1-giudizio_solo.json"):
 		CardDB.load_db("res://data/proposte/cards-v3-era1-giudizio_solo.json")
 		var c2 := _game(3, 990)
 		c2._start_era(5)
 		_eq("variante giudizio_solo: torna il Giudizio del tempo", str(c2.gs.current_event.get("id", "")), "ev_giudizio_del_tempo")
+	CardDB.load_db(CardDB.DB_PATH)
+
+func _test_v3_erosione() -> void:
+	if not FileAccess.file_exists("res://data/proposte/cards-v3-era1-erosione.json"): return
+	CardDB.load_db("res://data/proposte/cards-v3-era1-erosione.json")
+	_eq("le Capanne restano a 1", int(CardDB.buildings["ed_capanne"]["resistance"]), 1)
+	_eq("il Dolmen va a 10", int(CardDB.buildings["ed_dolmen"]["resistance"]), 10)
+	_eq("il Grattacielo va a 10", int(CardDB.buildings["ed_grattacielo"]["resistance"]), 10)
+	_eq("la protezione del lavoratore raddoppia", int(CardDB.constants["protection_bonus"]), 4)
+	_eq("l'Argine vale +2", int(CardDB.upgrades["po_argine"]["effects"][0]["value"]), 2)
+	var ctl := _game(3, 925)
+	var gs := ctl.gs
+	while not gs.pending_choice.is_empty():
+		ctl.choose(int((gs.pending_choice["options"] as Array)[0]))
+	gs.grid.buildings.clear()
+	for i in gs.grid.n_cols: gs.grid.terrains[i] = Enums.Terrain.PIANURA
+	var fermo := _put(gs, 0, "ed_dolmen", 1)
+	var usato := _put(gs, 0, "ed_dolmen", 2)
+	var protetto := _put(gs, 0, "ed_dolmen", 3)
+	var rovina := _put(gs, 1, "ed_dolmen", 4, 0, Enums.BuildingState.ROVINA)
+	gs.bruciati[usato.uid] = "%d:1" % gs.era
+	protetto.protection = 4
+	protetto.protected_by = 0
+	gs.current_event = {"id": "ev_prova", "name": "Prova", "force": 0, "effects": []}
+	EraRules.end_era(gs)
+	_eq("a fine era chi nessuno ha usato perde 2", fermo.effective_resistance(), 8)
+	_eq("  chi e' stato usato perde 1", usato.effective_resistance(), 9)
+	_eq("  chi aveva il lavoratore del padrone non perde niente", protetto.effective_resistance(), 10)
+	_eq("  la rovina non si logora", rovina.bonus_res, 0)
+	_eq("  il contatore dice quanto si e' perso", int(gs.players[0].counters.get("erosione", 0)), 3)
+	# Nel file base niente erosione.
+	CardDB.load_db("res://data/proposte/cards-v3-era1.json")
+	var c2 := _game(3, 925)
+	var g2 := c2.gs
+	while not g2.pending_choice.is_empty():
+		c2.choose(int((g2.pending_choice["options"] as Array)[0]))
+	g2.grid.buildings.clear()
+	var d2 := _put(g2, 0, "ed_dolmen", 1)
+	g2.current_event = {"id": "ev_prova", "name": "Prova", "force": 0, "effects": []}
+	EraRules.end_era(g2)
+	_eq("nel file base niente si logora", d2.bonus_res, 0)
+	CardDB.load_db(CardDB.DB_PATH)
+
+# L'evento con bersaglio (registro 201, variante `erosione_classi`): la Guerra
+# colpisce Civico, Commercio e Ingegneria e non vede i Religiosi, anche se
+# hanno resistenza sotto la forza. Senza `bersaglio` colpisce tutti.
+func _test_v3_evento_bersaglio() -> void:
+	if not FileAccess.file_exists("res://data/proposte/cards-v3-era1-erosione_classi.json"): return
+	CardDB.load_db("res://data/proposte/cards-v3-era1-erosione_classi.json")
+	var guerra: Dictionary = CardDB.events["ev_guerra"]
+	_ok("la Guerra ha un bersaglio di classe", guerra.has("bersaglio") and "civico" in (guerra["bersaglio"]["class"] as Array))
+	var ctl := _game(3, 925)
+	var gs := ctl.gs
+	while not gs.pending_choice.is_empty():
+		ctl.choose(int((gs.pending_choice["options"] as Array)[0]))
+	gs.grid.buildings.clear()
+	for i in gs.grid.n_cols: gs.grid.terrains[i] = Enums.Terrain.PIANURA
+	var sacello := _put(gs, 0, "ed_sacello", 1)     # Religione, 3
+	var casa := _put(gs, 1, "ed_casa_e3_s", 3)       # Civico, 3
+	_eq("il Sacello ha resistenza 3", sacello.effective_resistance(), 3)
+	gs.current_event = guerra
+	_ok("la Guerra colpisce la casa civica", Effects.evento_colpisce(gs, casa))
+	_ok("  e non vede il Sacello", not Effects.evento_colpisce(gs, sacello))
+	EraRules.resolve_event(gs)
+	_eq("forza 4: la casa (3) crolla", casa.state, Enums.BuildingState.ROVINA)
+	_eq("  il Sacello (3) resta intatto: non e' un bersaglio", sacello.state, Enums.BuildingState.INTATTO)
+	gs.current_event = {"id": "ev_prova", "name": "Prova", "force": 4, "effects": []}
+	EraRules.resolve_event(gs)
+	_eq("senza bersaglio la stessa forza lo butta giu'", sacello.state, Enums.BuildingState.ROVINA)
 	CardDB.load_db(CardDB.DB_PATH)
 

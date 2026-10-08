@@ -224,4 +224,12 @@ Rendita al 34). I sei eventi sono a forza 3 come l'era 4 (198, 64ª: 83,6 PV, un
 forbice 30-40; a forza 4 ne crollava meta', `--variante eventi5_forza4`). Via il soffio (199, "o dentro o fuori"): `rovina_gap` 1, resistenza sotto la forza = crolla, forze 2, 2, 3, 2, 2
 (-1 dove il soffio attutiva, l'era 1 resta a 2 per la resistenza 1); `--variante soffio` rifa' il conto di prima; misura
 65 le due alternative pulite, 66 la conferma: 83,3 PV, canali al decimo come la 64ª, vittorie 25-41 (Continuita' 41,
-Rendita 25) perche' il bot ora legge forze esatte; da ritarare le spinte, non la regola.
+Rendita 25) perche' il bot ora legge forze esatte; da ritarare le spinte, non la regola. IL TEMPO LOGORA (200-202, PR #87, varianti in `data/proposte/`, base intatta): scala 1-10 delle resistenze,
+erosione a fine era 2/1/0 (`EraRules.erosione`), eventi lievi 3-3-4-4-5 e gravi +2, eventi di classe con `bersaglio`
+(colpiscono solo le classi che nominano), `spolia_divisore` 4, `scavo_tessera_fattore` 0,5. Misure 67-69: con le forze
+ripide crollava tre quarti dell'era Moderna; coi bersagli di classe l'era Moderna torna intera e la preistoria resta ai
+megaliti (Dolmen 76%, Capanne 0%); con la tessera a meta' lo Scavo torna a 16 e la forbice a 24-38. Decisione del
+designer se farne la base; dopo: ristrutturazione che ridà resistenza, bot sulle tessere e sulla Continuita', schema
+dati (resistenza max 6 -> 10), carte. L'alternativa prudente (203, misura 70) e' la base (204): i dieci eventi di classe
+colpiscono solo le classi che nominano, con +1 di forza e senza malus; 82,8 PV, Scavo 16,8, crolli per era come la 66ª;
+`--variante senza_bersagli` per la base di prima.

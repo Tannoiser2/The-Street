@@ -351,31 +351,31 @@ era dalle 3 in su non producono: hanno l'effetto più forte.
 |--:|---|--:|---|
 | 1 | Carestia primitiva | 2 | Forza 2. Edifici a livello 0 non protetti che producono risorse: −2 res. |
 | 1 | Diluvio | 2 | Forza 2. Edifici su colonne fiume: −1 res. |
-| 1 | Età degli spiriti | 2 | Forza 2. Religione +1 res · Commercio −1 res. |
-| 1 | Faide tribali | 2 | Forza 2. Militare +1 res · Civico −2 res. |
+| 1 | Età degli spiriti | 3 | Forza 3. Colpisce solo Commercio, Civico. |
+| 1 | Faide tribali | 3 | Forza 3. Colpisce solo Civico, Commercio. |
 | 1 | Inverno lungo | 2 | Forza 2. Edifici su bosco e collina: −1 res. Tutti i giocatori perdono 1 pietra. |
 | 1 | Migrazione | 2 | Forza 2. Edifici non protetti: −1 res extra. |
 | 2 | Eruzione | 2 | Forza 2. Edifici su collina: −2 res. Chi perde un edificio pesca un potenziamento gratis (massimo uno per giocatore). |
 | 2 | Guerra civile | 2 | Forza 2. Nelle colonne con edifici di 2+ giocatori: tutti −1 res. |
 | 2 | Invasione | 2 | Forza 2. Edifici non protetti: −1 res extra. |
-| 2 | Pax imperiale | 2 | Forza 2. Ingegneria +1 res · Militare −1 res. |
-| 2 | Persecuzioni | 2 | Forza 2. Religione −2 res · Civico +1 res. |
+| 2 | Pax imperiale | 3 | Forza 3. Colpisce solo Militare. |
+| 2 | Persecuzioni | 3 | Forza 3. Colpisce solo Religione, Cultura. |
 | 2 | Terremoto | 2 | Forza 2. Edifici da 2 o 3 caselle: −1 res. |
 | 3 | Anni della fame | 3 | Forza 3. Nessuna produzione durante l’ultimo round dell’era. |
 | 3 | Grande incendio | 3 | Forza 3. Edifici a livello 0 o 1: −1 res; a livello 2+: −2 res. |
-| 3 | Guerra | 3 | Forza 3. Militare +1 res · Civico −1 res. |
+| 3 | Guerra | 4 | Forza 4. Colpisce solo Civico, Commercio, Ingegneria. |
 | 3 | Incursioni fluviali | 3 | Forza 3. Edifici su colonne fiume: −1 res. |
 | 3 | Peste | 3 | Forza 3. Colonne con 3+ edifici in piedi: tutti −1 res. |
-| 3 | Scisma | 3 | Forza 3. Religione −2 res · Cultura −1 res · Commercio +1 res. |
+| 3 | Scisma | 4 | Forza 4. Colpisce solo Religione, Cultura. |
 | 4 | Alluvione | 2 | Forza 2. Edifici su colonne fiume: −1 res. |
 | 4 | Bonifiche | 2 | Forza 2. Edifici su pianura: −2 res. Il primo terrapieno di ogni giocatore in quest’era costa 0. |
-| 4 | Controriforma | 2 | Forza 2. Religione +1 res · Cultura −1 res. |
+| 4 | Controriforma | 3 | Forza 3. Colpisce solo Cultura, Commercio. |
 | 4 | Rivoluzione industriale | 2 | Forza 2. Edifici con Scavo 2+: −1 res. |
-| 4 | Secolarizzazioni | 2 | Forza 2. Religione −2 res. |
+| 4 | Secolarizzazioni | 3 | Forza 3. Colpisce solo Religione. |
 | 4 | Speculazione edilizia | 2 | Forza 2. Ogni edificio con 2+ potenziamenti: −1 res. |
-| 5 | Crisi dello Stato | 2 | Forza 2. Civico −2 res · Militare −1 res · Ingegneria +1 res. |
+| 5 | Crisi dello Stato | 3 | Forza 3. Colpisce solo Civico, Militare. |
 | 5 | Crisi energetica | 2 | Forza 2. Edifici non protetti che producono risorse: −1 res. |
-| 5 | Globalizzazione | 2 | Forza 2. Commercio +1 res · Cultura −1 res. |
+| 5 | Globalizzazione | 3 | Forza 3. Colpisce solo Cultura, Civico. |
 | 5 | Guerra mondiale | 2 | Forza 2. Nelle colonne con edifici di 2+ giocatori: tutti −1 res. Militare −1 res. |
 | 5 | Innalzamento dei mari | 2 | Forza 2. Edifici su fiume: −2 res · su pianura: −1 res. |
 | 5 | Subsidenza | 2 | Forza 2. Edifici su pianura e fiume: −1 res. |

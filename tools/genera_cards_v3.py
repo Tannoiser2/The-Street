@@ -90,6 +90,120 @@ EVENTI_ERA_5 = [
 ]
 v3["events"].extend(EVENTI_ERA_5)
 _forze(v3, FORZE_V3)
+#   --variante erosione  IL TEMPO LOGORA (registro 200). Il designer: "1 sono le capanne, 10 i dolmen; al passaggio
+#                        di era tutti gli edifici soffrono un'erosione, 2 se mai abitato, 1 se abitato, 0 col lavoratore;
+#                        eventi deboli e forti che salgono di intensita'". Scala 1-10 delle resistenze, tutti i
+#                        modificatori raddoppiati, erosione 2/1/0, eventi lievi 3-7 per era e gravi +2.
+RESISTENZE_1_10 = {   # le eccezioni alla mappa 1->1, 2->3, 3->5, 4->7, 5->9: i megaliti e il cemento armato
+    "ed_dolmen": 10, "ed_menhir": 10, "ed_circolo_di_pietre": 10, "ed_tumulo_funerario": 9,
+    "ed_acquedotto": 8, "ed_anfiteatro": 9, "ed_castello": 8, "ed_mura": 8, "ed_fortezza_bastionata": 9,
+    "ed_duomo": 8, "ed_ponte_monumentale": 8,
+    "ed_grattacielo": 10, "ed_stazione": 9, "ed_ponte_in_acciaio": 9, "ed_condominio": 7, "ed_casa_e5_g": 8,
+    "ed_biblioteca": 6, "ed_museo": 6, "ed_universita": 6, "ed_officina": 6, "ed_fondazione_darte": 6,
+    "ed_parco_archeologico": 6, "ed_monumento_ai_caduti": 7, "ed_casa_e5_p": 6, "ed_caffe_letterario": 4,
+}
+EROSIONE_FORZE = {"lieve": {"1": 3, "2": 4, "3": 5, "4": 6, "5": 7}, "grave_in_piu": 2}
+def erosione(v):
+    c2 = v["constants"]
+    c2["erosione"] = {"non_usato": 2, "usato": 1, "protetto": 0}
+    c2["protection_bonus"] = int(c2["protection_bonus"]) * 2
+    c2["spolia_divisore"] = 4
+    for b in v["buildings"]:
+        b["resistance"] = RESISTENZE_1_10.get(b["id"], int(b["resistance"]) * 2 - 1)
+        if "resistance_text" in b: b.pop("resistance_text")
+    # tutti i +1/-1 della scala vecchia raddoppiano: potenziamenti, eventi, Personaggi, tessere dell'era
+    for grp in ("upgrades", "events", "characters", "buildings"):
+        for card in v[grp]:
+            for e in card.get("effects", []):
+                if e.get("op") in ("resistance", "protection_delta"):
+                    e["value"] = int(e["value"]) * 2
+    for ch in v["characters"]:
+        az = ch.get("azione")
+        if isinstance(az, dict) and az.get("tipo") == "resistenza":
+            az["n"] = int(az["n"]) * 2
+            ch["effect_text"] = ch["effect_text"].replace("+%d resistenza" % (az["n"] // 2), "+%d resistenza" % az["n"])
+    for t in v["tessere_era"]:
+        ef = t.get("effetto", {})
+        if "resistenza_era" in ef:
+            ef["resistenza_era"] = int(ef["resistenza_era"]) * 2
+            t["testo"] = t["testo"].replace("+%d resistenza" % (ef["resistenza_era"] // 2), "+%d resistenza" % ef["resistenza_era"])
+    for u in v["upgrades"]:
+        for e in u.get("effects", []):
+            if e.get("op") == "resistance":
+                u["effect_text"] = u["effect_text"].replace("+%d Resistenza" % (e["value"] // 2), "+%d Resistenza" % e["value"])
+    # gli eventi: lievi per era, gravi due punti sopra; i testi dicono la forza nuova e i modificatori raddoppiati
+    import re
+    for e in v["events"]:
+        if "force" not in e or int(e["force"]) <= 0: continue
+        nuova = EROSIONE_FORZE["lieve"][str(e["era"])] + (EROSIONE_FORZE["grave_in_piu"] if e.get("severity") == "grave" else 0)
+        e["effect_text"] = re.sub(r"Forza \d+\.", "Forza %d." % nuova, e["effect_text"])
+        e["effect_text"] = re.sub(r"([+\u2212-])(\d) res", lambda m: "%s%d res" % (m.group(1), int(m.group(2)) * 2), e["effect_text"])
+        e["force"] = nuova
+    # la forza che il bot si aspetta per le ere a venire: fra il lieve e il grave
+    c2["event_force_by_era"] = {k: f + 1 for k, f in EROSIONE_FORZE["lieve"].items()}
+#   --variante erosione_lieve  come erosione, ma il logorio e' 1 se non usato e 0 se usato o protetto
+def erosione_lieve(v):
+    erosione(v)
+    v["constants"]["erosione"] = {"non_usato": 1, "usato": 0, "protetto": 0}
+#   --variante erosione_calma  come erosione (logorio 2/1/0), ma gli eventi salgono piano: lievi 3, 3, 4, 4, 5 e gravi
+#                              due punti sopra (misura 67: con 3-7 e 5-9 l'era Moderna crollava per tre quarti)
+def erosione_calma(v):
+    erosione(v)
+    _forze_erosione(v, {"1": 3, "2": 3, "3": 4, "4": 4, "5": 5}, 2)
+#   --variante erosione_mod1  come erosione_calma, ma i modificatori degli eventi restano quelli di prima (-1, -2, +1):
+#                             sulla scala 1-10 un -4 di classe faceva cadere il Museo (6) anche all'evento lieve (vita 67ª)
+def erosione_mod1(v):
+    erosione_calma(v)
+    import re
+    for e in v["events"]:
+        for ef in e.get("effects", []):
+            if ef.get("op") == "resistance": ef["value"] = int(ef["value"]) // 2
+        e["effect_text"] = re.sub(r"([+\u2212-])(\d) res", lambda m: "%s%d res" % (m.group(1), int(m.group(2)) // 2), e["effect_text"])
+#   --variante erosione_classi  come erosione_mod1, e gli eventi di classe colpiscono SOLO le classi che nominano
+#                               (registro 201, il designer: "la guerra colpisce i civili ma non i religiosi, i terremoti tutti")
+BERSAGLI_CLASSE = {
+    "ev_eta_degli_spiriti": ["commercio", "civico"], "ev_faide_tribali": ["civico", "commercio"],
+    "ev_pax_imperiale": ["militare"], "ev_persecuzioni": ["religione", "cultura"],
+    "ev_guerra": ["civico", "commercio", "ingegneria"], "ev_scisma": ["religione", "cultura"],
+    "ev_controriforma": ["cultura", "commercio"], "ev_secolarizzazioni": ["religione"],
+    "ev_globalizzazione": ["cultura", "civico"], "ev_crisi_dello_stato": ["civico", "militare"],
+}
+def erosione_classi(v):
+    erosione_mod1(v)
+    nomi = {"commercio": "Commercio", "civico": "Civico", "militare": "Militare", "religione": "Religione", "cultura": "Cultura", "ingegneria": "Ingegneria"}
+    for e in v["events"]:
+        if e["id"] not in BERSAGLI_CLASSE: continue
+        e["bersaglio"] = {"class": BERSAGLI_CLASSE[e["id"]]}
+        e["effects"] = [ef for ef in e.get("effects", []) if not (ef.get("hook") == "on_event" and ef.get("op") == "resistance")]
+        e["effect_text"] = "Forza %d. Colpisce solo %s." % (int(e["force"]), " e ".join(nomi[c] for c in BERSAGLI_CLASSE[e["id"]]))
+#   --variante erosione_scavo  come erosione_classi, e la tessera scavo vale meta' dello Scavo del Personaggio, per
+#                              eccesso (registro 202: con le rovine raddoppiate lo Scavo saliva da 17 a 23 e la Scavo vinceva il 45%)
+def erosione_scavo(v):
+    erosione_classi(v)
+    v["constants"]["scavo_tessera_fattore"] = 0.5
+#   --variante bersaglio_classi  L'ALTERNATIVA PRUDENTE (registro 203): scala, forze ed erosione come la base; solo i
+#                                dieci eventi di classe colpiscono SOLO le classi che nominano, alla forza dell'era, senza malus
+def _bersagli(v, piu):
+    nomi = {"commercio": "Commercio", "civico": "Civico", "militare": "Militare", "religione": "Religione", "cultura": "Cultura", "ingegneria": "Ingegneria"}
+    for e in v["events"]:
+        if e["id"] not in BERSAGLI_CLASSE: continue
+        e["force"] = int(e["force"]) + piu
+        e["bersaglio"] = {"class": BERSAGLI_CLASSE[e["id"]]}
+        e["effects"] = [ef for ef in e.get("effects", []) if not (ef.get("hook") == "on_event" and ef.get("op") == "resistance")]
+        e["effect_text"] = "Forza %d. Colpisce solo %s." % (int(e["force"]), ", ".join(nomi[c] for c in BERSAGLI_CLASSE[e["id"]]))
+def bersaglio_classi(v):
+    _bersagli(v, 0)
+#   (bersaglio_classi_forte, misura 70, e' diventata la base: registro 204; `--variante senza_bersagli` per la base di prima)
+def bersaglio_classi_forte(v):
+    _bersagli(v, 1)
+def _forze_erosione(v, lievi, grave_in_piu):
+    import re
+    for e in v["events"]:
+        if "force" not in e or int(e["force"]) <= 0: continue
+        nuova = lievi[str(e["era"])] + (grave_in_piu if e.get("severity") == "grave" else 0)
+        e["effect_text"] = re.sub(r"Forza \d+\.", "Forza %d." % nuova, e["effect_text"])
+        e["force"] = nuova
+    v["constants"]["event_force_by_era"] = {k: f + 1 for k, f in lievi.items()}
 #   --variante soffio  il conto di prima del registro 199: "regge per un soffio" (rovina_gap 2) tranne la
 #                      resistenza stampata 1 (soffio_resistenza_min 2), forze 2, 3, 4, 3, 3
 def soffio(v):
@@ -977,10 +1091,19 @@ def finali_senza_tetto(v):
 def grattacielo_caro(v):
     for b in v["buildings"]:
         if b["id"] == "ed_grattacielo": b["cost"] = prod(pietra=3, idee=1)
-VARIANTI = {"soffio": soffio, "senza_soffio": senza_soffio, "senza_soffio_forze": senza_soffio_forze, "eventi5_forza4": eventi5_forza4, "giudizio_solo": giudizio_solo, "soffio_per_tutti": soffio_per_tutti, "tutto_in_vendita": tutto_in_vendita, "evento_coperto": evento_coperto, "scheletri_personaggi": scheletri_personaggi, "mazzetti_colorati": mazzetti_colorati, "finali_senza_tetto": finali_senza_tetto, "spianato_intero": spianato_intero, "grattacielo_caro": grattacielo_caro, "grandi_vecchie": grandi_vecchie, "proprietario": proprietario, "compenso_pv": compenso_pv, "senza_sconti": senza_sconti,
+VARIANTI = {"erosione": erosione, "erosione_lieve": erosione_lieve, "erosione_calma": erosione_calma, "erosione_mod1": erosione_mod1, "erosione_classi": erosione_classi, "erosione_scavo": erosione_scavo, "bersaglio_classi": bersaglio_classi, "bersaglio_classi_forte": bersaglio_classi_forte, "soffio": soffio, "senza_soffio": senza_soffio, "senza_soffio_forze": senza_soffio_forze, "eventi5_forza4": eventi5_forza4, "giudizio_solo": giudizio_solo, "soffio_per_tutti": soffio_per_tutti, "tutto_in_vendita": tutto_in_vendita, "evento_coperto": evento_coperto, "scheletri_personaggi": scheletri_personaggi, "mazzetti_colorati": mazzetti_colorati, "finali_senza_tetto": finali_senza_tetto, "spianato_intero": spianato_intero, "grattacielo_caro": grattacielo_caro, "grandi_vecchie": grandi_vecchie, "proprietario": proprietario, "compenso_pv": compenso_pv, "senza_sconti": senza_sconti,
             "lampo_vecchio": lampo_vecchio, "extra_sempre": extra_sempre, "senza_extra": senza_extra, "costi_vecchi": costi_vecchi,
             "case_seconda": case_seconda, "case_lampo1": case_lampo1, "senza_tuning": senza_tuning,
             "terreno_produce": terreno_produce, "senza_potenziamento_insieme": senza_potenziamento_insieme}
+# GLI EVENTI DI CLASSE CON BERSAGLIO NEL FILE BASE (registro 204, il designer: "porta bersaglio_classi_forte nella
+# base"). I dieci eventi di classe colpiscono solo le classi che nominano, con +1 di forza, senza malus. Le varianti
+# di prima (misure fino alla 70ª) restano costruite sulla base di prima, cosi' i loro file non cambiano: si
+# applica solo alla base e alle varianti nate dopo. `--variante senza_bersagli` e' la base di prima.
+VARIANTI.pop("bersaglio_classi_forte")
+VARIANTI["senza_bersagli"] = lambda v: None
+PRIMA_DEL_204 = set(VARIANTI)
+if variante not in PRIMA_DEL_204:
+    _bersagli(v3, 1)
 if variante:
     VARIANTI[variante](v3)
     v3["meta"]["ruleset"] = "v3-era1-prova-" + variante

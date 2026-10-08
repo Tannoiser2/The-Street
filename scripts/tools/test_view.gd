@@ -3399,10 +3399,18 @@ func _test_v3_sacchetto() -> void:
 	var trovato := str(r.tessere[0]["chi"])
 	var di_chi := TessereScavo.proprietario_personaggio(gs, trovato)
 	gs.phase = Enums.Phase.FINE_PARTITA
+	# La rovina e' larga due caselle: le tessere sono due, e possono essere
+	# tutte e due dello stesso giocatore. Si rigirano tutte quelle sue.
+	var attesi: Array = []
+	for t in r.tessere:
+		if t.has("chi") and TessereScavo.proprietario_personaggio(gs, str(t["chi"])) == di_chi and not str(t["chi"]) in attesi:
+			attesi.append(str(t["chi"]))
 	var rigirati: Array = []
 	for c in BoardLayout3D.carte_giocatore(gs, di_chi, 0):
 		if str(c["kind"]) == "personaggio" and not bool(c.get("coperta", false)): rigirati.append(str(c["id"]))
-	_eq("  a fine partita si rigira solo quello riportato alla luce", rigirati, [trovato])
+	rigirati.sort()
+	attesi.sort()
+	_eq("  a fine partita si rigirano solo quelli riportati alla luce", rigirati, attesi)
 	gs.phase = fase_prima
 	var scoperta := "\n".join(n._descrivi_sotto_edificio(r))
 	var nome := str(CardDB.characters[trovato]["name"])

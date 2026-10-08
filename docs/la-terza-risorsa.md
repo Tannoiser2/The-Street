@@ -3108,6 +3108,136 @@ edifici che vivevano: pianifica meglio le colonne lunghe e protegge con
 piu' giudizio. La ritaratura delle spinte (`rendita_per_era`,
 `continuita_peso`) e' la prossima misura, non questa regola.
 
+## Sessantasettesima misura: il tempo logora, primo giro
+
+Registro 200, varianti `erosione` (logorio 2/1/0) ed `erosione_lieve`
+(1/0/0): scala 1-10, modificatori raddoppiati, eventi lievi 3-7 per era e
+gravi due punti sopra. Stessi 300 semi, base la 66ª.
+
+| a giocatore | base (66ª) | erosione 2/1/0 | erosione 1/0/0 |
+|---|---|---|---|
+| PV a testa | 83,3 | **91,1** | 91,0 |
+| Scavo / finali / Rendita / cultura | 17,0 / 6,3 / 12,4 / 9,3 | **34,0** / 1,7 / 9,9 / 7,5 | 33,5 / 1,8 / 10,4 / 7,4 |
+| in rovina per era a fine partita (1-5) | 9,8 / 5,6 / 5,9 / 3,2 / 1,0 | 10,2 / 8,6 / 8,1 / 7,4 / **6,4** | 9,9 / 8,2 / 8,1 / 7,5 / 6,3 |
+| spianamenti / sopra / riscoperte | 3,3 / 7,9 / 2,8 | 1,0 / 8,9 / 6,3 | 1,1 / 8,9 / 6,2 |
+| era 1 in piedi alla fine, di cui megaliti | 3,13 / - | 2,74 / 2,67 | 2,97 / 2,83 |
+| resistenza logorata in tutto, a giocatore | - | 7,1 | 2,8 |
+| vittorie Bil / Cont / Lampo / Obi / Rend / Ritro / Scavo | 33 / 41 / 31 / 39 / 25 / 36 / 29 | 33 / 28 / 21 / 37 / 36 / 34 / 45 | 28 / 28 / 25 / 38 / 33 / 32 / 48 |
+
+La parte che il designer chiedeva c'e': della preistoria arrivano alla fine
+quasi solo i megaliti (2,67 su 2,74), le capanne spariscono, e il logorio
+si vede (7 punti di resistenza persi a giocatore). Ma il resto e' un fiume
+di rovine: l'era Moderna crolla per tre quarti (6,4 su 8,2), i finali
+scendono a 1,7, nessuno spiana piu' (1,0: le rovine le fa l'evento), le
+riscoperte raddoppiano e lo Scavo vale 34 punti su 91, la Scavo vince il
+45-48 e la Lampo il 21. La differenza fra 2/1/0 e 1/0/0 e' piccola: non e'
+il logorio che falcia, sono le forze. Con la scala 1-10 le carte dell'era 5
+stanno a 6-7 (il Grattacielo a 10) e l'evento lieve dell'era 5 a 7, il grave
+a 9: muore tutto, cemento armato compreso. La curva 3-7 era troppo ripida
+per una scala in cui la pietra sta a 5-7. Secondo giro: `erosione_calma`,
+logorio 2/1/0 e forze lievi 3, 3, 4, 4, 5 con gravi due punti sopra (68ª).
+
+## Sessantottesima misura: il tempo logora, secondo e terzo giro
+
+Tre varianti sopra la 67ª, stessi 300 semi, base la 66ª: `erosione_calma`
+(forze lievi 3, 3, 4, 4, 5 e gravi due punti sopra, modificatori
+raddoppiati), `erosione_mod1` (stesse forze, modificatori di prima: -1, -2,
++1) ed `erosione_classi` (come mod1, e i dieci eventi di classe colpiscono
+solo le classi che nominano, registro 201).
+
+| a giocatore | base (66ª) | calma | mod1 | classi |
+|---|---|---|---|---|
+| PV a testa | 83,3 | 89,1 | 89,9 | **85,5** |
+| Scavo / finali / Rendita | 17,0 / 6,3 / 12,4 | 29,4 / 3,0 / 11,0 | 27,7 / 4,1 / 11,5 | 23,4 / 4,5 / 11,4 |
+| in rovina per era a fine partita (1-5) | 9,8 / 5,6 / 5,9 / 3,2 / 1,0 | 10,1 / 7,5 / 7,9 / 7,0 / 4,1 | 10,1 / 7,2 / 7,5 / 6,9 / 3,3 | 10,2 / 7,2 / 7,2 / 6,5 / **2,4** |
+| spianamenti / riscoperte | 3,3 / 2,8 | 1,6 / 5,4 | 1,8 / 5,1 | 2,2 / 4,2 |
+| era 1 in piedi alla fine, di cui megaliti | 3,13 / - | 2,75 / 2,57 | 2,80 / - | 2,65 / - |
+| vittorie Bil / Cont / Lampo / Obi / Rend / Ritro / Scavo | 33 / 41 / 31 / 39 / 25 / 36 / 29 | 27 / 29 / 25 / 33 / 36 / 33 / 51 | 30 / 28 / 28 / 32 / 36 / 38 / 41 | 27 / 24 / 32 / 36 / 36 / 34 / 45 |
+
+La vita delle carte (120 partite, seme 100000), in piedi a fine partita:
+
+| carta | res base -> 1-10 | base | calma | mod1 | classi |
+|---|---|---|---|---|---|
+| Capanne | 1 -> 1 | 5% | 0% | 0% | 0% |
+| Palafitte | 2 -> 3 | 7% | 1% | 3% | 4% |
+| Dolmen | 3 -> 10 | 64% | 77% | 79% | 76% |
+| Menhir | 4 -> 10 | 70% | 73% | 77% | 76% |
+| Acquedotto | 4 -> 8 | 57% | 64% | 75% | 62% |
+| Anfiteatro | 5 -> 9 | 100% | 100% | 100% | 100% |
+| Castrum | 4 -> 7 | 45% | 64% | 61% | 56% |
+| Chiesa | 3 -> 5 | 45% | 14% | 25% | 30% |
+| Villa | 3 -> 5 | 92% | 18% | 24% | 33% |
+| Duomo | 4 -> 8 | 71% | 54% | 82% | 69% |
+| Grattacielo | 3 -> 10 | 96% | 97% | 100% | 100% |
+| Museo | 3 -> 6 | 94% | 29% | 39% | 77% |
+| Condominio | 3 -> 7 | 87% | 66% | 50% | 80% |
+
+Le forze calme da sole non bastano (89 PV, Scavo 29, la Scavo vince una su
+due). I modificatori singoli spostano poco. I bersagli di classe sono il
+passo che conta: l'era Moderna torna quasi intera (2,4 in rovina su 7,6, il
+Museo al 77%, il Condominio all'80%), i punti a 85,5, e la preistoria resta
+quella voluta (megaliti al 76%, capanne zero). Il prezzo che resta e' lo
+Scavo: con le rovine quasi raddoppiate (7,2 per era invece di 5,6-5,9) le
+tessere valgono 23 punti invece di 17 e la Scavo vince il 45%. Il valore
+della tessera era tarato su meta' delle rovine. Quarto giro:
+`erosione_scavo`, come classi e la tessera vale meta' dello Scavo del
+Personaggio (`scavo_tessera_fattore` 0,5, registro 202).
+
+## Sessantanovesima misura: il tempo logora, quarto giro (tessera a meta')
+
+Variante `erosione_scavo` (registro 202): come `erosione_classi`, e la
+tessera scavo vale meta' dello Scavo del Personaggio, per eccesso. Stessi
+300 semi, base la 66ª. Le partite sono le stesse della variante classi
+(il fattore tocca solo il punteggio), cambia il conto.
+
+| a giocatore | base (66ª) | classi | classi + tessera a meta' |
+|---|---|---|---|
+| PV a testa | 83,3 | 85,5 | 78,3 |
+| Scavo (tessere / bonus in partita) | 17,0 (11,7 / 5,3) | 23,4 | 16,2 (9,4 / 6,8) |
+| finali / Rendita / Cont / Lampo | 6,3 / 12,4 / 14,7 / 19,1 | 4,5 / 11,4 / 14,2 / 19,2 | 4,5 / 11,4 / 14,2 / 19,2 |
+| vittorie Bil / Cont / Lampo / Obi / Rend / Ritro / Scavo | 33 / 41 / 31 / 39 / 25 / 36 / 29 | 27 / 24 / 32 / 36 / 36 / 34 / 45 | 32 / 24 / 31 / 38 / 35 / 35 / 38 |
+
+Lo Scavo torna al suo peso (16,2 contro 17,0) e la Scavo scende dal 45 al
+38, ancora prima ma dentro una forbice 24-38. Il bot non sa del fattore:
+al draft valuta le tessere con lo Scavo intero (`scavo_scheletro`,
+`ritro_scheletro`, `scheletro_atteso`), quindi la Scavo e la Ritrovamenti
+pagano i Personaggi piu' del dovuto; e' una ritaratura da fare se il
+pacchetto passa. La Continuita' al 24 e' l'altro conto aperto: con
+l'erosione le colonne lunghe perdono pezzi e la sua base vale meno.
+
+Il pacchetto che la misura sostiene, se il designer lo vuole come base:
+scala 1-10 (`RESISTENZE_1_10`), erosione 2/1/0, forze lievi 3, 3, 4, 4, 5 e
+gravi due punti sopra, modificatori di terreno e condizione singoli, i
+dieci eventi di classe con bersaglio, tessera a meta'. Da fare dopo: la
+ristrutturazione che ridà resistenza, la ritaratura del bot sulle tessere e
+sulla Continuita', lo schema dati (resistenza massima 6 -> 10), le 74
+resistenze sulle carte e le 30 forze sugli eventi.
+
+## Settantesima misura: l'alternativa prudente, solo i bersagli di classe
+
+Registro 203. Scala, forze ed erosione come la base (66ª); i dieci eventi
+di classe colpiscono solo le classi che nominano, senza malus, alla forza
+dell'era (`bersaglio_classi`) o con +1 (`bersaglio_classi_forte`). Stessi
+300 semi.
+
+| a giocatore | base (66ª) | bersagli | bersagli +1 |
+|---|---|---|---|
+| PV a testa | 83,3 | 82,8 | 82,8 |
+| Scavo / finali / Rendita / Cont | 17,0 / 6,3 / 12,4 / 14,7 | 15,5 / 6,6 / 12,8 / 14,6 | 16,8 / 6,3 / 12,1 / 14,6 |
+| crolli per era a partita (1-5) | 6,3 / 2,7 / 9,0 / 2,5 / 5,0 | 5,5 / 2,7 / 8,0 / 3,2 / 4,0 | 6,8 / 2,2 / 8,5 / 2,7 / 4,6 |
+| spianamenti / riscoperte | 3,3 / 2,8 | 3,9 / 2,6 | 3,4 / 2,8 |
+| in piedi alla fine: Civico / Commercio / Cultura / Ingegneria / Militare / Religione | 38 / 35 / 64 / 68 / 63 / 53% | 45 / 33 / 67 / 66 / 61 / 54% | 41 / 30 / 63 / 66 / 63 / 54% |
+| vittorie Bil / Cont / Lampo / Obi / Rend / Ritro / Scavo | 33 / 41 / 31 / 39 / 25 / 36 / 29 | 31 / 40 / 28 / 41 / 27 / 38 / 27 | 30 / 34 / 35 / 44 / 26 / 38 / 27 |
+
+I bersagli da soli tolgono crolli (un evento su due ora non colpisce
+tutti) e lo Scavo scende a 15,5; con +1 i crolli tornano quelli della base
+e lo Scavo a 16,8: e' la versione che non sposta l'equilibrio. In tutte e
+due il gioco resta dov'era: punti, canali e forbice (26-44) a pochi decimi
+dalla base. L'effetto per classe a fine partita e' piccolo (pochi punti),
+perche' esce un evento per era e meta' sono di classe: si sente nella
+singola partita, non nella media. Scelta di chi misura: `bersaglio_classi_forte`
+se il designer vuole la regola senza toccare scala ed erosione.
+
 ## Come rifare il conto
 
 ```bash

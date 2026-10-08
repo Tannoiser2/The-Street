@@ -227,7 +227,10 @@ static func quote_above(gs: GameState, player: int, data: Dictionary, col_from: 
 					if not top in q.razed: q.razed.append(top)
 				elif not top in q.razed:
 					q.razed.append(top)
-					spolia += int(ceil(float(top.data["resistance"] + top.bonus_res) / 2.0))
+					# Le spoglie valgono meta' della resistenza; con la scala
+					# 1-10 del registro 200 un quarto (`spolia_divisore`), se no
+					# spianare un Dolmen da 10 regalava 5 Costruzione.
+					spolia += int(ceil(float(top.data["resistance"] + top.bonus_res) / float(CardDB.constants.get("spolia_divisore", 2))))
 			Enums.BuildingState.RUDERE:
 				# Il rudere depredato e' gia' rovina quando si costruisce:
 				# non offre continuita' di classe.
@@ -343,7 +346,7 @@ static func _quote_sopra_binario(gs: GameState, player: int, data: Dictionary, c
 						if not top in q.razed: q.razed.append(top)
 					elif not top in q.razed:
 						q.razed.append(top)
-						spolia += int(ceil(float(top.data["resistance"] + top.bonus_res) / 2.0))
+						spolia += int(ceil(float(top.data["resistance"] + top.bonus_res) / float(CardDB.constants.get("spolia_divisore", 2))))
 				Enums.BuildingState.RUDERE:
 					if top != despoil and top.shares_class_with(data): q.continuity_bonus = 1
 				Enums.BuildingState.ROVINA:

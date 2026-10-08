@@ -575,6 +575,13 @@ static func production_bonus(gs: GameState, player: int, pietra: int, oro: int) 
 # ---- op: resistance ------------------------------------------------
 # Somma dei modificatori dell'evento corrente applicabili all'edificio.
 # Sostituisce l'analisi testuale di effect_text.
+# L'evento in corso colpisce questo edificio? Si' se non ha `bersaglio`
+# (registro 201), altrimenti solo se il selettore lo descrive.
+static func evento_colpisce(gs: GameState, b: Building) -> bool:
+	var t = gs.current_event.get("bersaglio", null)
+	if t == null: return true
+	return matches(gs, b, t)
+
 static func event_resistance_modifier(gs: GameState, b: Building) -> int:
 	var mod := 0
 	for e in of_event(gs):

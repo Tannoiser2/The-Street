@@ -157,6 +157,12 @@ static func resolve_event(gs: GameState) -> Array[int]:
 	var persi: Array[int] = []       # chi ha perso un edificio: ev_eruzione
 	for b in gs.grid.buildings:
 		if not b.is_standing(): continue
+		# L'EVENTO CON BERSAGLIO (registro 201): colpisce solo gli edifici che
+		# il suo selettore descrive, gli altri non lo vedono nemmeno. Il
+		# designer: "la guerra colpisce gli edifici civili ma non quelli
+		# religiosi, i terremoti colpiscono tutti". Senza `bersaglio` vale per
+		# tutti come sempre.
+		if not Effects.evento_colpisce(gs, b): continue
 		var eff: int = b.effective_resistance() + Effects.event_resistance_modifier(gs, b)
 		if eff >= force:
 			# La Vetusta' cresce fino a `vetusta_max`; nella v2 e' 0, cioe'
@@ -273,6 +279,28 @@ static func _on_terrain(gs: GameState, b: Building, t: int) -> bool:
 	for c in range(b.col_from, b.col_to):
 		if gs.grid.terrains[c] == t: return true
 	return false
+
+# ---- erosione (registro 200) ----------------------------------------
+# Quanto perde un edificio a fine era: `erosione.protetto` se il padrone ci
+# aveva il lavoratore sopra, `erosione.usato` se qualcuno lo ha attivato
+# nell'era, `erosione.non_usato` altrimenti. Solo gli edifici in piedi e non
+# sotterrati: una rovina non ha piu' niente da perdere.
+static func erosione(gs: GameState) -> void:
+	if not CardDB.constants.has("erosione") or gs.era >= 5: return
+	var e: Dictionary = CardDB.constants["erosione"]
+	for b in gs.grid.buildings:
+		if not b.is_standing() or b.state != Enums.BuildingState.INTATTO: continue
+		var quanto := int(e.get("non_usato", 2))
+		if b.protected_by >= 0: quanto = int(e.get("protetto", 0))
+		elif usato_nell_era(gs, b): quanto = int(e.get("usato", 1))
+		if quanto <= 0: continue
+		b.bonus_res -= quanto
+		gs.players[b.owner].bump("erosione", quanto)
+		gs.log_line("%s si logora: -%d resistenza (ora %d)" % [b.data["name"], quanto, b.effective_resistance()])
+
+# Qualcuno ha attivato questo edificio in quest'era (la "scelta", registro 170).
+static func usato_nell_era(gs: GameState, b: Building) -> bool:
+	return str(gs.bruciati.get(b.uid, "")).begins_with("%d:" % gs.era)
 
 # ---- censimento ----------------------------------------------------
 # "Ogni vostro edificio in piedi paga la sua Rendita piu' la Vetusta'". Un
@@ -417,6 +445,17 @@ static func end_era_after_event(gs: GameState) -> void:
 	if gs.era < 5:
 		if PersonaggiV3.risorse_muoiono(): PersonaggiV3.azzera(gs)
 		else: disperse(gs)
+	# IL TEMPO LOGORA (registro 200, costante `erosione`, assente dove non c'e').
+	# Il designer: "al passaggio di era tutti gli edifici soffrono una
+	# erosione e si puo' togliere 1 o 2 di resistenza; un edificio mai
+	# abitato avra' un'erosione di 2, uno abitato di 1 oppure di 0". Si fa qui,
+	# dopo l'evento (che colpisce con la resistenza di quest'era) e prima che
+	# la protezione del lavoratore si azzeri, perche' e' quella a dire chi era
+	# "abitato dal padrone" (`protected_by`); "usato" e' chi e' stato attivato
+	# in quest'era da chiunque (`bruciati`, registro 170). Permanente, in
+	# `bonus_res`: la carta non si riscrive, si logora. Dopo l'era 5 niente:
+	# non c'e' un'era dopo che la veda.
+	erosione(gs)
 	for b in gs.grid.buildings:
 		b.protection = 0
 		b.protected_by = -1

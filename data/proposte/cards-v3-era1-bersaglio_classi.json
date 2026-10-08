@@ -1,7 +1,7 @@
 {
   "meta": {
     "game": "La Strada delle Ere",
-    "ruleset": "v3-era1-prova",
+    "ruleset": "v3-era1-prova-bersaglio_classi",
     "language": "it",
     "source": "distinta-carte (fonte unica)",
     "origine": "generato da tools/genera_cards_v3.py da data/cards-v2.json: non modificare a mano"
@@ -6263,10 +6263,10 @@
       "id": "ev_eta_degli_spiriti",
       "name": "Età degli spiriti",
       "era": 1,
-      "force": 3,
+      "force": 2,
       "severity": "lieve",
       "kind": "classe",
-      "effect_text": "Forza 3. Colpisce solo Commercio, Civico.",
+      "effect_text": "Forza 2. Colpisce solo Commercio, Civico.",
       "effects": [],
       "bersaglio": {
         "class": [
@@ -6328,10 +6328,10 @@
       "id": "ev_faide_tribali",
       "name": "Faide tribali",
       "era": 1,
-      "force": 3,
+      "force": 2,
       "severity": "grave",
       "kind": "classe",
-      "effect_text": "Forza 3. Colpisce solo Civico, Commercio.",
+      "effect_text": "Forza 2. Colpisce solo Civico, Commercio.",
       "effects": [],
       "bersaglio": {
         "class": [
@@ -6388,10 +6388,10 @@
       "id": "ev_pax_imperiale",
       "name": "Pax imperiale",
       "era": 2,
-      "force": 3,
+      "force": 2,
       "severity": "lieve",
       "kind": "classe",
-      "effect_text": "Forza 3. Colpisce solo Militare.",
+      "effect_text": "Forza 2. Colpisce solo Militare.",
       "effects": [],
       "bersaglio": {
         "class": [
@@ -6449,10 +6449,10 @@
       "id": "ev_persecuzioni",
       "name": "Persecuzioni",
       "era": 2,
-      "force": 3,
+      "force": 2,
       "severity": "grave",
       "kind": "classe",
-      "effect_text": "Forza 3. Colpisce solo Religione, Cultura.",
+      "effect_text": "Forza 2. Colpisce solo Religione, Cultura.",
       "effects": [],
       "bersaglio": {
         "class": [
@@ -6507,10 +6507,10 @@
       "id": "ev_guerra",
       "name": "Guerra",
       "era": 3,
-      "force": 4,
+      "force": 3,
       "severity": "lieve",
       "kind": "classe",
-      "effect_text": "Forza 4. Colpisce solo Civico, Commercio, Ingegneria.",
+      "effect_text": "Forza 3. Colpisce solo Civico, Commercio, Ingegneria.",
       "effects": [],
       "bersaglio": {
         "class": [
@@ -6576,10 +6576,10 @@
       "id": "ev_scisma",
       "name": "Scisma",
       "era": 3,
-      "force": 4,
+      "force": 3,
       "severity": "grave",
       "kind": "classe",
-      "effect_text": "Forza 4. Colpisce solo Religione, Cultura.",
+      "effect_text": "Forza 3. Colpisce solo Religione, Cultura.",
       "effects": [],
       "bersaglio": {
         "class": [
@@ -6629,10 +6629,10 @@
       "id": "ev_controriforma",
       "name": "Controriforma",
       "era": 4,
-      "force": 3,
+      "force": 2,
       "severity": "lieve",
       "kind": "classe",
-      "effect_text": "Forza 3. Colpisce solo Cultura, Commercio.",
+      "effect_text": "Forza 2. Colpisce solo Cultura, Commercio.",
       "effects": [],
       "bersaglio": {
         "class": [
@@ -6693,10 +6693,10 @@
       "id": "ev_secolarizzazioni",
       "name": "Secolarizzazioni",
       "era": 4,
-      "force": 3,
+      "force": 2,
       "severity": "grave",
       "kind": "classe",
-      "effect_text": "Forza 3. Colpisce solo Religione.",
+      "effect_text": "Forza 2. Colpisce solo Religione.",
       "effects": [],
       "bersaglio": {
         "class": [
@@ -6751,10 +6751,10 @@
       "id": "ev_globalizzazione",
       "name": "Globalizzazione",
       "era": 5,
-      "force": 3,
+      "force": 2,
       "severity": "lieve",
       "kind": "classe",
-      "effect_text": "Forza 3. Colpisce solo Cultura, Civico.",
+      "effect_text": "Forza 2. Colpisce solo Cultura, Civico.",
       "effects": [],
       "bersaglio": {
         "class": [
@@ -6818,10 +6818,10 @@
       "id": "ev_crisi_dello_stato",
       "name": "Crisi dello Stato",
       "era": 5,
-      "force": 3,
+      "force": 2,
       "severity": "grave",
       "kind": "classe",
-      "effect_text": "Forza 3. Colpisce solo Civico, Militare.",
+      "effect_text": "Forza 2. Colpisce solo Civico, Militare.",
       "effects": [],
       "bersaglio": {
         "class": [
