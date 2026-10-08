@@ -3238,6 +3238,33 @@ perche' esce un evento per era e meta' sono di classe: si sente nella
 singola partita, non nella media. Scelta di chi misura: `bersaglio_classi_forte`
 se il designer vuole la regola senza toccare scala ed erosione.
 
+## Settantunesima misura: le spinte sulla base coi bersagli
+
+Registro 205. Base: la 70ª con +1 (ora file base). Stessi 300 semi, spinte
+via `--spinta`.
+
+| lotto | spinte | Bil / Cont / Lampo / Obi / Rend / Ritro / Scavo | PV |
+|---|---|---|---|
+| base | tabella di prima | 30 / 34 / 35 / 44 / 26 / 38 / 27 | 82,8 |
+| A | obiettivi_peso 1,2 | 31 / 34 / 35 / 45 / 26 / 37 / 26 | 82,7 |
+| B | rendita_per_era 1,6 | 31 / 32 / 36 / 45 / 26 / 37 / 26 | 83,1 |
+| C | A + B | 31 / 32 / 35 / 46 / 27 / 37 / 26 | 83,0 |
+| D | C + scavo_scheletro 0,8 | 33 / 30 / 33 / 45 / 28 / 36 / 29 | 83,2 |
+| E | obiettivi_peso 0,5 | 33 / 38 / 33 / 40 / 27 / 37 / 26 | 82,6 |
+| F | rendita_per_era 1,0 | 29 / 34 / 36 / 41 / 28 / 38 / 27 | 83,0 |
+| G | scavo_scheletro 1,0 | 33 / 31 / 31 / 44 / 28 / 38 / 28 | 82,9 |
+| **H** | **E + F + G** | **35 / 35 / 32 / 38 / 27 / 36 / 30** | **83,1** |
+
+Le spinte piccole restano dentro l'errore (+-4). La Obiettivi non vince
+con un canale ma con un vantaggio diffuso (mezzo punto in piu' quasi
+dappertutto, Eredita' e Monumenti +1): il suo peso agisce solo quando
+costruisce, e va abbassato forte per vederlo. La Rendita che insegue la
+rendita lascia per strada 3-4 punti di Lampo: spingerla di piu' non serve,
+meno un poco. H e' la forbice piu' stretta misurata sulla base coi
+bersagli, 27-38, e va in tabella. La Rendita resta l'ultima: le sue carte
+dell'era 1 sono quasi tutte a resistenza 1 (registro 193) e il problema e'
+di carte, non di bot.
+
 ## Come rifare il conto
 
 ```bash

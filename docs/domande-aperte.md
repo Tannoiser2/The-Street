@@ -3223,3 +3223,12 @@ dato è stato importato da lì. Ma due confronti fra ciò che è stampato e
     non cambiano); `--variante senza_bersagli` e' la base di prima. Il
     pacchetto del tempo che logora (200-202) resta in variante.
 
+205. **Le spinte sulla base coi bersagli.** Il designer: "ritara le
+    spinte del bot sulla nuova base". Misura 71, otto lotti: in tabella
+    `obiettivi_peso` 0,5 (era 1,5), `rendita_per_era` 1,0 (era 1,3),
+    `scavo_scheletro` 1,0 (era 0,6). Forbice da 26-44 a 27-38, PV 83,1. La
+    Rendita resta ultima (27): le sue carte dell'era 1 sono a resistenza 1
+    e non passano l'era (registro 193); se va risollevata e' una questione
+    di carte (resistenza o rendita delle Capanne, della Cava, del
+    Focolare), non di spinte.
+
