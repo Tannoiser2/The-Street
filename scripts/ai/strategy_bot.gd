@@ -730,9 +730,16 @@ static var spinte_override := {}
 # 0,5 e 0,8 al 35-36), `rendita_zero` 0 (a -1,5 la Rendita crolla al 22% con
 # 74,7 PV: scarta tutto quel che non rende), `scavo_premio` 0 (a 0,8 la Scavo
 # scende al 18), `obiettivi_peso` 1,5 (a 0,8 la Obiettivi non si muove, 37).
-const SPINTE_V3 := {"rendita_per_era": 1.3, "rendita_zero": 0.0, "lampo": 0.8, "lampo_zero": 0.0,
+# Registro 205 (settantunesima misura): sulla base coi bersagli di classe
+# la Obiettivi vinceva il 44% e la Rendita il 26%. Le spinte piccole (1,2 /
+# 1,6 / 0,8) restavano nell'errore; quelle larghe insieme danno la forbice
+# piu' stretta, 27-38: `obiettivi_peso` 0,5 (la Obiettivi vince con un
+# vantaggio diffuso, non con le pietre miliari), `rendita_per_era` 1,0 (la
+# Rendita che insegue la rendita lascia per strada il Lampo),
+# `scavo_scheletro` 1,0.
+const SPINTE_V3 := {"rendita_per_era": 1.0, "rendita_zero": 0.0, "lampo": 0.8, "lampo_zero": 0.0,
 	"scavo_premio": 0.0, "scavo_terra": -0.5, "scavo_terra_scavo": 0.5, "protezione_attesa": 2.0,
-	"lampo_potenzia": 1.5, "lampo_sopra": 0.0, "obiettivi_peso": 1.5, "continuita_peso": 1.0,
+	"lampo_potenzia": 1.5, "lampo_sopra": 0.0, "obiettivi_peso": 0.5, "continuita_peso": 1.0,
 	# la Ritrovamenti (registro 173): lo scheletro del Personaggio al draft, le caselle che
 	# lasceranno tessere, la riscoperta delle proprie rovine nell'era 5 (per tessera), l'Arte.
 	# Con le caselle a 0,6 vinceva il 43% giocando da Rendita (le carte larghe sono quelle a
@@ -749,7 +756,7 @@ const SPINTE_V3 := {"rendita_per_era": 1.3, "rendita_zero": 0.0, "lampo": 0.8, "
 	"ritro_scheletro": 0.15, "ritro_caselle": 0.2, "ritro_riscoperta": 1.2, "ritro_arte": 0.4,
 	"ritro_azione_scavo": 0.8,
 	# Registro 188 (`scheletri: "personaggi"`): lo Scavo del Personaggio al draft, per tutti.
-	"scheletro_atteso": 0.15, "scavo_scheletro": 0.6,
+	"scheletro_atteso": 0.15, "scavo_scheletro": 1.0,
 	# I FINALI DELLE CARTE (registro 181): il bot non li pesava affatto, e il
 	# Grattacielo ("+1 PV per livello") valeva per lui il Lampo meno il costo.
 	# Peso dei PV che l'effetto finale darebbe se la partita finisse adesso,
