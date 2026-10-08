@@ -2420,30 +2420,25 @@ func _test_v3_eventi_era_5() -> void:
 	_ok("  e non ha piu' l'evento finale unico", not CardDB.constants.has("evento_finale"))
 	var forze := {}
 	for e in CardDB.events_of_era(5): forze[int(e["force"])] = true
-	_eq("  tutti di forza 2, come l'era 4 (registri 198-199)", forze.keys(), [2])
+	var fk: Array = forze.keys()
+	fk.sort()
+	_eq("  forza 2, e 3 per i due di classe (registri 199 e 204)", fk, [2, 3])
 	var ctl := _game(3, 990)
 	ctl._start_era(5)
 	var gs := ctl.gs
 	_ok("a inizio era 5 si pesca uno dei sei", int(gs.current_event.get("era", 0)) == 5 and str(gs.current_event["id"]).begins_with("ev_"))
-	# La Crisi dello Stato (forza 2): Civico -2. Un Civico da 3 scende a 1 e
-	# crolla, un Ingegneria da 3 sale a 4 e regge.
+	# La Crisi dello Stato (registro 204): forza 3, colpisce solo Civico e
+	# Militare. Una casa civica da 2 crolla, l'Osservatorio (Ingegneria, 2)
+	# non e' un bersaglio e resta in piedi.
 	gs.grid.buildings.clear()
 	for i in gs.grid.n_cols: gs.grid.terrains[i] = Enums.Terrain.COLLINA
-	var civico := ""
-	var ingegneria := ""
-	for id in CardDB.buildings:
-		var d: Dictionary = CardDB.buildings[id]
-		if int(d["era"]) != 5 or int(d["resistance"]) != 3 or int(d["width"]) != 1: continue
-		if civico == "" and "civico" in (d["classes"] as Array) and not "ingegneria" in (d["classes"] as Array): civico = str(id)
-		if ingegneria == "" and "ingegneria" in (d["classes"] as Array) and not "civico" in (d["classes"] as Array): ingegneria = str(id)
-	_ok("ci sono un Civico e un Ingegneria da 3 nell'era 5 (%s, %s)" % [civico, ingegneria], civico != "" and ingegneria != "")
-	if civico == "" or ingegneria == "": CardDB.load_db(CardDB.DB_PATH); return
-	var c := _put(gs, 0, civico, 1)
-	var ing := _put(gs, 1, ingegneria, 3)
+	var c := _put(gs, 0, "ed_casa_e4_p", 1)
+	var ing := _put(gs, 1, "ed_osservatorio", 3)
 	gs.current_event = CardDB.events["ev_crisi_dello_stato"]
+	_eq("la Crisi dello Stato ha forza 3", int(gs.current_event["force"]), 3)
 	EraRules.resolve_event(gs)
-	_eq("Crisi dello Stato: il Civico da 3 (-2) crolla", c.state, Enums.BuildingState.ROVINA)
-	_eq("  l'Ingegneria da 3 (+1) regge", ing.state, Enums.BuildingState.INTATTO)
+	_eq("  la casa civica da 2 crolla", c.state, Enums.BuildingState.ROVINA)
+	_eq("  l'Osservatorio da 2 non e' un bersaglio e regge", ing.state, Enums.BuildingState.INTATTO)
 	if FileAccess.file_exists("res://data/proposte/cards-v3-era1-giudizio_solo.json"):
 		CardDB.load_db("res://data/proposte/cards-v3-era1-giudizio_solo.json")
 		var c2 := _game(3, 990)
@@ -2451,11 +2446,6 @@ func _test_v3_eventi_era_5() -> void:
 		_eq("variante giudizio_solo: torna il Giudizio del tempo", str(c2.gs.current_event.get("id", "")), "ev_giudizio_del_tempo")
 	CardDB.load_db(CardDB.DB_PATH)
 
-
-
-# Il tempo logora (registro 200, variante `erosione`): scala 1-10, e a fine
-# era ogni edificio intatto perde 2 se nessuno lo ha usato, 1 se usato, 0 se
-# il padrone ci aveva il lavoratore. Senza la costante niente si logora.
 func _test_v3_erosione() -> void:
 	if not FileAccess.file_exists("res://data/proposte/cards-v3-era1-erosione.json"): return
 	CardDB.load_db("res://data/proposte/cards-v3-era1-erosione.json")

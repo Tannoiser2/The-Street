@@ -193,8 +193,7 @@ def _bersagli(v, piu):
         e["effect_text"] = "Forza %d. Colpisce solo %s." % (int(e["force"]), ", ".join(nomi[c] for c in BERSAGLI_CLASSE[e["id"]]))
 def bersaglio_classi(v):
     _bersagli(v, 0)
-#   --variante bersaglio_classi_forte  come bersaglio_classi, e gli eventi di classe hanno +1 di forza: colpiscono meno
-#                                      edifici ma piu' forte (registro 203)
+#   (bersaglio_classi_forte, misura 70, e' diventata la base: registro 204; `--variante senza_bersagli` per la base di prima)
 def bersaglio_classi_forte(v):
     _bersagli(v, 1)
 def _forze_erosione(v, lievi, grave_in_piu):
@@ -1096,6 +1095,15 @@ VARIANTI = {"erosione": erosione, "erosione_lieve": erosione_lieve, "erosione_ca
             "lampo_vecchio": lampo_vecchio, "extra_sempre": extra_sempre, "senza_extra": senza_extra, "costi_vecchi": costi_vecchi,
             "case_seconda": case_seconda, "case_lampo1": case_lampo1, "senza_tuning": senza_tuning,
             "terreno_produce": terreno_produce, "senza_potenziamento_insieme": senza_potenziamento_insieme}
+# GLI EVENTI DI CLASSE CON BERSAGLIO NEL FILE BASE (registro 204, il designer: "porta bersaglio_classi_forte nella
+# base"). I dieci eventi di classe colpiscono solo le classi che nominano, con +1 di forza, senza malus. Le varianti
+# di prima (misure fino alla 70ª) restano costruite sulla base di prima, cosi' i loro file non cambiano: si
+# applica solo alla base e alle varianti nate dopo. `--variante senza_bersagli` e' la base di prima.
+VARIANTI.pop("bersaglio_classi_forte")
+VARIANTI["senza_bersagli"] = lambda v: None
+PRIMA_DEL_204 = set(VARIANTI)
+if variante not in PRIMA_DEL_204:
+    _bersagli(v3, 1)
 if variante:
     VARIANTI[variante](v3)
     v3["meta"]["ruleset"] = "v3-era1-prova-" + variante

@@ -3214,3 +3214,12 @@ dato è stato importato da lì. Ma due confronti fra ciò che è stampato e
     della base al decimo (82,8 PV, Scavo 16,8, crolli per era uguali); si
     cambiano solo i testi delle dieci carte di classe. Decisione del designer.
 
+204. **Gli eventi di classe con bersaglio sono la base.** Il designer:
+    "porta bersaglio_classi_forte nella base". Nel file base i dieci eventi
+    di classe colpiscono solo le classi che nominano, con +1 di forza e
+    senza malus; i testi delle carte dicono "Forza N. Colpisce solo ...".
+    Scala, resistenze, eventi geografici e di comportamento invariati. Le
+    varianti nate prima restano costruite sulla base di prima (i loro file
+    non cambiano); `--variante senza_bersagli` e' la base di prima. Il
+    pacchetto del tempo che logora (200-202) resta in variante.
+

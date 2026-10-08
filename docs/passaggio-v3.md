@@ -230,4 +230,6 @@ erosione a fine era 2/1/0 (`EraRules.erosione`), eventi lievi 3-3-4-4-5 e gravi 
 ripide crollava tre quarti dell'era Moderna; coi bersagli di classe l'era Moderna torna intera e la preistoria resta ai
 megaliti (Dolmen 76%, Capanne 0%); con la tessera a meta' lo Scavo torna a 16 e la forbice a 24-38. Decisione del
 designer se farne la base; dopo: ristrutturazione che ridà resistenza, bot sulle tessere e sulla Continuita', schema
-dati (resistenza max 6 -> 10), carte.
+dati (resistenza max 6 -> 10), carte. L'alternativa prudente (203, misura 70) e' la base (204): i dieci eventi di classe
+colpiscono solo le classi che nominano, con +1 di forza e senza malus; 82,8 PV, Scavo 16,8, crolli per era come la 66ª;
+`--variante senza_bersagli` per la base di prima.
