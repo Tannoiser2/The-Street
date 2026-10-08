@@ -193,6 +193,25 @@ def _bersagli(v, piu):
         e["effect_text"] = "Forza %d. Colpisce solo %s." % (int(e["force"]), ", ".join(nomi[c] for c in BERSAGLI_CLASSE[e["id"]]))
 def bersaglio_classi(v):
     _bersagli(v, 0)
+#   LA RENDITA CON LE CARTE (registro 206). Le 15 carte a Rendita sono monumenti a resistenza 3-5 delle ere 1-4;
+#   nessuna nell'era 5.
+def _carte_rendita(v):
+    return [b for b in v["buildings"] if int(b.get("rendita", 0)) > 0]
+#   --variante rendita_presto  le carte a Rendita delle ere 1 e 2 rendono 1 in piu' (pagano piu' censimenti)
+def rendita_presto(v):
+    for b in _carte_rendita(v):
+        if int(b["era"]) <= 2: b["rendita"] = int(b["rendita"]) + 1
+#   --variante rendita_economica  le carte a Rendita costano 1 Costruzione in meno (minimo 1)
+def rendita_economica(v):
+    for b in _carte_rendita(v):
+        b["cost"]["pietra"] = max(1, int(b["cost"]["pietra"]) - 1)
+#   --variante rendita_robusta  le carte a Rendita hanno +1 resistenza: reggono un'era in piu' e incassano di piu'
+def rendita_robusta(v):
+    for b in _carte_rendita(v):
+        b["resistance"] = int(b["resistance"]) + 1
+#   --variante rendita_presto_robusta  le due insieme
+def rendita_presto_robusta(v):
+    rendita_presto(v); rendita_robusta(v)
 #   (bersaglio_classi_forte, misura 70, e' diventata la base: registro 204; `--variante senza_bersagli` per la base di prima)
 def bersaglio_classi_forte(v):
     _bersagli(v, 1)
@@ -1102,6 +1121,8 @@ VARIANTI = {"erosione": erosione, "erosione_lieve": erosione_lieve, "erosione_ca
 VARIANTI.pop("bersaglio_classi_forte")
 VARIANTI["senza_bersagli"] = lambda v: None
 PRIMA_DEL_204 = set(VARIANTI)
+# Le varianti nate dopo il registro 204 partono dalla base coi bersagli.
+VARIANTI.update({"rendita_presto": rendita_presto, "rendita_economica": rendita_economica, "rendita_robusta": rendita_robusta, "rendita_presto_robusta": rendita_presto_robusta})
 if variante not in PRIMA_DEL_204:
     _bersagli(v3, 1)
 if variante:
