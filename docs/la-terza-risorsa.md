@@ -3183,6 +3183,36 @@ della tessera era tarato su meta' delle rovine. Quarto giro:
 `erosione_scavo`, come classi e la tessera vale meta' dello Scavo del
 Personaggio (`scavo_tessera_fattore` 0,5, registro 202).
 
+## Sessantanovesima misura: il tempo logora, quarto giro (tessera a meta')
+
+Variante `erosione_scavo` (registro 202): come `erosione_classi`, e la
+tessera scavo vale meta' dello Scavo del Personaggio, per eccesso. Stessi
+300 semi, base la 66ª. Le partite sono le stesse della variante classi
+(il fattore tocca solo il punteggio), cambia il conto.
+
+| a giocatore | base (66ª) | classi | classi + tessera a meta' |
+|---|---|---|---|
+| PV a testa | 83,3 | 85,5 | 78,3 |
+| Scavo (tessere / bonus in partita) | 17,0 (11,7 / 5,3) | 23,4 | 16,2 (9,4 / 6,8) |
+| finali / Rendita / Cont / Lampo | 6,3 / 12,4 / 14,7 / 19,1 | 4,5 / 11,4 / 14,2 / 19,2 | 4,5 / 11,4 / 14,2 / 19,2 |
+| vittorie Bil / Cont / Lampo / Obi / Rend / Ritro / Scavo | 33 / 41 / 31 / 39 / 25 / 36 / 29 | 27 / 24 / 32 / 36 / 36 / 34 / 45 | 32 / 24 / 31 / 38 / 35 / 35 / 38 |
+
+Lo Scavo torna al suo peso (16,2 contro 17,0) e la Scavo scende dal 45 al
+38, ancora prima ma dentro una forbice 24-38. Il bot non sa del fattore:
+al draft valuta le tessere con lo Scavo intero (`scavo_scheletro`,
+`ritro_scheletro`, `scheletro_atteso`), quindi la Scavo e la Ritrovamenti
+pagano i Personaggi piu' del dovuto; e' una ritaratura da fare se il
+pacchetto passa. La Continuita' al 24 e' l'altro conto aperto: con
+l'erosione le colonne lunghe perdono pezzi e la sua base vale meno.
+
+Il pacchetto che la misura sostiene, se il designer lo vuole come base:
+scala 1-10 (`RESISTENZE_1_10`), erosione 2/1/0, forze lievi 3, 3, 4, 4, 5 e
+gravi due punti sopra, modificatori di terreno e condizione singoli, i
+dieci eventi di classe con bersaglio, tessera a meta'. Da fare dopo: la
+ristrutturazione che ridà resistenza, la ritaratura del bot sulle tessere e
+sulla Continuita', lo schema dati (resistenza massima 6 -> 10), le 74
+resistenze sulle carte e le 30 forze sugli eventi.
+
 ## Come rifare il conto
 
 ```bash
