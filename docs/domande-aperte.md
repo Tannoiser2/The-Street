@@ -3232,3 +3232,13 @@ dato è stato importato da lì. Ma due confronti fra ciò che è stampato e
     di carte (resistenza o rendita delle Capanne, della Cava, del
     Focolare), non di spinte.
 
+206. **La Rendita con le carte.** Il designer: "misura come risollevare la
+    Rendita con le carte". Correzione al registro 205: le carte a Rendita
+    non sono quelle a resistenza 1 dell'era 1 (quelle danno Lampo) ma 15
+    monumenti a resistenza 3-5 delle ere 1-4. Varianti `rendita_presto`
+    (+1 rendita nelle ere 1-2), `rendita_economica` (-1 Costruzione),
+    `rendita_robusta` (+1 resistenza), `rendita_presto_robusta`. Misura 72:
+    +1 resistenza porta la Rendita dal 27 al 36 a punti e canali invariati;
+    +1 rendita raddoppia il canale e gonfia tutti di 8 PV; -1 Costruzione
+    la peggiora. Decisione del designer.
+

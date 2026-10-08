@@ -3265,6 +3265,32 @@ bersagli, 27-38, e va in tabella. La Rendita resta l'ultima: le sue carte
 dell'era 1 sono quasi tutte a resistenza 1 (registro 193) e il problema e'
 di carte, non di bot.
 
+## Settantaduesima misura: la Rendita con le carte
+
+Registro 206. Le 15 carte a Rendita sono monumenti a resistenza 3-5 delle
+ere 1-4 (Circolo di pietre, Foro, Menhir, Dolmen, Acquedotto le piu' rese
+alla Rendita); nessuna nell'era 5. Stessi 300 semi, base la 71ª.
+
+| a giocatore | base | rendita +1 (ere 1-2) | -1 Costruzione | +1 resistenza | +1 rendita e +1 resistenza |
+|---|---|---|---|---|---|
+| PV a testa | 83,1 | 91,1 | 87,6 | 83,3 | 90,6 |
+| canale Rendita / Lampo / Scavo | 12,1 / 19,2 / 17,1 | **22,1** / 17,9 / 16,5 | 14,6 / 18,6 / 18,2 | 12,8 / 19,2 / 16,1 | **22,7** / 17,9 / 15,4 |
+| vittorie Bil / Cont / Lampo / Obi / Rend / Ritro / Scavo | 35 / 35 / 32 / 38 / 27 / 36 / 30 | 33 / 28 / 38 / 42 / 34 / 29 / 29 | 31 / 30 / 30 / 38 / 23 / 40 / 43 | 33 / 31 / 32 / 42 / **36** / 27 / 33 | 31 / 31 / 38 / 34 / 31 / 31 / 36 |
+
+- +1 rendita alle carte delle ere 1-2 raddoppia il canale (22 PV) e da' 8
+  PV a tutti: la Rendita sale al 34 ma il gioco cambia peso.
+- -1 Costruzione le compra chiunque: la Rendita scende al 23 e salgono
+  Scavo e Ritrovamenti (piu' monumenti, piu' rovine).
+- +1 resistenza non cambia il gioco (83,3 PV, canali al decimo) e porta
+  la Rendita dal 27 al 36: le sue carte reggono un'era in piu' e incassano
+  un censimento in piu'. La forbice resta larga (27-42): la Obiettivi sale
+  al 42 e la Ritrovamenti scende al 27, perche' meno monumenti crollano.
+- Le due prime insieme danno la forbice piu' stretta (31-38) ma con la
+  Rendita primo canale (22,7 PV, piu' del Lampo).
+
+Proposta di chi misura: +1 resistenza, che risolleva la Rendita senza
+spostare il resto; la scelta e' del designer.
+
 ## Come rifare il conto
 
 ```bash
