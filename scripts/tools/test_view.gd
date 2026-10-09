@@ -3318,6 +3318,9 @@ func _test_v3_sacchetto() -> void:
 	n.comincia()
 	var gs: GameState = n.ctl.gs
 	_ok("la v3 a schermo ha il sacchetto", TessereScavo.scheletri_personaggi())
+	# La v3 non ha Dinastia (zero copie): ne' la carta ne' i pupazzetti.
+	_ok("  e niente carta Dinastia", BoardLayout3D.carta_dinastia(gs).is_empty())
+	_eq("  ne' pupazzetti della Dinastia", BoardLayout3D.meeple_dinastia(gs).size(), 0)
 	var giri := 0
 	while not gs.pending_choice.is_empty() and giri < 12:
 		if int(gs.pending_choice["player"]) != 0: break
@@ -3393,6 +3396,15 @@ func _test_v3_sacchetto() -> void:
 		pers += 1
 		if bool(c.get("coperta", false)): girati += 1
 	_ok("  a era finita stanno tutti sottosopra (%d su %d)" % [girati, pers], pers > 0 and girati == pers)
+	# Registro 209: sul tavolo arrivano col dorso, tutti in una pila sola.
+	var in_pila := 0
+	var x_pila := {}
+	for c in BoardLayout3D.player_cards(gs, 0):
+		if int(c["player"]) != 0 or str(c["kind"]) != "personaggio": continue
+		if bool(c.get("coperta", false)):
+			in_pila += 1
+			x_pila[snappedf((c["aabb"] as AABB).position.x, 0.01)] = true
+	_ok("  e sul tavolo stanno col dorso in una pila sola (%d, %d colonne)" % [in_pila, x_pila.size()], in_pila == pers and x_pila.size() == 1)
 	var riga_coperta: PackedStringArray = n._descrivi_sotto_carta({"kind": "personaggio", "id": str(gs.players[0].personaggi_storia[0][0]), "player": 0, "coperta": true})
 	_ok("  e il riquadro dice che e' uno scheletro", "\n".join(riga_coperta).contains("scheletro"))
 	r.scavata = true

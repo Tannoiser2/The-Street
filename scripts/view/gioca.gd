@@ -1612,9 +1612,12 @@ func _disegna_cronaca(font: Font, cima: float) -> void:
 func _disegna_bottoni(font: Font, p: PlayerState) -> void:
 	var schermo := _hud.get_viewport_rect().size
 	var voci: Array = []
-	var din := AvailableActions.dinastia(ctl.gs, _io())
-	voci.append({"voce": din, "testo": "Dinastia  " + DescrizioneAzione.prezzo(din),
-		"attiva": din.legale and din.pagabile(p)})
+	# Il tasto della Dinastia solo dove il regolamento la prevede: nella v3
+	# restava spento per tutta la partita, a ricordare una carta che non c'e'.
+	if BoardLayout3D.dinastia_in_gioco():
+		var din := AvailableActions.dinastia(ctl.gs, _io())
+		voci.append({"voce": din, "testo": "Dinastia  " + DescrizioneAzione.prezzo(din),
+			"attiva": din.legale and din.pagabile(p)})
 	# Con le carte restituite non si ristruttura (registro 131): niente tasto.
 	if not TessereScavo.carte_restituite():
 		var restauri := AvailableActions.restauri(ctl.gs, _io(), ctl.colonna_attivata())
