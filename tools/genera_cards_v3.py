@@ -1104,6 +1104,12 @@ VARIANTI["senza_bersagli"] = lambda v: None
 PRIMA_DEL_204 = set(VARIANTI)
 if variante not in PRIMA_DEL_204:
     _bersagli(v3, 1)
+# L'EVENTO COPERTO NEL FILE BASE (registro 211, il designer: "evento coperto"). L'evento dell'era si pesca a inizio
+# era ma si scopre a fine era, quando colpisce; durante l'era si sa solo la forza. Come i bersagli, vale per la base e
+# per le varianti nate dopo; `--variante evento_scoperto` e' la base con l'evento visto da inizio era.
+VARIANTI["evento_scoperto"] = lambda v: v["constants"].pop("evento_a_fine_era", None)
+if variante not in PRIMA_DEL_204:
+    v3["constants"]["evento_a_fine_era"] = True
 # LA RISORSA SI CHIAMA COSTRUZIONE. Nei dati resta la chiave "pietra" (lo schema e la v1.5 non cambiano), ma due
 # testi ereditati dalla v2 la nominavano ancora sulla carta: si corregge solo cio' che il giocatore legge. Come i
 # bersagli, vale per la base e le varianti nuove; i file delle varianti di prima restano com'erano.

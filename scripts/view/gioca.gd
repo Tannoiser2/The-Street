@@ -1075,7 +1075,7 @@ func _disegna_hud() -> void:
 	var risorse := "%d pietra, %d oro" % [p.pietra, p.oro]
 	if _v2(): risorse = "%d Costruzione, %d Denaro, %d Idee" % [p.pietra, p.oro, p.idee]
 	var testa := "Era %d · %s · %s: %d PV, %s, lavoratori %d/%d" % [
-		gs.era, str(gs.current_event.get("name", "nessun evento")), chi,
+		gs.era, _nome_evento(gs), chi,
 		p.vp, risorse, p.workers_used, p.workers]
 	# V3: lo sconto, il Lampo e l'acquisto in piu' valgono solo in questo turno.
 	if _v3():
@@ -1178,6 +1178,13 @@ func _disegna_hud() -> void:
 		_riquadro(font, _nota, _nota_dove + Vector2(18, 18))
 	if not _rivelazione.is_empty():
 		_disegna_rivelazione(font)
+
+# Il nome dell'evento nella barra. Coperto (registro 211) se ne sa solo la
+# forza: il nome lo dice la rivelazione a fine era.
+func _nome_evento(gs: GameState) -> String:
+	if not gs.evento_coperto.is_empty():
+		return "evento coperto, forza %d" % int(gs.current_event.get("force", 0))
+	return str(gs.current_event.get("name", "nessun evento"))
 
 # Se l'ultima mossa ha chiuso un'era, l'evento che ha colpito si rivela. Lo
 # dice il controller (`ultima_fine_era`), che lo annota quando lo risolve:
