@@ -698,6 +698,8 @@ func _tessere_scavo(b: Building) -> void:
 			# Col sacchetto (registro 188) la tessera e' lo scheletro di un Personaggio.
 			if v.has("chi") and CardDB.characters.has(str(v["chi"])):
 				testo = "%s %d" % [CardDB.characters[str(v["chi"])]["name"], int(v.get("v", 0))]
+				# Con la grafica v3 nome e Scavo sono stampati sulla tessera.
+				if BoardLayout3D.v3_path("tessere_scavo", str(v["chi"]) + "_retro") != "": continue
 			_scritta(t.position + Vector3(t.size.x / 2.0, t.size.y + 0.5, t.size.z / 2.0), testo, 0.05, Color.WHITE)
 
 # Il valore di Scavo scritto sulla basetta, davanti e dietro: la striscia di
@@ -999,7 +1001,7 @@ func _file_laterali() -> void:
 			continue
 		var percorso := BoardLayout3D.carta_path(str(c["kind"]), str(c["id"]))
 		# Il Personaggio girato (registro 194): il dorso, non la faccia.
-		if bool(c.get("coperta", false)): percorso = BoardLayout3D.DORSO_PERSONAGGIO
+		if bool(c.get("coperta", false)): percorso = BoardLayout3D.dorso_personaggio(str(c["id"]))
 		var sfondo := CARTA_SFONDO
 		if percorso != "" and ResourceLoader.exists(percorso): sfondo = Color("#1d1b17")
 		elif bool(c.get("coperta", false)): sfondo = CARTA_COPERTA

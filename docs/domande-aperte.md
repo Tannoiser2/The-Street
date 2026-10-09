@@ -3232,3 +3232,15 @@ dato è stato importato da lì. Ma due confronti fra ciò che è stampato e
     di carte (resistenza o rendita delle Capanne, della Cava, del
     Focolare), non di spinte.
 
+
+207. **La grafica di Codex entra nella vista 3D.** Il designer ha rifatto
+    carte e componenti con Codex (`DA_PASSARE_A_CLAUDE_GODOT/`). Come per
+    `materiali/`, quei PDF servono solo alla grafica: i dati restano nei
+    file JSON. `tools/estrai_grafica_v3.py` ritaglia ogni carta dai PDF e
+    la riconosce dal nome stampato (i dorsi senza nome dalla posizione
+    speculare sul foglio); scrive i PNG in `assets/carte/v3/`, che non va
+    nel repository. Col ruleset v3 la vista 3D prende quelle facce:
+    edifici, Personaggi (coperti col dorso scheletro della loro carta),
+    potenziamenti, milestone, tessere dell'era e tessere scavo. Senza i PNG,
+    o con la v2, restano le facce di prima. Una `.gdignore` tiene i 390 MB
+    di PDF fuori dall'import di Godot.
