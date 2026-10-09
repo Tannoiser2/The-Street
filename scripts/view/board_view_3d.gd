@@ -25,6 +25,11 @@ var _evidenziata := -1
 # l'inquadratura calcolata da BoardLayout3D e basta.
 var orbita: CameraOrbita = null
 var _cam: Camera3D = null
+# LO SPAZIO LIBERO DELLO SCHERMO (registro 213): le barre e il pannello della
+# cronaca coprono i bordi, in pixel (sopra, destra, sotto, sinistra). La
+# telecamera si sposta di lato quanto basta a centrare il tavolo in cio' che
+# resta, cosi' la mappa non finisce sotto il pannello.
+var margini := Vector4.ZERO
 # Cosa accendere: la carta scelta, i posti dove si puo' metterla, gli edifici
 # che possono riceverla. E' l'interfaccia che lo decide; qui si disegna.
 var evidenze: Dictionary = {}
@@ -945,6 +950,21 @@ func _telecamera() -> void:
 # piu' lontano del tavolo. Il risultato e' una plancia grande come un
 # francobollo - che nessun test di geometria vede, perche' i numeri che
 # calcolano sono giusti: sbagliato e' lo spazio in cui finiscono.
+# Quanto vale un pixel sul piano della mira, e di li' lo spostamento: con
+# h_offset la telecamera scivola di lato senza girarsi, e la mira finisce al
+# centro dello spazio libero invece che al centro dello schermo. Il raggio del
+# clic passa per la stessa telecamera spostata, quindi il puntamento regge.
+func _centra_nello_spazio_libero(distanza: float) -> void:
+	var schermo := get_viewport().get_visible_rect().size if is_inside_tree() else Vector2.ZERO
+	if schermo.y <= 0.0 or margini == Vector4.ZERO:
+		_cam.h_offset = 0.0
+		_cam.v_offset = 0.0
+		return
+	var per_pixel := 2.0 * distanza * scale.y * tan(deg_to_rad(_cam.fov) / 2.0) / schermo.y
+	# Il centro libero sta (destra - sinistra)/2 a sinistra e (sopra - sotto)/2 in basso.
+	_cam.h_offset = (margini.y - margini.w) / 2.0 * per_pixel
+	_cam.v_offset = (margini.x - margini.z) / 2.0 * per_pixel
+
 func muovi_telecamera() -> void:
 	if _cam == null: return
 	var dove := BoardLayout3D.camera_position(gs)
@@ -953,6 +973,7 @@ func muovi_telecamera() -> void:
 		dove = orbita.posizione()
 		mira = orbita.mira
 	_cam.transform = Transform3D(Basis(), dove).looking_at(mira, Vector3.UP)
+	_centra_nello_spazio_libero(dove.distance_to(mira))
 	# Il piano di taglio deve stare dietro al tavolo anche quando si e'
 	# allontanato al massimo, altrimenti allontanandosi la citta' sparisce.
 	_cam.far = maxf(4000.0, dove.distance_to(mira)

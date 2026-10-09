@@ -3275,3 +3275,15 @@ dato è stato importato da lì. Ma due confronti fra ciò che è stampato e
     chiude. Il controller annota l'evento risolto e gli edifici colpiti in
     `ultima_fine_era`, che il motore non legge mai (TORNEO e VITA identici).
     Nel pacchetto web entrano anche i fronti degli eventi.
+
+213. **Le tre fasce dello schermo e il menu nuovo.** Il designer: "il log
+    in una finestra sulla destra in modo che non si sovrapponga alla mappa,
+    le informazioni sopra in una barra di stato, sotto tutti i tasti e le
+    scelte; il menu iniziale e' scarno e poco attraente". In alto la barra
+    di stato (era, evento, risorse, cosa fare). A destra il pannello della
+    cronaca, con le righe che vanno a capo. In basso i comandi: Personaggi
+    e scelte nella riga alta, colonne, azioni e velocita' dei bot in quella
+    bassa. La telecamera si sposta di lato quanto serve a centrare il tavolo
+    nello spazio libero, e i clic sulle fasce non arrivano alla mappa. Il
+    menu ha il paesaggio a tutto schermo, il titolo in oro, un motto e una
+    carta per era; i tasti accesi hanno il filo d'oro.

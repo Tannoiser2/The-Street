@@ -212,6 +212,7 @@ func _aggiorna() -> void:
 	if _orbita == null or _orbita.e_iniziale():
 		_orbita = CameraOrbita.da_stato(ctl.gs)
 		vista.orbita = _orbita
+	vista.margini = Vector4(BARRA_SU, PANNELLO_W, BARRA_GIU, 0.0)
 	vista.mostra(ctl.gs, _colonna_sotto_mouse, _acceso())
 	vista.scale = Vector3.ONE * BoardLayout3D.U
 	# Il tavolo e' cambiato sotto un mouse fermo: quel che la barra prometteva
@@ -456,9 +457,11 @@ func _inizia_pizzico() -> void:
 func _sopra(pos: Vector2) -> void:
 	_nota_dove = pos
 	if ctl == null: return
-	_nota = _descrivi_sotto(pos)
-	_sotto_mouse = _bersaglio_sotto(pos)
-	var col := _colonna_puntata(pos)
+	# Sulle fasce non c'e' tavolo: niente riquadro, niente posto acceso.
+	var fuori := _sulle_fasce(pos)
+	_nota = PackedStringArray() if fuori else _descrivi_sotto(pos)
+	_sotto_mouse = null if fuori else _bersaglio_sotto(pos)
+	var col := -1 if fuori else _colonna_puntata(pos)
 	if col != _colonna_sotto_mouse:
 		_colonna_sotto_mouse = col
 		_aggiorna()
@@ -714,6 +717,8 @@ func _clic(pixel: Vector2) -> void:
 		_rivelazione = {}
 		_aggiorna()
 		return
+	# Un clic sulle fasce che non cade su un tasto non arriva alla mappa sotto.
+	if _sulle_fasce(pixel): return
 	var gs := ctl.gs
 	if gs.phase == Enums.Phase.FINE_PARTITA: return
 	# Una scelta in sospeso viene prima di tutto: finche' non e' risolta il
@@ -1034,6 +1039,16 @@ func _esegui_mossa(v) -> void:
 
 # ---- quel poco che resta a schermo ------------------------------------
 const SFONDO := Color(0.09, 0.10, 0.13, 0.86)
+# LE TRE FASCE DELLO SCHERMO (registro 213). Il designer: "il log in una
+# finestra sulla destra in modo che non si sovrapponga alla mappa, le
+# informazioni sopra in una barra di stato, e sotto tutti i tasti e le
+# scelte". La barra di stato sta in alto, la cronaca in un pannello a destra
+# e i comandi in basso; la telecamera centra il tavolo in quel che resta.
+const BARRA_SU := 66.0
+const BARRA_GIU := 112.0
+const PANNELLO_W := 330.0
+const FASCIA := Color(0.07, 0.08, 0.10, 0.94)
+const FILO := Color(1, 1, 1, 0.10)
 const CHIARO := Color("#e8e6df")
 const SPENTO := Color("#8b919c")
 # Solo per il conto che non torna: e' l'unica cosa in tutta la barra che
@@ -1096,7 +1111,7 @@ func _disegna_hud() -> void:
 		var valore := 0
 		for u in p.potenziamenti_riscattati: valore += TessereScavo.costo(u)
 		testa += ", token riscattati %d (%d PV)" % [p.potenziamenti_riscattati.size(), valore]
-	_striscia(font, testa, 41.0, 12.0, 18)
+	_disegna_fasce()
 	_hud.draw_rect(Rect2(Vector2(20, 17), Vector2(13, 13)),
 		VISTA.colore_giocatore(v), true)
 	_hud.draw_string(font, Vector2(41, 30), testa,
@@ -1109,7 +1124,6 @@ func _disegna_hud() -> void:
 		_riga_azione(font, _sotto_mouse, p)
 	else:
 		var invito := _invito(gs)
-		_striscia(font, invito, 20.0, 39.0, 14)
 		_hud.draw_string(font, Vector2(20, 54), invito,
 			HORIZONTAL_ALIGNMENT_LEFT, -1, 14, SPENTO)
 
@@ -1124,16 +1138,16 @@ func _disegna_hud() -> void:
 		if _v3(): _disegna_personaggi(font, p)
 	if not _scelta.is_empty() and _io() >= 0:
 		var schermo_a := _hud.get_viewport_rect().size
-		_tasto(font, "Annulla la scelta", Vector2(20.0, schermo_a.y - 96.0), false, {"che": "annulla"}, 170.0)
+		_tasto(font, "Annulla la scelta", Vector2(schermo_a.x - 190.0, schermo_a.y - BARRA_GIU + 8.0), false, {"che": "annulla"}, 170.0)
 	var kind := str(gs.pending_choice.get("kind", ""))
 	var con_tasti := kind in ["tessera", "edificio"] and int(gs.pending_choice.get("player", -1)) == _io()
-	_disegna_cronaca(font, 116.0 if con_tasti else 82.0)
+	_disegna_cronaca(font)
 	# La scelta di una tessera dell'era: un tasto per opzione, sotto l'invito.
 	if kind == "tessera" and con_tasti:
 		var tx := 20.0
 		var etichette: Array = gs.pending_choice.get("etichette", [])
 		for i in etichette.size():
-			var r := _tasto(font, str(etichette[i]), Vector2(tx, 72.0), i == 0,
+			var r := _tasto(font, str(etichette[i]), Vector2(tx, _riga_alta()), i == 0,
 				{"che": "scelta_tessera", "n": i})
 			tx = r.end.x + 10.0
 	# V3, "quale edificio usi?": un tasto per edificio, col nome e l'azione.
@@ -1145,7 +1159,7 @@ func _disegna_hud() -> void:
 			if b == null: continue
 			var testo := "%s%s: %s" % [str(b.data["name"]), "" if b.owner == _io() else " (G%d)" % b.owner,
 				str(b.data.get("effect_text", "")).trim_prefix("Usa: ")]
-			var r := _tasto(font, testo, Vector2(tx, 72.0), i == 0, {"che": "scelta_edificio", "n": int(opzioni[i])})
+			var r := _tasto(font, testo, Vector2(tx, _riga_alta()), i == 0, {"che": "scelta_edificio", "n": int(opzioni[i])})
 			tx = r.end.x + 10.0
 
 	var schermo := _hud.get_viewport_rect().size
@@ -1155,21 +1169,21 @@ func _disegna_hud() -> void:
 		if _riepilogo_aperto and _rivelazione.is_empty():
 			_disegna_riepilogo(font, gs)
 		else:
-			_tasto(font, "Riepilogo", Vector2(20.0, schermo.y - 58.0), true,
+			_tasto(font, "Riepilogo", Vector2(20.0, _riga_bassa()), true,
 				{"che": "riepilogo"}, 150.0)
-			_tasto(font, "Nuova partita", Vector2(186.0, schermo.y - 58.0), false,
+			_tasto(font, "Nuova partita", Vector2(186.0, _riga_bassa()), false,
 				{"che": "menu"}, 150.0)
 	# La velocita' dei bot si cambia anche a partita iniziata: un tasto solo
 	# che gira fra i cinque modi, perche' in fondo allo schermo per cinque
 	# nomi non c'e' posto.
 	if inizio.bot > 0 and gs.phase != Enums.Phase.FINE_PARTITA:
 		var t := _tasto(font, "Bot: " + inizio.nome_velocita(),
-			Vector2(schermo.x - 190.0, schermo.y - 58.0), false,
+			Vector2(schermo.x - 190.0, _riga_bassa()), false,
 			{"che": "gira_velocita"}, 170.0)
 		if inizio.bot_a_mano() and bot_da_muovere():
 			_tasto(font, "Avanza", Vector2(t.position.x - 118.0, t.position.y),
 				true, {"che": "avanza"}, 110.0)
-	_hud.draw_string(font, Vector2(20, schermo.y - 16),
+	_hud.draw_string(font, Vector2(20, schermo.y - 10),
 		"Trascina per girare il tabellone · rotella per avvicinare · "
 		+ "tasto destro per spostare · R riporta l'inquadratura",
 		HORIZONTAL_ALIGNMENT_LEFT, -1, 12, Color("#6f7683"))
@@ -1250,7 +1264,6 @@ func _riga_azione(font: Font, v: AvailableActions.Voce, p: PlayerState) -> void:
 	var riga := DescrizioneAzione.riga(ctl.gs, v, _io())
 	var manca := DescrizioneAzione.ammanco(v, p)
 	if manca != "": manca = "  ·  " + manca
-	_striscia(font, riga + manca, 20.0, 39.0, 14)
 	_hud.draw_string(font, Vector2(20, 54), riga, HORIZONTAL_ALIGNMENT_LEFT, -1, 14, CHIARO)
 	if manca == "": return
 	var x := 20.0 + font.get_string_size(riga, HORIZONTAL_ALIGNMENT_LEFT, -1, 14).x
@@ -1491,26 +1504,79 @@ func _nome_giocatore(i: int) -> String:
 # I posti sono in ordine - prima gli umani, poi i bot - quindi chi gioca da
 # solo e' sempre il giocatore 0 e sa dove guardare. Con piu' umani si gioca a
 # turno sullo stesso schermo; con zero si guarda giocare.
-const SCELTA_LARGO := 680.0
+const SCELTA_LARGO := 900.0
+# Il titolo, il motto e la fila delle carte sopra le scelte.
+const TESTA_MENU := 134.0
 const SCELTA_ALTO := 296.0
 const RIGA_ALTA := 46.0
 
 func _disegna_scelta(font: Font) -> void:
+	_sfondo_menu()
 	_disegna_scelta_dentro(font)
 	_togli_lente()
+
+# IL MENU INIZIALE (registro 213). Il designer: "scarno e poco attraente".
+# Dietro, il paesaggio del tavolo a tutto schermo, scurito verso il basso
+# perche' il pannello si legga; sopra il titolo, una carta per era, dalla
+# Preistoria al Novecento: la strada che si costruira'.
+const ORO := Color("#e2bd73")
+const CARTE_MENU := ["ed_dolmen", "ed_tempio", "ed_torre_civica", "ed_osservatorio", "ed_museo"]
+var _tex_menu: Dictionary = {}
+
+func _texture_menu(percorso: String) -> Texture2D:
+	if not _tex_menu.has(percorso):
+		_tex_menu[percorso] = load(percorso) as Texture2D if ResourceLoader.exists(percorso) else null
+	return _tex_menu[percorso]
+
+func _sfondo_menu() -> void:
+	var schermo := _hud.get_viewport_rect().size
+	_hud.draw_rect(Rect2(Vector2.ZERO, schermo), Color("#14171d"), true)
+	var tex := _texture_menu("res://assets/sfondo.png")
+	if tex != null:
+		# Copre tutto lo schermo senza deformarsi: si scala sul lato che manca.
+		var k := maxf(schermo.x / tex.get_width(), schermo.y / tex.get_height())
+		var misura := Vector2(tex.get_width(), tex.get_height()) * k
+		_hud.draw_texture_rect(tex, Rect2((schermo - misura) / 2.0, misura), false)
+	# Il velo: leggero in alto, dove si vede il paesaggio, scuro in basso.
+	var su := Color(0.05, 0.06, 0.08, 0.35)
+	var giu := Color(0.05, 0.06, 0.08, 0.88)
+	_hud.draw_polygon(PackedVector2Array([Vector2.ZERO, Vector2(schermo.x, 0.0), schermo, Vector2(0.0, schermo.y)]),
+		PackedColorArray([su, su, giu, giu]))
 
 func _disegna_scelta_dentro(font: Font) -> void:
 	# Il pannello cresce con la riga della velocita', che c'e' solo se al
 	# tavolo siede almeno un bot.
-	var alto := SCELTA_ALTO + RIGA_ALTA + (RIGA_ALTA if inizio.bot > 0 else 0.0)
+	var alto := SCELTA_ALTO + RIGA_ALTA + (RIGA_ALTA if inizio.bot > 0 else 0.0) + TESTA_MENU
 	var r := _metti_lente(SCELTA_LARGO, alto)
-	_hud.draw_rect(r, SFONDO, true)
-	_hud.draw_rect(r, Color(1, 1, 1, 0.18), false, 1.0)
+	_hud.draw_rect(r, Color(0.07, 0.08, 0.10, 0.90), true)
+	_hud.draw_rect(r, Color(ORO, 0.55), false, 1.5)
+	_hud.draw_rect(r.grow(-5.0), Color(ORO, 0.18), false, 1.0)
 	var x := r.position.x + 28.0
-	var y := r.position.y + 46.0
+	var y := r.position.y + 58.0
+	# Il titolo, con un'ombra che lo stacca, e il motto sotto.
+	_hud.draw_string(font, Vector2(x + 2.0, y + 2.0), "La Strada delle Ere",
+		HORIZONTAL_ALIGNMENT_LEFT, -1, 38, Color(0, 0, 0, 0.6))
 	_hud.draw_string(font, Vector2(x, y), "La Strada delle Ere",
-		HORIZONTAL_ALIGNMENT_LEFT, -1, 26, CHIARO)
-	y += 40.0
+		HORIZONTAL_ALIGNMENT_LEFT, -1, 38, ORO)
+	y += 28.0
+	_hud.draw_string(font, Vector2(x, y), "Cinque ere, una strada: costruisci, resisti agli eventi, scava fra le rovine.",
+		HORIZONTAL_ALIGNMENT_LEFT, -1, 14, CHIARO)
+	y += 16.0
+	# Una carta per era, in fila come sulla strada: alte uguali, larghe
+	# quanto vuole il loro disegno.
+	var cx := x
+	var alta := 62.0
+	for id in CARTE_MENU:
+		var tex := _texture_menu("res://assets/carte/v3/edifici/%s.jpg" % id)
+		if tex == null: continue
+		var largo := alta * tex.get_width() / tex.get_height()
+		if cx + largo > r.end.x - 28.0: break
+		_hud.draw_rect(Rect2(Vector2(cx, y) + Vector2(3, 3), Vector2(largo, alta)), Color(0, 0, 0, 0.5), true)
+		_hud.draw_texture_rect(tex, Rect2(Vector2(cx, y), Vector2(largo, alta)), false)
+		cx += largo + 10.0
+	y += alta + 14.0
+	_hud.draw_line(Vector2(x, y), Vector2(r.end.x - 28.0, y), Color(ORO, 0.35), 1.0)
+	y += 22.0
 
 	# Il regolamento per primo: e' la scelta che cambia tutto il resto.
 	_hud.draw_string(font, Vector2(x, y + 20.0), "Regolamento",
@@ -1539,7 +1605,7 @@ func _disegna_scelta_dentro(font: Font) -> void:
 	_tasto(font, "cambia", Vector2(x + 130.0, y), false, {"che": "seme"})
 	y += 50.0
 
-	var via := _tasto(font, "Comincia", Vector2(x, y), true, {"che": "via"}, 150.0)
+	var via := _tasto(font, "Comincia", Vector2(x, y), true, {"che": "via"}, 150.0, true)
 	_hud.draw_string(font, Vector2(via.end.x + 16.0, y + 20.0),
 		inizio.descrizione(), HORIZONTAL_ALIGNMENT_LEFT, -1, 14, SPENTO)
 	var coda := "I posti sono in ordine: prima gli umani, poi i bot. "
@@ -1579,15 +1645,17 @@ func _riga_scelta(font: Font, etichetta: String, x: float, y: float,
 # Un tasto: lo disegna e lo mette fra quelli cliccabili. `dato` e' quello che
 # il clic eseguira', cosi' il disegno e il clic non possono divergere.
 func _tasto(font: Font, testo: String, dove: Vector2, acceso: bool,
-		dato: Dictionary, minimo := 0.0) -> Rect2:
+		dato: Dictionary, minimo := 0.0, pieno := false) -> Rect2:
 	var largo := maxf(minimo,
 		font.get_string_size(testo, HORIZONTAL_ALIGNMENT_LEFT, -1, 14).x + 24.0)
 	var r := Rect2(dove, Vector2(largo, 32.0))
-	_hud.draw_rect(r, Color(1, 1, 1, 0.12) if acceso else Color(0, 0, 0, 0.25), true)
-	_hud.draw_rect(r, Color(1, 1, 1, 0.55 if acceso else 0.20), false, 1.0)
+	# Acceso = filo d'oro; `pieno` (il tasto che fa partire la cosa) e' d'oro tutto.
+	var fondo := Color(ORO, 0.92) if pieno else (Color(ORO, 0.16) if acceso else Color(0, 0, 0, 0.30))
+	_hud.draw_rect(r, fondo, true)
+	_hud.draw_rect(r, Color(ORO, 0.85) if acceso else Color(1, 1, 1, 0.18), false, 1.0)
 	var m := font.get_string_size(testo, HORIZONTAL_ALIGNMENT_LEFT, -1, 14).x
 	_hud.draw_string(font, r.position + Vector2((largo - m) / 2.0, 21.0), testo,
-		HORIZONTAL_ALIGNMENT_LEFT, -1, 14, CHIARO if acceso else SPENTO)
+		HORIZONTAL_ALIGNMENT_LEFT, -1, 14, Color("#1b1712") if pieno else (CHIARO if acceso else SPENTO))
 	# Il tasto si registra dove si vede: con la lente, ingrandito.
 	_bottoni.append({"rect": Rect2(_lente * r.position, r.size * _lente.get_scale()), "scelta": dato})
 	return r
@@ -1646,7 +1714,7 @@ func _applica_scelta(d: Dictionary) -> void:
 # I tasti "attiva la colonna N": numero e terreno, uno per colonna libera.
 func _disegna_attiva_colonne(font: Font, p: PlayerState) -> void:
 	var schermo := _hud.get_viewport_rect().size
-	var y := schermo.y - 58.0
+	var y := _riga_bassa()
 	_hud.draw_string(font, Vector2(20.0, y + 20.0), "Attiva e incassa:",
 		HORIZONTAL_ALIGNMENT_LEFT, -1, 14, SPENTO)
 	var x := 150.0
@@ -1663,7 +1731,7 @@ func _disegna_personaggi(font: Font, p: PlayerState) -> void:
 	var liberi: Array[String] = ctl.personaggi_liberi(p)
 	if liberi.is_empty(): return
 	var schermo := _hud.get_viewport_rect().size
-	var y := schermo.y - 58.0 - 38.0
+	var y := _riga_alta()
 	_hud.draw_string(font, Vector2(20.0, y + 20.0), "Piazza:",
 		HORIZONTAL_ALIGNMENT_LEFT, -1, 14, SPENTO)
 	var x := 150.0
@@ -1675,24 +1743,56 @@ func _disegna_personaggi(font: Font, p: PlayerState) -> void:
 
 # La cronaca sotto la barra: la mossa piu' recente per intero, le altre una
 # riga sola. Le proprie in chiaro, quelle degli altri spente.
-func _disegna_cronaca(font: Font, cima: float) -> void:
-	var y := cima
-	var righe_max := 9
+func _disegna_cronaca(font: Font) -> void:
+	var schermo := _hud.get_viewport_rect().size
+	var x := schermo.x - PANNELLO_W + 14.0
+	var largo := PANNELLO_W - 28.0
+	var fondo := schermo.y - BARRA_GIU - 10.0
+	var y := BARRA_SU + 26.0
+	_hud.draw_string(font, Vector2(x, y), "CRONACA", HORIZONTAL_ALIGNMENT_LEFT, -1, 12, SPENTO)
+	y += 14.0
+	# La piu' recente in cima, per intero; le altre sotto finche' c'e' posto.
+	# Le righe lunghe vanno a capo dentro il pannello invece di sbordare sulla
+	# mappa.
 	for k in _cronaca.size():
 		var voce: Dictionary = _cronaca[k]
 		var righe: Array = voce["righe"]
-		var quante: int = righe.size() if k == 0 else 1
-		for j in mini(quante, righe_max):
+		y += 8.0
+		for j in righe.size():
 			var testo := str(righe[j])
 			var corpo := 13 if j == 0 else 12
-			_striscia(font, testo, 20.0, y - corpo - 2.0, corpo)
-			_hud.draw_string(font, Vector2(20.0 if j == 0 else 34.0, y), testo,
-				HORIZONTAL_ALIGNMENT_LEFT, -1, corpo,
+			var rientro := 0.0 if j == 0 else 12.0
+			var alto := font.get_multiline_string_size(testo, HORIZONTAL_ALIGNMENT_LEFT,
+				largo - rientro, corpo).y
+			if y + alto > fondo: return
+			_hud.draw_multiline_string(font, Vector2(x + rientro, y + corpo), testo,
+				HORIZONTAL_ALIGNMENT_LEFT, largo - rientro, corpo, -1,
 				CHIARO if bool(voce["mia"]) and k == 0 else SPENTO)
-			y += corpo + 8.0
-			righe_max -= 1
-		if righe_max <= 0: break
-		if k == 0: y += 6.0
+			y += alto + 3.0
+		_hud.draw_line(Vector2(x, y + 4.0), Vector2(x + largo, y + 4.0), FILO, 1.0)
+
+# Le tre fasce: sotto tutto il resto, e opache quanto basta a staccarle dal
+# tavolo. Il filo chiaro sul bordo dice dove finisce la mappa.
+func _disegna_fasce() -> void:
+	var schermo := _hud.get_viewport_rect().size
+	_hud.draw_rect(Rect2(0.0, 0.0, schermo.x, BARRA_SU), FASCIA, true)
+	_hud.draw_line(Vector2(0.0, BARRA_SU), Vector2(schermo.x, BARRA_SU), FILO, 1.0)
+	_hud.draw_rect(Rect2(0.0, schermo.y - BARRA_GIU, schermo.x, BARRA_GIU), FASCIA, true)
+	_hud.draw_line(Vector2(0.0, schermo.y - BARRA_GIU), Vector2(schermo.x, schermo.y - BARRA_GIU), FILO, 1.0)
+	var pannello := Rect2(schermo.x - PANNELLO_W, BARRA_SU, PANNELLO_W, schermo.y - BARRA_SU - BARRA_GIU)
+	_hud.draw_rect(pannello, FASCIA, true)
+	_hud.draw_line(pannello.position, Vector2(pannello.position.x, pannello.end.y), FILO, 1.0)
+
+func _sulle_fasce(pixel: Vector2) -> bool:
+	var schermo := _hud.get_viewport_rect().size
+	return pixel.y < BARRA_SU or pixel.y > schermo.y - BARRA_GIU or pixel.x > schermo.x - PANNELLO_W
+
+# Le due righe di tasti della barra bassa.
+func _riga_alta() -> float:
+	return _hud.get_viewport_rect().size.y - BARRA_GIU + 10.0
+
+func _riga_bassa() -> float:
+	return _hud.get_viewport_rect().size.y - BARRA_GIU + 52.0
 
 # Le azioni che non hanno una carta da cliccare sul tavolo. Sono tre, e stanno
 # in un angolo: non e' piu' un menu, e' quello che avanza.
@@ -1718,7 +1818,7 @@ func _disegna_bottoni(font: Font, p: PlayerState) -> void:
 	# incassata, e questo tasto chiude il turno senza un'azione.
 	voci.append({"voce": tutte[tutte.size() - 1], "testo": "Fine turno", "attiva": true})
 
-	var y := schermo.y - 58.0
+	var y := _riga_bassa()
 	var x := 20.0
 	for v in voci:
 		var largo := font.get_string_size(str(v["testo"]), HORIZONTAL_ALIGNMENT_LEFT,

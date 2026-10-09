@@ -3353,7 +3353,10 @@ func _test_rivelazione_evento() -> void:
 	_eq("  finche' resta aperta i bot aspettano", gs.current_index, prima)
 	n._clic(Vector2(5, 5))
 	_ok("  e un clic la chiude", n._rivelazione.is_empty())
-	n.queue_free()
+	# Subito, non a fine frame: col file dati della v1.5 ricaricato, un suo
+	# ultimo disegno cercherebbe i potenziamenti della v3 e non li troverebbe.
+	remove_child(n)
+	n.free()
 	CardDB.load_db(CardDB.DB_PATH)
 
 func _test_v3_sacchetto() -> void:
