@@ -2443,7 +2443,10 @@ func _test_v3_eventi_era_5() -> void:
 	var ctl := _game(3, 990)
 	ctl._start_era(5)
 	var gs := ctl.gs
-	_ok("a inizio era 5 si pesca uno dei sei", int(gs.current_event.get("era", 0)) == 5 and str(gs.current_event["id"]).begins_with("ev_"))
+	# Con l'evento coperto nella base (registro 211) la carta pescata aspetta
+	# in `evento_coperto`, e in `current_event` c'e' il segnaposto.
+	var pescato: Dictionary = gs.evento_coperto if not gs.evento_coperto.is_empty() else gs.current_event
+	_ok("a inizio era 5 si pesca uno dei sei", int(pescato.get("era", 0)) == 5 and str(pescato["id"]).begins_with("ev_"))
 	# La Crisi dello Stato (registro 204): forza 3, colpisce solo Civico e
 	# Militare. Una casa civica da 2 crolla, l'Osservatorio (Ingegneria, 2)
 	# non e' un bersaglio e resta in piedi.
@@ -2452,6 +2455,7 @@ func _test_v3_eventi_era_5() -> void:
 	var c := _put(gs, 0, "ed_casa_e4_p", 1)
 	var ing := _put(gs, 1, "ed_osservatorio", 3)
 	gs.current_event = CardDB.events["ev_crisi_dello_stato"]
+	gs.evento_coperto = {}
 	_eq("la Crisi dello Stato ha forza 3", int(gs.current_event["force"]), 3)
 	EraRules.resolve_event(gs)
 	_eq("  la casa civica da 2 crolla", c.state, Enums.BuildingState.ROVINA)
