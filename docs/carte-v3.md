@@ -353,7 +353,7 @@ era dalle 3 in su non producono: hanno l'effetto più forte.
 | 1 | Diluvio | 2 | Forza 2. Edifici su colonne fiume: −1 res. |
 | 1 | Età degli spiriti | 3 | Forza 3. Colpisce solo Commercio, Civico. |
 | 1 | Faide tribali | 3 | Forza 3. Colpisce solo Civico, Commercio. |
-| 1 | Inverno lungo | 2 | Forza 2. Edifici su bosco e collina: −1 res. Tutti i giocatori perdono 1 pietra. |
+| 1 | Inverno lungo | 2 | Forza 2. Edifici su bosco e collina: −1 res. Tutti i giocatori perdono 1 Costruzione. |
 | 1 | Migrazione | 2 | Forza 2. Edifici non protetti: −1 res extra. |
 | 2 | Eruzione | 2 | Forza 2. Edifici su collina: −2 res. Chi perde un edificio pesca un potenziamento gratis (massimo uno per giocatore). |
 | 2 | Guerra civile | 2 | Forza 2. Nelle colonne con edifici di 2+ giocatori: tutti −1 res. |
@@ -395,7 +395,7 @@ Se ne rivelano tanti quanti i giocatori meno uno; li prende il primo che soddisf
 | Terme di Caracalla | 4 | Primo a costruire un edificio da 3 caselle. |
 | Ponte Milvio | 4 | Primo ad avere 2 edifici su colonne fiume distinte. |
 | Mura Aureliane | 5 | Primo ad avere 3 edifici Militari in piedi contemporaneamente. |
-| Cloaca Massima | 4 | Primo ad aver speso almeno 3 pietra complessive in costi di terrapieno. |
+| Cloaca Massima | 4 | Primo ad aver speso almeno 3 Costruzione complessive in costi di terrapieno. |
 | Domus Aurea | 5 | Primo ad avere un edificio con 3 potenziamenti. |
 | Campidoglio | 4 | Primo ad avere 2 edifici Civici nella stessa colonna. |
 | Isola Tiberina | 4 | Primo a costruire su una colonna fiume a livello 2+. |
