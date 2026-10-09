@@ -688,10 +688,10 @@ static func e_v2() -> bool:
 
 # LE CARTE DELLA V3 (registro 207). Il designer le ha rifatte con Codex; i
 # PDF in DA_PASSARE_A_CLAUDE_GODOT/PDF_COMPONENTI/ si ritagliano con
-# tools/estrai_grafica_v3.py in assets/carte/v3/<gruppo>/<id>.png (fronte) e
-# <id>_retro.png (retro). Se il file non c'e' (grafica non estratta) si torna
+# tools/estrai_grafica_v3.py in assets/carte/v3/<gruppo>/<id>.jpg (fronte) e
+# <id>_retro.jpg (retro). Se il file non c'e' (grafica non estratta) si torna
 # alle facce di prima: la v3 resta giocabile anche senza.
-const CARTELLA_V3 := "res://assets/carte/v3/%s/%s.png"
+const CARTELLA_V3 := "res://assets/carte/v3/%s/%s.jpg"
 const GRUPPI_V3 := {"mercato": "edifici", "personaggio": "personaggi",
 	"potenziamento": "potenziamenti", "token": "potenziamenti",
 	"monumento": "obiettivi", "eredita": "obiettivi"}

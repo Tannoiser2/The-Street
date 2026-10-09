@@ -10,7 +10,8 @@
 #    la pagina gira su qualunque hosting statico.
 # 2. Nel pacchetto entra `assets/sagome/`, non tutto `assets/`: le carte
 #    estratte dai PDF pesano 71 MB e nessuno le carica a runtime. Con loro il
-#    .pck usciva da 66 MB, senza da 10.
+#    .pck usciva da 66 MB, senza da 10. Delle carte v3 entrano solo quelle
+#    che la plancia mostra (filtri in export_presets.cfg).
 #
 # Uso:  tools/esporta_web.sh [cartella]     (default: build/web)
 set -euo pipefail
@@ -35,6 +36,15 @@ fi
 if [ ! -d "$RADICE/assets/sagome/colore" ]; then
   echo "assets/ non c'e': lo rigenero dai PDF"
   python3 "$RADICE/tools/estrai_grafica.py"
+fi
+
+# Le carte della v3 (registro 207) vengono dai PDF rifatti con Codex: senza,
+# la pagina col regolamento v3 mostrerebbe le facce della v2. Nel pacchetto
+# entrano solo quelle che la plancia usa (gli eventi e i dorsi degli edifici,
+# dei potenziamenti e degli obiettivi restano fuori): circa 19 MB.
+if [ ! -d "$RADICE/assets/carte/v3/personaggi" ]; then
+  echo "mancano le carte v3: le ritaglio dai PDF di Codex"
+  python3 "$RADICE/tools/estrai_grafica_v3.py"
 fi
 
 cd "$RADICE"

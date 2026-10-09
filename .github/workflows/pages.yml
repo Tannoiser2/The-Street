@@ -55,6 +55,8 @@ jobs:
         run: |
           python3 -m pip install --quiet pymupdf
           python3 tools/estrai_grafica.py
+          # Le carte della v3, dai PDF rifatti con Codex (registro 207).
+          python3 tools/estrai_grafica_v3.py
 
       - name: Export web
         run: tools/esporta_web.sh
