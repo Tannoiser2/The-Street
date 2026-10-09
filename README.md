@@ -48,6 +48,9 @@ godot --headless res://scenes/test_effects.tscn
 
 # Geometria della plancia (M5): gira headless come gli altri
 godot --headless res://scenes/test_view.tscn
+# Solo i test che servono a un ritocco (registro 212): parole del titolo
+# o del nome della funzione, separate da virgole. Prima del merge, il giro intero.
+godot --headless res://scenes/test_view.tscn -- --solo dinastia,evento
 
 # Partite headless con RandomBot
 godot --headless res://scenes/headless_runner.tscn -- --games 100 --players 3 --seed 1

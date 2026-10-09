@@ -65,7 +65,24 @@ func _ready() -> void:
 	print("\n%d superati, %d falliti" % [_passed, _failed])
 	get_tree().quit(0 if _failed == 0 else 1)
 
+# IL FILTRO (registro 212): `-- --solo dinastia,evento` fa girare solo i test
+# il cui titolo o nome di funzione contiene una delle parole. Serve ai
+# ritocchi, un minuto invece di otto; prima del merge si fa il giro intero.
+var _solo: PackedStringArray = _leggi_solo()
+
+static func _leggi_solo() -> PackedStringArray:
+	var argv := OS.get_cmdline_user_args()
+	var i := argv.find("--solo")
+	if i < 0 or i + 1 >= argv.size(): return PackedStringArray()
+	return argv[i + 1].to_lower().split(",", false)
+
 func _run(name: String, f: Callable) -> void:
+	if not _solo.is_empty():
+		var chiave := (name + " " + f.get_method()).to_lower()
+		var dentro := false
+		for parola in _solo:
+			if chiave.contains(parola.strip_edges()): dentro = true
+		if not dentro: return
 	print("\n— %s" % name)
 	f.call()
 
