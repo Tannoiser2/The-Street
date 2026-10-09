@@ -3287,3 +3287,22 @@ dato è stato importato da lì. Ma due confronti fra ciò che è stampato e
     nello spazio libero, e i clic sulle fasce non arrivano alla mappa. Il
     menu ha il paesaggio a tutto schermo, il titolo in oro, un motto e una
     carta per era; i tasti accesi hanno il filo d'oro.
+
+211. **L'evento coperto nel file base.** Il designer: "evento coperto".
+    Nel file base v3 `evento_a_fine_era` e' attivo: l'evento si pesca a
+    inizio era, ma durante l'era si sa solo la forza (la barra dice "evento
+    coperto, forza N"); la carta si scopre a fine era, al centro dello
+    schermo (registro 210). `--variante evento_scoperto` e' la base di
+    prima. Misura 73, 300 partite, seme 700000, scoperto contro coperto:
+    PV 83,1 contro 84,0; forbice delle vittorie da 27-38 a 24-44 (Obiettivi
+    44, Rendita da 27 a 35, Lampo da 32 a 24); crolli per partita da 24,8 a
+    26,2, quasi tutti in piu' nelle ere 2-4. Il bot difende sulla forza e
+    non sul tipo di evento, quindi la differenza viene dagli effetti
+    dell'evento durante l'era, che col coperto non ci sono piu'.
+
+212. **I test si filtrano.** Il designer: "ogni piccola correzione mi tocca
+    aspettare 20 minuti". `test_view` e `test_actions` accettano
+    `-- --solo parola1,parola2` e fanno girare solo i test il cui titolo o
+    nome di funzione contiene una delle parole: un ritocco si controlla in
+    pochi secondi. Il giro intero si fa prima del merge. La verifica di
+    riferimento resta solo per i cambi di motore e bot.
