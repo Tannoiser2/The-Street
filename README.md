@@ -53,6 +53,19 @@ godot --headless res://scenes/test_view.tscn
 godot --headless res://scenes/headless_runner.tscn -- --games 100 --players 3 --seed 1
 ```
 
+### La grafica v3 (registro 207)
+
+Le carte disegnate con Codex stanno in PDF in `DA_PASSARE_A_CLAUDE_GODOT/`.
+Prima di aprire il gioco col ruleset v3 si ritagliano in PNG (serve
+`pip install pymupdf pillow`) e si fanno importare a Godot:
+
+```bash
+python3 tools/estrai_grafica_v3.py
+godot --headless --import
+```
+
+Senza questo passo la vista 3D usa le facce della v2.
+
 ### Guardare la plancia (M5)
 
 `--headless` usa un driver di disegno finto: **non produce immagini**. Per

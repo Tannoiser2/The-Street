@@ -130,11 +130,17 @@ static func casella_era_box(col: int) -> AABB:
 
 static func tessera_era_path(gs: GameState, col: int, bn := false) -> String:
 	if col < 0 or col >= gs.tessere_colonna.size() or gs.tessere_colonna[col] == "": return ""
+	# V3 (registro 207): la tessera girata e' il suo retro in bianco e nero.
+	var p3 := v3_path("tessere_era", gs.tessere_colonna[col] + ("_retro" if bn else ""))
+	if p3 != "": return p3
 	return "res://assets/carte/%s/%s.png" % ["tessere_era_bn" if bn else "tessere_era", gs.tessere_colonna[col]]
 
 # La faccia della carta distesa: a colori, o in bianco e nero se e' in rovina.
 static func carta_edificio_path(b: Building) -> String:
 	var bn := b.state != Enums.BuildingState.INTATTO
+	if not bn:
+		var p3 := v3_path("edifici", str(b.data["id"]))
+		if p3 != "": return p3
 	return "res://assets/carte/%s/%s.png" % ["edifici_v2_bn" if bn else "edifici_v2", str(b.data["id"])]
 
 static func col_x(col: int) -> float:
@@ -487,7 +493,14 @@ static func basetta_box(gs: GameState, b: Building) -> AABB:
 const ROVINA_DIR := "res://assets/tessere_rovina/"
 
 static func tessera_rovina_path(t: Dictionary, scoperta: bool) -> String:
-	if not scoperta: return ROVINA_DIR + "dorso.png"
+	# V3 (registro 207): il lato "ROVINA" uguale per tutte, e il retro di
+	# ogni Personaggio con lo scheletro, il nome e lo Scavo stampati.
+	if not scoperta:
+		var f3 := v3_path("tessere_scavo", "fronte")
+		return f3 if f3 != "" else ROVINA_DIR + "dorso.png"
+	if t.has("chi"):
+		var r3 := v3_path("tessere_scavo", str(t["chi"]) + "_retro")
+		if r3 != "": return r3
 	# Col sacchetto (registro 188) la tessera e' lo scheletro di un Personaggio:
 	# una faccia sola, neutra; nome e Scavo li scrive la vista sopra.
 	if t.has("chi"): return ROVINA_DIR + "faccia_personaggio.png"
@@ -673,6 +686,30 @@ const CARTELLA_EDIFICI_V2 := "res://assets/carte/edifici_v2/%s.png"
 static func e_v2() -> bool:
 	return (str(CardDB.ruleset).begins_with("v2") or str(CardDB.ruleset).begins_with("v3"))
 
+# LE CARTE DELLA V3 (registro 207). Il designer le ha rifatte con Codex; i
+# PDF in DA_PASSARE_A_CLAUDE_GODOT/PDF_COMPONENTI/ si ritagliano con
+# tools/estrai_grafica_v3.py in assets/carte/v3/<gruppo>/<id>.png (fronte) e
+# <id>_retro.png (retro). Se il file non c'e' (grafica non estratta) si torna
+# alle facce di prima: la v3 resta giocabile anche senza.
+const CARTELLA_V3 := "res://assets/carte/v3/%s/%s.png"
+const GRUPPI_V3 := {"mercato": "edifici", "personaggio": "personaggi",
+	"potenziamento": "potenziamenti", "token": "potenziamenti",
+	"monumento": "obiettivi", "eredita": "obiettivi"}
+
+static func e_v3() -> bool:
+	return str(CardDB.ruleset).begins_with("v3")
+
+static func v3_path(gruppo: String, id: String) -> String:
+	if not e_v3(): return ""
+	var p := CARTELLA_V3 % [gruppo, id]
+	return p if ResourceLoader.exists(p) else ""
+
+# Il retro del Personaggio girato (registro 194): nella v3 ogni Personaggio ha
+# il suo, con lo scheletro, il nome e lo Scavo.
+static func dorso_personaggio(id: String) -> String:
+	var p := v3_path("personaggi", id + "_retro")
+	return p if p != "" else DORSO_PERSONAGGIO
+
 # Il dorso del Personaggio girato (registro 194): il designer ne disegnera'
 # uno ad hoc, con lo scheletro; finche' non c'e', la vista stende un
 # riquadro scuro senza immagine.
@@ -680,6 +717,9 @@ const DORSO_PERSONAGGIO := "res://assets/carte/dorsi/personaggio_scheletro.png"
 
 static func carta_path(tipo: String, id: String) -> String:
 	if not CARTELLE_CARTE.has(tipo): return ""
+	if GRUPPI_V3.has(tipo):
+		var p3 := v3_path(str(GRUPPI_V3[tipo]), id)
+		if p3 != "": return p3
 	# Nella v2 i potenziamenti hanno le facce del loro PDF (registro 128), e
 	# sono le stesse per il token (registro 133).
 	if tipo in ["potenziamento", "token"] and e_v2():
