@@ -12,7 +12,7 @@ contorna (194 x 116 pt l'edificio da una casella, 115 x 194 il Personaggio,
 e cosi' via): si prendono i rettangoli abbastanza grandi, si tengono i piu'
 esterni, e dentro ognuno si cerca il nome stampato, confrontandolo coi nomi
 dei dati. Il nome dice l'id; la grafica finisce in
-assets/carte/v3/<gruppo>/<id>.png (fronte) e <id>_retro.png (retro). Nessun
+assets/carte/v3/<gruppo>/<id>.jpg (fronte) e <id>_retro.jpg (retro). Nessun
 numero viene letto: si guarda solo il nome per sapere quale carta e'.
 
   python3 tools/estrai_grafica_v3.py            # tutto
@@ -25,7 +25,12 @@ ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 PDF_DIR = os.path.join(ROOT, "DA_PASSARE_A_CLAUDE_GODOT", "PDF_COMPONENTI")
 DEST = os.path.join(ROOT, "assets", "carte", "v3")
 DATI = os.path.join(ROOT, "data", "proposte", "cards-v3-era1.json")
-DPI = 200
+# 150 dpi e JPEG: la pagina web porta tutte le carte nel pacchetto, e a 200 dpi in PNG pesavano 162 MB. Sul
+# tavolo una carta occupa poche centinaia di pixel: 150 dpi bastano a leggerla anche da vicino.
+DPI = 150
+QUALITA = 85
+def salva(pix, percorso):
+    pix.save(percorso, jpg_quality=QUALITA)
 
 # gruppo -> (pdf, sezioni dei dati i cui nomi cercare, ha il retro)
 GRUPPI = {
@@ -108,15 +113,15 @@ def estrai(gruppo, dati):
                 senza_nome += 1
                 # La tessera scavo ha il fronte "ROVINA" uguale per tutte (il
                 # nome sta sul retro): se ne tiene uno solo.
-                if gruppo == "tessere_scavo" and not retro and not os.path.exists(os.path.join(dest, "fronte.png")):
-                    pg.get_pixmap(clip=r, dpi=DPI).save(os.path.join(dest, "fronte.png"))
+                if gruppo == "tessere_scavo" and not retro and not os.path.exists(os.path.join(dest, "fronte.jpg")):
+                    salva(pg.get_pixmap(clip=r, dpi=DPI), os.path.join(dest, "fronte.jpg"))
                 continue
             if not retro: posti.append((r, cid))
             tabella = retri if retro else trovati
             if cid in tabella: continue          # copie: basta la prima
-            nome_file = cid + ("_retro" if retro else "") + ".png"
+            nome_file = cid + ("_retro" if retro else "") + ".jpg"
             pix = pg.get_pixmap(clip=r, dpi=DPI)
-            pix.save(os.path.join(dest, nome_file))
+            salva(pix, os.path.join(dest, nome_file))
             tabella[cid] = (i + 1, [round(x) for x in r])
         if not retro:
             # anche le copie servono a riconoscere il retro dalla posizione

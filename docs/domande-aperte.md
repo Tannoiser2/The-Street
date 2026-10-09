@@ -3244,3 +3244,11 @@ dato è stato importato da lì. Ma due confronti fra ciò che è stampato e
     potenziamenti, milestone, tessere dell'era e tessere scavo. Senza i PNG,
     o con la v2, restano le facce di prima. Una `.gdignore` tiene i 390 MB
     di PDF fuori dall'import di Godot.
+
+208. **La grafica v3 anche sulla pagina giocabile.** Il designer: "ancora
+    non vedo la nuova grafica". La pagina su GitHub Pages si ricostruisce a
+    ogni push su main, ma non ritagliava le carte v3 e non le metteva nel
+    pacchetto. Ora il workflow lancia anche `tools/estrai_grafica_v3.py`,
+    le carte escono in JPEG a 150 dpi (26 MB invece di 162) e nel pacchetto
+    web entrano solo quelle che la plancia mostra (circa 19 MB): niente
+    eventi, niente dorsi di edifici, potenziamenti e obiettivi.
