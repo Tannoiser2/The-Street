@@ -40,8 +40,8 @@ fi
 
 # Le carte della v3 (registro 207) vengono dai PDF rifatti con Codex: senza,
 # la pagina col regolamento v3 mostrerebbe le facce della v2. Nel pacchetto
-# entrano solo quelle che la plancia usa (gli eventi e i dorsi degli edifici,
-# dei potenziamenti e degli obiettivi restano fuori): circa 19 MB.
+# entrano solo quelle che la plancia usa (i dorsi degli eventi, degli
+# edifici, dei potenziamenti e degli obiettivi restano fuori): circa 21 MB.
 if [ ! -d "$RADICE/assets/carte/v3/personaggi" ]; then
   echo "mancano le carte v3: le ritaglio dai PDF di Codex"
   python3 "$RADICE/tools/estrai_grafica_v3.py"

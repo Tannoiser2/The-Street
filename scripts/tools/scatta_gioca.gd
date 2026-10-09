@@ -28,5 +28,8 @@ func _ready() -> void:
 		else:
 			g._racconta(func(): StrategyBot.play_turn(g.ctl, "bilanciata"))
 		g._turni_dei_bot()
+		# `--evento 1`: ci si ferma alla prima fine era, con la carta
+		# dell'evento rivelata al centro (registro 210).
+		if args.has("evento") and not g._rivelazione.is_empty(): break
 	g._aggiorna()
 	print("era ", g.ctl.gs.era, " edifici ", g.ctl.gs.grid.buildings.size(), " carte restituite ", TessereScavo.carte_restituite(), " grandezza vera ", BoardLayout3D.grandezza_vera())

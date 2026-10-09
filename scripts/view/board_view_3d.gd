@@ -461,6 +461,11 @@ func _posti_liberi() -> void:
 			if b.uid != int(uid): continue
 			var piede := BoardLayout3D.basetta_box(gs, b)
 			_cornice(piede, Color(0.42, 1.0, 0.52), 4.0)
+	# Gli edifici colpiti dall'evento appena rivelato (registro 210), in rosso.
+	for uid in evidenze.get("crollati", []):
+		for b in gs.grid.buildings:
+			if b.uid != int(uid): continue
+			_cornice(BoardLayout3D.basetta_box(gs, b), Color(1.0, 0.36, 0.28), 4.0)
 
 # Una carta stesa sul tavolo: lo spessore del cartoncino piu' il disegno
 # sopra. Il disegno e' un piano a se' e non la faccia della scatola, perche'

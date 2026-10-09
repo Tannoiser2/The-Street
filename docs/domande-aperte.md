@@ -3265,3 +3265,13 @@ dato è stato importato da lì. Ma due confronti fra ciò che è stampato e
     quelli riportati alla luce. La carta Dinastia, i suoi pupazzetti e il
     suo tasto ci sono solo se il file dati ne mette almeno una copia: v1.5 e
     v2 si', la v3 no.
+
+210. **L'evento si rivela al centro dello schermo.** Il designer: "quando
+    rivelato mettilo al centro dello schermo per rivelarlo e far vedere
+    quali edifici crollano". A fine era la carta dell'evento compare al
+    centro, con il suo effetto e l'elenco degli edifici colpiti (chi
+    crolla in rosso, chi resta rudere); sul tavolo quegli edifici hanno una
+    cornice rossa. Finche' la carta e' aperta i bot aspettano; un clic la
+    chiude. Il controller annota l'evento risolto e gli edifici colpiti in
+    `ultima_fine_era`, che il motore non legge mai (TORNEO e VITA identici).
+    Nel pacchetto web entrano anche i fronti degli eventi.
