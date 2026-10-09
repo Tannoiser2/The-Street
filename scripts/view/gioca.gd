@@ -107,6 +107,16 @@ var _nota_dove := Vector2.ZERO
 # guardare il tavolo con le eredita' scoperte, e si riapre col suo tasto.
 var _riepilogo_aperto := true
 
+# LA RIVELAZIONE DELL'EVENTO (registro 210). Il designer: "quando rivelato
+# mettilo al centro dello schermo per rivelarlo e far vedere quali edifici
+# crollano". A fine era la carta dell'evento compare al centro, con l'elenco
+# degli edifici colpiti, e quegli edifici si accendono di rosso sul tavolo.
+# Finche' resta aperta i bot aspettano; un clic la chiude.
+var _rivelazione: Dictionary = {}
+var _era_rivelata := 0
+const ROSSO_CROLLO := Color(1.0, 0.36, 0.28)
+var _tex_evento: Texture2D = null
+
 # Quanto manca al prossimo turno di bot, in secondi.
 var _attesa := 0.0
 
@@ -149,6 +159,8 @@ func _ready() -> void:
 func comincia() -> void:
 	inizio.sistema()
 	_riepilogo_aperto = true
+	_rivelazione = {}
+	_era_rivelata = 0
 	if vista != null:
 		remove_child(vista)
 		vista.queue_free()
@@ -210,6 +222,10 @@ func _aggiorna() -> void:
 # Cosa la vista deve accendere: la carta scelta, i posti dove puo' andare, gli
 # edifici che possono riceverla.
 func _acceso() -> Dictionary:
+	if not _rivelazione.is_empty():
+		var colpiti: Array = []
+		for c in _rivelazione["colpiti"]: colpiti.append(int(c["uid"]))
+		return {"crollati": colpiti}
 	if _scelta.is_empty(): return {}
 	var slot: Array = []
 	var uid: Array = []
@@ -238,6 +254,7 @@ func _racconta(mossa: Callable) -> Variant:
 	if ctl == null: return mossa.call()
 	var prima := Cronaca.fotografa(ctl.gs)
 	var esito = mossa.call()
+	_guarda_evento()
 	# "Tu" e' l'umano che ha mosso, se gioca da solo; a turno sullo stesso
 	# schermo ognuno e' "giocatore N". Si guarda chi ha mosso, non di chi e'
 	# il turno adesso: finita la mossa tocca gia' a un altro.
@@ -259,6 +276,7 @@ func muovi_un_bot() -> void:
 # Il tempo che passa muove i bot, uno alla volta. A "passo" non li muove
 # nessuno: aspettano il tasto Avanza.
 func _process(delta: float) -> void:
+	if not _rivelazione.is_empty(): return
 	if not bot_da_muovere() or inizio.bot_a_mano() or inizio.bot_subito(): return
 	_attesa -= delta
 	if _attesa <= 0.0: muovi_un_bot()
@@ -692,6 +710,10 @@ func _clic(pixel: Vector2) -> void:
 			_applica_scelta(b["scelta"])
 			return
 	if ctl == null: return
+	if not _rivelazione.is_empty():
+		_rivelazione = {}
+		_aggiorna()
+		return
 	var gs := ctl.gs
 	if gs.phase == Enums.Phase.FINE_PARTITA: return
 	# Una scelta in sospeso viene prima di tutto: finche' non e' risolta il
@@ -1130,7 +1152,7 @@ func _disegna_hud() -> void:
 	# Finita la partita si tira la somma. Il tasto per rifarne un'altra sta
 	# li' dentro: senza, bisognava ricaricare la pagina.
 	if gs.phase == Enums.Phase.FINE_PARTITA:
-		if _riepilogo_aperto:
+		if _riepilogo_aperto and _rivelazione.is_empty():
 			_disegna_riepilogo(font, gs)
 		else:
 			_tasto(font, "Riepilogo", Vector2(20.0, schermo.y - 58.0), true,
@@ -1154,6 +1176,64 @@ func _disegna_hud() -> void:
 
 	if not _nota.is_empty():
 		_riquadro(font, _nota, _nota_dove + Vector2(18, 18))
+	if not _rivelazione.is_empty():
+		_disegna_rivelazione(font)
+
+# Se l'ultima mossa ha chiuso un'era, l'evento che ha colpito si rivela. Lo
+# dice il controller (`ultima_fine_era`), che lo annota quando lo risolve:
+# a mossa finita `current_event` e' gia' quello dell'era dopo.
+func _guarda_evento() -> void:
+	if ctl == null: return
+	var u: Dictionary = ctl.ultima_fine_era
+	if u.is_empty() or int(u["era"]) == _era_rivelata: return
+	_era_rivelata = int(u["era"])
+	if (u["evento"] as Dictionary).is_empty(): return
+	_rivelazione = u
+
+# La carta al centro, e sotto cosa ha fatto: chi crolla, chi resta rudere.
+func _disegna_rivelazione(font: Font) -> void:
+	var schermo := _hud.get_viewport_rect().size
+	var ev: Dictionary = _rivelazione["evento"]
+	var righe := PackedStringArray()
+	for c in _rivelazione["colpiti"]:
+		var b := _edificio(int(c["uid"]))
+		if b == null: continue
+		var cosa := "crolla" if int(c["dopo"]) == Enums.BuildingState.ROVINA else "diventa rudere"
+		righe.append("%s (giocatore %d) %s" % [str(b.data["name"]), b.owner, cosa])
+	if righe.is_empty(): righe.append("Nessun edificio cade.")
+	var immagine := BoardLayout3D.v3_path("eventi", str(ev.get("id", "")))
+	var carta := Vector2(260.0, 275.0) if immagine != "" else Vector2.ZERO
+	var largo := 440.0
+	var alto := 70.0 + carta.y + 46.0 + righe.size() * 19.0 + 44.0
+	var r := Rect2((schermo - Vector2(largo, alto)) / 2.0, Vector2(largo, alto))
+	_hud.draw_rect(Rect2(Vector2.ZERO, schermo), Color(0, 0, 0, 0.25), true)
+	_hud.draw_rect(r, SFONDO, true)
+	_hud.draw_rect(r, Color(1, 1, 1, 0.22), false, 1.0)
+	var y := r.position.y + 30.0
+	_hud.draw_string(font, Vector2(r.position.x, y), "Fine dell'era %d: si rivela l'evento" % int(_rivelazione["era"]),
+		HORIZONTAL_ALIGNMENT_CENTER, largo, 13, SPENTO)
+	y += 26.0
+	_hud.draw_string(font, Vector2(r.position.x, y), str(ev.get("name", "")),
+		HORIZONTAL_ALIGNMENT_CENTER, largo, 20, CHIARO)
+	y += 14.0
+	if immagine != "":
+		# La texture si tiene in un campo: se muore con la funzione, il disegno
+		# che arriva dopo trova una texture liberata e mostra un riquadro bianco.
+		if _tex_evento == null or _tex_evento.resource_path != immagine:
+			_tex_evento = load(immagine) as Texture2D
+		if _tex_evento != null:
+			_hud.draw_texture_rect(_tex_evento, Rect2(Vector2(r.position.x + (largo - carta.x) / 2.0, y), carta), false)
+		y += carta.y
+	y += 24.0
+	_hud.draw_string(font, Vector2(r.position.x + 16.0, y), str(ev.get("effect_text", "")),
+		HORIZONTAL_ALIGNMENT_LEFT, largo - 32.0, 13, CHIARO)
+	y += 22.0
+	for riga in righe:
+		_hud.draw_string(font, Vector2(r.position.x + 16.0, y), riga,
+			HORIZONTAL_ALIGNMENT_LEFT, largo - 32.0, 13, ROSSO_CROLLO if riga.ends_with("crolla") else SPENTO)
+		y += 19.0
+	_hud.draw_string(font, Vector2(r.position.x, r.end.y - 16.0), "Clic per continuare",
+		HORIZONTAL_ALIGNMENT_CENTER, largo, 12, SPENTO)
 
 # Che mossa sarebbe cliccare qui, e quanto costa. Il conto che non torna esce
 # in coda e in rosso: il posto resta acceso perche' la mossa e' permessa, ed
@@ -1612,9 +1692,12 @@ func _disegna_cronaca(font: Font, cima: float) -> void:
 func _disegna_bottoni(font: Font, p: PlayerState) -> void:
 	var schermo := _hud.get_viewport_rect().size
 	var voci: Array = []
-	var din := AvailableActions.dinastia(ctl.gs, _io())
-	voci.append({"voce": din, "testo": "Dinastia  " + DescrizioneAzione.prezzo(din),
-		"attiva": din.legale and din.pagabile(p)})
+	# Il tasto della Dinastia solo dove il regolamento la prevede: nella v3
+	# restava spento per tutta la partita, a ricordare una carta che non c'e'.
+	if BoardLayout3D.dinastia_in_gioco():
+		var din := AvailableActions.dinastia(ctl.gs, _io())
+		voci.append({"voce": din, "testo": "Dinastia  " + DescrizioneAzione.prezzo(din),
+			"attiva": din.legale and din.pagabile(p)})
 	# Con le carte restituite non si ristruttura (registro 131): niente tasto.
 	if not TessereScavo.carte_restituite():
 		var restauri := AvailableActions.restauri(ctl.gs, _io(), ctl.colonna_attivata())

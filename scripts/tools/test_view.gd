@@ -53,6 +53,7 @@ func _ready() -> void:
 	_run("il personaggio sepolto sta sotto la carta del suo edificio", _test_sepolto)
 	_run("il terrapieno si paga e si vede", _test_terrapieni)
 	_run("v3: il sacchetto degli scheletri a schermo (registro 188)", _test_v3_sacchetto)
+	_run("l'evento si rivela al centro a fine era", _test_rivelazione_evento)
 	_run("sotto un edificio a scalino non resta un buco", _test_scalino)
 	_run("le carte stanno in piedi alla stessa altezza", _test_misure_carte)
 	_run("la sagoma e' un pezzo solo, spesso", _test_sagoma_estrusa)
@@ -3305,6 +3306,37 @@ func _test_v3_a_schermo() -> void:
 # IL SACCHETTO A SCHERMO (registro 188): il riquadro della rovina scoperta dice
 # di chi sono gli scheletri e chi incassa; il mazzetto davanti al giocatore e'
 # il sacchetto comune, con le tessere ancora dentro.
+# Registro 210: a fine era la carta dell'evento compare al centro, con gli
+# edifici colpiti accesi sul tavolo; i bot aspettano finche' un clic la chiude.
+func _test_rivelazione_evento() -> void:
+	if not FileAccess.file_exists("res://data/proposte/cards-v3-era1.json"): return
+	var scena := ResourceLoader.load("res://scenes/gioca.tscn") as PackedScene
+	if scena == null: return
+	var n := scena.instantiate()
+	add_child(n)
+	n.inizio.con_regolamento(2)
+	n.inizio.con_giocatori(3)
+	n.inizio.con_bot(3)
+	n.inizio.con_velocita(0)
+	n.comincia()
+	var gs: GameState = n.ctl.gs
+	_ok("a inizio partita nessun evento da rivelare", n._rivelazione.is_empty())
+	var giri := 0
+	while gs.era == 1 and giri < 400:
+		n.muovi_un_bot()
+		giri += 1
+	_ok("finita l'era 1 l'evento si rivela", not n._rivelazione.is_empty())
+	_eq("  ed e' quello dell'era 1", int(n._rivelazione.get("era", 0)), 1)
+	_eq("  e gli edifici colpiti si accendono sul tavolo",
+		(n._acceso().get("crollati", []) as Array).size(), (n._rivelazione.get("colpiti", []) as Array).size())
+	var prima := gs.current_index
+	n._process(10.0)
+	_eq("  finche' resta aperta i bot aspettano", gs.current_index, prima)
+	n._clic(Vector2(5, 5))
+	_ok("  e un clic la chiude", n._rivelazione.is_empty())
+	n.queue_free()
+	CardDB.load_db(CardDB.DB_PATH)
+
 func _test_v3_sacchetto() -> void:
 	if not FileAccess.file_exists("res://data/proposte/cards-v3-era1.json"): return
 	var scena := ResourceLoader.load("res://scenes/gioca.tscn") as PackedScene
@@ -3318,6 +3350,9 @@ func _test_v3_sacchetto() -> void:
 	n.comincia()
 	var gs: GameState = n.ctl.gs
 	_ok("la v3 a schermo ha il sacchetto", TessereScavo.scheletri_personaggi())
+	# La v3 non ha Dinastia (zero copie): ne' la carta ne' i pupazzetti.
+	_ok("  e niente carta Dinastia", BoardLayout3D.carta_dinastia(gs).is_empty())
+	_eq("  ne' pupazzetti della Dinastia", BoardLayout3D.meeple_dinastia(gs).size(), 0)
 	var giri := 0
 	while not gs.pending_choice.is_empty() and giri < 12:
 		if int(gs.pending_choice["player"]) != 0: break
@@ -3393,6 +3428,15 @@ func _test_v3_sacchetto() -> void:
 		pers += 1
 		if bool(c.get("coperta", false)): girati += 1
 	_ok("  a era finita stanno tutti sottosopra (%d su %d)" % [girati, pers], pers > 0 and girati == pers)
+	# Registro 209: sul tavolo arrivano col dorso, tutti in una pila sola.
+	var in_pila := 0
+	var x_pila := {}
+	for c in BoardLayout3D.player_cards(gs, 0):
+		if int(c["player"]) != 0 or str(c["kind"]) != "personaggio": continue
+		if bool(c.get("coperta", false)):
+			in_pila += 1
+			x_pila[snappedf((c["aabb"] as AABB).position.x, 0.01)] = true
+	_ok("  e sul tavolo stanno col dorso in una pila sola (%d, %d colonne)" % [in_pila, x_pila.size()], in_pila == pers and x_pila.size() == 1)
 	var riga_coperta: PackedStringArray = n._descrivi_sotto_carta({"kind": "personaggio", "id": str(gs.players[0].personaggi_storia[0][0]), "player": 0, "coperta": true})
 	_ok("  e il riquadro dice che e' uno scheletro", "\n".join(riga_coperta).contains("scheletro"))
 	r.scavata = true

@@ -3252,3 +3252,26 @@ dato è stato importato da lì. Ma due confronti fra ciò che è stampato e
     le carte escono in JPEG a 150 dpi (26 MB invece di 162) e nel pacchetto
     web entrano solo quelle che la plancia mostra (circa 19 MB): niente
     eventi, niente dorsi di edifici, potenziamenti e obiettivi.
+
+209. **I sepolti in pila, la Dinastia via.** Il designer: "rigirare i
+    personaggi a fine era e metterli su una pila laterale (sono stati
+    sepolti) in modo da avere visibili solo i 4 attivi. Poi a fine gioco si
+    rigirano solo i personaggi riportati alla luce. Poi togli la carta
+    Dinastia". Il dorso del registro 194 non arrivava mai sul tavolo: la
+    disposizione delle carte perdeva il segno "coperta", e i Personaggi
+    restavano col verso attivo. Ora davanti al giocatore la prima colonna e'
+    la pila dei sepolti, col dorso scheletro; nelle altre stanno i
+    Personaggi scoperti, cioe' quelli dell'era in corso e, a fine partita,
+    quelli riportati alla luce. La carta Dinastia, i suoi pupazzetti e il
+    suo tasto ci sono solo se il file dati ne mette almeno una copia: v1.5 e
+    v2 si', la v3 no.
+
+210. **L'evento si rivela al centro dello schermo.** Il designer: "quando
+    rivelato mettilo al centro dello schermo per rivelarlo e far vedere
+    quali edifici crollano". A fine era la carta dell'evento compare al
+    centro, con il suo effetto e l'elenco degli edifici colpiti (chi
+    crolla in rosso, chi resta rudere); sul tavolo quegli edifici hanno una
+    cornice rossa. Finche' la carta e' aperta i bot aspettano; un clic la
+    chiude. Il controller annota l'evento risolto e gli edifici colpiti in
+    `ultima_fine_era`, che il motore non legge mai (TORNEO e VITA identici).
+    Nel pacchetto web entrano anche i fronti degli eventi.

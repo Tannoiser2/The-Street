@@ -16,6 +16,10 @@ var gs: GameState
 # La colonna attivata e l'edificio abitato stanno nello STATO
 # (gs.colonna_attivata, gs.protetto_uid): vedi il commento in GameState.
 var _omaggi_da_piazzare: Array = []   # potenziamenti dell'Eruzione in attesa di bersaglio
+# L'ULTIMO EVENTO RISOLTO, per la vista (registro 210): quale evento, in che
+# era, e gli edifici che ha colpito con lo stato di prima e di dopo. Il motore
+# non lo legge mai: serve solo a mostrarlo al centro dello schermo.
+var ultima_fine_era: Dictionary = {}
 
 # ---- setup ---------------------------------------------------------
 func new_game(n_players: int, seed_value: int) -> void:
@@ -1081,7 +1085,15 @@ func _has_worker(i: int) -> bool:
 # ma dove lo decide il giocatore. Percio' la sequenza e' divisa in pezzi e
 # puo' sospendersi in mezzo.
 func _finish_era() -> void:
+	var evento: Dictionary = gs.evento_coperto if not gs.evento_coperto.is_empty() else gs.current_event
+	var prima := {}
+	for b in gs.grid.buildings: prima[b.uid] = b.state
 	var persi := EraRules.resolve_event(gs)
+	var colpiti: Array = []
+	for b in gs.grid.buildings:
+		if prima.has(b.uid) and b.state != int(prima[b.uid]):
+			colpiti.append({"uid": b.uid, "prima": int(prima[b.uid]), "dopo": b.state})
+	ultima_fine_era = {"era": gs.era, "evento": evento.duplicate(true), "colpiti": colpiti}
 	_omaggi_da_piazzare = EraRules.draw_gifts(gs, persi)
 	_prosegui_fine_era()
 

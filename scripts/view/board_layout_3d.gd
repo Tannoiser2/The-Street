@@ -1200,28 +1200,36 @@ static func _fila_destra(gs: GameState) -> Array[Dictionary]:
 
 	# La Dinastia sta "sempre disponibile fuori dalle file": in cima, sopra i
 	# personaggi, e non si sposta mai. Chi la compra ne prende il pupazzetto.
-	var m_din := misura_carta("dinastia")
-	var alto_righe := righe * m_pers.y + maxf(0.0, righe - 1) * CARTA_GAP
-	var alto_mon := gs.monuments_open.size() * m_mon.y \
-		+ maxf(0.0, gs.monuments_open.size() - 1) * CARTA_GAP
-	var totale := m_din.y + CARTA_GAP * 3.0 + alto_righe \
-		+ (CARTA_GAP * 3.0 + alto_mon if alto_mon > 0.0 else 0.0)
-	var z := board_d() / 2.0 - totale / 2.0
-	var x := board_w(gs) + BORDO
-
-	out.append({"kind": "dinastia", "id": "dinastia_1",
-		"aabb": AABB(Vector3(x, 0.0, z), Vector3(m_din.x, TESSERA_Y, m_din.y))})
+	# Dove il regolamento non la prevede (la v3 ne mette zero copie) la carta
+	# non c'e': il designer, "togli la carta Dinastia che non serve piu'".
+	var din := dinastia_in_gioco()
+	var m_din := misura_carta("dinastia") if din else Vector2.ZERO
 	# IL SACCHETTO DELLE TESSERE SCAVO (registro 188): uno solo, di tutti.
 	# Le tessere dentro sono gli scheletri dei Personaggi reclutati, quindi
 	# sta in cima alla loro fila, a fianco della Dinastia, dove nessun
 	# giocatore puo' crederlo suo. Prima stava davanti a ogni giocatore come
 	# il mazzetto rovine della v2, e a schermo sembravano tre sacchetti.
-	if grandezza_vera() and TessereScavo.scheletri_personaggi():
-		var m_sac := misura_carta("mazzetto")
+	var sacchetto := grandezza_vera() and TessereScavo.scheletri_personaggi()
+	var m_sac := misura_carta("mazzetto") if sacchetto else Vector2.ZERO
+	var alto_testa := maxf(m_din.y, m_sac.y)
+	var alto_righe := righe * m_pers.y + maxf(0.0, righe - 1) * CARTA_GAP
+	var alto_mon := gs.monuments_open.size() * m_mon.y \
+		+ maxf(0.0, gs.monuments_open.size() - 1) * CARTA_GAP
+	var totale := (alto_testa + CARTA_GAP * 3.0 if alto_testa > 0.0 else 0.0) + alto_righe \
+		+ (CARTA_GAP * 3.0 + alto_mon if alto_mon > 0.0 else 0.0)
+	var z := board_d() / 2.0 - totale / 2.0
+	var x := board_w(gs) + BORDO
+
+	if din:
+		out.append({"kind": "dinastia", "id": "dinastia_1",
+			"aabb": AABB(Vector3(x, 0.0, z + (alto_testa - m_din.y) / 2.0),
+				Vector3(m_din.x, TESSERA_Y, m_din.y))})
+	if sacchetto:
+		var x_sac := x + (m_din.x + CARTA_GAP if din else 0.0)
 		out.append({"kind": "mazzetto", "id": "sacchetto",
-			"aabb": AABB(Vector3(x + m_din.x + CARTA_GAP, 0.0, z + (m_din.y - m_sac.y) / 2.0),
+			"aabb": AABB(Vector3(x_sac, 0.0, z + (alto_testa - m_sac.y) / 2.0),
 				Vector3(m_sac.x, TESSERA_Y, m_sac.y))})
-	z += m_din.y + CARTA_GAP * 3.0
+	if alto_testa > 0.0: z += alto_testa + CARTA_GAP * 3.0
 
 	for i in righe:
 		if i < gs.char_row.size():
@@ -1449,6 +1457,14 @@ static func meeple_dinastia(gs: GameState) -> Array[Dictionary]:
 			r.position.y + r.size.y, r.position.z + r.size.z / 2.0)})
 	return out
 
+# La Dinastia c'e' se il file dati ne mette almeno una copia: v1.5 e v2 si',
+# la v3 no.
+static func dinastia_in_gioco() -> bool:
+	for id in CardDB.characters:
+		var c: Dictionary = CardDB.characters[id]
+		if bool(c.get("is_dynasty", false)): return int(c.get("copies", 0)) > 0
+	return false
+
 static func carta_dinastia(gs: GameState) -> Dictionary:
 	for c in _fila_destra(gs):
 		if str(c["kind"]) == "dinastia": return c
@@ -1508,7 +1524,7 @@ static func player_cards(gs: GameState, umano := -1) -> Array[Dictionary]:
 				z += profonda + CARTE_GIOCATORE_GAP
 				profonda = 0.0
 			out.append({"kind": str(carte[j]["kind"]), "id": str(carte[j]["id"]),
-				"player": i, "ordine": j,
+				"player": i, "ordine": j, "coperta": bool(carte[j].get("coperta", false)),
 				"aabb": AABB(Vector3(x, 0.0, z), Vector3(m.x, TESSERA_Y, m.y))})
 			x += m.x + CARTE_GIOCATORE_GAP
 			profonda = maxf(profonda, m.y)
@@ -1539,6 +1555,9 @@ static func player_cards(gs: GameState, umano := -1) -> Array[Dictionary]:
 # destra, nell'ordine in cui i Personaggi sono stati presi - quelli di
 # quest'era in fondo, i piu' vicini a chi guarda.
 const PERSONAGGI_COLONNE_MIN := 2
+# Lo sfasamento fra due carte della pila dei sepolti: quanto basta a vedere
+# lo spessore del mazzetto, non a leggerne le carte (sono coperte).
+const PILA_PASSO := 1.5
 
 static func _tavolo_giocatore(carte: Array, player: int, x0: float, spazio: float,
 		z0: float) -> Array[Dictionary]:
@@ -1548,9 +1567,12 @@ static func _tavolo_giocatore(carte: Array, player: int, x0: float, spazio: floa
 		var k := str(carte[j]["kind"])
 		var dove := k if k in ["mazzetto", "personaggio", "token"] else "obiettivi"
 		(colonne[dove] as Array).append(j)
+	# "coperta" viaggia con la carta: senza, il Personaggio girato (registro
+	# 194) arrivava al disegno col verso attivo e non si girava mai.
 	var voce := func(j: int, box: AABB) -> Dictionary:
 		return {"kind": str(carte[j]["kind"]), "id": str(carte[j]["id"]),
-			"player": player, "ordine": j, "aabb": box}
+			"player": player, "ordine": j, "aabb": box,
+			"coperta": bool(carte[j].get("coperta", false))}
 	var mt := misura_carta("token")
 	var largo_destra := 0.0
 	if not (colonne["token"] as Array).is_empty(): largo_destra = mt.x
@@ -1577,8 +1599,17 @@ static func _tavolo_giocatore(carte: Array, player: int, x0: float, spazio: floa
 	# Sotto, i Personaggi a ventaglio su piu' colonne: ognuno copre quello
 	# sopra di lui lasciandone fuori il nome e l'era, e sta un filo piu' in
 	# alto (chi copre sta sopra).
-	var pers: Array = colonne["personaggio"]
-	if pers.is_empty(): return out
+	# I SEPOLTI IN PILA (registro 209). Il designer: "rigirare i personaggi a
+	# fine era e metterli su una pila laterale (sono stati sepolti) in modo
+	# da avere visibili solo i 4 attivi". Le carte col dorso stanno nella
+	# prima colonna, una sull'altra, sfasate di un filo perche' si capisca
+	# che e' una pila; i Personaggi scoperti - quelli dell'era in corso, e a
+	# fine partita quelli riportati alla luce - si stendono nelle altre.
+	var pila: Array = []
+	var pers: Array = []
+	for j in colonne["personaggio"]:
+		(pila if bool(carte[j].get("coperta", false)) else pers).append(j)
+	if pers.is_empty() and pila.is_empty(): return out
 	var piena := misura_carta("personaggio")
 	var quante: int = maxi(PERSONAGGI_COLONNE_MIN,
 		int(floor((spazio + CARTE_GIOCATORE_GAP) / (piena.x + CARTE_GIOCATORE_GAP))))
@@ -1586,11 +1617,20 @@ static func _tavolo_giocatore(carte: Array, player: int, x0: float, spazio: floa
 	var scala: float = minf(1.0, posto / piena.x)
 	var mp := piena * scala
 	var passo := VENTAGLIO_Z * scala
+	var x_pers := x0
+	var colonne_pers := quante
+	if not pila.is_empty():
+		for n in pila.size():
+			out.append(voce.call(int(pila[n]), AABB(
+				Vector3(x0, float(n) * VENTAGLIO_Y, z + n * PILA_PASSO),
+				Vector3(mp.x, TESSERA_Y, mp.y))))
+		x_pers += mp.x + CARTE_GIOCATORE_GAP
+		colonne_pers = maxi(1, quante - 1)
 	for n in pers.size():
-		var colonna := n % quante
-		var riga := n / quante
+		var colonna := n % colonne_pers
+		var riga := n / colonne_pers
 		out.append(voce.call(int(pers[n]), AABB(
-			Vector3(x0 + colonna * (mp.x + CARTE_GIOCATORE_GAP), float(riga) * VENTAGLIO_Y, z + riga * passo),
+			Vector3(x_pers + colonna * (mp.x + CARTE_GIOCATORE_GAP), float(riga) * VENTAGLIO_Y, z + riga * passo),
 			Vector3(mp.x, TESSERA_Y, mp.y))))
 	return out
 
