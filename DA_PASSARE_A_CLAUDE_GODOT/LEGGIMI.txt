@@ -1,0 +1,17 @@
+PACCHETTO DI RIFERIMENTO PER IL PROGETTO GODOT
+
+I PDF in PDF_COMPONENTI sono le versioni definitive. Le pagine dispari sono i fronti e le pagine pari i relativi retri, quando previsti.
+
+Contenuto:
+- Edifici: tutte le cinque ere e le tessere RIS.
+- Personaggi: 80 carte; sul retro nome, scheletro e valore di Scavo.
+- Potenziamenti: tutte le cinque ere.
+- Tessere dell'Era: 35 tipi in due copie.
+- Eventi.
+- Obiettivi e Milestones.
+- Tessere Scavo/Rovine: 80 combinazioni fronte-retro.
+- Territori.
+
+La cartella DATI contiene la tabella sorgente delle carte, utile per implementare effetti e valori senza ricavarli graficamente dai PDF.
+La cartella ICONE contiene le icone PNG trasparenti da usare nell'interfaccia di Godot.
+I PDF A4 sono riferimenti grafici e di impaginazione: per il gioco digitale conviene importare le singole carte come PNG ritagliati, non mostrare direttamente le pagine PDF.
