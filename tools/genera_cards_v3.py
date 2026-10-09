@@ -1104,6 +1104,17 @@ VARIANTI["senza_bersagli"] = lambda v: None
 PRIMA_DEL_204 = set(VARIANTI)
 if variante not in PRIMA_DEL_204:
     _bersagli(v3, 1)
+# LA RISORSA SI CHIAMA COSTRUZIONE. Nei dati resta la chiave "pietra" (lo schema e la v1.5 non cambiano), ma due
+# testi ereditati dalla v2 la nominavano ancora sulla carta: si corregge solo cio' che il giocatore legge. Come i
+# bersagli, vale per la base e le varianti nuove; i file delle varianti di prima restano com'erano.
+TESTI_COSTRUZIONE = {"ev_inverno_lungo": ("effect_text", "perdono 1 pietra", "perdono 1 Costruzione"),
+                     "mo_cloaca_massima": ("condition_text", "3 pietra complessive", "3 Costruzione complessive")}
+if variante not in PRIMA_DEL_204:
+    for c in v3["events"] + v3["monuments"]:
+        if c["id"] in TESTI_COSTRUZIONE:
+            campo, prima, dopo = TESTI_COSTRUZIONE[c["id"]]
+            assert prima in c[campo], c["id"]
+            c[campo] = c[campo].replace(prima, dopo)
 if variante:
     VARIANTI[variante](v3)
     v3["meta"]["ruleset"] = "v3-era1-prova-" + variante
