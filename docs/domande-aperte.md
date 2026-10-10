@@ -3306,3 +3306,21 @@ dato è stato importato da lì. Ma due confronti fra ciò che è stampato e
     nome di funzione contiene una delle parole: un ritocco si controlla in
     pochi secondi. Il giro intero si fa prima del merge. La verifica di
     riferimento resta solo per i cambi di motore e bot.
+
+214. **Le spinte sulla base con l'evento coperto.** Il designer: "ritara i
+    bot". Misura 74, sei lotti da 300 partite sulla base del registro 211
+    (vittorie 24-44, Lampo 24, Obiettivi 44). `obiettivi_peso` non sposta
+    gli Obiettivi: 43-45 a 0,5, 0,3, 0,2 e anche a 0, quindi il loro
+    vantaggio non viene da quella spinta. `lampo` a 1,2 riporta il Lampo da
+    24 a 31 in tutti i lotti che lo provano, togliendo qualcosa alla
+    Rendita (da 35 a 28-30). In tabella: `lampo` 1,2, `rendita_per_era`
+    1,2, `obiettivi_peso` 0,2. Vittorie 29-45, PV 84,0. Con circa 128 posti
+    a strategia, uno scarto di 2-3 punti fra due lotti e' rumore. Resta
+    aperto perche' gli Obiettivi vincono: va cercato nelle carte (milestone,
+    obiettivi segreti), non nelle spinte.
+
+215. **La PR delle carte della Rendita si chiude.** La PR 89 proponeva
+    `rendita_robusta` (+1 resistenza alle 15 carte di Rendita) quando la
+    Rendita era ultima (27). Con l'evento coperto e le spinte del registro
+    214 sta a 30, a meta' classifica; le sue varianti erano misurate su una
+    base che non c'e' piu'. Il ramo resta su GitHub, se servisse.

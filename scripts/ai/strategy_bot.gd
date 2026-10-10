@@ -737,9 +737,13 @@ static var spinte_override := {}
 # vantaggio diffuso, non con le pietre miliari), `rendita_per_era` 1,0 (la
 # Rendita che insegue la rendita lascia per strada il Lampo),
 # `scavo_scheletro` 1,0.
-const SPINTE_V3 := {"rendita_per_era": 1.0, "rendita_zero": 0.0, "lampo": 0.8, "lampo_zero": 0.0,
+# Registro 214 (74ª misura, base con l'evento coperto): `lampo` da 0,8 a 1,2
+# (il Lampo da 24 a 31), `rendita_per_era` da 1,0 a 1,2, `obiettivi_peso` da
+# 0,5 a 0,2. Forbice da 24-44 a 29-45. Gli Obiettivi restano in testa anche
+# col loro peso a zero (43): il vantaggio non viene dalla spinta.
+const SPINTE_V3 := {"rendita_per_era": 1.2, "rendita_zero": 0.0, "lampo": 1.2, "lampo_zero": 0.0,
 	"scavo_premio": 0.0, "scavo_terra": -0.5, "scavo_terra_scavo": 0.5, "protezione_attesa": 2.0,
-	"lampo_potenzia": 1.5, "lampo_sopra": 0.0, "obiettivi_peso": 0.5, "continuita_peso": 1.0,
+	"lampo_potenzia": 1.5, "lampo_sopra": 0.0, "obiettivi_peso": 0.2, "continuita_peso": 1.0,
 	# la Ritrovamenti (registro 173): lo scheletro del Personaggio al draft, le caselle che
 	# lasceranno tessere, la riscoperta delle proprie rovine nell'era 5 (per tessera), l'Arte.
 	# Con le caselle a 0,6 vinceva il 43% giocando da Rendita (le carte larghe sono quelle a
