@@ -723,7 +723,11 @@ func _clic(pixel: Vector2) -> void:
 		_aggiorna()
 		return
 	# Un clic sulle fasce che non cade su un tasto non arriva alla mappa sotto.
-	if _sulle_fasce(pixel): return
+	# I tasti delle azioni (Fine turno, Dinastia, restauro) stanno proprio
+	# nella barra in basso e si provano piu' giu': prima questo controllo li
+	# scartava, e "Fine turno" non rispondeva piu'.
+	if _sulle_fasce(pixel) and not _bottoni.any(func(b): return (b["rect"] as Rect2).has_point(pixel)):
+		return
 	var gs := ctl.gs
 	if gs.phase == Enums.Phase.FINE_PARTITA: return
 	# Una scelta in sospeso viene prima di tutto: finche' non e' risolta il

@@ -54,6 +54,7 @@ func _ready() -> void:
 	_run("il terrapieno si paga e si vede", _test_terrapieni)
 	_run("v3: il sacchetto degli scheletri a schermo (registro 188)", _test_v3_sacchetto)
 	_run("l'evento si rivela al centro a fine era", _test_rivelazione_evento)
+	_run("il tasto Fine turno nella barra in basso risponde", _test_fine_turno_in_barra)
 	_run("sotto un edificio a scalino non resta un buco", _test_scalino)
 	_run("le carte stanno in piedi alla stessa altezza", _test_misure_carte)
 	_run("la sagoma e' un pezzo solo, spesso", _test_sagoma_estrusa)
@@ -3337,6 +3338,34 @@ func _test_v3_a_schermo() -> void:
 # il sacchetto comune, con le tessere ancora dentro.
 # Registro 210: a fine era la carta dell'evento compare al centro, con gli
 # edifici colpiti accesi sul tavolo; i bot aspettano finche' un clic la chiude.
+# Il tasto Fine turno sta nella barra in basso (registro 213): un clic li'
+# deve arrivare al tasto e non essere scartato come "clic sulla fascia".
+func _test_fine_turno_in_barra() -> void:
+	var scena := ResourceLoader.load("res://scenes/gioca.tscn") as PackedScene
+	if scena == null: return
+	var n := scena.instantiate()
+	add_child(n)
+	n.inizio.con_giocatori(3)
+	n.inizio.con_bot(2)
+	n.inizio.con_velocita(0)
+	n.comincia()
+	var gs: GameState = n.ctl.gs
+	while not gs.pending_choice.is_empty() and int(gs.pending_choice["player"]) == 0:
+		n.ctl.choose(int((gs.pending_choice["options"] as Array)[0]))
+	_ok("tocca all'umano", n._io() == 0)
+	_ok("  che attiva una colonna", n.ctl.place_worker(0))
+	var tutte := AvailableActions.tutte(gs, 0, n.ctl.colonna_attivata())
+	var schermo: Vector2 = n._hud.get_viewport_rect().size
+	var r := Rect2(Vector2(20.0, schermo.y - 60.0), Vector2(120.0, 32.0))
+	_ok("  il tasto sta sulla fascia in basso", n._sulle_fasce(r.get_center()))
+	n._bottoni = [{"rect": r, "voce": tutte[tutte.size() - 1]}]
+	var usati_prima := (gs.players[0] as PlayerState).workers_used
+	var turno_prima := [gs.current_index, gs.phase]
+	n._clic(r.get_center())
+	_ok("  e il clic chiude il turno", [gs.current_index, gs.phase] != turno_prima or (gs.players[0] as PlayerState).workers_used != usati_prima)
+	remove_child(n)
+	n.free()
+
 func _test_rivelazione_evento() -> void:
 	if not FileAccess.file_exists("res://data/proposte/cards-v3-era1.json"): return
 	var scena := ResourceLoader.load("res://scenes/gioca.tscn") as PackedScene
