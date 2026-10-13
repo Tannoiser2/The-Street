@@ -277,6 +277,11 @@ func muovi_un_bot() -> void:
 # Il tempo che passa muove i bot, uno alla volta. A "passo" non li muove
 # nessuno: aspettano il tasto Avanza.
 func _process(delta: float) -> void:
+	# Le carte del draft che escono, poi quelle che entrano (registro 216).
+	if _draft_uscita < DRAFT_USCITA or _draft_entrata < DRAFT_ENTRATA:
+		if _draft_uscita < DRAFT_USCITA: _draft_uscita += delta
+		else: _draft_entrata += delta
+		_hud.queue_redraw()
 	if not _rivelazione.is_empty(): return
 	if not bot_da_muovere() or inizio.bot_a_mano() or inizio.bot_subito(): return
 	_attesa -= delta
@@ -458,7 +463,7 @@ func _sopra(pos: Vector2) -> void:
 	_nota_dove = pos
 	if ctl == null: return
 	# Sulle fasce non c'e' tavolo: niente riquadro, niente posto acceso.
-	var fuori := _sulle_fasce(pos)
+	var fuori := _sulle_fasce(pos) or _draft_al_centro()
 	_nota = PackedStringArray() if fuori else _descrivi_sotto(pos)
 	_sotto_mouse = null if fuori else _bersaglio_sotto(pos)
 	var col := -1 if fuori else _colonna_puntata(pos)
@@ -729,6 +734,10 @@ func _clic(pixel: Vector2) -> void:
 		# fila dei Personaggi, e si sceglie cliccando la carta nella fila.
 		# Le altre scelte (l'edificio dove infilare una carta) si fanno
 		# cliccando l'edificio.
+		# V3: il draft a passaggio si fa con le carte al centro dello schermo.
+		if _draft_al_centro():
+			_clic_draft(pixel)
+			return
 		if str(gs.pending_choice.get("kind", "")) == "draft":
 			var c := _carta_puntata(pixel)
 			if c.is_empty() or str(c["kind"]) != "personaggio": return
@@ -1188,10 +1197,126 @@ func _disegna_hud() -> void:
 		+ "tasto destro per spostare · R riporta l'inquadratura",
 		HORIZONTAL_ALIGNMENT_LEFT, -1, 12, Color("#6f7683"))
 
+	_disegna_draft(font)
 	if not _nota.is_empty():
 		_riquadro(font, _nota, _nota_dove + Vector2(18, 18))
 	if not _rivelazione.is_empty():
 		_disegna_rivelazione(font)
+
+# ---- il draft al centro (registro 216) -------------------------------
+# Il designer: "il draft con le carte personaggio al centro dello schermo; una
+# volta scelta la carta, le rimaste si muovono verso sinistra e verso destra e
+# appaiono quelle per la nuova scelta". La mano di chi sceglie e' `char_row`
+# (il controller ce la mette per il draft a passaggio): qui si disegna grande
+# nello spazio libero, si sceglie con un clic, e la carta presa scende verso
+# il giocatore mentre le altre escono di lato.
+const DRAFT_ALTA := 300.0
+const DRAFT_USCITA := 0.45
+const DRAFT_ENTRATA := 0.35
+var _draft_rects: Array = []        # [{"rect", "posto", "id"}] delle carte che si possono prendere
+var _draft_mostrate: Array = []     # tutte quelle a schermo, anche le spente
+var _draft_vista: Array = []        # la mano gia' mostrata, per accorgersi di una nuova
+var _draft_uscenti: Array = []      # [{"id", "rect", "verso"}]: -1 sinistra, 1 destra, 0 presa
+var _draft_uscita := DRAFT_USCITA
+var _draft_entrata := DRAFT_ENTRATA
+var _tex_draft: Dictionary = {}
+
+func _draft_al_centro() -> bool:
+	return ctl != null and _v3() and ctl.gs.draft_giro > 0 and _io() >= 0 \
+		and str(ctl.gs.pending_choice.get("kind", "")) == "draft" \
+		and int(ctl.gs.pending_choice.get("player", -1)) == _io()
+
+# Il posto della carta i-esima di n: in fila, al centro dello spazio libero.
+func _rect_draft(i: int, n: int) -> Rect2:
+	var schermo := _hud.get_viewport_rect().size
+	var libero := Rect2(0.0, BARRA_SU, schermo.x - PANNELLO_W, schermo.y - BARRA_SU - BARRA_GIU)
+	var alta := minf(DRAFT_ALTA, libero.size.y * 0.7)
+	var misura := Vector2(alta * 66.0 / 93.2, alta)
+	var spazio := 24.0
+	var totale := n * misura.x + (n - 1) * spazio
+	if totale > libero.size.x - 40.0:
+		var k := (libero.size.x - 40.0) / totale
+		misura *= k
+		spazio *= k
+		totale *= k
+	var x0 := libero.position.x + (libero.size.x - totale) / 2.0
+	var y := libero.position.y + (libero.size.y - misura.y) / 2.0 + 14.0
+	return Rect2(Vector2(x0 + i * (misura.x + spazio), y), misura)
+
+func _carta_draft(id: String, r: Rect2, alfa: float, accesa: bool) -> void:
+	if alfa <= 0.0: return
+	if not _tex_draft.has(id):
+		var p := BoardLayout3D.v3_path("personaggi", id)
+		_tex_draft[id] = load(p) as Texture2D if p != "" else null
+	var tex: Texture2D = _tex_draft[id]
+	_hud.draw_rect(Rect2(r.position + Vector2(6, 8), r.size), Color(0, 0, 0, 0.45 * alfa), true)
+	if tex != null:
+		_hud.draw_texture_rect(tex, r, false, Color(1, 1, 1, alfa))
+	else:
+		_hud.draw_rect(r, Color(0.92, 0.88, 0.78, alfa), true)
+		_hud.draw_string(ThemeDB.fallback_font, r.position + Vector2(10, 26), _nome_personaggio(id),
+			HORIZONTAL_ALIGNMENT_LEFT, r.size.x - 20.0, 15, Color(0.1, 0.1, 0.1, alfa))
+	if accesa:
+		_hud.draw_rect(r.grow(3.0), Color(ORO, alfa), false, 3.0)
+
+func _disegna_draft(font: Font) -> void:
+	_draft_rects = []
+	_draft_mostrate = []
+	# Le carte che se ne vanno: la presa scende verso il posto del giocatore,
+	# le altre escono di lato, sfumando.
+	var schermo := _hud.get_viewport_rect().size
+	var k_u := clampf(_draft_uscita / DRAFT_USCITA, 0.0, 1.0)
+	if k_u < 1.0:
+		var corsa := ease(k_u, 2.2)
+		for u in _draft_uscenti:
+			var r: Rect2 = u["rect"]
+			var verso := int(u["verso"])
+			var d := Vector2(verso * schermo.x * 0.6 * corsa, 0.0) if verso != 0 \
+				else Vector2(0.0, schermo.y * 0.55 * corsa)
+			_carta_draft(str(u["id"]), Rect2(r.position + d, r.size), 1.0 - k_u * (0.4 if verso == 0 else 1.0), verso == 0)
+	if not _draft_al_centro(): return
+	var mano: Array = ctl.gs.char_row
+	if mano != _draft_vista:
+		_draft_vista = mano.duplicate()
+		_draft_entrata = 0.0
+	# La mano nuova entra solo quando la vecchia e' uscita.
+	if k_u < 1.0: return
+	var k_e := clampf(_draft_entrata / DRAFT_ENTRATA, 0.0, 1.0)
+	var opzioni: Array = ctl.gs.pending_choice.get("options", [])
+	var libero := Rect2(0.0, BARRA_SU, schermo.x - PANNELLO_W, schermo.y - BARRA_SU - BARRA_GIU)
+	_hud.draw_rect(libero, Color(0, 0, 0, 0.55 * k_e), true)
+	var prima := _rect_draft(0, mano.size())
+	_hud.draw_string(font, Vector2(libero.position.x, prima.position.y - 22.0),
+		"Giro %d: tieni un Personaggio, gli altri passano al vicino" % ctl.gs.draft_giro,
+		HORIZONTAL_ALIGNMENT_CENTER, libero.size.x, 18, Color(ORO, k_e))
+	for i in mano.size():
+		var r := _rect_draft(i, mano.size())
+		# Entrando le carte salgono di poco e si accendono.
+		r.position.y += (1.0 - ease(k_e, 0.5)) * 40.0
+		var si := i in opzioni
+		var sopra := si and k_e >= 1.0 and r.has_point(_nota_dove)
+		if sopra: r.position.y -= 14.0
+		_carta_draft(str(mano[i]), r, k_e * (1.0 if si else 0.45), sopra)
+		var voce := {"rect": r, "posto": i, "id": str(mano[i])}
+		_draft_mostrate.append(voce)
+		if si: _draft_rects.append(voce)
+
+func _clic_draft(pixel: Vector2) -> void:
+	for d in _draft_rects:
+		if not (d["rect"] as Rect2).has_point(pixel): continue
+		var posto := int(d["posto"])
+		# Le carte che restano escono verso il lato su cui stanno; la presa scende.
+		_draft_uscenti = []
+		for e in _draft_mostrate:
+			var verso := 0 if int(e["posto"]) == posto else (-1 if int(e["posto"]) < posto else 1)
+			_draft_uscenti.append({"id": e["id"], "rect": e["rect"], "verso": verso})
+		_draft_uscita = 0.0
+		var nome := _nome_personaggio(str(d["id"]))
+		if _racconta(func(): return ctl.choose(posto)):
+			_messaggio = "Hai preso %s." % nome
+			_turni_dei_bot()
+			_aggiorna()
+		return
 
 # Il nome dell'evento nella barra. Coperto (registro 211) se ne sa solo la
 # forza: il nome lo dice la rivelazione a fine era.
@@ -1290,8 +1415,10 @@ func _invito(gs: GameState) -> String:
 	elif not gs.pending_choice.is_empty():
 		invito = str(gs.pending_choice["prompt"])
 		if str(gs.pending_choice.get("kind", "")) == "draft":
-			invito += " — clicca una carta della fila dei Personaggi: e' gratis"
-			if _v3(): invito += "; la fila e' la tua mano, le altre passano al vicino"
+			if _v3() and gs.draft_giro > 0:
+				invito += " — la tua mano e' al centro: clicca la carta che tieni, le altre passano al vicino"
+			else:
+				invito += " — clicca una carta della fila dei Personaggi: e' gratis"
 		elif str(gs.pending_choice.get("kind", "")) == "tessera":
 			invito += " — scegli qui sotto"
 		elif str(gs.pending_choice.get("kind", "")) == "edificio":

@@ -3324,3 +3324,14 @@ dato è stato importato da lì. Ma due confronti fra ciò che è stampato e
     Rendita era ultima (27). Con l'evento coperto e le spinte del registro
     214 sta a 30, a meta' classifica; le sue varianti erano misurate su una
     base che non c'e' piu'. Il ramo resta su GitHub, se servisse.
+
+216. **Il draft al centro dello schermo.** Il designer: "il draft con le
+    carte personaggio al centro dello schermo; una volta scelta la carta, le
+    rimaste dovrebbero muoversi verso sinistra e verso destra e apparire
+    quelle per la nuova scelta. Inutile mettere le carte sul tavolo durante
+    la scelta". Nel draft a passaggio della v3 la mano di chi sceglie sta
+    grande al centro dello spazio libero, su un velo scuro; si sceglie con
+    un clic (la carta sotto il mouse si alza col filo d'oro). La carta presa
+    scende verso il giocatore, le altre escono a sinistra e a destra secondo
+    il lato su cui stavano; poi entra la mano nuova. Durante il draft la
+    fila dei Personaggi sul tavolo resta vuota. Il draft della v2 non cambia.
