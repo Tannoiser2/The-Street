@@ -31,6 +31,11 @@ func _ready() -> void:
 		# `--evento 1`: ci si ferma alla prima fine era, con la carta
 		# dell'evento rivelata al centro (registro 210).
 		if args.has("evento") and not g._rivelazione.is_empty(): break
+	# Senza `--evento` la carta dell'evento rimasta aperta si chiude, come
+	# farebbe il giocatore col suo clic: se no copre il tavolo da fotografare.
+	if not args.has("evento"):
+		g._rivelazione = {}
+		g._attesa_crolli = 0.0
 	g._aggiorna()
 	# `--scegli 1` (registro 218): si sceglie il primo Personaggio e la prima
 	# carta comprabile, per fotografare i posti accesi coi loro preventivi.
@@ -44,4 +49,9 @@ func _ready() -> void:
 				break
 		g._aggiorna()
 		print("comprabili ", g._comprabili.keys(), " posti ", g._bersagli.size())
+	# `--zoom N`: N scatti di rotella verso il tavolo, per guardare da vicino
+	# i pezzi piccoli (cubetti, pupazzetti) senza cambiare l'inquadratura vera.
+	if args.has("zoom"):
+		g._orbita.zoom(float(args["zoom"]))
+		g.vista.muovi_telecamera()
 	print("era ", g.ctl.gs.era, " edifici ", g.ctl.gs.grid.buildings.size(), " carte restituite ", TessereScavo.carte_restituite(), " grandezza vera ", BoardLayout3D.grandezza_vera())

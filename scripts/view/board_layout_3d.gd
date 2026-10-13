@@ -874,6 +874,7 @@ const LINGUETTA_D := 9.0
 static func cubetti(gs: GameState, b: Building) -> Array[Dictionary]:
 	var out: Array[Dictionary] = []
 	if b.state == Enums.BuildingState.ROVINA: return out
+	if grandezza_vera(): return cubetti_resistenza(gs, b)
 	var quanti := b.vetusta + cubetti_neri(b)
 	if quanti <= 0: return out
 	var passo := CUBETTO + CUBETTO_GAP
@@ -895,6 +896,70 @@ static func cubetti(gs: GameState, b: Building) -> Array[Dictionary]:
 			"tipo": "vetusta" if i < b.vetusta else "resistenza",
 		})
 	return out
+
+# LA RESISTENZA IN CUBETTI NERI (registro 221). Il designer: "dei cubetti
+# neri sugli edifici per rappresentare la loro resistenza, in modo che sia
+# chiaro il loro valore, in fila, chiaramente visibili ma che non coprano
+# scritte o potenziamenti". Quindi non piu' solo quella guadagnata (registro
+# 142): TUTTA, cioe' `effective_resistance()` - la stampata, i potenziamenti,
+# i Personaggi e il +2 del lavoratore che abita l'edificio. E' il numero che
+# l'evento confronta con la sua forza, e lo si legge contando i cubi.
+#
+# DOVE: le carte hanno tutte la stessa impaginazione (misurata sui jpg v3):
+# in alto il nome e le classi, a sinistra i costi, in basso la riga con
+# resistenza, scavo ed effetto; il token di un potenziamento copre il 70%
+# centrale della casella in larghezza e il 60% in profondita'. Resta
+# libera, su ogni carta, solo la striscia di illustrazione lungo il bordo
+# DESTRO dell'ultima casella, fra il riquadro del terreno e la riga in
+# basso: i cubi stanno li', in fila dall'alto verso il basso. Se non ci
+# stanno in una fila se ne fanno due affiancate, e solo dopo si
+# rimpiccioliscono.
+const CUBO_V3 := 5.0          # il lato pieno, quando c'e' posto
+const CUBO_V3_GAP := 1.5
+# Bassi: la fila corre verso il fondo del tavolo, e la telecamera la guarda
+# di scorcio; un cubo alto quanto largo nascondeva quello dietro e la fila
+# diventava una sbarra nera da cui non si contava niente.
+const CUBO_V3_ALTO := 0.6
+const CUBO_V3_SU := 11.0      # dal bordo alto: nome, classi e terreno
+const CUBO_V3_GIU := 9.0      # dal bordo basso: la riga di resistenza ed effetto
+const CUBO_V3_STRISCIA := 0.15  # la parte destra della casella libera dal token
+
+static func cubetti_resistenza(gs: GameState, b: Building) -> Array[Dictionary]:
+	var out: Array[Dictionary] = []
+	if not b.is_standing(): return out
+	var n := maxi(0, b.effective_resistance())
+	if n == 0: return out
+	var box := basetta_box(gs, b)
+	var casella := box.size.x / float(maxi(1, b.width()))
+	var largo := casella * CUBO_V3_STRISCIA - 2.0 * CARTA_MARGINE
+	var x_destra := box.end.x - CARTA_MARGINE
+	var z_su := box.position.z + CUBO_V3_SU
+	var alto := maxf(1.0, box.size.z - CUBO_V3_SU - CUBO_V3_GIU)
+	# Una fila o due: vince quella che lascia i cubi piu' grandi, a pari
+	# lato una sola, che si conta meglio.
+	var colonne := 1
+	var lato := _lato_cubo(n, 1, largo, alto)
+	var lato2 := _lato_cubo(n, 2, largo, alto)
+	if lato2 > lato + 0.01:
+		colonne = 2
+		lato = lato2
+	for i in n:
+		var r := i / colonne
+		var c := i % colonne
+		out.append({
+			"pos": Vector3(x_destra - lato / 2.0 - c * (lato + CUBO_V3_GAP),
+				box.end.y, z_su + lato / 2.0 + r * (lato + CUBO_V3_GAP)),
+			"lato": lato,
+			"alto": lato * CUBO_V3_ALTO,
+			"tipo": "resistenza",
+		})
+	return out
+
+static func _lato_cubo(n: int, colonne: int, largo: float, alto: float) -> float:
+	var righe := ceili(float(n) / float(colonne))
+	var per_largo := (largo - (colonne - 1) * CUBO_V3_GAP) / float(colonne)
+	var per_alto := (alto - (righe - 1) * CUBO_V3_GAP) / float(righe)
+	return maxf(0.5, minf(CUBO_V3, minf(per_largo, per_alto)))
 
 # I CUBETTI NERI SOLO PER LA RESISTENZA CHE NON SI VEDE GIA' (registro 142).
 # Con i potenziamenti a token la tessera Struttura sta sull'edificio e dice
@@ -1399,8 +1464,9 @@ static func carte_giocatore(gs: GameState, player: int, umano := -1) -> Array[Di
 # giocatore, ne' che quelli sulla strada tornano indietro a fine era. Adesso
 # stanno sulla bacchetta del loro colore e da li' vanno sulla colonna che
 # attivano - e a fine era, quando `worker_cols` si svuota, tornano da soli.
-const MEEPLE_W := 8.0
-const MEEPLE_H := 15.0
+# Grandi come quelli da tavolo (registro 221): erano 8 mm, si perdevano.
+const MEEPLE_W := 14.0
+const MEEPLE_H := 16.0
 const MEEPLE_D := 6.0
 const MEEPLE_GAP := 3.0
 
@@ -1443,12 +1509,29 @@ static func meeple_in_campo(gs: GameState, player: int) -> Array[Dictionary]:
 				if b.protected_by == player and b.covers(col) and b.is_standing():
 					ospite = b
 					break
-		if ospite != null:
+		if ospite != null and grandezza_vera():
+			# SULLA COLONNA DEI COSTI (registro 221): a edificio costruito i
+			# costi non servono piu', mentre la riga in basso - resistenza,
+			# scavo, effetto - serve ancora, e il pupazzetto grande ci stava
+			# sopra. La colonna dei costi e' a sinistra della prima casella,
+			# fra il 29% e il 76% della sua profondita'.
+			var box := basetta_box(gs, ospite)
+			out.append({"col": col, "uid": ospite.uid, "pos": Vector3(
+				box.position.x + MEEPLE_W / 2.0 + 0.5, box.end.y,
+				box.position.z + 0.52 * basetta_d())})
+		elif ospite != null:
 			var base := standee_base(gs, ospite)
 			out.append({"col": col, "uid": ospite.uid, "pos": Vector3(
 				base.x - span_w(ospite.width()) / 2.0 + MEEPLE_W / 2.0 + 2.0,
 				base.y + basetta_y(),
 				base.z + basetta_d() / 2.0 - MEEPLE_D / 2.0)})
+		elif grandezza_vera():
+			# Davanti alla colonna, sul tavolo fra la strada e le bacchette:
+			# grande com'e' adesso (registro 221), sulla tessera dell'era
+			# copriva proprio la scritta - "utilizzata", o il suo effetto.
+			out.append({"col": col, "uid": -1, "pos": Vector3(
+				col_x(col) + TESSERA_W / 2.0, 0.0,
+				board_d() + MEEPLE_D / 2.0 + 7.0)})
 		else:
 			out.append({"col": col, "uid": -1, "pos": Vector3(
 				col_x(col) + TESSERA_W / 2.0, TESSERA_Y,
