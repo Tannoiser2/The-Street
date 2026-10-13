@@ -928,7 +928,7 @@ func _colonne_possibili() -> Array[int]:
 
 func _voci_per(kind: String, id: String, col: int) -> Array:
 	match kind:
-		"mercato": return AvailableActions.piazzamenti(ctl.gs, _io(), col, id)
+		"mercato": return AvailableActions.piazzamenti(ctl.gs, _io(), col, id, _v3())
 		"potenziamento": return AvailableActions.bersagli_potenziamento(ctl.gs, _io(), col, id)
 		"personaggio": return AvailableActions.bersagli_reclutamento(ctl.gs, _io(), col, id)
 	return []
@@ -989,12 +989,13 @@ func _seleziona(c: Dictionary) -> void:
 		for st in _stati:
 			var g: GameState = st["gs"]
 			var colonna := int(st["col"])
-			var dalla_copia: Array = AvailableActions.piazzamenti(g, _io(), colonna, id) if kind == "mercato" \
+			var dalla_copia: Array = AvailableActions.piazzamenti(g, _io(), colonna, id, _v3()) if kind == "mercato" \
 				else AvailableActions.bersagli_potenziamento(g, _io(), colonna, id)
 			for v in dalla_copia:
-				if not v.legale or not v.pagabile(g.players[_io()]): continue
+				if not v.legale: continue
+				var pr := _prova_mossa(g, v)
+				if pr.is_empty(): continue
 				if ctl.gs.phase == Enums.Phase.PIAZZA: v.parametri["attiva"] = colonna
-				var pr := _preventivo_su(g, v)
 				var chiave: String = "%s|%s|%s|%s|%s" % [v.parametri.get("col_from", -1), v.parametri.get("level", 0),
 					v.parametri.get("binario", 0), v.parametri.get("above", false), v.parametri.get("uid", -1)]
 				if per_posto.has(chiave) and int(per_posto[chiave].parametri["preventivo"]["pv"]) >= int(pr["pv"]): continue
@@ -1066,7 +1067,7 @@ func _esegui(v) -> void:
 	# ognuno ha la sua voce nella cronaca.
 	_racconta(func(): _esegui_mossa(v))
 	# V3: con la domanda "quale edificio usi?" in sospeso la carta resta scelta.
-	if str(ctl.gs.pending_choice.get("kind", "")) != "edificio": _deseleziona(false)
+	if not str(ctl.gs.pending_choice.get("kind", "")) in ["edificio", "tessera"]: _deseleziona(false)
 	_turni_dei_bot()
 	_aggiorna()
 
@@ -1100,6 +1101,11 @@ func _esegui_mossa(v) -> void:
 		# risposta; la carta scelta resta scelta e si eseguira' al prossimo clic.
 		if str(ctl.gs.pending_choice.get("kind", "")) == "edificio":
 			_messaggio += "Prima scegli quale edificio usare, poi la mossa."
+			return
+		# Lo stesso per la tessera dell'era a scelta (registro 219): con la
+		# domanda aperta il motore rifiuta ogni mossa, e la costruzione saltava.
+		if str(ctl.gs.pending_choice.get("kind", "")) == "tessera":
+			_messaggio += "Prima scegli l'effetto della tessera, qui sotto; poi clicca di nuovo il posto."
 			return
 	fatto = _esegui_su(ctl, v)
 	_messaggio += v.etichetta if fatto else "Rifiutata: %s" % v.etichetta
@@ -1241,7 +1247,7 @@ func _disegna_hud() -> void:
 	if _v2(): _disegna_risorse(font, p)
 	_hud.draw_rect(Rect2(Vector2(20, 17), Vector2(13, 13)),
 		VISTA.colore_giocatore(v), true)
-	_hud.draw_string(font, Vector2(41, 30), testa,
+	_hud.draw_string(font, Vector2(41, 30), _taglia(font, testa, 18, _largo_barra() - 41.0),
 		HORIZONTAL_ALIGNMENT_LEFT, -1, 18, CHIARO)
 
 	# Col mouse su un posto acceso la barra smette di dare istruzioni e dice
@@ -1251,8 +1257,9 @@ func _disegna_hud() -> void:
 		_riga_azione(font, _sotto_mouse, p)
 	else:
 		var invito := _invito(gs)
-		_hud.draw_string(font, Vector2(20, 54), invito,
+		_hud.draw_string(font, Vector2(20, 54), _taglia(font, invito, 14, _largo_barra() - 20.0),
 			HORIZONTAL_ALIGNMENT_LEFT, -1, 14, SPENTO)
+	_disegna_messaggio(font)
 
 	if gs.phase == Enums.Phase.AZIONE and _io() >= 0 \
 			and gs.pending_choice.is_empty():
@@ -1372,44 +1379,55 @@ func _aggiorna_anteprima() -> void:
 		var g: GameState = st["gs"]
 		var pg: PlayerState = g.players[io]
 		var col := int(st["col"])
+		# Si compra DAVVERO su una copia: il preventivo delle regole non conta lo
+		# sconto del turno ne' le opzioni di pagamento, che il controller applica
+		# solo costruendo (registro 219: "avevo risorse sufficienti ma non mi
+		# permetteva di comprare").
 		for id in gs.market:
 			if _comprabili.has(str(id)): continue
-			for v in AvailableActions.piazzamenti(g, io, col, str(id)):
-				if v.legale and v.pagabile(pg):
+			for v in AvailableActions.piazzamenti(g, io, col, str(id), _v3()):
+				if v.legale and not _prova_mossa(g, v).is_empty():
 					_comprabili[str(id)] = true
 					break
 		for id in gs.upg_row:
 			if _comprabili.has(str(id)): continue
 			for v in AvailableActions.bersagli_potenziamento(g, io, col, str(id)):
-				if v.legale and v.pagabile(pg):
+				if v.legale and not _prova_mossa(g, v).is_empty():
 					_comprabili[str(id)] = true
 					break
 
-# Il preventivo di una voce gia' calcolata sulla copia `g`: il prezzo e' il
-# suo, i PV si vedono eseguendola su un'altra copia.
-func _preventivo_su(g: GameState, w) -> Dictionary:
+# La mossa provata su una copia di `g`: {} se il motore la rifiuta, se no
+# quanto e' costata davvero (risorse prima meno dopo, sconti compresi) e
+# quanti PV ha portato.
+func _prova_mossa(g: GameState, w) -> Dictionary:
 	var io := _io()
 	var c := GameController.new()
 	c.gs = g.duplica()
-	var prima := int((c.gs.players[io] as PlayerState).vp)
-	var pv := 0
-	if _esegui_su(c, w): pv = int((c.gs.players[io] as PlayerState).vp) - prima
-	return {"ok": true, "pietra": w.pietra, "oro": w.oro, "idee": w.idee, "pv": pv,
+	var p: PlayerState = c.gs.players[io]
+	var prima := [p.pietra, p.oro, p.idee, p.vp]
+	if not _esegui_su(c, w): return {}
+	return {"ok": true, "pietra": maxi(0, prima[0] - p.pietra), "oro": maxi(0, prima[1] - p.oro),
+		"idee": maxi(0, prima[2] - p.idee), "pv": p.vp - prima[3],
 		"spiana": (w.parametri.get("spiana", PackedStringArray()) as PackedStringArray).size() if w.parametri.has("spiana") else 0,
 		"terrapieni": int(w.parametri.get("terrapieni", 0))}
 
-# Il cartellino sopra il posto: quanto costa e quanti PV porta.
+# Il cartellino sopra il posto, su una riga sola e corto, perche' i posti
+# vicini non si accavallino (registro 219): costo con le iniziali (C, D, I) e
+# PV. Il dettaglio intero (spianare, terrapieni) lo dice la barra in alto
+# passando col mouse sul posto.
 func _etichetta_preventivo(pr: Dictionary) -> String:
 	if pr.is_empty(): return ""
 	var parti := PackedStringArray()
-	if int(pr["pietra"]) > 0: parti.append("%d Costr." % int(pr["pietra"]))
-	if int(pr["oro"]) > 0: parti.append("%d Den." % int(pr["oro"]))
-	if int(pr["idee"]) > 0: parti.append("%d Idee" % int(pr["idee"]))
-	var s := "gratis" if parti.is_empty() else " ".join(parti)
-	if int(pr["pv"]) != 0: s += "\n%+d PV" % int(pr["pv"])
-	if int(pr["spiana"]) > 0: s += "\nspiana"
-	if int(pr["terrapieni"]) > 0: s += "\n%d terrapien%s" % [int(pr["terrapieni"]), "o" if int(pr["terrapieni"]) == 1 else "i"]
+	if int(pr["pietra"]) > 0: parti.append("%dC" % int(pr["pietra"]))
+	if int(pr["oro"]) > 0: parti.append("%dD" % int(pr["oro"]))
+	if int(pr["idee"]) > 0: parti.append("%dI" % int(pr["idee"]))
+	var s := "0" if parti.is_empty() else " ".join(parti)
+	if int(pr["pv"]) != 0: s += "  %+dPV" % int(pr["pv"])
 	return s
+
+# V3: i potenziamenti si comprano insieme a una costruzione (registro 160).
+func potenziamento_dopo() -> bool:
+	return ctl != null and ctl.potenziamento_con_costruzione()
 
 func _icona(nome: String) -> Texture2D:
 	if not _tex_icone.has(nome):
@@ -1623,11 +1641,35 @@ func _riga_azione(font: Font, v: AvailableActions.Voce, p: PlayerState) -> void:
 	if v.parametri.has("preventivo") and int(v.parametri["preventivo"]["pv"]) != 0:
 		riga += " · %+d PV" % int(v.parametri["preventivo"]["pv"])
 	if manca != "": manca = "  ·  " + manca
+	riga = _taglia(font, riga, 14, _largo_barra() - 20.0)
 	_hud.draw_string(font, Vector2(20, 54), riga, HORIZONTAL_ALIGNMENT_LEFT, -1, 14, CHIARO)
 	if manca == "": return
 	var x := 20.0 + font.get_string_size(riga, HORIZONTAL_ALIGNMENT_LEFT, -1, 14).x
 	_hud.draw_string(font, Vector2(x, 54), manca,
 		HORIZONTAL_ALIGNMENT_LEFT, -1, 14, ROSSO)
+
+# LA BARRA NON SBORDA (registro 219): a destra ci sono le risorse, e una
+# frase lunga ci finiva sopra. Si taglia con i puntini; il messaggio
+# dell'ultima mossa ha un riquadro suo sotto la barra, dove va a capo.
+func _largo_barra() -> float:
+	return _hud.get_viewport_rect().size.x - PANNELLO_W - 16.0
+
+func _taglia(font: Font, testo: String, corpo: int, largo: float) -> String:
+	if font.get_string_size(testo, HORIZONTAL_ALIGNMENT_LEFT, -1, corpo).x <= largo: return testo
+	var t := testo
+	while t.length() > 4 and font.get_string_size(t + "…", HORIZONTAL_ALIGNMENT_LEFT, -1, corpo).x > largo:
+		t = t.substr(0, t.length() - 1)
+	return t + "…"
+
+func _disegna_messaggio(font: Font) -> void:
+	if _messaggio == "": return
+	var largo := minf(_largo_barra() - 20.0, 760.0)
+	var alto := font.get_multiline_string_size(_messaggio, HORIZONTAL_ALIGNMENT_LEFT, largo - 20.0, 14).y
+	var r := Rect2(Vector2(20.0, BARRA_SU + 8.0), Vector2(largo, alto + 14.0))
+	_hud.draw_rect(r, Color(0.07, 0.08, 0.10, 0.88), true)
+	_hud.draw_rect(r, Color(ORO, 0.45), false, 1.0)
+	_hud.draw_multiline_string(font, r.position + Vector2(10.0, 21.0), _messaggio,
+		HORIZONTAL_ALIGNMENT_LEFT, largo - 20.0, 14, -1, CHIARO)
 
 # La riga di stato cade sul cielo dipinto, che e' chiaro: senza una striscia
 # scura sotto, meta' frase si perde fra le nuvole. Larga quanto il testo e
@@ -1660,18 +1702,24 @@ func _invito(gs: GameState) -> String:
 		else:
 			invito += " — clicca l'edificio"
 	elif gs.acquisto_extra_aperto and _v3():
-		invito = "Acquisto in piu': un potenziamento%s, oppure Fine turno." % (
-			"" if gs.extra_solo_potenziamenti else " o una casa della riserva")
+		# Registro 219: si dice quanti potenziamenti si possono davvero prendere.
+		var pot := 0
+		for id in gs.upg_row:
+			if _comprabili.has(str(id)): pot += 1
+		invito = "Acquisto in piu': %s%s, oppure Fine turno." % [
+			"nessun potenziamento alla tua portata" if pot == 0 else "%d potenziament%s alla tua portata (accesi in verde, si mettono su un tuo edificio intatto della colonna o accanto)" % [pot, "o" if pot == 1 else "i"],
+			"" if gs.extra_solo_potenziamenti else " o una casa della riserva"]
 	elif gs.phase == Enums.Phase.PIAZZA:
-		invito = "Scegli una carta e ti mostro dove puoi metterla, "
+		invito = "Scegli una carta accesa e ti mostro dove puoi metterla, "
 		invito += "oppure clicca una colonna per attivarla e basta."
+		if _v3() and potenziamento_dopo():
+			invito += " I potenziamenti si comprano dopo una costruzione, nello stesso turno."
 		if _v3() and _lavoratore() != "":
 			invito = "Piazzi %s. " % _nome_personaggio(_lavoratore()) + invito
 	elif _scelta.is_empty():
 		invito = "Clicca una carta per vedere dove puoi metterla."
 	else:
 		invito = "Clicca un posto acceso. Esc per lasciar perdere."
-	if _messaggio != "": invito += "     — " + _messaggio
 	return invito
 
 # ---- il riepilogo finale ---------------------------------------------

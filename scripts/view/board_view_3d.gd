@@ -463,8 +463,8 @@ func _posti_liberi() -> void:
 		_cornice(box, col)
 		# Il cartellino (registro 218): costo vero e PV, sopra il posto.
 		if str(pz.get("etichetta", "")) != "":
-			_scritta(Vector3(box.position.x + box.size.x / 2.0, box.end.y + 30.0,
-				box.position.z + box.size.z / 2.0), str(pz["etichetta"]), 0.28, col.lightened(0.4))
+			_scritta(Vector3(box.position.x + box.size.x / 2.0, box.end.y + 8.0,
+				box.position.z + box.size.z / 2.0), str(pz["etichetta"]), 0.13, col.lightened(0.4))
 	for uid in evidenze.get("uid", []):
 		for b in gs.grid.buildings:
 			if b.uid != int(uid): continue
@@ -476,7 +476,7 @@ func _posti_liberi() -> void:
 			if b.uid != int(e["uid"]): continue
 			var piede := BoardLayout3D.basetta_box(gs, b)
 			_scritta(Vector3(piede.position.x + piede.size.x / 2.0, piede.end.y + 30.0,
-				piede.position.z + piede.size.z / 2.0), str(e["etichetta"]), 0.28, Color(0.7, 1.0, 0.75))
+				piede.position.z + piede.size.z / 2.0), str(e["etichetta"]), 0.13, Color(0.7, 1.0, 0.75))
 	# Gli edifici colpiti dall'evento appena rivelato (registro 210), in rosso.
 	for uid in evidenze.get("crollati", []):
 		for b in gs.grid.buildings:

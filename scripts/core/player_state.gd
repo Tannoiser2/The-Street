@@ -33,6 +33,10 @@ var monuments_claimed: Array = []
 var specialized_characters: Array[String] = []
 # Colonne dove hai gia' un lavoratore: "al massimo un vostro lavoratore per colonna".
 var worker_cols: Array[int] = []
+# V3 (registro 219): l'edificio usato da chi ha attivato ogni colonna, colonna
+# -> uid. Le regole non lo leggono: serve alla vista per mettere il
+# Personaggio sull'edificio scelto con "quale edificio usi?".
+var edificio_usato: Dictionary = {}
 # V3: i Personaggi gia' piazzati nell'era (ognuno e' un lavoratore e si piazza
 # una volta), e quel che un'azione lascia per il resto del turno: lo sconto
 # alla costruzione (`sconto_se` = "" sempre, "fiume" solo su fiume, "arte"
@@ -90,6 +94,7 @@ func duplica() -> PlayerState:
 	p.monuments_claimed = monuments_claimed.duplicate()
 	p.specialized_characters = specialized_characters.duplicate()
 	p.worker_cols = worker_cols.duplicate()
+	p.edificio_usato = edificio_usato.duplicate()
 	p.personaggi_piazzati = personaggi_piazzati.duplicate()
 	p.sconto_turno = sconto_turno
 	p.sconto_se = sconto_se
@@ -112,6 +117,7 @@ func reset_for_era() -> void:
 	workers_used = 0
 	specialized_characters.clear()
 	worker_cols.clear()
+	edificio_usato.clear()
 	personaggi_piazzati.clear()
 	terrapieno_free_used = false
 	effect_used.clear()

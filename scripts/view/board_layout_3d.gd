@@ -1421,10 +1421,19 @@ static func meeple_in_campo(gs: GameState, player: int) -> Array[Dictionary]:
 	for c in p.worker_cols:
 		var col := int(c)
 		var ospite: Building = null
-		for b in gs.grid.buildings:
-			if b.protected_by == player and b.covers(col) and b.is_standing():
-				ospite = b
-				break
+		# V3 (registro 219): il Personaggio sta sull'edificio che il giocatore
+		# ha scelto di usare in quella colonna ("quale edificio usi?"), prima
+		# ancora di quello suo che protegge: e' la scelta che ha appena fatto.
+		if p.edificio_usato.has(col):
+			for b in gs.grid.buildings:
+				if b.uid == int(p.edificio_usato[col]) and b.is_standing():
+					ospite = b
+					break
+		if ospite == null:
+			for b in gs.grid.buildings:
+				if b.protected_by == player and b.covers(col) and b.is_standing():
+					ospite = b
+					break
 		if ospite != null:
 			var base := standee_base(gs, ospite)
 			out.append({"col": col, "uid": ospite.uid, "pos": Vector3(
