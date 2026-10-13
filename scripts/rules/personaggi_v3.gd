@@ -55,6 +55,7 @@ static func usa_edificio(gs: GameState, attivatore: int, b: Building, col: int) 
 	gs.log_line("Giocatore %d usa %s (di giocatore %d) in colonna %d" % [attivatore, b.data["name"], b.owner, col])
 	esegui_azione(gs, attivatore, b.data.get("azione", {}), col, b.data, attivatore, b)
 	gs.bruciati[b.uid] = giro_corrente(gs)
+	p.edificio_usato[col] = b.uid
 	p.bump("az3_scelta_propri" if b.owner == attivatore else "az3_scelta_altrui")
 	if b.owner != attivatore and str(CardDB.constants.get("azione_edificio_compenso", "nessuno")) == "pv":
 		var padrone: PlayerState = gs.players[b.owner]

@@ -56,6 +56,7 @@ func _ready() -> void:
 	_run("l'evento si rivela al centro a fine era", _test_rivelazione_evento)
 	_run("v3: prima di piazzare si sceglie il Personaggio e si prova la mossa", _test_piazza_con_prova)
 	_run("v3: il mercato accende solo le carte comprabili, coi preventivi", _test_preventivi)
+	_run("v3: le carte accese sono quelle che il motore lascia comprare", _test_comprabili_forza_bruta)
 	_run("il tasto Fine turno nella barra in basso risponde", _test_fine_turno_in_barra)
 	_run("sotto un edificio a scalino non resta un buco", _test_scalino)
 	_run("le carte stanno in piedi alla stessa altezza", _test_misure_carte)
@@ -3373,6 +3374,89 @@ func _test_fine_turno_in_barra() -> void:
 # Registro 218: le carte accese nel mercato sono quelle che si possono davvero
 # comprare, e scegliendone una restano accesi solo posti con un preventivo
 # pagabile. Su piu' semi, perche' una partita sola puo' non avere il caso.
+# Registro 219: le carte accese si confrontano con la forza bruta. Per ogni
+# turno dell'umano si prova a costruire ogni carta del mercato in ogni
+# posizione (partenza, a terra o sopra, binario) col comando vero, dopo ogni
+# attivazione possibile: cosi' si vede se l'anteprima spegne carte che il
+# motore lascia comprare (lo sconto del turno, le opzioni di pagamento).
+func _test_comprabili_forza_bruta() -> void:
+	if not FileAccess.file_exists("res://data/proposte/cards-v3-era1.json"): return
+	var scena := ResourceLoader.load("res://scenes/gioca.tscn") as PackedScene
+	if scena == null: return
+	var sbagli := PackedStringArray()
+	var turni := 0
+	var ms_max := 0
+	var scelte_edificio := 0
+	for seme in [7, 23, 101]:
+		var n := scena.instantiate()
+		add_child(n)
+		n.inizio.con_regolamento(2)
+		n.inizio.con_giocatori(3)
+		n.inizio.con_bot(2)
+		n.inizio.con_velocita(4)
+		n.inizio.seme = seme
+		n.comincia()
+		var gs: GameState = n.ctl.gs
+		var giri := 0
+		while gs.phase != Enums.Phase.FINE_PARTITA and gs.era <= 2 and giri < 60:
+			giri += 1
+			if not gs.pending_choice.is_empty():
+				n.ctl.choose(int((gs.pending_choice["options"] as Array)[0]))
+				n._turni_dei_bot()
+				continue
+			if gs.phase == Enums.Phase.PIAZZA and n._io() == 0:
+				var liberi: Array[String] = n.ctl.personaggi_liberi(gs.players[0])
+				n._personaggio_scelto = liberi[0]
+				n._anteprima_chiave = ""
+				var t0 := Time.get_ticks_msec()
+				n._aggiorna_anteprima()
+				ms_max = maxi(ms_max, Time.get_ticks_msec() - t0)
+				var vere := {}
+				for col in n._colonne_possibili():
+					var base: GameController = n._copia_attivata(col, liberi[0], -1)
+					if base == null: continue
+					var copie: Array = [base]
+					if str(base.gs.pending_choice.get("kind", "")) == "edificio":
+						copie = []
+						for sc in base.gs.pending_choice["options"]:
+							var c2: GameController = n._copia_attivata(col, liberi[0], int(sc))
+							if c2 != null:
+								copie.append(c2)
+								# Il Personaggio sta sull'edificio scelto.
+								scelte_edificio += 1
+								var sopra_scelto := false
+								for m in BoardLayout3D.meeple_in_campo(c2.gs, 0):
+									if int(m["col"]) == col and int(m["uid"]) == int(sc): sopra_scelto = true
+								if not sopra_scelto: sbagli.append("seme %d: il Personaggio non sta sull'edificio scelto (%d)" % [seme, int(sc)])
+					for cp in copie:
+						for id in gs.market:
+							if vere.has(str(id)): continue
+							var w := int(CardDB.buildings[str(id)]["width"])
+							for cf in range(0, gs.grid.n_cols - w + 1):
+								for sopra in [false, true]:
+									for bin in [0, 1, 2, 3]:
+										if vere.has(str(id)): continue
+										var prova := GameController.new()
+										prova.gs = (cp as GameController).gs.duplica()
+										if prova.build(str(id), cf, sopra, 0, null, bin):
+											vere[str(id)] = "colonna %d, partenza %d, sopra %s, binario %d" % [col, cf, sopra, bin]
+				for id in gs.market:
+					if vere.has(str(id)) != n._comprabili.has(str(id)):
+						sbagli.append("seme %d era %d %s: motore %s, accesa %s (%s)" % [seme, gs.era, id, vere.has(str(id)), n._comprabili.has(str(id)), vere.get(str(id), "")])
+				turni += 1
+				StrategyBot.play_turn(n.ctl, "bilanciata")
+				n._turni_dei_bot()
+			elif n.bot_da_muovere():
+				n.muovi_un_bot()
+			else:
+				StrategyBot.play_turn(n.ctl, "bilanciata")
+				n._turni_dei_bot()
+		remove_child(n)
+		n.free()
+	CardDB.load_db(CardDB.DB_PATH)
+	_ok("provati %d turni dell'umano (anteprima al piu' %d ms), %d scelte dell'edificio" % [turni, ms_max, scelte_edificio], turni > 0 and scelte_edificio > 0)
+	_ok("le carte accese sono esattamente quelle che il motore lascia costruire", sbagli.is_empty(), "; ".join(sbagli))
+
 func _test_preventivi() -> void:
 	if not FileAccess.file_exists("res://data/proposte/cards-v3-era1.json"): return
 	var scena := ResourceLoader.load("res://scenes/gioca.tscn") as PackedScene
@@ -3426,6 +3510,7 @@ func _test_piazza_con_prova() -> void:
 	n.inizio.con_giocatori(3)
 	n.inizio.con_bot(2)
 	n.inizio.con_velocita(4)
+	n.inizio.seme = 15
 	n.comincia()
 	var gs: GameState = n.ctl.gs
 	var giri := 0
@@ -3470,8 +3555,16 @@ func _test_piazza_con_prova() -> void:
 		var prima := gs.grid.buildings.size()
 		n._esegui(vera)
 		_eq("  e cliccandola si piazza il Personaggio", p.workers_used, 1)
-		_ok("  e si costruisce (o si sceglie prima l'edificio)",
-			gs.grid.buildings.size() == prima + 1 or str(gs.pending_choice.get("kind", "")) == "edificio")
+		var aperta := str(gs.pending_choice.get("kind", ""))
+		_ok("  e si costruisce (o prima si risponde a edificio o tessera)",
+			gs.grid.buildings.size() == prima + 1 or aperta in ["edificio", "tessera"], n._messaggio)
+		# Col seme 15 la colonna 1 chiede l'effetto della tessera: risposto
+		# quello, il posto si clicca di nuovo e si costruisce.
+		if aperta == "tessera":
+			_ok("  il messaggio chiede prima la tessera", n._messaggio.contains("tessera"))
+			n.ctl.choose(int((gs.pending_choice["options"] as Array)[0]))
+			n._esegui(vera)
+			_eq("  e dopo la risposta si costruisce", gs.grid.buildings.size(), prima + 1)
 	remove_child(n)
 	n.free()
 	CardDB.load_db(CardDB.DB_PATH)

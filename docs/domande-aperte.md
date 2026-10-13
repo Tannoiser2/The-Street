@@ -3367,3 +3367,32 @@ dato è stato importato da lì. Ma due confronti fra ciò che è stampato e
     costo vero (sconti e terrapieni compresi), i PV che la mossa porta (si
     esegue su un'altra copia), "spiana" e i terrapieni. Le copie si rifanno
     solo quando la partita cambia.
+
+219. **I preventivi tornano coi conti veri.** Il designer: "avevo risorse
+    sufficienti ma non mi permetteva di comprare gli edifici; non e' chiaro
+    quando posso prendere i potenziamenti; quando mi fa scegliere
+    l'edificio da usare non sposta il segnalino; scritte enormi che si
+    accavallano". Quattro difetti, trovati con un test che confronta le
+    carte accese con la forza bruta (ogni carta, ogni posizione, ogni
+    attivazione, col comando vero):
+    - il preventivo delle regole non conta lo sconto del turno ne' le
+      opzioni di pagamento, che il controller applica costruendo: ora la
+      mossa si esegue su una copia, e il costo e' quello che il motore
+      toglie davvero;
+    - il motore della v3 accetta partenze a una colonna da quella attivata
+      anche se la carta non la copre ("nella colonna attivata o accanto"),
+      ma i posti offerti erano solo quelli che la coprono: l'interfaccia
+      della v3 ora li offre tutti (`piazzamenti(..., accanto)`). I bot e la
+      v1.5 restano come erano, quindi i bot non usano le partenze accanto:
+      da decidere se insegnargliele (cambierebbe le misure);
+    - con la tessera dell'era a scelta, dopo il piazzamento la domanda
+      restava aperta e la costruzione veniva rifiutata: ora si risponde
+      prima alla tessera e poi si clicca di nuovo il posto;
+    - il Personaggio sta sull'edificio scelto con "quale edificio usi?"
+      (`PlayerState.edificio_usato`, che le regole non leggono: TORNEO e
+      VITA identici).
+    I cartellini sopra i posti sono piccoli e su una riga ("2C 1D +2PV");
+    la barra in alto si taglia invece di finire sulle risorse, e il
+    messaggio dell'ultima mossa ha un riquadro suo sotto la barra. La barra
+    dice quanti potenziamenti sono alla portata nell'acquisto in piu', e
+    che nella v3 si comprano dopo una costruzione.

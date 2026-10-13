@@ -41,8 +41,16 @@ static func _voce(tipo: String, etichetta: String, q, parametri := {}) -> Voce:
 # Le colonne da cui un edificio largo `w` puo' partire coprendo `col`.
 # Il regolamento concede alla sola costruzione "la colonna attivata o una
 # adiacente"; le altre azioni restano sulla colonna.
-static func _partenze(gs: GameState, col: int, w: int) -> Array[int]:
+static func _partenze(gs: GameState, col: int, w: int, accanto := false) -> Array[int]:
 	var out: Array[int] = []
+	# `accanto` (registro 219): come il motore, che accetta ogni partenza a una
+	# colonna o meno da quella attivata ("nella colonna attivata o accanto"),
+	# anche se la carta non la copre. Spento resta com'era: solo le partenze che
+	# coprono la colonna, ed e' quello che usano i bot e la v1.5.
+	if accanto:
+		for c in range(maxi(0, col - 1), mini(gs.grid.n_cols - w, col + 1) + 1):
+			out.append(c)
+		return out
 	for c in range(maxi(0, col - w + 1), mini(gs.grid.n_cols - w, col + 1) + 1):
 		if c <= col and c + w > col: out.append(c)
 	return out
@@ -163,11 +171,11 @@ static func reclutamenti(gs: GameState, player: int, col: int) -> Array[Voce]:
 # Ogni posizione in cui un edificio del mercato puo' essere costruito: una
 # voce per colonna di partenza e per quota (a terra o sopra).
 static func piazzamenti(gs: GameState, player: int, col: int,
-		card_id: String) -> Array[Voce]:
+		card_id: String, accanto := false) -> Array[Voce]:
 	var out: Array[Voce] = []
 	if not CardDB.buildings.has(card_id): return out
 	var d: Dictionary = CardDB.buildings[card_id]
-	for c in _partenze(gs, col, int(d["width"])):
+	for c in _partenze(gs, col, int(d["width"]), accanto):
 		for pr in _prove(d):
 			var sopra: bool = pr[0]
 			var q = BuildRules.quote_above(gs, player, d, c, null, pr[1]) if sopra \
