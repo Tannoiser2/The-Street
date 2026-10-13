@@ -54,6 +54,7 @@ func _ready() -> void:
 	_run("il terrapieno si paga e si vede", _test_terrapieni)
 	_run("v3: il sacchetto degli scheletri a schermo (registro 188)", _test_v3_sacchetto)
 	_run("l'evento si rivela al centro a fine era", _test_rivelazione_evento)
+	_run("v3: prima di piazzare si sceglie il Personaggio e si prova la mossa", _test_piazza_con_prova)
 	_run("sotto un edificio a scalino non resta un buco", _test_scalino)
 	_run("le carte stanno in piedi alla stessa altezza", _test_misure_carte)
 	_run("la sagoma e' un pezzo solo, spesso", _test_sagoma_estrusa)
@@ -3337,6 +3338,68 @@ func _test_v3_a_schermo() -> void:
 # il sacchetto comune, con le tessere ancora dentro.
 # Registro 210: a fine era la carta dell'evento compare al centro, con gli
 # edifici colpiti accesi sul tavolo; i bot aspettano finche' un clic la chiude.
+# Registro 217: cliccando un posto il gioco non piazza il Personaggio a caso
+# e non spende il lavoratore per una mossa che poi rifiuta.
+func _test_piazza_con_prova() -> void:
+	if not FileAccess.file_exists("res://data/proposte/cards-v3-era1.json"): return
+	var scena := ResourceLoader.load("res://scenes/gioca.tscn") as PackedScene
+	if scena == null: return
+	var n := scena.instantiate()
+	add_child(n)
+	n.inizio.con_regolamento(2)
+	n.inizio.con_giocatori(3)
+	n.inizio.con_bot(2)
+	n.inizio.con_velocita(4)
+	n.comincia()
+	var gs: GameState = n.ctl.gs
+	var giri := 0
+	while not gs.pending_choice.is_empty() and giri < 12:
+		if int(gs.pending_choice["player"]) != 0: break
+		n.ctl.choose(int((gs.pending_choice["options"] as Array)[0]))
+		n._turni_dei_bot()
+		giri += 1
+	_ok("finito il draft tocca all'umano, che deve piazzare", gs.phase == Enums.Phase.PIAZZA and n._io() == 0)
+	var p: PlayerState = gs.players[0]
+	var liberi: Array[String] = n.ctl.personaggi_liberi(p)
+	# Una mossa impossibile: una carta che non e' in vendita.
+	var finta := AvailableActions.Voce.new()
+	finta.tipo = "costruisci"
+	finta.etichetta = "Costruisci una carta che non c'e'"
+	finta.parametri = {"card_id": "ed_grattacielo", "col_from": 0, "above": false, "binario": 0, "attiva": 0}
+	n._personaggio_scelto = ""
+	n._esegui(finta)
+	_eq("senza Personaggio scelto non si piazza", p.workers_used, 0)
+	_ok("  e il messaggio chiede di sceglierlo", n._messaggio.contains("scegli quale Personaggio"))
+	n._personaggio_scelto = liberi[0]
+	n._esegui(finta)
+	_eq("una mossa che non si puo' fare non spende il Personaggio", p.workers_used, 0)
+	_ok("  e il messaggio lo dice", n._messaggio.contains("resta in mano"))
+	_eq("  e si resta a piazzare", gs.phase, Enums.Phase.PIAZZA)
+	# E una mossa fattibile si fa: con le risorse in tasca si costruisce.
+	p.pietra = 99
+	p.oro = 99
+	p.idee = 99
+	var prova: GameController = n._copia_attivata(0, liberi[0], -1)
+	if prova != null and str(prova.gs.pending_choice.get("kind", "")) == "edificio":
+		prova.choose(int((prova.gs.pending_choice["options"] as Array)[0]))
+	var vera = null
+	if prova != null:
+		for v in AvailableActions.costruzioni(prova.gs, 0, 0):
+			if v.legale:
+				vera = v
+				break
+	_ok("c'e' una costruzione fattibile in colonna 1", vera != null)
+	if vera != null:
+		vera.parametri["attiva"] = 0
+		var prima := gs.grid.buildings.size()
+		n._esegui(vera)
+		_eq("  e cliccandola si piazza il Personaggio", p.workers_used, 1)
+		_ok("  e si costruisce (o si sceglie prima l'edificio)",
+			gs.grid.buildings.size() == prima + 1 or str(gs.pending_choice.get("kind", "")) == "edificio")
+	remove_child(n)
+	n.free()
+	CardDB.load_db(CardDB.DB_PATH)
+
 func _test_rivelazione_evento() -> void:
 	if not FileAccess.file_exists("res://data/proposte/cards-v3-era1.json"): return
 	var scena := ResourceLoader.load("res://scenes/gioca.tscn") as PackedScene

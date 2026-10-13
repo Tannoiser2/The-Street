@@ -3335,3 +3335,16 @@ dato è stato importato da lì. Ma due confronti fra ciò che è stampato e
     scende verso il giocatore, le altre escono a sinistra e a destra secondo
     il lato su cui stavano; poi entra la mano nuova. Durante il draft la
     fila dei Personaggi sul tavolo resta vuota. Il draft della v2 non cambia.
+
+217. **Prima di piazzare: chi, e se la mossa si puo' fare.** Il designer:
+    "ho selezionato un edificio, mi ha piazzato uno dei lavoratori sulla
+    colonna senza attivare una carta personaggio, non avevo sufficienti
+    risorse e non mi ha fatto piazzare l'edificio: ha speso un lavoratore e
+    ho perso un turno". Cliccando un posto acceso il gioco piazzava il primo
+    Personaggio libero e poi provava la mossa, che poteva fallire. Ora, con
+    piu' di un Personaggio libero, lo sceglie il giocatore: la riga in basso
+    dice "Scegli chi:" e nessuno e' acceso finche' non si clicca. E la mossa
+    si prova prima su una copia della partita, col Personaggio piazzato, la
+    colonna attivata e, se serve, ogni risposta a "quale edificio usi?": se
+    nemmeno cosi' si puo' fare, il Personaggio resta in mano e il messaggio
+    lo dice.
