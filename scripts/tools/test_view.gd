@@ -3595,8 +3595,20 @@ func _test_rivelazione_evento() -> void:
 	var prima := gs.current_index
 	n._process(10.0)
 	_eq("  finche' resta aperta i bot aspettano", gs.current_index, prima)
+	# Registro 220: con la carta aperta il tavolo e' quello di prima
+	# dell'evento; all'ok si sgretola, e solo dopo si va avanti.
+	n._aggiorna()
+	_ok("  con la carta aperta il tavolo e' com'era prima dell'evento", n.vista.gs == n._rivelazione["prima"])
+	var colpiti := (n._rivelazione["colpiti"] as Array).size()
 	n._clic(Vector2(5, 5))
 	_ok("  e un clic la chiude", n._rivelazione.is_empty())
+	_ok("  all'ok il tavolo torna quello vero", n.vista.gs == gs)
+	if colpiti > 0:
+		_ok("  e mentre si sgretola nessuno muove", n._attesa_crolli > 0.0)
+		n._process(0.1)
+		_eq("    (i bot aspettano ancora)", gs.current_index, prima)
+		n._process(5.0)
+		_ok("  finito lo sgretolamento si riparte", n._attesa_crolli <= 0.0)
 	# Subito, non a fine frame: col file dati della v1.5 ricaricato, un suo
 	# ultimo disegno cercherebbe i potenziamenti della v3 e non li troverebbe.
 	remove_child(n)

@@ -116,6 +116,9 @@ var _rivelazione: Dictionary = {}
 var _era_rivelata := 0
 const ROSSO_CROLLO := Color(1.0, 0.36, 0.28)
 var _tex_evento: Texture2D = null
+# Dopo l'ok: i secondi che restano allo sgretolamento, e chi crolla.
+var _attesa_crolli := 0.0
+var _crollati_in_corso: Array = []
 
 # Quanto manca al prossimo turno di bot, in secondi.
 var _attesa := 0.0
@@ -161,6 +164,8 @@ func comincia() -> void:
 	_riepilogo_aperto = true
 	_rivelazione = {}
 	_era_rivelata = 0
+	_attesa_crolli = 0.0
+	_crollati_in_corso = []
 	if vista != null:
 		remove_child(vista)
 		vista.queue_free()
@@ -214,7 +219,15 @@ func _aggiorna() -> void:
 		vista.orbita = _orbita
 	vista.margini = Vector4(BARRA_SU, PANNELLO_W, BARRA_GIU, 0.0)
 	_aggiorna_anteprima()
-	vista.mostra(ctl.gs, _colonna_sotto_mouse, _acceso())
+	# LA FINE DELL'ERA IN TRE TEMPI (registro 220). Il designer: "deve
+	# apparire l'evento, all'ok si devono sgretolare le rovine e solo dopo si
+	# inizia il draft". Con la carta aperta il tavolo resta com'era prima
+	# dell'evento; chiusa, si mostra lo stato vero e partono i crolli; il
+	# draft aspetta che finiscano.
+	var da_mostrare: GameState = ctl.gs
+	if not _rivelazione.is_empty() and _rivelazione.get("prima") is GameState:
+		da_mostrare = _rivelazione["prima"]
+	vista.mostra(da_mostrare, _colonna_sotto_mouse, _acceso())
 	vista.scale = Vector3.ONE * BoardLayout3D.U
 	# Il tavolo e' cambiato sotto un mouse fermo: quel che la barra prometteva
 	# puo' non esistere piu', quindi si richiede a partire dai bersagli nuovi.
@@ -228,6 +241,7 @@ func _acceso() -> Dictionary:
 		var colpiti: Array = []
 		for c in _rivelazione["colpiti"]: colpiti.append(int(c["uid"]))
 		return {"crollati": colpiti}
+	if _attesa_crolli > 0.0: return {"crollati": _crollati_in_corso}
 	# Le carte che si possono comprare davvero (registro 218): le altre del
 	# mercato si spengono.
 	if _scelta.is_empty():
@@ -293,6 +307,18 @@ func _process(delta: float) -> void:
 		else: _draft_entrata += delta
 		_hud.queue_redraw()
 	if not _rivelazione.is_empty(): return
+	# Mentre si sgretola nessuno muove; finito, il tavolo si ridisegna e il
+	# draft (o il riepilogo) compare.
+	if _attesa_crolli > 0.0:
+		_attesa_crolli -= delta
+		if _attesa_crolli <= 0.0:
+			_attesa_crolli = 0.0
+			_crollati_in_corso = []
+			_draft_entrata = 0.0
+			_aggiorna()
+		else:
+			_hud.queue_redraw()
+		return
 	if not bot_da_muovere() or inizio.bot_a_mano() or inizio.bot_subito(): return
 	_attesa -= delta
 	if _attesa <= 0.0: muovi_un_bot()
@@ -729,9 +755,13 @@ func _clic(pixel: Vector2) -> void:
 			return
 	if ctl == null: return
 	if not _rivelazione.is_empty():
+		_crollati_in_corso = []
+		for c in _rivelazione["colpiti"]: _crollati_in_corso.append(int(c["uid"]))
 		_rivelazione = {}
+		_attesa_crolli = BoardLayout3D.CROLLO_DURATA + 0.4 if not _crollati_in_corso.is_empty() else 0.0
 		_aggiorna()
 		return
+	if _attesa_crolli > 0.0: return
 	# Un clic sulle fasce che non cade su un tasto non arriva alla mappa sotto.
 	# I tasti delle azioni (Fine turno, Dinastia, restauro) stanno proprio
 	# nella barra in basso e si provano piu' giu': prima questo controllo li
@@ -1300,7 +1330,7 @@ func _disegna_hud() -> void:
 	# Finita la partita si tira la somma. Il tasto per rifarne un'altra sta
 	# li' dentro: senza, bisognava ricaricare la pagina.
 	if gs.phase == Enums.Phase.FINE_PARTITA:
-		if _riepilogo_aperto and _rivelazione.is_empty():
+		if _riepilogo_aperto and _rivelazione.is_empty() and _attesa_crolli <= 0.0:
 			_disegna_riepilogo(font, gs)
 		else:
 			_tasto(font, "Riepilogo", Vector2(20.0, _riga_bassa()), true,
@@ -1471,6 +1501,7 @@ var _tex_draft: Dictionary = {}
 
 func _draft_al_centro() -> bool:
 	return ctl != null and _v3() and ctl.gs.draft_giro > 0 and _io() >= 0 \
+		and _rivelazione.is_empty() and _attesa_crolli <= 0.0 \
 		and str(ctl.gs.pending_choice.get("kind", "")) == "draft" \
 		and int(ctl.gs.pending_choice.get("player", -1)) == _io()
 
