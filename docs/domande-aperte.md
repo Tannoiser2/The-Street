@@ -3396,3 +3396,21 @@ dato è stato importato da lì. Ma due confronti fra ciò che è stampato e
     messaggio dell'ultima mossa ha un riquadro suo sotto la barra. La barra
     dice quanti potenziamenti sono alla portata nell'acquisto in piu', e
     che nella v3 si comprano dopo una costruzione.
+
+220. **La fine dell'era in tre tempi, il mercato a sinistra.** Il designer:
+    "quando si arriva alla fine dell'era deve apparire l'evento, all'ok si
+    devono sgretolare le rovine e solo dopo si inizia il draft; ora le tre
+    cose accadono simultaneamente. Gli edifici e i potenziamenti mettili su
+    una finestra a sinistra, non sul tavolo, perche' non si vedono bene".
+    Mentre la carta dell'evento e' aperta il tavolo mostra la partita com'era
+    prima dell'evento, con gli edifici condannati cerchiati di rosso (il
+    controller ne salva una copia in `ultima_fine_era["prima"]`); all'ok si
+    mostra lo stato vero e gli edifici si sgretolano; il draft e il
+    riepilogo aspettano che lo sgretolamento finisca, e intanto i bot non
+    muovono. Gli edifici in vendita (mercato e riserva) e i potenziamenti
+    stanno in un pannello a sinistra, grandi: col filo verde quelli che si
+    possono comprare, spenti gli altri, d'oro quello scelto; si clicca la
+    carta nel pannello e poi il posto sul tavolo. Sul tavolo non ci sono
+    piu' (`BoardLayout3D.mercato_a_schermo`, acceso solo dalla partita a
+    schermo); la telecamera centra il tavolo fra i due pannelli e parte un
+    po' piu' lontana. TORNEO e VITA identici.

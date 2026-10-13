@@ -1115,10 +1115,18 @@ static func misura_carta(tipo: String) -> Vector2:
 
 # Tutte le carte delle file, ognuna col suo riquadro: serve a disegnarle e a
 # cliccarle. `kind` dice a quale fila appartiene, `id` quale carta e'.
+# IL MERCATO A SCHERMO (registro 220). Il designer: "gli edifici e i
+# potenziamenti mettili su una finestra a sinistra, non sul tavolo, perche'
+# non si vedono bene". Quando la partita si gioca a schermo (gioca.gd lo
+# accende e lo spegne) le carte in vendita e i potenziamenti stanno nel
+# pannello e non sul tavolo; i test della plancia, senza schermo, li trovano
+# ancora sul tavolo.
+static var mercato_a_schermo := false
+
 static func side_cards(gs: GameState, umano := -1) -> Array[Dictionary]:
 	var out: Array[Dictionary] = []
 
-	out.append_array(_fila_sinistra(gs))
+	if not mercato_a_schermo: out.append_array(_fila_sinistra(gs))
 	out.append_array(_fila_destra(gs))
 	out.append_array(player_cards(gs, umano))
 	return out
@@ -1200,7 +1208,8 @@ static func _fila_destra(gs: GameState) -> Array[Dictionary]:
 	# mano non va sulla fila, che durante il draft resta vuota. Il designer:
 	# "inutile mettere le carte sul tavolo durante la scelta".
 	var fila: Array = [] if gs.draft_giro > 0 else gs.char_row
-	var righe: int = maxi(fila.size(), gs.upg_row.size())
+	var pot: Array = [] if mercato_a_schermo else gs.upg_row
+	var righe: int = maxi(fila.size(), pot.size())
 
 	# La Dinastia sta "sempre disponibile fuori dalle file": in cima, sopra i
 	# personaggi, e non si sposta mai. Chi la compra ne prende il pupazzetto.
@@ -1239,10 +1248,10 @@ static func _fila_destra(gs: GameState) -> Array[Dictionary]:
 		if i < fila.size():
 			out.append({"kind": "personaggio", "id": str(fila[i]),
 				"aabb": AABB(Vector3(x, 0.0, z), Vector3(m_pers.x, TESSERA_Y, m_pers.y))})
-		if i < gs.upg_row.size():
+		if i < pot.size():
 			# Il potenziamento e' piu' corto del personaggio: si centra sulla
 			# sua riga, cosi' le due file restano allineate a occhio.
-			out.append({"kind": "potenziamento", "id": str(gs.upg_row[i]),
+			out.append({"kind": "potenziamento", "id": str(pot[i]),
 				"aabb": AABB(
 					Vector3(x + m_pers.x + CARTA_GAP, 0.0, z + (m_pers.y - m_pot.y) / 2.0),
 					Vector3(m_pot.x, TESSERA_Y, m_pot.y))})

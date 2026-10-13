@@ -145,6 +145,9 @@ var _centro_dita := Vector2.ZERO
 var _carta_presa: Dictionary = {}
 var _porta_carta := false
 
+func _exit_tree() -> void:
+	BoardLayout3D.mercato_a_schermo = false
+
 func _ready() -> void:
 	var strato := CanvasLayer.new()
 	add_child(strato)
@@ -160,6 +163,7 @@ func _ready() -> void:
 # a fine partita, quindi rifa' tutto da capo invece di rattoppare: via la
 # vista vecchia, stato nuovo, inquadratura nuova.
 func comincia() -> void:
+	BoardLayout3D.mercato_a_schermo = true
 	inizio.sistema()
 	_riepilogo_aperto = true
 	_rivelazione = {}
@@ -216,8 +220,12 @@ func _aggiorna() -> void:
 	# muove, comanda lui e nessun aggiornamento gliela riporta indietro.
 	if _orbita == null or _orbita.e_iniziale():
 		_orbita = CameraOrbita.da_stato(ctl.gs)
+		var schermo := get_viewport().get_visible_rect().size
+		var libero := schermo.x - PANNELLO_W - PANNELLO_SX
+		if libero > 100.0:
+			_orbita.allontana(clampf(schermo.x / libero * 0.8, 1.0, 1.6))
 		vista.orbita = _orbita
-	vista.margini = Vector4(BARRA_SU, PANNELLO_W, BARRA_GIU, 0.0)
+	vista.margini = Vector4(BARRA_SU, PANNELLO_W, BARRA_GIU, PANNELLO_SX)
 	_aggiorna_anteprima()
 	# LA FINE DELL'ERA IN TRE TEMPI (registro 220). Il designer: "deve
 	# apparire l'evento, all'ok si devono sgretolare le rovine e solo dopo si
@@ -501,6 +509,9 @@ func _sopra(pos: Vector2) -> void:
 	# Sulle fasce non c'e' tavolo: niente riquadro, niente posto acceso.
 	var fuori := _sulle_fasce(pos) or _draft_al_centro()
 	_nota = PackedStringArray() if fuori else _descrivi_sotto(pos)
+	var sopra_mercato := _carta_nel_mercato(pos)
+	if not sopra_mercato.is_empty():
+		_nota = _descrivi_sotto_carta({"kind": str(sopra_mercato["kind"]), "id": str(sopra_mercato["id"])})
 	_sotto_mouse = null if fuori else _bersaglio_sotto(pos)
 	var col := -1 if fuori else _colonna_puntata(pos)
 	if col != _colonna_sotto_mouse:
@@ -762,6 +773,11 @@ func _clic(pixel: Vector2) -> void:
 		_aggiorna()
 		return
 	if _attesa_crolli > 0.0: return
+	# Il pannello del mercato (registro 220): la carta si sceglie li'.
+	var nel_mercato := _carta_nel_mercato(pixel)
+	if not nel_mercato.is_empty():
+		_seleziona({"kind": str(nel_mercato["kind"]), "id": str(nel_mercato["id"])})
+		return
 	# Un clic sulle fasce che non cade su un tasto non arriva alla mappa sotto.
 	# I tasti delle azioni (Fine turno, Dinastia, restauro) stanno proprio
 	# nella barra in basso e si provano piu' giu': prima questo controllo li
@@ -1205,6 +1221,8 @@ const SFONDO := Color(0.09, 0.10, 0.13, 0.86)
 const BARRA_SU := 66.0
 const BARRA_GIU := 112.0
 const PANNELLO_W := 330.0
+# Il pannello del mercato a sinistra (registro 220): edifici e potenziamenti.
+const PANNELLO_SX := 300.0
 const FASCIA := Color(0.07, 0.08, 0.10, 0.94)
 const FILO := Color(1, 1, 1, 0.10)
 const CHIARO := Color("#e8e6df")
@@ -1306,6 +1324,7 @@ func _disegna_hud() -> void:
 	var kind := str(gs.pending_choice.get("kind", ""))
 	var con_tasti := kind in ["tessera", "edificio"] and int(gs.pending_choice.get("player", -1)) == _io()
 	_disegna_cronaca(font)
+	_disegna_mercato(font)
 	# La scelta di una tessera dell'era: un tasto per opzione, sotto l'invito.
 	if kind == "tessera" and con_tasti:
 		var tx := 20.0
@@ -1481,6 +1500,117 @@ func _disegna_risorse(font: Font, p: PlayerState) -> void:
 			ORO if str(voce[0]) == "pv_immediati" else CHIARO)
 		x += 78.0
 
+# ---- il mercato a sinistra (registro 220) -----------------------------
+# Le carte in vendita e i potenziamenti, grandi, in un pannello: accese col
+# filo verde quelle che si possono comprare, spente le altre, d'oro quella
+# scelta. Si dispongono a riga che va a capo; se non ci stanno si rimpiccioliscono.
+var _mercato_rects: Array = []      # [{"rect", "kind", "id"}]
+var _tex_mercato: Dictionary = {}
+
+func _tex_carta(kind: String, id: String) -> Texture2D:
+	var chiave := kind + "|" + id
+	if not _tex_mercato.has(chiave):
+		var p := BoardLayout3D.carta_path(kind, id)
+		_tex_mercato[chiave] = load(p) as Texture2D if p != "" and ResourceLoader.exists(p) else null
+	return _tex_mercato[chiave]
+
+# Le misure di ogni carta a una data altezza: l'immagine detta la larghezza.
+func _misura_mercato(kind: String, id: String, alta: float) -> Vector2:
+	var tex := _tex_carta(kind, id)
+	var rapporto := 1.0
+	if tex != null: rapporto = float(tex.get_width()) / float(tex.get_height())
+	elif kind == "potenziamento": rapporto = 28.0 / 68.0
+	elif CardDB.buildings.has(id): rapporto = float(int(CardDB.buildings[id]["width"]))
+	return Vector2(alta * rapporto, alta)
+
+# Dispone un gruppo di carte da (x0, y): righe che vanno a capo dentro `largo`.
+func _righe_mercato(carte: Array, x0: float, y: float, largo: float, alta: float) -> Array:
+	var out := []
+	var x := x0
+	var spazio := 8.0
+	for c in carte:
+		var m := _misura_mercato(str(c[0]), str(c[1]), alta)
+		if m.x > largo: m *= largo / m.x
+		if x > x0 and x + m.x > x0 + largo:
+			x = x0
+			y += alta + spazio
+		out.append({"rect": Rect2(Vector2(x, y), m), "kind": c[0], "id": c[1]})
+		x += m.x + spazio
+	return out
+
+# La disposizione del pannello, senza disegnare: la usano il disegno, il clic
+# e il passaggio del mouse, cosi' non possono divergere.
+func _disponi_mercato() -> Dictionary:
+	var out := {"carte": [], "y_pot": 0.0, "ha_pot": false}
+	if ctl == null or _hud == null: return out
+	var gs := ctl.gs
+	var schermo := _hud.get_viewport_rect().size
+	var x0 := 12.0
+	var largo := PANNELLO_SX - 24.0
+	var fondo := schermo.y - BARRA_GIU - 10.0
+	var edifici: Array = []
+	# Solo carte che il file dati caricato conosce (fra un test e l'altro i
+	# dati cambiano prima che la scena sparisca).
+	for id in gs.in_vendita():
+		if CardDB.buildings.has(str(id)): edifici.append(["mercato", str(id)])
+	var pot: Array = []
+	for id in gs.upg_row:
+		if CardDB.upgrades.has(str(id)): pot.append(["potenziamento", str(id)])
+	# L'altezza delle carte: si parte grandi e si scende finche' tutto ci sta.
+	var alta_e := 86.0
+	var alta_p := 110.0
+	var disposte_e := []
+	var disposte_p := []
+	var y_pot := 0.0
+	for prova in 8:
+		disposte_e = _righe_mercato(edifici, x0, BARRA_SU + 36.0, largo, alta_e)
+		var fine_e: float = BARRA_SU + 36.0
+		for d in disposte_e: fine_e = maxf(fine_e, (d["rect"] as Rect2).end.y)
+		y_pot = fine_e + 34.0
+		disposte_p = _righe_mercato(pot, x0, y_pot, largo, alta_p)
+		var fine_p := y_pot
+		for d in disposte_p: fine_p = maxf(fine_p, (d["rect"] as Rect2).end.y)
+		if fine_p <= fondo: break
+		alta_e *= 0.88
+		alta_p *= 0.88
+	out["carte"] = disposte_e + disposte_p
+	out["y_pot"] = y_pot
+	out["ha_pot"] = not pot.is_empty()
+	return out
+
+func _carta_nel_mercato(pixel: Vector2) -> Dictionary:
+	if pixel.x >= PANNELLO_SX: return {}
+	for d in _disponi_mercato()["carte"]:
+		if (d["rect"] as Rect2).has_point(pixel): return d
+	return {}
+
+func _disegna_mercato(font: Font) -> void:
+	_mercato_rects = []
+	var disp := _disponi_mercato()
+	if (disp["carte"] as Array).is_empty() and not bool(disp["ha_pot"]): return
+	var x0 := 12.0
+	_hud.draw_string(font, Vector2(x0, BARRA_SU + 24.0), "EDIFICI IN VENDITA", HORIZONTAL_ALIGNMENT_LEFT, -1, 12, SPENTO)
+	if bool(disp["ha_pot"]):
+		_hud.draw_string(font, Vector2(x0, float(disp["y_pot"]) - 10.0), "POTENZIAMENTI", HORIZONTAL_ALIGNMENT_LEFT, -1, 12, SPENTO)
+	var anteprima := _anteprima_attiva()
+	for d in disp["carte"]:
+		var r: Rect2 = d["rect"]
+		var kind := str(d["kind"])
+		var id := str(d["id"])
+		var comprabile: bool = anteprima and _comprabili.has(id)
+		var scelta: bool = str(_scelta.get("kind", "")) == kind and str(_scelta.get("id", "")) == id
+		var tinta := Color.WHITE if (comprabile or not anteprima) else Color(0.45, 0.45, 0.47)
+		var tex := _tex_carta(kind, id)
+		if tex != null:
+			_hud.draw_texture_rect(tex, r, false, tinta)
+		else:
+			_hud.draw_rect(r, Color(0.85, 0.82, 0.74) * tinta, true)
+			_hud.draw_string(font, r.position + Vector2(6, 16), _nome_carta(kind, id),
+				HORIZONTAL_ALIGNMENT_LEFT, r.size.x - 12.0, 11, Color(0.1, 0.1, 0.1))
+		if scelta: _hud.draw_rect(r.grow(3.0), ORO, false, 3.0)
+		elif comprabile: _hud.draw_rect(r.grow(2.0), Color(0.42, 1.0, 0.52), false, 2.0)
+		_mercato_rects.append(d)
+
 # ---- il draft al centro (registro 216) -------------------------------
 # Il designer: "il draft con le carte personaggio al centro dello schermo; una
 # volta scelta la carta, le rimaste si muovono verso sinistra e verso destra e
@@ -1508,7 +1638,7 @@ func _draft_al_centro() -> bool:
 # Il posto della carta i-esima di n: in fila, al centro dello spazio libero.
 func _rect_draft(i: int, n: int) -> Rect2:
 	var schermo := _hud.get_viewport_rect().size
-	var libero := Rect2(0.0, BARRA_SU, schermo.x - PANNELLO_W, schermo.y - BARRA_SU - BARRA_GIU)
+	var libero := Rect2(PANNELLO_SX, BARRA_SU, schermo.x - PANNELLO_W - PANNELLO_SX, schermo.y - BARRA_SU - BARRA_GIU)
 	var alta := minf(DRAFT_ALTA, libero.size.y * 0.7)
 	var misura := Vector2(alta * 66.0 / 93.2, alta)
 	var spazio := 24.0
@@ -1562,7 +1692,7 @@ func _disegna_draft(font: Font) -> void:
 	if k_u < 1.0: return
 	var k_e := clampf(_draft_entrata / DRAFT_ENTRATA, 0.0, 1.0)
 	var opzioni: Array = ctl.gs.pending_choice.get("options", [])
-	var libero := Rect2(0.0, BARRA_SU, schermo.x - PANNELLO_W, schermo.y - BARRA_SU - BARRA_GIU)
+	var libero := Rect2(PANNELLO_SX, BARRA_SU, schermo.x - PANNELLO_W - PANNELLO_SX, schermo.y - BARRA_SU - BARRA_GIU)
 	_hud.draw_rect(libero, Color(0, 0, 0, 0.55 * k_e), true)
 	var prima := _rect_draft(0, mano.size())
 	_hud.draw_string(font, Vector2(libero.position.x, prima.position.y - 22.0),
@@ -1696,7 +1826,7 @@ func _disegna_messaggio(font: Font) -> void:
 	if _messaggio == "": return
 	var largo := minf(_largo_barra() - 20.0, 760.0)
 	var alto := font.get_multiline_string_size(_messaggio, HORIZONTAL_ALIGNMENT_LEFT, largo - 20.0, 14).y
-	var r := Rect2(Vector2(20.0, BARRA_SU + 8.0), Vector2(largo, alto + 14.0))
+	var r := Rect2(Vector2(PANNELLO_SX + 12.0, BARRA_SU + 8.0), Vector2(minf(largo, _largo_barra() - PANNELLO_SX - 24.0), alto + 14.0))
 	_hud.draw_rect(r, Color(0.07, 0.08, 0.10, 0.88), true)
 	_hud.draw_rect(r, Color(ORO, 0.45), false, 1.0)
 	_hud.draw_multiline_string(font, r.position + Vector2(10.0, 21.0), _messaggio,
@@ -2225,10 +2355,14 @@ func _disegna_fasce() -> void:
 	var pannello := Rect2(schermo.x - PANNELLO_W, BARRA_SU, PANNELLO_W, schermo.y - BARRA_SU - BARRA_GIU)
 	_hud.draw_rect(pannello, FASCIA, true)
 	_hud.draw_line(pannello.position, Vector2(pannello.position.x, pannello.end.y), FILO, 1.0)
+	var sx := Rect2(0.0, BARRA_SU, PANNELLO_SX, schermo.y - BARRA_SU - BARRA_GIU)
+	_hud.draw_rect(sx, FASCIA, true)
+	_hud.draw_line(Vector2(sx.end.x, sx.position.y), sx.end, FILO, 1.0)
 
 func _sulle_fasce(pixel: Vector2) -> bool:
 	var schermo := _hud.get_viewport_rect().size
-	return pixel.y < BARRA_SU or pixel.y > schermo.y - BARRA_GIU or pixel.x > schermo.x - PANNELLO_W
+	return pixel.y < BARRA_SU or pixel.y > schermo.y - BARRA_GIU or pixel.x > schermo.x - PANNELLO_W \
+		or pixel.x < PANNELLO_SX
 
 # Le due righe di tasti della barra bassa.
 func _riga_alta() -> float:
