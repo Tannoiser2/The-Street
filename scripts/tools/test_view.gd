@@ -55,6 +55,7 @@ func _ready() -> void:
 	_run("v3: il sacchetto degli scheletri a schermo (registro 188)", _test_v3_sacchetto)
 	_run("l'evento si rivela al centro a fine era", _test_rivelazione_evento)
 	_run("v3: prima di piazzare si sceglie il Personaggio e si prova la mossa", _test_piazza_con_prova)
+	_run("v3: il mercato accende solo le carte comprabili, coi preventivi", _test_preventivi)
 	_run("il tasto Fine turno nella barra in basso risponde", _test_fine_turno_in_barra)
 	_run("sotto un edificio a scalino non resta un buco", _test_scalino)
 	_run("le carte stanno in piedi alla stessa altezza", _test_misure_carte)
@@ -3369,6 +3370,52 @@ func _test_fine_turno_in_barra() -> void:
 
 # Registro 217: cliccando un posto il gioco non piazza il Personaggio a caso
 # e non spende il lavoratore per una mossa che poi rifiuta.
+# Registro 218: le carte accese nel mercato sono quelle che si possono davvero
+# comprare, e scegliendone una restano accesi solo posti con un preventivo
+# pagabile. Su piu' semi, perche' una partita sola puo' non avere il caso.
+func _test_preventivi() -> void:
+	if not FileAccess.file_exists("res://data/proposte/cards-v3-era1.json"): return
+	var scena := ResourceLoader.load("res://scenes/gioca.tscn") as PackedScene
+	if scena == null: return
+	var sbagli := PackedStringArray()
+	var provate := 0
+	for seme in [7, 11, 23, 42, 101]:
+		var n := scena.instantiate()
+		add_child(n)
+		n.inizio.con_regolamento(2)
+		n.inizio.con_giocatori(3)
+		n.inizio.con_bot(2)
+		n.inizio.con_velocita(4)
+		n.inizio.seme = seme
+		n.comincia()
+		var gs: GameState = n.ctl.gs
+		var giri := 0
+		while not gs.pending_choice.is_empty() and giri < 12:
+			if int(gs.pending_choice["player"]) != 0: break
+			n.ctl.choose(int((gs.pending_choice["options"] as Array)[0]))
+			n._turni_dei_bot()
+			giri += 1
+		if gs.phase == Enums.Phase.PIAZZA and n._io() == 0:
+			n._personaggio_scelto = n.ctl.personaggi_liberi(gs.players[0])[0]
+			n._anteprima_chiave = ""
+			n._aggiorna_anteprima()
+			for id in gs.market:
+				provate += 1
+				n._deseleziona(false)
+				n._seleziona({"kind": "mercato", "id": str(id)})
+				var scelta_fatta: bool = not n._scelta.is_empty()
+				if scelta_fatta != n._comprabili.has(str(id)):
+					sbagli.append("seme %d %s: accesa %s, posti %s" % [seme, id, n._comprabili.has(str(id)), scelta_fatta])
+				if scelta_fatta:
+					for v in n._bersagli:
+						if not bool((v.parametri.get("preventivo", {}) as Dictionary).get("ok", false)):
+							sbagli.append("seme %d %s: posto senza preventivo" % [seme, id])
+		remove_child(n)
+		n.free()
+	CardDB.load_db(CardDB.DB_PATH)
+	_ok("provate %d carte di mercato su 5 semi" % provate, provate > 0)
+	_ok("le carte accese sono quelle comprabili, e i loro posti hanno un preventivo pagabile", sbagli.is_empty(), "; ".join(sbagli))
+
 func _test_piazza_con_prova() -> void:
 	if not FileAccess.file_exists("res://data/proposte/cards-v3-era1.json"): return
 	var scena := ResourceLoader.load("res://scenes/gioca.tscn") as PackedScene

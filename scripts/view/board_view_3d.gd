@@ -461,11 +461,22 @@ func _posti_liberi() -> void:
 		var col := Color(0.42, 1.0, 0.52)
 		if int(pz.get("level", 0)) > 0: col = Color(1.0, 0.76, 0.26)
 		_cornice(box, col)
+		# Il cartellino (registro 218): costo vero e PV, sopra il posto.
+		if str(pz.get("etichetta", "")) != "":
+			_scritta(Vector3(box.position.x + box.size.x / 2.0, box.end.y + 30.0,
+				box.position.z + box.size.z / 2.0), str(pz["etichetta"]), 0.28, col.lightened(0.4))
 	for uid in evidenze.get("uid", []):
 		for b in gs.grid.buildings:
 			if b.uid != int(uid): continue
 			var piede := BoardLayout3D.basetta_box(gs, b)
 			_cornice(piede, Color(0.42, 1.0, 0.52), 4.0)
+	for e in evidenze.get("etichette_uid", []):
+		if str(e["etichetta"]) == "": continue
+		for b in gs.grid.buildings:
+			if b.uid != int(e["uid"]): continue
+			var piede := BoardLayout3D.basetta_box(gs, b)
+			_scritta(Vector3(piede.position.x + piede.size.x / 2.0, piede.end.y + 30.0,
+				piede.position.z + piede.size.z / 2.0), str(e["etichetta"]), 0.28, Color(0.7, 1.0, 0.75))
 	# Gli edifici colpiti dall'evento appena rivelato (registro 210), in rosso.
 	for uid in evidenze.get("crollati", []):
 		for b in gs.grid.buildings:
@@ -1034,7 +1045,14 @@ func _file_laterali() -> void:
 		var stampa := Color.WHITE
 		if bool(c.get("sepolta", false)): stampa = CARTA_SEPOLTA
 		elif bool(c.get("spenta", false)): stampa = CARTA_SPENTA
+		# Registro 218: nel mercato accese solo le carte che si possono
+		# comprare davvero, le altre spente.
+		var al_mercato: bool = evidenze.has("comprabili") and not c.has("player") \
+			and str(c["kind"]) in ["mercato", "potenziamento"]
+		var comprabile: bool = al_mercato and (evidenze["comprabili"] as Dictionary).has(str(c["id"]))
+		if al_mercato and not comprabile: stampa = CARTA_SPENTA
 		_carta_stesa(r, percorso, sfondo * stampa, false, stampa, true)
+		if comprabile: _cornice(r, Color(0.42, 1.0, 0.52), 3.0)
 		# Niente scritte sopra: il nome e i numeri escono nel riquadro che
 		# segue il mouse. I numeri li' vengono dai DATI e non dal disegno,
 		# perche' quelli stampati sono vecchi - su 44 edifici su 60 lo Scavo

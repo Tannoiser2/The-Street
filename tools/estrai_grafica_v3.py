@@ -135,11 +135,29 @@ def estrai(gruppo, dati):
     return trovati, retri
 
 
+# LE ICONE (registro 218): le risorse, le classi e gli effetti disegnati da Codex, per
+# l'interfaccia a schermo. Sono gia' PNG: si copiano in assets/icone/ ridotte a 64 pixel.
+def icone():
+    from PIL import Image
+    src = os.path.join(ROOT, "DA_PASSARE_A_CLAUDE_GODOT", "ICONE")
+    dest = os.path.join(ROOT, "assets", "icone")
+    os.makedirs(dest, exist_ok=True)
+    n = 0
+    for f in sorted(os.listdir(src)):
+        if not f.endswith(".png"): continue
+        im = Image.open(os.path.join(src, f)).convert("RGBA")
+        im.thumbnail((64, 64))
+        im.save(os.path.join(dest, f))
+        n += 1
+    print("icone          %d" % n)
+
+
 def main():
     dati = json.load(open(DATI, encoding="utf-8"))
-    quali = sys.argv[1:] or list(GRUPPI)
+    quali = sys.argv[1:] or list(GRUPPI) + ["icone"]
     for g in quali:
-        estrai(g, dati)
+        if g == "icone": icone()
+        else: estrai(g, dati)
 
 
 if __name__ == "__main__":
