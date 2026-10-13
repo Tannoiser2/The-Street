@@ -32,4 +32,16 @@ func _ready() -> void:
 		# dell'evento rivelata al centro (registro 210).
 		if args.has("evento") and not g._rivelazione.is_empty(): break
 	g._aggiorna()
+	# `--scegli 1` (registro 218): si sceglie il primo Personaggio e la prima
+	# carta comprabile, per fotografare i posti accesi coi loro preventivi.
+	if args.has("scegli") and g._io() >= 0:
+		var liberi: Array[String] = g.ctl.personaggi_liberi(g.ctl.gs.players[g._io()])
+		if not liberi.is_empty(): g._personaggio_scelto = liberi[0]
+		g._aggiorna()
+		for id in g.ctl.gs.market:
+			if g._comprabili.has(str(id)):
+				g._seleziona({"kind": "mercato", "id": str(id)})
+				break
+		g._aggiorna()
+		print("comprabili ", g._comprabili.keys(), " posti ", g._bersagli.size())
 	print("era ", g.ctl.gs.era, " edifici ", g.ctl.gs.grid.buildings.size(), " carte restituite ", TessereScavo.carte_restituite(), " grandezza vera ", BoardLayout3D.grandezza_vera())

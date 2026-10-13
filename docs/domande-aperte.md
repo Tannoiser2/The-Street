@@ -3348,3 +3348,22 @@ dato è stato importato da lì. Ma due confronti fra ciò che è stampato e
     colonna attivata e, se serve, ogni risposta a "quale edificio usi?": se
     nemmeno cosi' si puo' fare, il Personaggio resta in mano e il messaggio
     lo dice.
+
+218. **I preventivi a schermo.** Il designer: "dovrebbe essere visibile
+    l'icona delle risorse con la quantita' posseduta; quando si deve
+    comprare si devono illuminare solo quelli che si possono effettivamente
+    comprare considerando le risorse possedute, gli sconti/bonus e la
+    possibilita' di posizionamento (costi spianare, sconti e terrapieni);
+    poi sulla mappa si illuminano le zone possibili col costo per
+    costruire e i PV conquistati". Nella barra di stato, a destra,
+    Costruzione, Denaro, Idee e PV con le icone di Codex (copiate in
+    `assets/icone/` da `tools/estrai_grafica_v3.py`). Le carte del mercato
+    e dei potenziamenti sono accese col filo verde solo se si possono
+    comprare: per ogni colonna attivabile (e ogni risposta a "quale edificio
+    usi?", e ogni Personaggio se non e' ancora scelto) si prende una copia
+    della partita gia' attivata e si chiede alle regole cosa si puo'
+    costruire e a che prezzo; le altre carte sono spente. Scelta una carta,
+    restano accesi solo i posti pagabili, e sopra ognuno un cartellino col
+    costo vero (sconti e terrapieni compresi), i PV che la mossa porta (si
+    esegue su un'altra copia), "spiana" e i terrapieni. Le copie si rifanno
+    solo quando la partita cambia.

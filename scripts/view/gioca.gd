@@ -213,6 +213,7 @@ func _aggiorna() -> void:
 		_orbita = CameraOrbita.da_stato(ctl.gs)
 		vista.orbita = _orbita
 	vista.margini = Vector4(BARRA_SU, PANNELLO_W, BARRA_GIU, 0.0)
+	_aggiorna_anteprima()
 	vista.mostra(ctl.gs, _colonna_sotto_mouse, _acceso())
 	vista.scale = Vector3.ONE * BoardLayout3D.U
 	# Il tavolo e' cambiato sotto un mouse fermo: quel che la barra prometteva
@@ -227,18 +228,27 @@ func _acceso() -> Dictionary:
 		var colpiti: Array = []
 		for c in _rivelazione["colpiti"]: colpiti.append(int(c["uid"]))
 		return {"crollati": colpiti}
-	if _scelta.is_empty(): return {}
+	# Le carte che si possono comprare davvero (registro 218): le altre del
+	# mercato si spengono.
+	if _scelta.is_empty():
+		return {"comprabili": _comprabili} if _anteprima_attiva() else {}
 	var slot: Array = []
 	var uid: Array = []
+	var etichette: Array = []
 	for v in _bersagli:
+		var pr: Dictionary = v.parametri.get("preventivo", {})
 		if v.parametri.has("col_from"):
 			var d: Dictionary = CardDB.buildings[str(v.parametri["card_id"])]
 			slot.append({"col_from": int(v.parametri["col_from"]),
 				"width": int(d["width"]), "level": int(v.parametri.get("level", 0)),
-				"binario": int(v.parametri.get("binario", 0)), "depth": int(d.get("depth", 1))})
+				"binario": int(v.parametri.get("binario", 0)), "depth": int(d.get("depth", 1)),
+				"etichetta": _etichetta_preventivo(pr)})
 		elif v.parametri.has("uid"):
 			uid.append(int(v.parametri["uid"]))
-	return {"carta": _scelta, "slot": slot, "uid": uid}
+			etichette.append({"uid": int(v.parametri["uid"]), "etichetta": _etichetta_preventivo(pr)})
+	var out := {"carta": _scelta, "slot": slot, "uid": uid, "etichette_uid": etichette}
+	if _anteprima_attiva(): out["comprabili"] = _comprabili
+	return out
 
 # C'e' un bot che deve muovere? Lo chiedono il motore dei turni, il tasto
 # "Avanza" e il disegno, quindi la risposta e' una sola.
@@ -966,6 +976,44 @@ func _seleziona(c: Dictionary) -> void:
 		_deseleziona()
 		return
 	var voci: Array = _bersagli_di(kind, id)
+	# Il preventivo vero (registro 218): ogni posto si prova sullo stato dopo
+	# l'attivazione, col prezzo scontato e i PV che porta; restano accesi solo
+	# quelli che si possono pagare.
+	if _anteprima_attiva() and kind in ["mercato", "potenziamento"]:
+		# Lo stesso posto si raggiunge spesso da piu' colonne, ognuna con la sua
+		# produzione: per ogni posto si tiene la colonna col preventivo migliore
+		# (pagabile, poi piu' PV), non la prima trovata.
+		# I posti si chiedono alle copie gia' attivate, le stesse che decidono
+		# quali carte si accendono: cosi' le due risposte non possono divergere.
+		var per_posto := {}
+		for st in _stati:
+			var g: GameState = st["gs"]
+			var colonna := int(st["col"])
+			var dalla_copia: Array = AvailableActions.piazzamenti(g, _io(), colonna, id) if kind == "mercato" \
+				else AvailableActions.bersagli_potenziamento(g, _io(), colonna, id)
+			for v in dalla_copia:
+				if not v.legale or not v.pagabile(g.players[_io()]): continue
+				if ctl.gs.phase == Enums.Phase.PIAZZA: v.parametri["attiva"] = colonna
+				var pr := _preventivo_su(g, v)
+				var chiave: String = "%s|%s|%s|%s|%s" % [v.parametri.get("col_from", -1), v.parametri.get("level", 0),
+					v.parametri.get("binario", 0), v.parametri.get("above", false), v.parametri.get("uid", -1)]
+				if per_posto.has(chiave) and int(per_posto[chiave].parametri["preventivo"]["pv"]) >= int(pr["pv"]): continue
+				v.parametri["preventivo"] = pr
+				per_posto[chiave] = v
+		var buone: Array = []
+		for v in per_posto.values():
+			var pr: Dictionary = v.parametri["preventivo"]
+			v.parametri["preventivo"] = pr
+			# Il prezzo che la barra scrive e' quello vero, dopo l'attivazione.
+			v.pietra = int(pr["pietra"])
+			v.oro = int(pr["oro"])
+			v.idee = int(pr["idee"])
+			buone.append(v)
+		if buone.is_empty():
+			_messaggio = "%s: con le tue risorse (e quel che incasseresti attivando) non la puoi pagare in nessun posto." % _nome_carta(kind, id)
+			_deseleziona()
+			return
+		voci = buone
 	# Un personaggio senza bersaglio da scegliere non ha niente da accendere:
 	# si recluta e basta, e chiedere un secondo clic sarebbe finto.
 	if voci.size() == 1 and not voci[0].parametri.has("uid") \
@@ -1166,6 +1214,10 @@ func _disegna_hud() -> void:
 	var testa := "Era %d · %s · %s: %d PV, %s, lavoratori %d/%d" % [
 		gs.era, _nome_evento(gs), chi,
 		p.vp, risorse, p.workers_used, p.workers]
+	# Con le icone (registro 218) le risorse e i PV stanno a destra, grandi:
+	# nella frase non si ripetono.
+	if _v2() and _icona("costruzione") != null:
+		testa = "Era %d · %s · %s · lavoratori %d/%d" % [gs.era, _nome_evento(gs), chi, p.workers_used, p.workers]
 	# V3: lo sconto, il Lampo e l'acquisto in piu' valgono solo in questo turno.
 	if _v3():
 		if p.sconto_turno > 0: testa += " · sconto %d%s" % [p.sconto_turno, "" if p.sconto_se == "" else " (" + p.sconto_se + ")"]
@@ -1186,6 +1238,7 @@ func _disegna_hud() -> void:
 		for u in p.potenziamenti_riscattati: valore += TessereScavo.costo(u)
 		testa += ", token riscattati %d (%d PV)" % [p.potenziamenti_riscattati.size(), valore]
 	_disegna_fasce()
+	if _v2(): _disegna_risorse(font, p)
 	_hud.draw_rect(Rect2(Vector2(20, 17), Vector2(13, 13)),
 		VISTA.colore_giocatore(v), true)
 	_hud.draw_string(font, Vector2(41, 30), testa,
@@ -1267,6 +1320,118 @@ func _disegna_hud() -> void:
 		_riquadro(font, _nota, _nota_dove + Vector2(18, 18))
 	if not _rivelazione.is_empty():
 		_disegna_rivelazione(font)
+
+# ---- i preventivi (registro 218) ---------------------------------------
+# Il designer: "si devono illuminare solo quelli che si possono effettivamente
+# comprare considerando le risorse possedute e gli eventuali sconti/bonus, e la
+# possibilita' di posizionamento; poi spostandosi sulla mappa si illuminano le
+# zone possibili, col costo per costruire e i PV conquistati".
+#
+# Si fa coi conti veri: per ogni colonna che si puo' attivare (e per ogni
+# risposta a "quale edificio usi?") si prende una copia della partita gia'
+# attivata; su quella si chiede alle regole cosa si puo' costruire e a che
+# prezzo, e si esegue la mossa su un'altra copia per vedere i PV. Le copie si
+# rifanno solo quando la partita cambia.
+var _anteprima_chiave := ""
+var _stati: Array = []          # [{"col": int, "gs": GameState}] dopo l'attivazione
+var _comprabili: Dictionary = {}   # id carta -> true
+var _tex_icone: Dictionary = {}
+
+func _anteprima_attiva() -> bool:
+	return ctl != null and _v2() and _io() >= 0 and ctl.gs.pending_choice.is_empty() \
+		and ctl.gs.phase in [Enums.Phase.PIAZZA, Enums.Phase.AZIONE]
+
+func _aggiorna_anteprima() -> void:
+	if ctl == null: return
+	var gs := ctl.gs
+	var io := _io()
+	var chiave := "%d|%d|%d|%s|%d|%d" % [gs.log.size(), gs.phase, gs.current_index, _personaggio_scelto,
+		gs.pending_choice.size(), (gs.players[io] as PlayerState).workers_used if io >= 0 else -1]
+	if chiave == _anteprima_chiave: return
+	_anteprima_chiave = chiave
+	_stati = []
+	_comprabili = {}
+	if not _anteprima_attiva(): return
+	if gs.phase == Enums.Phase.AZIONE:
+		_stati.append({"col": ctl.colonna_attivata(), "gs": gs})
+	else:
+		var chi: Array = []
+		if _v3() and _personaggio_da_scegliere(): chi = ctl.personaggi_liberi(gs.players[io])
+		else: chi = [_lavoratore()]
+		for pers in chi:
+			for c in _colonne_possibili():
+				var base := _copia_attivata(c, str(pers), -1)
+				if base == null: continue
+				if str(base.gs.pending_choice.get("kind", "")) == "edificio":
+					for sc in base.gs.pending_choice["options"]:
+						var c2 := _copia_attivata(c, str(pers), int(sc))
+						if c2 != null: _stati.append({"col": c, "gs": c2.gs})
+				else:
+					_stati.append({"col": c, "gs": base.gs})
+	for st in _stati:
+		var g: GameState = st["gs"]
+		var pg: PlayerState = g.players[io]
+		var col := int(st["col"])
+		for id in gs.market:
+			if _comprabili.has(str(id)): continue
+			for v in AvailableActions.piazzamenti(g, io, col, str(id)):
+				if v.legale and v.pagabile(pg):
+					_comprabili[str(id)] = true
+					break
+		for id in gs.upg_row:
+			if _comprabili.has(str(id)): continue
+			for v in AvailableActions.bersagli_potenziamento(g, io, col, str(id)):
+				if v.legale and v.pagabile(pg):
+					_comprabili[str(id)] = true
+					break
+
+# Il preventivo di una voce gia' calcolata sulla copia `g`: il prezzo e' il
+# suo, i PV si vedono eseguendola su un'altra copia.
+func _preventivo_su(g: GameState, w) -> Dictionary:
+	var io := _io()
+	var c := GameController.new()
+	c.gs = g.duplica()
+	var prima := int((c.gs.players[io] as PlayerState).vp)
+	var pv := 0
+	if _esegui_su(c, w): pv = int((c.gs.players[io] as PlayerState).vp) - prima
+	return {"ok": true, "pietra": w.pietra, "oro": w.oro, "idee": w.idee, "pv": pv,
+		"spiana": (w.parametri.get("spiana", PackedStringArray()) as PackedStringArray).size() if w.parametri.has("spiana") else 0,
+		"terrapieni": int(w.parametri.get("terrapieni", 0))}
+
+# Il cartellino sopra il posto: quanto costa e quanti PV porta.
+func _etichetta_preventivo(pr: Dictionary) -> String:
+	if pr.is_empty(): return ""
+	var parti := PackedStringArray()
+	if int(pr["pietra"]) > 0: parti.append("%d Costr." % int(pr["pietra"]))
+	if int(pr["oro"]) > 0: parti.append("%d Den." % int(pr["oro"]))
+	if int(pr["idee"]) > 0: parti.append("%d Idee" % int(pr["idee"]))
+	var s := "gratis" if parti.is_empty() else " ".join(parti)
+	if int(pr["pv"]) != 0: s += "\n%+d PV" % int(pr["pv"])
+	if int(pr["spiana"]) > 0: s += "\nspiana"
+	if int(pr["terrapieni"]) > 0: s += "\n%d terrapien%s" % [int(pr["terrapieni"]), "o" if int(pr["terrapieni"]) == 1 else "i"]
+	return s
+
+func _icona(nome: String) -> Texture2D:
+	if not _tex_icone.has(nome):
+		var p := "res://assets/icone/%s.png" % nome
+		_tex_icone[nome] = load(p) as Texture2D if ResourceLoader.exists(p) else null
+	return _tex_icone[nome]
+
+# Le risorse e i PV nella barra di stato, con le icone di Codex, a destra.
+func _disegna_risorse(font: Font, p: PlayerState) -> void:
+	var schermo := _hud.get_viewport_rect().size
+	var x := schermo.x - PANNELLO_W + 16.0
+	var voci := [["costruzione", p.pietra, "Costruzione"], ["denaro", p.oro, "Denaro"],
+		["idee", p.idee, "Idee"], ["pv_immediati", p.vp, "PV"]]
+	for voce in voci:
+		var tex := _icona(str(voce[0]))
+		if tex != null:
+			_hud.draw_texture_rect(tex, Rect2(Vector2(x, 14.0), Vector2(38.0, 38.0)), false)
+		else:
+			_hud.draw_string(font, Vector2(x, 40.0), str(voce[2]).left(1), HORIZONTAL_ALIGNMENT_LEFT, -1, 16, SPENTO)
+		_hud.draw_string(font, Vector2(x + 42.0, 42.0), str(voce[1]), HORIZONTAL_ALIGNMENT_LEFT, -1, 26,
+			ORO if str(voce[0]) == "pv_immediati" else CHIARO)
+		x += 78.0
 
 # ---- il draft al centro (registro 216) -------------------------------
 # Il designer: "il draft con le carte personaggio al centro dello schermo; una
@@ -1452,7 +1617,11 @@ func _disegna_rivelazione(font: Font) -> void:
 # giocatore deve vederle diverse.
 func _riga_azione(font: Font, v: AvailableActions.Voce, p: PlayerState) -> void:
 	var riga := DescrizioneAzione.riga(ctl.gs, v, _io())
-	var manca := DescrizioneAzione.ammanco(v, p)
+	# Col preventivo il posto e' pagabile per costruzione: niente ammanco, che
+	# guarderebbe le risorse di prima dell'attivazione.
+	var manca := "" if v.parametri.has("preventivo") else DescrizioneAzione.ammanco(v, p)
+	if v.parametri.has("preventivo") and int(v.parametri["preventivo"]["pv"]) != 0:
+		riga += " · %+d PV" % int(v.parametri["preventivo"]["pv"])
 	if manca != "": manca = "  ·  " + manca
 	_hud.draw_string(font, Vector2(20, 54), riga, HORIZONTAL_ALIGNMENT_LEFT, -1, 14, CHIARO)
 	if manca == "": return

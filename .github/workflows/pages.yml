@@ -53,7 +53,7 @@ jobs:
 
       - name: Grafica dai PDF
         run: |
-          python3 -m pip install --quiet pymupdf
+          python3 -m pip install --quiet pymupdf pillow
           python3 tools/estrai_grafica.py
           # Le carte della v3, dai PDF rifatti con Codex (registro 207).
           python3 tools/estrai_grafica_v3.py
