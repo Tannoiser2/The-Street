@@ -1196,7 +1196,11 @@ static func _fila_destra(gs: GameState) -> Array[Dictionary]:
 	var m_pers := misura_carta("personaggio")
 	var m_pot := misura_carta("potenziamento")
 	var m_mon := misura_carta("monumento")
-	var righe: int = maxi(gs.char_row.size(), gs.upg_row.size())
+	# IL DRAFT A PASSAGGIO (v3, registro 216) si fa al centro dello schermo: la
+	# mano non va sulla fila, che durante il draft resta vuota. Il designer:
+	# "inutile mettere le carte sul tavolo durante la scelta".
+	var fila: Array = [] if gs.draft_giro > 0 else gs.char_row
+	var righe: int = maxi(fila.size(), gs.upg_row.size())
 
 	# La Dinastia sta "sempre disponibile fuori dalle file": in cima, sopra i
 	# personaggi, e non si sposta mai. Chi la compra ne prende il pupazzetto.
@@ -1232,8 +1236,8 @@ static func _fila_destra(gs: GameState) -> Array[Dictionary]:
 	if alto_testa > 0.0: z += alto_testa + CARTA_GAP * 3.0
 
 	for i in righe:
-		if i < gs.char_row.size():
-			out.append({"kind": "personaggio", "id": str(gs.char_row[i]),
+		if i < fila.size():
+			out.append({"kind": "personaggio", "id": str(fila[i]),
 				"aabb": AABB(Vector3(x, 0.0, z), Vector3(m_pers.x, TESSERA_Y, m_pers.y))})
 		if i < gs.upg_row.size():
 			# Il potenziamento e' piu' corto del personaggio: si centra sulla

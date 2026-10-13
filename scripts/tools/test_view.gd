@@ -3274,6 +3274,18 @@ func _test_v3_a_schermo() -> void:
 		and int(gs.pending_choice["player"]) == 0)
 	_eq("  con una mano di 4", (gs.pending_choice.get("options", []) as Array).size(), 4)
 	_ok("  e l'invito dice che la fila e' la mano", n._invito(gs).contains("mano"))
+	# Registro 216: il draft si fa al centro dello schermo, non sul tavolo.
+	_ok("  la mano si sceglie al centro dello schermo", n._draft_al_centro())
+	var sul_tavolo := 0
+	for c in BoardLayout3D.side_cards(gs, 0):
+		if str(c["kind"]) == "personaggio" and str(c["id"]) in gs.char_row: sul_tavolo += 1
+	_eq("  e sul tavolo la fila resta vuota", sul_tavolo, 0)
+	var schermo: Vector2 = n._hud.get_viewport_rect().size
+	var ultima: Rect2 = n._rect_draft(3, 4)
+	var primissima: Rect2 = n._rect_draft(0, 4)
+	_ok("  le quattro carte stanno nello spazio libero, fuori dal pannello e dalle barre",
+		primissima.position.x >= 0.0 and ultima.end.x <= schermo.x - n.PANNELLO_W
+		and primissima.position.y >= n.BARRA_SU and primissima.end.y <= schermo.y - n.BARRA_GIU)
 	# Il draft a passaggio: quattro prese dell'umano, e fra l'una e l'altra i
 	# bot fanno le loro.
 	var giri := 0
