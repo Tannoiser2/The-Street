@@ -827,6 +827,10 @@ func _da_abitare(col: int) -> Building:
 	return null
 
 func _piazza_in_colonna(col: int) -> void:
+	if _personaggio_da_scegliere():
+		_messaggio = "Prima scegli quale Personaggio piazzare, nella riga in basso."
+		_aggiorna()
+		return
 	var chi := _lavoratore()
 	if _racconta(func(): return ctl.place_worker(col, _da_abitare(col), chi)):
 		_messaggio = _dopo_piazzamento(col, chi)
@@ -837,6 +841,10 @@ func _piazza_in_colonna(col: int) -> void:
 func _piazza_lavoratore(pixel: Vector2) -> void:
 	var col := _colonna_puntata(pixel)
 	if col < 0: return
+	if _personaggio_da_scegliere():
+		_messaggio = "Prima scegli quale Personaggio piazzare, nella riga in basso."
+		_aggiorna()
+		return
 	var chi := _lavoratore()
 	if _racconta(func(): return ctl.place_worker(col, _da_abitare(col), chi)):
 		_messaggio = _dopo_piazzamento(col, chi)
@@ -1023,7 +1031,19 @@ func _esegui_mossa(v) -> void:
 	# prima quale colonna gli aprira' la carta che vuole.
 	if ctl.gs.phase == Enums.Phase.PIAZZA and v.parametri.has("attiva"):
 		var dove := int(v.parametri["attiva"])
+		# REGISTRO 217. Il designer: "mi ha piazzato uno dei lavoratori senza
+		# attivare una carta personaggio, non avevo sufficienti risorse e non mi
+		# ha fatto piazzare l'edificio: ha speso un lavoratore e ho perso un
+		# turno". Due controlli PRIMA di piazzare: il Personaggio lo sceglie il
+		# giocatore, e la mossa si prova su una copia della partita, attivazione
+		# compresa; se nemmeno cosi' si puo' fare, il lavoratore resta in mano.
+		if _personaggio_da_scegliere():
+			_messaggio = "Prima scegli quale Personaggio piazzare, nella riga in basso."
+			return
 		var chi := _lavoratore()
+		if not _fattibile_dopo_attivazione(v, dove, chi):
+			_messaggio = "%s non si puo' fare nemmeno dopo aver attivato la colonna %d (risorse o posto): il Personaggio resta in mano." % [v.etichetta, dove + 1]
+			return
 		if not ctl.place_worker(dove, _da_abitare(dove), chi):
 			_messaggio = "Non puoi piazzare un lavoratore nella colonna %d." % (dove + 1)
 			return
@@ -1033,22 +1053,63 @@ func _esegui_mossa(v) -> void:
 		if str(ctl.gs.pending_choice.get("kind", "")) == "edificio":
 			_messaggio += "Prima scegli quale edificio usare, poi la mossa."
 			return
+	fatto = _esegui_su(ctl, v)
+	_messaggio += v.etichetta if fatto else "Rifiutata: %s" % v.etichetta
+
+# La mossa su un controller: quello vero o una copia di prova. Gli edifici si
+# cercano per uid nella partita di QUEL controller.
+func _esegui_su(c: GameController, v) -> bool:
 	match v.tipo:
 		"costruisci":
-			fatto = ctl.build(str(v.parametri["card_id"]), int(v.parametri["col_from"]),
+			return c.build(str(v.parametri["card_id"]), int(v.parametri["col_from"]),
 				bool(v.parametri["above"]), 0, null, int(v.parametri.get("binario", 0)))
 		"potenzia":
-			fatto = ctl.upgrade(str(v.parametri["upg_id"]), _edificio(int(v.parametri.get("uid", -1))))
+			return c.upgrade(str(v.parametri["upg_id"]), _per_uid(c.gs, int(v.parametri.get("uid", -1))))
 		"restaura":
-			fatto = ctl.restore(_edificio(int(v.parametri["uid"])))
+			return c.restore(_per_uid(c.gs, int(v.parametri["uid"])))
 		"recluta":
-			fatto = ctl.recruit(str(v.parametri["char_id"]), _edificio(int(v.parametri.get("uid", -1))))
+			return c.recruit(str(v.parametri["char_id"]), _per_uid(c.gs, int(v.parametri.get("uid", -1))))
 		"dinastia":
-			fatto = ctl.buy_dynasty()
+			return c.buy_dynasty()
 		"passa":
-			ctl.pass_action()
-			fatto = true
-	_messaggio += v.etichetta if fatto else "Rifiutata: %s" % v.etichetta
+			c.pass_action()
+			return true
+	return false
+
+static func _per_uid(g: GameState, uid: int) -> Building:
+	for b in g.grid.buildings:
+		if b.uid == uid: return b
+	return null
+
+# V3: con piu' di un Personaggio libero e nessuno scelto, il gioco non sceglie
+# al posto del giocatore.
+func _personaggio_da_scegliere() -> bool:
+	if ctl == null or not _v3() or _io() < 0: return false
+	var liberi: Array[String] = ctl.personaggi_liberi(ctl.gs.players[_io()])
+	return liberi.size() > 1 and not _personaggio_scelto in liberi
+
+# La prova: sulla copia si piazza il Personaggio e si attiva la colonna; se il
+# gioco chiede quale edificio usare si provano tutte le risposte; la mossa e'
+# fattibile se almeno una strada la permette.
+func _fattibile_dopo_attivazione(v, dove: int, chi: String) -> bool:
+	var prima := _copia_attivata(dove, chi, -1)
+	if prima == null: return true      # il piazzamento vero dira' lui cosa non va
+	var kind := str(prima.gs.pending_choice.get("kind", ""))
+	if kind != "" and kind != "edificio": return true   # altre domande: non si prevede
+	var scelte: Array = prima.gs.pending_choice.get("options", []) if kind == "edificio" else [-1]
+	for sc in scelte:
+		var c := _copia_attivata(dove, chi, int(sc))
+		if c != null and _esegui_su(c, v): return true
+	return false
+
+func _copia_attivata(dove: int, chi: String, scelta: int) -> GameController:
+	var c := GameController.new()
+	c.gs = ctl.gs.duplica()
+	var abita := _da_abitare(dove)
+	if not c.place_worker(dove, _per_uid(c.gs, abita.uid) if abita != null else null, chi): return null
+	if scelta >= 0 and str(c.gs.pending_choice.get("kind", "")) == "edificio":
+		if not c.choose(scelta): return null
+	return c
 
 # ---- quel poco che resta a schermo ------------------------------------
 const SFONDO := Color(0.09, 0.10, 0.13, 0.86)
@@ -1863,10 +1924,13 @@ func _disegna_personaggi(font: Font, p: PlayerState) -> void:
 	if liberi.is_empty(): return
 	var schermo := _hud.get_viewport_rect().size
 	var y := _riga_alta()
-	_hud.draw_string(font, Vector2(20.0, y + 20.0), "Piazza:",
-		HORIZONTAL_ALIGNMENT_LEFT, -1, 14, SPENTO)
+	# Acceso solo il Personaggio scelto davvero (registro 217): prima il primo
+	# della riga sembrava gia' scelto, e il gioco lo piazzava senza chiedere.
+	var da_scegliere := _personaggio_da_scegliere()
+	_hud.draw_string(font, Vector2(20.0, y + 20.0), "Scegli chi:" if da_scegliere else "Piazza:",
+		HORIZONTAL_ALIGNMENT_LEFT, -1, 14, ORO if da_scegliere else SPENTO)
 	var x := 150.0
-	var scelto := _lavoratore()
+	var scelto := "" if da_scegliere else _lavoratore()
 	for cid in liberi:
 		var r := _tasto(font, _nome_personaggio(cid), Vector2(x, y), cid == scelto,
 			{"che": "personaggio", "id": cid})
