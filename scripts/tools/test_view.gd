@@ -24,7 +24,7 @@ func _ready() -> void:
 	_run("3D: cielo e telecamera", _test_3d_scena)
 	_run("3D: una partita vera sta sulla strada", _test_3d_partita)
 	_run("3D: i cubetti sulla basetta", _test_cubetti)
-	_run("v2: i cubetti neri non ripetono i token (registro 142)", _test_cubetti_senza_token)
+	_run("v2: i cubetti neri sono tutta la resistenza (registro 221)", _test_cubetti_senza_token)
 	_run("3D: le linguette dei potenziamenti", _test_linguette)
 	_run("3D: le file e le plance sul tavolo", _test_tavolo)
 	_run("3D: cliccare una carta", _test_clic_sulle_carte)
@@ -2668,14 +2668,46 @@ func _test_cubetti_senza_token() -> void:
 	_ok("nella v2 le carte sono a grandezza vera", BoardLayout3D.grandezza_vera())
 	var gs := _gioco().gs
 	var b := _metti(gs, "ed_capanne", 2, 1)
-	b.upgrades.append("po_palizzata")       # +1 resistenza, token sull'edificio
+	# Registro 221: i cubetti sono TUTTA la resistenza, non solo quella
+	# guadagnata - il designer vuole leggerne il valore contando i cubi.
+	_eq("un cubetto per punto di resistenza", BoardLayout3D.cubetti(gs, b).size(),
+		b.effective_resistance())
+	b.upgrades.append("po_palizzata")
 	b.bonus_res = 1
-	_eq("il +1 della Palizzata non fa cubetto", BoardLayout3D.cubetti(gs, b).size(), 0)
-	b.bonus_res = 3                         # +2 da altro (un Personaggio)
-	_eq("  il resto si', due cubetti neri", BoardLayout3D.cubetti(gs, b).size(), 2)
-	b.upgrades.append("po_cemento_armato")  # +2: ora tutto viene dai token
-	b.bonus_res = 3
-	_eq("  con il Cemento armato i token coprono tutto", BoardLayout3D.cubetti(gs, b).size(), 0)
+	_eq("  anche quella del potenziamento", BoardLayout3D.cubetti(gs, b).size(),
+		b.effective_resistance())
+	b.protection = 2
+	_eq("  e il +2 del lavoratore che lo abita", BoardLayout3D.cubetti(gs, b).size(),
+		b.effective_resistance())
+	# Non coprono ne' le scritte ne' i potenziamenti: stanno nella striscia
+	# destra della carta, fra il riquadro del terreno e la riga in basso, e
+	# fuori dai token.
+	var box := BoardLayout3D.basetta_box(gs, b)
+	var token := BoardLayout3D.token_box(gs, b)
+	var fuori := 0
+	var sul_token := 0
+	for c in BoardLayout3D.cubetti(gs, b):
+		var p: Vector3 = c["pos"]
+		var l := float(c["lato"]) / 2.0
+		if p.x + l > box.end.x or p.x - l < box.end.x - box.size.x * BoardLayout3D.CUBO_V3_STRISCIA: fuori += 1
+		if p.z - l < box.position.z + BoardLayout3D.CUBO_V3_SU - 0.01 \
+				or p.z + l > box.end.z - BoardLayout3D.CUBO_V3_GIU + 0.01: fuori += 1
+		for t in token:
+			if p.x + l > t.position.x and p.x - l < t.end.x and p.z + l > t.position.z and p.z - l < t.end.z:
+				sul_token += 1
+	_eq("  tutti nella striscia libera a destra", fuori, 0)
+	_eq("  e nessuno sopra un token", sul_token, 0)
+	# Tanti cubi: due file affiancate, mai fuori dalla striscia.
+	b.bonus_res = 6
+	var molti := BoardLayout3D.cubetti(gs, b)
+	_eq("con resistenza %d ci sono tutti" % b.effective_resistance(), molti.size(), b.effective_resistance())
+	var sborda := 0
+	for c in molti:
+		var p: Vector3 = c["pos"]
+		if p.z + float(c["lato"]) / 2.0 > box.end.z - BoardLayout3D.CUBO_V3_GIU + 0.01: sborda += 1
+	_eq("  e non scendono sulla riga in basso", sborda, 0)
+	b.state = Enums.BuildingState.ROVINA
+	_eq("la rovina non ne porta", BoardLayout3D.cubetti(gs, b).size(), 0)
 	CardDB.load_db(CardDB.DB_PATH)
 
 # Registro 146: il designer, sull'iPad, non riusciva ad attivare una colonna

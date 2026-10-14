@@ -3414,3 +3414,22 @@ dato è stato importato da lì. Ma due confronti fra ciò che è stampato e
     piu' (`BoardLayout3D.mercato_a_schermo`, acceso solo dalla partita a
     schermo); la telecamera centra il tavolo fra i due pannelli e parte un
     po' piu' lontana. TORNEO e VITA identici.
+
+221. **La resistenza in cubetti neri, i pupazzetti nuovi.** Il designer:
+    "dei cubetti neri sugli edifici per rappresentare la loro resistenza,
+    in modo che sia chiaro il loro valore, in fila, chiaramente visibili ma
+    che non coprano scritte o potenziamenti; e i meeple non puoi farli piu'
+    carini e grandi?". Con le carte a grandezza vera i cubetti sono adesso
+    TUTTA la resistenza (`effective_resistance()`: la stampata, i
+    potenziamenti, i Personaggi, il +2 del lavoratore), non piu' solo
+    quella guadagnata (superato il registro 142). Sulle carte v3 l'unico
+    posto senza scritte e senza token e' la striscia d'illustrazione lungo
+    il bordo destro dell'ultima casella, fra il riquadro del terreno e la
+    riga in basso: la fila sta li', dall'alto verso il basso, e diventa
+    doppia solo se cosi' i cubi restano piu' grandi. Sono bassi e col
+    coperchio grigio: visti di scorcio, cubi neri alti quanto larghi si
+    fondevano in una sbarra. I pupazzetti hanno la sagoma del meeple vero
+    (testa, braccia, gambe; un poligono estruso), 14 x 16 mm invece di 8 x
+    15; quello che abita un edificio sta sulla colonna dei costi, che a
+    edificio costruito non serve piu', e non sulla riga di resistenza ed
+    effetto. La v1.5 resta com'era. Solo vista: TORNEO e VITA identici.

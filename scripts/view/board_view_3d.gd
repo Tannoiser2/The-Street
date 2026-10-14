@@ -1092,35 +1092,83 @@ func _dettaglio_carta(c: Dictionary) -> String:
 			return "vale %d" % BoardLayout3D.scheletro_valore(int(id))
 	return ""
 
-# IL PUPAZZETTO. Non un parallelepipedo: un corpo che si allarga verso il
-# basso e una testa tonda, cioe' la sagoma che al tavolo si riconosce a colpo
-# d'occhio anche piccola e di scorcio. E' fatto di tre pezzi perche' tre
-# bastano - un meeple vero ha le braccia, ma a 8 mm non si vedrebbero.
-func _meeple(dove: Vector3, colore: Color) -> Node3D:
-	var n := Node3D.new()
+# IL PUPAZZETTO (registro 221). Il designer: "non mi piacciono i meeple, non
+# puoi farli piu' carini e grandi?". Prima erano tre scatole e una pallina,
+# 8 mm di larghezza: adesso e' la sagoma del meeple vero - testa tonda,
+# braccia aperte, gambe divaricate - ritagliata in un pezzo di legno spesso
+# e grande come quelli da tavolo. La sagoma e' un poligono estruso, fatto
+# una volta sola e condiviso da tutti: cambia solo il colore.
+const MEEPLE_SAGOMA := [
+	Vector2(0.0, 0.24), Vector2(0.10, 0.0), Vector2(0.44, 0.0), Vector2(0.48, 0.04),
+	Vector2(0.31, 0.44), Vector2(0.47, 0.51), Vector2(0.52, 0.57), Vector2(0.50, 0.63),
+	Vector2(0.44, 0.66), Vector2(0.17, 0.67),
+]
+const MEEPLE_TESTA := Vector2(0.0, 0.83)
+const MEEPLE_RAGGIO := 0.19
+static var _meeple_mesh: ArrayMesh = null
+
+static func _contorno_meeple() -> PackedVector2Array:
+	var destra := PackedVector2Array(MEEPLE_SAGOMA)
+	var out := PackedVector2Array(destra)
+	# La testa: un arco da sotto il mento a destra fino a sotto il mento a
+	# sinistra, passando per la cima.
+	for k in 15:
+		var a := deg_to_rad(-60.0 + 300.0 * float(k) / 14.0)
+		out.append(MEEPLE_TESTA + Vector2(cos(a), sin(a)) * MEEPLE_RAGGIO)
+	for k in range(destra.size() - 1, 0, -1):
+		out.append(Vector2(-destra[k].x, destra[k].y))
+	return out
+
+static func meeple_mesh() -> ArrayMesh:
+	if _meeple_mesh != null: return _meeple_mesh
 	var w := BoardLayout3D.MEEPLE_W
 	var h := BoardLayout3D.MEEPLE_H
 	var d := BoardLayout3D.MEEPLE_D
-	var corpo := _scatola(Vector3(w, h * 0.45, d), colore)
-	corpo.position = Vector3(0, h * 0.225, 0)
-	n.add_child(corpo)
-	var busto := _scatola(Vector3(w * 0.62, h * 0.28, d), colore)
-	busto.position = Vector3(0, h * 0.45 + h * 0.14, 0)
-	n.add_child(busto)
-	var testa := MeshInstance3D.new()
-	var s := SphereMesh.new()
-	s.radius = w * 0.34
-	s.height = w * 0.68
-	s.radial_segments = 10
-	s.rings = 6
-	testa.mesh = s
+	var punti := PackedVector2Array()
+	for q in _contorno_meeple(): punti.append(Vector2(q.x * w, q.y * h))
+	var tri := Geometry2D.triangulate_polygon(punti)
+	var st := SurfaceTool.new()
+	st.begin(Mesh.PRIMITIVE_TRIANGLES)
+	# Davanti e dietro.
+	for t in range(0, tri.size(), 3):
+		st.set_normal(Vector3(0, 0, 1))
+		for k in [0, 1, 2]:
+			var q := punti[tri[t + k]]
+			st.add_vertex(Vector3(q.x, q.y, d / 2.0))
+		st.set_normal(Vector3(0, 0, -1))
+		for k in [2, 1, 0]:
+			var q := punti[tri[t + k]]
+			st.add_vertex(Vector3(q.x, q.y, -d / 2.0))
+	# Il fianco, un rettangolo per lato del contorno.
+	for k in punti.size():
+		var a := punti[k]
+		var b := punti[(k + 1) % punti.size()]
+		var n := Vector3(b.y - a.y, a.x - b.x, 0).normalized()
+		st.set_normal(n)
+		for v in [Vector3(a.x, a.y, d / 2.0), Vector3(b.x, b.y, -d / 2.0), Vector3(b.x, b.y, d / 2.0),
+				Vector3(a.x, a.y, d / 2.0), Vector3(a.x, a.y, -d / 2.0), Vector3(b.x, b.y, -d / 2.0)]:
+			st.add_vertex(v)
+	_meeple_mesh = st.commit()
+	return _meeple_mesh
+
+func _meeple(dove: Vector3, colore: Color) -> Node3D:
+	var m := MeshInstance3D.new()
+	m.mesh = meeple_mesh()
 	var mat := StandardMaterial3D.new()
 	mat.albedo_color = colore
-	testa.material_override = mat
-	testa.position = Vector3(0, h * 0.73 + w * 0.3, 0)
-	n.add_child(testa)
-	n.position = dove
-	return n
+	# Legno verniciato: un filo di lucido, che fa leggere i fianchi.
+	mat.roughness = 0.45
+	# Un filo di luce propria: di fianco alla luce del tavolo i colori del
+	# giocatore diventavano blu notte e verde bosco, e i pupazzetti sparivano.
+	mat.emission_enabled = true
+	mat.emission = colore
+	mat.emission_energy_multiplier = 0.25
+	# La sagoma e' a facce piatte e il verso dei triangoli lo decide la
+	# triangolazione: si disegnano tutte e due le facce, e via il dubbio.
+	mat.cull_mode = BaseMaterial3D.CULL_DISABLED
+	m.material_override = mat
+	m.position = dove
+	return m
 
 # I pupazzetti di tutti: quelli ancora in mano sulla bacchetta, quelli gia'
 # usati sulla strada, e quelli della Dinastia ancora sulla sua carta.
@@ -1155,15 +1203,24 @@ func _plance() -> void:
 # tabellone - cosa che in 3D non si puo' fare.
 const CUBETTO_BIANCO := Color("#e6e3da")
 const CUBETTO_NERO := Color("#2b2b30")
+const CUBETTO_COPERCHIO := Color("#8a8a92")
 const LINGUETTA := Color("#c9a227")
 
 func _cubetti(b: Building) -> void:
 	for c in BoardLayout3D.cubetti(gs, b):
 		var lato: float = float(c["lato"])
-		var m := _scatola(Vector3(lato, lato, lato),
+		var alto: float = float(c.get("alto", lato))
+		var m := _scatola(Vector3(lato, alto, lato),
 			CUBETTO_BIANCO if str(c["tipo"]) == "vetusta" else CUBETTO_NERO)
-		m.position = (c["pos"] as Vector3) + Vector3(0, lato / 2.0, 0)
+		m.position = (c["pos"] as Vector3) + Vector3(0, alto / 2.0, 0)
 		add_child(m)
+		# Il coperchio grigio (registro 221): neri su neri, visti di scorcio,
+		# i cubi della fila si fondevano in una sbarra. Una faccia di sopra
+		# piu' chiara, con il bordo nero attorno, li fa contare uno per uno.
+		if c.has("alto"):
+			var cap := _scatola(Vector3(lato * 0.7, 0.2, lato * 0.7), CUBETTO_COPERCHIO)
+			cap.position = (c["pos"] as Vector3) + Vector3(0, alto + 0.1, 0)
+			add_child(cap)
 
 # "Infilate la carta sotto, lasciandone sporgere la linguetta": il
 # potenziamento si vede perche' spunta, non perche' sia scritto da qualche

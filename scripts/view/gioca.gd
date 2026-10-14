@@ -591,7 +591,9 @@ func _descrivi_sotto_edificio(b: Building) -> PackedStringArray:
 		var riga := "G%d · %s · resistenza %d" % [b.owner, stato, b.effective_resistance()]
 		if int(CardDB.constants.get("vetusta_max", 0)) > 0:
 			riga += " · vetusta %d" % b.vetusta
-		elif BoardLayout3D.cubetti_neri(b) > 0:
+		# Con le carte a grandezza vera i cubetti sono tutta la resistenza
+		# (registro 221), che la riga dice gia': contarli a parte confonde.
+		elif not BoardLayout3D.grandezza_vera() and BoardLayout3D.cubetti_neri(b) > 0:
 			var nc := BoardLayout3D.cubetti_neri(b)
 			riga += " (%d cubett%s ner%s)" % [nc, "o" if nc == 1 else "i", "o" if nc == 1 else "i"]
 		out.append(riga)
