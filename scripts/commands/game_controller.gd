@@ -1165,8 +1165,17 @@ func _per_uid(uid: int) -> Building:
 	return null
 
 func _completa_fine_era() -> void:
+	var foto := _foto_pv()
 	EraRules.end_era_after_event(gs)
 	Conditions.claim_monuments(gs)      # l'evento puo' aver cambiato la plancia
+	# I PV DI FINE ERA, CON IL PERCHE' (registro 222). Il designer: "non si
+	# capisce quanti PV guadagnano i giocatori alla fine di un'era e
+	# perche'". Si confrontano i punti di ognuno prima e dopo il conto di
+	# fine era - censimento, Personaggi, Monumenti, Eredita' - canale per
+	# canale e edificio per edificio. Solo per la vista: il motore non lo
+	# legge.
+	if ultima_fine_era.get("era", -1) == gs.era:
+		ultima_fine_era["pv"] = _pv_di_fine_era(foto)
 	era_ended.emit(gs.era)
 	if gs.era >= 5:
 		Scoring.final_scoring(gs)
@@ -1174,6 +1183,53 @@ func _completa_fine_era() -> void:
 		game_ended.emit(Scoring.winner(gs))
 	else:
 		_start_era(gs.era + 1)
+
+# I punti di tutti, per canale e per voce, e quelli fruttati da ogni edificio.
+func _foto_pv() -> Dictionary:
+	var giocatori: Array = []
+	for p in gs.players: giocatori.append(p.vp_dettaglio.duplicate(true))
+	var edifici := {}
+	for b in gs.grid.buildings: edifici[b.uid] = b.vp_reso.duplicate()
+	return {"giocatori": giocatori, "edifici": edifici}
+
+# Per ogni giocatore: {"player", "totale", "voci": [{"canale", "testo", "pv"}]}.
+# Il testo dice il perche': per un canale che viene dagli edifici (il
+# censimento, i PV prodotti) gli edifici uno per uno; per gli altri la voce
+# che il nucleo ha segnato (i Personaggi, il nome del Monumento).
+func _pv_di_fine_era(foto: Dictionary) -> Array:
+	var out: Array = []
+	for i in gs.players.size():
+		var p: PlayerState = gs.players[i]
+		var prima: Dictionary = foto["giocatori"][i]
+		var voci: Array = []
+		var totale := 0
+		for canale in p.vp_dettaglio:
+			var ora: Dictionary = p.vp_dettaglio[canale]
+			var era_prima: Dictionary = prima.get(canale, {})
+			var delta := 0
+			var parti := PackedStringArray()
+			for v in ora:
+				var d := int(ora[v]) - int(era_prima.get(v, 0))
+				if d == 0: continue
+				delta += d
+				if str(v) != "": parti.append("%s %+d" % [str(v), d])
+			if delta == 0: continue
+			# Gli edifici che hanno reso su questo canale: se tornano col
+			# totale sono il perche' piu' preciso.
+			var edifici := PackedStringArray()
+			var dagli_edifici := 0
+			for b in gs.grid.buildings:
+				if b.owner != i: continue
+				var e_prima: Dictionary = (foto["edifici"] as Dictionary).get(b.uid, {})
+				var d := int(b.vp_reso.get(canale, 0)) - int(e_prima.get(canale, 0))
+				if d == 0: continue
+				dagli_edifici += d
+				edifici.append("%s %+d" % [str(b.data["name"]), d])
+			if dagli_edifici == delta and not edifici.is_empty(): parti = edifici
+			voci.append({"canale": str(canale), "parti": parti, "pv": delta})
+			totale += delta
+		out.append({"player": i, "totale": totale, "voci": voci})
+	return out
 
 func _shuffle(a: Array) -> void:
 	for i in range(a.size() - 1, 0, -1):

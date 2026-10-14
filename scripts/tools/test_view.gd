@@ -3627,6 +3627,27 @@ func _test_rivelazione_evento() -> void:
 	_eq("  ed e' quello dell'era 1", int(n._rivelazione.get("era", 0)), 1)
 	_eq("  e gli edifici colpiti si accendono sul tavolo",
 		(n._acceso().get("crollati", []) as Array).size(), (n._rivelazione.get("colpiti", []) as Array).size())
+	# Registro 222: i PV di fine era, giocatore per giocatore e col perche'.
+	var pv: Array = n._rivelazione.get("pv", [])
+	_eq("  con i PV di fine era di ogni giocatore", pv.size(), gs.n_players)
+	var tornano := true
+	var qualcuno := false
+	for g in pv:
+		var somma := 0
+		for v in g["voci"]: somma += int(v["pv"])
+		if somma != int(g["totale"]): tornano = false
+		if int(g["totale"]) != 0: qualcuno = true
+	_ok("    e il totale e' la somma delle voci", tornano)
+	_ok("    e qualcuno a fine era 1 prende punti", qualcuno)
+	var censiti := true
+	for g in pv:
+		for v in g["voci"]:
+			if str(v["canale"]) == "rendita" and (v["parti"] as PackedStringArray).is_empty(): censiti = false
+	_ok("    il censimento dice quali edifici hanno pagato", censiti)
+	var in_cronaca := false
+	for voce in n._cronaca:
+		if str((voce["righe"] as Array)[0]).begins_with("Fine dell'era 1: i punti"): in_cronaca = true
+	_ok("    e restano in cronaca", in_cronaca)
 	var prima := gs.current_index
 	n._process(10.0)
 	_eq("  finche' resta aperta i bot aspettano", gs.current_index, prima)

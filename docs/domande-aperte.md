@@ -3433,3 +3433,16 @@ dato è stato importato da lì. Ma due confronti fra ciò che è stampato e
     15; quello che abita un edificio sta sulla colonna dei costi, che a
     edificio costruito non serve piu', e non sulla riga di resistenza ed
     effetto. La v1.5 resta com'era. Solo vista: TORNEO e VITA identici.
+
+222. **I PV di fine era, col perche'.** Il designer: "non si capisce quanti
+    PV guadagnano i giocatori alla fine di un'era e perche'". Il controller
+    fotografa i punti di ognuno (`vp_dettaglio`) e quelli fruttati da ogni
+    edificio (`vp_reso`) prima del conto di fine era, e li confronta dopo:
+    canale per canale, e per i canali che vengono dagli edifici - il
+    censimento - edificio per edificio. Il risultato sta in
+    `ultima_fine_era["pv"]`, che il motore non legge. Sullo schermo e' una
+    colonna accanto alla carta dell'evento ("I punti di fine era": chi ha
+    preso quanto, il totale raggiunto, e il perche', per esempio "Censimento
+    +3 (Dolmen +1, Circolo di pietre +2)"), e la stessa cosa resta in
+    cronaca. Il censimento paga solo gli edifici rimasti in piedi dopo
+    l'evento: e' anche il modo per vedere quanto e' costato un crollo.

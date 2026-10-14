@@ -298,7 +298,46 @@ func _racconta(mossa: Callable) -> Variant:
 	if not righe.is_empty():
 		_cronaca.push_front({"righe": righe, "mia": mio})
 		while _cronaca.size() > CRONACA_VOCI: _cronaca.pop_back()
+	_racconta_pv_fine_era()
 	return esito
+
+# I PV di fine era anche in cronaca (registro 222): la carta dell'evento si
+# chiude, la cronaca resta, e si puo' tornare a leggere chi ha preso cosa.
+var _era_pv_raccontata := -1
+
+func _racconta_pv_fine_era() -> void:
+	var u: Dictionary = ctl.ultima_fine_era
+	if not u.has("pv") or int(u["era"]) == _era_pv_raccontata: return
+	_era_pv_raccontata = int(u["era"])
+	var righe: Array = ["Fine dell'era %d: i punti" % int(u["era"])]
+	for g in _righe_pv(u["pv"]):
+		righe.append(str(g["titolo"]) + ("" if (g["righe"] as Array).is_empty() else " — " + "; ".join(g["righe"])))
+	_cronaca.push_front({"righe": righe, "mia": false})
+	while _cronaca.size() > CRONACA_VOCI: _cronaca.pop_back()
+
+# Il racconto dei PV di fine era, giocatore per giocatore: il titolo col
+# totale e una riga per canale, col perche' (gli edifici del censimento, i
+# Personaggi, il nome del Monumento). Chi ha preso di piu' sta in cima.
+func _righe_pv(pv: Array) -> Array:
+	var nomi := {}
+	for v in Riepilogo.voci(): nomi[str(v["id"])] = str(v["nome"])
+	var out: Array = []
+	for g in pv:
+		var i := int(g["player"])
+		var chi := "Tu" if inizio.e_umano(i) and inizio.umani() <= 1 else "Giocatore %d" % i
+		var righe: Array = []
+		var voci: Array = (g["voci"] as Array).duplicate()
+		voci.sort_custom(func(a, b): return int(a["pv"]) > int(b["pv"]))
+		for v in voci:
+			var nome := str(nomi.get(str(v["canale"]), str(v["canale"]).capitalize()))
+			var parti: PackedStringArray = v["parti"]
+			var riga := "%s %+d" % [nome, int(v["pv"])]
+			if not parti.is_empty(): riga += " (" + ", ".join(parti) + ")"
+			righe.append(riga)
+		out.append({"player": i, "totale": int(g["totale"]),
+			"titolo": "%s: %+d PV (ora %d)" % [chi, int(g["totale"]), ctl.gs.players[i].vp], "righe": righe})
+	out.sort_custom(func(a, b): return int(a["totale"]) > int(b["totale"]))
+	return out
 
 func muovi_un_bot() -> void:
 	if not bot_da_muovere(): return
@@ -1762,10 +1801,17 @@ func _disegna_rivelazione(font: Font) -> void:
 	var carta := Vector2(260.0, 275.0) if immagine != "" else Vector2.ZERO
 	var largo := 440.0
 	var alto := 70.0 + carta.y + 46.0 + righe.size() * 19.0 + 44.0
-	var r := Rect2((schermo - Vector2(largo, alto)) / 2.0, Vector2(largo, alto))
+	# A destra della carta, i PV di fine era (registro 222).
+	var pv: Array = _righe_pv(_rivelazione["pv"]) if _rivelazione.has("pv") else []
+	var largo_pv := 400.0 if not pv.is_empty() else 0.0
+	if not pv.is_empty():
+		alto = maxf(alto, 70.0 + _alto_pv(font, pv, largo_pv - 32.0) + 44.0)
+	var r := Rect2((schermo - Vector2(largo + largo_pv, alto)) / 2.0, Vector2(largo + largo_pv, alto))
 	_hud.draw_rect(Rect2(Vector2.ZERO, schermo), Color(0, 0, 0, 0.25), true)
 	_hud.draw_rect(r, SFONDO, true)
 	_hud.draw_rect(r, Color(1, 1, 1, 0.22), false, 1.0)
+	if not pv.is_empty():
+		_disegna_pv(font, pv, Rect2(r.position + Vector2(largo, 0.0), Vector2(largo_pv, alto)))
 	var y := r.position.y + 30.0
 	_hud.draw_string(font, Vector2(r.position.x, y), "Fine dell'era %d: si rivela l'evento" % int(_rivelazione["era"]),
 		HORIZONTAL_ALIGNMENT_CENTER, largo, 13, SPENTO)
@@ -1790,7 +1836,40 @@ func _disegna_rivelazione(font: Font) -> void:
 			HORIZONTAL_ALIGNMENT_LEFT, largo - 32.0, 13, ROSSO_CROLLO if riga.ends_with("crolla") else SPENTO)
 		y += 19.0
 	_hud.draw_string(font, Vector2(r.position.x, r.end.y - 16.0), "Clic per continuare",
-		HORIZONTAL_ALIGNMENT_CENTER, largo, 12, SPENTO)
+		HORIZONTAL_ALIGNMENT_CENTER, largo + largo_pv, 12, SPENTO)
+
+func _alto_pv(font: Font, pv: Array, largo: float) -> float:
+	var h := 0.0
+	for g in pv:
+		h += 24.0
+		for riga in g["righe"]:
+			h += font.get_multiline_string_size(str(riga), HORIZONTAL_ALIGNMENT_LEFT, largo - 12.0, 12).y + 2.0
+		h += 8.0
+	return h
+
+func _disegna_pv(font: Font, pv: Array, r: Rect2) -> void:
+	_hud.draw_line(Vector2(r.position.x, r.position.y + 20.0), Vector2(r.position.x, r.end.y - 36.0),
+		Color(1, 1, 1, 0.15), 1.0)
+	var x := r.position.x + 16.0
+	var largo := r.size.x - 32.0
+	var y := r.position.y + 30.0
+	_hud.draw_string(font, Vector2(x, y), "I punti di fine era", HORIZONTAL_ALIGNMENT_LEFT, largo, 13, SPENTO)
+	y += 32.0
+	for g in pv:
+		var colore: Color = VISTA.colore_giocatore(int(g["player"]))
+		_hud.draw_rect(Rect2(x, y - 11.0, 10.0, 10.0), colore, true)
+		_hud.draw_string(font, Vector2(x + 16.0, y), str(g["titolo"]), HORIZONTAL_ALIGNMENT_LEFT, largo - 16.0, 15,
+			ORO if int(g["totale"]) > 0 else CHIARO)
+		y += 8.0
+		if (g["righe"] as Array).is_empty():
+			_hud.draw_string(font, Vector2(x + 12.0, y + 12.0), "nessun punto", HORIZONTAL_ALIGNMENT_LEFT, largo - 12.0, 12, SPENTO)
+			y += 16.0
+		for riga in g["righe"]:
+			var alto := font.get_multiline_string_size(str(riga), HORIZONTAL_ALIGNMENT_LEFT, largo - 12.0, 12).y
+			_hud.draw_multiline_string(font, Vector2(x + 12.0, y + 12.0), str(riga), HORIZONTAL_ALIGNMENT_LEFT,
+				largo - 12.0, 12, -1, CHIARO)
+			y += alto + 2.0
+		y += 22.0
 
 # Che mossa sarebbe cliccare qui, e quanto costa. Il conto che non torna esce
 # in coda e in rosso: il posto resta acceso perche' la mossa e' permessa, ed
