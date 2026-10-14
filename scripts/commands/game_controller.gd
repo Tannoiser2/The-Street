@@ -1086,6 +1086,9 @@ func _has_worker(i: int) -> bool:
 # puo' sospendersi in mezzo.
 func _finish_era() -> void:
 	var evento: Dictionary = gs.evento_coperto if not gs.evento_coperto.is_empty() else gs.current_event
+	# La partita com'era prima dell'evento (registro 220): la vista la mostra
+	# finche' la carta e' aperta, e gli edifici si sgretolano solo dopo l'ok.
+	var foto := gs.duplica()
 	var prima := {}
 	for b in gs.grid.buildings: prima[b.uid] = b.state
 	var persi := EraRules.resolve_event(gs)
@@ -1093,7 +1096,7 @@ func _finish_era() -> void:
 	for b in gs.grid.buildings:
 		if prima.has(b.uid) and b.state != int(prima[b.uid]):
 			colpiti.append({"uid": b.uid, "prima": int(prima[b.uid]), "dopo": b.state})
-	ultima_fine_era = {"era": gs.era, "evento": evento.duplicate(true), "colpiti": colpiti}
+	ultima_fine_era = {"era": gs.era, "evento": evento.duplicate(true), "colpiti": colpiti, "prima": foto}
 	_omaggi_da_piazzare = EraRules.draw_gifts(gs, persi)
 	_prosegui_fine_era()
 

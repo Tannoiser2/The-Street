@@ -97,6 +97,13 @@ func trasla(dp: Vector2, altezza_viewport: float) -> void:
 		mira.y,
 		clampf(mira.z, _pan_max.position.z, _pan_max.end.z))
 
+# L'inquadratura di partenza un po' piu' lontana (registro 220): coi due
+# pannelli lo spazio per il tavolo e' piu' stretto dello schermo. Si sposta
+# anche il riferimento, cosi' resta "l'inquadratura calcolata".
+func allontana(fattore: float) -> void:
+	distanza *= fattore
+	_distanza0 = distanza
+
 func reimposta() -> void:
 	mira = _mira0
 	distanza = _distanza0

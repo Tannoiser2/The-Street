@@ -3202,22 +3202,25 @@ func _test_tocco_e_voli() -> void:
 	# la esegue): niente rotazione.
 	s._orbita.reimposta()
 	s.vista.muovi_telecamera()
-	var cam: Camera3D = s.get_viewport().get_camera_3d()
+	# Registro 220: il mercato sta nel pannello a sinistra, non sul tavolo.
 	var scelta_ok := false
-	if cam != null and s._io() >= 0:
-		for c in BoardLayout3D.side_cards(gs, s._io()):
-			if str(c["kind"]) != "mercato" or c.has("player"): continue
-			var a: AABB = c["aabb"]
-			var pixel := cam.unproject_position((a.position + a.size / 2.0) * BoardLayout3D.U)
-			var trovata: Dictionary = s._carta_puntata(pixel)
-			if trovata.is_empty() or str(trovata.get("id", "")) != str(c["id"]): continue
-			tocca.call(0, pixel, true)
-			tocca.call(0, pixel + Vector2(6, 4), false)
-			scelta_ok = not s._scelta.is_empty() or s._messaggio != ""
-			break
-	_ok("un tocco (anche tremolante) su una carta del mercato la sceglie", scelta_ok)
+	var sul_tavolo := 0
+	for c in BoardLayout3D.side_cards(gs, s._io()):
+		if str(c["kind"]) == "mercato" and not c.has("player"): sul_tavolo += 1
+	_eq("il mercato non sta sul tavolo", sul_tavolo, 0)
+	var disp: Dictionary = s._disponi_mercato()
+	if s._io() >= 0 and not (disp["carte"] as Array).is_empty():
+		var r: Rect2 = disp["carte"][0]["rect"]
+		tocca.call(0, r.get_center(), true)
+		tocca.call(0, r.get_center() + Vector2(6, 4), false)
+		scelta_ok = not s._scelta.is_empty() or s._messaggio != ""
+	_ok("un tocco (anche tremolante) su una carta del mercato, nel pannello, la sceglie", scelta_ok)
 	s._deseleziona(false)
-	# I voli: un edificio esce dal mercato e la sua carta vola al posto.
+	# I voli: un edificio esce dal mercato e la sua carta vola al posto. Col
+	# mercato nel pannello (registro 220) la carta non e' sul tavolo e non
+	# vola: il volo si prova col mercato sul tavolo, com'e' senza schermo.
+	BoardLayout3D.mercato_a_schermo = false
+	s._aggiorna()
 	var uid_prima := {}
 	for b in gs.grid.buildings: uid_prima[b.uid] = true
 	var guardia := 0
@@ -3595,8 +3598,20 @@ func _test_rivelazione_evento() -> void:
 	var prima := gs.current_index
 	n._process(10.0)
 	_eq("  finche' resta aperta i bot aspettano", gs.current_index, prima)
+	# Registro 220: con la carta aperta il tavolo e' quello di prima
+	# dell'evento; all'ok si sgretola, e solo dopo si va avanti.
+	n._aggiorna()
+	_ok("  con la carta aperta il tavolo e' com'era prima dell'evento", n.vista.gs == n._rivelazione["prima"])
+	var colpiti := (n._rivelazione["colpiti"] as Array).size()
 	n._clic(Vector2(5, 5))
 	_ok("  e un clic la chiude", n._rivelazione.is_empty())
+	_ok("  all'ok il tavolo torna quello vero", n.vista.gs == gs)
+	if colpiti > 0:
+		_ok("  e mentre si sgretola nessuno muove", n._attesa_crolli > 0.0)
+		n._process(0.1)
+		_eq("    (i bot aspettano ancora)", gs.current_index, prima)
+		n._process(5.0)
+		_ok("  finito lo sgretolamento si riparte", n._attesa_crolli <= 0.0)
 	# Subito, non a fine frame: col file dati della v1.5 ricaricato, un suo
 	# ultimo disegno cercherebbe i potenziamenti della v3 e non li troverebbe.
 	remove_child(n)
