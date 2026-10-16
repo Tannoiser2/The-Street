@@ -3446,3 +3446,19 @@ dato è stato importato da lì. Ma due confronti fra ciò che è stampato e
     +3 (Dolmen +1, Circolo di pietre +2)"), e la stessa cosa resta in
     cronaca. Il censimento paga solo gli edifici rimasti in piedi dopo
     l'evento: e' anche il modo per vedere quanto e' costato un crollo.
+
+223. **Il regolamento v3.** Il designer: "hai riscritto il regolamento? Versione
+    V3? Scrivilo in formato esteso e professionale, non per punti elenco".
+    `docs/regolamento-v3.md` descrive il gioco come il motore lo gioca oggi con
+    `data/proposte/cards-v3-era1.json`, confrontato regola per regola con il
+    registro 153-222; dove la v3 non cambia, riprende `regolamento-v2.md`. In
+    fondo, una nota raccoglie i punti in cui registro e motore non coincidono
+    o una carta non fa quel che promette: lo Scavo permanente e lo Scavo dei
+    gettoni Arte che non danno punti, la forza dell'evento coperto che ne
+    tradisce il tipo e gli eventi con effetti durante l'era che non scattano,
+    le case ◈ da una Costruzione che non si pagano in Denaro, il costruire
+    accanto misurato sulla prima colonna della carta, il Grattacielo a terra,
+    il blocco di salita per colonna intera, la direzione del draft ancora
+    provvisoria, l'Eredita' dei bot tenuta a caso, l'omaggio dell'Eruzione
+    senza vincolo di classe e la tessera Cappella di famiglia senza effetto.
+    Solo documentazione: nessun cambio al motore o alle carte.
